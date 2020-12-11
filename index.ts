@@ -1,4 +1,5 @@
 import * as express from 'express';
+import * as connection from './db/connection';
 
 const app = express();
 const hostname = '127.0.0.1';
