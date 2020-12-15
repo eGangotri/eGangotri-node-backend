@@ -15,3 +15,4 @@ npm install uuid
 ### Mongo Schema/Collection
 Schema: archive_upload_monitor
 Collection:Items_Queued
+UI: MongoDB Compass
