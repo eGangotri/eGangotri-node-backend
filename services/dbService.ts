@@ -12,16 +12,20 @@ export async function addItemsUsheredBulk(itemsArray:any[]){
 }
 
 export async function addItemsBulk(itemsArray:any[], docType: DOC_TYPE = DOC_TYPE.IQ){
-    console.log(`adding ${itemsArray.length} items to Mongo`);
+    if(itemsArray.length < 1){
+        return
+    }
+    const csvForInsertion = itemsArray[0].csvName;
+    console.log(`adding ${itemsArray.length} items for ${csvForInsertion} to Mongo`);
     const mongooseModel:Model<Document> = docType === DOC_TYPE.IQ ? ItemsQueued : ItemsUshered;
     try {
         const result = await mongooseModel.insertMany(itemsArray).catch((err)=> {
-            console.log(`insertMany err: ${err}`)
+            console.log(`insertMany err (${csvForInsertion})  (${typeof itemsArray}) : ${err}`)
         });
         //console.log(`result ${JSON.stringify(result)}`)
         return result;
     } catch (err) {
-        console.log(`err in addItemsUsheredBulk:`, err)
+        console.log(`err((${csvForInsertion})) in addItemsUsheredBulk:`, err)
         throw err;
     }
 }
