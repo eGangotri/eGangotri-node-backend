@@ -13,7 +13,7 @@ export async function processCSV(csvFileName: string, uploadCycleId: string, doc
     if(!csvFileName.endsWith('.csv')){
         csvFileName = csvFileName + '.csv';
     }
-    console.log(`reading ${csvFileName}`);
+    //console.log(`reading ${csvFileName}`);
     let itemsArray = []
 
     fs.createReadStream(csvFileName)
@@ -22,9 +22,8 @@ export async function processCSV(csvFileName: string, uploadCycleId: string, doc
             itemsArray.push(await extractData(row, uploadCycleId, csvFileName, docType));
         })
         .on('end', async () => {
-            console.log('CSV file successfully processed');
             const response = await addItemsBulk(itemsArray, docType);
-            console.log(`finished reading ${csvFileName}`);
+            //console.log(`finished reading ${csvFileName}`);
             return response;
         });
 }
