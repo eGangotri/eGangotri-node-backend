@@ -4,12 +4,9 @@
 npm init
 npm i express tsc ts-node typescript cors body-parser
 
+npm run start
 ###Additional Softwares
-npm install mongoose
-npm install fs
-npm install csv
-npm install csv-parser
-npm install uuid
+mongoose
 
 
 ### Mongo Schema/Collection

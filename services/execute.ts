@@ -6,19 +6,24 @@ import { ItemsQueued } from '../models/itemsQueued';
 import { v4 as uuidv4 } from 'uuid';
 import { addItemsBulk } from './dbService';
 import { ItemsUshered } from '../models/itemsUshered';
+import { DOC_TYPE } from '../common';
 
-let iqArray = []
 
-export async function processCSV(csvFileName: string, uploadCycleId: string, docType: 'IQ' | 'IU' = 'IQ') {
+export async function processCSV(csvFileName: string, uploadCycleId: string, docType: DOC_TYPE = DOC_TYPE.IQ) {
+    if(!csvFileName.endsWith('.csv')){
+        csvFileName = csvFileName + '.csv';
+    }
     console.log(`reading ${csvFileName}`);
+    let itemsArray = []
+
     fs.createReadStream(csvFileName)
         .pipe(csv())
         .on('data', async (row) => {
-            iqArray.push(await extractData(row, uploadCycleId, csvFileName, docType));
+            itemsArray.push(await extractData(row, uploadCycleId, csvFileName, docType));
         })
         .on('end', async () => {
             console.log('CSV file successfully processed');
-            const response = await addItemsBulk(iqArray, docType);
+            const response = await addItemsBulk(itemsArray, docType);
             console.log(`finished reading ${csvFileName}`);
             return response;
         });
@@ -26,12 +31,12 @@ export async function processCSV(csvFileName: string, uploadCycleId: string, doc
 
 export async function processCSVPair(_queuedCSV: string, _usheredCSV: string) {
     const uploadCycleId = uuidv4();
-    //processCSV(_queuedCSV, uploadCycleId, 'IQ');
-    processCSV(_usheredCSV, uploadCycleId, 'IU');
+    processCSV(_queuedCSV, uploadCycleId, DOC_TYPE.IQ);
+    processCSV(_usheredCSV, uploadCycleId, DOC_TYPE.IU);
 }
 
-export async function extractData(row, uploadCycleId, csvFileName, docType: 'IQ' | 'IU' = 'IQ') {
-    return docType === 'IQ' ? await extractDataForItemsQueued(row, uploadCycleId, csvFileName) : await extractDataForItemsUshered(row, uploadCycleId, csvFileName);
+export async function extractData(row, uploadCycleId, csvFileName, docType: DOC_TYPE = DOC_TYPE.IQ) {
+    return docType === DOC_TYPE.IQ ? await extractDataForItemsQueued(row, uploadCycleId, csvFileName) : await extractDataForItemsUshered(row, uploadCycleId, csvFileName);
 }
 
 export async function extractDataForItemsQueued(row: any, uploadCycleId: string, csvFileName: string) {
