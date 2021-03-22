@@ -18,7 +18,7 @@ export async function addItemsBulk(itemsArray:any[], docType: DOC_TYPE = DOC_TYP
         const result = await mongooseModel.insertMany(itemsArray).catch((err)=> {
             console.log(`insertMany err: ${err}`)
         });
-        console.log(`result ${JSON.stringify(result)}`)
+        //console.log(`result ${JSON.stringify(result)}`)
         return result;
     } catch (err) {
         console.log(`err in addItemsUsheredBulk:`, err)
