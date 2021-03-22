@@ -41,7 +41,7 @@ export async function extractData(row, uploadCycleId, csvFileName, docType: DOC_
 
 export async function extractDataForItemsQueued(row: any, uploadCycleId: string, csvFileName: string) {
     const rowArray = _.values(row);
-    console.log('extractDataForItemsQueued: ' + rowArray[0]);
+    //console.log('extractDataForItemsQueued: ' + rowArray[0]);
     return new ItemsQueued(
         {
             archiveProfile: rowArray[0],
@@ -56,7 +56,7 @@ export async function extractDataForItemsQueued(row: any, uploadCycleId: string,
 
 export async function extractDataForItemsUshered(row: any, uploadCycleId: string, csvFileName: string) {
     const rowArray = _.values(row);
-    console.log('extractDataForItemsUshered:' + rowArray[3] + ' ::: ' + rowArray[4]);
+    //console.log('extractDataForItemsUshered:' + rowArray[3] + ' ::: ' + rowArray[4]);
     const itemUsheredObj = {
         archiveProfile: rowArray[0],
         uploadLink: rowArray[1],
@@ -66,6 +66,6 @@ export async function extractDataForItemsUshered(row: any, uploadCycleId: string
         csvName: csvFileName,
         uploadCycleId
     }
-    console.log('extractDataForItemsUshered:' + JSON.stringify(itemUsheredObj));
+    //console.log('extractDataForItemsUshered:' + JSON.stringify(itemUsheredObj));
     return new ItemsUshered(itemUsheredObj);
 }
