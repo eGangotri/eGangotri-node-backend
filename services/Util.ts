@@ -22,10 +22,10 @@ import * as moment from 'moment';
       }
     });
   
-    console.log(`We will process following Files:`);
+    console.log(`We will process following ${processableFiles?.length} Files:`);
   
     processableFiles.forEach((fileName)=>{
-      console.log(`${fileName}`);
+      //console.log(`${fileName}`);
     })
     return processableFiles;
   }

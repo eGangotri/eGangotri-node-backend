@@ -41,8 +41,8 @@ export async function extractData(row, uploadCycleId, csvFileName, docType: DOC_
 }
 
 export async function extractDataForItemsQueued(row: any, uploadCycleId: string, csvFileName: string, fileModifiedDate:Date) {
-    const rowArray = _.values(row);
-    //console.log('extractDataForItemsQueued: ' + rowArray[0]);
+    const rowArray = stripQuotesForItemsInArray(row);
+    //console.log('extractDataForItemsQueued: ' + rowArray);
     return new ItemsQueued(
         {
             archiveProfile: rowArray[0],
@@ -57,7 +57,7 @@ export async function extractDataForItemsQueued(row: any, uploadCycleId: string,
 }
 
 export async function extractDataForItemsUshered(row: any, uploadCycleId: string, csvFileName: string, fileModifiedDate:Date) {
-    const rowArray = _.values(row);
+    const rowArray = stripQuotesForItemsInArray(row);
     //console.log('extractDataForItemsUshered:' + rowArray[3] + ' ::: ' + rowArray[4]);
     const itemUsheredObj = {
         archiveProfile: rowArray[0],
@@ -72,3 +72,14 @@ export async function extractDataForItemsUshered(row: any, uploadCycleId: string
     //console.log('extractDataForItemsUshered:' + JSON.stringify(itemUsheredObj));
     return new ItemsUshered(itemUsheredObj);
 }
+
+function stripQuotes(text:any){
+    const strippedValue = (typeof text === 'string') ? text.toString().replace(/\"/g,'').replace(/\"/g,'').trim(): text;
+    //console.log(`stripQuotes ${JSON.stringify(text)} ${strippedValue}`);
+    return strippedValue;
+}
+
+function stripQuotesForItemsInArray(rowArray:any[]){
+    return _.values(rowArray).map((r:any)=> {return stripQuotes(r);});
+}
+
