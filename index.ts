@@ -23,7 +23,7 @@ app.listen(port, async () => {
   console.log(`Server running at http://${hostname}:${port}/`);
 
   const queuedFile = filesOnGivenDate(ITEM_QUEUED_FOLDER, "ALL");
-  const usheredFile = filesOnGivenDate(ITEM_USHERED_FOLDER,"ALL");
+  const usheredFile = filesOnGivenDate(ITEM_USHERED_FOLDER, "ALL");
 
   dbConnect();
   for(let i = 0; i < queuedFile.length;i++){
