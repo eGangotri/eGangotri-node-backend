@@ -7,7 +7,8 @@ const schema = new mongoose.Schema(
         localPath: { type: String, required: true },
         title: { type: String, required: true },
         uploadCycleId: { type: String, required: true },
-        csvName: { type: String, required: true }
+        csvName: { type: String, required: true },
+        datetimeUploadStarted: { type: Date, required: true }
     }, {
         collection: 'Items_Queued',
         timestamps:true

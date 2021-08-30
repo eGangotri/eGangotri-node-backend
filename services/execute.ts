@@ -16,10 +16,12 @@ export async function processCSV(csvFileName: string, uploadCycleId: string, doc
     //console.log(`reading ${csvFileName}`);
     let itemsArray = []
 
+    const fileModifiedDate:Date = fs.statSync(csvFileName).mtime;
+
     fs.createReadStream(csvFileName)
         .pipe(csv())
         .on('data', async (row) => {
-            itemsArray.push(await extractData(row, uploadCycleId, csvFileName, docType));
+            itemsArray.push(await extractData(row, uploadCycleId, csvFileName, docType,fileModifiedDate));
         })
         .on('end', async () => {
             const response = await addItemsBulk(itemsArray, docType);
@@ -34,11 +36,11 @@ export async function processCSVPair(_queuedCSV: string, _usheredCSV: string) {
     processCSV(_usheredCSV, uploadCycleId, DOC_TYPE.IU);
 }
 
-export async function extractData(row, uploadCycleId, csvFileName, docType: DOC_TYPE = DOC_TYPE.IQ) {
-    return docType === DOC_TYPE.IQ ? await extractDataForItemsQueued(row, uploadCycleId, csvFileName) : await extractDataForItemsUshered(row, uploadCycleId, csvFileName);
+export async function extractData(row, uploadCycleId, csvFileName, docType: DOC_TYPE = DOC_TYPE.IQ, fileModifiedDate:Date) {
+    return docType === DOC_TYPE.IQ ? await extractDataForItemsQueued(row, uploadCycleId, csvFileName, fileModifiedDate) : await extractDataForItemsUshered(row, uploadCycleId, csvFileName, fileModifiedDate);
 }
 
-export async function extractDataForItemsQueued(row: any, uploadCycleId: string, csvFileName: string) {
+export async function extractDataForItemsQueued(row: any, uploadCycleId: string, csvFileName: string, fileModifiedDate:Date) {
     const rowArray = _.values(row);
     //console.log('extractDataForItemsQueued: ' + rowArray[0]);
     return new ItemsQueued(
@@ -48,12 +50,13 @@ export async function extractDataForItemsQueued(row: any, uploadCycleId: string,
             localPath: rowArray[2],
             title: rowArray[3],
             csvName: csvFileName,
-            uploadCycleId
+            uploadCycleId,
+            datetimeUploadStarted:fileModifiedDate
         }
     );
 }
 
-export async function extractDataForItemsUshered(row: any, uploadCycleId: string, csvFileName: string) {
+export async function extractDataForItemsUshered(row: any, uploadCycleId: string, csvFileName: string, fileModifiedDate:Date) {
     const rowArray = _.values(row);
     //console.log('extractDataForItemsUshered:' + rowArray[3] + ' ::: ' + rowArray[4]);
     const itemUsheredObj = {
@@ -63,7 +66,8 @@ export async function extractDataForItemsUshered(row: any, uploadCycleId: string
         title: rowArray[3],
         archiveItemId: rowArray[4],
         csvName: csvFileName,
-        uploadCycleId
+        uploadCycleId,
+        datetimeUploadStarted:fileModifiedDate
     }
     //console.log('extractDataForItemsUshered:' + JSON.stringify(itemUsheredObj));
     return new ItemsUshered(itemUsheredObj);
