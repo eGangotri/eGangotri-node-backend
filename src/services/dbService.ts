@@ -32,7 +32,7 @@ export async function addItemsBulk(itemsArray:any[], docType: DOC_TYPE = DOC_TYP
     }
 }
 
-export function dbConnect() {
+export function connectToMongo() {
   console.log('\nAttempting to connect to DB');
   if (connection_config.DB_URL) {
     mongoose.connect(connection_config.DB_URL, connection_config.options);

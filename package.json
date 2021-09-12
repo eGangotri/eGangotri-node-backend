@@ -5,10 +5,10 @@
   "main": "index.ts",
   "scripts": {
     "test": "npm test",
-    "flatfile-to-mongo": "ts-node ./tasks/flatfile-to-mongo.ts",
-    "start": "ts-node index.ts",
-    "web-scrap": "ts-node downloadLinks.ts",
-    "exec": "ts-node ./exec/exec.ts"
+    "flatfile-to-mongo": "ts-node ./src/tasks/flatfile-to-mongo.ts",
+    "start": "ts-node ./src/index.ts",
+    "web-scrap": "ts-node ./src/downloadLinks.ts",
+    "exec": "ts-node ./src/exec/exec.ts"
   },
   "repository": {
     "type": "git",

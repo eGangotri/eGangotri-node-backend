@@ -1,6 +1,6 @@
 
 import { filesOnGivenDate } from '../services/Util';
-import { dbConnect } from '../services/dbService';
+import { connectToMongo } from '../services/dbService';
 import { processCSVPair } from '../services/execute';
 import * as os from 'os';
 
@@ -14,7 +14,7 @@ const queuedFile = filesOnGivenDate(ITEM_QUEUED_FOLDER, "ALL");
 const usheredFile = filesOnGivenDate(ITEM_USHERED_FOLDER, "ALL");
 
 (()=>{
-    dbConnect();
+    connectToMongo();
     for(let i = 0; i < queuedFile.length;i++){
         console.log(`i ${queuedFile.join(",")} ${i}`)
         processCSVPair(queuedFile[i], usheredFile[i]);
