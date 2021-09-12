@@ -13,3 +13,7 @@ mongoose
 Schema: archive_upload_monitor
 Collection:Items_Queued
 UI: MongoDB Compass
+
+### Applications Hosted
+1. Upload Monitor Web App
+2. Command Line executer
