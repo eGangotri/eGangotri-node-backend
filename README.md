@@ -4,7 +4,10 @@
 npm init
 npm i express tsc ts-node typescript cors body-parser
 
-npm run start
+nodemon --exec npm run start
+OR
+nodemon 
+
 ###Additional Softwares
 mongoose
 
@@ -17,3 +20,4 @@ UI: MongoDB Compass
 ### Applications Hosted
 1. Upload Monitor Web App
 2. Command Line executer
+npm run exec

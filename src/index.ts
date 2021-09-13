@@ -1,12 +1,13 @@
 import * as express from 'express';
 import { itemsQueuedRoute } from './routes/itemsQueued.route'
 import { connectToMongo } from './services/dbService';
+import * as fs from 'fs';
 
 const app = express();
 const hostname = '127.0.0.1';
 const port = 4000;
 
-connectToMongo()
+connectToMongo();
 
 app.use((req, res, next) => {
   res.append('Access-Control-Allow-Origin', ['*']);
@@ -23,6 +24,12 @@ app.use('/itemsQueued', itemsQueuedRoute);
 
 app.listen(port, async () => {
   console.log(`Server running at http://${hostname}:${port}/`);
+  const file = "C:/Users/Chetan Pandey/eGangotri/items_queued/queued_items_12-Sep-2021_6-17-AM.csv";
+  const fileModifiedDate:Date = fs.statSync(file).birthtime;
+  const ctime:Date = fs.statSync(file).ctime;
+  const birthtime :Date = fs.statSync(file).birthtime ;
+  console.log(`birthtime ${birthtime} \n fileModifiedDate:${fileModifiedDate} \nctime ${ctime}`);
 });
+
 
 
