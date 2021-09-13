@@ -16,7 +16,7 @@ const usheredFile = filesOnGivenDate(ITEM_USHERED_FOLDER, "ALL");
 (()=>{
     connectToMongo();
     for(let i = 0; i < queuedFile.length;i++){
-        console.log(`i ${queuedFile.join(",")} ${i}`)
+        //console.log(`i ${queuedFile.join(",")} ${i}`)
         processCSVPair(queuedFile[i], usheredFile[i]);
     }
 })();
