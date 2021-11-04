@@ -1,4 +1,4 @@
-# eGangotri-upload-monitor
+# egangotri-node-backend
 
 ###Instructions to Create
 npm init
