@@ -17,7 +17,7 @@ app.use((req, res, next) => {
 });
 
 app.get('/', function (req, res) {
-  res.send('eGangotri-node-upload-monitor');
+  res.send('eGangotri-node-node-backend');
 })
 
 app.use('/itemsQueued', itemsQueuedRoute);
