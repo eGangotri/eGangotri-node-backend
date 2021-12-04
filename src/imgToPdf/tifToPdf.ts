@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import { PDFDocument } from 'pdf-lib';
 import { tiffToPng, getAllTifs, deleteAllPngs } from './imgUtils';
+import * as path from 'path';
 
 async function createPdf(pdfName: string, directoryPath: string) {
     const pdfDoc = await PDFDocument.create()
@@ -22,14 +23,17 @@ async function createPdf(pdfName: string, directoryPath: string) {
             height: pngDims.height,
         })
         const pdfBytes = await pdfDoc.save()
-        fs.writeFileSync(`${directoryPath}\\sample.pdf`, pdfBytes);
+        const pdfName = path.parse(directoryPath).name + ".pdf";     //=> "hello"
+        console.log(`pdfName ${pdfName}`)
+        fs.writeFileSync(`${directoryPath}\\${pdfName}`, pdfBytes);
     })
 }
 async function createPdfAndDeleteGeneratedFiles(directoryPath: string) {
-    await createPdf('${directoryPath}\\sample.pdf', directoryPath)
-    console.log("after pdf creation. Now delete all generated .pngs")
-    //deleteAllPngs(directoryPath);
+     createPdf('${directoryPath}\\sample.pdf', directoryPath).then(() =>{
+         console.log("after pdf creation. Now delete all generated .pngs")
+         //deleteAllPngs(directoryPath);
+     })
 }
 
-createPdfAndDeleteGeneratedFiles("C:\\tmp\\sampleTifs")
+createPdfAndDeleteGeneratedFiles("C:\\tmp\\1")
 
