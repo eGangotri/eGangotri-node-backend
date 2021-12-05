@@ -1,38 +1,36 @@
 import * as fs from 'fs';
-import { PDFDocument } from 'pdf-lib';
 import { tiffToPng, getAllTifs, deleteAllPngs, getAllPngs } from './imgUtils';
 import * as path from 'path';
 import { createPngs } from './tifToPng';
 
-async function createPdf2(directoryPath: string) {
-    const _pngs = await getAllPngs(directoryPath);
-    const pdfName = path.parse(directoryPath).name + ".pdf";
-    console.log(`pdfName ${pdfName}`)
-   // await imagesToPdf(_pngs, pdfName)
-}
+const PDFDocument = require('pdfkit');
+
+
 async function createPdf(directoryPath: string) {
     const _pngs = await getAllPngs(directoryPath);
+    const pdfName = directoryPath + "\\" + path.parse(directoryPath).name + "-1.pdf";
+    console.log(`pdfName ${pdfName}`)
+    const doc = new PDFDocument({autoFirstPage: false});
 
-    console.log(`_tiffToPng ${_pngs}`);
-    const pdfDoc = await PDFDocument.create()
 
-    for (let _png of _pngs) {
-        const pngImageBytes = fs.readFileSync(_png);
-        const pngImage = await pdfDoc.embedPng(pngImageBytes)
-        const pngDims = pngImage.scale(1)
+    doc.pipe(fs.createWriteStream(pdfName)); // write to PDF
 
-        const page = pdfDoc.addPage()
-        page.drawImage(pngImage)
-        const pdfBytes = await pdfDoc.save()
-        const pdfName = path.parse(directoryPath).name + ".pdf";
-        console.log(`pdfName ${pdfName}`)
-        fs.writeFileSync(`${directoryPath}\\${pdfName}`, pdfBytes);
-    }
+    let img = doc.openImage(_pngs[0]);
+    doc.addPage({size: [img.width, img.height]});
+    doc.image(img, 0, 0);
+
+    img = doc.openImage(_pngs[1]);
+    doc.addPage({size: [img.width, img.height]});
+    doc.image(img, 0, 0);
+    // finalize the PDF and end the stream
+    doc.end();
+    console.log("PDF created")
+   // await imagesToPdf(_pngs, pdfName)
 }
 async function createPdfAndDeleteGeneratedFiles(directoryPath: string) {
-    await createPdf2(directoryPath);
+    await createPdf(directoryPath);
     console.log("after pdf creation. Now delete all generated .pngs")
-    //deleteAllPngs(directoryPath);
+    deleteAllPngs(directoryPath);
 }
 
 
