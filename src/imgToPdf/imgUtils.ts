@@ -1,53 +1,53 @@
-import * as fs from 'fs';
+; import * as fs from 'fs';
 import * as  Jimp from "jimp"
 
-export function tiffToPng(tiffs: Array<string>, dest: string) {
-    tiffs.forEach((tiff) => {
-        const fileName = `${tiff}.png`
-        Jimp.read(tiff, function (err, file) {
-            if (err) {
-                console.log(`tiffToPng err ${fileName} ${err}`)
-            } else {
-                console.log(`fileName ${fileName}`);
-                file.write(fileName)
-            }
+export async function tiffToPng(tiffs: Array<string>, dest: string) {
+    console.log(`tiffs ${tiffs}`)
+    const promises = tiffs.map((tiff) => {
+        Jimp.read(tiff).then(_ => {
+            const fileName = `${tiff}.png`
+            console.log(`tiffToPng: fileName ${fileName}`);
+            _.write(fileName)
         })
+        .catch(console.error);
     });
-    return getAllPngs(dest)
+
+    return Promise.all(promises)
+    .then(async () => await getAllPngs(dest));
 }
 
-export const getAllTifs = (directoryPath: string) => {
-    return getAllFilesOfGivenType(directoryPath, [".tif", ".tiff"]);
+export const getAllTifs = async (directoryPath: string) => {
+    return await getAllFilesOfGivenType(directoryPath, [".tif", ".tiff"]);
 }
 
-export const getAllPngs = (directoryPath: string) => {
-    return getAllFilesOfGivenType(directoryPath, [".png"]);
+export const getAllPngs = async (directoryPath: string) => {
+    return await getAllFilesOfGivenType(directoryPath, [".png"]);
 }
 
-export const deleteAllPngs = (directoryPath: string) => {
-    return deleteFiles(getAllPngs(directoryPath));
+export const deleteAllPngs = async (directoryPath: string) => {
+    return await deleteFiles(await getAllPngs(directoryPath));
 }
 
-const deleteFiles = (files: Array<string>) => {
-    files.forEach(file => {
+export async function deleteFiles(files: Array<string>) {
+    for (let file of files) {
         try {
-            fs.unlinkSync(file)
+            fs.unlinkSync(file);
+            console.log(`deleted ${file}`);
         } catch (err) {
             console.error(err)
         }
-    });
+    };
 }
 
-export const getAllFilesOfGivenType = (directoryPath: string, _types: Array<string> = []) => {
+export const getAllFilesOfGivenType = async (directoryPath: string, _types: Array<string> = []) => {
     let files = []
-    fs.readdirSync(directoryPath).forEach(file => {
-        _types.forEach((_type) => {
-            if (file.toLowerCase().endsWith(_type)) {
-                // console.log(directoryPath + "\\" + file);
-                files.push(directoryPath + "\\" + file);
-            }
-        })
-    });
+    const contentList = fs.readdirSync(directoryPath)
+    for (let content of contentList) {
+        if (content.toLowerCase().endsWith(_types[0]) || (_types.length > 1 && content.toLowerCase().endsWith(_types[1]))) {
+            console.log("getAllFilesOfGivenType: " + directoryPath + "\\" + content);
+            files.push(directoryPath + "\\" + content);
+        }
+    }
     return files;
 }
 
