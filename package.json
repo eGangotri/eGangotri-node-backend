@@ -9,7 +9,7 @@
     "start": "ts-node ./src/index.ts",
     "web-scrap": "ts-node ./src/downloadLinks.ts",
     "exec": "ts-node ./src/exec/exec.ts",
-    "tif2pdf": "ts-node ./src/imgToPdf/tifToPdf.ts"
+    "tif2pdf": "ts-node ./src/imgToPdf/TifToPdf.ts"
   },
   "repository": {
     "type": "git",
