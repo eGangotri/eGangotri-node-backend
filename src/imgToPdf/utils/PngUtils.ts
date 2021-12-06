@@ -11,9 +11,7 @@ export async function createPngs(src:string, dest:string){
 
 async function tiffToPng(tifFile:string, dest:string){
     const tifFileName = dest + "\\" + path.parse(tifFile).name + ".png";
-
     const png = await sharp(tifFile)
     .png()
     .toFile(tifFileName)
-    console.log(`created ${tifFileName}`)
 }
