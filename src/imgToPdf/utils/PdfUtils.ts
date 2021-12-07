@@ -67,7 +67,6 @@ function addBanner(doc: any, img: any) {
           height: doc.page.height*0.31 - (doc.page.margins.top+doc.page.margins.bottom)
         })
         doc.moveDown();
-    console.log(` doc.page.height ${doc.page.height} ${img.width} ${img.height}`)
     doc.font(PDF_FONT).fontSize(calculateFontSize(img.height))
         .fillColor('black')
         .text(INTRO_TEXT, doc.page.margins.left, doc.page.height*0.31, {
