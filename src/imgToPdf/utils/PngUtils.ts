@@ -14,7 +14,6 @@ export function pngFolderName(src:string, dest:string){
 export async function tifftoPngs(src:string, dest:string){
     const tiffs = await getAllTifs(src);
     const folderForPngs = pngFolderName(src,dest);
-    let count = 
     for(let tiff of tiffs){
         await tiffToPng(tiff,folderForPngs)
     }
