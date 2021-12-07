@@ -30,7 +30,7 @@ const getAllFilesOfGivenType = async (dir: string, _types: Array<string> = []) =
             files.push(dir + "\\" + content);
         }
     }
-    console.log(`Found ${files.length} ${_types[0]}(s) of ${contentList.length}  items in ${dir}`)
+    console.log(`Found ${files.length} ${_types[0]}(s) of ${contentList.length}  items in \n\t${dir}`)
 
     return files;
 }
