@@ -33,6 +33,8 @@
     "express": "^4.17.1",
     "moment": "^2.29.1",
     "mongoose": "^5.11.7",
+    "pdf-lib": "^1.17.1",
+    "pdf-merger-js": "^3.2.1",
     "pdfkit": "^0.13.0",
     "puppeteer": "^9.1.1",
     "sharp": "^0.29.3",
