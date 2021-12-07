@@ -1,6 +1,6 @@
 import { deleteAllPngs } from './utils/ImgUtils';
-import { createPdfAndDeleteGeneratedFiles } from './utils/PdfUtils';
-import { createPngs } from './utils/PngUtils';
+import { createPdfAndDeleteGeneratedFiles, mergepPdfs } from './utils/PdfUtils';
+import { tifftoPngs } from './utils/PngUtils';
 import * as fs from 'fs';
 import { getDirectories } from './utils/Utils';
 
@@ -11,14 +11,20 @@ async function tifToPdf(src:string,dest:string){
     if (!fs.existsSync(dest)){
         fs.mkdirSync(dest);
     }
-    await createPngs(src,dest)
-    console.log(`createPngs ends`)
-    await createPdfAndDeleteGeneratedFiles(src,dest);
-    console.log(GENERATION_REPORT);
+    const tiffCount = await tifftoPngs(src,dest)
+    if(tiffCount.countMatch){
+        await createPdfAndDeleteGeneratedFiles(src,dest);
+    }
+    else{
+            const err =`${src} \n ${dest} \n tiff(${tiffCount.tiffsCount})/png count${tiffCount.pngCount} mismatch. 
+        will not proceed`;
+        GENERATION_REPORT.push(err)
+        console.log(err);
+    }
 }
 (async () => {
     const src = "D:\\NMM\\August-2019\\01-08-2019"
-    const dest = "E:\\manus"
+    const dest = "E:\\ramtek"
     const subfolders = getDirectories(src);
     console.log(subfolders)
     for(let subfolder of subfolders){
@@ -26,5 +32,7 @@ async function tifToPdf(src:string,dest:string){
         console.log(`process Folder ${forderForPdfizeing}`)
         await tifToPdf(forderForPdfizeing,dest)
     }
+    console.log(GENERATION_REPORT);
+    //await mergepPdfs("E:\\ramtek\\M-10-Surya Kavach - Kavikulguru Kalidas Sanskrit University Ramtek Collection.pdf")
 })();
 

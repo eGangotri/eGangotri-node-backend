@@ -1,15 +1,15 @@
 import * as fs from 'fs';
 
-export const getAllTifs = async (directoryPath: string) => {
-    return await getAllFilesOfGivenType(directoryPath, [".tif", ".tiff"]);
+export const getAllTifs = async (dir: string) => {
+    return await getAllFilesOfGivenType(dir, [".tif", ".tiff"]);
 }
 
-export const getAllPngs = async (directoryPath: string) => {
-    return await getAllFilesOfGivenType(directoryPath, [".png"]);
+export const getAllPngs = async (dir: string) => {
+    return await getAllFilesOfGivenType(dir, [".png"]);
 }
 
-export const deleteAllPngs = async (directoryPath: string) => {
-    return await deleteFiles(await getAllPngs(directoryPath));
+export const deleteAllPngs = async (dir: string) => {
+    return await deleteFiles(await getAllPngs(dir));
 }
 
 export async function deleteFiles(files: Array<string>) {
@@ -22,14 +22,16 @@ export async function deleteFiles(files: Array<string>) {
     };
 }
 
-const getAllFilesOfGivenType = async (directoryPath: string, _types: Array<string> = []) => {
+const getAllFilesOfGivenType = async (dir: string, _types: Array<string> = []) => {
     let files = []
-    const contentList = fs.readdirSync(directoryPath)
+    const contentList = fs.readdirSync(dir)
     for (let content of contentList) {
         if (content.toLowerCase().endsWith(_types[0]) || (_types.length > 1 && content.toLowerCase().endsWith(_types[1]))) {
-            files.push(directoryPath + "\\" + content);
+            files.push(dir + "\\" + content);
         }
     }
+    console.log(`Found ${files.length} ${_types[0]}(s) of ${contentList.length}  items in ${dir}`)
+
     return files;
 }
 
