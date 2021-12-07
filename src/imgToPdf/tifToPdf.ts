@@ -10,7 +10,7 @@ export async function tifToPdf(src: string, dest: string) {
         fs.mkdirSync(dest);
     }
     const tiffCount = await tifftoPngs(src, dest)
-    if (!tiffCount.countMatch) {
+    if (tiffCount.countMatch) {
         await createPdfAndDeleteGeneratedFiles(src, dest);
     }
     else {
