@@ -13,12 +13,9 @@ const FOLDERS = getUploadableFolders("D:\\NMM\\August-2019", "E:\\ramtek");
 const index = 2;
 (async () => {
     console.log(FOLDERS)
-    console.log(`This Run will convert Tiffs in Folder # ${index + 1} ${FOLDERS[index].src} to ${FOLDERS[index].dest}`);
-    const x = true;
-    if (x) {
-        garbageCollect()
-        process.exit(0);
-    }
+    console.log(`This Run will convert tifs in Folder # ${index + 1} 
+    ${FOLDERS[index].src} to 
+    ${FOLDERS[index].dest}`);
     const src = FOLDERS[index].src
     const dest = FOLDERS[index].dest;
 
@@ -31,7 +28,7 @@ const index = 2;
     let subFolderCount = 0;
     for (let subfolder of subfolders) {
         const forderForPdfizeing = `${src}\\${subfolder}`;
-        console.log(`\n${++subFolderCount}).Processing ${(await getAllTifs(forderForPdfizeing)).length}Tiffs in Folder \n\t${forderForPdfizeing}`)
+        console.log(`\n${++subFolderCount}).Processing ${(await getAllTifs(forderForPdfizeing)).length} tiffs in Folder \n\t${forderForPdfizeing}`)
         await tifToPdf(forderForPdfizeing, dest)
         garbageCollect()
     }
