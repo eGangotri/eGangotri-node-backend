@@ -1,11 +1,10 @@
-import { tifToPdf } from './TifToPdf';
 import { getAllTifs } from './utils/ImgUtils';
 import * as fs from 'fs';
 
 import {
-    folderCountEqualsPDFCount, formatTime,
-    garbageCollect, getAllPdfs,
-    getDirectories, getUploadableFolders
+    formatTime,
+     getAllPdfs,
+    getDirectories
 } from './utils/Utils';
 import { getPdfPageCount } from './utils/PdfLibUtils';
 import { INTRO_PAGE_ADJUSTMENT } from './utils/constants';
@@ -16,8 +15,8 @@ export let GENERATION_REPORT = [];
 // const tiffFolderMain = "D:\\NMM\\August-2019\\02-08-2019";
 // const pdfFolder = "E:\\ramtek2-";
 
-const tiffFolderMain = "D:\\NMM\\August-2019\\03-08-2019";
-const pdfFolder = "E:\\ramtek-3";
+const tiffFolderMain = "D:\\NMM\\August-2019\\02-08-2019";
+const pdfFolder = "E:\\ramtek2-";
 
 (async () => {
     let NOT_CREATED = [];
@@ -26,17 +25,20 @@ const pdfFolder = "E:\\ramtek-3";
     let UNCHECKABLE = [];
 
     const pdfCounts = (await getAllPdfs(pdfFolder)).length
-    const tiffSubFolders: Array<string> = getDirectories(tiffFolderMain)
+    const tiffSubFolders: Array<string> = await getDirectories(tiffFolderMain)
     const START_TIME = Number(Date.now())
-    console.log(`Tally Check started for ${tiffSubFolders.length} Folder(s)\n\t${tiffSubFolders.join("\n\t")} at ${START_TIME}`)
+    console.log(`Tally Check started for ${tiffSubFolders.length} Folder(s)
+    \n\t${tiffSubFolders.join("\n\t")}
+     at ${new Date(START_TIME)}`);
+
     GENERATION_REPORT.push(`Tally Check started for ${tiffSubFolders.length} folder(s) `)
 
     let subFolderCount = 0;
     for (let subfolder of tiffSubFolders) {
         const folderForChecking = `${tiffFolderMain}\\${subfolder}`;
         const pdfPath = `${pdfFolder}\\${subfolder}.pdf`
-        console.log(`Testing Item #${++subFolderCount} of ${pdfCounts} pdfs :${pdfPath}\n`);
-
+        subFolderCount++
+        console.log(`Testing Item #${subFolderCount} of ${pdfCounts} pdfs :${pdfPath}\n`);
         if (!fs.existsSync(pdfPath)) {
             console.log(`****Error ${pdfPath} was never created`);
             GENERATION_REPORT.push(`****Error ${pdfPath} was never created`);
@@ -75,6 +77,6 @@ const pdfFolder = "E:\\ramtek-3";
     Reconvert [${(NOT_CREATED.map((x)=>`"${x}"`)).join(",")}]
     Error Margin: ${tiffSubFolders.length} - ${pdfCounts} = ${tiffSubFolders.length - pdfCounts}
     `);
-    GENERATION_REPORT.push(`Tally Check ended at ${END_TIME}.\nTotal Time Taken ${formatTime(END_TIME - START_TIME)}`);
+    GENERATION_REPORT.push(`Tally Check ended at ${new Date(END_TIME)}.\nTotal Time Taken ${formatTime(END_TIME - START_TIME)}`);
     console.log(GENERATION_REPORT);
 })();

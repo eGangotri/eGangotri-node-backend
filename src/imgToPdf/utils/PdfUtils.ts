@@ -4,6 +4,7 @@ import * as path from 'path';
 import { GENERATION_REPORT } from '../index';
 import { pngFolderName } from './PngUtils';
 import { ADD_INTRO_PDF, FOOTER_LINK, FOOTER_TEXT, INTRO_BANNER, INTRO_PAGE_ADJUSTMENT, INTRO_TEXT, PDF_FONT } from './constants';
+import { removeFolderWithContents } from './FileUtils';
 const PDFDocument = require('pdfkit');
 
 //https://pdfkit.org/docs/text.html
@@ -13,7 +14,7 @@ export async function createPdf(src: string, dest: string) {
     const doc = new PDFDocument({ autoFirstPage: false, bufferPages: true });
     doc.pipe(fs.createWriteStream(pdf)); // write to PDF
 
-    let introPDFAdded = false
+    let introPDFAdded = false;
     for (let png of _pngs) {
         let img = doc.openImage(png);
         if (!introPDFAdded && ADD_INTRO_PDF) {
@@ -85,6 +86,5 @@ function checkPageCountEqualsImgCount(doc: any, pdf: string, pngCount: number) {
 
 export async function createPdfAndDeleteGeneratedFiles(tifSrc: string, destPdf: string) {
     await createPdf(tifSrc, destPdf);
-    fs.rmSync(pngFolderName(tifSrc,destPdf), { recursive: true, force: true });
-    
+    removeFolderWithContents(pngFolderName(tifSrc,destPdf))
 }
