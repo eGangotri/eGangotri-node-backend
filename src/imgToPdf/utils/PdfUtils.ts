@@ -3,36 +3,11 @@ import { getAllPngs } from '../utils/ImgUtils';
 import * as path from 'path';
 import { GENERATION_REPORT } from '../index';
 import { pngFolderName } from './PngUtils';
+import { ADD_INTRO_PDF, FOOTER_LINK, FOOTER_TEXT, INTRO_BANNER, INTRO_TEXT, PDF_FONT } from './constants';
 
 const PDFMerger = require('pdf-merger-js');
 const PDFDocument = require('pdfkit');
 
-const FOOTER_TEXT = 'CC-0. In Public Domain.Kavikulguru Kalidas Sanskrit University Ramtek Collection';
-const PDF_FONT = 'Times-Roman';
-const FOOTER_LINK = 'https://kksu.org/';
-const INTRO_BANNER = 'E:\\KKSU_Banner.jpg';
-const ADD_INTRO_PDF = true;
-const INTRO_TEXT = `This PDF you are browsing now is a digitized copy of rare books and manuscripts from the Jnanayogi Dr. Shrikant Jichkar Knowledge Resource Center Library located in Kavikula Guru Kalidas Sanskrit University Ramtek, Maharashtra.
-
-Digitization was executed by NMM(https://www.namami.gov.in/)
-
-About KKSU
-The University was established on 18 September 1997. KKSU is an institution dedicated to the advanced learning of Sanskrit. It is located at Ramtek in Nagpur District, Maharashtra.
-The pdf is offered freely to the Community of Scholars with the intent to promote Sanskrit Learning.
-
-Website
-https://kksu.co.in/
-
-Sincerely,
-
-Prof. Shrinivasa Varkhedi
-Hon'ble Vice-Chancellor
-
-Dr. Deepak Kapade
-Librarian
-
-Digital Uploaded by eGangotri Digital Preservation Trust, New Delhi
-https://egangotri.wordpress.com/`
 
 //https://pdfkit.org/docs/text.html
 export async function createPdf(src: string, dest: string) {
@@ -55,7 +30,7 @@ export async function createPdf(src: string, dest: string) {
 
     // finalize the PDF and end the stream
     doc.end();
-    console.log(`Created \n\t${pdf}/`)
+    console.log(`Created pdf from ${_pngs} Image Files: \n\t${pdf}`)
     checkPageCountEqualsImgCount(doc, pdf, _pngs.length);
 }
 
@@ -101,7 +76,7 @@ function checkPageCountEqualsImgCount(doc: any, pdf: string, pngCount: number) {
     const range = doc.bufferedPageRange();
     const addIntroAdjustment = ADD_INTRO_PDF ? 1 : 0
     const pdfPageCount = range.start - addIntroAdjustment;
-    if (pdfPageCount === pngCount + addIntroAdjustment) {
+    if (pdfPageCount === pngCount) {
         GENERATION_REPORT.push(`${pdf}(${pngCount}) created with PageCount same as png count`)
     }
     else {
