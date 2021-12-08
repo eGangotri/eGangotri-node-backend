@@ -16,7 +16,7 @@ export async function tifftoPngs(src: string, dest: string) {
 
     return Promise.all(tiffs.map((tiff) => tiffToPng(tiff, folderForPngs))).then(async () => {
         const pngCount = (await getAllPngs(folderForPngs)).length
-        console.log({ tiffsCount: tiffs.length, pngCount, countMatch: tiffs.length == pngCount })
+        //console.log({ tiffsCount: tiffs.length, pngCount, countMatch: tiffs.length == pngCount })
         return { tiffsCount: tiffs.length, pngCount, countMatch: tiffs.length == pngCount };
     });
 }

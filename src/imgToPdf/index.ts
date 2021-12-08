@@ -36,10 +36,8 @@ async function exec(tiffSubFolders: Array<string>, pdfDest: string) {
 
     let tiffSubFolderCounter = 0;
     for (let tiffSubFolder of tiffSubFolders) {
-        const tiffCount = (await getAllTifs(tiffSubFolder)).length
-        console.log(`\n${++tiffSubFolderCounter} of ${tiffSubFoldersCount}).Processing ${tiffCount} tiffs in Folder \n\t${tiffSubFolder}`)
+        console.log(`\n${++tiffSubFolderCounter} of ${tiffSubFoldersCount}).`)
         await tifToPdf(tiffSubFolder, pdfDest)
-        garbageCollect()
     }
     const END_TIME = Number(Date.now())
     GENERATION_REPORT.push(await folderCountEqualsPDFCount(tiffSubFolders.length, pdfDest));
@@ -48,14 +46,14 @@ async function exec(tiffSubFolders: Array<string>, pdfDest: string) {
 }
 
 async function execFixed() {
-    const tiffSubFolders = ['D:\\NMM\\August-2019\\02-08-2019\\M-37-Brahma Karma Suchay - Kavikulguru Kalidas Sanskrit University Ramtek Collection', 'D:\\NMM\\August-2019\\02-08-2019\\M-38-Devalay Gram Mahatmya - Kavikulguru Kalidas Sanskrit University Ramtek Collection', 'D:\\NMM\\August-2019\\02-08-2019\\M-39-Vanadurga - Kavikulguru Kalidas Sanskrit University Ramtek Collection', 'D:\\NMM\\August-2019\\02-08-2019\\M-40-Ganapati Kavach - Kavikulguru Kalidas Sanskrit University Ramtek Collection', 'D:\\NMM\\August-2019\\02-08-2019\\M-41-Devalay Gram Mahatmya - Kavikulguru Kalidas Sanskrit University Ramtek Collection', 'D:\\NMM\\August-2019\\02-08-2019\\M-42-Haritalik Puja Katha_Rishi Panchami Puja Katha - Kavikulguru Kalidas Sanskrit University Ramtek Collection', 'D:\\NMM\\August-2019\\02-08-2019\\M-43-Haritalik Puja Katha_Rishi Panchami Puja Katha - Kavikulguru Kalidas Sanskrit University Ramtek Collection']
-    //const tiffSubFolders = ["D:\\NMM\\August-2019\\03-08-2019\\M-72-Sulabh Veda Prakash - Kavikulguru Kalidas Sanskrit University Ramtek Collection"]
+    //const tiffSubFolders = ['D:\\NMM\\August-2019\\02-08-2019\\M-37-Brahma Karma Suchay - Kavikulguru Kalidas Sanskrit University Ramtek Collection', 'D:\\NMM\\August-2019\\02-08-2019\\M-38-Devalay Gram Mahatmya - Kavikulguru Kalidas Sanskrit University Ramtek Collection', 'D:\\NMM\\August-2019\\02-08-2019\\M-39-Vanadurga - Kavikulguru Kalidas Sanskrit University Ramtek Collection', 'D:\\NMM\\August-2019\\02-08-2019\\M-40-Ganapati Kavach - Kavikulguru Kalidas Sanskrit University Ramtek Collection', 'D:\\NMM\\August-2019\\02-08-2019\\M-41-Devalay Gram Mahatmya - Kavikulguru Kalidas Sanskrit University Ramtek Collection', 'D:\\NMM\\August-2019\\02-08-2019\\M-42-Haritalik Puja Katha_Rishi Panchami Puja Katha - Kavikulguru Kalidas Sanskrit University Ramtek Collection', 'D:\\NMM\\August-2019\\02-08-2019\\M-43-Haritalik Puja Katha_Rishi Panchami Puja Katha - Kavikulguru Kalidas Sanskrit University Ramtek Collection']
+    const tiffSubFolders = ["D:\\NMM\\August-2019\\03-08-2019\\M-72-Sulabh Veda Prakash - Kavikulguru Kalidas Sanskrit University Ramtek Collection"]
 
-    const destPdf = "E:\\ramtek2--";
-    //const destPdf = "E:\\ramtek3--";
+    //const destPdf = "E:\\ramtek2--";
+    const destPdf = "E:\\ramtek3--";
     //console.log(`${tiffSubFolders}`)
-    //await exec(tiffSubFolders, destPdf)
-    await exec(["C:\\tmp\\tiffs"], "C:\\tmp\\pdfDest")
+    await exec(tiffSubFolders, destPdf)
+    //await exec(["C:\\tmp\\tiffs","C:\\tmp\\tiffs2","C:\\tmp\\tiffs3"], "C:\\tmp\\pdfDest6");
 }
 
 //execDynamic();

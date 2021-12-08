@@ -5,6 +5,7 @@ import { GENERATION_REPORT } from '../index';
 import { pngFolderName } from './PngUtils';
 import { ADD_INTRO_PDF, FOOTER_LINK, FOOTER_TEXT, INTRO_BANNER, INTRO_PAGE_ADJUSTMENT, INTRO_TEXT, PDF_FONT } from './constants';
 import { removeFolderWithContents } from './FileUtils';
+import { formatTime, garbageCollect } from './Utils';
 const PDFDocument = require('pdfkit');
 
 //https://pdfkit.org/docs/text.html
@@ -13,9 +14,10 @@ export async function createPdf(src: string, dest: string) {
     const pdf = dest + "\\" + path.parse(src).name + ".pdf";
     const doc = new PDFDocument({ autoFirstPage: false, bufferPages: true });
     doc.pipe(fs.createWriteStream(pdf)); // write to PDF
-
+    let garbageCollectCounter = 0;
     let introPDFAdded = false;
     for (let png of _pngs) {
+        const START_TIME = Number(Date.now())
         let img = doc.openImage(png);
         if (!introPDFAdded && ADD_INTRO_PDF) {
             introPDFAdded = true;
@@ -24,6 +26,10 @@ export async function createPdf(src: string, dest: string) {
         doc.addPage({ size: [img.width, img.height] });
         doc.image(img, 0, 0)
         addFooter(doc)
+        garbageCollectCounter++
+        if (garbageCollectCounter % 100 === 0 || garbageCollectCounter === _pngs.length) {
+            garbageCollect()
+        }
     }
 
     // finalize the PDF and end the stream
@@ -35,20 +41,21 @@ export async function createPdf(src: string, dest: string) {
 function addBanner(doc: any, img: any) {
     doc.addPage({ size: [img.width, img.height] });
     const banner = doc.openImage(INTRO_BANNER)
-    doc.image(banner, doc.page.margins.left, doc.page.margins.top, 
-        { width: doc.page.width - (doc.page.margins.left+doc.page.margins.right),
-          height: doc.page.height*0.31 - (doc.page.margins.top+doc.page.margins.bottom)
+    doc.image(banner, doc.page.margins.left, doc.page.margins.top,
+        {
+            width: doc.page.width - (doc.page.margins.left + doc.page.margins.right),
+            height: doc.page.height * 0.31 - (doc.page.margins.top + doc.page.margins.bottom)
         })
-        doc.moveDown();
+    doc.moveDown();
     doc.font(PDF_FONT).fontSize(calculateFontSize(img.height))
         .fillColor('black')
-        .text(INTRO_TEXT, doc.page.margins.left, doc.page.height*0.31, {
+        .text(INTRO_TEXT, doc.page.margins.left, doc.page.height * 0.31, {
             align: 'left'
         });
     addFooter(doc);
 }
 
-function calculateFontSize(pageHeight: number, ratio:number = 0.02) {
+function calculateFontSize(pageHeight: number, ratio: number = 0.02) {
     return (pageHeight * ratio > 14) ? pageHeight * ratio : 14;
 }
 
@@ -86,5 +93,5 @@ function checkPageCountEqualsImgCount(doc: any, pdf: string, pngCount: number) {
 
 export async function createPdfAndDeleteGeneratedFiles(tifSrc: string, destPdf: string) {
     await createPdf(tifSrc, destPdf);
-    removeFolderWithContents(pngFolderName(tifSrc,destPdf))
+    removeFolderWithContents(pngFolderName(tifSrc, destPdf))
 }
