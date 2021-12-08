@@ -30,7 +30,7 @@ export async function createPdf(src: string, dest: string) {
 
     // finalize the PDF and end the stream
     doc.end();
-    console.log(`Created pdf from ${_pngs} Image Files: \n\t${pdf}`)
+    console.log(`Created pdf from ${_pngs.length} Image Files: \n\t${pdf}`)
     checkPageCountEqualsImgCount(doc, pdf, _pngs.length);
 }
 
