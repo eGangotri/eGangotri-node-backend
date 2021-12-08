@@ -1,10 +1,14 @@
 import * as fs from 'fs';
-import * as path from 'path';
-
+require('expose-gc')
 export const getDirectories = source =>
      fs.readdirSync(source, { withFileTypes: true })
           .filter(dirent => dirent.isDirectory())
           .map(dirent => dirent.name)
+export const getDirectoriesWithFullPath = source =>
+     fs.readdirSync(source, { withFileTypes: true })
+          .filter(dirent => dirent.isDirectory())
+          .map(dirent => `${source}\\${dirent.name}`)
+
 
 export function formatTime(timeLapseinMS: number) {
      const timeLapseInSecs = timeLapseinMS / 1000
@@ -59,7 +63,18 @@ export const getUploadableFolders = (srcFolder: string, dest: string) => {
      return dirs.map((subFolder, index) => {
           return {
                src: `${srcFolder}\\${subFolder}`,
-               dest: `${dest}_${index + 1}_${subFolder}`
+               dest: `${dest}ramtek_${index + 1}_${subFolder}`
+          }
+     });
+}
+
+export const getUploadableFoldersForList = (srcFolder: Array<string>, dest: string) => {
+     console.log(`${srcFolder.length} uploadable folders.`);
+
+     return srcFolder.map((subFolder, index) => {
+          return {
+               src: `${subFolder}`,
+               dest: `${dest}ramtek_${index + 1}_${subFolder}`
           }
      });
 }
