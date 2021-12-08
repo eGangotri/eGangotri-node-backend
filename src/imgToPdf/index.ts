@@ -1,43 +1,63 @@
-import { tifToPdf } from './TifToPdf';
 import { getAllTifs } from './utils/ImgUtils';
 import {
     folderCountEqualsPDFCount, formatTime,
-    garbageCollect, getAllPdfs, 
-    getDirectories, getUploadableFolders
+    garbageCollect, getAllPdfs,
+     getDirectoriesWithFullPath, getUploadableFolders, getUploadableFoldersForList
 } from './utils/Utils';
-require('expose-gc');
+import * as fs from 'fs';
+import { tifToPdf } from './TifToPdf';
 
 export let GENERATION_REPORT = [];
 
-const FOLDERS = getUploadableFolders("D:\\NMM\\August-2019", "E:\\ramtek");
-const index = 2;
-(async () => {
+
+async function execDynamic() {
+    const index = 2;
+    const FOLDERS = getUploadableFolders("D:\\NMM\\August-2019", "E:\\");
     console.log(FOLDERS)
     console.log(`This Run will convert tifs in Folder # ${index + 1} 
     ${FOLDERS[index].src} to 
     ${FOLDERS[index].dest}`);
+
     const src = FOLDERS[index].src
     const dest = FOLDERS[index].dest;
+    const tiffSubFolders = getDirectoriesWithFullPath(src);
+    console.log(`${tiffSubFolders}`)
+    await exec(tiffSubFolders, dest)
+}
 
-    const subfolders = getDirectories(src);
-
-    console.log(`TifToPDF started for ${subfolders.length} Folder(s)\n\t${subfolders.join("\n\t")}`)
+async function exec(tiffSubFolders: Array<string>, pdfDest: string) {
+    if (!fs.existsSync(pdfDest)) {
+        fs.mkdirSync(pdfDest);
+    }
+    const tiffSubFoldersCount = tiffSubFolders.length;
+    console.log(`TifToPDF started for ${tiffSubFoldersCount} Folder(s)\n\t${tiffSubFolders.join("\n\t")}`)
     const START_TIME = Number(Date.now())
 
-    GENERATION_REPORT.push(`TifToPDF started for ${subfolders.length} folder(s) at ${START_TIME}`)
+    GENERATION_REPORT.push(`TifToPDF started for ${tiffSubFoldersCount} folder(s) at ${START_TIME}`)
 
-    const x= true;
-    if(x)process.exit(0)
-
-    let subFolderCount = 0;
-    for (let subfolder of subfolders) {
-        const forderForPdfizeing = `${src}\\${subfolder}`;
-        console.log(`\n${++subFolderCount}).Processing ${(await getAllTifs(forderForPdfizeing)).length} tiffs in Folder \n\t${forderForPdfizeing}`)
-        await tifToPdf(forderForPdfizeing, dest)
+    let tiffSubFolderCounter = 0;
+    for (let tiffSubFolder of tiffSubFolders) {
+        const tiffCount = (await getAllTifs(tiffSubFolder)).length
+        console.log(`\n${++tiffSubFolderCounter} of ${tiffSubFoldersCount}).Processing ${tiffCount} tiffs in Folder \n\t${tiffSubFolder}`)
+        await tifToPdf(tiffSubFolder, pdfDest)
         garbageCollect()
     }
     const END_TIME = Number(Date.now())
-    GENERATION_REPORT.push(await folderCountEqualsPDFCount(subfolders.length, dest));
+    GENERATION_REPORT.push(await folderCountEqualsPDFCount(tiffSubFolders.length, pdfDest));
     GENERATION_REPORT.push(`TifToPDF ended at ${END_TIME}.\nTotal Time Taken ${formatTime(END_TIME - START_TIME)}`);
     console.log(GENERATION_REPORT);
-})();
+}
+
+async function execFixed() {
+    const tiffSubFolders = ['D:\\NMM\\August-2019\\02-08-2019\\M-37-Brahma Karma Suchay - Kavikulguru Kalidas Sanskrit University Ramtek Collection', 'D:\\NMM\\August-2019\\02-08-2019\\M-38-Devalay Gram Mahatmya - Kavikulguru Kalidas Sanskrit University Ramtek Collection', 'D:\\NMM\\August-2019\\02-08-2019\\M-39-Vanadurga - Kavikulguru Kalidas Sanskrit University Ramtek Collection', 'D:\\NMM\\August-2019\\02-08-2019\\M-40-Ganapati Kavach - Kavikulguru Kalidas Sanskrit University Ramtek Collection', 'D:\\NMM\\August-2019\\02-08-2019\\M-41-Devalay Gram Mahatmya - Kavikulguru Kalidas Sanskrit University Ramtek Collection', 'D:\\NMM\\August-2019\\02-08-2019\\M-42-Haritalik Puja Katha_Rishi Panchami Puja Katha - Kavikulguru Kalidas Sanskrit University Ramtek Collection', 'D:\\NMM\\August-2019\\02-08-2019\\M-43-Haritalik Puja Katha_Rishi Panchami Puja Katha - Kavikulguru Kalidas Sanskrit University Ramtek Collection']
+    //const tiffSubFolders = ["D:\\NMM\\August-2019\\03-08-2019\\M-72-Sulabh Veda Prakash - Kavikulguru Kalidas Sanskrit University Ramtek Collection"]
+
+    const destPdf = "E:\\ramtek2--";
+    //const destPdf = "E:\\ramtek3--";
+    console.log(`${tiffSubFolders}`)
+    await exec(tiffSubFolders, destPdf)
+}
+
+//execDynamic();
+execFixed();
+
