@@ -6,7 +6,13 @@ import * as fs from 'fs';
  * https://www.npmjs.com/package/pdf-lib
  */
 
-export async function getPdfPageCount(pdf:string){
-    const pdfDoc = await PDFDocument.load(fs.readFileSync(pdf));
-    return pdfDoc.getPages().length
+export async function getPdfPageCount(pdfPath:string){
+    var stats = fs.statSync(pdfPath)
+    var fileSizeInBytes = stats.size;
+    var fileSizeInGB = fileSizeInBytes / (1024*1024*1024);
+        if(fileSizeInGB<=2){
+            const pdfDoc = await PDFDocument.load(fs.readFileSync(pdfPath));
+            return pdfDoc.getPages().length
+        }
+        else return -1
 }
