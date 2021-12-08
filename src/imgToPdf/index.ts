@@ -25,6 +25,10 @@ const index = 2;
     const START_TIME = Number(Date.now())
 
     GENERATION_REPORT.push(`TifToPDF started for ${subfolders.length} folder(s) at ${START_TIME}`)
+
+    const x= true;
+    if(x)process.exit(0)
+
     let subFolderCount = 0;
     for (let subfolder of subfolders) {
         const forderForPdfizeing = `${src}\\${subfolder}`;

@@ -3,7 +3,7 @@ import { getAllPngs } from '../utils/ImgUtils';
 import * as path from 'path';
 import { GENERATION_REPORT } from '../index';
 import { pngFolderName } from './PngUtils';
-import { ADD_INTRO_PDF, FOOTER_LINK, FOOTER_TEXT, INTRO_BANNER, INTRO_TEXT, PDF_FONT } from './constants';
+import { ADD_INTRO_PDF, FOOTER_LINK, FOOTER_TEXT, INTRO_BANNER, INTRO_PAGE_ADJUSTMENT, INTRO_TEXT, PDF_FONT } from './constants';
 
 const PDFMerger = require('pdf-merger-js');
 const PDFDocument = require('pdfkit');
@@ -74,8 +74,7 @@ function addFooter(doc: any) {
 
 function checkPageCountEqualsImgCount(doc: any, pdf: string, pngCount: number) {
     const range = doc.bufferedPageRange();
-    const addIntroAdjustment = ADD_INTRO_PDF ? 1 : 0
-    const pdfPageCount = range.start - addIntroAdjustment;
+    const pdfPageCount = range.start - INTRO_PAGE_ADJUSTMENT;
     if (pdfPageCount === pngCount) {
         GENERATION_REPORT.push(`${pdf}(${pngCount}) created with PageCount same as png count`)
     }

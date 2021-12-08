@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import * as path from 'path';
 
 export const getDirectories = source =>
      fs.readdirSync(source, { withFileTypes: true })
@@ -54,10 +55,11 @@ export const getAllFilesOfGivenType = async (dir: string, _types: Array<string> 
 export const getUploadableFolders = (srcFolder: string, dest: string) => {
      const dirs = getDirectories(srcFolder);
      console.log(`${dirs.length} uploadable folders.`);
+
      return dirs.map((subFolder, index) => {
           return {
                src: `${srcFolder}\\${subFolder}`,
-               dest: `${dest}-${index + 1}`
+               dest: `${dest}_${index + 1}_${subFolder}`
           }
      });
 }
