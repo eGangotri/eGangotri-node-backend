@@ -17,7 +17,6 @@ export async function createPdf(src: string, dest: string) {
     let garbageCollectCounter = 0;
     let introPDFAdded = false;
     for (let png of _pngs) {
-        const START_TIME = Number(Date.now())
         let img = doc.openImage(png);
         if (!introPDFAdded && ADD_INTRO_PDF) {
             introPDFAdded = true;
