@@ -5,21 +5,17 @@ import { formatTime } from './utils/Utils';
 import { getAllTifs } from './utils/ImgUtils';
 
 export async function tifToPdf(tifSrc: string, destPdf: string) {
-    const START_TIME = Number(Date.now())
-    
     const tiffCount = (await getAllTifs(tifSrc)).length
     console.log(`Converting ${tiffCount} tiffs in Folder \n\t${tifSrc}`)
 
     const tiffToPngStats = await tifftoPngs(tifSrc, destPdf)
-    const END_TIME = Number(Date.now())
 
     if (tiffToPngStats.countMatch) {
         const START_TIME = Number(Date.now())
         await createPdfAndDeleteGeneratedFiles(tifSrc, destPdf);
-    const END_TIME = Number(Date.now())
-    console.log(`createPdfAndDeleteGeneratedFiles ended at ${new Date(END_TIME)}.
+        const END_TIME = Number(Date.now())
+        console.log(`createPdfAndDeleteGeneratedFiles ended at ${new Date(END_TIME)}.
     \nTotal Time Taken ${formatTime(END_TIME - START_TIME)}`);
-
     }
     else {
         const err = `Error!!!
