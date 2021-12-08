@@ -1,18 +1,17 @@
 import { getAllTifs } from './utils/ImgUtils';
 import {
     folderCountEqualsPDFCount, formatTime,
-    garbageCollect, getAllPdfs,
-     getDirectoriesWithFullPath, getUploadableFolders, getUploadableFoldersForList
+    garbageCollect, 
+     getDirectoriesWithFullPath, getUploadableFolders
 } from './utils/Utils';
 import * as fs from 'fs';
 import { tifToPdf } from './TifToPdf';
 
 export let GENERATION_REPORT = [];
 
-
 async function execDynamic() {
     const index = 2;
-    const FOLDERS = getUploadableFolders("D:\\NMM\\August-2019", "E:\\");
+    const FOLDERS = await getUploadableFolders("D:\\NMM\\August-2019", "E:\\");
     console.log(FOLDERS)
     console.log(`This Run will convert tifs in Folder # ${index + 1} 
     ${FOLDERS[index].src} to 
@@ -20,7 +19,7 @@ async function execDynamic() {
 
     const src = FOLDERS[index].src
     const dest = FOLDERS[index].dest;
-    const tiffSubFolders = getDirectoriesWithFullPath(src);
+    const tiffSubFolders = await getDirectoriesWithFullPath(src);
     console.log(`${tiffSubFolders}`)
     await exec(tiffSubFolders, dest)
 }
@@ -33,7 +32,7 @@ async function exec(tiffSubFolders: Array<string>, pdfDest: string) {
     console.log(`TifToPDF started for ${tiffSubFoldersCount} Folder(s)\n\t${tiffSubFolders.join("\n\t")}`)
     const START_TIME = Number(Date.now())
 
-    GENERATION_REPORT.push(`TifToPDF started for ${tiffSubFoldersCount} folder(s) at ${START_TIME}`)
+    GENERATION_REPORT.push(`TifToPDF started for ${tiffSubFoldersCount} folder(s) at ${new Date(START_TIME)}`)
 
     let tiffSubFolderCounter = 0;
     for (let tiffSubFolder of tiffSubFolders) {
@@ -44,7 +43,7 @@ async function exec(tiffSubFolders: Array<string>, pdfDest: string) {
     }
     const END_TIME = Number(Date.now())
     GENERATION_REPORT.push(await folderCountEqualsPDFCount(tiffSubFolders.length, pdfDest));
-    GENERATION_REPORT.push(`TifToPDF ended at ${END_TIME}.\nTotal Time Taken ${formatTime(END_TIME - START_TIME)}`);
+    GENERATION_REPORT.push(`TifToPDF ended at ${new Date(END_TIME)}.\nTotal Time Taken ${formatTime(END_TIME - START_TIME)}`);
     console.log(GENERATION_REPORT);
 }
 
@@ -54,8 +53,9 @@ async function execFixed() {
 
     const destPdf = "E:\\ramtek2--";
     //const destPdf = "E:\\ramtek3--";
-    console.log(`${tiffSubFolders}`)
-    await exec(tiffSubFolders, destPdf)
+    //console.log(`${tiffSubFolders}`)
+    //await exec(tiffSubFolders, destPdf)
+    await exec(["C:\\tmp\\tiffs"], "C:\\tmp\\pdfDest")
 }
 
 //execDynamic();
