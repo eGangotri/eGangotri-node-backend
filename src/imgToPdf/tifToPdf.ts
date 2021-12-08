@@ -3,8 +3,6 @@ import { tifftoPngs } from './utils/PngUtils';
 import * as fs from 'fs';
 import { GENERATION_REPORT } from './index';
 
-
-
 export async function tifToPdf(src: string, dest: string) {
     if (!fs.existsSync(dest)) {
         fs.mkdirSync(dest);
