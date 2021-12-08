@@ -16,9 +16,9 @@ export const getDirectoriesWithFullPath = async (source:string) => {
 
 export function formatTime(timeLapseinMS: number) {
      const timeLapseInSecs = timeLapseinMS / 1000
-     let timeLapse = `${(timeLapseInSecs * 100) / 100} sec(s)`
+     let timeLapse = `${timeLapseInSecs.toFixed(2)} sec(s)`
      if (timeLapseInSecs > 60) {
-          timeLapse = `${((timeLapseInSecs / 60) * 100) / 100} minute(s)`
+          timeLapse = `${(timeLapseInSecs / 60).toFixed(2)} minute(s)`
      }
      return timeLapse
 }
@@ -54,7 +54,7 @@ export const getAllFilesOfGivenType = async (dir: string, _types: Array<string> 
      files = contentList.map((x) => dir + "\\" + x).filter((y) => {
           return _types.includes(path.extname(y).toLowerCase())
      })
-     //console.log(`Found ${files.length} ${_types.join(",")}(s) of  items`)
+     //console.log(`Found ${files.length} ${files} ${_types.join(",")}(s) in ${dir}`)
 
      return files;
 }
