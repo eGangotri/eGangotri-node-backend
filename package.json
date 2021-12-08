@@ -9,7 +9,8 @@
     "start": "ts-node ./src/index.ts",
     "web-scrap": "ts-node ./src/downloadLinks.ts",
     "exec": "ts-node ./src/exec/exec.ts",
-    "tif2pdf": "ts-node ./src/imgToPdf/index.ts"
+    "tif2pdfOrig": "ts-node ./src/imgToPdf/index.ts",
+    "tif2pdf":"node -r ts-node/register --max-old-space-size=3049 ./src/imgToPdf/index.ts"
   },
   "repository": {
     "type": "git",
@@ -30,6 +31,7 @@
     "cors": "^2.8.5",
     "csv": "^5.3.2",
     "csv-parser": "^3.0.0",
+    "expose-gc": "^1.0.0",
     "express": "^4.17.1",
     "moment": "^2.29.1",
     "mongoose": "^5.11.7",

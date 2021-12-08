@@ -51,7 +51,7 @@ export const getAllFilesOfGivenType = async (dir: string, _types: Array<string> 
      return files;
 }
 
-export const getUploadableFolders = (srcFolder: string, dest:string) => {
+export const getUploadableFolders = (srcFolder: string, dest: string) => {
      const dirs = getDirectories(srcFolder);
      console.log(`${dirs.length} uploadable folders.`);
      return dirs.map((subFolder, index) => {
@@ -60,4 +60,18 @@ export const getUploadableFolders = (srcFolder: string, dest:string) => {
                dest: `${dest}-${index + 1}`
           }
      });
+}
+export function garbageCollect() {
+     const before = getMemUsage();
+     global.gc()
+     const after = getMemUsage();
+     console.log(`Mem Usage reduced approximately from 
+     \t${Math.round(before * 100) / 100} MB to
+     \t${Math.round(after * 100) / 100} MB 
+     \treleasing ${Math.round((before-after) * 100) / 100} MB `);
+}
+
+export function getMemUsage() {
+     const used = process.memoryUsage().heapUsed / 1024 / 1024;
+     return used;
 }
