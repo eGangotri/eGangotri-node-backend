@@ -44,7 +44,13 @@ async function exec(tifSubFolders: Array<string>, pdfDest: string) {
     console.log(GENERATION_REPORT);
 }
 
-async function directlyFromPngs(folderForPngs:string, destPdf:string){
+async function directlyFromPngs(){
+const folderForPngs:string = "E:\\ramtek3----WithPdfMErge";
+
+const destPdf = "C:\\tmp\\pdfMerge"
+
+//"E:\\ramtek3--"
+
     await pngToPdf(folderForPngs,destPdf);
 }
 async function execFixed() {
@@ -52,7 +58,7 @@ async function execFixed() {
     // const destPdf = "E:\\ramtek2---";
     
     const tifSubFolders = ["D:\\NMM\\August-2019\\03-08-2019\\M-72-Sulabh Veda Prakash - Kavikulguru Kalidas Sanskrit University Ramtek Collection"]
-    const destPdf = "E:\\ramtek3--";
+    const destPdf = "E:\\ramtek3----WithPdfMErge";
 
     //console.log(`${tifSubFolders}`)
     await exec(tifSubFolders, destPdf)
@@ -60,10 +66,7 @@ async function execFixed() {
 }
 
 //execDynamic();
-execFixed();
-/*
-directlyFromPngs("E:\\ramtek3--\\M-72-Sulabh Veda Prakash - Kavikulguru Kalidas Sanskrit University Ramtek Collection",
-"E:\\ramtek3--")
-*/
+//execFixed();
+directlyFromPngs()
 
 
