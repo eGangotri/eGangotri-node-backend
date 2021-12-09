@@ -2,17 +2,16 @@ import * as fs from 'fs';
 import { getAllPngs } from '../utils/ImgUtils';
 import * as path from 'path';
 import { GENERATION_REPORT } from '../index';
-import { pngFolderName } from './PngUtils';
 import { ADD_INTRO_PDF, FOOTER_LINK, FOOTER_TEXT, INTRO_BANNER, INTRO_PAGE_ADJUSTMENT, INTRO_TEXT, PDF_FONT } from './constants';
 import { removeFolderWithContents } from './FileUtils';
 import { formatTime, garbageCollect } from './Utils';
 const PDFDocument = require('pdfkit');
 
 //https://pdfkit.org/docs/text.html
-export async function createPdf(src: string, dest: string) {
-    const _pngs = await getAllPngs(pngFolderName(src, dest));
-    const pdf = dest + "\\" + path.parse(src).name + ".pdf";
-    const doc = new PDFDocument({ autoFirstPage: false, bufferPages: true });
+export async function createPdf(pngSrc: string, dest: string) {
+    const _pngs = await getAllPngs(pngSrc);
+    const pdf = dest + "\\" + path.parse(pngSrc).name + ".pdf";
+    const doc = new PDFDocument({ autoFirstPage: false, bufferPages: false });
     doc.pipe(fs.createWriteStream(pdf)); // write to PDF
     let garbageCollectCounter = 0;
     let introPDFAdded = false;
@@ -26,7 +25,7 @@ export async function createPdf(src: string, dest: string) {
         doc.image(img, 0, 0)
         addFooter(doc)
         garbageCollectCounter++
-        if (garbageCollectCounter % 100 === 0 || garbageCollectCounter === _pngs.length) {
+        if (garbageCollectCounter % 75 === 0 || garbageCollectCounter === _pngs.length) {
             garbageCollect()
         }
     }
@@ -90,7 +89,7 @@ function checkPageCountEqualsImgCount(doc: any, pdf: string, pngCount: number) {
     return pdfPageCount === pngCount
 }
 
-export async function createPdfAndDeleteGeneratedFiles(tifSrc: string, destPdf: string) {
-    await createPdf(tifSrc, destPdf);
-    removeFolderWithContents(pngFolderName(tifSrc, destPdf))
+export async function createPdfAndDeleteGeneratedFiles(pngSrc: string, destPdf: string) {
+    await createPdf(pngSrc, destPdf);
+    removeFolderWithContents(pngSrc)
 }

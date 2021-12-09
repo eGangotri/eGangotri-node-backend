@@ -3,19 +3,20 @@ import * as fs from 'fs';
 
 import {
     formatTime,
+     garbageCollect,
      getAllPdfs,
-    getDirectories
+    getDirectories,
+    heapStats
 } from './utils/Utils';
 import { getPdfPageCount } from './utils/PdfLibUtils';
 import { INTRO_PAGE_ADJUSTMENT } from './utils/constants';
-require('expose-gc');
 
-export let GENERATION_REPORT = [];
+export let GENERATION_REPORT:Array<string> = [];
 
-// const tiffFolderMain = "D:\\NMM\\August-2019\\02-08-2019";
+// const tifFolderMain = "D:\\NMM\\August-2019\\02-08-2019";
 // const pdfFolder = "E:\\ramtek2-";
 
-const tiffFolderMain = "D:\\NMM\\August-2019\\02-08-2019";
+const tifFolderMain = "D:\\NMM\\August-2019\\02-08-2019";
 const pdfFolder = "E:\\ramtek2-";
 
 (async () => {
@@ -24,18 +25,20 @@ const pdfFolder = "E:\\ramtek2-";
     let MATCHING = [];
     let UNCHECKABLE = [];
 
+    heapStats();
+    garbageCollect()
     const pdfCounts = (await getAllPdfs(pdfFolder)).length
-    const tiffSubFolders: Array<string> = await getDirectories(tiffFolderMain)
+    const tifSubFolders: Array<string> = await getDirectories(tifFolderMain)
     const START_TIME = Number(Date.now())
-    console.log(`Tally Check started for ${tiffSubFolders.length} Folder(s)
-    \n\t${tiffSubFolders.join("\n\t")}
+    console.log(`Tally Check started for ${tifSubFolders.length} Folder(s)
+    \n\t${tifSubFolders.join("\n\t")}
      at ${new Date(START_TIME)}`);
 
-    GENERATION_REPORT.push(`Tally Check started for ${tiffSubFolders.length} folder(s) `)
+    GENERATION_REPORT.push(`Tally Check started for ${tifSubFolders.length} folder(s) `)
 
     let subFolderCount = 0;
-    for (let subfolder of tiffSubFolders) {
-        const folderForChecking = `${tiffFolderMain}\\${subfolder}`;
+    for (let subfolder of tifSubFolders) {
+        const folderForChecking = `${tifFolderMain}\\${subfolder}`;
         const pdfPath = `${pdfFolder}\\${subfolder}.pdf`
         subFolderCount++
         console.log(`Testing Item #${subFolderCount} of ${pdfCounts} pdfs :${pdfPath}\n`);
@@ -47,11 +50,11 @@ const pdfFolder = "E:\\ramtek2-";
         }
 
         const pdfPageCount = await getPdfPageCount(pdfPath) - INTRO_PAGE_ADJUSTMENT;
-        const tiffCount = (await getAllTifs(folderForChecking)).length;
+        const tifCount = (await getAllTifs(folderForChecking)).length;
 
-        if ((pdfPageCount) === tiffCount) {
+        if ((pdfPageCount) === tifCount) {
             MATCHING.push(folderForChecking);
-            GENERATION_REPORT.push(`pdf ${subfolder}.pdf has matching count ${(tiffCount)}\n`);
+            GENERATION_REPORT.push(`pdf ${subfolder}.pdf has matching count ${(tifCount)}\n`);
         }
         else {
             if(pdfPageCount>0){
@@ -61,7 +64,7 @@ const pdfFolder = "E:\\ramtek2-";
                 UNCHECKABLE.push(folderForChecking);
             }
             GENERATION_REPORT.push(`
-            ****PDF Count  (${pdfPageCount}) for ${subfolder}.pdf is not same as ${tiffCount}\n`);
+            ****PDF Count  (${pdfPageCount}) for ${subfolder}.pdf is not same as ${tifCount}\n`);
         }
 
     }
@@ -71,11 +74,11 @@ const pdfFolder = "E:\\ramtek2-";
     MATCHING_COUNT: ${MATCHING.length}
     UNCHECKABLE_COUNT: ${UNCHECKABLE.length}
     NOT_CREATED_COUNT: ${NOT_CREATED.length}
-    Total Tiff Folders expected for Conversion: ${tiffSubFolders.length}
+    Total Tiff Folders expected for Conversion: ${tifSubFolders.length}
     Total PDFs in Folder: ${pdfCounts}
     Manually check ${UNCHECKABLE}
     Reconvert [${(NOT_CREATED.map((x)=>`"${x}"`)).join(",")}]
-    Error Margin: ${tiffSubFolders.length} - ${pdfCounts} = ${tiffSubFolders.length - pdfCounts}
+    Error Margin: ${tifSubFolders.length} - ${pdfCounts} = ${tifSubFolders.length - pdfCounts}
     `);
     GENERATION_REPORT.push(`Tally Check ended at ${new Date(END_TIME)}.\nTotal Time Taken ${formatTime(END_TIME - START_TIME)}`);
     console.log(GENERATION_REPORT);

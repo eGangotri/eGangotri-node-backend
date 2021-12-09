@@ -1,7 +1,7 @@
 import { getAllPngs, getAllTifs } from "./ImgUtils";
 import * as path from 'path';
 import * as fs from 'fs';
-const sharp = require("sharp")
+const sharp = require("sharp");
 
 export function pngFolderName(src: string, dest: string) {
     const folderName = dest + "\\" + path.parse(src).name
@@ -10,18 +10,18 @@ export function pngFolderName(src: string, dest: string) {
     }
     return folderName;
 }
-export async function tifftoPngs(src: string, dest: string) {
-    const tiffs = await getAllTifs(src);
-    const folderForPngs = pngFolderName(src, dest);
+export async function tiftoPngs(tifSrc: string, dest: string) {
+    const tifs = await getAllTifs(tifSrc);
+    const folderForPngs = pngFolderName(tifSrc, dest);
 
-    return Promise.all(tiffs.map((tiff) => tiffToPng(tiff, folderForPngs))).then(async () => {
+    return Promise.all(tifs.map((tif) => tifToPng(tif, folderForPngs))).then(async () => {
         const pngCount = (await getAllPngs(folderForPngs)).length
-        //console.log({ tiffsCount: tiffs.length, pngCount, countMatch: tiffs.length == pngCount })
-        return { tiffsCount: tiffs.length, pngCount, countMatch: tiffs.length == pngCount };
+        //console.log({ tifsCount: tifs.length, pngCount, countMatch: tifs.length == pngCount })
+        return { tifsCount: tifs.length, pngCount, countMatch: tifs.length == pngCount };
     });
 }
 
-async function tiffToPng(tifFile: string, dest: string) {
+async function tifToPng(tifFile: string, dest: string) {
     const tifFileName = dest + "\\" + path.parse(tifFile).name + ".png";
     const png = await sharp(tifFile)
         .png()
