@@ -8,3 +8,15 @@ export function removeFolderWithContents(folder:string){
         }
     })
 }
+
+export const removeExcept = async (folder:any, except:Array<string>)=>{
+    const contentList = await fs.promises.readdir(folder)
+    const files = contentList.map((x) => folder + "\\" + x).filter((y) => {
+        console.log(`Found ${y}`)
+        return !except.includes(y)
+   }).map(e => fs.unlink(e, (err) => {
+            if (err) throw err;
+            console.log(`${e} was deleted`);
+          }))
+
+}

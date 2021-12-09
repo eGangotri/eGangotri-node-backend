@@ -53,9 +53,10 @@ export const getAllFilesOfGivenType = async (dir: string, _types: Array<string> 
 
      const contentList = await fs.promises.readdir(dir)
      files = contentList.map((x) => dir + "\\" + x).filter((y) => {
+          console.log(`Found ${y}`)
           return _types.includes(path.extname(y).toLowerCase())
      })
-     //console.log(`Found ${files.length} ${files} ${_types.join(",")}(s) in ${dir}`)
+     console.log(`Found ${files.length} ${files} ${_types.join(",")}(s) in ${dir}`)
 
      return files;
 }
