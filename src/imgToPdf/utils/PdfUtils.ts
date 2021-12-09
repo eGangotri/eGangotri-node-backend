@@ -5,7 +5,6 @@ import { GENERATION_REPORT } from '../index';
 import { pngFolderName } from './PngUtils';
 import { ADD_INTRO_PDF, FOOTER_LINK, FOOTER_TEXT, INTRO_BANNER, INTRO_PAGE_ADJUSTMENT, INTRO_TEXT, PDF_FONT } from './constants';
 
-const PDFMerger = require('pdf-merger-js');
 const PDFDocument = require('pdfkit');
 
 
@@ -92,9 +91,9 @@ export async function createPdfAndDeleteGeneratedFiles(src: string, dest: string
 }
 
 export async function mergepPdfs(pdf: string, INTRO_PDF: string) {
-    const merger = new PDFMerger();
-    console.log(`merging ${INTRO_PDF}`)
-    merger.add(INTRO_PDF);
-    merger.add(pdf);
-    await merger.save(pdf + "x.pdf"); //save under given name and reset the internal document
+    // const merger = new PDFMerger();
+    // console.log(`merging ${INTRO_PDF}`)
+    // merger.add(INTRO_PDF);
+    // merger.add(pdf);
+    // await merger.save(pdf + "x.pdf"); //save under given name and reset the internal document
 }
