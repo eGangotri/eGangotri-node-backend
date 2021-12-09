@@ -1,6 +1,6 @@
 import * as fs from 'fs';
-require('expose-gc')
 const path = require('path');
+const v8 = require('v8');
 
 export const getDirectories = async (source:string) => {
      const subDirs = await fs.promises.readdir(source, { withFileTypes: true })
@@ -81,9 +81,18 @@ export const getUploadableFoldersForList = (srcFolder: Array<string>, dest: stri
           }
      });
 }
+export function heapStats(){
+     const v8 = require('v8');
+     const totalHeapSize = v8.getHeapStatistics().total_available_size;
+     const totalHeapSizeGb = (totalHeapSize / 1024 / 1024 / 1024).toFixed(2);
+     console.log('totalHeapSizeGb: ', totalHeapSizeGb);
+}
+
 export function garbageCollect() {
      const before = getMemUsage();
-     global.gc()
+     if (global.gc) {
+          console.log("....");
+          global.gc();}
      const after = getMemUsage();
      console.log(`Mem Usage reduced approximately from 
      \t${Math.round(before * 100) / 100} MB to
