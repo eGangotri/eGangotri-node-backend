@@ -36,7 +36,7 @@ export async function createPdf(pngSrc: string, pdfDestFolder: string) {
         await pngToPdf(_pngs[0], firstPdfPageWithIntro, true);
         const promises = [];
         for (let png of _pngs.slice(1)) {
-            promises.push(pngToPdf(png, pdfDestFolder + "\\" + path.parse(png).name + ".pdf", needToAddintroPdf));
+            promises.push(await pngToPdf(png, pdfDestFolder + "\\" + path.parse(png).name + ".pdf", needToAddintroPdf));
         }
         Promise.all(promises).then(async () => {
         console.log("all pdfs converted")
@@ -45,17 +45,14 @@ export async function createPdf(pngSrc: string, pdfDestFolder: string) {
         setTimeout( ()=>{
             console.log("sleeping for few minutes")
         }, 10000)
-        const pdfName =  
-        pdfDestFolder + "\\" +path.parse(pdfDestFolder).name + ".pdf";
-        await mergeAllPdfsInFolder(pdfDestFolder,pdfName);
-        await checkPageCountEqualsImgCountusingPdfLib(pdfName, _pngs.length);
     });
 
 }
 
 async function pngToPdf(pngSrc: string, pdf: string, firstPageNeedingIntro = false) {
     const doc = new PDFDocument({ autoFirstPage: false, bufferPages: false });
-    doc.pipe(fs.createWriteStream(pdf)); // write to PDF
+    const writeStream = fs.createWriteStream(pdf);
+    doc.pipe(writeStream); // write to PDF
     let img = doc.openImage(pngSrc);
     if(firstPageNeedingIntro){
         addBanner(doc, img);
@@ -65,6 +62,13 @@ async function pngToPdf(pngSrc: string, pdf: string, firstPageNeedingIntro = fal
     addFooter(doc)
     // finalize the PDF and end the stream
     doc.end();
+    doc.on('end', ()=>{
+        console.log(`doc.on png to pdf for ${pdf} done`);
+    })
+    writeStream.on('finish', function () {
+        // do stuff with the PDF file
+    console.log(`finish png to pdf for ${pdf} done`);
+    });
     console.log(`png to pdf for ${pdf} done`);
 }
 
@@ -173,7 +177,7 @@ export async function createPdfX(pngSrc: string, dest: string) {
     const pdf = dest + "\\" + path.parse(pngSrc).name + ".pdf";
     console.log(`Creating pdf ${pdf} from ${path.parse(pngSrc).name}`);
     const doc = new PDFDocument({ autoFirstPage: false, bufferPages: false });
-    var buffers = [];
+    var buffers:Array<any> = [];
     doc.on('data', buffers.push.bind(buffers));
     doc.on('end', function () {
         //https://github.com/foliojs/pdfkit/issues/728

@@ -5,6 +5,7 @@ import { formatTime } from './utils/Utils';
 import { getAllTifs } from './utils/ImgUtils';
 
 export async function tifToPdf(tifSrc: string, destPdf: string) {
+    //dont async.DP
     const tifCount = (await getAllTifs(tifSrc)).length
     console.log(`Converting ${tifCount} tifs in Folder \n\t${tifSrc}`)
 
@@ -12,7 +13,7 @@ export async function tifToPdf(tifSrc: string, destPdf: string) {
 
     if (tifToPngStats.countMatch) {
         const folderForPngs = pngFolderName(tifSrc, destPdf);
-        pngToPdf(folderForPngs,destPdf)
+        await pngToPdf(folderForPngs,destPdf)
     }
     else {
         const err = `Error!!!
