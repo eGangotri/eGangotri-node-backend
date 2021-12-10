@@ -5,6 +5,7 @@ import {
 } from './utils/Utils';
 import * as fs from 'fs';
 import { pngToPdf, tifToPdf } from './TifToPdf';
+"use strict";
 
 export let GENERATION_REPORT = [];
 
@@ -61,12 +62,13 @@ async function execFixed() {
     const destPdf = "E:\\ramtek3----WithPdfMErge";
 
     //console.log(`${tifSubFolders}`)
-    await exec(tifSubFolders, destPdf)
+    //await exec(tifSubFolders, destPdf)
     //await exec(["C:\\tmp\\tifs","C:\\tmp\\tifs2","C:\\tmp\\tifs3"], "C:\\tmp\\pdfDest8");
+    await exec(["C:\\tmp\\tifs"], "C:\\tmp\\pdf11");
 }
 
 //execDynamic();
-//execFixed();
-directlyFromPngs()
+execFixed();
+//directlyFromPngs()
 
 

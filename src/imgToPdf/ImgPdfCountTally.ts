@@ -9,9 +9,10 @@ import {
     getDirectoriesWithFullPath,
     heapStats
 } from './utils/Utils';
-import { getPdfPageCount, mergePDFDocuments } from './utils/PdfLibUtils';
+import { getPdfPageCount, mergeAllPdfsInFolder, mergePDFDocuments } from './utils/PdfLibUtils';
 import { INTRO_PAGE_ADJUSTMENT } from './utils/constants';
 import { removeExcept } from './utils/FileUtils';
+import * as path from 'path';
 
 export let GENERATION_REPORT:Array<string> = [];
 
@@ -29,22 +30,16 @@ const pdfFolder = "E:\\ramtek2-";
 
     heapStats();
     garbageCollect()
-    
-    removeExcept("C:\\tmp\\pdfMerge", ["C:\\tmp\\pdfMerge\\pdfMerge.pdf"])
-    if(2 === (1+1)){
-        return;
+    const pdfDestFolderFotMergeTest = "C:\\tmp\\pdf10"
+    const pdfName = pdfDestFolderFotMergeTest + "\\" +path.parse(pdfDestFolderFotMergeTest).name + ".pdf";
+    await mergeAllPdfsInFolder(pdfDestFolderFotMergeTest,pdfName);
+    //removeExcept("C:\\tmp\\pdfMerge", ["C:\\tmp\\pdfMerge\\pdfMerge.pdf"])
+    const xx = true
+    console.log("..")
+    if(xx){
+        process.exit(0);
     }
-    
-    const pdfs = await getAllPdfs("C:\\tmp\\mergeExperiment1");
-
-    const pdfForMerge = pdfs.map( (x) => {
-        return fs.readFileSync(x)
-    })
-    const s1 = Number(Date.now())
-    mergePDFDocuments(pdfForMerge,"C:\\tmp\\mergeExperiment.pdf");
-    const e1 = Number(Date.now())
-
-    console.log(`Tally Check ended at ${new Date(s1)}.\nTotal Time Taken ${formatTime(e1 - s1)}`);
+    console.log(".....");
 
     const pdfCounts = (await getAllPdfs(pdfFolder)).length
     const tifSubFolders: Array<string> = await getDirectories(tifFolderMain)
