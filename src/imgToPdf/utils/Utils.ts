@@ -92,7 +92,7 @@ export function heapStats(text = '') {
 
 var getStats = function (text: string = '') {
      var stats = v8.getHeapSpaceStatistics();
-     stats.forEach(function (stat) {
+     stats.forEach(function (stat:any) {
           console.log(text + ' ' + stat.space_name + ' Available size : ' + formatMem(stat.space_available_size));
      });
 };

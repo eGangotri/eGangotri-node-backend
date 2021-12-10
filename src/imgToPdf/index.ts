@@ -5,9 +5,11 @@ import {
 } from './utils/Utils';
 import * as fs from 'fs';
 import { pngToPdf, tifToPdf } from './TifToPdf';
+import { checkPageCountEqualsImgCountusingPdfLib, mergeAllPdfsInFolder } from './utils/PdfLibUtils';
 "use strict";
+import * as path from 'path';
 
-export let GENERATION_REPORT = [];
+export let GENERATION_REPORT:Array<string> = [];
 
 async function execDynamic() {
     const index = 2;
@@ -64,7 +66,13 @@ async function execFixed() {
     //console.log(`${tifSubFolders}`)
     //await exec(tifSubFolders, destPdf)
     //await exec(["C:\\tmp\\tifs","C:\\tmp\\tifs2","C:\\tmp\\tifs3"], "C:\\tmp\\pdfDest8");
-    await exec(["C:\\tmp\\tifs"], "C:\\tmp\\pdf11");
+
+    await exec(["C:\\tmp\\tifs"], "C:\\tmp\\pdf1");
+    const pdfDestFolder = "C:\\tmp\\pdf15"
+    const pdfName =  
+    pdfDestFolder + "\\" +path.parse(pdfDestFolder).name + ".pdf";
+    await mergeAllPdfsInFolder(pdfDestFolder,pdfName);
+   // await checkPageCountEqualsImgCountusingPdfLib(pdfName, _pngs.length);
 }
 
 //execDynamic();
