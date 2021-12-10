@@ -5,32 +5,52 @@ import { GENERATION_REPORT } from '../index';
 import { ADD_INTRO_PDF, FOOTER_LINK, FOOTER_TEXT, INTRO_BANNER, INTRO_PAGE_ADJUSTMENT, INTRO_TEXT, PDF_FONT } from './constants';
 import { removeExcept, removeFolderWithContents } from './FileUtils';
 import { formatTime, garbageCollect, getAllPdfs, heapStats } from './Utils';
-import { mergeAllPdfsInFolder, mergePDFDocuments } from './PdfLibUtils';
+import { checkPageCountEqualsImgCountusingPdfLib, mergeAllPdfsInFolder, mergePDFDocuments } from './PdfLibUtils';
 const PDFDocument = require('pdfkit');
-
 
 //https://pdfkit.org/docs/text.html
 export async function createPdf(pngSrc: string, pdfDestFolder: string) {
     const _pngs = await getAllPngs(pngSrc);
     let needToAddintroPdf = true;
     heapStats('Starting memory');
-    let counter = 0;
-    for (let png of _pngs) {
-        const pdf = pdfDestFolder + "\\" + path.parse(png).name + ".pdf";
+    // let counter = 0;
+    // for (let png of _pngs) {
+    //     const pdf = pdfDestFolder + "\\" + path.parse(png).name + ".pdf";
+    //     console.log(`processing 
+    //     ${png} to
+    //     ${pdf}
+    //     `);
+    //     await pngToPdf(png, pdf, needToAddintroPdf);
+    //     if(counter++ > 3){
+    //         break;
+    //     }
+    //     needToAddintroPdf = false;
+    // }
+
+        const firstPdfPageWithIntro = pdfDestFolder + "\\" + path.parse(_pngs[0]).name + ".pdf";
         console.log(`processing 
-        ${png} to
-        ${pdf}
+        ${_pngs[0]} to
+        ${firstPdfPageWithIntro}
         `);
-        await pngToPdf(png, pdf, needToAddintroPdf);
-        needToAddintroPdf = false;
-        if(counter++ > 2){
-            break;
+        
+        await pngToPdf(_pngs[0], firstPdfPageWithIntro, true);
+        const promises = [];
+        for (let png of _pngs.slice(1)) {
+            promises.push(pngToPdf(png, pdfDestFolder + "\\" + path.parse(png).name + ".pdf", needToAddintroPdf));
         }
-    }
-    heapStats('before garbage collection');
-    garbageCollect()
-    await mergeAllPdfsInFolder(pdfDestFolder, 
-        pdfDestFolder + "\\" +path.parse(pdfDestFolder).name + ".pdf")
+        Promise.all(promises).then(async () => {
+        console.log("all pdfs converted")
+        heapStats('before garbage collection');
+        garbageCollect()
+        setTimeout( ()=>{
+            console.log("sleeping for few minutes")
+        }, 10000)
+        const pdfName =  
+        pdfDestFolder + "\\" +path.parse(pdfDestFolder).name + ".pdf";
+        await mergeAllPdfsInFolder(pdfDestFolder,pdfName);
+        await checkPageCountEqualsImgCountusingPdfLib(pdfName, _pngs.length);
+    });
+
 }
 
 async function pngToPdf(pngSrc: string, pdf: string, firstPageNeedingIntro = false) {
@@ -143,8 +163,8 @@ function checkPageCountEqualsImgCount(doc: any, pdf: string, pngCount: number) {
 
 export async function createPdfAndDeleteGeneratedFiles(pngSrc: string, pdfDestFolder: string) {
     await createPdf(pngSrc, pdfDestFolder);
-    removeExcept(pdfDestFolder,[
-        pdfDestFolder + "\\" +path.parse(pdfDestFolder).name + ".pdf"]);
+    //removeExcept(pdfDestFolder,[
+     //   pdfDestFolder + "\\" +path.parse(pdfDestFolder).name + ".pdf"]);
 }
 
 //https://stackoverflow.com/questions/23771085/how-to-pipe-a-stream-using-pdfkit-with-node-js
