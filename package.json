@@ -12,6 +12,7 @@
     "tif2pdfOrig": "ts-node ./src/imgToPdf/index.ts",
     "tif2pdf": "node -r ts-node/register ./src/imgToPdf/index.ts",
     "t": "node -r ts-node/register --max-old-space-size=4500 --inspect --expose-gc ./src/imgToPdf/index.ts",
+    "ts": "ts-node ./src/imgToPdf/index.ts",
     "tally": "node -r ts-node/register --max-old-space-size=4500 --inspect --expose-gc ./src/imgToPdf/ImgPdfCountTally"
   },
   "repository": {

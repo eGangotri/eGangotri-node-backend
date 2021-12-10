@@ -2,6 +2,7 @@ import * as express from 'express';
 import { itemsQueuedRoute } from './routes/itemsQueued.route'
 import { connectToMongo } from './services/dbService';
 import * as fs from 'fs';
+import { launchGradleRoute } from './routes/launchGradle.route';
 
 const app = express();
 const hostname = '127.0.0.1';
@@ -21,6 +22,7 @@ app.get('/', function (req, res) {
 })
 
 app.use('/itemsQueued', itemsQueuedRoute);
+app.use('/launchGradle', launchGradleRoute);
 
 app.listen(port, async () => {
   console.log(`Server running at http://${hostname}:${port}/`);
