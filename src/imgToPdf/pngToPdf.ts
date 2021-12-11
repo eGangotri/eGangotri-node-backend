@@ -17,7 +17,6 @@ export async function distributedLoadBasedPnToPdfConverter(pngRootFolder: string
     const PNG_SUB_FOLDER = "\\pngs\\"
     const PDF_SUB_FOLDER = "\\pdfs\\"
     const allPngs = await getAllPngs(pngRootFolder);
-    let counter = 1;
     const chunkedPngs = chunk(allPngs, CHUNK_SIZE);
     const chunkedPngsCount = chunkedPngs.length;
     console.log(`distributedLoadBasedPnToPdfConverter pngRootFolder ${pngRootFolder} pdfRootFolder ${pdfRootFolder}`);
@@ -27,6 +26,7 @@ export async function distributedLoadBasedPnToPdfConverter(pngRootFolder: string
     if (!fs.existsSync(pngRootFolder + PDF_SUB_FOLDER)) {
         fs.mkdirSync(pngRootFolder + PDF_SUB_FOLDER);
     }
+    let counter = 1;
     for (let _chunkedPngs of chunkedPngs) {
         //console.log(`_chunkedPngFolder: ${_chunkedPngs.length}`);
         const newFolderForChunkedPngs = pngRootFolder + PNG_SUB_FOLDER + `-${counter++}`
@@ -42,10 +42,11 @@ export async function distributedLoadBasedPnToPdfConverter(pngRootFolder: string
 
     let pngToPdfCounter = 0;
     while (pngToPdfCounter < chunkedPngsCount) {
+        pngToPdfCounter++;
         const newFolderForChunkedPdfs = pngRootFolder + PDF_SUB_FOLDER + `-${pngToPdfCounter}`;
         if (!fs.existsSync(newFolderForChunkedPdfs)) {
             fs.mkdirSync(newFolderForChunkedPdfs);
-        }pngToPdfCounter++;
+        }
         console.log(`create pngToPdfCounter ${pngToPdfCounter}, chunkedPngsCount ${chunkedPngsCount}`);
         await createPdf(pngRootFolder + PNG_SUB_FOLDER + `-${pngToPdfCounter}`,
         pngRootFolder + PDF_SUB_FOLDER + `-${pngToPdfCounter}`, pngToPdfCounter===1);
