@@ -11,18 +11,18 @@ import { getAllTifs } from './ImgUtils';
  */
 
 export async function getPdfPageCount(pdfPath: string) {
-    var stats = fs.statSync(pdfPath)
-    let pdfDoc;
-    var fileSizeInBytes = stats.size;
-    var fileSizeInGB = fileSizeInBytes / (1024 * 1024 * 1024);
-    if (fileSizeInGB <= 2) {
-        pdfDoc = await PDFDocument.load(fs.readFileSync(pdfPath));
+    if (getFilzeSize(pdfPath) <= 2) {
+        const pdfDoc = await PDFDocument.load(fs.readFileSync(pdfPath));
+        return pdfDoc.getPages().length
     }
-    else return -1
-    return pdfDoc.getPages().length
-
+    else return -1;
 }
 
+export function getFilzeSize(pdfPath: string) {
+    let stats = fs.statSync(pdfPath)
+    let fileSizeInBytes = stats.size;
+    return fileSizeInBytes / (1024 * 1024 * 1024);
+}
 export async function mergePDFDocuments(documents: Array<any>, pdfName: string) {
     const mergedPdf = await PDFDocument.create();
     let counter = 0

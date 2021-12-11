@@ -60,14 +60,15 @@ export async function distributedLoadBasedPnToPdfConverter(pngRootFolder: string
             const pdfPath = 
             pngRootFolder + PDF_SUB_FOLDER + `-${pdfMergeCounter}.pdf`
             await mergeAllPdfsInFolder(pngRootFolder + PDF_SUB_FOLDER + `-${pdfMergeCounter}`,pdfPath);
-            await checkPageCountEqualsImgCountUsingPdfLib(pdfPath,tifCount);
         }
         catch (e) {
             console.log(e);
         }
     }
 
-    await mergeAllPdfsInFolder(pngRootFolder + PDF_SUB_FOLDER, pdfRootFolder + "//" + path.parse(pngRootFolder).name + ".pdf");
+    const finalPdfPath = pdfRootFolder + "//" + path.parse(pngRootFolder).name + ".pdf";
+    await mergeAllPdfsInFolder(pngRootFolder + PDF_SUB_FOLDER,finalPdfPath);
+    await checkPageCountEqualsImgCountUsingPdfLib(finalPdfPath,tifCount);
     //removeFolderWithContents(pngRootFolder);
 }
 

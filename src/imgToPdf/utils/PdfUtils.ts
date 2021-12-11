@@ -2,10 +2,9 @@ import * as fs from 'fs';
 import { getAllPngs } from '../utils/ImgUtils';
 import * as path from 'path';
 import { GENERATION_REPORT } from '../convert';
-import { ADD_INTRO_PDF, FOOTER_LINK, FOOTER_TEXT, INTRO_BANNER, INTRO_PAGE_ADJUSTMENT, INTRO_TEXT, PDF_FONT } from './constants';
-import { removeExcept, removeFolderWithContents } from './FileUtils';
-import { formatTime, garbageCollect, getAllPdfs, heapStats } from './Utils';
-import { checkPageCountEqualsImgCountUsingPdfLib, mergeAllPdfsInFolder, mergePDFDocuments } from './PdfLibUtils';
+import {  FOOTER_LINK, FOOTER_TEXT, INTRO_BANNER, INTRO_TEXT, PDF_FONT } from './constants';
+import {  garbageCollect, heapStats } from './Utils';
+import { ADD_INTRO_PDF, INTRO_PAGE_ADJUSTMENT } from '..';
 const PDFDocument = require('pdfkit');
 
 //https://pdfkit.org/docs/text.html
