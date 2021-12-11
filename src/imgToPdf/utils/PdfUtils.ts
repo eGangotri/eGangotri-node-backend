@@ -43,7 +43,7 @@ export async function pngToPdf(pngSrc: string, pdf: string, firstPageNeedingIntr
         fs.writeFileSync(pdf, Buffer.concat(buffers));
     });
     doc.on("error", (err:any) => console.log("error" + err));
-    console.log(`pngToPdf ${pngSrc} pdf ${pdf} firstPageNeedingIntro ${firstPageNeedingIntro}`)
+    //console.log(`pngToPdf ${pngSrc} pdf ${pdf} firstPageNeedingIntro ${firstPageNeedingIntro}`)
     let img = doc.openImage(pngSrc);
     if(firstPageNeedingIntro){
         addBanner(doc, img);

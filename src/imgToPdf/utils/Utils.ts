@@ -1,6 +1,6 @@
 import * as fs from 'fs';
-const path = require('path');
 const v8 = require('v8');
+import * as path from 'path';
 
 export const getDirectories = async (source: string) => {
      const subDirs = await fs.promises.readdir(source, { withFileTypes: true })

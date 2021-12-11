@@ -1,15 +1,10 @@
 import {
     folderCountEqualsPDFCount, formatTime,
-    garbageCollect,
     getDirectoriesWithFullPath, getUploadableFolders
 } from './utils/Utils';
 import * as fs from 'fs';
 import { tifToPdf } from './TifToPdf';
-"use strict";
 import * as path from 'path';
-import { getAllTifs } from './utils/ImgUtils';
-import { createUnparsedSourceFile } from 'typescript';
-import { pngToPdf } from './utils/PdfUtils';
 
 export let GENERATION_REPORT: Array<string> = [];
 
@@ -37,7 +32,18 @@ async function exec(tifFoldersForTransformation: Array<string>, pdfDest: string)
     const START_TIME = Number(Date.now())
     GENERATION_REPORT.push(`TifToPDF started for ${tifFoldersForTransformationCount} folder(s) at ${new Date(START_TIME)}`)
     for (let mainFolder of tifFoldersForTransformation) {
-        await tifToPdf(mainFolder, pdfDest);
+        try {
+            const START_TIME = Number(Date.now())
+            await tifToPdf(mainFolder, pdfDest);
+            const END_TIME = Number(Date.now())
+            console.log(`exec for ${path.parse(mainFolder).name} -> ${path.parse(pdfDest).name} ended at ${new Date(END_TIME)}.
+            \nTotal Time Taken for converting
+            ${path.parse(mainFolder).name} -> ${path.parse(pdfDest).name}
+            ${formatTime(END_TIME - START_TIME)}`);
+        }
+        catch(e){
+            console.log(`tifToPdf Error for ${mainFolder} -> ${pdfDest}` , e)
+        }
     }
     const END_TIME = Number(Date.now())
     GENERATION_REPORT.push(await folderCountEqualsPDFCount(tifFoldersForTransformation.length, pdfDest));
@@ -47,7 +53,7 @@ async function exec(tifFoldersForTransformation: Array<string>, pdfDest: string)
 
 
 async function execFixed() {
-    const tifFoldersForTransformation =
+    const tifFoldersForTransformationX =
      ['D:\\NMM\\August-2019\\02-08-2019\\M-37-Brahma Karma Suchay - Kavikulguru Kalidas Sanskrit University Ramtek Collection', 
     'D:\\NMM\\August-2019\\02-08-2019\\M-38-Devalay Gram Mahatmya - Kavikulguru Kalidas Sanskrit University Ramtek Collection', 
     'D:\\NMM\\August-2019\\02-08-2019\\M-39-Vanadurga - Kavikulguru Kalidas Sanskrit University Ramtek Collection', 
@@ -56,9 +62,11 @@ async function execFixed() {
     'D:\\NMM\\August-2019\\02-08-2019\\M-42-Haritalik Puja Katha_Rishi Panchami Puja Katha - Kavikulguru Kalidas Sanskrit University Ramtek Collection',
      'D:\\NMM\\August-2019\\02-08-2019\\M-43-Haritalik Puja Katha_Rishi Panchami Puja Katha - Kavikulguru Kalidas Sanskrit University Ramtek Collection']
    
-     //const tifFoldersForTransformation = ["C:\\tmp\\M-72-Sulabh Veda Prakash - Kavikulguru Kalidas Sanskrit University Ramtek Collection"]
-    const destPdf = "E:\\ramtek2Remaining";
-    await exec(tifFoldersForTransformation, destPdf)
+     const tifFoldersForTransformation = ["C:\\tmp\\M-72-Sulabh Veda Prakash - Kavikulguru Kalidas Sanskrit University Ramtek Collection"]
+    const destPdf = "E:\\ramtek2RemainingX";
+    await exec(["C:\\tmp\\tifs","C:\\tmp\\tifs2","C:\\tmp\\tifs3"], "C:\\tmp\\pdf1");
+
+    //await exec(tifFoldersForTransformation, destPdf)
 
 }
 //execDynamic();

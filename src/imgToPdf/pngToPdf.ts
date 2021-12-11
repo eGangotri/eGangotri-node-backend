@@ -13,14 +13,14 @@ async function directlyFromPngs() {
     await pngToPdf(folderForPngs, destPdf);
 }
 
-export async function loadDividedPngToPDF(pngRootFolder: string, pdfRootFolder: string, tifCount:number) {
+export async function distributedLoadBasedPnToPdfConverter(pngRootFolder: string, pdfRootFolder: string, tifCount:number) {
     const PNG_SUB_FOLDER = "\\pngs\\"
     const PDF_SUB_FOLDER = "\\pdfs\\"
     const allPngs = await getAllPngs(pngRootFolder);
     let counter = 1;
     const chunkedPngs = chunk(allPngs, CHUNK_SIZE);
     const chunkedPngsCount = chunkedPngs.length;
-    console.log(`loadDividedPngToPDF pngRootFolder ${pngRootFolder} pdfRootFolder ${pdfRootFolder}`);
+    console.log(`distributedLoadBasedPnToPdfConverter pngRootFolder ${pngRootFolder} pdfRootFolder ${pdfRootFolder}`);
     if (!fs.existsSync(pngRootFolder + PNG_SUB_FOLDER)) {
         fs.mkdirSync(pngRootFolder + PNG_SUB_FOLDER);
     }
@@ -28,14 +28,14 @@ export async function loadDividedPngToPDF(pngRootFolder: string, pdfRootFolder: 
         fs.mkdirSync(pngRootFolder + PDF_SUB_FOLDER);
     }
     for (let _chunkedPngs of chunkedPngs) {
-        console.log(`_chunkedPngFolder: ${_chunkedPngs}`);
+        //console.log(`_chunkedPngFolder: ${_chunkedPngs.length}`);
         const newFolderForChunkedPngs = pngRootFolder + PNG_SUB_FOLDER + `-${counter++}`
         if (!fs.existsSync(newFolderForChunkedPngs)) {
             fs.mkdirSync(newFolderForChunkedPngs);
         }
         for (let _png of _chunkedPngs) {
             const newName = newFolderForChunkedPngs + "\\" + path.parse(_png).name + path.parse(_png).ext;
-            console.log(`newName: ${newName}`);
+            //console.log(`newName: ${newName}`);
             fs.renameSync(_png, newName);
         }
     }
@@ -64,7 +64,7 @@ export async function loadDividedPngToPDF(pngRootFolder: string, pdfRootFolder: 
     }
 
     await mergeAllPdfsInFolder(pngRootFolder + PDF_SUB_FOLDER, pdfRootFolder + "//" + path.parse(pngRootFolder).name + ".pdf");
-    removeFolderWithContents(pngRootFolder);
+    //removeFolderWithContents(pngRootFolder);
 }
 
 export async function pngsToPdf(folderForPngs: string, destPdf: string) {

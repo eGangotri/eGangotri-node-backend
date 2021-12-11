@@ -2,7 +2,6 @@ import { getAllTifs } from './utils/ImgUtils';
 import * as fs from 'fs';
 
 import {
-    chunk,
     formatTime,
      garbageCollect,
      getAllPdfs,
@@ -11,8 +10,6 @@ import {
 } from './utils/Utils';
 import { getPdfPageCount, mergeAllPdfsInFolder, mergePDFDocuments } from './utils/PdfLibUtils';
 import { INTRO_PAGE_ADJUSTMENT } from './utils/constants';
-import { removeExcept } from './utils/FileUtils';
-import * as path from 'path';
 
 export let GENERATION_REPORT:Array<string> = [];
 

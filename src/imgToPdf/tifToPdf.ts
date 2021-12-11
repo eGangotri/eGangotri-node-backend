@@ -2,7 +2,7 @@ import { pngFolderName, tiftoPngs } from './utils/PngUtils';
 import { GENERATION_REPORT } from './convert';
 import { getAllTifs } from './utils/ImgUtils';
 import * as fs from 'fs';
-import { loadDividedPngToPDF } from './pngToPdf';
+import { distributedLoadBasedPnToPdfConverter } from './pngToPdf';
 
 export async function tifToPdf(tifRootFolder: string, destPdf: string) {
     if (!fs.existsSync(destPdf)) {
@@ -20,7 +20,7 @@ export async function tifToPdf(tifRootFolder: string, destPdf: string) {
     console.log("after tifToPngStats")
     if (tifToPngStats.countMatch) {
         const pngRootFolder = pngFolderName(tifRootFolder, destPdf);
-        await loadDividedPngToPDF(pngRootFolder, destPdf,tifCount)
+        await distributedLoadBasedPnToPdfConverter(pngRootFolder, destPdf,tifCount)
         //await pngsToPdf(pngRootFolder,destPdf)
     }
     else {
