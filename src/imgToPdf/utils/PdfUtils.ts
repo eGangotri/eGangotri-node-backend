@@ -9,14 +9,14 @@ import { checkPageCountEqualsImgCountusingPdfLib, mergeAllPdfsInFolder, mergePDF
 const PDFDocument = require('pdfkit');
 
 //https://pdfkit.org/docs/text.html
-export async function createPdf(pngSrc: string, pdfDestFolder: string) {
+export async function createPdf(pngSrc: string, pdfDestFolder: string, firstPageNeedingIntro = false) {
     if(!fs.existsSync(pdfDestFolder)){
         fs.mkdirSync(pdfDestFolder);
     }
     const _pngs = await getAllPngs(pngSrc);
     heapStats('Starting memory');
     let counter = 0;
-    await pngToPdf(_pngs[0], pdfDestFolder + "\\" + path.parse(_pngs[0]).name + ".pdf", true);
+    await pngToPdf(_pngs[0], pdfDestFolder + "\\" + path.parse(_pngs[0]).name + ".pdf", firstPageNeedingIntro);
 
     for (let png of _pngs.slice(1)) {
         const pdf = pdfDestFolder + "\\" + path.parse(png).name + ".pdf";
@@ -43,7 +43,7 @@ export async function pngToPdf(pngSrc: string, pdf: string, firstPageNeedingIntr
         fs.writeFileSync(pdf, Buffer.concat(buffers));
     });
     doc.on("error", (err:any) => console.log("error" + err));
-
+    console.log(`pngToPdf ${pngSrc} pdf ${pdf} firstPageNeedingIntro ${firstPageNeedingIntro}`)
     let img = doc.openImage(pngSrc);
     if(firstPageNeedingIntro){
         addBanner(doc, img);
