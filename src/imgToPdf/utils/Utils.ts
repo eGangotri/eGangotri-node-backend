@@ -53,10 +53,10 @@ export const getAllFilesOfGivenType = async (dir: string, _types: Array<string> 
 
      const contentList = await fs.promises.readdir(dir)
      files = contentList.map((x) => dir + "\\" + x).filter((y) => {
-          console.log(`Found ${y}`)
+          // console.log(`Found ${y}`)
           return _types.includes(path.extname(y).toLowerCase())
      })
-     console.log(`Found ${files.length} ${files} ${_types.join(",")}(s) in ${dir}`)
+     // console.log(`Found ${files.length} ${files} ${_types.join(",")}(s) in ${dir}`)
 
      return files;
 }
@@ -87,12 +87,12 @@ export function heapStats(text = '') {
      var stats = v8.getHeapStatistics();
      const totalHeapSize = stats.total_available_size;
      console.log(`${text} totalHeapSizeGb: ${formatMem(totalHeapSize)}`);
-     getStats(text);
+     //getStats(text);
 }
 
 var getStats = function (text: string = '') {
      var stats = v8.getHeapSpaceStatistics();
-     stats.forEach(function (stat:any) {
+     stats.forEach(function (stat: any) {
           console.log(text + ' ' + stat.space_name + ' Available size : ' + formatMem(stat.space_available_size));
      });
 };
@@ -118,4 +118,14 @@ export function garbageCollect() {
 export function getMemUsage() {
      const used = process.memoryUsage().heapUsed / 1024 / 1024;
      return used;
+}
+
+export const chunk = (arr:Array<any>, size:number) => {
+     if(size > arr.length || size < 1){
+          return [arr]
+     }
+     return Array.from({ length: Math.ceil(arr.length / size) }, (v, i) =>
+          arr.slice(i * size, i * size + size)
+     )
+
 }
