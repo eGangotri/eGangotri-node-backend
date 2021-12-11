@@ -5,7 +5,7 @@ import { GENERATION_REPORT } from '../convert';
 import { ADD_INTRO_PDF, FOOTER_LINK, FOOTER_TEXT, INTRO_BANNER, INTRO_PAGE_ADJUSTMENT, INTRO_TEXT, PDF_FONT } from './constants';
 import { removeExcept, removeFolderWithContents } from './FileUtils';
 import { formatTime, garbageCollect, getAllPdfs, heapStats } from './Utils';
-import { checkPageCountEqualsImgCountusingPdfLib, mergeAllPdfsInFolder, mergePDFDocuments } from './PdfLibUtils';
+import { checkPageCountEqualsImgCountUsingPdfLib, mergeAllPdfsInFolder, mergePDFDocuments } from './PdfLibUtils';
 const PDFDocument = require('pdfkit');
 
 //https://pdfkit.org/docs/text.html

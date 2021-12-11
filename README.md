@@ -21,3 +21,7 @@ UI: MongoDB Compass
 1. Upload Monitor Web App
 2. Command Line executer
 npm run exec
+
+### Things to do
+find out how to increase pdflib 2 GB limit for PDF
+Fix the Memory Dump Issue of image files conversion to pdf if higher than 100 MB
