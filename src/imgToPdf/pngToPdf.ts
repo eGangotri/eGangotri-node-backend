@@ -42,7 +42,10 @@ export async function distributedLoadBasedPnToPdfConverter(pngRootFolder: string
 
     let pngToPdfCounter = 0;
     while (pngToPdfCounter < chunkedPngsCount) {
-        pngToPdfCounter++;
+        const newFolderForChunkedPdfs = pngRootFolder + PDF_SUB_FOLDER + `-${pngToPdfCounter}`;
+        if (!fs.existsSync(newFolderForChunkedPdfs)) {
+            fs.mkdirSync(newFolderForChunkedPdfs);
+        }pngToPdfCounter++;
         console.log(`create pngToPdfCounter ${pngToPdfCounter}, chunkedPngsCount ${chunkedPngsCount}`);
         await createPdf(pngRootFolder + PNG_SUB_FOLDER + `-${pngToPdfCounter}`,
         pngRootFolder + PDF_SUB_FOLDER + `-${pngToPdfCounter}`, pngToPdfCounter===1);
