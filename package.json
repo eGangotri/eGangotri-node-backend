@@ -13,7 +13,8 @@
     "tif2pdf": "node -r ts-node/register ./src/imgToPdf/index.ts",
     "t": "node -r ts-node/register --max-old-space-size=4500 --inspect --expose-gc ./src/imgToPdf/index.ts",
     "ts": "ts-node ./src/imgToPdf/index.ts",
-    "tally": "node -r ts-node/register --max-old-space-size=4500 --inspect --expose-gc ./src/imgToPdf/ImgPdfCountTally"
+    "tally": "node -r ts-node/register --max-old-space-size=4500 --inspect --expose-gc ./src/imgToPdf/tally.ts",
+    "merge": "node -r ts-node/register --max-old-space-size=4500 --inspect --expose-gc ./src/imgToPdf/merge.ts"
   },
   "repository": {
     "type": "git",

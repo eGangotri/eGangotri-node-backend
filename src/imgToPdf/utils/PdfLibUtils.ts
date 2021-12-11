@@ -2,7 +2,7 @@ import { PDFDocument } from 'pdf-lib'
 import * as fs from 'fs';
 import { formatTime, getAllPdfs } from './Utils';
 import { INTRO_PAGE_ADJUSTMENT } from './constants';
-import { GENERATION_REPORT } from '..';
+import { GENERATION_REPORT } from '../convert';
 
 /**
  * Uses https://pdf-lib.js.org/#examples
@@ -38,7 +38,7 @@ export async function mergePDFDocuments(documents:Array<any>, pdfName:string) {
 export async function mergeAllPdfsInFolder(pdfFolder:string, pdfName:string){
     const START_TIME = Number(Date.now())
     const pdfs = await getAllPdfs(pdfFolder);
-    console.log(`pdfs in ${pdfFolder} ${pdfs.join(",")}`)
+    console.log(`Merging pdfs in ${pdfFolder}`)
     const pdfForMerge = pdfs.map( (x) => {
         return fs.readFileSync(x)
     })

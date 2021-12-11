@@ -1,6 +1,6 @@
 import { createPdfAndDeleteGeneratedFiles, pngToPdf } from './utils/PdfUtils';
 import { pngFolderName, tiftoPngs } from './utils/PngUtils';
-import { GENERATION_REPORT } from './index';
+import { GENERATION_REPORT } from './convert';
 import { chunk, formatTime } from './utils/Utils';
 import { getAllPngs, getAllTifs } from './utils/ImgUtils';
 import * as fs from 'fs';
@@ -12,7 +12,7 @@ export async function tifToPdf(tifRootFolder: string, destPdf: string) {
         fs.mkdirSync(destPdf);
     }
     const tifCount = (await getAllTifs(tifRootFolder)).length
-    console.log(`Converting ${tifCount} tifs in Folder \n\t${tifRootFolder}`)
+    console.log(`--Converting ${tifCount} tifs in Folder \n\t${tifRootFolder}`)
     let tifToPngStats
     try {
         tifToPngStats = await tiftoPngs(tifRootFolder, destPdf)
@@ -24,7 +24,7 @@ export async function tifToPdf(tifRootFolder: string, destPdf: string) {
     if (tifToPngStats.countMatch) {
         const pngRootFolder = pngFolderName(tifRootFolder, destPdf);
         //await loadDividedPngToPDF(pngRootFolder, destPdf)
-        await pngToPdf(pngRootFolder,destPdf)
+        await pngsToPdf(pngRootFolder,destPdf)
     }
     else {
         const err = `Error!!!
@@ -62,7 +62,7 @@ export async function loadDividedPngToPDF(pngRootFolder: string, pdfRootFolder: 
         pngToPdfCounter++;
         console.log(`create pngToPdfCounter ${pngToPdfCounter}, chunkedPngsCount ${chunkedPngsCount}`);
         await pngToPdf(pngRootFolder + PNG_SUB_FOLDER + `-${pngToPdfCounter}`,
-         pdfRootFolder + PDF_SUB_FOLDER + `-${pngToPdfCounter}`)
+         pdfRootFolder + PDF_SUB_FOLDER + `-${pngToPdfCounter}`, pngToPdfCounter===1);
     }
 
     let pdfMergeCounter = 0;
@@ -81,7 +81,7 @@ export async function loadDividedPngToPDF(pngRootFolder: string, pdfRootFolder: 
     await mergeAllPdfsInFolder(pdfRootFolder, pdfRootFolder + "//" + path.parse(pngRootFolder).name + ".pdf");
 }
 
-export async function pngToPdf(folderForPngs: string, destPdf: string) {
+export async function pngsToPdf(folderForPngs: string, destPdf: string) {
     const START_TIME = Number(Date.now())
     await createPdfAndDeleteGeneratedFiles(folderForPngs, destPdf);
     const END_TIME = Number(Date.now())
