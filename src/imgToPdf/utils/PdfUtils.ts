@@ -54,7 +54,6 @@ export async function pngToPdf(pngSrc: string, pdf: string, firstPageNeedingIntr
     doc.flushPages()
     // finalize the PDF and end the stream
     doc.end();
-    console.log(`png to pdf for ${pdf} done`);
 }
 
 //https://pdfkit.org/docs/text.html

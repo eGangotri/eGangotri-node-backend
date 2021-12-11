@@ -1,7 +1,7 @@
 import { PDFDocument } from 'pdf-lib'
 import * as fs from 'fs';
 import { formatTime, getAllPdfs } from './Utils';
-import { INTRO_PAGE_ADJUSTMENT } from './constants';
+import { INTRO_PAGE_ADJUSTMENT } from '../index';
 import { GENERATION_REPORT } from '../convert';
 import { getAllTifs } from './ImgUtils';
 
