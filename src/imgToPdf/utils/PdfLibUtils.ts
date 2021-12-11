@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import { formatTime, getAllPdfs } from './Utils';
 import { INTRO_PAGE_ADJUSTMENT } from './constants';
 import { GENERATION_REPORT } from '../convert';
+import { getAllTifs } from './ImgUtils';
 
 /**
  * Uses https://pdf-lib.js.org/#examples
@@ -52,7 +53,13 @@ export async function mergeAllPdfsInFolder(pdfFolder:string, pdfName:string){
 
 }
 
-export async function checkPageCountEqualsImgCountusingPdfLib(pdfPath:string, pngCount:number){
+export async function checkPageCountEqualsImgCountInFolderUsingPdfLib(pdfPath:string, folder:string){
+    const pdfPageCount = await getPdfPageCount(pdfPath) - INTRO_PAGE_ADJUSTMENT;
+    const pngCount  = (await getAllTifs(folder)).length
+    return checkPageCountEqualsImgCountUsingPdfLib(pdfPath,pngCount);
+}
+
+export async function checkPageCountEqualsImgCountUsingPdfLib(pdfPath:string, pngCount:number){
     const pdfPageCount = await getPdfPageCount(pdfPath) - INTRO_PAGE_ADJUSTMENT;
     
     if (pdfPageCount === pngCount) {

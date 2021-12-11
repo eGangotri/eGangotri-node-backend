@@ -5,7 +5,8 @@ import { chunk, formatTime } from './utils/Utils';
 import { getAllPngs, getAllTifs } from './utils/ImgUtils';
 import * as fs from 'fs';
 import * as path from 'path';
-import { mergeAllPdfsInFolder } from './utils/PdfLibUtils';
+import { checkPageCountEqualsImgCountInFolderUsingPdfLib, checkPageCountEqualsImgCountUsingPdfLib, mergeAllPdfsInFolder } from './utils/PdfLibUtils';
+import { removeFolderWithContents } from './utils/FileUtils';
 
 export async function tifToPdf(tifRootFolder: string, destPdf: string) {
     if (!fs.existsSync(destPdf)) {
@@ -23,7 +24,7 @@ export async function tifToPdf(tifRootFolder: string, destPdf: string) {
     console.log("after tifToPngStats")
     if (tifToPngStats.countMatch) {
         const pngRootFolder = pngFolderName(tifRootFolder, destPdf);
-        await loadDividedPngToPDF(pngRootFolder, destPdf)
+        await loadDividedPngToPDF(pngRootFolder, destPdf,tifCount)
         //await pngsToPdf(pngRootFolder,destPdf)
     }
     else {
@@ -37,7 +38,7 @@ export async function tifToPdf(tifRootFolder: string, destPdf: string) {
     }
 }
 
-export async function loadDividedPngToPDF(pngRootFolder: string, pdfRootFolder: string) {
+export async function loadDividedPngToPDF(pngRootFolder: string, pdfRootFolder: string, tifCount:number) {
     const CHUNK_SIZE = 5;
     const PNG_SUB_FOLDER = "\\pngs\\"
     const PDF_SUB_FOLDER = "\\pdfs\\"
@@ -78,8 +79,10 @@ export async function loadDividedPngToPDF(pngRootFolder: string, pdfRootFolder: 
         try {
             pdfMergeCounter++;
             console.log(`merge pdfMergeCounter ${pdfMergeCounter}, chunkedPngsCount ${chunkedPngsCount}`);
-            await mergeAllPdfsInFolder(pngRootFolder + PDF_SUB_FOLDER + `-${pdfMergeCounter}`,
-            pngRootFolder + PDF_SUB_FOLDER + `-${pdfMergeCounter}.pdf`);
+            const pdfPath = 
+            pngRootFolder + PDF_SUB_FOLDER + `-${pdfMergeCounter}.pdf`
+            await mergeAllPdfsInFolder(pngRootFolder + PDF_SUB_FOLDER + `-${pdfMergeCounter}`,pdfPath);
+            await checkPageCountEqualsImgCountUsingPdfLib(pdfPath,tifCount);
         }
         catch (e) {
             console.log(e);
@@ -87,6 +90,7 @@ export async function loadDividedPngToPDF(pngRootFolder: string, pdfRootFolder: 
     }
 
     await mergeAllPdfsInFolder(pngRootFolder + PDF_SUB_FOLDER, pdfRootFolder + "//" + path.parse(pngRootFolder).name + ".pdf");
+    removeFolderWithContents(pngRootFolder);
 }
 
 export async function pngsToPdf(folderForPngs: string, destPdf: string) {
