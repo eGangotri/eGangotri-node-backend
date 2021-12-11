@@ -3,8 +3,7 @@ export const FOOTER_TEXT = 'CC-0. In Public Domain.Kavikulguru Kalidas Sanskrit 
 export const PDF_FONT = 'Times-Roman';
 export const FOOTER_LINK = 'https://kksu.org/';
 export const INTRO_BANNER = 'E:\\KKSU_Banner.jpg';
-export const ADD_INTRO_PDF = true;
-export const INTRO_PAGE_ADJUSTMENT = ADD_INTRO_PDF ? 1 : 0
+
 
 export const INTRO_TEXT = `This PDF you are browsing now is a digitized copy of rare books and manuscripts from the Jnanayogi Dr. Shrikant Jichkar Knowledge Resource Center Library located in Kavikulaguru Kalidas Sanskrit University Ramtek, Maharashtra.
 
