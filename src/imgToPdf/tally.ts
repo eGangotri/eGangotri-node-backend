@@ -30,20 +30,6 @@ const pdfFolder = "E:\\ramtek2-";
 
     heapStats();
     garbageCollect()
-    const pdfDestFolderFotMergeTest = "C:\\tmp\\pdf10"
-    const pdfName = pdfDestFolderFotMergeTest + "\\" +path.parse(pdfDestFolderFotMergeTest).name + ".pdf";
-    //await mergeAllPdfsInFolder(pdfDestFolderFotMergeTest,pdfName);
-    //removeExcept("C:\\tmp\\pdfMerge", ["C:\\tmp\\pdfMerge\\pdfMerge.pdf"])
-    const xx = true
-    console.log(chunk(["1","2", "3", "4", "5", "6", "7"], 0));
-    console.log(chunk(["1","2", "3", "4", "5", "6", "7"], 5));
-    console.log(chunk(["1","2", "3", "4", "5", "6", "7"], 20));
-
-    if(xx){
-        process.exit(0);
-    }
-    console.log(".....");
-
     const pdfCounts = (await getAllPdfs(pdfFolder)).length
     const tifSubFolders: Array<string> = await getDirectories(tifFolderMain)
     const START_TIME = Number(Date.now())
