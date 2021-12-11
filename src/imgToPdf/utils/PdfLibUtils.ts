@@ -24,12 +24,15 @@ export async function getPdfPageCount(pdfPath:string){
 
 export async function mergePDFDocuments(documents:Array<any>, pdfName:string) {
 	const mergedPdf = await PDFDocument.create();
-
+    let counter = 0
 	for (let document of documents) {
 		document = await PDFDocument.load(document);
-
+        console.log(` counter ${++counter}`)
 		const copiedPages = await mergedPdf.copyPages(document, document.getPageIndices());
-		copiedPages.forEach((page) => mergedPdf.addPage(page));    
+        console.log(` copiedPages ${counter}`)
+		copiedPages.forEach((page) => mergedPdf.addPage(page));   
+        console.log(` copiedPages ${counter}`)
+
 	}
 	
 	return await fs.promises.writeFile(pdfName, await mergedPdf.save());
