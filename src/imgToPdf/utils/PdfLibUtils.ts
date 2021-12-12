@@ -1,8 +1,7 @@
 import { PDFDocument } from 'pdf-lib'
 import * as fs from 'fs';
 import { formatTime, getAllPdfs } from './Utils';
-import { INTRO_PAGE_ADJUSTMENT } from '../index';
-import { GENERATION_REPORT } from '../index';
+import { addReport, INTRO_PAGE_ADJUSTMENT } from '../index';
 import { getAllTifs } from './ImgUtils';
 import * as path from 'path';
 
@@ -72,13 +71,13 @@ export async function checkPageCountEqualsImgCountUsingPdfLib(pdfPath: string, p
     const pdfPageCount = await getPdfPageCount(pdfPath) - INTRO_PAGE_ADJUSTMENT;
 
     if (pdfPageCount === pngCount) {
-        GENERATION_REPORT.push(`${pdfPath}(${pngCount}) created with PageCount same as png count(${pngCount})`)
+        addReport(`${pdfPath}(${pngCount}) created with PageCount same as png count(${pngCount})`)
     }
     else if (pdfPageCount === -1) {
-        GENERATION_REPORT.push(`${pdfPath} is over threshhold size. pls check if same as ${pngCount}`);
+        addReport(`${pdfPath} is over threshhold size. pls check if same as ${pngCount}`);
     }
     else {
-        GENERATION_REPORT.push(`***Error
+        addReport(`***Error
         Image Count (${pngCount}) and PDF Count (${pdfPageCount}) at variance by ${pngCount - pdfPageCount}
         for  ${pdfPath} !!!`)
     }

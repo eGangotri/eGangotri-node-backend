@@ -5,7 +5,7 @@ import {
 } from "./utils/PdfLibUtils";
 import * as path from 'path';
 import { getAllPdfs, getAllPdfsInFolders, getDirectoriesWithFullPath } from "./utils/Utils";
-import { GENERATION_REPORT, printReport } from "./index";
+import { addReport, printReport } from "./index";
 import { PDF_EXT, PDF_SUB_FOLDER, PNG_SUB_FOLDER } from "./utils/constants";
 import { mergeUsingEasyPdf } from "./utils/EasyPdfMergeUtil";
 
@@ -31,10 +31,9 @@ import { mergeUsingEasyPdf } from "./utils/EasyPdfMergeUtil";
             //await checkPageCountEqualsImgCountInFolderUsingPdfLib(pdfName, folder + PNG_SUB_FOLDER);
         }
         catch (e) {
-            GENERATION_REPORT.push(`***mergeAllPdfsInFolder
+            addReport(`***mergeAllPdfsInFolder
             ${path.parse(folder).name} Failed 
             ${e}`)
-            console.log(GENERATION_REPORT.at(-1));
         }
     }
     printReport();
