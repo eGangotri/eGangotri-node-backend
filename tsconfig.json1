@@ -1,0 +1,33 @@
+{
+    "compilerOptions": {
+        "target": "es6",
+        "lib": [
+          "es6",
+          "dom"
+        ],
+        "rootDir": "./src",
+        "outDir": "./dist",
+        "module": "es2020",
+        "moduleResolution": "node",
+        "strict": true,
+        "declaration": false,
+        "sourceMap": true,
+        "inlineSources": true,
+        "types": [
+          "node"
+        ], "typeRoots": [
+            "./node_modules/@types"
+          ],
+        "stripInternal": true,
+        "incremental": true,
+        "skipLibCheck": true,
+        "inlineSourceMap": false,
+        "noEmit": false
+      },
+      "ts-node": {
+        "cwd": "/c/ws/eGangotri-node-backend",
+        "projectSearchDir": "/c/ws/eGangotri-node-backend",
+        "require": [],
+        "project": "/c/ws/eGangotri-node-backend/tsconfig.json"
+      }
+}

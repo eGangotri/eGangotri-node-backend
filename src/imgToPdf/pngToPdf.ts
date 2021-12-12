@@ -1,25 +1,28 @@
-import { createPdf, createPdfAndDeleteGeneratedFiles, pngToPdf } from './utils/PdfUtils';
+import { createPdf, createPdfAndDeleteGeneratedFiles, createRedundantPdf, pngToPdf } from './utils/PdfUtils';
 import { chunk, formatTime } from './utils/Utils';
 import { getAllPngs } from './utils/ImgUtils';
 import * as fs from 'fs';
 import * as path from 'path';
-import { checkPageCountEqualsImgCountUsingPdfLib, mergeAllPdfsInFolder } from './utils/PdfLibUtils';
+import { checkPageCountEqualsImgCountUsingPdfLib, mergeAllPdfsInFolder, mergePdfsInList } from './utils/PdfLibUtils';
 import { removeFolderWithContents } from './utils/FileUtils';
-import { CHUNK_SIZE } from '.';
+import { CHUNK_SIZE, REDUNDANT_FOLDER } from '.';
+import { GENERATION_REPORT } from './index';
+import { PDF_EXT, PDF_SUB_FOLDER, PNG_SUB_FOLDER } from './utils/constants';
 
 async function directlyFromPngs() {
-    const folderForPngs: string = "E:\\ramtek3----WithPdfMErge";
-    const destPdf = "C:\\tmp\\pdfMerge"
-    await pngToPdf(folderForPngs, destPdf);
+    // const folderForPngs: string = "E:\\ramtek3----WithPdfMErge";
+    // const destPdf = "C:\\tmp\\pdfMerge"
+    // await pngToPdf(folderForPngs, destPdf);
 }
 
 export async function distributedLoadBasedPnToPdfConverter(pngRootFolder: string, pdfRootFolder: string, tifCount:number) {
-    const PNG_SUB_FOLDER = "\\pngs\\"
-    const PDF_SUB_FOLDER = "\\pdfs\\"
+
     const allPngs = await getAllPngs(pngRootFolder);
     const chunkedPngs = chunk(allPngs, CHUNK_SIZE);
     const chunkedPngsCount = chunkedPngs.length;
-    console.log(`distributedLoadBasedPnToPdfConverter pngRootFolder ${pngRootFolder} pdfRootFolder ${pdfRootFolder}`);
+    console.log(`distributedLoadBasedPnToPdfConverter 
+    pngRootFolder ${pngRootFolder} 
+    pdfRootFolder ${pdfRootFolder}`);
     if (!fs.existsSync(pngRootFolder + PNG_SUB_FOLDER)) {
         fs.mkdirSync(pngRootFolder + PNG_SUB_FOLDER);
     }
@@ -51,23 +54,38 @@ export async function distributedLoadBasedPnToPdfConverter(pngRootFolder: string
         await createPdf(pngRootFolder + PNG_SUB_FOLDER + `-${pngToPdfCounter}`,
         pngRootFolder + PDF_SUB_FOLDER + `-${pngToPdfCounter}`, pngToPdfCounter===1);
     }
+    //hack to force a flush
+    await createRedundantPdf(REDUNDANT_FOLDER);
+
 
     let pdfMergeCounter = 0;
+    let listOfAllPDFFoldersCreated = []
     while (pdfMergeCounter < chunkedPngsCount) {
+        pdfMergeCounter++;
+        console.log(`merge pdfMergeCounter ${pdfMergeCounter}, chunkedPngsCount ${chunkedPngsCount}`);
+        const pdfPath = pngRootFolder + PDF_SUB_FOLDER + `-${pdfMergeCounter}`;
+        const pdfNameWithPath = pdfPath + `.pdf`
+        listOfAllPDFFoldersCreated.push(pdfPath)
         try {
-            pdfMergeCounter++;
-            console.log(`merge pdfMergeCounter ${pdfMergeCounter}, chunkedPngsCount ${chunkedPngsCount}`);
-            const pdfPath = 
-            pngRootFolder + PDF_SUB_FOLDER + `-${pdfMergeCounter}.pdf`
-            await mergeAllPdfsInFolder(pngRootFolder + PDF_SUB_FOLDER + `-${pdfMergeCounter}`,pdfPath);
+            await mergeAllPdfsInFolder(pngRootFolder + PDF_SUB_FOLDER + `-${pdfMergeCounter}`,pdfNameWithPath);
         }
         catch (e) {
-            console.log(e);
+            console.log(`error while generating ${pdfNameWithPath}` + e);
         }
     }
 
-    const finalPdfPath = pdfRootFolder + "//" + path.parse(pngRootFolder).name + ".pdf";
-    await mergeAllPdfsInFolder(pngRootFolder + PDF_SUB_FOLDER,finalPdfPath);
+    const finalPdfPath = pdfRootFolder + "//" + path.parse(pngRootFolder).name + PDF_EXT;
+    try {
+        console.log(`Merging Final PDF: ${finalPdfPath}`);
+        //because there is issue combining large pdfs we are limiting to this work-around
+        //await mergeAllPdfsInFolder(pngRootFolder + PDF_SUB_FOLDER,finalPdfPath);
+        await mergePdfsInList([listOfAllPDFFoldersCreated],finalPdfPath);
+    }
+    catch (e:any) {
+        console.log(e);
+        GENERATION_REPORT.push(`${finalPdfPath} Generation Error`, e);
+
+    }
     await checkPageCountEqualsImgCountUsingPdfLib(finalPdfPath,tifCount);
     //removeFolderWithContents(pngRootFolder);
 }

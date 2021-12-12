@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 const v8 = require('v8');
 import * as path from 'path';
+import { PDF_EXT } from './constants';
 
 export const getDirectories = async (source: string) => {
      const subDirs = await fs.promises.readdir(source, { withFileTypes: true })
@@ -45,7 +46,15 @@ export async function deleteFiles(files: Array<string>) {
 }
 
 export const getAllPdfs = async (dir: string) => {
-     return await getAllFilesOfGivenType(dir, [".pdf"]);
+     return await getAllFilesOfGivenType(dir, [PDF_EXT]);
+}
+
+export const getAllPdfsInFolders = async (dirs: Array<string>) => {
+     let pdfs = [];
+     for(let dir of dirs){
+          pdfs.push( await getAllPdfs(dir));
+     }
+     return pdfs.flat(1);
 }
 
 export const getAllFilesOfGivenType = async (dir: string, _types: Array<string> = []) => {

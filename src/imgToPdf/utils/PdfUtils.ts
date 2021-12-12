@@ -1,8 +1,8 @@
 import * as fs from 'fs';
 import { getAllPngs } from '../utils/ImgUtils';
 import * as path from 'path';
-import { GENERATION_REPORT } from '../convert';
-import {  FOOTER_LINK, FOOTER_TEXT, INTRO_BANNER, INTRO_TEXT, PDF_FONT } from './constants';
+import { GENERATION_REPORT } from '../index';
+import {  FOOTER_LINK, FOOTER_TEXT, INTRO_BANNER, INTRO_TEXT, PDF_EXT, PDF_FONT } from './constants';
 import {  garbageCollect, heapStats } from './Utils';
 import { ADD_INTRO_PDF, INTRO_PAGE_ADJUSTMENT } from '..';
 const PDFDocument = require('pdfkit');
@@ -15,10 +15,10 @@ export async function createPdf(pngSrc: string, pdfDestFolder: string, firstPage
     const _pngs = await getAllPngs(pngSrc);
     heapStats('Starting memory');
     let counter = 0;
-    await pngToPdf(_pngs[0], pdfDestFolder + "\\" + path.parse(_pngs[0]).name + ".pdf", firstPageNeedingIntro);
+    await pngToPdf(_pngs[0], pdfDestFolder + "\\" + path.parse(_pngs[0]).name + PDF_EXT, firstPageNeedingIntro);
 
     for (let png of _pngs.slice(1)) {
-        const pdf = pdfDestFolder + "\\" + path.parse(png).name + ".pdf";
+        const pdf = pdfDestFolder + "\\" + path.parse(png).name + PDF_EXT;
         console.log(`processing 
         ${png} to
         ${pdf}
@@ -30,6 +30,23 @@ export async function createPdf(pngSrc: string, pdfDestFolder: string, firstPage
             garbageCollect()
         }
     }
+}
+export async function createRedundantPdf(pdf: string){
+    const doc = new PDFDocument({ autoFirstPage: false, bufferPages: true });
+    var buffers:Array<any> = [];
+    doc.on('data', buffers.push.bind(buffers));
+    doc.on('end', function () {
+        //https://github.com/foliojs/pdfkit/issues/728
+        heapStats('Final memory on doc end');
+        fs.writeFileSync(pdf, Buffer.concat(buffers));
+    });
+    doc.on("error", (err:any) => console.log("error" + err));
+    doc.addPage();
+    doc.text("redundant");
+    doc.save()
+    doc.flushPages()
+    // finalize the PDF and end the stream
+    doc.end();
 }
 
 export async function pngToPdf(pngSrc: string, pdf: string, firstPageNeedingIntro = false) {
@@ -59,7 +76,7 @@ export async function pngToPdf(pngSrc: string, pdf: string, firstPageNeedingIntr
 //https://pdfkit.org/docs/text.html
 export async function createPdfWithWriteStream(pngSrc: string, dest: string) {
     const _pngs = await getAllPngs(pngSrc);
-    const pdf = dest + "\\" + path.parse(pngSrc).name + ".pdf";
+    const pdf = dest + "\\" + path.parse(pngSrc).name + PDF_EXT;
     console.log(`Creating pdf ${pdf} from ${path.parse(pngSrc).name}`);
     const doc = new PDFDocument({ autoFirstPage: false, bufferPages: false });
     doc.pipe(fs.createWriteStream(pdf)); // write to PDF
@@ -153,13 +170,13 @@ export async function createPdfAndDeleteGeneratedFiles(pngSrc: string, pdfDestFo
    
     await createPdf(pngSrc, pdfDestFolder);
     //removeExcept(pdfDestFolder,[
-     //   pdfDestFolder + "\\" +path.parse(pdfDestFolder).name + ".pdf"]);
+     //   pdfDestFolder + "\\" +path.parse(pdfDestFolder).name + PDF_EXT]);
 }
 
 //https://stackoverflow.com/questions/23771085/how-to-pipe-a-stream-using-pdfkit-with-node-js
 export async function createPdfWithBuffer(pngSrc: string, dest: string) {
     const _pngs = await getAllPngs(pngSrc);
-    const pdf = dest + "\\" + path.parse(pngSrc).name + ".pdf";
+    const pdf = dest + "\\" + path.parse(pngSrc).name + PDF_EXT;
     console.log(`Creating pdf ${pdf} from ${path.parse(pngSrc).name}`);
     const doc = new PDFDocument({ autoFirstPage: false, bufferPages: false });
     var buffers:Array<any> = [];
