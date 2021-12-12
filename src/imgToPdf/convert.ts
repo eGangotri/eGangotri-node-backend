@@ -5,8 +5,8 @@ import {
 import * as fs from 'fs';
 import { tifToPdf } from './TifToPdf';
 import * as path from 'path';
+import { GENERATION_REPORT, printReport } from '.';
 
-export let GENERATION_REPORT: Array<string> = [];
 
 async function execDynamic() {
     const index = 2;
@@ -28,7 +28,8 @@ async function exec(tifFoldersForTransformation: Array<string>, pdfDest: string)
         fs.mkdirSync(pdfDest);
     }
     const tifFoldersForTransformationCount = tifFoldersForTransformation.length;
-    console.log(`TifToPDF started for ${tifFoldersForTransformationCount} Folder(s)\n\t${tifFoldersForTransformation.join("\n\t")}`)
+    console.log(`TifToPDF started for ${tifFoldersForTransformationCount} Folder(s)
+    \t${tifFoldersForTransformation.map((elem, index) => `(${index}). ${elem}`).join("\n\t")}`)
     const START_TIME = Number(Date.now())
     GENERATION_REPORT.push(`TifToPDF started for ${tifFoldersForTransformationCount} folder(s) at ${new Date(START_TIME)}`)
     for (let mainFolder of tifFoldersForTransformation) {
@@ -48,25 +49,26 @@ async function exec(tifFoldersForTransformation: Array<string>, pdfDest: string)
     const END_TIME = Number(Date.now())
     GENERATION_REPORT.push(await folderCountEqualsPDFCount(tifFoldersForTransformation.length, pdfDest));
     GENERATION_REPORT.push(`TifToPDF ended at ${new Date(END_TIME)}.\nTotal Time Taken ${formatTime(END_TIME - START_TIME)}`);
-    console.log(GENERATION_REPORT);
+    printReport();
 }
 
 
 async function execFixed() {
-    const tifFoldersForTransformationX =
-     ['D:\\NMM\\August-2019\\02-08-2019\\M-37-Brahma Karma Suchay - Kavikulguru Kalidas Sanskrit University Ramtek Collection', 
-    'D:\\NMM\\August-2019\\02-08-2019\\M-38-Devalay Gram Mahatmya - Kavikulguru Kalidas Sanskrit University Ramtek Collection', 
-    'D:\\NMM\\August-2019\\02-08-2019\\M-39-Vanadurga - Kavikulguru Kalidas Sanskrit University Ramtek Collection', 
-    'D:\\NMM\\August-2019\\02-08-2019\\M-40-Ganapati Kavach - Kavikulguru Kalidas Sanskrit University Ramtek Collection',
-     'D:\\NMM\\August-2019\\02-08-2019\\M-41-Devalay Gram Mahatmya - Kavikulguru Kalidas Sanskrit University Ramtek Collection', 
-    'D:\\NMM\\August-2019\\02-08-2019\\M-42-Haritalik Puja Katha_Rishi Panchami Puja Katha - Kavikulguru Kalidas Sanskrit University Ramtek Collection',
-     'D:\\NMM\\August-2019\\02-08-2019\\M-43-Haritalik Puja Katha_Rishi Panchami Puja Katha - Kavikulguru Kalidas Sanskrit University Ramtek Collection']
+    const rootFolder =  'D:\\NMM\\August-2019\\02-08-2019'
+    const tifFoldersForTransformation = [ 
+        `${rootFolder}\\M-37-Brahma Karma Sammuchaya - Kavikulguru Kalidas Sanskrit University Ramtek Collection`, 
+  `${rootFolder}\\M-38-Devalaya Gram Mahatmya - Kavikulguru Kalidas Sanskrit University Ramtek Collection`, 
+    `${rootFolder}\\M-39-Vana Durga - Kavikulguru Kalidas Sanskrit University Ramtek Collection`, 
+    `${rootFolder}\\M-40-Ganapati Kavach - Kavikulguru Kalidas Sanskrit University Ramtek Collection`,
+     `${rootFolder}\\M-41-Devalaya Gram Mahatmya - Kavikulguru Kalidas Sanskrit University Ramtek Collection`, 
+    `${rootFolder}\\M-42-Haritalik Puja Katha_Rishi Panchami Puja Katha - Kavikulguru Kalidas Sanskrit University Ramtek Collection`,
+     `${rootFolder}\\M-43-Haritalik Puja Katha_Rishi Panchami Puja Katha - Kavikulguru Kalidas Sanskrit University Ramtek Collection`]
    
-     const tifFoldersForTransformation = ["C:\\tmp\\M-72-Sulabh Veda Prakash - Kavikulguru Kalidas Sanskrit University Ramtek Collection"]
-    const destPdf = "E:\\ramtek2RemainingX";
-    await exec(["C:\\tmp\\tifs","C:\\tmp\\tifs2","C:\\tmp\\tifs3"], "C:\\tmp\\pdf1");
+    // const tifFoldersForTransformation = ["C:\\tmp\\M-72-Sulabh Veda Prakash - Kavikulguru Kalidas Sanskrit University Ramtek Collection"]
+    const destPdf = "E:\\ramtek211Dec";
+    //await exec(["C:\\tmp\\tifs","C:\\tmp\\tifs2","C:\\tmp\\tifs3"], "C:\\tmp\\pdf1");
 
-    //await exec(tifFoldersForTransformation, destPdf)
+    await exec(tifFoldersForTransformation.slice(0), destPdf)
 
 }
 //execDynamic();

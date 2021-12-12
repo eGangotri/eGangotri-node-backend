@@ -8,10 +8,9 @@ import {
     getDirectories,
     heapStats
 } from './utils/Utils';
-import { getPdfPageCount, mergeAllPdfsInFolder, mergePDFDocuments } from './utils/PdfLibUtils';
-import { INTRO_PAGE_ADJUSTMENT } from './utils/constants';
+import { getPdfPageCount } from './utils/PdfLibUtils';
+import { GENERATION_REPORT, INTRO_PAGE_ADJUSTMENT } from './index';
 
-export let GENERATION_REPORT:Array<string> = [];
 
 // const tifFolderMain = "D:\\NMM\\August-2019\\02-08-2019";
 // const pdfFolder = "E:\\ramtek2-";
@@ -81,5 +80,5 @@ const pdfFolder = "E:\\ramtek2-";
     Error Margin: ${tifSubFolders.length} - ${pdfCounts} = ${tifSubFolders.length - pdfCounts}
     `);
     GENERATION_REPORT.push(`Tally Check ended at ${new Date(END_TIME)}.\nTotal Time Taken ${formatTime(END_TIME - START_TIME)}`);
-    console.log(GENERATION_REPORT);
+     printReport();;
 })();

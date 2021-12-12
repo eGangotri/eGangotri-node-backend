@@ -2,8 +2,9 @@ import { PDFDocument } from 'pdf-lib'
 import * as fs from 'fs';
 import { formatTime, getAllPdfs } from './Utils';
 import { INTRO_PAGE_ADJUSTMENT } from '../index';
-import { GENERATION_REPORT } from '../convert';
+import { GENERATION_REPORT } from '../index';
 import { getAllTifs } from './ImgUtils';
+import * as path from 'path';
 
 /**
  * Uses https://pdf-lib.js.org/#examples
@@ -28,41 +29,43 @@ export async function mergePDFDocuments(documents: Array<any>, pdfName: string) 
     let counter = 0
     for (let document of documents) {
         document = await PDFDocument.load(document);
-        console.log(` counter ${++counter}`)
         const copiedPages = await mergedPdf.copyPages(document, document.getPageIndices());
-        console.log(` copiedPages ${counter}`)
         copiedPages.forEach((page) => mergedPdf.addPage(page));
-        console.log(` copiedPages ${counter}`)
+        console.log(` copiedPage ${++counter} to ${path.parse(pdfName).name}`)
 
     }
 
     return await fs.promises.writeFile(pdfName, await mergedPdf.save());
 }
 
-export async function mergeAllPdfsInFolder(pdfFolder: string, pdfName: string) {
+export async function mergePdfsInList(pdfFolders: Array<any>, pdfName: string) {
+    const flattened = pdfFolders.flat(1);
     const START_TIME = Number(Date.now())
-    const pdfs = await getAllPdfs(pdfFolder);
-    if (pdfs.length === 1) {
-        console.log(`Single PDF merely copy ${pdfFolder}`)
-        fs.copyFileSync(pdfs[0], pdfName);
+    if (flattened.length === 1) {
+        console.log(`Single PDF merely copy ${flattened}`)
+        fs.copyFileSync(flattened[0], pdfName);
     }
     else {
-        console.log(`Merging ${pdfs.length} pdfs in ${pdfFolder}`)
-        const pdfForMerge = pdfs.map((x) => {
+        console.log(`Merging ${flattened.length} pdfs from  ${pdfFolders.length} Folders`)
+        const pdfForMerge = flattened.map((x) => {
             return fs.readFileSync(x)
         })
         await mergePDFDocuments(pdfForMerge, pdfName);
     }
     const EMD_TIME = Number(Date.now())
     console.log(`\nTotal Time Taken for pdfmerge ${formatTime(EMD_TIME - START_TIME)}`);
-    console.log(`Created pdf from ${pdfs.length} pdf Files: \n\t${pdfName}`)
+    console.log(`Created pdf from ${flattened.length} pdf Files: \n\t${pdfName}`)
 
 }
 
-export async function checkPageCountEqualsImgCountInFolderUsingPdfLib(pdfPath: string, folder: string) {
-    const pdfPageCount = await getPdfPageCount(pdfPath) - INTRO_PAGE_ADJUSTMENT;
-    const pngCount = (await getAllTifs(folder)).length
-    return checkPageCountEqualsImgCountUsingPdfLib(pdfPath, pngCount);
+export async function mergeAllPdfsInFolder(pdfFolder: string, pdfName: string) {
+    const pdfs = await getAllPdfs(pdfFolder);
+    mergePdfsInList([pdfs],pdfName);
+}
+
+export async function checkPageCountEqualsImgCountInFolderUsingPdfLib(pdfWithFullPath: string, pngFolder: string) {
+    const pngCount = (await getAllTifs(pngFolder)).length
+    return checkPageCountEqualsImgCountUsingPdfLib(pdfWithFullPath, pngCount);
 }
 
 export async function checkPageCountEqualsImgCountUsingPdfLib(pdfPath: string, pngCount: number) {
