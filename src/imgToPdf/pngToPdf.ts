@@ -5,8 +5,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { checkPageCountEqualsImgCountUsingPdfLib, mergeAllPdfsInFolder, mergePdfsInList } from './utils/PdfLibUtils';
 import { removeFolderWithContents } from './utils/FileUtils';
-import { CHUNK_SIZE, REDUNDANT_FOLDER } from '.';
-import { GENERATION_REPORT } from './index';
+import { addReport, CHUNK_SIZE, REDUNDANT_FOLDER } from '.';
 import { PDF_EXT, PDF_SUB_FOLDER, PNG_SUB_FOLDER } from './utils/constants';
 
 async function directlyFromPngs() {
@@ -83,7 +82,7 @@ export async function distributedLoadBasedPnToPdfConverter(pngRootFolder: string
     }
     catch (e:any) {
         console.log(e);
-        GENERATION_REPORT.push(`${finalPdfPath} Generation Error`, e);
+        addReport(`${finalPdfPath} Generation Error ${e}`);
 
     }
     await checkPageCountEqualsImgCountUsingPdfLib(finalPdfPath,tifCount);

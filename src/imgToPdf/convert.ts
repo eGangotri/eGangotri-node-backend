@@ -5,7 +5,7 @@ import {
 import * as fs from 'fs';
 import { tifToPdf } from './TifToPdf';
 import * as path from 'path';
-import { GENERATION_REPORT, printReport } from '.';
+import { addReport, printReport } from '.';
 
 
 async function execDynamic() {
@@ -28,16 +28,16 @@ async function exec(tifFoldersForTransformation: Array<string>, pdfDest: string)
         fs.mkdirSync(pdfDest);
     }
     const tifFoldersForTransformationCount = tifFoldersForTransformation.length;
-    console.log(`TifToPDF started for ${tifFoldersForTransformationCount} Folder(s)
-    \t${tifFoldersForTransformation.map((elem, index) => `(${index}). ${elem}`).join("\n\t")}`)
     const START_TIME = Number(Date.now())
-    GENERATION_REPORT.push(`TifToPDF started for ${tifFoldersForTransformationCount} folder(s) at ${new Date(START_TIME)}`)
+    addReport(`TifToPDF started for ${tifFoldersForTransformationCount} folder(s) at ${new Date(START_TIME)}
+    \t${tifFoldersForTransformation.map((elem, index) => `(${index+1}). ${elem}`).join("\n\t")}`)
+
     for (let mainFolder of tifFoldersForTransformation) {
         try {
             const START_TIME = Number(Date.now())
             await tifToPdf(mainFolder, pdfDest);
             const END_TIME = Number(Date.now())
-            console.log(`exec for ${path.parse(mainFolder).name} -> ${path.parse(pdfDest).name} ended at ${new Date(END_TIME)}.
+            console.log(`tifToPdf for ${path.parse(mainFolder).name} -> ${path.parse(pdfDest).name} ended at ${new Date(END_TIME)}.
             \nTotal Time Taken for converting
             ${path.parse(mainFolder).name} -> ${path.parse(pdfDest).name}
             ${formatTime(END_TIME - START_TIME)}`);
@@ -47,8 +47,8 @@ async function exec(tifFoldersForTransformation: Array<string>, pdfDest: string)
         }
     }
     const END_TIME = Number(Date.now())
-    GENERATION_REPORT.push(await folderCountEqualsPDFCount(tifFoldersForTransformation.length, pdfDest));
-    GENERATION_REPORT.push(`TifToPDF ended at ${new Date(END_TIME)}.\nTotal Time Taken ${formatTime(END_TIME - START_TIME)}`);
+    addReport(await folderCountEqualsPDFCount(tifFoldersForTransformation.length, pdfDest));
+    addReport(`TifToPDF ended at ${new Date(END_TIME)}.\nTotal Time Taken ${formatTime(END_TIME - START_TIME)}`);
     printReport();
 }
 
@@ -58,17 +58,14 @@ async function execFixed() {
     const tifFoldersForTransformation = [ 
         `${rootFolder}\\M-37-Brahma Karma Sammuchaya - Kavikulguru Kalidas Sanskrit University Ramtek Collection`, 
   `${rootFolder}\\M-38-Devalaya Gram Mahatmya - Kavikulguru Kalidas Sanskrit University Ramtek Collection`, 
-    `${rootFolder}\\M-39-Vana Durga - Kavikulguru Kalidas Sanskrit University Ramtek Collection`, 
     `${rootFolder}\\M-40-Ganapati Kavach - Kavikulguru Kalidas Sanskrit University Ramtek Collection`,
      `${rootFolder}\\M-41-Devalaya Gram Mahatmya - Kavikulguru Kalidas Sanskrit University Ramtek Collection`, 
-    `${rootFolder}\\M-42-Haritalik Puja Katha_Rishi Panchami Puja Katha - Kavikulguru Kalidas Sanskrit University Ramtek Collection`,
-     `${rootFolder}\\M-43-Haritalik Puja Katha_Rishi Panchami Puja Katha - Kavikulguru Kalidas Sanskrit University Ramtek Collection`]
-   
+    ]
     // const tifFoldersForTransformation = ["C:\\tmp\\M-72-Sulabh Veda Prakash - Kavikulguru Kalidas Sanskrit University Ramtek Collection"]
     const destPdf = "E:\\ramtek211Dec";
     //await exec(["C:\\tmp\\tifs","C:\\tmp\\tifs2","C:\\tmp\\tifs3"], "C:\\tmp\\pdf1");
 
-    await exec(tifFoldersForTransformation.slice(0), destPdf)
+    await exec([tifFoldersForTransformation[3]], destPdf)
 
 }
 //execDynamic();

@@ -9,14 +9,14 @@ import {
     heapStats
 } from './utils/Utils';
 import { getPdfPageCount } from './utils/PdfLibUtils';
-import { GENERATION_REPORT, INTRO_PAGE_ADJUSTMENT } from './index';
+import { addReport, INTRO_PAGE_ADJUSTMENT, printReport } from './index';
 
 
 // const tifFolderMain = "D:\\NMM\\August-2019\\02-08-2019";
 // const pdfFolder = "E:\\ramtek2-";
 
 const tifFolderMain = "D:\\NMM\\August-2019\\02-08-2019";
-const pdfFolder = "E:\\ramtek2-";
+const pdfFolder = "E:\\uploadFrom2";// "E:\\ramtek2-";
 
 (async () => {
     let NOT_CREATED = [];
@@ -33,7 +33,7 @@ const pdfFolder = "E:\\ramtek2-";
     \n\t${tifSubFolders.join("\n\t")}
      at ${new Date(START_TIME)}`);
 
-    GENERATION_REPORT.push(`Tally Check started for ${tifSubFolders.length} folder(s) `)
+    addReport(`Tally Check started for ${tifSubFolders.length} folder(s) `)
 
     let subFolderCount = 0;
     for (let subfolder of tifSubFolders) {
@@ -43,7 +43,7 @@ const pdfFolder = "E:\\ramtek2-";
         console.log(`Testing Item #${subFolderCount} of ${pdfCounts} pdfs :${pdfPath}\n`);
         if (!fs.existsSync(pdfPath)) {
             console.log(`****Error ${pdfPath} was never created`);
-            GENERATION_REPORT.push(`****Error ${pdfPath} was never created`);
+            addReport(`****Error ${pdfPath} was never created`);
             NOT_CREATED.push(folderForChecking);
             continue;
         }
@@ -53,7 +53,7 @@ const pdfFolder = "E:\\ramtek2-";
 
         if ((pdfPageCount) === tifCount) {
             MATCHING.push(folderForChecking);
-            GENERATION_REPORT.push(`pdf ${subfolder}.pdf has matching count ${(tifCount)}\n`);
+            addReport(`pdf ${subfolder}.pdf has matching count ${(tifCount)}\n`);
         }
         else {
             if(pdfPageCount>0){
@@ -62,23 +62,24 @@ const pdfFolder = "E:\\ramtek2-";
             else {
                 UNCHECKABLE.push(folderForChecking);
             }
-            GENERATION_REPORT.push(`
+            addReport(`
             ****PDF Count  (${pdfPageCount}) for ${subfolder}.pdf is not same as ${tifCount}\n`);
         }
 
     }
     const END_TIME = Number(Date.now())
-    GENERATION_REPORT.push(`Stats:
+    addReport(`Stats:
     NON_MATCHING_COUNT: ${NON_MATCHING.length}
     MATCHING_COUNT: ${MATCHING.length}
     UNCHECKABLE_COUNT: ${UNCHECKABLE.length}
     NOT_CREATED_COUNT: ${NOT_CREATED.length}
     Total Tiff Folders expected for Conversion: ${tifSubFolders.length}
     Total PDFs in Folder: ${pdfCounts}
+    Ready For Upload: ${MATCHING}
     Manually check ${UNCHECKABLE}
-    Reconvert [${(NOT_CREATED.map((x)=>`"${x}"`)).join(",")}]
+    Reconvert [${(NOT_CREATED.map((x)=>`"${x}"`)).join(",\n")}]
     Error Margin: ${tifSubFolders.length} - ${pdfCounts} = ${tifSubFolders.length - pdfCounts}
     `);
-    GENERATION_REPORT.push(`Tally Check ended at ${new Date(END_TIME)}.\nTotal Time Taken ${formatTime(END_TIME - START_TIME)}`);
+    addReport(`Tally Check ended at ${new Date(END_TIME)}.\nTotal Time Taken ${formatTime(END_TIME - START_TIME)}`);
      printReport();;
 })();

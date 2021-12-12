@@ -1,5 +1,5 @@
 import { pngFolderName, tiftoPngs } from './utils/PngUtils';
-import { GENERATION_REPORT } from './index';
+import { addReport } from './index';
 import { getAllTifs } from './utils/ImgUtils';
 import * as fs from 'fs';
 import { distributedLoadBasedPnToPdfConverter } from './pngToPdf';
@@ -25,7 +25,7 @@ export async function tifToPdf(tifRootFolder: string, destPdf: string) {
             \t ${destPdf}
             Tiff Count(${tifToPngStats.tifsCount}) != Png Count(${tifToPngStats.pngCount}) mismatch. 
             Will not proceed`;
-            GENERATION_REPORT.push(err)
+            addReport(err)
             console.log(err);
         }
     }
