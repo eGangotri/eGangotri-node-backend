@@ -1,5 +1,4 @@
 import { 
-    checkPageCountEqualsImgCountInFolderUsingPdfLib, 
     mergeAllPdfsInFolder, 
     mergePdfsInList 
 } from "./utils/PdfLibUtils";
@@ -8,6 +7,7 @@ import { getAllPdfs, getAllPdfsInFolders, getDirectoriesWithFullPath } from "./u
 import { addReport, printReport } from "./index";
 import { PDF_EXT, PDF_SUB_FOLDER, PNG_SUB_FOLDER } from "./utils/constants";
 import { mergeUsingEasyPdf } from "./utils/EasyPdfMergeUtil";
+import { checkPageCountEqualsImgCountInFolder } from "./utils/PdfUtil";
 
 (async () => {
     const rootFolder = "E:\\ramtek2---";
@@ -28,7 +28,7 @@ import { mergeUsingEasyPdf } from "./utils/EasyPdfMergeUtil";
             console.log("going to mergeusing easypdf")
             //mergeUsingEasyPdf(pdfsInFolders.slice(0,30), pdfName);
             //await mergePdfsInList(folder + PDF_SUB_FOLDER, pdfName);
-            //await checkPageCountEqualsImgCountInFolderUsingPdfLib(pdfName, folder + PNG_SUB_FOLDER);
+            await checkPageCountEqualsImgCountInFolder(pdfName, folder + PNG_SUB_FOLDER);
         }
         catch (e) {
             addReport(`***mergeAllPdfsInFolder
