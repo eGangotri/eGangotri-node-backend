@@ -1,5 +1,5 @@
 import {
-    folderCountEqualsPDFCount, formatTime,
+    formatTime,
     getDirectoriesWithFullPath, getUploadableFolders
 } from './utils/Utils';
 import * as fs from 'fs';
@@ -9,7 +9,7 @@ import { addReport, printReport } from '.';
 
 
 async function execDynamic() {
-    const index = 2;
+    const index = 3;
     const FOLDERS = await getUploadableFolders("D:\\NMM\\August-2019", "E:\\");
     console.log(FOLDERS)
     console.log(`This Run will convert tifs in Folder # ${index + 1} 
@@ -47,25 +47,17 @@ async function exec(tifFoldersForTransformation: Array<string>, pdfDest: string)
         }
     }
     const END_TIME = Number(Date.now())
-    addReport(await folderCountEqualsPDFCount(tifFoldersForTransformation.length, pdfDest));
-    addReport(`TifToPDF ended at ${new Date(END_TIME)}.\nTotal Time Taken ${formatTime(END_TIME - START_TIME)}`);
+    addReport(`TifToPDF for ${tifFoldersForTransformation.length} Folder(s) ended at ${new Date(END_TIME)}.\nTotal Time Taken ${formatTime(END_TIME - START_TIME)}`);
     printReport();
 }
 
 
 async function execFixed() {
-    const rootFolder =  'D:\\NMM\\August-2019\\02-08-2019'
-    const tifFoldersForTransformation = [ 
-        `${rootFolder}\\M-37-Brahma Karma Sammuchaya - Kavikulguru Kalidas Sanskrit University Ramtek Collection`, 
-  `${rootFolder}\\M-38-Devalaya Gram Mahatmya - Kavikulguru Kalidas Sanskrit University Ramtek Collection`, 
-    `${rootFolder}\\M-40-Ganapati Kavach - Kavikulguru Kalidas Sanskrit University Ramtek Collection`,
-     `${rootFolder}\\M-41-Devalaya Gram Mahatmya - Kavikulguru Kalidas Sanskrit University Ramtek Collection`, 
-    ]
-    // const tifFoldersForTransformation = ["C:\\tmp\\M-72-Sulabh Veda Prakash - Kavikulguru Kalidas Sanskrit University Ramtek Collection"]
-    const destPdf = "E:\\ramtek211Dec";
-    //await exec(["C:\\tmp\\tifs","C:\\tmp\\tifs2","C:\\tmp\\tifs3"], "C:\\tmp\\pdf1");
-
-    await exec([tifFoldersForTransformation[3]], destPdf)
+    const tifFoldersForTransformation = 
+    ['D:\\NMM\\August-2019\\05-08-2019\\M-88-Maurya Goswami Charitra_Kumar Sambhav 1st Sarga - Kavikulguru Kalidas Sanskrit University Ramtek Collection','D:\\NMM\\August-2019\\05-08-2019\\M-87-Maurya Goswami Charitra_Kumar Sambhav 1st Sarga - Kavikulguru Kalidas Sanskrit University Ramtek Collection','D:\\NMM\\August-2019\\05-08-2019\\M-82-Rukminii Svayamvar_Durga Kalpa Taru_Goda Nirnay Chandrika - Kavikulguru Kalidas Sanskrit University Ramtek Collection','D:\\NMM\\August-2019\\05-08-2019\\M-81-Rukminii Svayamvar_Durga Kalpa Taru_Goda Nirnay Chandrika - Kavikulguru Kalidas Sanskrit University Ramtek Collection','D:\\NMM\\August-2019\\05-08-2019\\M-80-Rukminii Svayamvar_Durga Kalpa Taru_Goda Nirnay Chandrika - Kavikulguru Kalidas Sanskrit University Ramtek Collection','D:\\NMM\\August-2019\\05-08-2019\\M-79-Hiranya Koshiya Nitya Vidhi - Kavikulguru Kalidas Sanskrit University Ramtek Collection','D:\\NMM\\August-2019\\05-08-2019\\M-78-Abhyas Chintan_Daksha Prajapati SMriti_Pratyangira Puja - Kavikulguru Kalidas Sanskrit University Ramtek Collection','D:\\NMM\\August-2019\\05-08-2019\\M-77-Abhyas Chintan_Daksha Prajapati SMriti_Pratyangira Puja - Kavikulguru Kalidas Sanskrit University Ramtek Collection','D:\\NMM\\August-2019\\05-08-2019\\M-76-Abhyas Chintan_Daksha Prajapati SMriti_Pratyangir Puja - Kavikulguru Kalidas Sanskrit University Ramtek Collection','D:\\NMM\\August-2019\\05-08-2019\\M-75-Amrit Arnav_Yam Niyam Yog Vishayak - Kavikulguru Kalidas Sanskrit University Ramtek Collection','D:\\NMM\\August-2019\\05-08-2019\\M-74-Amrit Arnav_Yam Niyam Yog Vishayak - Kavikulguru Kalidas Sanskrit University Ramtek Collection','D:\\NMM\\August-2019\\05-08-2019\\M-73-Bhakti Kavya Sangrah - Kavikulguru Kalidas Sanskrit University Ramtek Collection','D:\\NMM\\August-2019\\05-08-2019\\M-151-Gita Gauripati - Kavikulguru Kalidas Sanskrit University Ramtek Collection','D:\\NMM\\August-2019\\05-08-2019\\M-150-Mantra Kosh - Kavikulguru Kalidas Sanskrit University Ramtek Collection','D:\\NMM\\August-2019\\05-08-2019\\M-149-Shri Sukta - Kavikulguru Kalidas Sanskrit University Ramtek Collection','D:\\NMM\\August-2019\\05-08-2019\\M-148-Vancha Kalpa Lata - Kavikulguru Kalidas Sanskrit University Ramtek Collection','D:\\NMM\\August-2019\\05-08-2019\\M-147-Shiv Pamarjan Stotra - Kavikulguru Kalidas Sanskrit University Ramtek Collection','D:\\NMM\\August-2019\\05-08-2019\\M-146-Shyama Rahasya - Kavikulguru Kalidas Sanskrit University Ramtek Collection','D:\\NMM\\August-2019\\05-08-2019\\M-145-Bhagavat Gita - Kavikulguru Kalidas Sanskrit University Ramtek Collection','D:\\NMM\\August-2019\\05-08-2019\\M-143-Shad Devata Puja - Kavikulguru Kalidas Sanskrit University Ramtek Collection','D:\\NMM\\August-2019\\05-08-2019\\M-142-Mudra Lakshan - Kavikulguru Kalidas Sanskrit University Ramtek Collection','D:\\NMM\\August-2019\\05-08-2019\\M-141-Parthiv Ling Puja - Kavikulguru Kalidas Sanskrit University Ramtek Collection','D:\\NMM\\August-2019\\05-08-2019\\M-140-Gayatri Jap Vidhi - Kavikulguru Kalidas Sanskrit University Ramtek Collection']
+                    
+    const destPdf = "E:\\ramtek4Y";
+    await exec(tifFoldersForTransformation, destPdf);
 
 }
 //execDynamic();

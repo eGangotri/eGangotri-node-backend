@@ -3,19 +3,14 @@ import { chunk, formatTime } from './utils/Utils';
 import { getAllPngs } from './utils/ImgUtils';
 import * as fs from 'fs';
 import * as path from 'path';
-import { checkPageCountEqualsImgCountUsingPdfLib, mergeAllPdfsInFolder, mergePdfsInList } from './utils/PdfLibUtils';
-import { removeFolderWithContents } from './utils/FileUtils';
 import { addReport, CHUNK_SIZE, REDUNDANT_FOLDER } from '.';
 import { PDF_EXT, PDF_SUB_FOLDER, PNG_SUB_FOLDER } from './utils/constants';
 
-async function directlyFromPngs() {
-    // const folderForPngs: string = "E:\\ramtek3----WithPdfMErge";
-    // const destPdf = "C:\\tmp\\pdfMerge"
-    // await pngToPdf(folderForPngs, destPdf);
+async function directlyFromPngs(folderForPngs:string, pdfNameWithPath:string) {
+    await pngToPdf(folderForPngs, pdfNameWithPath);
 }
 
 export async function distributedLoadBasedPnToPdfConverter(pngRootFolder: string, pdfRootFolder: string, tifCount:number) {
-
     const allPngs = await getAllPngs(pngRootFolder);
     const chunkedPngs = chunk(allPngs, CHUNK_SIZE);
     const chunkedPngsCount = chunkedPngs.length;
@@ -61,12 +56,12 @@ export async function distributedLoadBasedPnToPdfConverter(pngRootFolder: string
     let listOfAllPDFFoldersCreated = []
     while (pdfMergeCounter < chunkedPngsCount) {
         pdfMergeCounter++;
-        console.log(`merge pdfMergeCounter ${pdfMergeCounter}, chunkedPngsCount ${chunkedPngsCount}`);
+        //console.log(`merge pdfMergeCounter ${pdfMergeCounter}, chunkedPngsCount ${chunkedPngsCount}`);
         const pdfPath = pngRootFolder + PDF_SUB_FOLDER + `-${pdfMergeCounter}`;
         const pdfNameWithPath = pdfPath + `.pdf`
         listOfAllPDFFoldersCreated.push(pdfPath)
         try {
-            await mergeAllPdfsInFolder(pngRootFolder + PDF_SUB_FOLDER + `-${pdfMergeCounter}`,pdfNameWithPath);
+           // await mergeAllPdfsInFolder(pngRootFolder + PDF_SUB_FOLDER + `-${pdfMergeCounter}`,pdfNameWithPath);
         }
         catch (e) {
             console.log(`error while generating ${pdfNameWithPath}` + e);
@@ -75,17 +70,16 @@ export async function distributedLoadBasedPnToPdfConverter(pngRootFolder: string
 
     const finalPdfPath = pdfRootFolder + "//" + path.parse(pngRootFolder).name + PDF_EXT;
     try {
-        console.log(`Merging Final PDF: ${finalPdfPath}`);
+         //console.log(`Merging Final PDF: ${finalPdfPath}`);
         //because there is issue combining large pdfs we are limiting to this work-around
         //await mergeAllPdfsInFolder(pngRootFolder + PDF_SUB_FOLDER,finalPdfPath);
-        await mergePdfsInList([listOfAllPDFFoldersCreated],finalPdfPath);
+        //await mergePdfsInList([listOfAllPDFFoldersCreated],finalPdfPath);
     }
     catch (e:any) {
         console.log(e);
         addReport(`${finalPdfPath} Generation Error ${e}`);
-
     }
-    await checkPageCountEqualsImgCountUsingPdfLib(finalPdfPath,tifCount);
+    //await checkPageCountEqualsImgCount(finalPdfPath,tifCount);
     //removeFolderWithContents(pngRootFolder);
 }
 

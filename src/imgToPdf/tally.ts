@@ -8,15 +8,16 @@ import {
     getDirectories,
     heapStats
 } from './utils/Utils';
-import { getPdfPageCount } from './utils/PdfLibUtils';
 import { addReport, INTRO_PAGE_ADJUSTMENT, printReport } from './index';
+import { pdfPageCountUsingPdfJs } from './utils/PdfJsUtil';
+import { getPdfPageCount } from './utils/PdfUtil';
 
 
 // const tifFolderMain = "D:\\NMM\\August-2019\\02-08-2019";
 // const pdfFolder = "E:\\ramtek2-";
 
-const tifFolderMain = "D:\\NMM\\August-2019\\02-08-2019";
-const pdfFolder = "E:\\uploadFrom2";// "E:\\ramtek2-";
+const tifFolderMain = "D:\\NMM\\August-2019\\03-08-2019";
+const pdfFolder = "E:\\ramtek-3";
 
 (async () => {
     let NOT_CREATED = [];
@@ -42,25 +43,23 @@ const pdfFolder = "E:\\uploadFrom2";// "E:\\ramtek2-";
         subFolderCount++
         console.log(`Testing Item #${subFolderCount} of ${pdfCounts} pdfs :${pdfPath}\n`);
         if (!fs.existsSync(pdfPath)) {
-            console.log(`****Error ${pdfPath} was never created`);
             addReport(`****Error ${pdfPath} was never created`);
             NOT_CREATED.push(folderForChecking);
             continue;
         }
-
-        const pdfPageCount = await getPdfPageCount(pdfPath) - INTRO_PAGE_ADJUSTMENT;
+        const pdfPageCount = (await getPdfPageCount(pdfPath)) - INTRO_PAGE_ADJUSTMENT;
         const tifCount = (await getAllTifs(folderForChecking)).length;
 
         if ((pdfPageCount) === tifCount) {
             MATCHING.push(folderForChecking);
-            addReport(`pdf ${subfolder}.pdf has matching count ${(tifCount)}\n`);
+            addReport(`pdf ${subfolder}.pdf(${pdfPageCount}) Page Count == PNG Count ${(tifCount)}\n`);
         }
         else {
             if(pdfPageCount>0){
                 NON_MATCHING.push(folderForChecking);
             }
             else {
-                UNCHECKABLE.push(folderForChecking);
+                UNCHECKABLE.push(folderForChecking + ` should have ${tifCount+INTRO_PAGE_ADJUSTMENT} pages`);
             }
             addReport(`
             ****PDF Count  (${pdfPageCount}) for ${subfolder}.pdf is not same as ${tifCount}\n`);

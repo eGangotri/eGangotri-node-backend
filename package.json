@@ -11,7 +11,7 @@
     "exec": "ts-node ./src/exec/exec.ts",
     "tif2pdfOrig": "ts-node ./src/imgToPdf/convert.ts",
     "tif2pdf": "node -r ts-node/register ./src/imgToPdf/convert.ts",
-    "t": "node -r ts-node/register --max-old-space-size=4500 --inspect --expose-gc ./src/imgToPdf/convert.ts",
+    "convert": "node -r ts-node/register --max-old-space-size=4500 --inspect --expose-gc ./src/imgToPdf/convert.ts",
     "tally": "node -r ts-node/register --max-old-space-size=4500 --inspect --expose-gc ./src/imgToPdf/tally.ts",
     "merge": "node -r ts-node/register --max-old-space-size=4500 --inspect --expose-gc ./src/imgToPdf/merge.ts",
     "png2pdf": "node -r ts-node/register --max-old-space-size=4500 --inspect --expose-gc ./src/imgToPdf/pngToPdf.ts"
@@ -41,6 +41,7 @@
     "moment": "^2.29.1",
     "mongoose": "^5.11.7",
     "pdf-lib": "^1.17.1",
+    "pdfjs-dist": "^2.10.377",
     "pdfkit": "^0.13.0",
     "puppeteer": "^13.0.0",
     "sharp": "^0.29.3",

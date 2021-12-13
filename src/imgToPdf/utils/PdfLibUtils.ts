@@ -10,13 +10,15 @@ import * as path from 'path';
  * https://www.npmjs.com/package/pdf-lib
  */
 
-export async function getPdfPageCount(pdfPath: string) {
+
+export async function getPdfPageCountUsingPdfLib(pdfPath: string) {
     if (getFilzeSize(pdfPath) <= 2) {
         const pdfDoc = await PDFDocument.load(fs.readFileSync(pdfPath));
         return pdfDoc.getPages().length
     }
     else return -1;
 }
+
 
 export function getFilzeSize(pdfPath: string) {
     let stats = fs.statSync(pdfPath)
@@ -60,26 +62,4 @@ export async function mergePdfsInList(pdfFolders: Array<any>, pdfName: string) {
 export async function mergeAllPdfsInFolder(pdfFolder: string, pdfName: string) {
     const pdfs = await getAllPdfs(pdfFolder);
     mergePdfsInList([pdfs],pdfName);
-}
-
-export async function checkPageCountEqualsImgCountInFolderUsingPdfLib(pdfWithFullPath: string, pngFolder: string) {
-    const pngCount = (await getAllTifs(pngFolder)).length
-    return checkPageCountEqualsImgCountUsingPdfLib(pdfWithFullPath, pngCount);
-}
-
-export async function checkPageCountEqualsImgCountUsingPdfLib(pdfPath: string, pngCount: number) {
-    const pdfPageCount = await getPdfPageCount(pdfPath) - INTRO_PAGE_ADJUSTMENT;
-
-    if (pdfPageCount === pngCount) {
-        addReport(`${pdfPath}(${pngCount}) created with PageCount same as png count(${pngCount})`)
-    }
-    else if (pdfPageCount === -1) {
-        addReport(`${pdfPath} is over threshhold size. pls check if same as ${pngCount}`);
-    }
-    else {
-        addReport(`***Error
-        Image Count (${pngCount}) and PDF Count (${pdfPageCount}) at variance by ${pngCount - pdfPageCount}
-        for  ${pdfPath} !!!`)
-    }
-    return pdfPageCount === pngCount
 }
