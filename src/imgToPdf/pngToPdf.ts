@@ -1,4 +1,4 @@
-import { createPdf, createPdfAndDeleteGeneratedFiles, createRedundantPdf, pngToPdf } from './utils/PdfUtils';
+import { createPdf, createRedundantPdf, pngToPdf } from './utils/PdfUtils';
 import { chunk, formatTime } from './utils/Utils';
 import { getAllPngs } from './utils/ImgUtils';
 import * as fs from 'fs';
@@ -50,43 +50,12 @@ export async function distributedLoadBasedPnToPdfConverter(pngRootFolder: string
     }
     //hack to force a flush
     await createRedundantPdf(REDUNDANT_FOLDER);
-
-
-    let pdfMergeCounter = 0;
-    let listOfAllPDFFoldersCreated = []
-    while (pdfMergeCounter < chunkedPngsCount) {
-        pdfMergeCounter++;
-        //console.log(`merge pdfMergeCounter ${pdfMergeCounter}, chunkedPngsCount ${chunkedPngsCount}`);
-        const pdfPath = pngRootFolder + PDF_SUB_FOLDER + `-${pdfMergeCounter}`;
-        const pdfNameWithPath = pdfPath + `.pdf`
-        listOfAllPDFFoldersCreated.push(pdfPath)
-        try {
-           // await mergeAllPdfsInFolder(pngRootFolder + PDF_SUB_FOLDER + `-${pdfMergeCounter}`,pdfNameWithPath);
-        }
-        catch (e) {
-            console.log(`error while generating ${pdfNameWithPath}` + e);
-        }
-    }
-
-    const finalPdfPath = pdfRootFolder + "//" + path.parse(pngRootFolder).name + PDF_EXT;
-    try {
-         //console.log(`Merging Final PDF: ${finalPdfPath}`);
-        //because there is issue combining large pdfs we are limiting to this work-around
-        //await mergeAllPdfsInFolder(pngRootFolder + PDF_SUB_FOLDER,finalPdfPath);
-        //await mergePdfsInList([listOfAllPDFFoldersCreated],finalPdfPath);
-    }
-    catch (e:any) {
-        console.log(e);
-        addReport(`${finalPdfPath} Generation Error ${e}`);
-    }
-    //await checkPageCountEqualsImgCount(finalPdfPath,tifCount);
-    //removeFolderWithContents(pngRootFolder);
 }
 
 export async function pngsToPdf(folderForPngs: string, destPdf: string) {
     const START_TIME = Number(Date.now())
-    await createPdfAndDeleteGeneratedFiles(folderForPngs, destPdf);
+    await createPdf(folderForPngs, destPdf);
     const END_TIME = Number(Date.now())
-    console.log(`createPdfAndDeleteGeneratedFiles ended at ${new Date(END_TIME)}.
+    console.log(`pngsToPdf ended at ${new Date(END_TIME)}.
     \nTotal Time Taken ${formatTime(END_TIME - START_TIME)}`);
 }
