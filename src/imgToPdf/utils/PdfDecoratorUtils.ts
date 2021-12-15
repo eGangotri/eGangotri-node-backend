@@ -5,14 +5,16 @@ export const INTRO_BANNER = 'E:\\KKSU_Banner.jpg';
 
 export const INTRO_TEXT = `This PDF you are browsing now is a digitized copy of rare books and manuscripts from the Jnanayogi Dr. Shrikant Jichkar Knowledge Resource Center Library located in Kavikulaguru Kalidas Sanskrit University Ramtek, Maharashtra.
 
-Digitization was executed by NMM(https://www.namami.gov.in/)
-
-About KKSU
-The University was established on 18 September 1997. KKSU is an institution dedicated to the advanced learning of Sanskrit. It is located at Ramtek in Nagpur District, Maharashtra.
-The pdf is offered freely to the Community of Scholars with the intent to promote Sanskrit Learning.
+KKSU University (1997- Present) in Ramtek, Maharashtra is an institution dedicated to the advanced learning of Sanskrit. 
+The University Collection is offered freely to the Community of Scholars with the intent to promote Sanskrit Learning.
 
 Website
 https://kksu.co.in/
+
+Digitization was executed by NMM 
+
+https://www.namami.gov.in/
+
 
 Sincerely,
 
