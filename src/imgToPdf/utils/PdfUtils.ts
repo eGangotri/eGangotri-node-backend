@@ -20,10 +20,10 @@ export async function createPdf(pngSrc: string, pdfDestFolder: string, firstPage
 
     for (let png of _pngs.slice(1)) {
         const pdf = pdfDestFolder + "\\" + path.parse(png).name + PDF_EXT;
-        console.log(`processing 
-        ${png} to
-        ${pdf}
-        `);
+        // console.log(`processing 
+        // ${png} to
+        // ${pdf}
+        // `);
         await pngToPdf(png, pdf);
         counter++
         if (counter % 75 === 0 || counter === _pngs.length) {
@@ -42,7 +42,7 @@ export async function createRedundantPdf(pdfPath: string) {
     doc.on('data', buffers.push.bind(buffers));
     doc.on('end', function () {
         //https://github.com/foliojs/pdfkit/issues/728
-        heapStats('Final memory on doc end');
+        //heapStats('Final memory on doc end');
         fs.writeFileSync(pdfPathWithName, Buffer.concat(buffers));
     });
     doc.on("error", (err: any) => console.log("error" + err));
@@ -136,7 +136,7 @@ function checkPageCountEqualsImgCount(doc: any, pdf: string, pngCount: number) {
 export async function createPdfWithBuffer(pngSrc: string, dest: string) {
     const _pngs = await getAllPngs(pngSrc);
     const pdf = dest + "\\" + path.parse(pngSrc).name + PDF_EXT;
-    console.log(`Creating pdf ${pdf} from ${path.parse(pngSrc).name}`);
+    //console.log(`Creating pdf ${pdf} from ${path.parse(pngSrc).name}`);
     const doc = new PDFDocument({ autoFirstPage: false, bufferPages: false });
     var buffers: Array<any> = [];
     doc.on('data', buffers.push.bind(buffers));

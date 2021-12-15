@@ -2,27 +2,25 @@ import { pngFolderName, tiftoPngs } from './utils/PngUtils';
 import { addReport } from './index';
 import { getAllTifs } from './utils/ImgUtils';
 import * as fs from 'fs';
-import { distributedLoadBasedPnToPdfConverter } from './pngToPdf';
+import { distributedLoadBasedPngToPdfConverter } from './pngToPdfUtil';
 
-export async function tifToPdf(tifRootFolder: string, destPdf: string) {
-    if (!fs.existsSync(destPdf)) {
-        fs.mkdirSync(destPdf);
+export async function tifToPdf(tifRootFolder: string, destFolder: string) {
+    if (!fs.existsSync(destFolder)) {
+        fs.mkdirSync(destFolder);
     }
     const tifCount = (await getAllTifs(tifRootFolder)).length
     console.log(`Converting ${tifCount} tifs from Folder \n\t${tifRootFolder}  to pngs`)
 
     try {
-        let tifToPngStats = await tiftoPngs(tifRootFolder, destPdf)
+        let tifToPngStats = await tiftoPngs(tifRootFolder, destFolder)
         if (tifToPngStats?.countMatch) {
-            console.log("Tif->Png COnversion Over with 100% Count Match");
-            const pngRootFolder = pngFolderName(tifRootFolder, destPdf);
-            await distributedLoadBasedPnToPdfConverter(pngRootFolder, destPdf,tifCount)
-            //await pngsToPdf(pngRootFolder,destPdf)
+            console.log("Tif->Png conversion Over with 100% Count Match");
+            await distributedLoadBasedPngToPdfConverter(tifRootFolder, destFolder)
         }
         else {
             const err = `Error!!!
             \t ${tifRootFolder} 
-            \t ${destPdf}
+            \t ${destFolder}
             Tiff Count(${tifToPngStats.tifsCount}) != Png Count(${tifToPngStats.pngCount}) mismatch. 
             Will not proceed`;
             addReport(err)
