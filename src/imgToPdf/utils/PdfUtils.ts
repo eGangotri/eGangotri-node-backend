@@ -8,6 +8,9 @@ import { garbageCollect, heapStats } from './Utils';
 import { ADD_INTRO_PDF, INTRO_PAGE_ADJUSTMENT } from '..';
 const PDFDocument = require('pdfkit');
 
+const SUM_FOLDER_NAME = "SUM.pdf"
+let DEFAULT_PDF_WIDTH = 300
+let DEFAULT_PDF_HEIGHT = 500
 //https://pdfkit.org/docs/text.html
 export async function createPdf(pngSrc: string, pdfDestFolder: string, firstPageNeedingIntro = false) {
     if (!fs.existsSync(pdfDestFolder)) {
@@ -37,7 +40,7 @@ export async function createRedundantPdf(pdfPath: string) {
         fs.mkdirSync(pdfPath)
     }
     const pdfPathWithName = pdfPath + "\\" + `redundant${Number(Date.now())}.pdf`
-    const doc = new PDFDocument({ autoFirstPage: false, bufferPages: true });
+    const doc = new PDFDocument({ autoFirstPage: false });
     var buffers: Array<any> = [];
     doc.on('data', buffers.push.bind(buffers));
     doc.on('end', function () {
@@ -49,13 +52,36 @@ export async function createRedundantPdf(pdfPath: string) {
     doc.addPage();
     doc.text("redundant");
     doc.save()
-    doc.flushPages()
+    
     // finalize the PDF and end the stream
     doc.end();
 }
 
+export async function createPdfFromDotSum(dotSumText: String,pdfDumpFolder:string){
+    const doc = new PDFDocument({ autoFirstPage: false });
+    var buffers: Array<any> = [];
+    doc.on('data', buffers.push.bind(buffers));
+    doc.on('end', function () {
+        //https://github.com/foliojs/pdfkit/issues/728
+        heapStats('Final memory on doc end');
+        fs.writeFileSync(`${pdfDumpFolder}//${SUM_FOLDER_NAME}`, Buffer.concat(buffers));
+    });
+    doc.on("error", (err: any) => console.log("error" + err));
+    console.log(`dotSumText ${dotSumText}`);
+    doc.font(PDF_FONT).fontSize(calculateFontSize(DEFAULT_PDF_HEIGHT))
+    .fillColor('black')
+    .text(dotSumText, doc.page.margins.left, doc.page.margins.top, {
+        align: 'left'
+    });
+    addFooter(doc)
+    doc.save()
+    // finalize the PDF and end the stream
+    doc.end();
+}
+
+
 export async function pngToPdf(pngSrc: string, pdf: string, firstPageNeedingIntro = false) {
-    const doc = new PDFDocument({ autoFirstPage: false, bufferPages: true });
+    const doc = new PDFDocument({ autoFirstPage: false });
     var buffers: Array<any> = [];
     doc.on('data', buffers.push.bind(buffers));
     doc.on('end', function () {
@@ -66,6 +92,8 @@ export async function pngToPdf(pngSrc: string, pdf: string, firstPageNeedingIntr
     doc.on("error", (err: any) => console.log("error" + err));
     //console.log(`pngToPdf ${pngSrc} pdf ${pdf} firstPageNeedingIntro ${firstPageNeedingIntro}`)
     let img = doc.openImage(pngSrc);
+    DEFAULT_PDF_WIDTH = img.width
+    DEFAULT_PDF_HEIGHT = img.height
     if (firstPageNeedingIntro) {
         addBanner(doc, img);
     }
@@ -73,7 +101,7 @@ export async function pngToPdf(pngSrc: string, pdf: string, firstPageNeedingIntr
     doc.image(img, 0, 0)
     addFooter(doc)
     doc.save()
-    doc.flushPages()
+    
     // finalize the PDF and end the stream
     doc.end();
 }
@@ -86,7 +114,6 @@ function addBanner(doc: any, img: any) {
             width: doc.page.width - (doc.page.margins.left + doc.page.margins.right),
             height: doc.page.height * 0.31 - (doc.page.margins.top + doc.page.margins.bottom)
         })
-    //doc.moveDown();
     doc.font(PDF_FONT).fontSize(calculateFontSize(img.height))
         .fillColor('black')
         .text(INTRO_TEXT, doc.page.margins.left, doc.page.height * 0.31, {
