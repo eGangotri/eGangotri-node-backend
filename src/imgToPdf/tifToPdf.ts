@@ -9,6 +9,10 @@ export async function tifToPdf(rootSrcFolder: string, destFolder: string) {
         fs.mkdirSync(destFolder);
     }
     const tifCount = (await getAllTifs(rootSrcFolder)).length
+    if(tifCount === 0){
+        console.log(`No tifs in Folder \n\t${rootSrcFolder}.`);
+        return;
+    }
     console.log(`Converting ${tifCount} tifs from Folder \n\t${rootSrcFolder}  to pngs`)
 
     try {

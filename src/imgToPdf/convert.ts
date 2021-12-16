@@ -52,8 +52,8 @@ async function exec(rootSrcFolders: Array<string>, destFolder: string) {
 }
 
 async function execFixed() {
-    const rootSrcFolders =  await getDirectoriesWithFullPath("C:\\tmp\\experiment")
-    const destFolder = "C:\\tmp\\experimentDestH";
+    const rootSrcFolders =  ["C:\\tmp\\expWithSmallFiles\\Kalidas"];//await getDirectoriesWithFullPath("C:\\tmp\\experiment")
+    const destFolder = "C:\\tmp\\expWithSmallFilesDest";
     await exec(rootSrcFolders, destFolder);
 }
 

@@ -18,20 +18,22 @@ export async function createPdf(pngSrc: string, pdfDestFolder: string, firstPage
     }
     const _pngs = await getAllPngs(pngSrc);
     heapStats('Starting memory');
-    let counter = 0;
-    await pngToPdf(_pngs[0], pdfDestFolder + "\\" + path.parse(_pngs[0]).name + PDF_EXT, firstPageNeedingIntro);
+    if (_pngs?.length) {
+        let counter = 0;
+        await pngToPdf(_pngs[0], pdfDestFolder + "\\" + path.parse(_pngs[0]).name + PDF_EXT, firstPageNeedingIntro);
 
-    for (let png of _pngs.slice(1)) {
-        const pdf = pdfDestFolder + "\\" + path.parse(png).name + PDF_EXT;
-        // console.log(`processing 
-        // ${png} to
-        // ${pdf}
-        // `);
-        await pngToPdf(png, pdf);
-        counter++
-        if (counter % 75 === 0 || counter === _pngs.length) {
-            heapStats('before garbage collection');
-            garbageCollect()
+        for (let png of _pngs.slice(1)) {
+            const pdf = pdfDestFolder + "\\" + path.parse(png).name + PDF_EXT;
+            // console.log(`processing 
+            // ${png} to
+            // ${pdf}
+            // `);
+            await pngToPdf(png, pdf);
+            counter++
+            if (counter % 75 === 0 || counter === _pngs.length) {
+                heapStats('before garbage collection');
+                garbageCollect()
+            }
         }
     }
 }
@@ -52,12 +54,12 @@ export async function createRedundantPdf(pdfPath: string) {
     doc.addPage();
     doc.text("redundant");
     doc.save()
-    
+
     // finalize the PDF and end the stream
     doc.end();
 }
 
-export async function createPdfFromDotSum(dotSumText: String,pdfDumpFolder:string){
+export async function createPdfFromDotSum(dotSumText: String, pdfDumpFolder: string) {
     const doc = new PDFDocument({ autoFirstPage: false });
     var buffers: Array<any> = [];
     doc.on('data', buffers.push.bind(buffers));
@@ -67,13 +69,17 @@ export async function createPdfFromDotSum(dotSumText: String,pdfDumpFolder:strin
         fs.writeFileSync(`${pdfDumpFolder}//${SUM_FOLDER_NAME}`, Buffer.concat(buffers));
     });
     doc.on("error", (err: any) => console.log("error" + err));
-    console.log(`dotSumText ${dotSumText}`);
+    
+    doc.addPage({ size: [DEFAULT_PDF_WIDTH, DEFAULT_PDF_HEIGHT] });
+
     doc.font(PDF_FONT).fontSize(calculateFontSize(DEFAULT_PDF_HEIGHT))
-    .fillColor('black')
-    .text(dotSumText, doc.page.margins.left, doc.page.margins.top, {
-        align: 'left'
-    });
-    addFooter(doc)
+        .fillColor('black')
+        .text(dotSumText, doc.page.margins.left, doc.page.margins.top, {
+            align: 'left'
+        });
+    console.log(`after docSumText`);
+
+    //addFooter(doc)
     doc.save()
     // finalize the PDF and end the stream
     doc.end();
@@ -101,7 +107,7 @@ export async function pngToPdf(pngSrc: string, pdf: string, firstPageNeedingIntr
     doc.image(img, 0, 0)
     addFooter(doc)
     doc.save()
-    
+
     // finalize the PDF and end the stream
     doc.end();
 }
@@ -157,7 +163,7 @@ function checkPageCountEqualsImgCount(doc: any, pdf: string, pngCount: number) {
     }
     return pdfPageCount === pngCount
 }
-    
+
 
 //https://stackoverflow.com/questions/23771085/how-to-pipe-a-stream-using-pdfkit-with-node-js
 export async function createPdfWithBuffer(pngSrc: string, dest: string) {

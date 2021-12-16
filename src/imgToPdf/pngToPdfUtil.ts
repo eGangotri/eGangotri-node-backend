@@ -49,7 +49,7 @@ export async function distributedLoadBasedPngToPdfConverter(tifSrcFolder: string
 
 export async function handleDotSumFile(tifSrcFolder: string, pngPdfDumpFolder: string) {
     const dotSumFile = await getAllDotSumFiles(tifSrcFolder);
-    if(dotSumFile){
+    if(dotSumFile?.length > 0){
         const newDotSumFile = pngPdfDumpFolder + "//" + path.parse(dotSumFile[0]).name + path.parse(dotSumFile[0]).ext
         fs.writeFileSync(newDotSumFile, fs.readFileSync(dotSumFile[0]));
     }
@@ -75,7 +75,7 @@ export async function chunkedPngsToChunkedPdfs(pngPdfDumpFolder: string){
         `${_pdfs}-${pngToPdfCounter}`, pngToPdfCounter===1);
     }
     const dotSumFile =  await getAllDotSumFiles(pngPdfDumpFolder)
-    if(dotSumFile){
+    if(dotSumFile?.length>0){
         const lastPdfDumpFolder = `${_pdfs}-${pngToPdfCounter}`
         await createPdfFromDotSum(fs.readFileSync(dotSumFile[0]).toString(),lastPdfDumpFolder);
     }
