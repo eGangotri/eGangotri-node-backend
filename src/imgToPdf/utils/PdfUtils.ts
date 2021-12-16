@@ -4,7 +4,7 @@ import * as path from 'path';
 import { addReport } from '../index';
 import { PDF_EXT } from './constants';
 import { FOOTER_LINK, FOOTER_TEXT, INTRO_BANNER, INTRO_TEXT, PDF_FONT } from './PdfDecoratorUtils';
-import { garbageCollect, heapStats } from './Utils';
+import { chunk, garbageCollect, heapStats } from './Utils';
 import { ADD_INTRO_PDF, INTRO_PAGE_ADJUSTMENT } from '..';
 const PDFDocument = require('pdfkit');
 
@@ -70,18 +70,20 @@ export async function createPdfFromDotSum(dotSumText: String, pdfDumpFolder: str
     });
     doc.on("error", (err: any) => console.log("error" + err));
     
-    doc.addPage({ size: [DEFAULT_PDF_WIDTH, DEFAULT_PDF_HEIGHT] });
-
-    doc.font(PDF_FONT).fontSize(calculateFontSize(DEFAULT_PDF_HEIGHT))
+    const fontSize = calculateFontSize(DEFAULT_PDF_HEIGHT)
+    const lines = dotSumText.split(/\r?\n/);
+    const numberOfLines = Math.floor(DEFAULT_PDF_HEIGHT*0.009)
+    const chunkedLines = chunk(lines, numberOfLines )
+    for(let line of chunkedLines){
+    const chunkedLineWithNewLine = line.map((x)=>`${x}\n`);
+        doc.addPage({ size: [DEFAULT_PDF_WIDTH, DEFAULT_PDF_HEIGHT] });
+        doc.font(PDF_FONT).fontSize(fontSize)
         .fillColor('black')
-        .text(dotSumText, doc.page.margins.left, doc.page.margins.top, {
-            align: 'left'
-        });
-    console.log(`after docSumText`);
+        .text(chunkedLineWithNewLine, doc.page.margins.left, doc.page.margins.top)
+        addFooter(doc)
+    }
 
-    //addFooter(doc)
     doc.save()
-    // finalize the PDF and end the stream
     doc.end();
 }
 
@@ -121,10 +123,10 @@ function addBanner(doc: any, img: any) {
             height: doc.page.height * 0.31 - (doc.page.margins.top + doc.page.margins.bottom)
         })
     doc.font(PDF_FONT).fontSize(calculateFontSize(img.height))
-        .fillColor('black')
-        .text(INTRO_TEXT, doc.page.margins.left, doc.page.height * 0.31, {
-            align: 'left'
-        });
+    .fillColor('black')
+    .text(INTRO_TEXT, doc.page.margins.left, doc.page.height * 0.31, {
+        align: 'left'
+    })
     addFooter(doc);
 }
 
@@ -142,11 +144,11 @@ function addFooter(doc: any) {
     const pageHeight = doc.page.height
     const yCoordinate = pageHeight * 0.95
     doc.font(PDF_FONT).fontSize(footerFontSize(pageHeight))
-        .fillColor('black')
-        .text(FOOTER_TEXT, 0, yCoordinate, {
-            link: FOOTER_LINK,
-            align: 'center'
-        });
+    .fillColor('black')
+    .text(FOOTER_TEXT, 0, yCoordinate, {
+        link: FOOTER_LINK,
+        align: 'center'
+    })
     doc.page.margins.bottom = oldBottomMargin; // ReProtect bottom margin
 }
 
