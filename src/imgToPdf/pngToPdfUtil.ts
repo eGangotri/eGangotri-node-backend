@@ -1,10 +1,10 @@
-import { createPdf, createRedundantPdf, pngToPdf } from './utils/PdfUtils';
-import { chunk, formatTime, getDirectories } from './utils/Utils';
+import { createPdf, createPdfFromDotSum, createRedundantPdf } from './utils/PdfUtils';
+import { chunk, formatTime, getAllDotSumFiles, getDirectories } from './utils/Utils';
 import { getAllPngs } from './utils/ImgUtils';
 import * as fs from 'fs';
 import * as path from 'path';
-import { addReport, CHUNK_SIZE, REDUNDANT_FOLDER } from '.';
-import { PDF_EXT, PDF_SUB_FOLDER, PNG_SUB_FOLDER } from './utils/constants';
+import { CHUNK_SIZE, REDUNDANT_FOLDER } from '.';
+import { PDF_SUB_FOLDER, PNG_SUB_FOLDER } from './utils/constants';
 import { pngFolderName } from './utils/PngUtils';
 
 
@@ -42,8 +42,17 @@ export async function chunkPngs(pngPdfDumpFolder: string){
 
 export async function distributedLoadBasedPngToPdfConverter(tifSrcFolder: string, destFolder: string) {
     const pngPdfDumpFolder = pngFolderName(tifSrcFolder, destFolder);
+    await handleDotSumFile(tifSrcFolder,pngPdfDumpFolder)
     await chunkPngs(pngPdfDumpFolder)
     await chunkedPngsToChunkedPdfs(pngPdfDumpFolder)
+}
+
+export async function handleDotSumFile(tifSrcFolder: string, pngPdfDumpFolder: string) {
+    const dotSumFile = await getAllDotSumFiles(tifSrcFolder);
+    if(dotSumFile){
+        const newDotSumFile = pngPdfDumpFolder + "//" + path.parse(dotSumFile[0]).name + path.parse(dotSumFile[0]).ext
+        fs.writeFileSync(newDotSumFile, fs.readFileSync(dotSumFile[0]));
+    }
 }
 
 export async function chunkedPngsToChunkedPdfs(pngPdfDumpFolder: string){
@@ -65,6 +74,12 @@ export async function chunkedPngsToChunkedPdfs(pngPdfDumpFolder: string){
         await createPdf(`${_pngs}-${pngToPdfCounter}`,
         `${_pdfs}-${pngToPdfCounter}`, pngToPdfCounter===1);
     }
+    const dotSumFile =  await getAllDotSumFiles(pngPdfDumpFolder)
+    if(dotSumFile){
+        const lastPdfDumpFolder = `${_pdfs}-${pngToPdfCounter}`
+        await createPdfFromDotSum(fs.readFileSync(dotSumFile[0]).toString(),lastPdfDumpFolder);
+    }
+
     //hack to force a flush
     await createRedundantPdf(REDUNDANT_FOLDER);
 }

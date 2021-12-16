@@ -57,6 +57,10 @@ export const getAllPdfsInFolders = async (dirs: Array<string>) => {
      return pdfs.flat(1);
 }
 
+export const getAllDotSumFiles = async (dir: string) => {
+     return await getAllFilesOfGivenType(dir, [".sum"]);
+}
+
 export const getAllFilesOfGivenType = async (dir: string, _types: Array<string> = []) => {
      let files = []
 
