@@ -31,10 +31,11 @@ async function exec(rootSrcFolders: Array<string>, destFolder: string) {
     const START_TIME = Number(Date.now())
     addReport(`TifToPDF started for ${rootSrcFoldersCount} folder(s) at ${new Date(START_TIME)}
     \t${rootSrcFolders.map((elem, index) => `(${index+1}). ${elem}`).join("\n\t")}`)
-
+    let execCounter = 0
     for (let rootSrcFolder of rootSrcFolders) {
         try {
             const START_TIME = Number(Date.now())
+            addReport(`${++execCounter} of ${rootSrcFoldersCount}) ${rootSrcFolder} -> ${destFolder}`)
             await tifToPdf(rootSrcFolder, destFolder);
             const END_TIME = Number(Date.now())
             console.log(`tifToPdf for ${path.parse(rootSrcFolder).name} -> ${path.parse(destFolder).name} ended at ${new Date(END_TIME)}.
