@@ -5,6 +5,7 @@ export const ADD_INTRO_PDF = true;
 export const INTRO_PAGE_ADJUSTMENT = ADD_INTRO_PDF ? 1 : 0
 export let GENERATION_REPORT: Array<string> = [];
 export const REDUNDANT_FOLDER = "C:\\tmp\\redundant";
+export const HANDLE_CHECKSUM = true;
 export function printReport(){
     GENERATION_REPORT.map((rep,index) =>{
         return `${index}. ${rep}`

@@ -3,7 +3,7 @@ import { chunk, formatTime, getAllDotSumFiles, getDirectories } from './utils/Ut
 import { getAllPngs } from './utils/ImgUtils';
 import * as fs from 'fs';
 import * as path from 'path';
-import { CHUNK_SIZE, REDUNDANT_FOLDER } from '.';
+import { CHUNK_SIZE, HANDLE_CHECKSUM, REDUNDANT_FOLDER } from '.';
 import { PDF_SUB_FOLDER, PNG_SUB_FOLDER } from './utils/constants';
 import { pngFolderName } from './utils/PngUtils';
 
@@ -42,7 +42,9 @@ export async function chunkPngs(pngPdfDumpFolder: string){
 
 export async function distributedLoadBasedPngToPdfConverter(tifSrcFolder: string, destFolder: string) {
     const pngPdfDumpFolder = pngFolderName(tifSrcFolder, destFolder);
-    await handleDotSumFile(tifSrcFolder,pngPdfDumpFolder)
+    if(HANDLE_CHECKSUM){
+        await handleDotSumFile(tifSrcFolder,pngPdfDumpFolder)
+    }
     await chunkPngs(pngPdfDumpFolder)
     await chunkedPngsToChunkedPdfs(pngPdfDumpFolder)
 }
@@ -74,10 +76,12 @@ export async function chunkedPngsToChunkedPdfs(pngPdfDumpFolder: string){
         await createPdf(`${_pngs}-${pngToPdfCounter}`,
         `${_pdfs}-${pngToPdfCounter}`, pngToPdfCounter===1);
     }
-    const dotSumFile =  await getAllDotSumFiles(pngPdfDumpFolder)
-    if(dotSumFile?.length>0){
-        const lastPdfDumpFolder = `${_pdfs}-${pngToPdfCounter}`
-        await createPdfFromDotSum(fs.readFileSync(dotSumFile[0]).toString(),lastPdfDumpFolder);
+    if(HANDLE_CHECKSUM){
+        const dotSumFile =  await getAllDotSumFiles(pngPdfDumpFolder)
+        if(dotSumFile?.length>0){
+            const lastPdfDumpFolder = `${_pdfs}-${pngToPdfCounter}`
+            await createPdfFromDotSum(fs.readFileSync(dotSumFile[0]).toString(),lastPdfDumpFolder);
+        }
     }
 
     //hack to force a flush

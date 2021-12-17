@@ -57,10 +57,8 @@ async function execFixed() {
     await exec(rootSrcFolders, destFolder);
 }
 
-    //last used was 6, then 5 again and next willl be 7
-    //using 7
-    //using 8
-//execDynamic(8);
-execFixed();
+//last used was  5/6/7/8
+execDynamic(8);
+//execFixed();
 
 

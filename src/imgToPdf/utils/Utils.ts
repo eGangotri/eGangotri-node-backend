@@ -17,9 +17,13 @@ export const getDirectoriesWithFullPath = async (source: string) => {
 
 export function formatTime(timeLapseinMS: number) {
      const timeLapseInSecs = timeLapseinMS / 1000
+     const timeLapseInMins = timeLapseinMS / 1000/60
      let timeLapse = `${timeLapseInSecs.toFixed(2)} sec(s)`
-     if (timeLapseInSecs > 60) {
-          timeLapse = `${(timeLapseInSecs / 60).toFixed(2)} minute(s)`
+     if (timeLapseInMins > 60) {
+          timeLapse = `${(timeLapseInSecs / 60/60).toFixed(2)} hour(s)`
+     }
+     else if (timeLapseInSecs > 60) {
+          timeLapse = `${(timeLapseInSecs / 60/60).toFixed(2)} min(s)`
      }
      return timeLapse
 }
