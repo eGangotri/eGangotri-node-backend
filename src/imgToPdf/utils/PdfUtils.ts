@@ -8,7 +8,7 @@ import { chunk, garbageCollect, heapStats } from './Utils';
 import { ADD_INTRO_PDF, INTRO_PAGE_ADJUSTMENT } from '..';
 const PDFDocument = require('pdfkit');
 
-const SUM_FOLDER_NAME = "SUM.pdf"
+const DOT_SUM_PDF_NAME = "SUM.pdf"
 let DEFAULT_PDF_WIDTH = 300
 let DEFAULT_PDF_HEIGHT = 500
 //https://pdfkit.org/docs/text.html
@@ -17,40 +17,25 @@ export async function createPdf(pngSrc: string, pdfDestFolder: string, firstPage
         fs.mkdirSync(pdfDestFolder);
     }
     const _pngs = await getAllPngs(pngSrc);
-    heapStats('Starting memory');
     if (_pngs?.length) {
         let counter = 0;
-        await pngToPdf(_pngs[0], pdfDestFolder + "\\" + path.parse(_pngs[0]).name + PDF_EXT, firstPageNeedingIntro);
+        await pngToPdf(_pngs[0], pdfDestFolder, path.parse(_pngs[0]).name + PDF_EXT, firstPageNeedingIntro);
 
         for (let png of _pngs.slice(1)) {
-            const pdf = pdfDestFolder + "\\" + path.parse(png).name + PDF_EXT;
             // console.log(`processing 
             // ${png} to
             // ${pdf}
             // `);
-            await pngToPdf(png, pdf);
+            await pngToPdf(png, pdfDestFolder, path.parse(png).name + PDF_EXT);
             counter++
             if (counter % 75 === 0 || counter === _pngs.length) {
-                heapStats('before garbage collection');
                 garbageCollect()
             }
         }
     }
 }
 export async function createRedundantPdf(pdfPath: string) {
-    if (!fs.existsSync(pdfPath)) {
-        fs.mkdirSync(pdfPath)
-    }
-    const pdfPathWithName = pdfPath + "\\" + `redundant${Number(Date.now())}.pdf`
-    const doc = new PDFDocument({ autoFirstPage: false });
-    var buffers: Array<any> = [];
-    doc.on('data', buffers.push.bind(buffers));
-    doc.on('end', function () {
-        //https://github.com/foliojs/pdfkit/issues/728
-        //heapStats('Final memory on doc end');
-        fs.writeFileSync(pdfPathWithName, Buffer.concat(buffers));
-    });
-    doc.on("error", (err: any) => console.log("error" + err));
+    const doc = prepareDocument(pdfPath , `redundant${Number(Date.now())}.pdf`)
     doc.addPage();
     doc.text("redundant");
     doc.save()
@@ -59,17 +44,24 @@ export async function createRedundantPdf(pdfPath: string) {
     doc.end();
 }
 
-export async function createPdfFromDotSum(dotSumText: String, pdfDumpFolder: string) {
+export function prepareDocument(pdfPath: string, pdfName:string)
+{
+    if (!fs.existsSync(pdfPath)) {
+        fs.mkdirSync(pdfPath)
+    }
+    const pdfPathWithName = `${pdfPath}//${pdfName}`
     const doc = new PDFDocument({ autoFirstPage: false });
     var buffers: Array<any> = [];
     doc.on('data', buffers.push.bind(buffers));
     doc.on('end', function () {
-        //https://github.com/foliojs/pdfkit/issues/728
-        heapStats('Final memory on doc end');
-        fs.writeFileSync(`${pdfDumpFolder}//${SUM_FOLDER_NAME}`, Buffer.concat(buffers));
+        fs.writeFileSync(pdfPathWithName, Buffer.concat(buffers));
     });
     doc.on("error", (err: any) => console.log("error" + err));
-    
+    return doc
+}
+export async function createPdfFromDotSum(dotSumText: String, pdfDumpFolder: string) {
+    const doc = prepareDocument(pdfDumpFolder,DOT_SUM_PDF_NAME)
+
     const fontSize = calculateFontSize(DEFAULT_PDF_HEIGHT)
     const lines = dotSumText.split(/\r?\n/);
     const numberOfLines = Math.floor(DEFAULT_PDF_HEIGHT*0.009)
@@ -88,16 +80,8 @@ export async function createPdfFromDotSum(dotSumText: String, pdfDumpFolder: str
 }
 
 
-export async function pngToPdf(pngSrc: string, pdf: string, firstPageNeedingIntro = false) {
-    const doc = new PDFDocument({ autoFirstPage: false });
-    var buffers: Array<any> = [];
-    doc.on('data', buffers.push.bind(buffers));
-    doc.on('end', function () {
-        //https://github.com/foliojs/pdfkit/issues/728
-        heapStats('Final memory on doc end');
-        fs.writeFileSync(pdf, Buffer.concat(buffers));
-    });
-    doc.on("error", (err: any) => console.log("error" + err));
+export async function pngToPdf(pngSrc: string, pdfDumpFolder:string, pdfName: string, firstPageNeedingIntro = false) {
+    const doc = prepareDocument(pdfDumpFolder, pdfName);
     //console.log(`pngToPdf ${pngSrc} pdf ${pdf} firstPageNeedingIntro ${firstPageNeedingIntro}`)
     let img = doc.openImage(pngSrc);
     DEFAULT_PDF_WIDTH = img.width
@@ -150,58 +134,4 @@ function addFooter(doc: any) {
         align: 'center'
     })
     doc.page.margins.bottom = oldBottomMargin; // ReProtect bottom margin
-}
-
-function checkPageCountEqualsImgCount(doc: any, pdf: string, pngCount: number) {
-    const range = doc.bufferedPageRange();
-    const pdfPageCount = range.start - INTRO_PAGE_ADJUSTMENT;
-    if (pdfPageCount === pngCount) {
-        addReport(`${pdf}(${pngCount}) created with PageCount same as png count`)
-    }
-    else {
-        addReport(`***Error
-        Image Count (${pngCount}) and PDF Count (${pdfPageCount}) at variance by ${pngCount - pdfPageCount}
-        for  ${pdf} !!!`)
-    }
-    return pdfPageCount === pngCount
-}
-
-
-//https://stackoverflow.com/questions/23771085/how-to-pipe-a-stream-using-pdfkit-with-node-js
-export async function createPdfWithBuffer(pngSrc: string, dest: string) {
-    const _pngs = await getAllPngs(pngSrc);
-    const pdf = dest + "\\" + path.parse(pngSrc).name + PDF_EXT;
-    //console.log(`Creating pdf ${pdf} from ${path.parse(pngSrc).name}`);
-    const doc = new PDFDocument({ autoFirstPage: false, bufferPages: false });
-    var buffers: Array<any> = [];
-    doc.on('data', buffers.push.bind(buffers));
-    doc.on('end', function () {
-        //https://github.com/foliojs/pdfkit/issues/728
-        heapStats('Final memory');
-        fs.writeFileSync(pdf, Buffer.concat(buffers));
-    });
-    let garbageCollectCounter = 0;
-    let introPDFAdded = false;
-    heapStats('Starting memory');
-
-    for (let png of _pngs) {
-        let img = doc.openImage(png);
-        if (!introPDFAdded && ADD_INTRO_PDF) {
-            introPDFAdded = true;
-            addBanner(doc, img);
-        }
-        doc.addPage({ size: [img.width, img.height] });
-        doc.image(img, 0, 0)
-        addFooter(doc)
-        garbageCollectCounter++
-        if (garbageCollectCounter % 75 === 0 || garbageCollectCounter === _pngs.length) {
-            heapStats('before garbage collection');
-            garbageCollect()
-        }
-    }
-
-    // finalize the PDF and end the stream
-    doc.end();
-    console.log(`Created pdf from ${_pngs.length} Image Files: \n\t${pdf}`)
-    checkPageCountEqualsImgCount(doc, pdf, _pngs.length);
 }

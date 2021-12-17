@@ -53,12 +53,12 @@ async function exec(rootSrcFolders: Array<string>, destFolder: string) {
 
 async function execFixed() {
     const rootSrcFolders =  ["C:\\tmp\\expWithSmallFiles\\Kalidas"];//await getDirectoriesWithFullPath("C:\\tmp\\experiment")
-    const destFolder = "C:\\tmp\\expWithSmallFilesDest";
+    const destFolder = "C:\\tmp\\_x2";
     await exec(rootSrcFolders, destFolder);
 }
 
-//last used was  5/6/7/8
-execDynamic(8);
-//execFixed();
+//last used was 9/10/11
+//execDynamic(13);
+execFixed();
 
 
