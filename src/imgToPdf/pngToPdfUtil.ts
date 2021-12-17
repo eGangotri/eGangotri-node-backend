@@ -17,9 +17,8 @@ import { pngFolderName } from './utils/PngUtils';
  */
 export async function chunkPngs(pngPdfDumpFolder: string){
     const allPngs = await getAllPngs(pngPdfDumpFolder);
-    console.log(`allPngs ${allPngs}`)
     const chunkedPngs = chunk(allPngs, CHUNK_SIZE);
-    console.log(`chunkPngs to pngPdfDumpFolder ${pngPdfDumpFolder}`);
+    //console.log(`chunkPngs to pngPdfDumpFolder ${pngPdfDumpFolder}`);
 
     if (!fs.existsSync(pngPdfDumpFolder + PNG_SUB_FOLDER)) {
         fs.mkdirSync(pngPdfDumpFolder + PNG_SUB_FOLDER);

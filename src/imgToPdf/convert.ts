@@ -57,8 +57,8 @@ async function execFixed() {
     await exec(rootSrcFolders, destFolder);
 }
 
-//last used was 9/10/11
-//execDynamic(13);
-execFixed();
+//last used was 9/10/11/12/13(redo)
+execDynamic(13);
+//execFixed();
 
 
