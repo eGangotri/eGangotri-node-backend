@@ -53,13 +53,15 @@ async function exec(rootSrcFolders: Array<string>, destFolder: string) {
 }
 
 async function execFixed() {
-    const rootSrcFolders =  ["C:\\tmp\\expWithSmallFiles\\Kalidas"];//await getDirectoriesWithFullPath("C:\\tmp\\experiment")
-    const destFolder = "C:\\tmp\\_x2";
+    const rootSrcFolders = await getDirectoriesWithFullPath("E:\\ramtek-11_shortBy1")
+    const destFolder = "E:\\ramtek-11_shortBy1Dest";
     await exec(rootSrcFolders, destFolder);
 }
 
-//last used was 9/10/11/12/13(redo)
-execDynamic(13);
-//execFixed();
-
-
+//doing 14/15/16/17
+//execDynamic(17);
+execFixed();
+//E:\\ramtek-17_27-08-2019(13)
+//E:\\ramtek-18_28-08-2019(32)
+//E:\\ramtek-16_26-08-2019(15)
+//E:\\ramtek-15_23-08-2019(4)
