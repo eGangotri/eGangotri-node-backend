@@ -5,7 +5,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { CHUNK_SIZE, HANDLE_CHECKSUM, REDUNDANT_FOLDER } from '.';
 import { PDF_SUB_FOLDER, PNG_SUB_FOLDER } from './utils/constants';
-import { pngFolderName } from './utils/PngUtils';
+import { genPngFolderNameAndCreateIfNotExists } from './utils/PngUtils';
 
 
 /**
@@ -39,20 +39,20 @@ export async function chunkPngs(pngPdfDumpFolder: string){
 
 }
 
-export async function distributedLoadBasedPngToPdfConverter(tifSrcFolder: string, destFolder: string) {
-    const pngPdfDumpFolder = pngFolderName(tifSrcFolder, destFolder);
+export async function distributedLoadBasedPngToPdfConverter(pngPdfDumpFolder: string,
+     dotSumFiles:Array<string> = []) {
+    console.log(`pngPdfDumpFolder  ${pngPdfDumpFolder}`)
     if(HANDLE_CHECKSUM){
-        await handleDotSumFile(tifSrcFolder,pngPdfDumpFolder)
+        await handleDotSumFile(pngPdfDumpFolder,dotSumFiles)
     }
     await chunkPngs(pngPdfDumpFolder)
     await chunkedPngsToChunkedPdfs(pngPdfDumpFolder)
 }
 
-export async function handleDotSumFile(tifSrcFolder: string, pngPdfDumpFolder: string) {
-    const dotSumFile = await getAllDotSumFiles(tifSrcFolder);
-    if(dotSumFile?.length > 0){
-        const newDotSumFile = pngPdfDumpFolder + "//" + path.parse(dotSumFile[0]).name + path.parse(dotSumFile[0]).ext
-        fs.writeFileSync(newDotSumFile, fs.readFileSync(dotSumFile[0]));
+export async function handleDotSumFile( pngPdfDumpFolder: string, dotSumFiles:Array<string>) {
+    if(dotSumFiles?.length > 0){
+        const newDotSumFile = pngPdfDumpFolder + "//" + path.parse(dotSumFiles[0]).name + path.parse(dotSumFiles[0]).ext
+        fs.writeFileSync(newDotSumFile, fs.readFileSync(dotSumFiles[0]));
     }
 }
 

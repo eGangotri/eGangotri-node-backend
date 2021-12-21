@@ -80,9 +80,10 @@ export async function createPdfFromDotSum(dotSumText: String, pdfDumpFolder: str
 }
 
 
-export async function pngToPdf(pngSrc: string, pdfDumpFolder:string, pdfName: string, firstPageNeedingIntro = false) {
+export async function pngToPdf(pngSrc: string, pdfDumpFolder:string,
+     pdfName: string, firstPageNeedingIntro = false) {
     const doc = prepareDocument(pdfDumpFolder, pdfName);
-    //console.log(`pngToPdf ${pngSrc} pdf ${pdf} firstPageNeedingIntro ${firstPageNeedingIntro}`)
+    console.log(`pngToPdf ${pngSrc} pdfName ${pdfName} `)
     let img = doc.openImage(pngSrc);
     DEFAULT_PDF_WIDTH = img.width
     DEFAULT_PDF_HEIGHT = img.height

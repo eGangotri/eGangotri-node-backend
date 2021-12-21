@@ -11,10 +11,10 @@
     "exec": "ts-node ./src/exec/exec.ts",
     "tif2pdfOrig": "ts-node ./src/imgToPdf/convert.ts",
     "tif2pdf": "node -r ts-node/register ./src/imgToPdf/convert.ts",
-    "convert": "node -r ts-node/register --max-old-space-size=8192 --inspect --expose-gc ./src/imgToPdf/convert.ts",
-    "tally": "node -r ts-node/register --max-old-space-size=8192 --inspect --expose-gc ./src/imgToPdf/tally.ts",
-    "merge": "node -r ts-node/register --max-old-space-size=8192 --inspect --expose-gc ./src/imgToPdf/merge.ts",
-    "png2pdf": "node -r ts-node/register --max-old-space-size=8192 --inspect --expose-gc ./src/imgToPdf/pngToPdf.ts"
+    "convert": "node -r ts-node/register --max-old-space-size=2048 --inspect --expose-gc ./src/imgToPdf/convert.ts",
+    "tally": "node -r ts-node/register --max-old-space-size=2048 --inspect --expose-gc ./src/imgToPdf/tally.ts",
+    "merge": "node -r ts-node/register --max-old-space-size=2048 --inspect --expose-gc ./src/imgToPdf/merge.ts",
+    "png2pdf": "node -r ts-node/register --max-old-space-size=2048 --inspect --expose-gc ./src/imgToPdf/pngToPdf.ts"
   },
   "repository": {
     "type": "git",

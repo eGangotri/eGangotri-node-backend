@@ -1,8 +1,9 @@
-import { pngFolderName, tiftoPngs } from './utils/PngUtils';
-import { addReport } from './index';
+import { genPngFolderNameAndCreateIfNotExists, tiftoPngs } from './utils/PngUtils';
+import { addReport, HANDLE_CHECKSUM } from './index';
 import { getAllTifs } from './utils/ImgUtils';
 import * as fs from 'fs';
 import { distributedLoadBasedPngToPdfConverter } from './pngToPdfUtil';
+import { getAllDotSumFiles } from './utils/Utils';
 
 export async function tifToPdf(rootSrcFolder: string, destFolder: string) {
     if (!fs.existsSync(destFolder)) {
@@ -19,7 +20,10 @@ export async function tifToPdf(rootSrcFolder: string, destFolder: string) {
         let tifToPngStats = await tiftoPngs(rootSrcFolder, destFolder)
         if (tifToPngStats?.countMatch) {
             console.log("Tif->Png conversion Over with 100% Count Match");
-            await distributedLoadBasedPngToPdfConverter(rootSrcFolder, destFolder)
+            const pngPdfDumpFolder = genPngFolderNameAndCreateIfNotExists(rootSrcFolder, destFolder);
+            console.log(`pngPdfDumpFolder  ${pngPdfDumpFolder}`)
+            const dotSumFiles:Array<string> = HANDLE_CHECKSUM ? await getAllDotSumFiles(rootSrcFolder):[]
+            await distributedLoadBasedPngToPdfConverter(pngPdfDumpFolder,dotSumFiles)
         }
         else {
             const err = `Error!!!
