@@ -9,7 +9,8 @@ import { addReport, printReport } from '.';
 
 
 async function execDynamic(index:number) {
-    const FOLDERS = await getUploadableFolders("D:\\NMM\\August-2019", "E:\\");
+    const FOLDERS = await getUploadableFolders("D:\\NMM\\Oct-2019", "E:\\Oct-2019\\");
+    //const FOLDERS = await getUploadableFolders("D:\\NMM\\July-2019", "E:\\July-2019\\");
     console.log(FOLDERS)
     console.log(`This Run will convert tifs in Folder # ${index + 1} 
     ${FOLDERS[index].src} to 
@@ -53,15 +54,14 @@ async function exec(rootSrcFolders: Array<string>, destFolder: string) {
 }
 
 async function execFixed() {
-    const rootSrcFolders = await getDirectoriesWithFullPath("E:\\ramtek-11_shortBy1")
-    const destFolder = "E:\\ramtek-11_shortBy1Dest";
+    const rootSrcFolders = await getDirectoriesWithFullPath("E:\\July-2019\\ramtek-4_23-07-2019(13)_toForRecnvtAndMerge_M-1958 M-1945");
+    // await getDirectoriesWithFullPath("E:\\ramtek-11_shortBy1")
+    const destFolder = "E:\\July-2019\\ramtek-4_dest2";
     await exec(rootSrcFolders, destFolder);
+    //
 }
 
-//doing 14/15/16/17
-//execDynamic(17);
-execFixed();
-//E:\\ramtek-17_27-08-2019(13)
-//E:\\ramtek-18_28-08-2019(32)
-//E:\\ramtek-16_26-08-2019(15)
-//E:\\ramtek-15_23-08-2019(4)
+//Total 10 items so we needd to use 0-9
+//0-4 used. start 5 next time
+execDynamic(9);
+//execFixed();
