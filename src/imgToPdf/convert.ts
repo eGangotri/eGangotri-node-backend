@@ -6,10 +6,10 @@ import * as fs from 'fs';
 import { tifToPdf } from './TifToPdf';
 import * as path from 'path';
 import { addReport, printReport } from '.';
-
+import * as _ from 'lodash';
 
 async function execDynamic(index:number) {
-    const FOLDERS = await getUploadableFolders("D:\\NMM\\Oct-2019", "E:\\Oct-2019\\");
+    const FOLDERS = await getUploadableFolders("D:\\NMM\\Sep-2019", "E:\\Sep-2019\\");
     //const FOLDERS = await getUploadableFolders("D:\\NMM\\July-2019", "E:\\July-2019\\");
     console.log(FOLDERS)
     console.log(`This Run will convert tifs in Folder # ${index + 1} 
@@ -54,14 +54,22 @@ async function exec(rootSrcFolders: Array<string>, destFolder: string) {
 }
 
 async function execFixed() {
-    const rootSrcFolders = await getDirectoriesWithFullPath("E:\\July-2019\\ramtek-4_23-07-2019(13)_toForRecnvtAndMerge_M-1958 M-1945");
+    const rootSrcFolders = 
+    await getDirectoriesWithFullPath("E:\\tifReductionTest");
     // await getDirectoriesWithFullPath("E:\\ramtek-11_shortBy1")
-    const destFolder = "E:\\July-2019\\ramtek-4_dest2";
+    const destFolder = "E:\\tifReductionResult";
     await exec(rootSrcFolders, destFolder);
     //
 }
 
-//Total 10 items so we needd to use 0-9
-//0-4 used. start 5 next time
-execDynamic(9);
+//0-15
+async function execMultiple(_ranges:number[]){
+    for (const index of _ranges) {
+        console.log(`Processing index ${index}`);
+        await execDynamic(index);
+      }
+}
 //execFixed();
+//execMultiple(_.range(0,5));
+//execMultiple(_.range(5,10));
+//execMultiple(_.range(10,15));
