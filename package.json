@@ -38,6 +38,7 @@
     "csv-parser": "^3.0.0",
     "easy-pdf-merge": "^0.2.6",
     "express": "^4.17.1",
+    "lodash": "^4.17.21",
     "moment": "^2.29.1",
     "mongoose": "^5.11.7",
     "pdf-lib": "^1.17.1",
@@ -51,6 +52,7 @@
     "yarn": "^1.22.17"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.178",
     "ts-node": "^10.4.0"
   }
 }

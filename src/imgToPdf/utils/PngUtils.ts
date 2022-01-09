@@ -3,6 +3,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 const sharp = require("sharp");
 
+const PNG_QUALITY_REDUCTION = 30;
 export function genPngFolderNameAndCreateIfNotExists(src: string, dest: string) {
     const folderName = dest + "\\" + path.parse(src).name
     if (!fs.existsSync(folderName)) {
@@ -24,6 +25,7 @@ export async function tiftoPngs(tifSrc: string, dest: string) {
 async function tifToPng(tifFile: string, dest: string) {
     const tifFileName = dest + "\\" + path.parse(tifFile).name + ".png";
     const png = await sharp(tifFile)
-        .png()
+        .png({quality: PNG_QUALITY_REDUCTION})
         .toFile(tifFileName)
 }
+
