@@ -53,13 +53,12 @@ async function exec(rootSrcFolders: Array<string>, destFolder: string) {
     printReport();
 }
 
-async function execFixed() {
-    const rootSrcFolders = 
-    await getDirectoriesWithFullPath("E:\\tifReductionTest");
-    // await getDirectoriesWithFullPath("E:\\ramtek-11_shortBy1")
-    const destFolder = "E:\\tifReductionResult";
+async function execFixed(rootSrcFolder:string, destFolder:string = '') {
+    const rootSrcFolders = await getDirectoriesWithFullPath(rootSrcFolder)
+    if(!destFolder){
+        destFolder = rootSrcFolder + "_dest"
+    }
     await exec(rootSrcFolders, destFolder);
-    //
 }
 
 //0-15
@@ -69,8 +68,21 @@ async function execMultiple(_ranges:number[]){
         await execDynamic(index);
       }
 }
-//execFixed();
+//execFixed("E:\\_remaining\\ramtek-4_rem");
+//execFixed("E:\\_remaining\\ramtek-13_remaining");
+// execFixed("E:\\July-2019\\toUpload\\ramtek-6_rem");
+
+ const folderName = "E:\\Oct-2019\\toUpload\\" 
+
+//execFixed(`${folderName}\\r-3_rem`);
+ //execFixed(`${folderName}\\r-5_rem`);
+execFixed(`${folderName}\\r-6-rem`);
+ //execFixed(`${folderName}\\ramtek-1_rem`);
+//execFixed(`${folderName}\\ramtek-2_rem`);
+//execFixed(`${folderName}\\ramtek-9_rem`);
+// execFixed(`${folderName}\\ramtek-10_rem`);
+
 //execMultiple(_.range(0,5));
 //execMultiple(_.range(5,10));
 //execMultiple(_.range(10,15));
-execMultiple(_.range(15,16));
+//execMultiple(_.range(15,16));
