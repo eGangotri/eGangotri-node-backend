@@ -18,21 +18,24 @@ import { genPngFolderNameAndCreateIfNotExists } from './utils/PngUtils';
 export async function chunkPngs(pngPdfDumpFolder: string){
     const allPngs = await getAllPngs(pngPdfDumpFolder);
     const chunkedPngs = chunk(allPngs, CHUNK_SIZE);
-    //console.log(`chunkPngs to pngPdfDumpFolder ${pngPdfDumpFolder}`);
+    console.log(`allPngs ${allPngs}`);
+    console.log(`chunkPngs to pngPdfDumpFolder ${pngPdfDumpFolder} chunkedPngs 
+    ${chunkedPngs}`);
+
 
     if (!fs.existsSync(pngPdfDumpFolder + PNG_SUB_FOLDER)) {
         fs.mkdirSync(pngPdfDumpFolder + PNG_SUB_FOLDER);
     }
     let counter = 1;
     for (let _chunkedPngs of chunkedPngs) {
-        //console.log(`_chunkedPngFolder: ${_chunkedPngs.length}`);
+        console.log(`_chunkedPngFolder: ${_chunkedPngs.length}`);
         const newFolderForChunkedPngs = pngPdfDumpFolder + PNG_SUB_FOLDER + `-${counter++}`
         if (!fs.existsSync(newFolderForChunkedPngs)) {
             fs.mkdirSync(newFolderForChunkedPngs);
         }
         for (let _png of _chunkedPngs) {
             const newName = newFolderForChunkedPngs + "\\" + path.parse(_png).name + path.parse(_png).ext;
-            //console.log(`newName: ${newName}`);
+            console.log(`newName: ${newName}`);
             fs.renameSync(_png, newName);
         }
     }
