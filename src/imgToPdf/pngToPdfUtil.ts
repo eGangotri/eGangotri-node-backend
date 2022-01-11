@@ -5,7 +5,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { CHUNK_SIZE, HANDLE_CHECKSUM, REDUNDANT_FOLDER } from '.';
 import { PDF_SUB_FOLDER, PNG_SUB_FOLDER } from './utils/constants';
-import { genPngFolderNameAndCreateIfNotExists } from './utils/PngUtils';
+import { appendAlphaCodeForNum } from './utils/PngUtils';
 
 
 /**
@@ -26,10 +26,11 @@ export async function chunkPngs(pngPdfDumpFolder: string){
     if (!fs.existsSync(pngPdfDumpFolder + PNG_SUB_FOLDER)) {
         fs.mkdirSync(pngPdfDumpFolder + PNG_SUB_FOLDER);
     }
-    let counter = 1;
+    let counter = 0;
     for (let _chunkedPngs of chunkedPngs) {
         console.log(`_chunkedPngFolder: ${_chunkedPngs.length}`);
-        const newFolderForChunkedPngs = pngPdfDumpFolder + PNG_SUB_FOLDER + `-${counter++}`
+        counter++
+        const newFolderForChunkedPngs = pngPdfDumpFolder + PNG_SUB_FOLDER + `-${appendAlphaCodeForNum(counter)}`
         if (!fs.existsSync(newFolderForChunkedPngs)) {
             fs.mkdirSync(newFolderForChunkedPngs);
         }
@@ -70,18 +71,19 @@ export async function chunkedPngsToChunkedPdfs(pngPdfDumpFolder: string){
     let pngToPdfCounter = 0;
     while (pngToPdfCounter < chunkedPngsCount) {
         pngToPdfCounter++;
-        const newFolderForChunkedPdfs = `${_pdfs}-${pngToPdfCounter}`;
+        const alphaAppended = appendAlphaCodeForNum(pngToPdfCounter)
+        const newFolderForChunkedPdfs = `${_pdfs}-${alphaAppended}`;
         if (!fs.existsSync(newFolderForChunkedPdfs)) {
             fs.mkdirSync(newFolderForChunkedPdfs);
         }
         //console.log(`create pngToPdfCounter ${pngToPdfCounter}, chunkedPngsCount ${chunkedPngsCount}`);
-        await createPdf(`${_pngs}-${pngToPdfCounter}`,
-        `${_pdfs}-${pngToPdfCounter}`, pngToPdfCounter===1);
+        await createPdf(`${_pngs}-${alphaAppended}`,
+        `${newFolderForChunkedPdfs}`, pngToPdfCounter===1);
     }
     if(HANDLE_CHECKSUM){
         const dotSumFile =  await getAllDotSumFiles(pngPdfDumpFolder)
         if(dotSumFile?.length>0){
-            const lastPdfDumpFolder = `${_pdfs}-${pngToPdfCounter}`
+            const lastPdfDumpFolder = `${_pdfs}-${appendAlphaCodeForNum(pngToPdfCounter)}`
             await createPdfFromDotSum(fs.readFileSync(dotSumFile[0]).toString(),lastPdfDumpFolder);
         }
     }

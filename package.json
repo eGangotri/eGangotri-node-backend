@@ -14,7 +14,8 @@
     "convert": "node -r ts-node/register --max-old-space-size=2048 --inspect --expose-gc ./src/imgToPdf/convert.ts",
     "tally": "node -r ts-node/register --max-old-space-size=2048 --inspect --expose-gc ./src/imgToPdf/tally.ts",
     "merge": "node -r ts-node/register --max-old-space-size=2048 --inspect --expose-gc ./src/imgToPdf/merge.ts",
-    "png2pdf": "node -r ts-node/register --max-old-space-size=2048 --inspect --expose-gc ./src/imgToPdf/pngToPdf.ts"
+    "png2pdf": "node -r ts-node/register --max-old-space-size=2048 --inspect --expose-gc ./src/imgToPdf/pngToPdf.ts",
+    "alpha": "node -r ts-node/register ./src/imgToPdf/utils/PngUtils.ts"
   },
   "repository": {
     "type": "git",
