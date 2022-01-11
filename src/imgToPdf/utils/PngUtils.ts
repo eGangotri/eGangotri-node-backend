@@ -2,6 +2,7 @@ import { getAllPngs, getAllTifs } from "./ImgUtils";
 import * as path from 'path';
 import * as fs from 'fs';
 import { size } from "lodash";
+import { mkDirIfDoesntExists } from "./Utils";
 const sharp = require("sharp");
 
 const PNG_QUALITY_REDUCTION = 10;
@@ -30,16 +31,14 @@ function getAlphaOrdered(index:number) {
     return ALPHABETIC_ORDER[index];
 }
 
-export function genPngFolderNameAndCreateIfNotExists(src: string, dest: string) {
+export async function genPngFolderNameAndCreateIfNotExists(src: string, dest: string) {
     const folderName = dest + "\\" + path.parse(src).name
-    if (!fs.existsSync(folderName)) {
-        fs.mkdirSync(folderName);
-    }
+    await mkDirIfDoesntExists(folderName);
     return folderName;
 }
 export async function tiftoPngs(tifSrc: string, dest: string) {
     const tifs = await getAllTifs(tifSrc);
-    const folderForPngs = genPngFolderNameAndCreateIfNotExists(tifSrc, dest);
+    const folderForPngs = await genPngFolderNameAndCreateIfNotExists(tifSrc, dest);
 
     return Promise.all(tifs.map((tif) => tifToPng(tif, folderForPngs))).then(async () => {
         const pngCount = (await getAllPngs(folderForPngs)).length
