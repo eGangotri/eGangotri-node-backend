@@ -13,7 +13,7 @@ import { genPngFolderNameAndCreateIfNotExists } from "./utils/PngUtils";
 async function exec(rootFoldersForConversion: Array<string>, procChunkedPngs:boolean = true) {
     const rootFoldersForConversionCount = rootFoldersForConversion.length;
     const START_TIME = Number(Date.now())
-    addReport(`PngToPDF started for ${rootFoldersForConversionCount} folder(s) at ${new Date(START_TIME)}
+    addReport(`PngToPDF exec started for ${rootFoldersForConversionCount} folder(s) at ${new Date(START_TIME)}
     \t${rootFoldersForConversion.map((elem, index) => `(${index + 1}). ${elem}`).join("\n\t")}`)
     for (let rootFolder of rootFoldersForConversion) {
         try {

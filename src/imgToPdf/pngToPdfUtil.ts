@@ -16,6 +16,7 @@ import { appendAlphaCodeForNum } from './utils/PngUtils';
  * @returns 
  */
 export async function chunkPngs(pngPdfDumpFolder: string) {
+    let RENAME_FAILURE_MAP = new Map()
     const allPngs = await getAllPngs(pngPdfDumpFolder);
     const chunkedPngs = chunk(allPngs, CHUNK_SIZE);
     console.log(`allPngs ${allPngs}`);
@@ -24,25 +25,35 @@ export async function chunkPngs(pngPdfDumpFolder: string) {
 
     await mkDirIfDoesntExists(pngPdfDumpFolder + PNG_SUB_FOLDER);
 
-    return Promise.all(chunkedPngs.map((_chunkedPngs, index) => {
+    const _promises = chunkedPngs.map(async (_chunkedPngs, index) => {
         console.log(`_chunkedPngFolder: ${_chunkedPngs.length} ${index}`);
 
         const newFolderForChunkedPngs = pngPdfDumpFolder + PNG_SUB_FOLDER + `-${appendAlphaCodeForNum(index + 1)}`
-        fs.mkdir(newFolderForChunkedPngs, (err) => {
-            if (err) throw err;
-            for (let _png of _chunkedPngs) {
-                const newName = newFolderForChunkedPngs + "\\" + path.parse(_png).name + path.parse(_png).ext;
-                console.log(`newName: ${newName}`);
-                fs.rename(_png, newName, function (err) {
-                    if (err) console.log('ERROR in renaming: ' + err);
-                });
-            }
+        await mkDirIfDoesntExists(newFolderForChunkedPngs);
+        const _innerPromise = _chunkedPngs.map(_png => {
+            const newName = newFolderForChunkedPngs + "\\" + path.parse(_png).name + path.parse(_png).ext;
+            console.log(`newName: ${newName}`);
+            return fs.rename(_png, newName, function (err) {
+                if (err) {
+                    console.error('ERROR in renaming: ' + err);
+                    RENAME_FAILURE_MAP.set(_png, newName)
+                }
+            });
+            })
+            return await Promise.all(_innerPromise)
         });
-    })).then(() => {
-        console.log(`async chunking over`);
-        return {}
-    });
+    
+        await Promise.all(_promises)
+        console.log(`async chunking over. ${RENAME_FAILURE_MAP}`);
+        for (const [_png, newName] of RENAME_FAILURE_MAP.entries()) {
+            fs.rename(_png, newName, function (err) {
+                if (err) {
+                    console.error('RENAME_FAILURE_MAP ERROR in renaming: ' + err);
+                }
+            });
+        }
 }
+
 
 export async function distributedLoadBasedPngToPdfConverter(pngPdfDumpFolder: string,
     dotSumFiles: Array<string> = []) {
@@ -89,22 +100,21 @@ export async function chunkedPngsToChunkedPdfs(pngPdfDumpFolder: string) {
         // `${newFolderForChunkedPdfs}`, pngToPdfCounter===1);
     }
 
-    return Promise.all(alphaAppendedArray.map((alphaAppended, index) => {
-        createPdf(`${_pngs}-${alphaAppended}`, `${_pdfs}-${alphaAppended}`, index === 0)
-    }
-    )).then(async () => {
-        if (HANDLE_CHECKSUM) {
-            const dotSumFile = await getAllDotSumFiles(pngPdfDumpFolder)
-            if (dotSumFile?.length > 0) {
-                const lastPdfDumpFolder = `${_pdfs}-${appendAlphaCodeForNum(pngToPdfCounter)}`
-                await createPdfFromDotSum(fs.readFileSync(dotSumFile[0]).toString(), lastPdfDumpFolder);
-            }
-        }
-
-        //hack to force a flush
-        await createRedundantPdf(REDUNDANT_FOLDER);
+    const promises = alphaAppendedArray.map((alphaAppended, index) => {
+        return createPdf(`${_pngs}-${alphaAppended}`, `${_pdfs}-${alphaAppended}`, index === 0)
     });
 
+    await Promise.all(promises)
+    if (HANDLE_CHECKSUM) {
+        const dotSumFile = await getAllDotSumFiles(pngPdfDumpFolder)
+        if (dotSumFile?.length > 0) {
+            const lastPdfDumpFolder = `${_pdfs}-${appendAlphaCodeForNum(pngToPdfCounter)}`
+            await createPdfFromDotSum(fs.readFileSync(dotSumFile[0]).toString(), lastPdfDumpFolder);
+        }
+    }
+
+    //hack to force a flush
+    await createRedundantPdf(REDUNDANT_FOLDER);
 }
 
 export async function pngsToPdf(folderForPngs: string, destPdf: string) {
