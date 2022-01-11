@@ -8,7 +8,7 @@ import { chunk, garbageCollect, heapStats } from './Utils';
 import { ADD_INTRO_PDF, INTRO_PAGE_ADJUSTMENT } from '..';
 const PDFDocument = require('pdfkit');
 
-const DOT_SUM_PDF_NAME = "SUM.pdf"
+const DOT_SUM_PDF_NAME = "Z_SUM.pdf"
 let DEFAULT_PDF_WIDTH = 300
 let DEFAULT_PDF_HEIGHT = 500
 //https://pdfkit.org/docs/text.html
@@ -32,6 +32,11 @@ export async function createPdf(pngSrc: string, pdfDestFolder: string, firstPage
                 garbageCollect()
             }
         }
+        /*
+        return Promise.all( _pngs.slice(1).map((png) => pngToPdf(png, pdfDestFolder, path.parse(png).name + PDF_EXT))).then(async () => {
+            console.log(`pngToPdf call over for ${_pngs.length} `);
+        });
+        */
     }
 }
 export async function createRedundantPdf(pdfPath: string) {

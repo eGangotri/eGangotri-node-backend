@@ -76,12 +76,12 @@ async function execMultiple(_ranges:number[]){
 
 //execFixed(`${folderName}\\r-3_rem`);
  //execFixed(`${folderName}\\r-5_rem`);
-execFixed(`${folderName}\\r-6-rem`);
+//execFixed(`${folderName}\\r-6-rem`);
  //execFixed(`${folderName}\\ramtek-1_rem`);
 //execFixed(`${folderName}\\ramtek-2_rem`);
 //execFixed(`${folderName}\\ramtek-9_rem`);
 // execFixed(`${folderName}\\ramtek-10_rem`);
-
+execFixed(`E:\\tif2PDFSmallTest`);
 //execMultiple(_.range(0,5));
 //execMultiple(_.range(5,10));
 //execMultiple(_.range(10,15));
