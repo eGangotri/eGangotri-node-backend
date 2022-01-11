@@ -4,7 +4,7 @@ import * as path from 'path';
 import { addReport } from '../index';
 import { PDF_EXT } from './constants';
 import { FOOTER_LINK, FOOTER_TEXT, INTRO_BANNER, INTRO_TEXT, PDF_FONT } from './PdfDecoratorUtils';
-import { chunk, garbageCollect, heapStats } from './Utils';
+import { chunk, garbageCollect, heapStats, mkDirIfDoesntExists } from './Utils';
 import { ADD_INTRO_PDF, INTRO_PAGE_ADJUSTMENT } from '..';
 const PDFDocument = require('pdfkit');
 
@@ -13,14 +13,13 @@ let DEFAULT_PDF_WIDTH = 300
 let DEFAULT_PDF_HEIGHT = 500
 //https://pdfkit.org/docs/text.html
 export async function createPdf(pngSrc: string, pdfDestFolder: string, firstPageNeedingIntro = false) {
-    if (!fs.existsSync(pdfDestFolder)) {
-        fs.mkdirSync(pdfDestFolder);
-    }
+    await mkDirIfDoesntExists(pdfDestFolder);
+
     const _pngs = await getAllPngs(pngSrc);
     if (_pngs?.length) {
         let counter = 0;
         await pngToPdf(_pngs[0], pdfDestFolder, path.parse(_pngs[0]).name + PDF_EXT, firstPageNeedingIntro);
-
+/*
         for (let png of _pngs.slice(1)) {
             // console.log(`processing 
             // ${png} to
@@ -32,15 +31,20 @@ export async function createPdf(pngSrc: string, pdfDestFolder: string, firstPage
                 garbageCollect()
             }
         }
-        /*
-        return Promise.all( _pngs.slice(1).map((png) => pngToPdf(png, pdfDestFolder, path.parse(png).name + PDF_EXT))).then(async () => {
+        */
+
+        return Promise.all( _pngs.slice(1).map((png, index) => {
+            pngToPdf(png, pdfDestFolder, path.parse(png).name + PDF_EXT)
+            if (index % 75 === 0 || index === _pngs.length) {
+                garbageCollect()
+            }
+        })).then(async () => {
             console.log(`pngToPdf call over for ${_pngs.length} `);
         });
-        */
     }
 }
 export async function createRedundantPdf(pdfPath: string) {
-    const doc = prepareDocument(pdfPath , `redundant${Number(Date.now())}.pdf`)
+    const doc = await prepareDocument(pdfPath , `redundant${Number(Date.now())}.pdf`)
     doc.addPage();
     doc.text("redundant");
     doc.save()
@@ -49,23 +53,22 @@ export async function createRedundantPdf(pdfPath: string) {
     doc.end();
 }
 
-export function prepareDocument(pdfPath: string, pdfName:string)
+export async function prepareDocument(pdfPath: string, pdfName:string)
 {
-    if (!fs.existsSync(pdfPath)) {
-        fs.mkdirSync(pdfPath)
-    }
+    await mkDirIfDoesntExists(pdfPath);
+
     const pdfPathWithName = `${pdfPath}//${pdfName}`
     const doc = new PDFDocument({ autoFirstPage: false });
     var buffers: Array<any> = [];
     doc.on('data', buffers.push.bind(buffers));
     doc.on('end', function () {
-        fs.writeFileSync(pdfPathWithName, Buffer.concat(buffers));
+        fs.promises.writeFile(pdfPathWithName, Buffer.concat(buffers));
     });
     doc.on("error", (err: any) => console.log("error" + err));
     return doc
 }
 export async function createPdfFromDotSum(dotSumText: String, pdfDumpFolder: string) {
-    const doc = prepareDocument(pdfDumpFolder,DOT_SUM_PDF_NAME)
+    const doc = await prepareDocument(pdfDumpFolder,DOT_SUM_PDF_NAME)
 
     const fontSize = calculateFontSize(DEFAULT_PDF_HEIGHT)
     const lines = dotSumText.split(/\r?\n/);
@@ -87,7 +90,7 @@ export async function createPdfFromDotSum(dotSumText: String, pdfDumpFolder: str
 
 export async function pngToPdf(pngSrc: string, pdfDumpFolder:string,
      pdfName: string, firstPageNeedingIntro = false) {
-    const doc = prepareDocument(pdfDumpFolder, pdfName);
+    const doc = await prepareDocument(pdfDumpFolder, pdfName);
     console.log(`pngToPdf ${pngSrc} pdfName ${pdfName} `)
     let img = doc.openImage(pngSrc);
     DEFAULT_PDF_WIDTH = img.width

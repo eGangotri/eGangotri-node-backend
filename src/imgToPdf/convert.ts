@@ -1,6 +1,6 @@
 import {
     formatTime,
-    getDirectoriesWithFullPath, getUploadableFolders
+    getDirectoriesWithFullPath, getUploadableFolders, mkDirIfDoesntExists
 } from './utils/Utils';
 import * as fs from 'fs';
 import { tifToPdf } from './TifToPdf';
@@ -25,9 +25,8 @@ async function execDynamic(index:number) {
 }
 
 async function exec(rootSrcFolders: Array<string>, destFolder: string) {
-    if (!fs.existsSync(destFolder)) {
-        fs.mkdirSync(destFolder);
-    }
+    await mkDirIfDoesntExists(destFolder);
+
     const rootSrcFoldersCount = rootSrcFolders.length;
     const START_TIME = Number(Date.now())
     addReport(`TifToPDF started for ${rootSrcFoldersCount} folder(s) at ${new Date(START_TIME)}
