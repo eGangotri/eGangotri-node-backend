@@ -19,28 +19,14 @@ export async function createPdf(pngSrc: string, pdfDestFolder: string, firstPage
     if (_pngs?.length) {
         let counter = 0;
         await pngToPdf(_pngs[0], pdfDestFolder, path.parse(_pngs[0]).name + PDF_EXT, firstPageNeedingIntro);
-/*
-        for (let png of _pngs.slice(1)) {
-            // console.log(`processing 
-            // ${png} to
-            // ${pdf}
-            // `);
-            await pngToPdf(png, pdfDestFolder, path.parse(png).name + PDF_EXT);
-            counter++
-            if (counter % 75 === 0 || counter === _pngs.length) {
-                garbageCollect()
-            }
-        }
-        */
-
-        return Promise.all( _pngs.slice(1).map((png, index) => {
-            pngToPdf(png, pdfDestFolder, path.parse(png).name + PDF_EXT)
+        const _promises =  _pngs.slice(1).map((png, index) => {
             if (index % 75 === 0 || index === _pngs.length) {
                 garbageCollect()
             }
-        })).then(async () => {
-            console.log(`pngToPdf call over for ${_pngs.length} `);
+            return pngToPdf(png, pdfDestFolder, path.parse(png).name + PDF_EXT)
         });
+        await Promise.all(_promises)
+        console.log(`pngToPdf call over for ${_pngs.length} `);
     }
 }
 export async function createRedundantPdf(pdfPath: string) {
