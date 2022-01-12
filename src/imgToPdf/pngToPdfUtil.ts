@@ -3,9 +3,10 @@ import { chunk, formatTime, getAllDotSumFiles, getAllPdfsInFolders, getAllPngsIn
 import { getAllPngs } from './utils/ImgUtils';
 import * as fs from 'fs';
 import * as path from 'path';
-import { CHUNK_SIZE, HANDLE_CHECKSUM, REDUNDANT_FOLDER } from '.';
+import { CHUNK_SIZE, HANDLE_CHECKSUM, INTRO_PAGE_ADJUSTMENT, REDUNDANT_FOLDER } from '.';
 import { PDF_SUB_FOLDER, PNG_SUB_FOLDER } from './utils/constants';
 import { appendAlphaCodeForNum } from './utils/PngUtils';
+import { getPdfPageCount } from './utils/PdfUtil';
 
 
 /**
@@ -19,8 +20,7 @@ export async function chunkPngs(pngPdfDumpFolder: string) {
     let RENAME_FAILURE_MAP = new Map()
     const allPngs = await getAllPngs(pngPdfDumpFolder);
     const chunkedPngs = chunk(allPngs, CHUNK_SIZE);
-    console.log(`chunkPngs to pngPdfDumpFolder ${pngPdfDumpFolder} chunkedPngs 
-    ${chunkedPngs.length}`);
+    console.log(`pngs in ${pngPdfDumpFolder} dumped to ${chunkedPngs.length} folders`);
 
     await mkDirIfDoesntExists(pngPdfDumpFolder + PNG_SUB_FOLDER);
 
@@ -56,17 +56,19 @@ export async function distributedLoadBasedPngToPdfConverter(pngPdfDumpFolder: st
     if (HANDLE_CHECKSUM) {
         await handleDotSumFile(pngPdfDumpFolder, dotSumFiles)
     }
+    const origPngCount = (await getAllPngs(pngPdfDumpFolder)).length
+
     let START_TIME = Number(Date.now())
     await chunkPngs(pngPdfDumpFolder)
     let END_TIME = Number(Date.now())
     console.log(`Time Taken for chunkPngs ${formatTime(END_TIME - START_TIME)}`);
-    const pngCountCheck  = await testChunkPngsFileCountIsCorrect(pngPdfDumpFolder);
+    const pngCountCheck  = await testChunkPngsFileCountIsCorrect(pngPdfDumpFolder, origPngCount);
     if (pngCountCheck) {
         START_TIME = Number(Date.now())
         await chunkedPngsToChunkedPdfs(pngPdfDumpFolder)
         END_TIME = Number(Date.now())
         console.log(`Time Taken for chunkedPngsToChunkedPdfs ${formatTime(END_TIME - START_TIME)}`);
-        const pdfCountCheck = await testChunkPdfsFileCountIsCorrect(pngPdfDumpFolder);
+        const pdfCountCheck = await testChunkPdfsFileCountIsCorrect(pngPdfDumpFolder, origPngCount);
         if (!pdfCountCheck) {
             console.error("***** Fatal. ChunkedPngs has a Count Mismatch. Cant proceed")
         }
@@ -76,23 +78,21 @@ export async function distributedLoadBasedPngToPdfConverter(pngPdfDumpFolder: st
     }
 
 }
-async function testChunkPngsFileCountIsCorrect(pngPdfDumpFolder:string) {
+async function testChunkPngsFileCountIsCorrect(pngPdfDumpFolder:string, origPngCount:number) {
     const _pngs = pngPdfDumpFolder + PNG_SUB_FOLDER
     const _folders = (await getDirectoriesWithFullPath(_pngs)).filter(
         (dir:any) => !dir.match(/ignore/)
     );
     const pngsInFolders = await getAllPngsInFolders(_folders);
-    console.log(`pngsInFolders length = ${pngsInFolders.length}`)
-    return true
+    return pngsInFolders.length == origPngCount
 }
-async function testChunkPdfsFileCountIsCorrect(pngPdfDumpFolder:string) {
+async function testChunkPdfsFileCountIsCorrect(pngPdfDumpFolder:string, origPngCount:number) {
     const _pdfs = pngPdfDumpFolder + PDF_SUB_FOLDER
     const _folders = (await getDirectoriesWithFullPath(_pdfs)).filter(
         (dir:any) => !dir.match(/ignore/)
     );
     const pdfsInFolders = await getAllPdfsInFolders(_folders);
-    console.log(`pdfsInFolders length = ${pdfsInFolders.length}`)
-    return true;
+    return pdfsInFolders.length == origPngCount + INTRO_PAGE_ADJUSTMENT
 }
 
 export async function handleDotSumFile(pngPdfDumpFolder: string, dotSumFiles: Array<string>) {
