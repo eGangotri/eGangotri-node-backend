@@ -52,7 +52,7 @@ export async function chunkPngs(pngPdfDumpFolder: string) {
 
 export async function distributedLoadBasedPngToPdfConverter(pngPdfDumpFolder: string,
     dotSumFiles: Array<string> = []) {
-    console.log(`pngPdfDumpFolder  ${pngPdfDumpFolder}`)
+    console.log(`distributedLoadBasedPngToPdfConverter:pngPdfDumpFolder  ${pngPdfDumpFolder}`)
     if (HANDLE_CHECKSUM) {
         await handleDotSumFile(pngPdfDumpFolder, dotSumFiles)
     }
