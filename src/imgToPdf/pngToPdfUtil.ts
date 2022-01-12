@@ -25,25 +25,23 @@ export async function chunkPngs(pngPdfDumpFolder: string) {
 
     await mkDirIfDoesntExists(pngPdfDumpFolder + PNG_SUB_FOLDER);
 
-    const _outerPromises = chunkedPngs.map(async (_chunkedPngs, index) => {
-       // console.log(`_chunkedPngFolder: ${_chunkedPngs.length} ${index}`);
-
+    const promiseArrayFirst = chunkedPngs.map(async (_chunkedPngs, index) => {
+        //console.log(`_chunkedPngFolder: ${_chunkedPngs} ${index}`);
         const newFolderForChunkedPngs = pngPdfDumpFolder + PNG_SUB_FOLDER + `-${appendAlphaCodeForNum(index + 1)}`
-        await mkDirIfDoesntExists(newFolderForChunkedPngs);
-        const _innerPromise = _chunkedPngs.map(_png => {
+        return mkDirIfDoesntExists(newFolderForChunkedPngs);
+    });
+    await Promise.all(promiseArrayFirst)
+
+    const promiseArraySecond:Array<Promise<any>> = []
+    chunkedPngs.map((_chunkedPngs,index:number) => {
+        const newFolderForChunkedPngs = pngPdfDumpFolder + PNG_SUB_FOLDER + `-${appendAlphaCodeForNum(index + 1)}`
+        for(let _png of _chunkedPngs){
             const newName = newFolderForChunkedPngs + "\\" + path.parse(_png).name + path.parse(_png).ext;
             //console.log(`newName: ${newName}`);
-            return fs.rename(_png, newName, function (err) {
-                if (err) {
-                    console.error('ERROR in renaming: ' + err);
-                    RENAME_FAILURE_MAP.set(_png, newName)
-                }
-            });
-        })
-        return await Promise.all(_innerPromise)
-    });
-
-    await Promise.all(_outerPromises)
+            promiseArraySecond.push(fs.promises.rename(_png, newName))
+        }
+    })
+    await Promise.all(promiseArraySecond)
     console.log(`async png chunking over.  Rename Failure Count: ${RENAME_FAILURE_MAP.size}`);
     for (const [_png, newName] of RENAME_FAILURE_MAP.entries()) {
         await fs.promises.rename(_png, newName);
