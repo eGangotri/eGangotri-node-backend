@@ -24,7 +24,7 @@ export async function tifToPdf(rootSrcFolder: string, destFolder: string) {
         if (tifToPngStats?.countMatch) {
             console.log("Tif->Png conversion Over with 100% Count Match");
             const pngPdfDumpFolder = await genPngFolderNameAndCreateIfNotExists(rootSrcFolder, destFolder);
-            console.log(`pngPdfDumpFolder  ${pngPdfDumpFolder}`)
+            //console.log(`pngPdfDumpFolder  ${pngPdfDumpFolder}`)
             const dotSumFiles:Array<string> = HANDLE_CHECKSUM ? await getAllDotSumFiles(rootSrcFolder):[]
             await distributedLoadBasedPngToPdfConverter(pngPdfDumpFolder,dotSumFiles)
         }
