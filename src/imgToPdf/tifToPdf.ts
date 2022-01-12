@@ -3,7 +3,7 @@ import { addReport, HANDLE_CHECKSUM } from './index';
 import { getAllTifs } from './utils/ImgUtils';
 import * as fs from 'fs';
 import { distributedLoadBasedPngToPdfConverter } from './pngToPdfUtil';
-import { getAllDotSumFiles, mkDirIfDoesntExists } from './utils/Utils';
+import { formatTime, getAllDotSumFiles, mkDirIfDoesntExists } from './utils/Utils';
 
 export async function tifToPdf(rootSrcFolder: string, destFolder: string) {
     await mkDirIfDoesntExists(destFolder);
@@ -16,7 +16,11 @@ export async function tifToPdf(rootSrcFolder: string, destFolder: string) {
     console.log(`Converting ${tifCount} tifs from Folder \n\t${rootSrcFolder}  to pngs`)
 
     try {
+        const START_TIME = Number(Date.now())
         let tifToPngStats = await tiftoPngs(rootSrcFolder, destFolder)
+        const END_TIME = Number(Date.now())
+        console.log(`Tif2Png Time Taken ${formatTime(END_TIME - START_TIME)}`);
+
         if (tifToPngStats?.countMatch) {
             console.log("Tif->Png conversion Over with 100% Count Match");
             const pngPdfDumpFolder = await genPngFolderNameAndCreateIfNotExists(rootSrcFolder, destFolder);
