@@ -9,16 +9,16 @@ import { ADD_INTRO_PDF, INTRO_PAGE_ADJUSTMENT } from '..';
 const PDFDocument = require('pdfkit');
 
 const DOT_SUM_PDF_NAME = "Z_SUM.pdf"
-let DEFAULT_PDF_WIDTH = 300
-let DEFAULT_PDF_HEIGHT = 500
+let DEFAULT_PDF_WIDTH = 4000
+let DEFAULT_PDF_HEIGHT = 5000
 //https://pdfkit.org/docs/text.html
 export async function createPdf(pngSrc: string, pdfDestFolder: string, firstPageNeedingIntro = false) {
     await mkDirIfDoesntExists(pdfDestFolder);
 
     const _pngs = await getAllPngs(pngSrc);
     if (_pngs?.length) {
-        let counter = 0;
         await pngToPdf(_pngs[0], pdfDestFolder, path.parse(_pngs[0]).name + PDF_EXT, firstPageNeedingIntro);
+        
         const _promises =  _pngs.slice(1).map((png, index) => {
             if (index % 75 === 0 || index === _pngs.length) {
                 garbageCollect()
@@ -58,7 +58,7 @@ export async function createPdfFromDotSum(dotSumText: String, pdfDumpFolder: str
 
     const fontSize = calculateFontSize(DEFAULT_PDF_HEIGHT)
     const lines = dotSumText.split(/\r?\n/);
-    const numberOfLines = Math.floor(DEFAULT_PDF_HEIGHT*0.009)
+    const numberOfLines = Math.floor(DEFAULT_PDF_HEIGHT*0.008)
     const chunkedLines = chunk(lines, numberOfLines )
     for(let line of chunkedLines){
     const chunkedLineWithNewLine = line.map((x)=>`${x}\n`);

@@ -7,6 +7,7 @@ import { CHUNK_SIZE, HANDLE_CHECKSUM, INTRO_PAGE_ADJUSTMENT, REDUNDANT_FOLDER } 
 import { PDF_SUB_FOLDER, PNG_SUB_FOLDER } from './utils/constants';
 import { appendAlphaCodeForNum } from './utils/PngUtils';
 import { getPdfPageCount } from './utils/PdfUtil';
+import { isReturnStatement } from 'typescript';
 
 
 /**
@@ -84,7 +85,9 @@ async function testChunkPngsFileCountIsCorrect(pngPdfDumpFolder:string, origPngC
         (dir:any) => !dir.match(/ignore/)
     );
     const pngsInFolders = await getAllPngsInFolders(_folders);
-    return pngsInFolders.length == origPngCount
+    const countCheck =  pngsInFolders.length == origPngCount
+    console.error(`:testChunkPngsFileCountIsCorrect: (${pngsInFolders.length} == ${origPngCount}) == ${countCheck} `)
+    return countCheck
 }
 async function testChunkPdfsFileCountIsCorrect(pngPdfDumpFolder:string, origPngCount:number) {
     const _pdfs = pngPdfDumpFolder + PDF_SUB_FOLDER
@@ -92,7 +95,9 @@ async function testChunkPdfsFileCountIsCorrect(pngPdfDumpFolder:string, origPngC
         (dir:any) => !dir.match(/ignore/)
     );
     const pdfsInFolders = await getAllPdfsInFolders(_folders);
-    return pdfsInFolders.length == origPngCount + INTRO_PAGE_ADJUSTMENT
+    const countCheck = pdfsInFolders.length == origPngCount + INTRO_PAGE_ADJUSTMENT
+    console.error(`:testChunkPdfsFileCountIsCorrect: (${pdfsInFolders.length} == ${origPngCount + INTRO_PAGE_ADJUSTMENT}) == ${countCheck} `)
+    return countCheck
 }
 
 export async function handleDotSumFile(pngPdfDumpFolder: string, dotSumFiles: Array<string>) {
@@ -116,11 +121,7 @@ export async function chunkedPngsToChunkedPdfs(pngPdfDumpFolder: string) {
         const alphaAppended = appendAlphaCodeForNum(pngToPdfCounter)
         const newFolderForChunkedPdfs = `${_pdfs}-${alphaAppended}`;
         await mkDirIfDoesntExists(newFolderForChunkedPdfs);
-
         alphaAppendedArray.push(alphaAppended)
-        //console.log(`create pngToPdfCounter ${pngToPdfCounter}, chunkedPngsCount ${chunkedPngsCount}`);
-        // await createPdf(`${_pngs}-${alphaAppended}`,
-        // `${newFolderForChunkedPdfs}`, pngToPdfCounter===1);
     }
 
     const promises = alphaAppendedArray.map((alphaAppended, index) => {
