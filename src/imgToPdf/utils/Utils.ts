@@ -57,7 +57,8 @@ export const getAllPdfs = async (dir: string) => {
 export const getAllFilessInFoldersOfGivenType = async (dirs: Array<string>, _types:string) => {
      let pdfs = [];
      for(let dir of dirs){
-          pdfs.push( await getAllFilesOfGivenType(dir, [_types]));
+          const _file = await getAllFilesOfGivenType(dir, [_types])
+          pdfs.push(_file);
      }
      return pdfs.flat(1);
 }

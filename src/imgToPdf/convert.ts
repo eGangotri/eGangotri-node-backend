@@ -73,16 +73,9 @@ async function execMultiple(_ranges:number[]){
 
  const folderName = "E:\\Oct-2019\\toUpload\\" 
 
-//execFixed(`${folderName}\\r-3_rem`);
- //execFixed(`${folderName}\\r-5_rem`);
-//execFixed(`${folderName}\\r-6-rem`);
- //execFixed(`${folderName}\\ramtek-1_rem`);
-//execFixed(`${folderName}\\ramtek-2_rem`);
-//execFixed(`${folderName}\\ramtek-9_rem`);
-// execFixed(`${folderName}\\ramtek-10_rem`);
 //execFixed(`E:\\_tests\\tifLarge_test`); //E:\tif2PDFSmallTest
 //execFixed(`E:\\_tests\\tif2PDFSmallTest`); //E:\tif2PDFSmallTest
-execFixed(`E:\\_tests\\X`); //E:\tif2PDFSmallTest
+execFixed(`E:\\_tests\\sumTest`); //E:\tif2PDFSmallTest
 //execMultiple(_.range(0,5));
 //execMultiple(_.range(5,10));
 //execMultiple(_.range(10,15));
