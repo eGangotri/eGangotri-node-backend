@@ -80,7 +80,7 @@ async function execMultiple(_ranges:number[]){
 //execFixed(`${folderName}\\ramtek-2_rem`);
 //execFixed(`${folderName}\\ramtek-9_rem`);
 // execFixed(`${folderName}\\ramtek-10_rem`);
-execFixed(`E:\\tif2PDFSmallTest`);
+execFixed(`E:\\tifLarge_test`); //tifLarge
 //execMultiple(_.range(0,5));
 //execMultiple(_.range(5,10));
 //execMultiple(_.range(10,15));

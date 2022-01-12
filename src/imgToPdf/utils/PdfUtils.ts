@@ -26,7 +26,7 @@ export async function createPdf(pngSrc: string, pdfDestFolder: string, firstPage
             return pngToPdf(png, pdfDestFolder, path.parse(png).name + PDF_EXT)
         });
         await Promise.all(_promises)
-        console.log(`pngToPdf call over for ${_pngs.length} `);
+        //console.log(`pngToPdf call over for ${_pngs.length} `);
     }
 }
 export async function createRedundantPdf(pdfPath: string) {
@@ -77,7 +77,7 @@ export async function createPdfFromDotSum(dotSumText: String, pdfDumpFolder: str
 export async function pngToPdf(pngSrc: string, pdfDumpFolder:string,
      pdfName: string, firstPageNeedingIntro = false) {
     const doc = await prepareDocument(pdfDumpFolder, pdfName);
-    console.log(`pngToPdf ${pngSrc} pdfName ${pdfName} `)
+    //console.log(`pngToPdf ${pngSrc} pdfName ${pdfName} `)
     let img = doc.openImage(pngSrc);
     DEFAULT_PDF_WIDTH = img.width
     DEFAULT_PDF_HEIGHT = img.height

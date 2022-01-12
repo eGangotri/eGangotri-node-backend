@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 const v8 = require('v8');
 import * as path from 'path';
-import { PDF_EXT } from './constants';
+import { PDF_EXT, PNG_EXT } from './constants';
 
 export const getDirectories = async (source: string) => {
      const subDirs = await fs.promises.readdir(source, { withFileTypes: true })
@@ -54,12 +54,19 @@ export const getAllPdfs = async (dir: string) => {
      return await getAllFilesOfGivenType(dir, [PDF_EXT]);
 }
 
-export const getAllPdfsInFolders = async (dirs: Array<string>) => {
+export const getAllFilessInFoldersOfGivenType = async (dirs: Array<string>, _types:string) => {
      let pdfs = [];
      for(let dir of dirs){
-          pdfs.push( await getAllPdfs(dir));
+          pdfs.push( await getAllFilesOfGivenType(dir, [_types]));
      }
      return pdfs.flat(1);
+}
+
+export const getAllPdfsInFolders = async (dirs: Array<string>) => {
+     return getAllFilessInFoldersOfGivenType(dirs, PDF_EXT)
+}
+export const getAllPngsInFolders = async (dirs: Array<string>) => {
+     return getAllFilessInFoldersOfGivenType(dirs, PNG_EXT)
 }
 
 export const getAllDotSumFiles = async (dir: string) => {
@@ -126,10 +133,10 @@ export function garbageCollect() {
      if (global.gc) {
           global.gc();
           const after = getMemUsage();
-          console.log(`Mem Usage reduced approximately from 
-     \t${Math.round(before * 100) / 100} MB to
-     \t${Math.round(after * 100) / 100} MB 
-     \treleasing ${Math.round((before - after) * 100) / 100} MB `);
+     //      console.log(`Mem Usage reduced approximately from 
+     // \t${Math.round(before * 100) / 100} MB to
+     // \t${Math.round(after * 100) / 100} MB 
+     // \treleasing ${Math.round((before - after) * 100) / 100} MB `);
      }
 }
 
