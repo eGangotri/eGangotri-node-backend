@@ -14,13 +14,12 @@ async function tally(dirToTally: string, tallyType:number = 1) {
     }
     let targetCount = 0;
     if(tallyType === 1){
-      const targetCount = (await getDirectoriesWithFullPath(folder)).length;
+      targetCount = (await getDirectoriesWithFullPath(folder)).length;
     }
     else{
-      const targetCount = (await getAllPdfs(folder)).length;
-
+      targetCount = (await getAllPdfs(folder)).length;
     }
-    console.log(`targetCount ${targetCount} for Folder ${folder}`);
+    console.log(`Item Count ${targetCount} for Target Item ${folder}`);
     const tallyCheck = folderLengthFromTitle === targetCount
     if(tallyCheck){
         tallySuccessCount++
@@ -38,9 +37,10 @@ async function tally(dirToTally: string, tallyType:number = 1) {
   console.log(await Promise.all(tallyStats));
   console.log(`Taily Failure: ${tallyFailureCount}`);
   console.log(`Taily Success Count: ${tallySuccessCount}`);
-  console.log(` Is Success Count and No. fo Folders matching ${totalTallyableDirectoryCount=== tallySuccessCount?  "Yes Complete Success" : "!!!! FAILURES !!!!"}`)
+  console.log(` Is Success Count and No. of Target Items matching ${totalTallyableDirectoryCount=== tallySuccessCount?  "Yes Complete Success" : "!!!! FAILURES !!!!"}`)
 }
 
 const TALLY_FOR_FOLDERS = 1;
 const TALLY_FOR_PDFS = 2;
-tally("E:\\August-2019_reduced", TALLY_FOR_PDFS);
+//tally("C:\\tmp\\tallyTest", TALLY_FOR_PDFS);
+tally("C:\\tmp\\tallyTest", TALLY_FOR_FOLDERS);
