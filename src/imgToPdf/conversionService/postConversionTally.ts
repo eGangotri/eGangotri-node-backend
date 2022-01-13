@@ -1,4 +1,4 @@
-import { getAllFilesOfGivenType, getAllPdfs, getDirectories, getDirectoriesWithFullPath } from "./utils/Utils";
+import { getAllFilesOfGivenType, getAllPdfs, getDirectories, getDirectoriesWithFullPath } from "../utils/Utils";
 
 async function tally(dirToTally: string) {
   let tallyFailureCount = 0;
