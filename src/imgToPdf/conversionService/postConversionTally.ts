@@ -1,6 +1,6 @@
 import { getAllFilesOfGivenType, getAllPdfs, getDirectories, getDirectoriesWithFullPath } from "../utils/Utils";
 
-async function tally(dirToTally: string) {
+async function tally(dirToTally: string, tallyType:number = 1) {
   let tallyFailureCount = 0;
   let tallySuccessCount = 0; 
   const folders = await getDirectoriesWithFullPath(dirToTally);
@@ -12,10 +12,16 @@ async function tally(dirToTally: string) {
       folderLengthFromTitle = parseInt(tokens[1]);
       console.log(`folderLengthFromTitle ${folderLengthFromTitle} from ${folder}`);
     }
-    const subFolderCount = (await getDirectoriesWithFullPath(folder)).length;
-    console.log(`subFolderCount ${subFolderCount} for Folder ${folder}`);
+    let targetCount = 0;
+    if(tallyType === 1){
+      const targetCount = (await getDirectoriesWithFullPath(folder)).length;
+    }
+    else{
+      const targetCount = (await getAllPdfs(folder)).length;
 
-    const tallyCheck = folderLengthFromTitle === subFolderCount
+    }
+    console.log(`targetCount ${targetCount} for Folder ${folder}`);
+    const tallyCheck = folderLengthFromTitle === targetCount
     if(tallyCheck){
         tallySuccessCount++
     }
@@ -35,4 +41,6 @@ async function tally(dirToTally: string) {
   console.log(` Is Success Count and No. fo Folders matching ${totalTallyableDirectoryCount=== tallySuccessCount?  "Yes Complete Success" : "!!!! FAILURES !!!!"}`)
 }
 
-tally("E:\\August-2019_reduced");
+const TALLY_FOR_FOLDERS = 1;
+const TALLY_FOR_PDFS = 2;
+tally("E:\\August-2019_reduced", TALLY_FOR_PDFS);
