@@ -9,7 +9,8 @@ import { addReport, printReport } from '.';
 import * as _ from 'lodash';
 
 async function execDynamic(index:number) {
-    const FOLDERS = await getUploadableFolders("D:\\NMM\\Sep-2019", "E:\\Sep-2019\\");
+    const FOLDERS = await getUploadableFolders("D:\\NMM\\August-2019", "E:\\August-2019_reduced-15-20\\");
+    //const FOLDERS = await getUploadableFolders("D:\\NMM\\Sep-2019", "E:\\Sep-2019\\");
     //const FOLDERS = await getUploadableFolders("D:\\NMM\\July-2019", "E:\\July-2019\\");
     console.log(FOLDERS)
     console.log(`This Run will convert tifs in Folder # ${index + 1} 
@@ -67,16 +68,9 @@ async function execMultiple(_ranges:number[]){
         await execDynamic(index);
       }
 }
-//execFixed("E:\\_remaining\\ramtek-4_rem");
-//execFixed("E:\\_remaining\\ramtek-13_remaining");
 // execFixed("E:\\July-2019\\toUpload\\ramtek-6_rem");
-
- const folderName = "E:\\Oct-2019\\toUpload\\" 
-
-//execFixed(`E:\\_tests\\tifLarge_test`); //E:\tif2PDFSmallTest
-//execFixed(`E:\\_tests\\tif2PDFSmallTest`); //E:\tif2PDFSmallTest
-execFixed(`E:\\_tests\\sumTest`); //E:\tif2PDFSmallTest
+//21 Folders
 //execMultiple(_.range(0,5));
 //execMultiple(_.range(5,10));
-//execMultiple(_.range(10,15));
-//execMultiple(_.range(15,16));
+execMultiple(_.range(10,15));
+//execMultiple(_.range(15,20));
