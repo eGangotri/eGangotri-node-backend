@@ -11,7 +11,7 @@ async function tally(dirToTally: string) {
       folderLengthFromTitle = parseInt(tokens[1]);
       console.log(folderLengthFromTitle);
     }
-    const pdfCount = (await getAllPdfs(folder)).length;
+    const pdfCount = (await getAllPdfs(folder) ).length;
     const tallyCheck = folderLengthFromTitle  == pdfCount
     if(tallyCheck){
         tailySuccessCount++
