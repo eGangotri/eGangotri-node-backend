@@ -1,11 +1,11 @@
 import {
     formatTime,
     getDirectoriesWithFullPath, getUploadableFolders, mkDirIfDoesntExists
-} from './utils/Utils';
+} from '../utils/Utils';
 import * as fs from 'fs';
-import { tifToPdf } from './TifToPdf';
+import { tifToPdf } from '../TifToPdf';
 import * as path from 'path';
-import { addReport, printReport } from '.';
+import { addReport, printReport } from '..';
 import * as _ from 'lodash';
 
 async function execDynamic(index:number) {
