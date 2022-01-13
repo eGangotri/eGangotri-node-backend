@@ -9,9 +9,8 @@ import { addReport, printReport } from '..';
 import * as _ from 'lodash';
 
 async function execDynamic(index:number) {
-    const FOLDERS = await getUploadableFolders("D:\\NMM\\August-2019", "E:\\August-2019_reduced-15-20\\");
     //const FOLDERS = await getUploadableFolders("D:\\NMM\\Sep-2019", "E:\\Sep-2019\\");
-    //const FOLDERS = await getUploadableFolders("D:\\NMM\\July-2019", "E:\\July-2019\\");
+    const FOLDERS = await getUploadableFolders("D:\\NMM\\July-2019", "E:\\July-2019\\");
     console.log(FOLDERS)
     console.log(`This Run will convert tifs in Folder # ${index + 1} 
     ${FOLDERS[index].src} to 
@@ -70,7 +69,7 @@ async function execMultiple(_ranges:number[]){
 }
 // execFixed("E:\\July-2019\\toUpload\\ramtek-6_rem");
 //21 Folders
-//execMultiple(_.range(0,5));
+execMultiple(_.range(0,6));
 //execMultiple(_.range(5,10));
-execMultiple(_.range(10,15));
+//execMultiple(_.range(10,15));
 //execMultiple(_.range(15,20));

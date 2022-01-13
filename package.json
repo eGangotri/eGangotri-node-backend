@@ -9,17 +9,11 @@
     "start": "ts-node ./src/index.ts",
     "web-scrap": "ts-node ./src/downloadLinks.ts",
     "exec": "ts-node ./src/exec/exec.ts",
-    "tif2pdfOrig": "ts-node ./src/imgToPdf/convert.ts",
-    "tally": "node -r ts-node/register --max-old-space-size=2048 --inspect --expose-gc ./src/imgToPdf/tally.ts",
-    "merge": "node -r ts-node/register --max-old-space-size=2048 --inspect --expose-gc ./src/imgToPdf/merge.ts",
     "png2pdf": "node -r ts-node/register --max-old-space-size=2048 --inspect --expose-gc ./src/imgToPdf/pngToPdf.ts",
     "alpha": "node -r ts-node/register ./src/imgToPdf/utils/PngUtils.ts",
     "convert": "node -r ts-node/register --max-old-space-size=2048 --inspect --expose-gc ./src/imgToPdf/conversionService/convert.ts",
-    "tif2pdf": "node -r ts-node/register ./src/imgToPdf/conversionService/convert.ts",
     "tally-post-conversion": "node -r ts-node/register ./src/imgToPdf/conversionService/postConversionTally.ts",
     "move-merged-pdfs": "node -r ts-node/register ./src/imgToPdf/conversionService/moveMergedPdfs.ts"
-    
-
   },
   "repository": {
     "type": "git",
