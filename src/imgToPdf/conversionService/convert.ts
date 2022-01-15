@@ -67,9 +67,9 @@ async function execMultiple(_ranges:number[]){
         await execDynamic(index);
       }
 }
-// execFixed("E:\\July-2019\\toUpload\\ramtek-6_rem");
+ execFixed("E:\\_tests\\tif2PDFSmallTest");
 //21 Folders
-execMultiple(_.range(0,6));
+//execMultiple(_.range(0,6));
 //execMultiple(_.range(5,10));
 //execMultiple(_.range(10,15));
 //execMultiple(_.range(15,20));
