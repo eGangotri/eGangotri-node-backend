@@ -44,7 +44,7 @@ export async function getListOfItemsQueued(limit: number) {
 
 export async function getListOfItemsQueuedArrangedByProfile(limit: number) {
     const items = await getListOfItemsQueued(limit);
-    const groupedItems = _.groupBy(items, function(item){ return item.archiveProfile; });
+    const groupedItems = _.groupBy(items, function(item:any){ return item.archiveProfile; });
     console.log(`groupedItems ${JSON.stringify(groupedItems)}`);
     return groupedItems;
 }

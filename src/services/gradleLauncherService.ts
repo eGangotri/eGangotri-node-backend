@@ -2,7 +2,7 @@ import { exec, spawn } from 'child_process';
 import { WORKING_DIR } from '../common';
 
 
-export function launchUploader(args) {
+export function launchUploader(args:any) {
     console.log(`args ${args}`);
     if(!args){
         args = "C:\\Users\\Chetan Pandey\\Downloads\\forPrint"
