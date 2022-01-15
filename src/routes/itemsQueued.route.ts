@@ -42,7 +42,7 @@ itemsQueuedRoute.get('/listByProfile', async (req:any, resp:any) => {
 })
 
 function getLimit(res:any){
-    const limit = res.query.limit || "100"
+    const limit = res?.query?.limit || "100"
     console.log(`req.query ${JSON.stringify(res.query)} ${limit}`);
     return parseInt(limit);
 }
