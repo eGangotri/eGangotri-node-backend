@@ -13,6 +13,11 @@
     OR
     nodemon 
 
+    Start egangotri-react-frontend by running the following command
+    npm run start 
+    and viewing
+    http://localhost:3000/
+    
     ###Additional Softwares
     mongoose
 
