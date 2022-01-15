@@ -1,5 +1,8 @@
 import { getAllFilesOfGivenType, getAllPdfs, getDirectories, getDirectoriesWithFullPath } from "../utils/Utils";
 
+const TALLY_FOR_FOLDERS = 1;
+const TALLY_FOR_PDFS = 2;
+
 async function tally(dirToTally: string, tallyType:number = 1) {
   let tallyFailureCount = 0;
   let tallySuccessCount = 0; 
@@ -37,10 +40,22 @@ async function tally(dirToTally: string, tallyType:number = 1) {
   console.log(await Promise.all(tallyStats));
   console.log(`Taily Failure: ${tallyFailureCount}`);
   console.log(`Taily Success Count: ${tallySuccessCount}`);
-  console.log(` Is Success Count and No. of Target Items matching ${totalTallyableDirectoryCount=== tallySuccessCount?  "Yes Complete Success" : "!!!! FAILURES !!!!"}`)
+  console.log(` Is Success Count(${tallySuccessCount}) and No. of Target Items(${totalTallyableDirectoryCount}) matching ${totalTallyableDirectoryCount=== tallySuccessCount?  "Yes Complete Success" : "!!!! FAILURES !!!!"}`)
 }
 
-const TALLY_FOR_FOLDERS = 1;
-const TALLY_FOR_PDFS = 2;
+//Before Merge
+tally("E:\\July-2019", TALLY_FOR_FOLDERS);
+
+//After Merge
 //tally("C:\\tmp\\tallyTest", TALLY_FOR_PDFS);
-tally("C:\\tmp\\tallyTest", TALLY_FOR_FOLDERS);
+
+
+/**
+ * Steps:
+ * yarn convert
+ * yarn tally-post-conversion
+ * gradle merge(mega)
+ * gradle tally(mega)
+ * yarn move-merged-pdfs
+ * gradle uploadToArchive
+ */

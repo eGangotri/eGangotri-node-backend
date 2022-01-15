@@ -32,7 +32,7 @@ function getAlphaOrdered(index: number) {
 }
 
 export async function genPngFolderNameAndCreateIfNotExists(src: string, dest: string) {
-    const folderName = dest + "\\" + path.parse(src).name
+    const folderName = dest + "\\" + path.parse(src).base
     await mkDirIfDoesntExists(folderName);
     return folderName;
 }
