@@ -1,4 +1,4 @@
-import * as express from 'express';
+const express = require('express');
 import { itemsQueuedRoute } from './routes/itemsQueued.route'
 import { connectToMongo } from './services/dbService';
 import * as fs from 'fs';
@@ -10,14 +10,14 @@ const port = 4000;
 
 connectToMongo();
 
-app.use((req, res, next) => {
+app.use((req:any, res:any, next:any) => {
   res.append('Access-Control-Allow-Origin', ['*']);
   res.append('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
   res.append('Access-Control-Allow-Headers', 'Content-Type');
   next();
 });
 
-app.get('/', function (req, res) {
+app.get('/', function (req:any, res:any) {
   res.send('eGangotri-node-node-backend');
 })
 

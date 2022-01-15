@@ -51,7 +51,9 @@
     "yarn": "^1.22.17"
   },
   "devDependencies": {
+    "@types/express": "^4.17.13",
     "@types/lodash": "^4.14.178",
+    "@types/underscore": "^1.11.4",
     "ts-node": "^10.4.0"
   }
 }

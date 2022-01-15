@@ -4,10 +4,10 @@ import * as mongoose from 'mongoose';
 import { getListOfItemsQueued, getListOfItemsQueuedArrangedByProfile } from '../services/dbService';
 import { launchUploader } from '../services/gradleLauncherService';
 
-export const launchGradleRoute = new express.Router();
+export const launchGradleRoute =  express.Router();
 
 
-launchGradleRoute.get('/', async (req, resp) => {
+launchGradleRoute.get('/', async (req:any, resp:any) => {
     try {
         launchUploader(req.query.profiles)
         resp.status(200).send("Success");
