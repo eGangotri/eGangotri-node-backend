@@ -34,11 +34,12 @@
 
 ###Softwware No. 2. 
 ###NMM-Tiff-2-pdf
-yarn run convert
-yarn run tally-post-conversion
-gradle merge mega
-gradle tally mega
-yarn run move-merged-pdfs
-gradle uploadToArchive
+ * yarn run convert
+ * yarn run tally-post-conversion ( with TALLY_FOR_FOLDERS)
+ * gradle merge(mega)
+ * yarn run move-merged-pdfs
+ * yarn run tally-post-conversion ( with TALLY_FOR_PDFS )Checks Numbers of Items in Sync Only
+ * gradle tally(mega) ( checks pageCount corresponds to image count)
+ * gradle uploadToArchive
 
 
