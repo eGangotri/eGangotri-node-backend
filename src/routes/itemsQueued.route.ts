@@ -1,4 +1,4 @@
-import * as express from 'express';
+import express from 'express';
 import { ItemsQueued } from '../models/itemsQueued';
 import * as mongoose from 'mongoose';
 import { getListOfItemsQueued, getListOfItemsQueuedArrangedByProfile } from '../services/dbService';
