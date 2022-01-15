@@ -44,19 +44,7 @@ async function tally(dirToTally: string, tallyType:number = 1) {
 }
 
 //Before Merge
-//tally("E:\\July-2019", TALLY_FOR_FOLDERS);
+tally("E:\\July-2019_d", TALLY_FOR_FOLDERS);
 
 //After Merge
-tally("E:\\July-2019", TALLY_FOR_PDFS);
-
-
-/**
- * Steps:
- * yarn convert
- * yarn tally-post-conversion ( with TALLY_FOR_FOLDERS)
- * gradle merge(mega)
- * yarn move-merged-pdfs
- * yarn tally-post-conversion ( with TALLY_FOR_PDFS )Checks Numbers of Items in Sync Only
- * gradle tally(mega) ( checks pageCount corresponds to image count)
- * gradle uploadToArchive
- */
+//tally("E:\\July-2019", TALLY_FOR_PDFS);
