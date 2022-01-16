@@ -14,6 +14,7 @@ Install Mongo Shell
 Install Mongo Compass ( MONGODB comes with an option to install MONGO Compass so 
     this can be skipped)
     https://downloads.mongodb.com/compass/mongodb-compass-1.30.1-win32-x64.msi
+In MongoDB Compass create Collection 'archive_upload_monitor'
 
 Ref:
 
