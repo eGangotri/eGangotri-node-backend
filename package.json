@@ -5,7 +5,7 @@
   "main": "index.ts",
   "scripts": {
     "test": "npm test",
-    "flatfile-to-mongo": "ts-node ./src/tasks/flatfile-to-mongo.ts",
+    "flatfile-to-mongo": "ts-node ./src/tasks/flatfile-to-mongo.ts C:/tmp/failedUploadsFixing",
     "start": "ts-node ./src/index.ts",
     "web-scrap": "ts-node ./src/downloadLinks.ts",
     "exec": "ts-node ./src/exec/exec.ts",
@@ -54,6 +54,7 @@
     "@types/express": "^4.17.13",
     "@types/lodash": "^4.14.178",
     "@types/underscore": "^1.11.4",
+    "@types/uuid": "^8.3.4",
     "ts-node": "^10.4.0"
   }
 }
