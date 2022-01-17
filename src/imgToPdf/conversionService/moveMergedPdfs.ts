@@ -20,4 +20,4 @@ async function moveMergedPdfs(rootDir: string) {
 
 
 //E:\August-2019_reduced\ramtek-1_01-08-2019(19)\finalPdfsTmpLoc
-moveMergedPdfs("E:\\July-2019");
+moveMergedPdfs("E:\\Oct-2019");
