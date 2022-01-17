@@ -66,15 +66,13 @@ async function execFixed(rootSrcFolder:string, destFolder:string = '') {
     await exec(rootSrcFolders, destFolder);
 }
 
-//0-15
 async function execMultiple(_ranges:number[]){
     for (const index of _ranges) {
         console.log(`Processing index ${index} Range:(${_ranges})`);
-        //await execDynamic(index);
+        await execDynamic(index);
       }
 }
- //execFixed("E:\\_tests\\tif2PDFSmallTest");
-//16 Folders
+//execFixed("E:\\_tests\\tif2PDFSmallTest");
 //execMultiple(_.range(0,5));
 //execMultiple(_.range(5,10));
 //execMultiple(_.range(10,15));
