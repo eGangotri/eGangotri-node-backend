@@ -37,16 +37,17 @@ async function tally(dirToTally: string, tallyType:number = 1) {
     }
   });
 
+  const _tallType  = tallyType===TALLY_FOR_FOLDERS?"Folder Tally":"PDF Tally"
   console.log(await Promise.all(tallyStats));
-  console.log(`Taily Failure: ${tallyFailureCount}`);
-  console.log(`Taily Success Count: ${tallySuccessCount}`);
-  console.log(` Is Success Count(${tallySuccessCount}) and No. of Target Items(${totalTallyableDirectoryCount}) matching ${totalTallyableDirectoryCount=== tallySuccessCount?  "Yes Complete Success" : "!!!! FAILURES !!!!"}`)
+  console.log(`${_tallType} Failure(s): ${tallyFailureCount}`);
+  console.log(`${_tallType} Success Count: ${tallySuccessCount}`);
+  console.log(`${_tallType} Is Success Count(${tallySuccessCount}) and No. of Target Items(${totalTallyableDirectoryCount}) matching ${totalTallyableDirectoryCount=== tallySuccessCount?  "Yes Complete Success" : "!!!! FAILURES !!!!"}`)
 }
 
 //Before Merge
-tally("E:\\Oct-2019", TALLY_FOR_FOLDERS);
+tally("E:\\Sep-2019", TALLY_FOR_FOLDERS);
 
 //After Merge
-//tally("E:\\July-2019", TALLY_FOR_PDFS);
+//tally("E:\\Sep-2019", TALLY_FOR_PDFS);
 
 //yarn run tally-post-conversion
