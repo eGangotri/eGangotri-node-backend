@@ -44,7 +44,9 @@ async function tally(dirToTally: string, tallyType:number = 1) {
 }
 
 //Before Merge
-tally("E:\\July-2019_d", TALLY_FOR_FOLDERS);
+tally("E:\\Oct-2019", TALLY_FOR_FOLDERS);
 
 //After Merge
 //tally("E:\\July-2019", TALLY_FOR_PDFS);
+
+//yarn run tally-post-conversion

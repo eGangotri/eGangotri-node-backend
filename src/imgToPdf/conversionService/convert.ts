@@ -9,11 +9,16 @@ import { addReport, printReport } from '..';
 import * as _ from 'lodash';
 
 async function execDynamic(index:number) {
-    //const FOLDERS = await getUploadableFolders("D:\\NMM\\Sep-2019", "E:\\Sep-2019\\");
+    const FOLDERS = await getUploadableFolders("D:\\NMM\\Sep-2019", "E:\\Sep-2019\\");
     //const FOLDERS = await getUploadableFolders("D:\\NMM\\July-2019", "E:\\July-2019\\");
-    const FOLDERS = await getUploadableFolders("D:\\NMM\\Oct-2019", "E:\\Oct-2019\\");
+    //const FOLDERS = await getUploadableFolders("D:\\NMM\\Oct-2019", "E:\\Oct-2019\\");
+    if(FOLDERS.length <= index){
+        console.log(`Provided index ${index} is higher than 0-based Index of No. of Folders(${FOLDERS.length}). Quitting`);
+        process.exit(0);
+    }
     console.log(FOLDERS)
-    console.log(`This Run will convert tifs in Folder # ${index + 1} 
+    console.log(`This Run will convert tifs in Folder # ${index + 1}
+   
     ${FOLDERS[index].src} to 
     ${FOLDERS[index].dest}`);
 
@@ -64,13 +69,13 @@ async function execFixed(rootSrcFolder:string, destFolder:string = '') {
 //0-15
 async function execMultiple(_ranges:number[]){
     for (const index of _ranges) {
-        console.log(`Processing index ${index}`);
-        await execDynamic(index);
+        console.log(`Processing index ${index} Range:(${_ranges})`);
+        //await execDynamic(index);
       }
 }
  //execFixed("E:\\_tests\\tif2PDFSmallTest");
-//10 Folders
+//16 Folders
 //execMultiple(_.range(0,5));
-execMultiple(_.range(5,10));
+//execMultiple(_.range(5,10));
 //execMultiple(_.range(10,15));
-//execMultiple(_.range(15,20));
+execMultiple(_.range(15,16)); // didnr run this yet
