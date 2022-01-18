@@ -37,7 +37,8 @@ async function tally(dirToTally: string, tallyType:number = 1) {
     console.log(`Tally Check for ${folder} ${tallyCheck}`);
     return {
         folder,
-        tallyCheck
+        tallyCheck,
+        diff: folderLengthFromTitle - targetCount 
     }
   });
 
@@ -46,9 +47,9 @@ async function tally(dirToTally: string, tallyType:number = 1) {
   console.log(`TOTAL_NUMBER_OF_FOLDERS_HAVING_PDF_CREATIBLES: ${TOTAL_NUMBER_OF_FOLDERS_HAVING_PDF_CREATIBLES}`)
   console.log(`TOTAL_NUMBER_OF_TARGETS_GENERATED: ${TOTAL_NUMBER_OF_TARGETS_GENERATED}`)
   const targetItemCountDiff = TOTAL_NUMBER_OF_FOLDERS_HAVING_PDF_CREATIBLES-TOTAL_NUMBER_OF_TARGETS_GENERATED
-  console.log( "Target Item Creation Count",targetItemCountDiff=== 0? "Matches. Sucesss": `Short by ${targetItemCountDiff}. Failed`)
+  console.log(`Target Item Creation Count(${TOTAL_NUMBER_OF_FOLDERS_HAVING_PDF_CREATIBLES}==${TOTAL_NUMBER_OF_TARGETS_GENERATED})`,targetItemCountDiff=== 0? "Matches. Sucesss": `Short by ${targetItemCountDiff}. Failed`)
   
-  console.log(`${_tallType} Failure(s): ${tallyFailureCount}`);
+  console.log(`\n${_tallType} Failure(s): ${tallyFailureCount}`);
   console.log(`${_tallType} Success Count: ${tallySuccessCount}`);
   console.log(`${_tallType} Is Success Count(${tallySuccessCount}) and No. of Target Items(${totalTallyableDirectoryCount}) matching ${totalTallyableDirectoryCount=== tallySuccessCount?  "Yes Complete Success" : "!!!! FAILURES !!!!"}`)
 }
