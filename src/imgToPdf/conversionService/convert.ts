@@ -72,8 +72,22 @@ async function execMultiple(_ranges:number[]){
         await execDynamic(index);
       }
 }
-//execFixed("E:\\_tests\\tif2PDFSmallTest");
-//execMultiple(_.range(0,5));
-//execMultiple(_.range(5,10));
-//execMultiple(_.range(10,15));
-//execMultiple(_.range(15,16)); 
+execFixed("E:/Sep-2019_src2\\13-09-2019");
+//execMultiple(_.range(0,4));
+//execMultiple(_.range(4,8));
+////execMultiple(_.range(8,12));
+//execMultiple(_.range(12,17));
+
+/**
+ *  D:\NMM\Sep-2019\13-09-2019\M-592-Yajurveda Kram Path - Kavikulguru Kalidas Sanskrit University Ramtek Collection
+                 E:\Sep-2019\ramtek-10_13-09-2019(22)
+            Tiff Count(319) != Png Count(318) mismatch.
+ */
+
+            /**
+             * Error!!!
+                 D:\NMM\Sep-2019\21-09-2019\M-2267-Adhyatma Ramayan Arth Bodh - Kavikulguru Kalidas Sanskrit University Ramtek Collection
+                 E:\Sep-2019\ramtek-16_21-09-2019(4)
+            Tiff Count(938) != Png Count(937) mismatch.
+            Will not proceed
+             */

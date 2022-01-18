@@ -12,11 +12,19 @@ const alphabet = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L",
     "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"];
 
 export function appendAlphaCode(numericTitle: string) {
-    return appendAlphaCodeForNum(parseInt(numericTitle));
+    /***
+     * some file names are like 0000123A/ 000123B
+     */
+    let appendix = ""
+    if(numericTitle.endsWith("A") || numericTitle.endsWith("B") || numericTitle.endsWith("C")){
+        appendix  = numericTitle[numericTitle.length - 1]
+    }
+    const _codedVal =  appendAlphaCodeForNum(parseInt(numericTitle), appendix);
+    return _codedVal
 }
 
-export function appendAlphaCodeForNum(numericTitle: number) {
-    return (isNaN(numericTitle) ? '' : getAlphaOrdered(numericTitle) + "_") + numericTitle;
+export function appendAlphaCodeForNum(numericTitle: number, appendix:string = '') {
+    return (isNaN(numericTitle) ? '' : getAlphaOrdered(numericTitle) + "_") + numericTitle + appendix;
 }
 function getAlphaOrdered(index: number) {
     if (ALPHABETIC_ORDER.length === 0) {
