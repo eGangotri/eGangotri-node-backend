@@ -22,7 +22,7 @@ export async function tifToPdf(rootSrcFolder: string, destFolder: string) {
         console.log(`Tif2Png Time Taken ${formatTime(END_TIME - START_TIME)}`);
 
         if (tifToPngStats?.countMatch) {
-            console.log("Tif->Png conversion Over with 100% Count Match");
+            //console.log("Tif->Png conversion Over with 100% Count Match");
             const pngPdfDumpFolder = await genPngFolderNameAndCreateIfNotExists(rootSrcFolder, destFolder);
             //console.log(`pngPdfDumpFolder  ${pngPdfDumpFolder}`)
             const dotSumFiles:Array<string> = HANDLE_CHECKSUM ? await getAllDotSumFiles(rootSrcFolder):[]
