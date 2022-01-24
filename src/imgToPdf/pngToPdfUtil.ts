@@ -42,7 +42,7 @@ export async function chunkPngs(pngPdfDumpFolder: string) {
         }
     })
     await Promise.all(promiseArraySecond)
-    console.log(`async png chunking over.  Rename Failure Count: ${RENAME_FAILURE_MAP.size}`);
+    //console.log(`async png chunking over.  Rename Failure Count: ${RENAME_FAILURE_MAP.size}`);
     for (const [_png, newName] of RENAME_FAILURE_MAP.entries()) {
         await fs.promises.rename(_png, newName);
     }
@@ -84,7 +84,7 @@ async function testChunkPngsFileCountIsCorrect(pngPdfDumpFolder:string, origPngC
     );
     const pngsInFolders = await getAllPngsInFolders(_folders);
     const countCheck =  pngsInFolders.length == origPngCount
-    console.error(`:testChunkPngsFileCountIsCorrect: (${pngsInFolders.length} == ${origPngCount}) == ${countCheck} `)
+    //console.log(`:testChunkPngsFileCountIsCorrect: (${pngsInFolders.length} == ${origPngCount}) == ${countCheck} `)
     return countCheck
 }
 async function testChunkPdfsFileCountIsCorrect(pngPdfDumpFolder:string, origPngCount:number) {
@@ -94,7 +94,7 @@ async function testChunkPdfsFileCountIsCorrect(pngPdfDumpFolder:string, origPngC
     );
     const pdfsInFolders = await getAllPdfsInFolders(_folders);
     const countCheck = pdfsInFolders.length == origPngCount + INTRO_PAGE_ADJUSTMENT
-    console.error(`:testChunkPdfsFileCountIsCorrect: (${pdfsInFolders.length} == ${origPngCount + INTRO_PAGE_ADJUSTMENT}) == ${countCheck} `)
+    console.log(`:testChunkPdfsFileCountIsCorrect: (${pdfsInFolders.length} == ${origPngCount + INTRO_PAGE_ADJUSTMENT}) == ${countCheck} `)
     return countCheck
 }
 

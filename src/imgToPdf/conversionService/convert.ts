@@ -8,8 +8,8 @@ import * as path from 'path';
 import { addReport, printReport } from '..';
 import * as _ from 'lodash';
 
-async function execDynamic(index:number) {
-    const FOLDERS = await getUploadableFolders("D:\\NMM\\Sep-2019", "E:\\Sep-2019\\");
+async function execDynamic(index:number, nmmFolder:string, localFolder:string) {
+    const FOLDERS = await getUploadableFolders(nmmFolder, localFolder + "\\");
     //const FOLDERS = await getUploadableFolders("D:\\NMM\\July-2019", "E:\\July-2019\\");
     //const FOLDERS = await getUploadableFolders("D:\\NMM\\Oct-2019", "E:\\Oct-2019\\");
     if(FOLDERS.length <= index){
@@ -44,7 +44,9 @@ async function exec(rootSrcFolders: Array<string>, destFolder: string) {
             addReport(`${++execCounter} of ${rootSrcFoldersCount}) ${rootSrcFolder} -> ${destFolder}`)
             await tifToPdf(rootSrcFolder, destFolder);
             const END_TIME = Number(Date.now())
-            console.log(`tifToPdf for ${path.parse(rootSrcFolder).name} -> ${path.parse(destFolder).name} ended at ${new Date(END_TIME)}.
+            console.log(`tifToPdf for 
+            ${path.parse(rootSrcFolder).name} ->
+            ${path.parse(destFolder).name} ended at ${new Date(END_TIME)}.
             \nTotal Time Taken for converting
             ${path.parse(rootSrcFolder).name} -> ${path.parse(destFolder).name}
             ${formatTime(END_TIME - START_TIME)}`);
@@ -66,28 +68,18 @@ async function execFixed(rootSrcFolder:string, destFolder:string = '') {
     await exec(rootSrcFolders, destFolder);
 }
 
-async function execMultiple(_ranges:number[]){
+async function execMultiple(_ranges:number[], nmmFolder:string, localFolder:string){
     for (const index of _ranges) {
         console.log(`Processing index ${index} Range:(${_ranges})`);
-        await execDynamic(index);
+        await execDynamic(index, nmmFolder, localFolder);
       }
 }
-execFixed("E:/Sep-2019_src2\\13-09-2019");
-//execMultiple(_.range(0,4));
-//execMultiple(_.range(4,8));
-////execMultiple(_.range(8,12));
-//execMultiple(_.range(12,17));
+//execFixed("E:/Sep-2019_src\\21-09-2019");
+//const mmYYYY = "Dec-2019"
+const mmYYYY = "Feb-2020"
 
-/**
- *  D:\NMM\Sep-2019\13-09-2019\M-592-Yajurveda Kram Path - Kavikulguru Kalidas Sanskrit University Ramtek Collection
-                 E:\Sep-2019\ramtek-10_13-09-2019(22)
-            Tiff Count(319) != Png Count(318) mismatch.
- */
-
-            /**
-             * Error!!!
-                 D:\NMM\Sep-2019\21-09-2019\M-2267-Adhyatma Ramayan Arth Bodh - Kavikulguru Kalidas Sanskrit University Ramtek Collection
-                 E:\Sep-2019\ramtek-16_21-09-2019(4)
-            Tiff Count(938) != Png Count(937) mismatch.
-            Will not proceed
-             */
+const _nmm = `D:/NMM/${mmYYYY}`
+const _local = `E:/${mmYYYY}`
+// execMultiple(_.range(0,4), _nmm, _local);
+// execMultiple(_.range(4,8), _nmm, _local);
+// execMultiple(_.range(8,10), _nmm, _local);
