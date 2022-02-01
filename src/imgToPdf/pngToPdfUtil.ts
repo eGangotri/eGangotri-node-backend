@@ -94,7 +94,7 @@ async function testChunkPdfsFileCountIsCorrect(pngPdfDumpFolder:string, origPngC
     );
     const pdfsInFolders = await getAllPdfsInFolders(_folders);
     const countCheck = pdfsInFolders.length == origPngCount + INTRO_PAGE_ADJUSTMENT
-    console.log(`:testChunkPdfsFileCountIsCorrect: (${pdfsInFolders.length} == ${origPngCount + INTRO_PAGE_ADJUSTMENT}) == ${countCheck} `)
+    //console.log(`:testChunkPdfsFileCountIsCorrect: (${pdfsInFolders.length} == ${origPngCount + INTRO_PAGE_ADJUSTMENT}) == ${countCheck} `)
     return countCheck
 }
 

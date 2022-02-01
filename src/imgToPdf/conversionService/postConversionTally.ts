@@ -55,11 +55,12 @@ async function tally(dirToTally: string, tallyType:number = 1) {
 }
 
 //Before Merge
-const mmYYYY = "Jan-2020"
+const mmYYYY = "May-2020"
 const _nmm = `D:/NMM/${mmYYYY}`
-const _local = `E:/NMM-2/${mmYYYY}`
+//const _local = `E:/NMM-2/${mmYYYY}`
+const _local = `E:/${mmYYYY}`
 
-tally(_local, TALLY_FOR_FOLDERS);
+//tally(_local, TALLY_FOR_FOLDERS);
 
 //After Merge
 tally(_local, TALLY_FOR_PDFS);
