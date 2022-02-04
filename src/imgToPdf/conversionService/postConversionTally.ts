@@ -4,10 +4,20 @@ const TALLY_FOR_FOLDERS = 1;
 const TALLY_FOR_PDFS = 2;
 let  TOTAL_NUMBER_OF_FOLDERS_HAVING_PDF_CREATIBLES = 0
 let  TOTAL_NUMBER_OF_TARGETS_GENERATED = 0
+let FOLDER_COUNT_EQUALS_GENERATED_FOLDERS = false
 async function tally(dirToTally: string, tallyType:number = 1) {
   let tallyFailureCount = 0;
   let tallySuccessCount = 0; 
   const folders = await getDirectoriesWithFullPath(dirToTally);
+
+  let dirToTallySubFolderCountFromTitle = parseInt(dirToTally.split("(")[1]);
+  if(dirToTallySubFolderCountFromTitle !== folders.length){
+    console.log(`Folder Count ${folders.length} not same as ${dirToTallySubFolderCountFromTitle}`);
+  }
+  else{
+    FOLDER_COUNT_EQUALS_GENERATED_FOLDERS = true
+  }
+
   let totalTallyableDirectoryCount = folders.length; 
   let tallyStats = folders.map(async (folder) => {
     const tokens = folder.split("(");
@@ -52,17 +62,18 @@ async function tally(dirToTally: string, tallyType:number = 1) {
   console.log(`\n${_tallType} Failure(s): ${tallyFailureCount}`);
   console.log(`${_tallType} Success Count: ${tallySuccessCount}`);
   console.log(`${_tallType} Is Success Count(${tallySuccessCount}) and No. of Target Items(${totalTallyableDirectoryCount}) matching ${totalTallyableDirectoryCount=== tallySuccessCount?  "Yes Complete Success" : "!!!! FAILURES !!!!"}`)
+  console.log(`FOLDER_COUNT_EQUALS_GENERATED_FOLDERS: ${FOLDER_COUNT_EQUALS_GENERATED_FOLDERS}`);
 }
 
 //Before Merge
-const mmYYYY = "May-2020"
+const mmYYYY = "July-2020"
 const _nmm = `D:/NMM/${mmYYYY}`
 //const _local = `E:/NMM-2/${mmYYYY}`
 const _local = `E:/${mmYYYY}`
 
-//tally(_local, TALLY_FOR_FOLDERS);
+tally(_local, TALLY_FOR_FOLDERS);
 
 //After Merge
-tally(_local, TALLY_FOR_PDFS);
+//tally(_local, TALLY_FOR_PDFS);
 
 //yarn run tally-post-conversion
