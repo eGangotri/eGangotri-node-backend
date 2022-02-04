@@ -36,5 +36,5 @@ async function moveMergedPdfs(rootDir: string) {
 }
 
 //E:\August-2019_reduced\ramtek-1_01-08-2019(19)\finalPdfsTmpLoc
-moveMergedPdfs("E:\\May-2020");
+moveMergedPdfs("E:\\June-2020");
 //yarn run  move-merged-pdfs
