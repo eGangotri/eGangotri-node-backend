@@ -1,22 +1,23 @@
 import { getAllFilesOfGivenType, getAllPdfs, getDirectories, getDirectoriesWithFullPath } from "../utils/Utils";
+import * as path from 'path';
 
 const TALLY_FOR_FOLDERS = 1;
 const TALLY_FOR_PDFS = 2;
 let TOTAL_NUMBER_OF_FOLDERS_HAVING_PDF_CREATIBLES = 0
 let TOTAL_NUMBER_OF_TARGETS_GENERATED = 0
 let FOLDER_COUNT_EQUALS_GENERATED_FOLDERS_OR_PDFS = false;
-
-async function tally(dirToTally: string, tallyType: number = 1) {
+//doesnt refer to NMM. only local
+async function tally(dirToTally: string,  tallyType: number = 1) {
   let tallyFailureCount = 0;
   let tallySuccessCount = 0;
   const folders = await getDirectoriesWithFullPath(dirToTally);
 
-  let dirToTallySubFolderCountFromTitle = parseInt(dirToTally.split("(")[1]);
+  let dirToTallySubFolderCountFromTitle = parseInt(path.parse(dirToTally).name.split("(")[1]);
  
 
   let totalTallyableDirectoryCount = folders.length;
   let tallyStats = folders.map(async (folder) => {
-    const tokens = folder.split("(");
+    const tokens = path.parse(folder).name.split("(");
     let folderLengthFromTitle = -1
     if (tokens && tokens.length === 2) {
       folderLengthFromTitle = parseInt(tokens[1]);
@@ -69,10 +70,10 @@ async function tally(dirToTally: string, tallyType: number = 1) {
 }
 
 //Before Merge
-const mmYYYY = "July-2020"
+const mmYYYY = "June-2020"
 const _nmm = `D:/NMM/${mmYYYY}`
 //const _local = `E:/NMM-2/${mmYYYY}`
-const _local = `E:/${mmYYYY}`
+const _local = `E:/${mmYYYY}_(21)` 
 
 tally(_local, TALLY_FOR_FOLDERS);
 

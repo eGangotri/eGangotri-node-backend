@@ -5,10 +5,10 @@ import * as fs from 'fs';
 
 async function moveMergedPdfs(rootDir: string) {
   const discardableFolder = `${rootDir}_disc_`
-  const tmpFolder = `${rootDir}_tmp_`
-  await mkDirIfDoesntExists(tmpFolder);
+  const pdfFolder = `${rootDir}_pdf_`
+  await mkDirIfDoesntExists(pdfFolder);
   await mkDirIfDoesntExists(discardableFolder);
-  renamers(rootDir,tmpFolder);
+  renamers(rootDir,pdfFolder);
   console.log(`01`);
   //Since 
   // fs.renameSync(rootDir, discardableFolder)
@@ -16,19 +16,19 @@ async function moveMergedPdfs(rootDir: string) {
   //;
   // renamers(rootDir,discardableFolder);
   // console.log(`12`);
-  //  // also fails fs.renameSync(tmpFolder, rootDir)
-  //  renamers(tmpFolder, rootDir);
+  //  // also fails fs.renameSync(pdfFolder, rootDir)
+  //  renamers(pdfFolder, rootDir);
 
   console.log(`Shifted all Pdfs to be under ${rootDir}. unwanted files dumped to ${discardableFolder}`);
 
 }
 
- const renamers = async (rootDir:string, tmpFolder:string) =>{
+ const renamers = async (rootDir:string, pdfFolder:string) =>{
   const folders = await getDirectories(rootDir);
   let renamingPromises = folders.map(async (folder) => {
   const srcPdfFolder = `${rootDir}\\${folder}\\${FINAL_PDF_LOC}`
-  const destFolderName = `${tmpFolder}\\${folder}`
-  await mkDirIfDoesntExists(tmpFolder);
+  const destFolderName = `${pdfFolder}\\${folder}`
+  await mkDirIfDoesntExists(pdfFolder);
   console.log(`renaming ${srcPdfFolder} -> ${destFolderName}`);
   return fs.promises.rename(srcPdfFolder, destFolderName)
   });

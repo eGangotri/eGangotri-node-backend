@@ -26,7 +26,7 @@ async function execDynamic(index:number, nmmFolder:string, localFolder:string) {
     console.log(rootSrcFolders)
     console.log(dest)
     try {
-        //await exec(rootSrcFolders, dest)
+        await exec(rootSrcFolders, dest)
     }
     catch(e){
         console.log("error",e);
