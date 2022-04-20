@@ -55,3 +55,13 @@ Ref:
  * yarn run tally-post-conversion ( with TALLY_FOR_PDFS )Checks Numbers of Items in Sync Only
  * gradle tally(mega) ( checks pageCount corresponds to image count)
  * gradle uploadToArchive
+
+
+
+## Docker
+docker build . -t egangotri/egangotri-node-backend
+docker run -d -p 8080:80  egangotri/egangotri-node-backend:latest
+docker login
+docker push  egangotri/egangotri-node-backend
+
+http://ip_address:80/
