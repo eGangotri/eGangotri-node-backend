@@ -8,13 +8,11 @@ import * as path from 'path';
 import { addReport, printReport } from '..';
 import * as _ from 'lodash';
 
-async function execDynamic(index:number) {
-    const FOLDERS = await getUploadableFolders("D:\\NMM\\Sep-2019", "E:\\Sep-2019\\");
-    //const FOLDERS = await getUploadableFolders("D:\\NMM\\July-2019", "E:\\July-2019\\");
-    //const FOLDERS = await getUploadableFolders("D:\\NMM\\Oct-2019", "E:\\Oct-2019\\");
+async function execDynamic(index:number, nmmFolder:string, localFolder:string) {
+    const FOLDERS = await getUploadableFolders(nmmFolder, localFolder);
     if(FOLDERS.length <= index){
         console.log(`Provided index ${index} is higher than 0-based Index of No. of Folders(${FOLDERS.length}). Quitting`);
-        process.exit(0);
+        return;
     }
     console.log(FOLDERS)
     console.log(`This Run will convert tifs in Folder # ${index + 1}
@@ -27,7 +25,12 @@ async function execDynamic(index:number) {
     const dest = FOLDERS[index].dest + `(${ rootSrcFolders.length})`;
     console.log(rootSrcFolders)
     console.log(dest)
-    await exec(rootSrcFolders, dest)
+    try {
+        await exec(rootSrcFolders, dest)
+    }
+    catch(e){
+        console.log("error",e);
+    }
 }
 
 async function exec(rootSrcFolders: Array<string>, destFolder: string) {
@@ -44,7 +47,9 @@ async function exec(rootSrcFolders: Array<string>, destFolder: string) {
             addReport(`${++execCounter} of ${rootSrcFoldersCount}) ${rootSrcFolder} -> ${destFolder}`)
             await tifToPdf(rootSrcFolder, destFolder);
             const END_TIME = Number(Date.now())
-            console.log(`tifToPdf for ${path.parse(rootSrcFolder).name} -> ${path.parse(destFolder).name} ended at ${new Date(END_TIME)}.
+            console.log(`tifToPdf for 
+            ${path.parse(rootSrcFolder).name} ->
+            ${path.parse(destFolder).name} ended at ${new Date(END_TIME)}.
             \nTotal Time Taken for converting
             ${path.parse(rootSrcFolder).name} -> ${path.parse(destFolder).name}
             ${formatTime(END_TIME - START_TIME)}`);
@@ -54,6 +59,7 @@ async function exec(rootSrcFolders: Array<string>, destFolder: string) {
         }
     }
     const END_TIME = Number(Date.now())
+    GRAND_TOTAL_TIME += END_TIME - START_TIME
     addReport(`TifToPDF for ${rootSrcFolders.length} Folder(s) ended at ${new Date(END_TIME)}.\nTotal Time Taken ${formatTime(END_TIME - START_TIME)}`);
     printReport();
 }
@@ -66,16 +72,23 @@ async function execFixed(rootSrcFolder:string, destFolder:string = '') {
     await exec(rootSrcFolders, destFolder);
 }
 
-//0-15
-async function execMultiple(_ranges:number[]){
+async function execMultiple(_ranges:number[], nmmFolder:string, localFolder:string){
+    const START_TIME = Number(Date.now())
     for (const index of _ranges) {
         console.log(`Processing index ${index} Range:(${_ranges})`);
-        //await execDynamic(index);
-      }
+        await execDynamic(index, nmmFolder, localFolder)
+        console.log(`TIME SPENT SO FAR:  ${formatTime(GRAND_TOTAL_TIME)}`)
+    }
+    console.log(`GRAND_TOTAL_TIME:  ${formatTime(GRAND_TOTAL_TIME)}`)
+    const END_TIME = Number(Date.now())
+    console.log(`execMultiple:  ${formatTime(END_TIME-START_TIME)}`)
 }
- //execFixed("E:\\_tests\\tif2PDFSmallTest");
-//16 Folders
-//execMultiple(_.range(0,5));
-//execMultiple(_.range(5,10));
-//execMultiple(_.range(10,15));
-//execMultiple(_.range(15,16)); 
+
+//execFixed("D:\\NMM\\May-2020\\28-05-2020");
+const mmYYYY = "June-2020"
+const _nmm = `D:/NMM/${mmYYYY}`
+const _local = `E:/${mmYYYY}`
+let GRAND_TOTAL_TIME = 0;
+const x = 16
+const increment = x+5
+execMultiple(_.range(x,increment), _nmm, _local);
