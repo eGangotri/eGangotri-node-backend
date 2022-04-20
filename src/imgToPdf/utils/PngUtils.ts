@@ -12,11 +12,25 @@ const alphabet = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L",
     "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"];
 
 export function appendAlphaCode(numericTitle: string) {
-    return appendAlphaCodeForNum(parseInt(numericTitle));
+    /***
+     * some file names are like 0000123A/ 000123B
+     */
+    let appendix = ""
+    if(numericTitle.endsWith("A") ){
+        appendix  = "1"
+    }
+    else if( numericTitle.endsWith("B")){
+        appendix  = "2"
+    } 
+    else if(numericTitle.endsWith("C")){
+        appendix  = "3"
+    } 
+    const _codedVal =  appendAlphaCodeForNum(parseInt(numericTitle), appendix);
+    return _codedVal
 }
 
-export function appendAlphaCodeForNum(numericTitle: number) {
-    return (isNaN(numericTitle) ? '' : getAlphaOrdered(numericTitle) + "_") + numericTitle;
+export function appendAlphaCodeForNum(numericTitle: number, appendix:string = '') {
+    return (isNaN(numericTitle) ? '' : getAlphaOrdered(numericTitle) + "_") + numericTitle + appendix;
 }
 function getAlphaOrdered(index: number) {
     if (ALPHABETIC_ORDER.length === 0) {
@@ -45,7 +59,7 @@ export async function tiftoPngs(tifSrc: string, dest: string) {
 
     await Promise.all(conversionPromises)
     const pngCount = (await getAllPngs(folderForPngs)).length
-    console.log({ tifsCount: tifs.length, pngCount, countMatch: tifs.length == pngCount })
+    //console.log({ tifsCount: tifs.length, pngCount, countMatch: tifs.length == pngCount })
     return { tifsCount: tifs.length, pngCount, countMatch: tifs.length == pngCount };
 }
 

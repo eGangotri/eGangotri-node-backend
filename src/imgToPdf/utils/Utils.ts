@@ -95,7 +95,7 @@ export const getUploadableFolders = async (srcFolder: string, dest: string) => {
           return {
                folderNo: `${index+1}`,
                src: `${srcFolder}\\${subFolder}`,
-               dest: `${dest}ramtek-${index + 1}_${subFolder}`
+               dest: `${dest}_(${dirs.length})\\ramtek-${index + 1}_${subFolder}`
           }
      });
 }
