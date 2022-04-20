@@ -61,7 +61,7 @@ export async function getListOfItemsQueuedArrangedByProfile(limit: number) {
 }
 
 export function connectToMongo() {
-  console.log("\nAttempting to connect to DB");
+  console.log("\nAttempting to connect to DB:", connection_config.DB_URL);
   if (connection_config.DB_URL) {
     try {
       mongoose.connect(connection_config.DB_URL, connection_config.options);
