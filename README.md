@@ -60,8 +60,8 @@ Ref:
 
 ## Docker
 docker build . -t egangotri/egangotri-node-backend
-docker run -d -p 8080:80  egangotri/egangotri-node-backend:latest
+docker run -d -p 80:80  egangotri/egangotri-node-backend:latest
 docker login
 docker push  egangotri/egangotri-node-backend
-
-http://ip_address:80/
+## access docker iamge via
+http://localhost:80/
