@@ -6,7 +6,7 @@ import { launchGradleRoute } from "./routes/launchGradle.route";
 
 const app = express();
 const hostname = "127.0.0.1";
-const port = 4000;
+const port = 80;
 
 connectToMongo();
 
