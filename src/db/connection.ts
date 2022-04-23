@@ -1,12 +1,12 @@
 const configData = require("../config.json");
 
 
-const production = true;
+const prod = configData.prod;
 
 const DB_NAME = 'archive_upload_monitor';
-const DB_HOST = production?configData.AZURE_DB_HOST:configData.DEV_DB_HOST;
-const DB_PORT = production?configData.AZURE_DB_PORT:configData.AZURE_DB_PORT;
-const DB_PARAMS =  production?configData.AZURE_DB_PARAMS:configData.AZURE_DB_PARAMS;
+const DB_HOST = prod?configData.AZURE_DB_HOST:configData.DEV_DB_HOST;
+const DB_PORT = prod?configData.AZURE_DB_PORT:configData.AZURE_DB_PORT;
+const DB_PARAMS =  prod?configData.AZURE_DB_PARAMS:configData.AZURE_DB_PARAMS;
 
 const DB_URL = `mongodb://${DB_HOST}:${DB_PORT}${DB_PARAMS}/${DB_NAME}`;
 
