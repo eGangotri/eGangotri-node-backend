@@ -7,14 +7,14 @@ import mongoose from "mongoose";
 import * as _ from "underscore";
 
 export async function addItemsQueuedBulk(itemsArray: any[]) {
-  return await addItemsBulk(itemsArray, DOC_TYPE.IQ);
+  return await addItemstoMongoBulk(itemsArray, DOC_TYPE.IQ);
 }
 
 export async function addItemsUsheredBulk(itemsArray: any[]) {
-  return await addItemsBulk(itemsArray, DOC_TYPE.IU);
+  return await addItemstoMongoBulk(itemsArray, DOC_TYPE.IU);
 }
 
-export async function addItemsBulk(
+export async function addItemstoMongoBulk(
   itemsArray: any[],
   docType: DOC_TYPE = DOC_TYPE.IQ
 ) {
@@ -33,7 +33,7 @@ export async function addItemsBulk(
         `insertMany err (${csvForInsertion})  (${typeof itemsArray}) : ${err}`
       );
     });
-    //console.log(`result ${JSON.stringify(result)}`)
+    console.log(`result ${JSON.stringify(result)}`)
     return result;
   } catch (err) {
     console.log(`err((${csvForInsertion})) in addItemsUsheredBulk:`, err);
@@ -60,19 +60,28 @@ export async function getListOfItemsQueuedArrangedByProfile(limit: number) {
   return groupedItems;
 }
 
-export function connectToMongo() {
+export async function connectToMongo() {
   console.log("\nAttempting to connect to DB:", connection_config.DB_URL);
   if (connection_config.DB_URL) {
     try {
-      mongoose.connect(connection_config.DB_URL, connection_config.options);
+      console.log(`1`)
+      await mongoose.connect(connection_config.DB_URL, connection_config.options);
+      console.log(`1.2`)
       const db = mongoose.connection;
-      db.on("error", console.error.bind(console, "connection error:"));
-      db.once("open", function () {
+      db.on("error", ()=>{
+        console.log("connection error:");
+      });
+      db.once("open",  () => {
         // we're connected!
+        console.log(`2`)
         console.log("we are connected");
       });
     } catch (err) {
         console.log("could not connect to mongoose DB\n", err);
     }
+  }
+  else{
+    console.log(`No ${connection_config.DB_URL}`);
+
   }
 }
