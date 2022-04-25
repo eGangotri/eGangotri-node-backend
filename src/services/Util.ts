@@ -30,3 +30,17 @@ import moment from 'moment';
     return processableFiles;
   }
   
+
+  function stripQuotes(text: any) {
+    const strippedValue =
+      typeof text === "string"
+        ? text.toString().replace(/\"/g, "").replace(/\"/g, "").trim()
+        : text;
+    return strippedValue;
+  }
+  
+  export function stripQuotesForItemsInArray(rowArray: Array<any>) {
+    return rowArray.map((r: any) => {
+      return stripQuotes(r);
+    });
+  }
