@@ -10,6 +10,12 @@ const DB_PARAMS =  prod?configData.AZURE_DB_PARAMS:configData.AZURE_DB_PARAMS;
 
 const DB_URL = `mongodb://${DB_HOST}:${DB_PORT}${DB_PARAMS}/${DB_NAME}`;
 
+/***
+ * In Mongo Compass use:
+ * 
+ mongodb://egangotri:bcWbOF0rPGAU4BhJJdlGjVTdbs1xAboMl9poX68Qm4UOMusvdGds4JNxRPTb3RzqLaXoAGEI80H5P49dIfnmcg==@egangotri.mongo.cosmos.azure.com:10255/?ssl=true&replicaSet=globaldb&retrywrites=false&maxIdleTimeMS=120000&appName=@egangotri@
+ */
+
 export const connection_config = {
     DB_NAME,
     DB_URL,

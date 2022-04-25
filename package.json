@@ -5,7 +5,7 @@
   "main": "index.ts",
   "scripts": {
     "test": "npm test",
-    "flatfile-to-mongo": "ts-node ./src/tasks/flatfile-to-mongo.ts C:/tmp/failedUploadsFixing",
+    "flatfile-to-mongo": "ts-node ./src/tasks/flatfile-to-mongo.ts \"C:/Users/Chetan Pandey/eGangotri\"",
     "start": "ts-node ./src/index.ts",
     "web-scrap": "ts-node ./src/downloadLinks.ts",
     "exec": "ts-node ./src/exec/exec.ts",
