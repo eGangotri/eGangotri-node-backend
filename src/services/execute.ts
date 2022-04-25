@@ -27,7 +27,8 @@ export async function processCSV(
   try {
     const response = await addItemstoMongoBulk(itemsArray, docType);
     console.log(
-      `finished reading ${csvFileName} and pushing extracted data (${itemsArray[0]})to DB with response ${response}`
+      `finished reading ${csvFileName} and pushing extracted data (${itemsArray[0]})to 
+      DB with response ${response}`
     );
     return response;
   } catch (err) {

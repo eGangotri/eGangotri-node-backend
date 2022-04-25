@@ -33,7 +33,7 @@ export async function addItemstoMongoBulk(
         `insertMany err (${csvForInsertion})  (${typeof itemsArray}) : ${err}`
       );
     });
-    console.log(`result ${JSON.stringify(result)}`)
+    console.log(`addItemstoMongoBulk:result ${JSON.stringify(result)}`)
     return result;
   } catch (err) {
     console.log(`err((${csvForInsertion})) in addItemsUsheredBulk:`, err);
@@ -64,16 +64,13 @@ export async function connectToMongo() {
   console.log("\nAttempting to connect to DB:", connection_config.DB_URL);
   if (connection_config.DB_URL) {
     try {
-      console.log(`1`)
       await mongoose.connect(connection_config.DB_URL, connection_config.options);
-      console.log(`1.2`)
       const db = mongoose.connection;
       db.on("error", ()=>{
         console.log("connection error:");
       });
       db.once("open",  () => {
         // we're connected!
-        console.log(`2`)
         console.log("we are connected");
       });
     } catch (err) {
