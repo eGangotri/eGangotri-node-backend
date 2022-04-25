@@ -20,13 +20,15 @@ const queuedFile = filesOnGivenDate(ITEM_QUEUED_FOLDER, givenDate);
 const usheredFile = filesOnGivenDate(ITEM_USHERED_FOLDER, givenDate);
 
 function flatFile2Mongo(){
-    connectToMongo().then( () =>{
+    connectToMongo().then( async () =>{
         console.log("started writting to mongo")
         for(let i = 0; i < queuedFile.length;i++){
             console.log(`queuedFile(s) ${queuedFile.join(",")} i=${i}`)
             console.log(`usheredFile(s) ${usheredFile.join(",")} i=${i}`)
-            processCSVPair(queuedFile[i], usheredFile[i]);
+            await processCSVPair(queuedFile[i], usheredFile[i]);
         }
+        console.log("end of writting to mongo")
+        process.exit()
     });
 }
 
