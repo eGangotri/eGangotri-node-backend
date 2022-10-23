@@ -1,8 +1,8 @@
 const express = require("express");
-import { itemsQueuedRoute } from "./routes/itemsQueued.route";
-import { connectToMongo } from "./services/dbService";
-import * as fs from "fs";
-import { launchGradleRoute } from "./routes/launchGradle.route";
+const { itemsQueuedRoute }  = require("./routes/itemsQueued.route");
+const{ connectToMongo } = require("./services/dbService");
+const fs  = require("fs");
+const { launchGradleRoute } = require("./routes/launchGradle.route");
 
 const app = express();
 const hostname = "127.0.0.1";

@@ -1,5 +1,5 @@
 const configData = require("../config.json");
-
+const mongoAtlasConfigs = require("../pwd.json");
 
 const prod = configData.prod;
 
@@ -8,8 +8,9 @@ const DB_HOST = prod?configData.AZURE_DB_HOST:configData.DEV_DB_HOST;
 const DB_PORT = prod?configData.AZURE_DB_PORT:configData.AZURE_DB_PORT;
 const DB_PARAMS =  prod?configData.AZURE_DB_PARAMS:configData.AZURE_DB_PARAMS;
 
-const DB_URL = `mongodb://${DB_HOST}:${DB_PORT}${DB_PARAMS}/${DB_NAME}`;
-
+//const DB_URL = `mongodb://${DB_HOST}:${DB_PORT}${DB_PARAMS}/${DB_NAME}`;
+const MONGO_ATLAS_PWD = mongoAtlasConfigs.MONGO_ATLAS_PWD
+const DB_URL = `mongodb+srv://egangotri:${MONGO_ATLAS_PWD}@cluster0.yqcrz.mongodb.net/?retryWrites=true&w=majority`;
 /***
  * In Mongo Compass use:
  * 
