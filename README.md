@@ -16,6 +16,10 @@ Install Mongo Compass ( MONGODB comes with an option to install MONGO Compass so
     https://downloads.mongodb.com/compass/mongodb-compass-1.30.1-win32-x64.msi
 In MongoDB Compass create Collection 'archive_upload_monitor'
 
+For Prod: Mongo DB is hosted in Mongo Atlas
+
+https://cloud.mongodb.com/v2/5fd0d07d2dddad3b7d4e35d9#clusters
+
 Ref:
 
     (https://www.mongodb.com/try/download/compass)

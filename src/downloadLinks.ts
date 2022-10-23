@@ -1,5 +1,5 @@
 const puppeteer = require('puppeteer');
-const fs = require('fs');
+import fs from 'fs';
 
 (async event => {
     const link = 'https://203.88.139.46/ihg/tree_1/brwhtm/';

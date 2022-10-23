@@ -3,7 +3,8 @@ import { ItemsQueued } from "../models/itemsQueued";
 import { ItemsUshered } from "../models/itemsUshered";
 import { DOC_TYPE } from "../common";
 import { connection_config } from "../db/connection";
-import mongoose from "mongoose";
+import * as mongoose from 'mongoose';
+
 import * as _ from "underscore";
 
 export async function addItemsQueuedBulk(itemsArray: any[]) {
