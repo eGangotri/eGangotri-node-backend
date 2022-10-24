@@ -1,5 +1,7 @@
 const express = require("express");
+//const { itemsUsheredRoute }  = require( "./routes/itemsUshered.route");
 const { itemsQueuedRoute }  = require("./routes/itemsQueued.route");
+
 const{ connectToMongo } = require("./services/dbService");
 const fs  = require("fs");
 const { launchGradleRoute } = require("./routes/launchGradle.route");
@@ -18,10 +20,13 @@ app.use((req: any, res: any, next: any) => {
 });
 
 app.get("/", function (req: any, res: any) {
-  res.send("eGangotri-node-node-backend");
+  res.send({
+    response:"eGangotri-node-backend"
+  });
 });
 
 app.use("/itemsQueued", itemsQueuedRoute);
+//app.use("/itemsUshered", itemsUsheredRoute);
 app.use("/launchGradle", launchGradleRoute);
 
 app.listen(port, async () => {
