@@ -1,8 +1,7 @@
-import * as express from 'express';
+const express = require("express");
 import { ItemsQueued } from '../models/itemsQueued';
-import * as mongoose from 'mongoose';
 import { getListOfItemsQueued, getListOfItemsQueuedArrangedByProfile } from '../services/dbService';
-import { launchUploader } from '../services/gradleLauncherService';
+import { getLimit } from './utils';
 
 export const itemsQueuedRoute = express.Router()
 
@@ -25,7 +24,9 @@ itemsQueuedRoute.post('/add', async (req:any, resp:any) => {
         console.log("req.body")
         const iq = new ItemsQueued(req.body);
         await iq.save();
-        resp.status(200).send(iq);
+        resp.status(200).send({
+            "response":iq
+        });
     }
     catch (err: any) {
         console.log('Error', err);
@@ -37,7 +38,9 @@ itemsQueuedRoute.get('/list', async (req:any, resp:any) => {
     try {
         const items = await getListOfItemsQueued(getLimit(resp));
         console.log(`after`)
-        resp.status(200).send(items);
+        resp.status(200).send({
+            "response":items
+        });
     }
     catch (err: any) {
         console.log('Error', err);
@@ -48,16 +51,12 @@ itemsQueuedRoute.get('/list', async (req:any, resp:any) => {
 itemsQueuedRoute.get('/listByProfile', async (req:any, resp:any) => {
     try {
         const groupedItems = await getListOfItemsQueuedArrangedByProfile(getLimit(resp));
-        resp.status(200).send(groupedItems);
+        resp.status(200).send({
+            "response":groupedItems
+        });
     }
     catch (err: any) {
         console.log('Error', err);
         resp.status(400).send(err);
     }
 })
-
-function getLimit(res:any){
-    const limit = res?.query?.limit || "100"
-    console.log(`req.query ${JSON.stringify(res.query)} ${limit}`);
-    return parseInt(limit);
-}
