@@ -6,8 +6,23 @@ import { launchUploader } from '../services/gradleLauncherService';
 
 export const itemsQueuedRoute = express.Router()
 
+/**
+ * INSOMNIA POST Request Sample
+POST http://127.0.0.1/itemsQueued/add 
+JSON Body 
+ {
+	"uploadCycleId": "2",
+	"title": "2",
+	"localPath": "2",
+	"archiveProfile": "2",
+	"datetimeUploadStarted": "12/12/2002 12:12:21",
+	"csvName": "2",
+	"uploadLink":"333"
+}
+ */
 itemsQueuedRoute.post('/add', async (req:any, resp:any) => {
     try {
+        console.log("req.body")
         const iq = new ItemsQueued(req.body);
         await iq.save();
         resp.status(200).send(iq);

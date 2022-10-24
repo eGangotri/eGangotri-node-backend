@@ -9,7 +9,7 @@ const hostname = "127.0.0.1";
 const port = 80;
 
 connectToMongo();
-
+app.use(express.json());
 app.use((req: any, res: any, next: any) => {
   res.append("Access-Control-Allow-Origin", ["*"]);
   res.append("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE");
