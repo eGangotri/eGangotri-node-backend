@@ -10,7 +10,13 @@ var DB_PORT = prod ? configData.AZURE_DB_PORT : configData.AZURE_DB_PORT;
 var DB_PARAMS = prod ? configData.AZURE_DB_PARAMS : configData.AZURE_DB_PARAMS;
 //const DB_URL = `mongodb://${DB_HOST}:${DB_PORT}${DB_PARAMS}/${DB_NAME}`;
 var MONGO_ATLAS_PWD = mongoAtlasConfigs.MONGO_ATLAS_PWD;
-var DB_URL = "mongodb+srv://egangotri:".concat(MONGO_ATLAS_PWD, "@cluster0.yqcrz.mongodb.net/?retryWrites=true&w=majority");
+var MONGO_ATLAS_USER = mongoAtlasConfigs.MONGO_ATLAS_USER;
+var MONGO_DB_PROTOCOL = mongoAtlasConfigs.MONGO_DB_PROTOCOL;
+var MONGO_DB_PATH = mongoAtlasConfigs.MONGO_DB_PATH;
+
+var DB_URL = `${MONGO_DB_PROTOCOL}${MONGO_ATLAS_USER}:${MONGO_ATLAS_PWD}${MONGO_DB_PATH}`
+"mongodb+srv://egangotri:".concat(MONGO_ATLAS_PWD, "@cluster0.yqcrz.mongodb.net/?retryWrites=true&w=majority");
+
 /***
  * In Mongo Compass use:
  *
