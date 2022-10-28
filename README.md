@@ -32,12 +32,13 @@ Ref:
     Start Mongo by launching MongoDBCompass with URL
     mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&directConnection=true&ssl=false
     #Run
-    nodemon --exec npm run start
+    nodemon --exec yarn run start
+    //if on WSL/Linux etc you may need to use sudo yarn run start
     OR
     nodemon 
 
     Start egangotri-react-frontend by running the following command
-    npm run start 
+    yarn run start 
     and viewing
     http://localhost:3000/
     

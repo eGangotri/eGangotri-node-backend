@@ -1,6 +1,7 @@
+import { Request } from "express";
 
-export const getLimit = (res:any):number => {
-    const limit = res?.query?.limit || "100"
-    console.log(`req.query ${JSON.stringify(res.query)} ${limit}`);
-    return parseInt(limit);
+export const getLimit = (req:Request):number => {
+    const limit = req?.query?.limit as string;
+    console.log(`req.query ${JSON.stringify(req.query)} ${limit}`);
+    return parseInt(limit || "100");
 }
