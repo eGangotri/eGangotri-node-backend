@@ -1,12 +1,17 @@
 # egangotri-node-backend
 
 ###Instructions to Create
+#First Time
 #npm init
-#npm i express tsc ts-node typescript cors body-parser
+
+# on a new Machine with code from git
+yarn install 
+yarn global add express ts-node typescript cors body-parser
+yarn global  add  @tsconfig/node16 -D
 
 ###Software No. 1
 ###Node Backend for eGangotri-react-frontend
-###First Time
+###First Time (if using local. diff. instructions for using mongo Atlas)
 Install MongoDB
     https://fastdl.mongodb.org/windows/mongodb-windows-x86_64-5.0.5-signed.msi
 Install Mongo Shell
