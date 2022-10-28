@@ -37,7 +37,7 @@ itemsQueuedRoute.post('/add', async (req:any, resp:any) => {
 itemsQueuedRoute.get('/list', async (req:any, resp:any) => {
     try {
         const items = await getListOfItemsQueued(getLimit(resp));
-        console.log(`after`)
+        console.log(`after getListOfItemsQueued`)
         resp.status(200).send({
             "response":items
         });
