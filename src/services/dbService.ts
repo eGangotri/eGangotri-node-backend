@@ -2,8 +2,8 @@ import { Model, Document } from "mongoose";
 import { ItemsQueued } from "../models/itemsQueued";
 import { ItemsUshered } from "../models/itemsUshered";
 import { DOC_TYPE } from "../common";
-import { connection_config } from "../db/connection";
-import * as mongoose from 'mongoose';
+import { MONGO_DB_URL, MONGO_OPTIONS } from "../db/connection";
+import mongoose from "mongoose";
 
 import * as _ from "underscore";
 
@@ -62,10 +62,10 @@ export async function getListOfItemsQueuedArrangedByProfile(limit: number) {
 }
 
 export async function connectToMongo() {
-  console.log("\nAttempting to connect to DB:", connection_config.DB_URL);
-  if (connection_config.DB_URL) {
+  console.log("\nAttempting to connect to DB:", MONGO_DB_URL);
+  if (MONGO_DB_URL) {
     try {
-      await mongoose.connect(connection_config.DB_URL, connection_config.options);
+      await mongoose.connect(MONGO_DB_URL, MONGO_OPTIONS);
       const db = mongoose.connection;
       db.on("error", ()=>{
         console.log("connection error:");
@@ -79,7 +79,7 @@ export async function connectToMongo() {
     }
   }
   else{
-    console.log(`No ${connection_config.DB_URL}`);
+    console.log(`No ${MONGO_DB_URL}`);
 
   }
 }

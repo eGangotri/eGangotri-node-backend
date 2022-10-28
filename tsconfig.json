@@ -1,28 +1,9 @@
 {
+  "extends": "@tsconfig/node16/tsconfig.json",
   "compilerOptions": {
-    "target": "es6",
-    "lib": ["es6", "dom"],
-    "resolveJsonModule": true,
-    "esModuleInterop": true,
-    "rootDir": "./src",
-    "outDir": "./dist",
-    "module": "es2020",
-    "moduleResolution": "node",
-    "strict": true,
-    "declaration": false,
-    "sourceMap": true,
-    "inlineSources": true,
-    "types": ["node"],
-    "typeRoots": ["./node_modules/@types"],
-    "stripInternal": true,
-    "incremental": true,
-    "skipLibCheck": true,
-    "inlineSourceMap": false,
-    "noEmit": false
+    "baseUrl":"./src",
+    "noEmit": true
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "**/*.spec.ts"],
-  "ts-node": {
-    "esm": true
-  }
+  "exclude": ["node_modules", "**/*.spec.ts", "**/*.js"],
 }
