@@ -52,7 +52,7 @@ export async function addItemstoMongoBulk(
   }
 }
 
-export async function getListOfItemsQueued(queryOptions: ItemsListOptionsType) {
+export async function getListOfItems(queryOptions: ItemsListOptionsType) {
   // Empty `filter` means "match all documents"
   let dateFilter = {};
   if (queryOptions?.startDate && queryOptions?.endDate) {
@@ -74,8 +74,26 @@ export async function getListOfItemsQueued(queryOptions: ItemsListOptionsType) {
   const items = await ItemsQueued.find(dateFilter)
     .sort({ createdAt: 1 })
     .limit(limit);
+  return {limit,dateFilter};
+}
+
+export async function getListOfItemsQueued(queryOptions: ItemsListOptionsType) {
+  const {limit,dateFilter} = await getListOfItems(queryOptions)
+  const items = await ItemsQueued.find(dateFilter)
+    .sort({ createdAt: 1 })
+    .limit(limit);
   return items;
 }
+
+export async function getListOfItemsUshered(queryOptions: ItemsListOptionsType) {
+  const {limit,dateFilter} = await getListOfItems(queryOptions)
+  const items = await ItemsUshered.find(dateFilter)
+    .sort({ createdAt: 1 })
+    .limit(limit);
+  return items;
+}
+
+
 
 export async function getListOfItemsQueuedArrangedByProfile(
   queryOptions: ItemsListOptionsType

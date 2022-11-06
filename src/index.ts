@@ -1,6 +1,6 @@
 const express = require("express");
-//const { itemsUsheredRoute }  = require( "./routes/itemsUshered.route");
 const { itemsQueuedRoute }  = require("./routes/itemsQueued.route");
+const { itemsUsheredRoute }  = require( "./routes/itemsUshered.route");
 
 const{ connectToMongo } = require("./services/dbService");
 const fs  = require("fs");
@@ -26,7 +26,7 @@ app.get("/", function (req: any, res: any) {
 });
 
 app.use("/itemsQueued", itemsQueuedRoute);
-//app.use("/itemsUshered", itemsUsheredRoute);
+app.use("/itemsUshered", itemsUsheredRoute);
 app.use("/launchGradle", launchGradleRoute);
 
 app.listen(port, async () => {
