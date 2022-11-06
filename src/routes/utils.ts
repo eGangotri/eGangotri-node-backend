@@ -1,7 +1,5 @@
-import { Request } from "express";
+import { MAX_ITEMS_LISTABLE } from "../utils/constants";
 
-export const getLimit = (req:Request):number => {
-    const limit = req?.query?.limit as string;
-    console.log(`req.query ${JSON.stringify(req.query)} ${limit}`);
-    return parseInt(limit || "100");
+export const getLimit = (limit:string|undefined|number):number => {
+    return typeof limit == 'number' ? limit :parseInt(limit|| `${MAX_ITEMS_LISTABLE}`);
 }

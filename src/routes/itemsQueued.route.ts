@@ -37,7 +37,7 @@ itemsQueuedRoute.post('/add', async (req:Request, resp:Response) => {
 
 itemsQueuedRoute.get('/list', async (req:Request, resp:Response) => {
     try {
-        const items = await getListOfItemsQueued(getLimit(req));
+        const items = await getListOfItemsQueued(req?.query);
         console.log(`after getListOfItemsQueued`)
         resp.status(200).send({
             "response":items
@@ -51,7 +51,7 @@ itemsQueuedRoute.get('/list', async (req:Request, resp:Response) => {
 
 itemsQueuedRoute.get('/listByProfile', async (req:Request, resp:Response) => {
     try {
-        const groupedItems = await getListOfItemsQueuedArrangedByProfile(getLimit(req));
+        const groupedItems = await getListOfItemsQueuedArrangedByProfile(req?.query);
         resp.status(200).send({
             "response":groupedItems
         });

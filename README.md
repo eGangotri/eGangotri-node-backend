@@ -8,7 +8,8 @@
 yarn install 
 yarn global add express ts-node typescript cors body-parser
 yarn global  add  @tsconfig/node16 -D
-
+npm install --location=global --force nodemon
+(without --force it was not installing)
 ###Software No. 1
 ###Node Backend for eGangotri-react-frontend
 ###First Time (if using local. diff. instructions for using mongo Atlas)
