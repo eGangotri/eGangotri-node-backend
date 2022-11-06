@@ -4,8 +4,18 @@ import { ItemsUshered } from "../models/itemsUshered";
 import { DOC_TYPE } from "../common";
 import { MONGO_DB_URL, MONGO_OPTIONS } from "../db/connection";
 import mongoose from "mongoose";
+import { subDays } from "date-fns";
 
 import * as _ from "underscore";
+import { getLimit } from "../routes/utils";
+import { isoDateStringToDate } from "../utils/utils";
+import { DEFAULT_DAYS_BEFORE_CURRENT_FOR_SEARCH } from "../utils/constants";
+
+type ItemsListOptionsType = {
+  limit?: number;
+  startDate?: string;
+  endDate?: string;
+};
 
 export async function addItemsQueuedBulk(itemsArray: any[]) {
   return await addItemstoMongoBulk(itemsArray, DOC_TYPE.IQ);
@@ -34,7 +44,7 @@ export async function addItemstoMongoBulk(
         `insertMany err (${csvForInsertion})  (${typeof itemsArray}) : ${err}`
       );
     });
-    console.log(`addItemstoMongoBulk:result ${JSON.stringify(result)}`)
+    console.log(`addItemstoMongoBulk:result ${JSON.stringify(result)}`);
     return result;
   } catch (err) {
     console.log(`err((${csvForInsertion})) in addItemsUsheredBulk:`, err);
@@ -42,22 +52,43 @@ export async function addItemstoMongoBulk(
   }
 }
 
-export async function getListOfItemsQueued(limit: number) {
+export async function getListOfItemsQueued(queryOptions: ItemsListOptionsType) {
   // Empty `filter` means "match all documents"
-  const filter = { createdAt: { $gte: new Date().getDate() - 10 } };
-  const items = await ItemsQueued.find(filter)
+  let dateFilter = {};
+  if (queryOptions?.startDate && queryOptions?.endDate) {
+  }
+
+  if (queryOptions?.startDate && queryOptions?.endDate) {
+    dateFilter = {
+      createdAt: {
+        $gte: new Date(isoDateStringToDate(queryOptions?.startDate)),
+        $lte: new Date(isoDateStringToDate(queryOptions?.endDate)),
+      },
+    };
+  } else {
+    dateFilter = { createdAt: { $gte: subDays(new Date(), DEFAULT_DAYS_BEFORE_CURRENT_FOR_SEARCH) } };
+  }
+
+  const limit: number = getLimit(queryOptions?.limit);
+
+  const items = await ItemsQueued.find(dateFilter)
     .sort({ createdAt: 1 })
     .limit(limit);
-  console.log(`getListOfItemsQueued ${JSON.stringify(items[0])} Length ${items.length} limit ${limit} `);
   return items;
 }
 
-export async function getListOfItemsQueuedArrangedByProfile(limit: number) {
-  const items = await getListOfItemsQueued(limit);
+export async function getListOfItemsQueuedArrangedByProfile(
+  queryOptions: ItemsListOptionsType
+) {
+  const items = await getListOfItemsQueued(queryOptions);
   const groupedItems = _.groupBy(items, function (item: any) {
     return item.archiveProfile;
   });
-  console.log(`getListOfItemsQueuedArrangedByProfile ${JSON.stringify(groupedItems.length)}`);
+  console.log(
+    `getListOfItemsQueuedArrangedByProfile ${JSON.stringify(
+      groupedItems.length
+    )}`
+  );
   return groupedItems;
 }
 
@@ -67,19 +98,17 @@ export async function connectToMongo() {
     try {
       await mongoose.connect(MONGO_DB_URL, MONGO_OPTIONS);
       const db = mongoose.connection;
-      db.on("error", ()=>{
+      db.on("error", () => {
         console.log("connection error:");
       });
-      db.once("open",  () => {
+      db.once("open", () => {
         // we're connected!
         console.log("we are connected");
       });
     } catch (err) {
-        console.log("could not connect to mongoose DB\n", err);
+      console.log("could not connect to mongoose DB\n", err);
     }
-  }
-  else{
+  } else {
     console.log(`No ${MONGO_DB_URL}`);
-
   }
 }
