@@ -1,14 +1,13 @@
 const express = require("express");
 import { ItemsQueued } from '../models/itemsQueued';
 import { getListOfItemsQueued, getListOfItemsQueuedArrangedByProfile } from '../services/dbService';
-import { getLimit } from './utils';
 import { Request, Response } from 'express';
 
 export const itemsQueuedRoute = express.Router()
 
 /**
  * INSOMNIA POST Request Sample
-POST http://127.0.0.1/itemsQueued/add 
+POST http://localhost/itemsQueued/add 
 JSON Body 
  {
 	"uploadCycleId": "2",
