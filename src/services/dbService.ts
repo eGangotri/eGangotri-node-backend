@@ -11,10 +11,11 @@ import { getLimit } from "../routes/utils";
 import { isoDateStringToDate } from "../utils/utils";
 import { DEFAULT_DAYS_BEFORE_CURRENT_FOR_SEARCH } from "../utils/constants";
 
-type ItemsListOptionsType = {
+interface ItemsListOptionsType {
   limit?: number;
   startDate?: string;
   endDate?: string;
+  archiveProfile?: string;
 };
 
 export async function addItemsQueuedBulk(itemsArray: any[]) {
@@ -52,42 +53,43 @@ export async function addItemstoMongoBulk(
   }
 }
 
-export async function getListOfItems(queryOptions: ItemsListOptionsType) {
+export function setOptionsForItemListing(queryOptions: ItemsListOptionsType) {
   // Empty `filter` means "match all documents"
-  let dateFilter = {};
+  let mongoOptionsFilter = {};
   if (queryOptions?.startDate && queryOptions?.endDate) {
   }
 
   if (queryOptions?.startDate && queryOptions?.endDate) {
-    dateFilter = {
+    mongoOptionsFilter = {
       createdAt: {
         $gte: new Date(isoDateStringToDate(queryOptions?.startDate)),
         $lte: new Date(isoDateStringToDate(queryOptions?.endDate)),
       },
     };
   } else {
-    dateFilter = { createdAt: { $gte: subDays(new Date(), DEFAULT_DAYS_BEFORE_CURRENT_FOR_SEARCH) } };
+    mongoOptionsFilter = { createdAt: { $gte: subDays(new Date(), DEFAULT_DAYS_BEFORE_CURRENT_FOR_SEARCH) } };
   }
 
+  if (queryOptions?.archiveProfile){
+    const archiveProfiles:string[] = queryOptions?.archiveProfile.split(",")
+    console.log(`archiveProfiles ${archiveProfiles}`)
+    mongoOptionsFilter = {archiveProfile : { $in: archiveProfiles }}
+  }
   const limit: number = getLimit(queryOptions?.limit);
-
-  const items = await ItemsQueued.find(dateFilter)
-    .sort({ createdAt: 1 })
-    .limit(limit);
-  return {limit,dateFilter};
+  return {limit, mongoOptionsFilter};
 }
 
 export async function getListOfItemsQueued(queryOptions: ItemsListOptionsType) {
-  const {limit,dateFilter} = await getListOfItems(queryOptions)
-  const items = await ItemsQueued.find(dateFilter)
+  const {limit,mongoOptionsFilter} = setOptionsForItemListing(queryOptions)
+  const items = await ItemsQueued.find(mongoOptionsFilter)
     .sort({ createdAt: 1 })
     .limit(limit);
   return items;
 }
 
 export async function getListOfItemsUshered(queryOptions: ItemsListOptionsType) {
-  const {limit,dateFilter} = await getListOfItems(queryOptions)
-  const items = await ItemsUshered.find(dateFilter)
+  const {limit,mongoOptionsFilter} = setOptionsForItemListing(queryOptions)
+  const items = await ItemsUshered.find(mongoOptionsFilter)
     .sort({ createdAt: 1 })
     .limit(limit);
   return items;
