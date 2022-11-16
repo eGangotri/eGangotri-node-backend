@@ -1,4 +1,4 @@
-src/pwd.json
+src/pwd*.json
 
 # Logs
 logs
