@@ -8,7 +8,6 @@ import { subDays } from "date-fns";
 
 import * as _ from "underscore";
 import { getLimit } from "../routes/utils";
-import { isoDateStringToDate } from "../utils/utils";
 import { DEFAULT_DAYS_BEFORE_CURRENT_FOR_SEARCH } from "../utils/constants";
 
 interface ItemsListOptionsType {
@@ -62,8 +61,8 @@ export function setOptionsForItemListing(queryOptions: ItemsListOptionsType) {
   if (queryOptions?.startDate && queryOptions?.endDate) {
     mongoOptionsFilter = {
       createdAt: {
-        $gte: new Date(isoDateStringToDate(queryOptions?.startDate)),
-        $lte: new Date(isoDateStringToDate(queryOptions?.endDate)),
+        $gte: new Date(queryOptions?.startDate),
+        $lte: new Date(queryOptions?.endDate),
       },
     };
   } else {
