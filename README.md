@@ -76,3 +76,11 @@ docker login
 docker push  egangotri/egangotri-node-backend
 ## access docker iamge via
 http://localhost:80/
+
+
+#ERRORS
+If you are getting 
+Attempting to connect to DB: mongodb+srv:// ......
+Error: listen EACCES: permission denied 0.0.0.0:80
+
+then dont use WSL Terminal, switch to BASH Terminal
