@@ -1,4 +1,4 @@
-import fs from "fs";
+Rimport fs from "fs";
 var fsPromises = require("fs").promises;
 const csv = require("csv-parse");
 
