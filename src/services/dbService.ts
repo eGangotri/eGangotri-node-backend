@@ -56,9 +56,6 @@ export function setOptionsForItemListing(queryOptions: ItemsListOptionsType) {
   // Empty `filter` means "match all documents"
   let mongoOptionsFilter = {};
   if (queryOptions?.startDate && queryOptions?.endDate) {
-  }
-
-  if (queryOptions?.startDate && queryOptions?.endDate) {
     mongoOptionsFilter = {
       createdAt: {
         $gte: new Date(queryOptions?.startDate),
@@ -81,7 +78,7 @@ export function setOptionsForItemListing(queryOptions: ItemsListOptionsType) {
 export async function getListOfItemsQueued(queryOptions: ItemsListOptionsType) {
   const {limit,mongoOptionsFilter} = setOptionsForItemListing(queryOptions)
   const items = await ItemsQueued.find(mongoOptionsFilter)
-    .sort({ createdAt: 1 })
+    .sort({ createdAt: -1 })
     .limit(limit);
   return items;
 }
@@ -89,12 +86,10 @@ export async function getListOfItemsQueued(queryOptions: ItemsListOptionsType) {
 export async function getListOfItemsUshered(queryOptions: ItemsListOptionsType) {
   const {limit,mongoOptionsFilter} = setOptionsForItemListing(queryOptions)
   const items = await ItemsUshered.find(mongoOptionsFilter)
-    .sort({ createdAt: 1 })
+    .sort({ createdAt: -1 })
     .limit(limit);
   return items;
 }
-
-
 
 export async function getListOfItemsQueuedArrangedByProfile(
   queryOptions: ItemsListOptionsType
