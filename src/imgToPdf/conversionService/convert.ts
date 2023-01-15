@@ -85,10 +85,10 @@ async function execMultiple(_ranges:number[], nmmFolder:string, localFolder:stri
 }
 
 //execFixed("D:\\NMM\\May-2020\\28-05-2020");
-const mmYYYY = "June-2020"
-const _nmm = `D:/NMM/${mmYYYY}`
-const _local = `E:/${mmYYYY}`
+const mmYYYY = "Dec-2019";
+const _nmm = `D:/NMM/${mmYYYY}`;
+const _local = `E:/NMM-5/${mmYYYY}`
 let GRAND_TOTAL_TIME = 0;
-const x = 16
-const increment = x+5
+const x = 12
+const increment = x+3
 execMultiple(_.range(x,increment), _nmm, _local);

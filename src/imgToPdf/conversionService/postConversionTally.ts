@@ -70,14 +70,10 @@ async function tally(dirToTally: string,  tallyType: number = 1) {
 }
 
 //Before Merge
-const mmYYYY = "June-2020"
-const _nmm = `D:/NMM/${mmYYYY}`
-//const _local = `E:/NMM-2/${mmYYYY}`
-const _local = `E:/${mmYYYY}_(21)` 
-
-tally(_local, TALLY_FOR_FOLDERS);
-
+const mmYYYY = "Dec-2019_(15)";
+const _local = `E:/NMM-5/${mmYYYY}`
+//tally(_local, TALLY_FOR_FOLDERS);
 //After Merge
-//tally(_local, TALLY_FOR_PDFS);
+tally(_local, TALLY_FOR_PDFS);
 
 //yarn run tally-post-conversion
