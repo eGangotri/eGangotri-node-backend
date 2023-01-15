@@ -8,7 +8,6 @@ import { subDays } from "date-fns";
 
 import * as _ from "underscore";
 import { getLimit } from "../routes/utils";
-import { isoDateStringToDate } from "../utils/utils";
 import { DEFAULT_DAYS_BEFORE_CURRENT_FOR_SEARCH } from "../utils/constants";
 
 interface ItemsListOptionsType {
@@ -57,13 +56,10 @@ export function setOptionsForItemListing(queryOptions: ItemsListOptionsType) {
   // Empty `filter` means "match all documents"
   let mongoOptionsFilter = {};
   if (queryOptions?.startDate && queryOptions?.endDate) {
-  }
-
-  if (queryOptions?.startDate && queryOptions?.endDate) {
     mongoOptionsFilter = {
       createdAt: {
-        $gte: new Date(isoDateStringToDate(queryOptions?.startDate)),
-        $lte: new Date(isoDateStringToDate(queryOptions?.endDate)),
+        $gte: new Date(queryOptions?.startDate),
+        $lte: new Date(queryOptions?.endDate),
       },
     };
   } else {
@@ -82,7 +78,7 @@ export function setOptionsForItemListing(queryOptions: ItemsListOptionsType) {
 export async function getListOfItemsQueued(queryOptions: ItemsListOptionsType) {
   const {limit,mongoOptionsFilter} = setOptionsForItemListing(queryOptions)
   const items = await ItemsQueued.find(mongoOptionsFilter)
-    .sort({ createdAt: 1 })
+    .sort({ createdAt: -1 })
     .limit(limit);
   return items;
 }
@@ -90,12 +86,10 @@ export async function getListOfItemsQueued(queryOptions: ItemsListOptionsType) {
 export async function getListOfItemsUshered(queryOptions: ItemsListOptionsType) {
   const {limit,mongoOptionsFilter} = setOptionsForItemListing(queryOptions)
   const items = await ItemsUshered.find(mongoOptionsFilter)
-    .sort({ createdAt: 1 })
+    .sort({ createdAt: -1 })
     .limit(limit);
   return items;
 }
-
-
 
 export async function getListOfItemsQueuedArrangedByProfile(
   queryOptions: ItemsListOptionsType
