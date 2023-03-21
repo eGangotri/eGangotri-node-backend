@@ -10,6 +10,7 @@ yarn global add express ts-node typescript cors body-parser
 yarn global  add  @tsconfig/node16 -D
 npm install --location=global --force nodemon
 (without --force it was not installing)
+
 ###Software No. 1
 ###Node Backend for eGangotri-react-frontend
 ###First Time (if using local. diff. instructions for using mongo Atlas)
@@ -30,8 +31,14 @@ Ref:
 
     (https://www.mongodb.com/try/download/compass)
 
-    Start Mongo by launching MongoDBCompass with URL
+    Start Mongo by launching MongoDBCompass with URL for Local
     mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&directConnection=true&ssl=false
+    
+    for server:
+    consult pwd.json for the specific values
+
+    mongodb+srv://<username>:<password>@<cluster0>.<xxxxx>.mongodb.net/?authMechanism=DEFAULT
+    
     #Run
     nodemon --exec yarn run start
     //if on WSL/Linux etc you may need to use sudo yarn run start
@@ -79,8 +86,20 @@ http://localhost:80/
 
 
 #ERRORS
-If you are getting 
+#1. If you are getting 
 Attempting to connect to DB: mongodb+srv:// ......
 Error: listen EACCES: permission denied 0.0.0.0:80
 
 then dont use WSL Terminal, switch to BASH Terminal
+
+#2. could not connect to mongoose DB
+ Error: querySrv EREFUSED _mongodb._tcp.cluster0.yqcrz.mongodb.net
+    at QueryReqWrap.onresolve [as oncomplete] (node:internal/dns/callback_resolver:47:19) {
+  errno: undefined,
+  code: 'EREFUSED',
+  syscall: 'querySrv',
+  hostname: '_mongodb._tcp.cluster0.yqcrz.mongodb.net'
+
+In Access List add your IP Adddress at:
+
+https://cloud.mongodb.com/v2/5fd0d07d2dddad3b7d4e35d9#/security/network/accessList

@@ -36,7 +36,7 @@ itemsUsheredRoute.post('/add', async (req:any, resp:any) => {
 itemsUsheredRoute.get('/list', async (req:Request, resp:Response) => {
     try {
         const items = await getListOfItemsUshered(req?.query);
-        console.log(`after getListOfItemsUshered`)
+        console.log(`after getListOfItemsUshered retirieved item count: ${items.length}`)
         resp.status(200).send({
             "response":items
         });
