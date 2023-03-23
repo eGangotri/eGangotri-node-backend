@@ -13,7 +13,7 @@ npm install --location=global --force nodemon
 
 ###Software No. 1
 ###Node Backend for eGangotri-react-frontend
-###First Time (if using local. diff. instructions for using mongo Atlas)
+###First Time (if using local. Different instructions for using mongo Atlas)
 Install MongoDB
     https://fastdl.mongodb.org/windows/mongodb-windows-x86_64-5.0.5-signed.msi
 Install Mongo Shell
