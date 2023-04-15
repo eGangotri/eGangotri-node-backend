@@ -1,82 +1,101 @@
 import Csv from "@csv-js/csv";
-import { DailyWorkReportType, PageCountStatsType } from "../types/dailyyWorkReportTypes";
+import {
+  DailyWorkReportType,
+  PageCountStatsType,
+} from "../types/dailyyWorkReportTypes";
 import mongoose from "mongoose";
+import moment from 'moment';
+import { DD_MM_YYYY_FORMAT } from "../utils/utils";
 
 const header = [
+  {
+    key: "dateOfReport",
+    label: "DATE",
+  },
+  {
+    key: "operatorName",
+    label: "NAME",
+  },
+  {
+    key: "totalPdfCount",
+    label: "TOTAL PDF COUNT",
+  },
+  {
+    key: "totalPageCount",
+    label: "TOTAL PAGE COUNT(Pages)",
+  },
+  {
+    key: "totalSize",
+    label: "TOTAL SIZE",
+  },
+
+  {
+    key: "pageCountStats",
+    label: "Operator Name",
+  },
+];
+
+const dailyDetailReportHeader = [
   {
     key: "operatorName",
     label: "Operator Name",
   },
   {
-    key: "totalPdfCount",
+    key: "fileName",
+    label: "File Name",
   },
   {
-    key: "totalPageCount",
+    key: "pageCount",
+    label: "PAGE COUNT(Pages)",
   },
   {
-    key: "totalSize",
-  },
-  {
-    key: "dateOfReport",
-  },
-  {
-    key: "pageCountStats",
+    key: "fileSize",
+    label: "File Size",
   },
 ];
 
-const dailyDetailReportHeader = [
-    {
-      key: "operatorName",
-      label: "Operator Name",
-    },
-    {
-      key: "fileName",
-    },
-    {
-      key: "pageCount",
-    },
-    {
-      key: "fileSize",
-    },
-  ];
-  
-
 export const generateCSV = (reports: mongoose.Document[]) => {
   const csv = new Csv(header, { name: "Daily Work Report " });
-  const dailyDetailCSV = new Csv(dailyDetailReportHeader, { name: "Daily Work Report " });
+  const dailyDetailCSV = new Csv(dailyDetailReportHeader, {
+    name: "Daily Work Report ",
+  });
   reports.forEach((report: mongoose.Document) => {
-    const dailyWorkReport = JSON.parse(JSON.stringify(report.toJSON())) as DailyWorkReportType
+    const dailyWorkReport = JSON.parse(
+      JSON.stringify(report.toJSON())
+    ) as DailyWorkReportType;
+
+    const formattedDate = moment(dailyWorkReport.dateOfReport).format(DD_MM_YYYY_FORMAT);
+    //dailyWorkReport.dateOfReport.toLocaleString().slice(0,10);
+    console.log(formattedDate);
     csv.append([
       {
+        dateOfReport: formattedDate,
         operatorName: dailyWorkReport.operatorName,
         totalPdfCount: dailyWorkReport.totalPdfCount,
         totalPageCount: dailyWorkReport.totalPageCount,
         totalSize: dailyWorkReport.totalSize,
-        dateOfReport: dailyWorkReport.dateOfReport,
       },
     ]);
 
-    const stats = dailyWorkReport.pageCountStats
-    stats.forEach( (stat:PageCountStatsType) => {
-        
-    dailyDetailCSV.append([
+    const stats = dailyWorkReport.pageCountStats;
+    stats.forEach((stat: PageCountStatsType) => {
+      dailyDetailCSV.append([
         {
           operatorName: dailyWorkReport.operatorName,
-          fileName:stat.fileName,
-          pageCount:stat.pageCount,
-          fileSize:stat.fileSize,
+          fileName: stat.fileName,
+          pageCount: stat.pageCount,
+          fileSize: stat.fileSize,
         },
       ]);
-    //console.log(`stat ${JSON.stringify(stat)}`)
-
-    })
+      //console.log(`stat ${JSON.stringify(stat)}`)
+    });
     //console.log(`item ${JSON.stringify(dailyWorkReport)}`)
   });
 
-  const _csv = csv.toString(); 
+  const _csv = csv.toString();
   const _dailyDetailCSV = dailyDetailCSV.toString();
   console.log(`_csv \n${_csv}`);
   // Browser download csv
   //csv.download();
-  return [_csv,_dailyDetailCSV]
+  return [_csv, _dailyDetailCSV];
 };
