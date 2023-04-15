@@ -9,6 +9,26 @@
   dependencies:
     "@jridgewell/trace-mapping" "0.3.9"
 
+"@csv-js/core@^0.0.1":
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/@csv-js/core/-/core-0.0.1.tgz#6bc5077e99bbf583d2c62f284d7553821139f40d"
+  integrity sha512-BIPw/wSBwgfWRqJDHRQJMuq41YIL/lksmzhfd8t34KbyEHAKuH2sJDVNGnBdBzQ6DMpkNQBgKwsaIapXBlVfyQ==
+  dependencies:
+    "@csv-js/type" "^0.0.1"
+
+"@csv-js/csv@^0.0.3":
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/@csv-js/csv/-/csv-0.0.3.tgz#1c69f9a769314ef9dd8f69d67c033f2f7dab196c"
+  integrity sha512-O4efPNI62E6XQYbgJau2juE8k8je46mKrTyb62HHl+mQScrtHO6WNdL2boG+QxDkFgdTFJ30uE6iXX8sHuHFMA==
+  dependencies:
+    "@csv-js/core" "^0.0.1"
+    "@csv-js/type" "^0.0.1"
+
+"@csv-js/type@^0.0.1":
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/@csv-js/type/-/type-0.0.1.tgz#ee6619223600028b1b373fb03cd596238832b74a"
+  integrity sha512-95oZIejYHPQd6I+c8zdouA6ALumf2jUgr4uHMJlrPy3qfHiG0B/OaY5MuC4tQBHKKB9DZx8RBfGonCq2d2s2ww==
+
 "@jridgewell/resolve-uri@^3.0.3":
   version "3.1.0"
   resolved "https://registry.npmjs.org/@jridgewell/resolve-uri/-/resolve-uri-3.1.0.tgz"

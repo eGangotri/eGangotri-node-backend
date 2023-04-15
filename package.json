@@ -29,6 +29,7 @@
   },
   "homepage": "https://github.com/eGangotri/egangotri-node-backend#readme",
   "dependencies": {
+    "@csv-js/csv": "^0.0.3",
     "@types/node": "^16.11.12",
     "body-parser": "^1.20.1",
     "child_process": "^1.0.2",

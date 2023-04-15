@@ -1,6 +1,7 @@
 const express = require("express");
 import { DailyWorkReport } from "../models/dailyWorkReport";
 import { ItemsUshered } from "../models/itemsUshered";
+import { generateCSV } from "../services/dailyWorkReportService";
 import { getListOfDailyWorkReport, getListOfItemsUshered } from "../services/dbService";
 import { Request, Response } from "express";
 
@@ -51,6 +52,24 @@ dailyWorkReportRoute.get("/list", async (req: Request, resp: Response) => {
     resp.status(200).send({
       response: items,
     });
+  } catch (err: any) {
+    console.log("Error", err);
+    resp.status(400).send(err);
+  }
+});
+
+dailyWorkReportRoute.get("/csv", async (req: Request, resp: Response) => {
+  try {
+    const items = await getListOfDailyWorkReport(req?.query);
+    console.log(
+      `after getListOfDailyWorkReport retirieved item count: ${items.length}`
+      );
+    const [_csv, _detailedCSV] = generateCSV(items)
+    resp.status(200).send(`
+    ${_csv}
+    
+    ${_detailedCSV}
+    `);
   } catch (err: any) {
     console.log("Error", err);
     resp.status(400).send(err);
