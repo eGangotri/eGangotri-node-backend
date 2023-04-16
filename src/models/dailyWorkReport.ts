@@ -3,6 +3,8 @@ import * as mongoose from "mongoose";
 const schema = new mongoose.Schema(
   {
     operatorName: { type: String, required: true },
+    center: { type: String, required: true },
+    lib: { type: String, required: false },
     totalPdfCount: { type: Number, required: true },
     totalPageCount: { type: Number, required: true },
     totalSize: { type: String, required: true },

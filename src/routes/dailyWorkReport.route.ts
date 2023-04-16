@@ -11,6 +11,8 @@ POST http://localhost/dailyWorkReport/add
 JSON Body 
 const x =    {
   "operatorName": "Aman",
+  "center": "Varanasi",
+  "lib": "Tripathi",
   "totalPdfCount": 2,
   "totalPageCount": 500,
   "totalSize": "200 MB",

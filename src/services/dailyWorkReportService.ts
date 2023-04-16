@@ -17,6 +17,14 @@ const header = [
     label: "NAME",
   },
   {
+    key: "center",
+    label: "Center",
+  },
+  {
+    key: "lib",
+    label: "Lib",
+  },
+  {
     key: "totalPdfCount",
     label: "TOTAL PDF COUNT",
   },
@@ -65,12 +73,13 @@ export const generateCSV = (reports: mongoose.Document[]) => {
     ) as DailyWorkReportType;
 
     const formattedDate = moment(dailyWorkReport.dateOfReport).format(DD_MM_YYYY_FORMAT);
-    //dailyWorkReport.dateOfReport.toLocaleString().slice(0,10);
     console.log(formattedDate);
     csv.append([
       {
         dateOfReport: formattedDate,
         operatorName: dailyWorkReport.operatorName,
+        center: dailyWorkReport.center,
+        lib: dailyWorkReport.lib,
         totalPdfCount: dailyWorkReport.totalPdfCount,
         totalPageCount: dailyWorkReport.totalPageCount,
         totalSize: dailyWorkReport.totalSize,
