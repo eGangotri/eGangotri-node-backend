@@ -13,6 +13,6 @@ export type DailyWorkReportType = {
 export type PageCountStatsType = {
   _id: string;
   fileName: string;
-  pageCount: 150;
-  fileSize: "250 MB";
+  pageCount: number;
+  fileSize: string;
 };
