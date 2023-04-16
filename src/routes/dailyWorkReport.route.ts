@@ -35,8 +35,8 @@ export const dailyWorkReportRoute = express.Router();
 
 dailyWorkReportRoute.post("/add", async (req: Request, resp: Response) => {
   try {
-    console.log("req.body");
     const wr = new DailyWorkReport(req.body);
+    console.log(`dailyWorkReportRoute /add ${JSON.stringify(wr)}`);
     await wr.save();
     resp.status(200).send(wr);
   } catch (err: any) {
