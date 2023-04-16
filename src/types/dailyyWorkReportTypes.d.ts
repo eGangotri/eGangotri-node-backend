@@ -11,7 +11,6 @@ export type DailyWorkReportType = {
 };
 
 export type PageCountStatsType = {
-  _id: string;
   fileName: string;
   pageCount: number;
   fileSize: string;
