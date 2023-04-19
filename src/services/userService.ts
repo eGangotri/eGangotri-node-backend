@@ -23,14 +23,17 @@ export function setOptionsForUserListing(queryOptions: UserListOptionsType) {
         $lte: new Date(queryOptions?.endDate),
       },
     };
-  } else {
+  }
+  /**
+   *  else {
     mongoOptionsFilter = {
       ...mongoOptionsFilter,
-      createdAt: {
-        $gte: subDays(new Date(), DEFAULT_DAYS_BEFORE_CURRENT_FOR_SEARCH),
-      },
+      // createdAt: {
+      //   $gte: subDays(new Date(), DEFAULT_DAYS_BEFORE_CURRENT_FOR_SEARCH),
+      // },
     };
   }
+   */
 
   if (queryOptions?.username) {
     const _username: string[] = queryOptions?.username.split(",");
@@ -41,6 +44,7 @@ export function setOptionsForUserListing(queryOptions: UserListOptionsType) {
     const _pwd: string[] = queryOptions?.password.split(",");
     mongoOptionsFilter = { ...mongoOptionsFilter,password: { $in: _pwd } };
   }
+  console.log(`mongoOptionsFilter ${JSON.stringify(mongoOptionsFilter)}`)
   const limit: number = getLimit(queryOptions?.limit);
   return { limit, mongoOptionsFilter };
 }
