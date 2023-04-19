@@ -1,0 +1,74 @@
+const express = require("express");
+import { User } from "../models/user";
+import { Request, Response } from "express";
+import { getUsers } from "../services/userService";
+import { LoginUsersDocument } from "../services/types";
+import { stripPassword } from "./utils";
+
+/**
+ * INSOMNIA POST Request Sample
+POST http://localhost/user/add 
+JSON Body 
+{
+	"username": "Avneet",
+	"password": "123456789",
+	"role": "Basic"
+}
+ */
+export const userRoute = express.Router();
+
+userRoute.post("/add", async (req: Request, resp: Response) => {
+  try {
+    const user = new User(req.body);
+    console.log(`userRoute /add ${JSON.stringify(user)}`);
+    await user.save();
+    resp.status(200).send(user);
+  } catch (err: any) {
+    console.log("Error", err);
+    resp.status(400).send(err);
+  }
+});
+
+/**
+ * 	This "response": [
+		{
+			"_id": "643eb3f6c2530d1d4c923838",
+			"username": "Aman",
+			"password": "123456789",
+			"role": "basic",
+			"createdAt": "2023-04-18T15:15:02.677Z",
+			"updatedAt": "2023-04-18T15:15:02.677Z",
+			"__v": 0
+		}
+    is trimmed using stripPassword(users)
+ */
+userRoute.get("/list", async (req: Request, resp: Response) => {
+  try {
+    console.log(`req?.query ${JSON.stringify(req?.query)}`);
+    const users: LoginUsersDocument[] = await getUsers(req?.query);
+    resp.status(200).send({
+      response: stripPassword(users),
+    });
+  } catch (err: any) {
+    console.log("Error", err);
+    resp.status(400).send(err);
+  }
+});
+
+userRoute.post(
+  "/checkValidCredentials",
+  async (req: Request, resp: Response) => {
+    try {
+      console.log(`req?.body ${JSON.stringify(req?.body)}`);
+      const users: LoginUsersDocument[] = await getUsers(req?.body);
+      console.log(`users${JSON.stringify(users)}`);
+
+      resp.status(200).send({
+        response: users?.length !== 0,
+      });
+    } catch (err: any) {
+      console.log("Error", err);
+      resp.status(400).send(err);
+    }
+  }
+);

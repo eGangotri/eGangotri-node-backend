@@ -3,6 +3,7 @@ const { itemsQueuedRoute }  = require("./routes/itemsQueued.route");
 const { itemsUsheredRoute }  = require( "./routes/itemsUshered.route");
 const { launchGradleRoute } = require("./routes/launchGradle.route");
 const { dailyWorkReportRoute } = require("./routes/dailyWorkReport.route");
+const { userRoute } = require("./routes/userRoute.route");
 
 const{ connectToMongo } = require("./services/dbService");
 const fs  = require("fs");
@@ -30,6 +31,7 @@ app.use("/itemsQueued", itemsQueuedRoute);
 app.use("/itemsUshered", itemsUsheredRoute);
 app.use("/launchGradle", launchGradleRoute);
 app.use("/dailyWorkReport", dailyWorkReportRoute);
+app.use("/user", userRoute);
 
 app.listen(port, async () => {
   console.log(`Server running at http://${hostname}:${port}/`);

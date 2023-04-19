@@ -63,10 +63,8 @@ const dailyDetailReportHeader = [
 ];
 
 export const generateCSV = (reports: mongoose.Document[]) => {
-  const csv = new Csv(header, { name: "Daily Work Report " });
-  const dailyDetailCSV = new Csv(dailyDetailReportHeader, {
-    name: "Daily Work Report ",
-  });
+  const csv = new Csv(header, { name: "Daily Work Report" });
+ 
   reports.forEach((report: mongoose.Document) => {
     const dailyWorkReport = JSON.parse(
       JSON.stringify(report.toJSON())
@@ -85,7 +83,27 @@ export const generateCSV = (reports: mongoose.Document[]) => {
         totalSize: dailyWorkReport.totalSize,
       },
     ]);
+  });
 
+  const _csv = csv.toString();
+  console.log(`_csv \n${_csv}`);
+  // Browser download csv
+  //csv.download();
+  return _csv;
+};
+
+
+export const generateDetailedCSV = (reports: mongoose.Document[]) => {
+  const dailyDetailCSV = new Csv(dailyDetailReportHeader, {
+    name: "Daily Work Report - Detailed",
+  });
+  reports.forEach((report: mongoose.Document) => {
+    const dailyWorkReport = JSON.parse(
+      JSON.stringify(report.toJSON())
+    ) as DailyWorkReportType;
+
+    const formattedDate = moment(dailyWorkReport.dateOfReport).format(DD_MM_YYYY_FORMAT);
+    console.log(formattedDate);
     const stats = dailyWorkReport.pageCountStats;
     stats.forEach((stat: PageCountStatsType) => {
       dailyDetailCSV.append([
@@ -98,13 +116,8 @@ export const generateCSV = (reports: mongoose.Document[]) => {
       ]);
       //console.log(`stat ${JSON.stringify(stat)}`)
     });
-    //console.log(`item ${JSON.stringify(dailyWorkReport)}`)
   });
 
-  const _csv = csv.toString();
   const _dailyDetailCSV = dailyDetailCSV.toString();
-  console.log(`_csv \n${_csv}`);
-  // Browser download csv
-  //csv.download();
-  return [_csv, _dailyDetailCSV];
+  return _dailyDetailCSV;
 };

@@ -9,7 +9,7 @@ import { Request, Response } from "express";
  * INSOMNIA POST Request Sample
 POST http://localhost/dailyWorkReport/add 
 JSON Body 
-const x =    {
+{
   "operatorName": "Aman",
   "center": "Varanasi",
   "lib": "Tripathi",
@@ -66,12 +66,22 @@ dailyWorkReportRoute.get("/csv", async (req: Request, resp: Response) => {
     console.log(
       `after getListOfDailyWorkReport retirieved item count: ${items.length}`
       );
-    const [_csv, _detailedCSV] = generateCSV(items)
-    resp.status(200).send(`
-    ${_csv}
-    
-    ${_detailedCSV}
-    `);
+    const _csv = generateCSV(items)
+    resp.status(200).send(_csv);
+  } catch (err: any) {
+    console.log("Error", err);
+    resp.status(400).send(err);
+  }
+});
+
+dailyWorkReportRoute.get("/detailedCsv", async (req: Request, resp: Response) => {
+  try {
+    const items = await getListOfDailyWorkReport(req?.query);
+    console.log(
+      `after getListOfDailyWorkReport retirieved item count: ${items.length}`
+      );
+    const _detailedCSV = generateCSV(items)
+    resp.status(200).send(_detailedCSV);
   } catch (err: any) {
     console.log("Error", err);
     resp.status(400).send(err);
