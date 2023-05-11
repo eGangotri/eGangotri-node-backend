@@ -12,6 +12,7 @@ import { DEFAULT_DAYS_BEFORE_CURRENT_FOR_SEARCH } from "../utils/constants";
 import { DailyWorkReport } from "../models/dailyWorkReport";
 
 type ItemsListOptionsType = {
+  ids?: string,
   limit?: number,
   startDate?: string,
   endDate?: string,
@@ -72,6 +73,14 @@ export function setOptionsForItemListing(queryOptions: ItemsListOptionsType) {
     };
   } else {
     mongoOptionsFilter = { createdAt: { $gte: subDays(new Date(), DEFAULT_DAYS_BEFORE_CURRENT_FOR_SEARCH) } };
+  }
+
+  console.log(`ids ${JSON.stringify(queryOptions)}`)
+
+  if(queryOptions?.ids){
+    const ids:string[] = queryOptions?.ids.split(",")
+    console.log(`ids ${ids}`)
+    mongoOptionsFilter = {_id : { $in: ids }}
   }
 
   if (queryOptions?.archiveProfile){
@@ -161,7 +170,7 @@ export async function connectToMongo() {
       });
       db.once("open", () => {
         // we're connected!
-        console.log("we are connected");
+        console.log(`we are connected to ${MONGO_DB_URL}`);
       });
     } catch (err) {
       console.log("could not connect to mongoose DB\n", err);
