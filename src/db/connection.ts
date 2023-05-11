@@ -18,7 +18,7 @@ export const MONGO_DB_NAME = "test";
 
 const prod = configData.prod;
 
-const DB_URL = `mongodb+srv://egangotri:${MONGO_CONFIGS.MONGO_ATLAS_PWD}@cluster0.yqcrz.mongodb.net/?retryWrites=true&w=majority`;
+const DB_URL = `mongodb+srv://${MONGO_CONFIGS.MONGO_ATLAS_USER}:${MONGO_CONFIGS.MONGO_ATLAS_PWD}@${MONGO_CONFIGS.MONGO_DB_PATH}/?retryWrites=true&w=majority`;
 const DB_HOST = prod ? configData.AZURE_DB_HOST : configData.DEV_DB_HOST;
 const DB_PORT = prod ? configData.AZURE_DB_PORT : configData.AZURE_DB_PORT;
 const DB_PARAMS = prod
