@@ -24,25 +24,16 @@ export function setOptionsForUserListing(queryOptions: UserListOptionsType) {
       },
     };
   }
-  /**
-   *  else {
-    mongoOptionsFilter = {
-      ...mongoOptionsFilter,
-      // createdAt: {
-      //   $gte: subDays(new Date(), DEFAULT_DAYS_BEFORE_CURRENT_FOR_SEARCH),
-      // },
-    };
-  }
-   */
 
   if (queryOptions?.username) {
     const _username: string[] = queryOptions?.username.split(",");
-    mongoOptionsFilter = { username: { $in: _username } };
+    var regexArray = _username.map(pattern => new RegExp(pattern, 'i'));
+    mongoOptionsFilter = { username: { $in: regexArray } };
   }
-  
+
   if (queryOptions?.password) {
     const _pwd: string[] = queryOptions?.password.split(",");
-    mongoOptionsFilter = { ...mongoOptionsFilter,password: { $in: _pwd } };
+    mongoOptionsFilter = { ...mongoOptionsFilter, password: { $in: _pwd } };
   }
   console.log(`mongoOptionsFilter ${JSON.stringify(mongoOptionsFilter)}`)
   const limit: number = getLimit(queryOptions?.limit);
