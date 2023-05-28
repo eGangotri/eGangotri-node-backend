@@ -1,0 +1,20 @@
+FROM node:16
+
+#Disabled by appending X to File Name. asapp.yaml for GCP wil start using it instead
+
+# Create app directory
+WORKDIR /usr/src/app
+
+# Install app dependencies
+COPY package.json ./
+
+COPY . .
+
+RUN npm install
+
+EXPOSE 80
+
+ENV DEV_ENV prod
+
+
+CMD [ "npm", "run", "start" ]

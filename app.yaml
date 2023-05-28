@@ -1,0 +1,10 @@
+# [ start app_yaml]
+# runtime: custom 
+#if using docker
+
+runtime: nodejs
+env: flex
+runtime_config:
+  operating_system: "ubuntu22"
+skip_files:
+- package-lock.json
