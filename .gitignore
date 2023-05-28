@@ -1,4 +1,3 @@
-src/pwd*.json
 
 # Logs
 logs
@@ -43,6 +42,7 @@ build/Release
 # Dependency directories
 node_modules/
 jspm_packages/
+functions/
 
 # TypeScript v1 declaration files
 typings/
