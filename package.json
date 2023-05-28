@@ -37,6 +37,7 @@
     "cors": "^2.8.5",
     "csv-parse": "latest",
     "date-fns": "^2.29.3",
+    "dotenv": "^16.0.3",
     "easy-pdf-merge": "^0.2.6",
     "express": "^4.18.2",
     "g": "^2.0.1",
