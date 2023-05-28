@@ -62,5 +62,8 @@
     "@types/underscore": "^1.11.4",
     "@types/uuid": "^8.3.4",
     "ts-node": "^10.9.1"
+  },
+  "engines": {
+    "node": "19.6.0"
   }
 }
