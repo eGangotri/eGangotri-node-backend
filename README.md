@@ -85,10 +85,27 @@ docker push  egangotri/egangotri-node-backend
 http://localhost:80/
 
 
-Deployment on GCP
-Install Gcloud cLI
+## Deployment on GCP
+### create a cloud project in GCP
+https://console.cloud.google.com/cloud-build/dashboard?project=hardy-ivy-388117
+
+### Install Gcloud CLI
 https://cloud.google.com/sdk/docs/install
 
+### create app.yaml
+
+### gcloud 
+
+First time:
+gcloud auth login
+gcloud init
+
+
+gcloud app deploy
+gcloud app browse
+
+The Site is available here.
+https://hardy-ivy-388117.de.r.appspot.com/
 
 #ERRORS
 #1. If you are getting 
