@@ -1,5 +1,5 @@
 const express = require("express");
-import * as serverless from "serverless-http";
+
 const { itemsQueuedRoute }  = require("./routes/itemsQueued.route");
 const { itemsUsheredRoute }  = require( "./routes/itemsUshered.route");
 const { launchGradleRoute } = require("./routes/launchGradle.route");
@@ -11,7 +11,7 @@ const fs  = require("fs");
 
 const app = express();
 const hostname = "127.0.0.1";
-const port = 80;
+const port = process.env.PORT || 80;
 
 connectToMongo();
 app.use(express.json());

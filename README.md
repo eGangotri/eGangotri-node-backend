@@ -85,6 +85,11 @@ docker push  egangotri/egangotri-node-backend
 http://localhost:80/
 
 
+Deployment on GCP
+Install Gcloud cLI
+https://cloud.google.com/sdk/docs/install
+
+
 #ERRORS
 #1. If you are getting 
 Attempting to connect to DB: mongodb+srv:// ......
@@ -104,23 +109,22 @@ In Access List add your IP Adddress at:
 
 https://cloud.mongodb.com/v2/5fd0d07d2dddad3b7d4e35d9#/security/network/accessList
 
+##2
+Error: error:0308010C:digital envelope routines::unsupported
+    at new Hash (node:internal/crypto/hash:71:19)
+    at Object.createHash (node:crypto:140:10)
+    at module.exports (C:\ws\eGangotri-node-backend\node_modules\webpack\lib\util\createHash.js:135:53)
+    at NormalModule._initBuildHash (C:\ws\eGangotri-node-backend\node_modules\webpack\lib\NormalModule.js:417:16)
+    at C:\ws\eGangotri-node-backend\node_modules\webpack\lib\NormalModule.js:452:10
+    at C:\ws\eGangotri-node-backend\node_modules\webpack\lib\NormalModule.js:323:13
+    at C:\ws\eGangotri-node-backend\node_modules\loader-runner\lib\LoaderRunner.js:367:11
+    at C:\ws\eGangotri-node-backend\node_modules\loader-runner\lib\LoaderRunner.js:233:18
+    at context.callback (C:\ws\eGangotri-node-backend\node_modules\loader-runner\lib\LoaderRunner.js:111:13)
+    at C:\ws\eGangotri-node-backend\node_modules\babel-loader\lib\index.js:44:103 {
+  opensslErrorStack: [ 'error:03000086:digital envelope routines::initialization error' ],
+  library: 'digital envelope routines',
+  reason: 'unsupported',
+  code: 'ERR_OSSL_EVP_UNSUPPORTED'
+}
 
-#Firebase Hosting
-https://medium.com/skyshidigital/deploy-node-js-to-firebase-hosting-cdc44518fe21
-Create Account in Firebase Console.
-npm install -g firebase-tools
-firebase login
-firebase init
-
-? Are you ready to proceed? (Y/n) 
-? Which Firebase features do you want to set up for this directory? Press Space to select features, then Enter to confirm your choices. (Press <space> to select, <a>
->(*) Hosting: Configure files for Firebase Hosting and (optionally) set up GitHub Action deploys
-
-? Please select an option: (Use arrow keys)
-> Use an existing project
-? Select a default Firebase project for this directory: egangotri-node-backend (egangotri-node-backend)
-i  Using project egangotri-node-backend (egangotri-node-backend)
-
-? What do you want to use as your public directory? build
-? Configure as a single-page app (rewrite all urls to /index.html)? (y/N) y
-? Set up automatic builds and deploys with GitHub? (y/N) N
+export NODE_OPTIONS=--openssl-legacy-provider
