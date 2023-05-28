@@ -1,4 +1,5 @@
 const express = require("express");
+import * as serverless from "serverless-http";
 const { itemsQueuedRoute }  = require("./routes/itemsQueued.route");
 const { itemsUsheredRoute }  = require( "./routes/itemsUshered.route");
 const { launchGradleRoute } = require("./routes/launchGradle.route");
