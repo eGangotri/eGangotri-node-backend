@@ -103,3 +103,24 @@ then dont use WSL Terminal, switch to BASH Terminal
 In Access List add your IP Adddress at:
 
 https://cloud.mongodb.com/v2/5fd0d07d2dddad3b7d4e35d9#/security/network/accessList
+
+
+#Firebase Hosting
+https://medium.com/skyshidigital/deploy-node-js-to-firebase-hosting-cdc44518fe21
+Create Account in Firebase Console.
+npm install -g firebase-tools
+firebase login
+firebase init
+
+? Are you ready to proceed? (Y/n) 
+? Which Firebase features do you want to set up for this directory? Press Space to select features, then Enter to confirm your choices. (Press <space> to select, <a>
+>(*) Hosting: Configure files for Firebase Hosting and (optionally) set up GitHub Action deploys
+
+? Please select an option: (Use arrow keys)
+> Use an existing project
+? Select a default Firebase project for this directory: egangotri-node-backend (egangotri-node-backend)
+i  Using project egangotri-node-backend (egangotri-node-backend)
+
+? What do you want to use as your public directory? build
+? Configure as a single-page app (rewrite all urls to /index.html)? (y/N) y
+? Set up automatic builds and deploys with GitHub? (y/N) N
