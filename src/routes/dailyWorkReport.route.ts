@@ -1,7 +1,6 @@
 const express = require("express");
 import { DailyWorkReport } from "../models/dailyWorkReport";
-import { generateCSV } from "../services/dailyWorkReportService";
-import { getListOfDailyWorkReport, getListOfItemsUshered } from "../services/dbService";
+import { generateCSV, getListOfDailyWorkReport } from "../services/dailyWorkReportService";
 import { Request, Response } from "express";
 import { validateUserFromRequest } from "./utils";
 

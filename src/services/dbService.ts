@@ -9,22 +9,8 @@ import { subDays } from "date-fns";
 import * as _ from "underscore";
 import { getLimit } from "../routes/utils";
 import { DEFAULT_DAYS_BEFORE_CURRENT_FOR_SEARCH } from "../utils/constants";
-import { DailyWorkReport } from "../models/dailyWorkReport";
+import { ItemsListOptionsType } from "./types";
 
-type ItemsListOptionsType = {
-  ids?: string,
-  limit?: number,
-  startDate?: string,
-  endDate?: string,
-  archiveProfile?: string,
-};
-
-type DailyWorkReportListOptionsType = {
-  limit?: number,
-  startDate?: string,
-  endDate?: string,
-  operatorName?: string,
-};
 
 export async function addItemsQueuedBulk(itemsArray: any[]) {
   return await addItemstoMongoBulk(itemsArray, DOC_TYPE.IQ);
@@ -92,72 +78,6 @@ export function setOptionsForItemListing(queryOptions: ItemsListOptionsType) {
   return {limit, mongoOptionsFilter};
 }
 
-export function setOptionsForDailyWorkReportListing(queryOptions: DailyWorkReportListOptionsType) {
-  // Empty `filter` means "match all documents"
-  let mongoOptionsFilter = {};
-  if (queryOptions?.startDate && queryOptions?.endDate) {
-    mongoOptionsFilter = {
-      createdAt: {
-        $gte: new Date(queryOptions?.startDate),
-        $lte: new Date(queryOptions?.endDate),
-      },
-    };
-  } else {
-    mongoOptionsFilter = { createdAt: { $gte: subDays(new Date(), DEFAULT_DAYS_BEFORE_CURRENT_FOR_SEARCH) } };
-  }
-
-  if (queryOptions?.operatorName){
-    const operatorName:string[] = queryOptions?.operatorName.split(",")
-    console.log(`operatorName ${operatorName}`)
-    mongoOptionsFilter = {operatorName : { $in: operatorName }}
-  }
-  const limit: number = getLimit(queryOptions?.limit);
-  return {limit, mongoOptionsFilter};
-}
-
-export async function getListOfItemsQueued(queryOptions: ItemsListOptionsType) {
-  const {limit,mongoOptionsFilter} = setOptionsForItemListing(queryOptions)
-  const items = await ItemsQueued.find(mongoOptionsFilter)
-    .sort({ createdAt: -1 })
-    .limit(limit);
-  return items;
-}
-
-export async function getListOfItemsUshered(queryOptions: ItemsListOptionsType) {
-  const {limit,mongoOptionsFilter} = setOptionsForItemListing(queryOptions)
-  const items = await ItemsUshered.find(mongoOptionsFilter)
-    .sort({ createdAt: -1 })
-    .limit(limit);
-  return items;
-}
-
-export async function getListOfItemsQueuedArrangedByProfile(
-  queryOptions: ItemsListOptionsType
-) {
-  const items = await getListOfItemsQueued(queryOptions);
-  const groupedItems = _.groupBy(items, function (item: any) {
-    return item.archiveProfile;
-  });
-  console.log(
-    `getListOfItemsQueuedArrangedByProfile ${JSON.stringify(
-      groupedItems.length
-    )}`
-  );
-  return groupedItems;
-}
-
-
-export async function getListOfDailyWorkReport(queryOptions: ItemsListOptionsType) {
-  const {limit,mongoOptionsFilter} = setOptionsForDailyWorkReportListing(queryOptions)
-
-  // MyModel.find({ 'customObjects.name': 'object1' }, (err, documents) => {
-  //   console.log(documents);
-  // });
-  const items = await DailyWorkReport.find(mongoOptionsFilter)
-    .sort({ createdAt: -1 })
-    .limit(limit);
-  return items;
-}
 
 export async function connectToMongo() {
   console.log("\nAttempting to connect to DB:", MONGO_DB_URL);

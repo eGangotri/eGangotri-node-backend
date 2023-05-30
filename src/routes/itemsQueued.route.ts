@@ -1,8 +1,8 @@
 const express = require("express");
 import { ItemsQueued } from '../models/itemsQueued';
-import { getListOfItemsQueued, getListOfItemsQueuedArrangedByProfile } from '../services/dbService';
 import { Request, Response } from 'express';
 import { validateSuperAdminUserFromRequest } from './utils';
+import { getListOfItemsQueued, getListOfItemsQueuedArrangedByProfile } from '../services/itemsQueuedService';
 
 export const itemsQueuedRoute = express.Router()
 

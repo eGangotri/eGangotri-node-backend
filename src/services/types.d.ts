@@ -19,3 +19,19 @@ export type UserListOptionsType = {
     startDate?: string;
     endDate?: string;
   };
+
+  export type ItemsListOptionsType = {
+    ids?: string,
+    limit?: number,
+    startDate?: string,
+    endDate?: string,
+    archiveProfile?: string,
+  };
+  
+  export type DailyWorkReportListOptionsType = {
+    limit?: number,
+    startDate?: string,
+    endDate?: string,
+    operatorName?: string,
+  };
+  
