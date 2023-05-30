@@ -37,10 +37,10 @@ export const validateUserFromRequest = async (req: Request) => {
 }
 
 export const validateSuperAdminUserFromRequest = async (req: Request) => {
-  const username = req?.body?.user;
-  const password = req?.body?.password;
+  const username = req?.body?.superadmin_user;
+  const password = req?.body?.superadmin_password;
   if (!username || !password) {
-    return [false, "Username or password missing"];
+    return [false, "Superadmin Username or password missing"];
   }
   const _user = await validateUser(username, password);
   const users = _user.map(document => document.toObject());

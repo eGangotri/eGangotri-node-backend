@@ -11,8 +11,8 @@ export const itemsQueuedRoute = express.Router()
 POST http://localhost/itemsQueued/add 
 JSON Body 
  {
-    "user": "XXXX",
-	"password": "XXXXX",
+    "superadmin_user": "XXXX",
+	"superadmin_password": "XXXXX",
 	"uploadCycleId": "2",
 	"title": "2",
 	"localPath": "2",
