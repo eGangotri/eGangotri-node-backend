@@ -2,6 +2,7 @@ const express = require("express");
 import { ItemsQueued } from '../models/itemsQueued';
 import { getListOfItemsQueued, getListOfItemsQueuedArrangedByProfile } from '../services/dbService';
 import { Request, Response } from 'express';
+import { validateSuperAdminUserFromRequest } from './utils';
 
 export const itemsQueuedRoute = express.Router()
 
@@ -10,6 +11,8 @@ export const itemsQueuedRoute = express.Router()
 POST http://localhost/itemsQueued/add 
 JSON Body 
  {
+    "user": "XXXX",
+	"password": "XXXXX",
 	"uploadCycleId": "2",
 	"title": "2",
 	"localPath": "2",
@@ -20,13 +23,21 @@ JSON Body
 }
  */
 itemsQueuedRoute.post('/add', async (req:Request, resp:Response) => {
+    
     try {
-        console.log("req.body")
-        const iq = new ItemsQueued(req.body);
-        await iq.save();
-        resp.status(200).send({
-            "response":iq
-        });
+        const _validate = await validateSuperAdminUserFromRequest(req)
+        if (_validate[0]) {
+            console.log("itemsQueuedRoute:post:req.body")
+            const iq = new ItemsQueued(req.body);
+            await iq.save();
+            resp.status(200).send({
+                "response":iq
+            });
+          }
+          else {
+            resp.status(200).send({error:_validate[1]});
+          }
+       
     }
     catch (err: any) {
         console.log('Error', err);
