@@ -1,9 +1,11 @@
 const express = require("express");
 import { DailyWorkReport } from "../models/dailyWorkReport";
-import { ItemsUshered } from "../models/itemsUshered";
 import { generateCSV } from "../services/dailyWorkReportService";
 import { getListOfDailyWorkReport, getListOfItemsUshered } from "../services/dbService";
 import { Request, Response } from "express";
+import { validateUserFromRequest } from "./utils";
+
+export const dailyWorkReportRoute = express.Router();
 
 /**
  * INSOMNIA POST Request Sample
@@ -11,6 +13,7 @@ POST http://localhost/dailyWorkReport/add
 JSON Body 
 {
   "operatorName": "Aman",
+  "password": "12228",
   "center": "Varanasi",
   "lib": "Tripathi",
   "totalPdfCount": 2,
@@ -21,24 +24,32 @@ JSON Body
     {
       "fileName": "ek.pdf",
       "pageCount": 300,
-      "fileSize": "50 MB",
+      "fileSize": "50 MB"
     },
     {
       "fileName": "do.pdf",
       "pageCount": 200,
-      "fileSize": "150 MB",
-    },
-  ],
+      "fileSize": "150 MB"
+    }
+  ]
 }
  */
-export const dailyWorkReportRoute = express.Router();
 
 dailyWorkReportRoute.post("/add", async (req: Request, resp: Response) => {
   try {
-    const wr = new DailyWorkReport(req.body);
-    console.log(`dailyWorkReportRoute /add ${JSON.stringify(wr)}`);
-    await wr.save();
-    resp.status(200).send(wr);
+    const user = req.body.operatorName
+    
+    if (await validateUserFromRequest(req)) {
+      const wr = new DailyWorkReport(req.body);
+      console.log(`dailyWorkReportRoute /add ${JSON.stringify(wr)}`);
+      await wr.save();
+      resp.status(200).send({
+        "success": `Added Daily Report Stats with Id ${wr._id} for ${user}`
+      });
+    }
+    else {
+      resp.status(200).send({error:`Couldn't validate User ${user}`});
+    }
   } catch (err: any) {
     console.log("Error", err);
     resp.status(400).send(err);
@@ -65,7 +76,7 @@ dailyWorkReportRoute.get("/csv", async (req: Request, resp: Response) => {
     const items = await getListOfDailyWorkReport(req?.query);
     console.log(
       `after getListOfDailyWorkReport retirieved item count: ${items.length}`
-      );
+    );
     const _csv = generateCSV(items)
     resp.status(200).send(_csv);
   } catch (err: any) {
@@ -79,7 +90,7 @@ dailyWorkReportRoute.get("/detailedCsv", async (req: Request, resp: Response) =>
     const items = await getListOfDailyWorkReport(req?.query);
     console.log(
       `after getListOfDailyWorkReport retirieved item count: ${items.length}`
-      );
+    );
     const _detailedCSV = generateCSV(items)
     resp.status(200).send(_detailedCSV);
   } catch (err: any) {

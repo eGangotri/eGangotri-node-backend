@@ -55,13 +55,21 @@ userRoute.get("/list", async (req: Request, resp: Response) => {
   }
 });
 
+//POST http://localhost/user/checkValidCredentials 
+/**
+ * {
+			"username": "Aman",
+			"password": "123456789"
+		}
+ */
+
 userRoute.post(
   "/checkValidCredentials",
   async (req: Request, resp: Response) => {
     try {
-      console.log(`req?.body ${JSON.stringify(req?.body)}`);
+      console.log(`checkValidCredentials:req?.body ${JSON.stringify(req?.body)}`);
       const users: LoginUsersDocument[] = await getUsers(req?.body);
-      console.log(`users${JSON.stringify(users)}`);
+      console.log(`checkValidCredentials:${JSON.stringify(users)}`);
 
       resp.status(200).send({
         response: users?.length !== 0,
