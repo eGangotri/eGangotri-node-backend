@@ -2,12 +2,15 @@ const express = require("express");
 import { ItemsUshered } from '../models/itemsUshered';
 import { getListOfItemsUshered } from "../services/dbService";
 import { Request, Response } from 'express';
+import { validateSuperAdminUserFromRequest } from './utils';
 
 /**
  * INSOMNIA POST Request Sample
 POST http://localhost/itemsUshered/add 
 JSON Body 
  {
+    "user": "XXXX",
+	"password": "XXXXX",
 	"uploadCycleId": "2",
 	"title": "2",
 	"localPath": "2",
@@ -21,11 +24,19 @@ JSON Body
 export const itemsUsheredRoute = express.Router()
 
 itemsUsheredRoute.post('/add', async (req:any, resp:any) => {
+    
     try {
-        console.log("req.body:add")
-        const iq = new ItemsUshered(req.body);
-        await iq.save();
-        resp.status(200).send(iq);
+        const _validate = await validateSuperAdminUserFromRequest(req);
+        if (_validate[0]) {
+            console.log("req.body:add")
+            const iq = new ItemsUshered(req.body);
+            await iq.save();
+            resp.status(200).send(iq);
+          }
+          else {
+            resp.status(200).send({error:_validate[1]});
+          }
+       
     }
     catch (err: any) {
         console.log('Error', err);
