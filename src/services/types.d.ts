@@ -10,3 +10,12 @@ export interface LoginUsersDocument extends mongoose.Document {
     password: string,
     role: string,
   }
+
+export type UserListOptionsType = {
+    username?: string;
+    password?: string;
+    role?: string;
+    limit?: number;
+    startDate?: string;
+    endDate?: string;
+  };
