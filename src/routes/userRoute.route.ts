@@ -15,6 +15,7 @@ JSON Body
 	"role": "Basic"
 }
  */
+//Role can be Basic/Admin/Superadmin
 export const userRoute = express.Router();
 
 userRoute.post("/add", async (req: Request, resp: Response) => {
