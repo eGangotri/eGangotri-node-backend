@@ -1,8 +1,8 @@
 const express = require("express");
 import { ItemsUshered } from '../models/itemsUshered';
-import { getListOfItemsUshered } from "../services/dbService";
 import { Request, Response } from 'express';
 import { validateSuperAdminUserFromRequest } from './utils';
+import { getListOfItemsUshered } from '../services/itemsUsheredService';
 
 /**
  * INSOMNIA POST Request Sample

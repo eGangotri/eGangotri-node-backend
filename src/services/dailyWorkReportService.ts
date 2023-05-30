@@ -6,6 +6,11 @@ import {
 import mongoose from "mongoose";
 import moment from 'moment';
 import { DD_MM_YYYY_FORMAT } from "../utils/utils";
+import { DailyWorkReport } from "../models/dailyWorkReport";
+import { DailyWorkReportListOptionsType, ItemsListOptionsType } from "./types";
+import { DEFAULT_DAYS_BEFORE_CURRENT_FOR_SEARCH } from "../utils/constants";
+import { subDays } from "date-fns";
+import { getLimit } from "../routes/utils";
 
 const header = [
   {
@@ -121,3 +126,39 @@ export const generateDetailedCSV = (reports: mongoose.Document[]) => {
   const _dailyDetailCSV = dailyDetailCSV.toString();
   return _dailyDetailCSV;
 };
+
+
+export function setOptionsForDailyWorkReportListing(queryOptions: DailyWorkReportListOptionsType) {
+  // Empty `filter` means "match all documents"
+  let mongoOptionsFilter = {};
+  if (queryOptions?.startDate && queryOptions?.endDate) {
+    mongoOptionsFilter = {
+      createdAt: {
+        $gte: new Date(queryOptions?.startDate),
+        $lte: new Date(queryOptions?.endDate),
+      },
+    };
+  } else {
+    mongoOptionsFilter = { createdAt: { $gte: subDays(new Date(), DEFAULT_DAYS_BEFORE_CURRENT_FOR_SEARCH) } };
+  }
+
+  if (queryOptions?.operatorName){
+    const operatorName:string[] = queryOptions?.operatorName.split(",")
+    //This wil make the username case-independent
+    var regexArray = operatorName.map(pattern => new RegExp(pattern, 'i'));
+    console.log(` queryOptions?.operatorName ${queryOptions?.operatorName} : regexArray: ${regexArray}`)
+    mongoOptionsFilter = {...mongoOptionsFilter, operatorName: { $in: regexArray } };
+    console.log(`mongoOptionsFilter ${JSON.stringify(mongoOptionsFilter)}`)
+  }
+  const limit: number = getLimit(queryOptions?.limit);
+  return {limit, mongoOptionsFilter};
+}
+
+export async function getListOfDailyWorkReport(queryOptions: ItemsListOptionsType) {
+  const {limit,mongoOptionsFilter} = setOptionsForDailyWorkReportListing(queryOptions)
+
+  const items = await DailyWorkReport.find(mongoOptionsFilter)
+    .sort({ createdAt: -1 })
+    .limit(limit);
+  return items;
+}
