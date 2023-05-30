@@ -10,6 +10,8 @@ import { stripPassword, validateSuperAdminUserFromRequest } from "./utils";
 POST http://localhost/user/add 
 JSON Body 
 {
+  "superadmin_user": "XXXX",
+	"superadmin_password": "XXXXX",
   "username": "Avneet",
   "password": "123456789",
   "role": "Basic"
@@ -25,13 +27,11 @@ userRoute.post("/add", async (req: Request, resp: Response) => {
       const user = new User(req.body);
       console.log(`userRoute /add ${JSON.stringify(user)}`);
       await user.save();
-      resp.status(200).send(user);
+      resp.status(200).send(stripPassword([user])[0]);
     }
     else {
       resp.status(200).send({ error: _validate[1] });
     }
-
-
   } catch (err: any) {
     console.log("Error", err);
     resp.status(400).send(err);
