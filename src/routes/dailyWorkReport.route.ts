@@ -8,6 +8,8 @@ import { createReadStream } from "fs";
 import moment from 'moment';
 import mongoose from "mongoose";
 import { DD_MM_YYYY_FORMAT } from "../utils/utils";
+import * as fsExtra from "fs-extra";
+import * as fs from "fs";
 
 export const dailyWorkReportRoute = express.Router();
 
@@ -95,16 +97,25 @@ dailyWorkReportRoute.get("/csvAsFile", async (req: Request, resp: Response) => {
     console.log(
       `after getListOfDailyWorkReport retirieved item count: ${items.length}`
     );
-    
-    generateCSVAsFile(resp,items)
+
+    generateCSVAsFile(resp, items)
   } catch (err: any) {
     console.log("Error", err);
     resp.status(400).send(err);
   }
 });
 
-export const generateCSVAsFile = async (res: Response, data: mongoose.Document[] ) => {
-  const csvFileName = `eGangotri-Staff-DWR-On-${moment(new Date()).format(DD_MM_YYYY_FORMAT)}.csv`
+export const generateCSVAsFile = async (res: Response, data: mongoose.Document[]) => {
+  
+  const CSVS_DIR = ".//_csvs"
+  fsExtra.emptyDirSync(CSVS_DIR);
+  ;
+  if (!fs.existsSync(CSVS_DIR)) {
+    console.log('creating: ', CSVS_DIR);
+    fs.mkdirSync(CSVS_DIR)
+  }
+
+  const csvFileName = `${CSVS_DIR}//eGangotri-Staff-DWR-On-${moment(new Date()).format(DD_MM_YYYY_FORMAT)}.csv`
   try {
     // Define the CSV file headers
     const csvWriter = createObjectCsvWriter({

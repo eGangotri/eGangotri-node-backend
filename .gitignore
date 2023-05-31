@@ -1,3 +1,4 @@
+.csv
 
 # Logs
 logs
@@ -105,4 +106,3 @@ dist
 
 # TernJS port file
 .tern-port
-.csv
