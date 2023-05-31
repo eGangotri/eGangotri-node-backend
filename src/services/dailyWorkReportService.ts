@@ -12,7 +12,7 @@ import { DEFAULT_DAYS_BEFORE_CURRENT_FOR_SEARCH } from "../utils/constants";
 import { subDays } from "date-fns";
 import { getLimit } from "../routes/utils";
 
-const header = [
+export const CSV_HEADER = [
   {
     key: "dateOfReport",
     label: "DATE",
@@ -41,12 +41,39 @@ const header = [
     key: "totalSize",
     label: "TOTAL SIZE",
   },
-
-  {
-    key: "pageCountStats",
-    label: "Operator Name",
-  },
 ];
+
+export const CSV_HEADER_API2 = 
+[
+  {
+    id: "dateOfReport",
+    title: "Date of Report",
+  },
+  {
+    id: "operatorName",
+    title: "Operator Name",
+  },
+  {
+    id: "center",
+    title: "Center",
+  },
+  {
+    id: "lib",
+    title: "Lib",
+  },
+  {
+    id: "totalPdfCount",
+    title: "TOTAL PDF COUNT",
+  },
+  {
+    id: "totalPageCount",
+    title: "TOTAL PAGE COUNT(Pages)",
+  },
+  {
+    id: "totalSize",
+    title: "TOTAL SIZE",
+  }
+]
 
 const dailyDetailReportHeader = [
   {
@@ -68,7 +95,7 @@ const dailyDetailReportHeader = [
 ];
 
 export const generateCSV = (reports: mongoose.Document[]) => {
-  const csv = new Csv(header, { name: "Daily Work Report" });
+  const csv = new Csv(CSV_HEADER, { name: "Daily Work Report" });
  
   reports.forEach((report: mongoose.Document) => {
     const dailyWorkReport = JSON.parse(
@@ -92,11 +119,33 @@ export const generateCSV = (reports: mongoose.Document[]) => {
 
   const _csv = csv.toString();
   console.log(`_csv \n${_csv}`);
-  // Browser download csv
-  //csv.download();
   return _csv;
 };
 
+export const generateCSVApi2 = (reports: mongoose.Document[]) => {
+  //const csv = new Csv(CSV_HEADER, { name: "Daily Work Report" });
+  const csvData:any[] = [];
+  reports.forEach((report: mongoose.Document) => {
+    const dailyWorkReport = JSON.parse(
+      JSON.stringify(report.toJSON())
+    ) as DailyWorkReportType;
+
+    const formattedDate = moment(dailyWorkReport.dateOfReport).format(DD_MM_YYYY_FORMAT);
+    console.log(formattedDate);
+    csvData.push({
+        dateOfReport: formattedDate,
+        operatorName: dailyWorkReport.operatorName,
+        center: dailyWorkReport.center,
+        lib: dailyWorkReport.lib,
+        totalPdfCount: dailyWorkReport.totalPdfCount,
+        totalPageCount: dailyWorkReport.totalPageCount,
+        totalSize: dailyWorkReport.totalSize,
+      },
+    );
+  });
+
+  return csvData;
+};
 
 export const generateDetailedCSV = (reports: mongoose.Document[]) => {
   const dailyDetailCSV = new Csv(dailyDetailReportHeader, {
