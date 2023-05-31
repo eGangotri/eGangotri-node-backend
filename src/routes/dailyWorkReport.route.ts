@@ -1,15 +1,8 @@
 const express = require("express");
 import { DailyWorkReport } from "../models/dailyWorkReport";
-import { CSV_HEADER_API2, generateCSV, getListOfDailyWorkReport } from "../services/dailyWorkReportService";
+import { generateCSV, generateCSVAsFile, getListOfDailyWorkReport } from "../services/dailyWorkReportService";
 import { Request, Response } from "express";
 import { validateUserFromRequest } from "./utils";
-import { createObjectCsvWriter } from "csv-writer";
-import { createReadStream } from "fs";
-import moment from 'moment';
-import mongoose from "mongoose";
-import { DD_MM_YYYY_FORMAT } from "../utils/utils";
-import * as fsExtra from "fs-extra";
-import * as fs from "fs";
 
 export const dailyWorkReportRoute = express.Router();
 
@@ -77,6 +70,7 @@ dailyWorkReportRoute.get("/list", async (req: Request, resp: Response) => {
   }
 });
 
+//localhost/dailyWorkReport/csv?startDate="1-Jan-2023"&endDate="31-Jun-2023"
 dailyWorkReportRoute.get("/csv", async (req: Request, resp: Response) => {
   try {
     const items = await getListOfDailyWorkReport(req?.query);
@@ -99,55 +93,6 @@ dailyWorkReportRoute.get("/csvAsFile", async (req: Request, resp: Response) => {
     );
 
     generateCSVAsFile(resp, items)
-  } catch (err: any) {
-    console.log("Error", err);
-    resp.status(400).send(err);
-  }
-});
-
-export const generateCSVAsFile = async (res: Response, data: mongoose.Document[]) => {
-  
-  const CSVS_DIR = ".//_csvs"
-  fsExtra.emptyDirSync(CSVS_DIR);
-  ;
-  if (!fs.existsSync(CSVS_DIR)) {
-    console.log('creating: ', CSVS_DIR);
-    fs.mkdirSync(CSVS_DIR)
-  }
-
-  const csvFileName = `${CSVS_DIR}//eGangotri-Staff-DWR-On-${moment(new Date()).format(DD_MM_YYYY_FORMAT)}.csv`
-  try {
-    // Define the CSV file headers
-    const csvWriter = createObjectCsvWriter({
-      path: csvFileName,
-      header: CSV_HEADER_API2
-    });
-
-    // Write the data array to a CSV file
-    await csvWriter.writeRecords(data);
-
-    // Set the response headers to indicate that the response is a CSV file
-    res.setHeader('Content-Type', 'text/csv');
-    res.setHeader('Content-Disposition', `attachment; filename=${csvFileName}`);
-
-    // Stream the CSV file as the response
-    const fileStream = createReadStream(csvFileName);
-    fileStream.pipe(res);
-  } catch (error) {
-    console.error('Error writing CSV:', error);
-    res.status(500).send('Internal Server Error');
-  }
-}
-
-dailyWorkReportRoute.get("/detailedCsv", async (req: Request, resp: Response) => {
-  try {
-    const items = await getListOfDailyWorkReport(req?.query);
-
-    console.log(
-      `after getListOfDailyWorkReport retirieved item count: ${items.length}`
-    );
-    const _detailedCSV = generateCSV(items)
-    resp.status(200).send(_detailedCSV);
   } catch (err: any) {
     console.log("Error", err);
     resp.status(400).send(err);
