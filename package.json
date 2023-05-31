@@ -35,6 +35,7 @@
     "child_process": "^1.0.2",
     "cors": "^2.8.5",
     "csv-parse": "latest",
+    "csv-writer": "^1.6.0",
     "date-fns": "^2.29.3",
     "dotenv": "^16.0.3",
     "easy-pdf-merge": "^0.2.6",
