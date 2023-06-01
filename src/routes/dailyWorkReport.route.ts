@@ -1,6 +1,6 @@
 const express = require("express");
 import { DailyWorkReport } from "../models/dailyWorkReport";
-import { generateCSV, generateCSVAsFile, getListOfDailyWorkReport } from "../services/dailyWorkReportService";
+import { generateCSV, generateCSVApi2 as generateCSVAsJsonArray, generateCSVAsFile, getListOfDailyWorkReport } from "../services/dailyWorkReportService";
 import { Request, Response } from "express";
 import { validateUserFromRequest } from "./utils";
 
@@ -75,9 +75,24 @@ dailyWorkReportRoute.get("/csv", async (req: Request, resp: Response) => {
   try {
     const items = await getListOfDailyWorkReport(req?.query);
     console.log(
-      `after getListOfDailyWorkReport retirieved item count: ${items.length}`
+      `after getListOfDailyWorkReport retirieved item count: ${items[0]}`
     );
     const _csv = generateCSV(items)
+    resp.status(200).send(_csv);
+  } catch (err: any) {
+    console.log("Error", err);
+    resp.status(400).send(err);
+  }
+});
+
+//localhost/dailyWorkReport/csvAsJsonArray?startDate="1-Jan-2023"&endDate="31-Jun-2023"
+dailyWorkReportRoute.get("/csvAsJsonArray", async (req: Request, resp: Response) => {
+  try {
+    const items = await getListOfDailyWorkReport(req?.query);
+    console.log(
+      `after getListOfDailyWorkReport retirieved item count: ${items[0]}`
+    );
+    const _csv = generateCSVAsJsonArray(items)
     resp.status(200).send(_csv);
   } catch (err: any) {
     console.log("Error", err);

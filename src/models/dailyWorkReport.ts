@@ -8,11 +8,13 @@ const schema = new mongoose.Schema(
     totalPdfCount: { type: Number, required: true },
     totalPageCount: { type: Number, required: true },
     totalSize: { type: String, required: true },
+    totalSizeRaw: { type: Number, required: true },
     dateOfReport: { type: Date, required: true },
     pageCountStats: { type: [{
       fileName: String,
       pageCount: Number,
       fileSize: String,
+      fileSizeRaw: Number,
     }], required: true },
   },
   {

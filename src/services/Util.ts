@@ -44,3 +44,7 @@ import moment from 'moment';
       return stripQuotes(r);
     });
   }
+
+  export function addSizeStrings() {
+    
+  }
