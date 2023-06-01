@@ -59,6 +59,10 @@ export const CSV_HEADER = [
     {
       id: "totalSize",
       title: "TOTAL SIZE",
+    },
+    {
+      id: "totalSizeRaw",
+      title: "TOTAL SIZE (Raw)",
     }
   ]
   

@@ -75,10 +75,8 @@ export const getAllDotSumFiles = async (dir: string) => {
 }
 
 export const getAllFilesOfGivenType = async (dir: string, _types: Array<string> = []) => {
-     let files = []
-
      const contentList = await fs.promises.readdir(dir)
-     files = contentList.map((x) => dir + "\\" + x).filter((y) => {
+     let files = contentList.map((x) => dir + "\\" + x).filter((y) => {
           // console.log(`Found ${y}`)
           return _types.includes(path.extname(y).toLowerCase())
      })

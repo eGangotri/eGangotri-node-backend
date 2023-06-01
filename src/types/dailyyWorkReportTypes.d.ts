@@ -6,6 +6,7 @@ export type DailyWorkReportType = {
   totalPdfCount: number;
   totalPageCount: number;
   totalSize: string;
+  totalSizeRaw: number;
   dateOfReport: Date;
   pageCountStats: PageCountStatsType[];
 };
@@ -14,4 +15,5 @@ export type PageCountStatsType = {
   fileName: string;
   pageCount: number;
   fileSize: string;
+  fileSizeRaw: string;
 };
