@@ -127,16 +127,47 @@ export function setOptionsForDailyWorkReportListing(queryOptions: DailyWorkRepor
   // }
 
   if (queryOptions?.operatorName) {
-    const operatorName: string[] = queryOptions?.operatorName.split(",")
+    const operatorName: string[] = replaceQuotesAndSplit(queryOptions.operatorName)
     //This wil make the username case-independent
     var regexArray = operatorName.map(pattern => new RegExp(pattern, 'i'));
     mongoOptionsFilter = { ...mongoOptionsFilter, operatorName: { $in: regexArray } };
     console.log(`mongoOptionsFilter ${JSON.stringify(mongoOptionsFilter)}`)
   }
+
+  if (queryOptions?.isLastTwoHours) {
+    const isLastTwoHours = replaceQuotes(queryOptions.isLastTwoHours);
+    if(isLastTwoHours  === 'true'){
+      mongoOptionsFilter = {
+        ...mongoOptionsFilter, 
+        createdAt: {
+          $gte: new Date(getDateTwoHoursBeforeNow()),
+          $lte: new Date(new Date()),
+        },
+      };
+    }
+  }
+
+  if (queryOptions?._id) {
+    const _id:string[] = replaceQuotesAndSplit(queryOptions._id);
+    mongoOptionsFilter = { ...mongoOptionsFilter, _id: { $in: _id } };
+
+  }
   const limit: number = getLimit(queryOptions?.limit);
   console.log(` queryOptions ${JSON.stringify(queryOptions)} : mongoOptionsFilter: ${JSON.stringify(mongoOptionsFilter)}`)
 
   return { limit, mongoOptionsFilter };
+}
+
+const replaceQuotes = (replaceable:string) =>{
+  return replaceable?.replace(/"|'/g, "")
+}
+
+const replaceQuotesAndSplit = (replaceable:string) =>{
+  return replaceQuotes(replaceable).split(",");
+}
+
+function getDateTwoHoursBeforeNow(_date: Date = new Date()): Date {
+    return new Date(_date.getTime() - (2 * 60 * 60 * 1000));
 }
 
 export async function getListOfDailyWorkReport(queryOptions: ItemsListOptionsType) {
@@ -167,31 +198,23 @@ export const generateCSVAsFile = async (res: Response, data: mongoose.Document[]
       header: CSV_HEADER_API2
     });
 
-    const _toObj = data.map(x=>x.toObject());
     const pdfCountSum = _.sum(data.map(x=>x.get("totalPdfCount")))
     const pageCountSum = _.sum(data.map(x=>x.get("totalPageCount")));
     const sizeCountRawSum = _.sum(data.map(x=>x.get("totalSizeRaw")||0));
 
-    const genericArray:any[] = [{
-      ...data
-    }];
 
-    genericArray.push(
-        {
-            dateOfReport: "Totals",
-            operatorName: "",
-            center: "",
-            lib: "",
-            totalPdfCount: pdfCountSum,
-            totalPageCount: pageCountSum,
-            totalSize: Mirror.sizeInfo(sizeCountRawSum),
-            totalSizeRaw: sizeCountRawSum,
-      })
-
-      console.log(`_toObj ${pdfCountSum} ${pageCountSum} ${sizeCountRawSum} ${Mirror.sizeInfo(sizeCountRawSum)} ${JSON.stringify(_toObj[0])}`);
+      console.log(`_toObj ${pdfCountSum} ${pageCountSum} ${sizeCountRawSum} ${Mirror.sizeInfo(sizeCountRawSum)}}`);
       await csvWriter.writeRecords(data); 
-
-      await csvWriter.writeRecords(genericArray); 
+      await csvWriter.writeRecords([{
+        dateOfReport: "Totals",
+        operatorName: "",
+        center: "",
+        lib: "",
+        totalPdfCount: pdfCountSum,
+        totalPageCount: pageCountSum,
+        totalSize: Mirror.sizeInfo(sizeCountRawSum),
+        totalSizeRaw: sizeCountRawSum,
+  }]); 
 
     // Set the response headers to indicate that the response is a CSV file
     res.setHeader('Content-Type', 'text/csv');
