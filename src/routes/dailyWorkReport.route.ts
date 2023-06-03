@@ -11,43 +11,70 @@ export const dailyWorkReportRoute = express.Router();
 POST http://localhost/dailyWorkReport/add 
 JSON Body 
 {
-  "operatorName": "Aman",
-  "password": "12228",
-  "center": "Varanasi",
-  "lib": "Tripathi",
-  "totalPdfCount": 2,
-  "totalPageCount": 500,
-  "totalSize": "200 MB",
-  "dateOfReport": "2023/04/15 12:12:21",
-  "pageCountStats": [
-    {
-      "fileName": "ek.pdf",
-      "pageCount": 300,
-      "fileSize": "50 MB"
-    },
-    {
-      "fileName": "do.pdf",
-      "pageCount": 200,
-      "fileSize": "150 MB"
-    }
-  ]
+	"operatorName": "test2",
+	"center": "Haridwar",
+	"lib": "Gurukul-Kangri",
+	"totalPdfCount": 3,
+	"totalPageCount": 896,
+	"totalSize": "460.3 MB",
+	"totalSizeRaw": "3333333333",
+	"dateOfReport": "2023-05-30T17:11:57.792Z",
+	"pageCountStats": [
+		{
+			"fileName": "The complete works of the swami vivekananda).pdf",
+			"pageCount": 471,
+			"fileSize": "234.58 MB"
+		},
+		{
+			"fileName": "Sharika leela.pdf",
+			"pageCount": 284,
+			"fileSize": "111.25 MB"
+		},
+		{
+			"fileName": "The temples of india).pdf",
+			"pageCount": 141,
+			"fileSize": "114.47 MB"
+		}
+	],
+	"password": "22222"
 }
  */
 
 dailyWorkReportRoute.post("/add", async (req: Request, resp: Response) => {
   try {
-    const user = req.body.operatorName
+    const operatorName = req.body.operatorName
 
     if (await validateUserFromRequest(req)) {
       const wr = new DailyWorkReport(req.body);
-      console.log(`dailyWorkReportRoute /add ${JSON.stringify(wr)}`);
-      await wr.save();
-      resp.status(200).send({
-        "success": `Added Daily Report Stats with Id ${wr._id} for ${user}`
-      });
+
+      //Check if any request was sent in Last 2 hours
+      const _query:typeof req.query = {};
+      _query['isLastTwoHours'] = 'true';
+      _query['operatorName'] = operatorName;
+
+      const items = await getListOfDailyWorkReport(_query);
+      if (items && items.length > 0) {
+        console.log(`dailyWorkReportRoute: /add ${JSON.stringify(items)} ${items[0]}`);
+         const updatedDocument = await wr.updateOne({_id:items[0]._id}).exec();
+
+         console.log(`dailyWorkReportRoute:updatedDocument ${JSON.stringify(updatedDocument)}}`);
+
+        resp.status(200).send({
+          "warning": `Since Last Submission Request < 2 Hours. exisiting Data is merely overwritten not inserted.${wr._id} for ${operatorName}`
+        });
+
+      }
+
+      else {
+        console.log(`dailyWorkReportRoute /add ${JSON.stringify(wr)}`);
+        await wr.save();
+        resp.status(200).send({
+          "success": `Added Daily Report Stats with Id ${wr._id} for ${operatorName}`
+        });
+      }
     }
     else {
-      resp.status(200).send({ error: `Couldn't validate User ${user}` });
+      resp.status(200).send({ error: `Couldn't validate User ${operatorName}` });
     }
   } catch (err: any) {
     console.log("Error", err);
@@ -59,7 +86,7 @@ dailyWorkReportRoute.get("/list", async (req: Request, resp: Response) => {
   try {
     const items = await getListOfDailyWorkReport(req?.query);
     console.log(
-      `after getListOfDailyWorkReport retirieved item count: ${items.length}`
+      `after getListOfDailyWorkReport retrieved item count: ${items.length}`
     );
     resp.status(200).send({
       response: items,
@@ -75,7 +102,7 @@ dailyWorkReportRoute.get("/csv", async (req: Request, resp: Response) => {
   try {
     const items = await getListOfDailyWorkReport(req?.query);
     console.log(
-      `after getListOfDailyWorkReport retirieved item count: ${items[0]}`
+      `after getListOfDailyWorkReport retrieved item count: ${items[0]}`
     );
     const _csv = generateCSV(items)
     resp.status(200).send(_csv);
@@ -90,7 +117,7 @@ dailyWorkReportRoute.get("/csvAsJsonArray", async (req: Request, resp: Response)
   try {
     const items = await getListOfDailyWorkReport(req?.query);
     console.log(
-      `after getListOfDailyWorkReport retirieved item count: ${items[0]}`
+      `after getListOfDailyWorkReport retrieved item count: ${items[0]}`
     );
     const _csv = generateCSVAsJsonArray(items)
     resp.status(200).send(_csv);
@@ -104,7 +131,7 @@ dailyWorkReportRoute.get("/csvAsFile", async (req: Request, resp: Response) => {
   try {
     const items = await getListOfDailyWorkReport(req?.query);
     console.log(
-      `after getListOfDailyWorkReport retirieved item count: ${items.length}`
+      `after getListOfDailyWorkReport retrieved item count: ${items.length}`
     );
 
     generateCSVAsFile(resp, items)

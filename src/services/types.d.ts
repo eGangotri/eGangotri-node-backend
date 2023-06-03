@@ -29,9 +29,11 @@ export type UserListOptionsType = {
   };
   
   export type DailyWorkReportListOptionsType = {
-    limit?: number,
+    _id?: string,
     startDate?: string,
     endDate?: string,
     operatorName?: string,
+    isLastTwoHours?: string, //true or false as string
+    limit?: number,
   };
   
