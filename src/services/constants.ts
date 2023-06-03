@@ -28,6 +28,10 @@ export const CSV_HEADER = [
       key: "totalSize",
       label: "TOTAL SIZE",
     },
+    {
+      key: "totalSizeRaw",
+      label: "TOTAL SIZE (Raw)",
+    },
   ];
   
   export const CSV_HEADER_API2 = 

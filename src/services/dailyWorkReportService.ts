@@ -24,7 +24,7 @@ export const generateCSV = (reports: mongoose.Document[]) => {
 
   let pdfCountSum = 0;
   let pageCountSum = 0;
-  let sizeCountSum = 0;
+  let sizeRawSum = 0;
 
   reports.forEach((report: mongoose.Document) => {
     const dailyWorkReport = JSON.parse(
@@ -35,7 +35,7 @@ export const generateCSV = (reports: mongoose.Document[]) => {
     console.log(formattedDate);
     pdfCountSum += dailyWorkReport.totalPdfCount;
     pageCountSum += dailyWorkReport.totalPageCount;
-    sizeCountSum += dailyWorkReport?.totalSizeRaw || 0;
+    sizeRawSum += dailyWorkReport?.totalSizeRaw || 0;
     csv.append([
       {
         dateOfReport: formattedDate,
@@ -45,6 +45,7 @@ export const generateCSV = (reports: mongoose.Document[]) => {
         totalPdfCount: dailyWorkReport.totalPdfCount,
         totalPageCount: dailyWorkReport.totalPageCount,
         totalSize: dailyWorkReport.totalSize,
+        totalSizeRaw: dailyWorkReport.totalSizeRaw,
       },
     ]);
   });
@@ -57,7 +58,8 @@ export const generateCSV = (reports: mongoose.Document[]) => {
       lib: "",
       totalPdfCount: pdfCountSum,
       totalPageCount: pageCountSum,
-      totalSize: Mirror.sizeInfo(sizeCountSum),
+      totalSize: Mirror.sizeInfo(sizeRawSum),
+      totalSizeRaw: sizeRawSum,
     },
   ]);
 
@@ -106,35 +108,6 @@ export const generateCSVApi2 = (reports: mongoose.Document[]) => {
   );
   console.log(`csvData ${JSON.stringify(csvData)}`)
   return csvData;
-};
-
-export const generateDetailedCSV = (reports: mongoose.Document[]) => {
-  const dailyDetailCSV = new Csv(dailyDetailReportHeader, {
-    name: "Daily Work Report - Detailed",
-  });
-  reports.forEach((report: mongoose.Document) => {
-    const dailyWorkReport = JSON.parse(
-      JSON.stringify(report.toJSON())
-    ) as DailyWorkReportType;
-
-    const formattedDate = moment(dailyWorkReport.dateOfReport).format(DD_MM_YYYY_FORMAT);
-    console.log(formattedDate);
-    const stats = dailyWorkReport.pageCountStats;
-    stats.forEach((stat: PageCountStatsType) => {
-      dailyDetailCSV.append([
-        {
-          operatorName: dailyWorkReport.operatorName,
-          fileName: stat.fileName,
-          pageCount: stat.pageCount,
-          fileSize: stat.fileSize,
-        },
-      ]);
-      //console.log(`stat ${JSON.stringify(stat)}`)
-    });
-  });
-
-  const _dailyDetailCSV = dailyDetailCSV.toString();
-  return _dailyDetailCSV;
 };
 
 
@@ -200,12 +173,12 @@ export const generateCSVAsFile = async (res: Response, data: mongoose.Document[]
     const sizeCountRawSum = _.sum(data.map(x=>x.get("totalSizeRaw")||0));
 
     const genericArray:any[] = [{
-      ..._toObj
+      ...data
     }];
 
     genericArray.push(
         {
-            dateOfReport: "",
+            dateOfReport: "Totals",
             operatorName: "",
             center: "",
             lib: "",
@@ -215,11 +188,10 @@ export const generateCSVAsFile = async (res: Response, data: mongoose.Document[]
             totalSizeRaw: sizeCountRawSum,
       })
 
-    await csvWriter.writeRecords(genericArray);
-    console.log(`_toObj ${pdfCountSum} ${pageCountSum} ${sizeCountRawSum} ${Mirror.sizeInfo(sizeCountRawSum)} ${JSON.stringify(_toObj[0])}`);
-      // Create an extra row as a separate array
-      const extraRow = { name: 'Extra Person', age: 40, city: 'Extra City' };
+      console.log(`_toObj ${pdfCountSum} ${pageCountSum} ${sizeCountRawSum} ${Mirror.sizeInfo(sizeCountRawSum)} ${JSON.stringify(_toObj[0])}`);
+      await csvWriter.writeRecords(data); 
 
+      await csvWriter.writeRecords(genericArray); 
 
     // Set the response headers to indicate that the response is a CSV file
     res.setHeader('Content-Type', 'text/csv');
