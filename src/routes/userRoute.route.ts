@@ -11,7 +11,7 @@ POST http://localhost/user/add
 JSON Body 
 {
   "superadmin_user": "XXXX",
-	"superadmin_password": "XXXXX",
+  "superadmin_password": "XXXXX",
   "username": "Avneet",
   "password": "123456789",
   "role": "Basic"
@@ -79,10 +79,19 @@ userRoute.post(
       console.log(`checkValidCredentials:req?.body ${JSON.stringify(req?.body)}`);
       const users: LoginUsersDocument[] = await getUsers(req?.body);
       console.log(`checkValidCredentials:${JSON.stringify(users)}`);
-
-      resp.status(200).send({
-        response: users?.length !== 0,
-      });
+      let response = {}
+      if (users && users?.length === 1) {
+        response = {
+          success: true,
+          role: users[0].get("role")
+        }
+      }
+      else {
+        response = {
+          success: false
+        }
+      }
+      resp.status(200).send(response);
     } catch (err: any) {
       console.log("Error", err);
       resp.status(400).send(err);
