@@ -33,6 +33,7 @@ export type UserListOptionsType = {
     startDate?: string,
     endDate?: string,
     operatorName?: string,
+    centers?: string,
     isLastTwoHours?: string, //true or false as string
     limit?: number,
   };

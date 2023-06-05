@@ -10,7 +10,7 @@ import { createObjectCsvWriter } from "csv-writer";
 import { createReadStream } from "fs";
 import * as fsExtra from "fs-extra";
 import * as fs from "fs";
-import { CSV_HEADER_API2} from "./constants";
+import { CSV_HEADER_API2 } from "./constants";
 import * as Mirror from "../mirror/FrontEndBackendCommonCode"
 import * as _ from 'lodash';
 import { getDateTwoHoursBeforeNow, replaceQuotes, replaceQuotesAndSplit } from "./Util";
@@ -19,27 +19,50 @@ import { getDateTwoHoursBeforeNow, replaceQuotes, replaceQuotesAndSplit } from "
 
 export function setOptionsForDailyWorkReportListing(queryOptions: DailyWorkReportListOptionsType) {
   // Empty `filter` means "match all documents"
+  // mongoOptionsFilter: {"dateOfReport":{"$gte":"2023-06-22T18:30:00.000Z","$lte":"2023-06-24T18:29:59.000Z"}}
   let mongoOptionsFilter = {};
   if (queryOptions?.startDate && queryOptions?.endDate) {
+    // const startDateWithTimeComponent =  new Date(replaceQuotes(queryOptions?.startDate))
+    // startDateWithTimeComponent.setHours(0);
+    // startDateWithTimeComponent.setMinutes(0);
+    // startDateWithTimeComponent.setSeconds(0);
+    // console.log(`startDateWithTimeComponent ${startDateWithTimeComponent}`)
+
+    // const endDateWithTimeComponent =  new Date(replaceQuotes(queryOptions?.endDate))
+    // endDateWithTimeComponent.setHours(23);
+    // endDateWithTimeComponent.setMinutes(59);
+    // endDateWithTimeComponent.setSeconds(59);
+    
+    const startDateWithTimeComponent = new Date(replaceQuotes(queryOptions?.startDate) + " 00:00:00");
+    const endDateWithTimeComponent = new Date(replaceQuotes(queryOptions?.endDate) + " 23:59:59");
+    console.log(`endDateWithTimeComponent ${endDateWithTimeComponent}  ${new Date()}`)
     mongoOptionsFilter = {
-      dateOfReport: {
-        $gte: new Date(queryOptions?.startDate),
-        $lte: new Date(queryOptions?.endDate),
+      createdAt: {
+        $gte: startDateWithTimeComponent,
+        $lte: endDateWithTimeComponent,
       },
     };
   }
-  //else {
-  //   mongoOptionsFilter = { dateOfReport: { $gte: subDays(new Date(), DEFAULT_DAYS_BEFORE_CURRENT_FOR_SEARCH) } };
-  // }
 
   if (queryOptions?.operatorName) {
     const operatorName: string[] = replaceQuotesAndSplit(queryOptions.operatorName)
     //This wil make the username case-independent
     var regexArray = operatorName.map(pattern => new RegExp(pattern, 'i'));
     mongoOptionsFilter = { ...mongoOptionsFilter, operatorName: { $in: regexArray } };
-    console.log(`mongoOptionsFilter ${JSON.stringify(mongoOptionsFilter)}`)
   }
 
+
+  if (queryOptions?.centers) {
+    const centers: string[] = replaceQuotesAndSplit(queryOptions.centers)
+    //This wil make the username case-independent
+    var regexArray = centers.map(pattern => new RegExp(pattern, 'i'));
+    mongoOptionsFilter = { ...mongoOptionsFilter, center: { $in: regexArray } };
+  }
+
+  if (queryOptions?._id) {
+    const _id: string[] = replaceQuotesAndSplit(queryOptions._id);
+    mongoOptionsFilter = { ...mongoOptionsFilter, _id: { $in: _id } };
+  }
   if (queryOptions?.isLastTwoHours) {
     const isLastTwoHours = replaceQuotes(queryOptions.isLastTwoHours);
     if (isLastTwoHours === 'true') {
@@ -53,17 +76,11 @@ export function setOptionsForDailyWorkReportListing(queryOptions: DailyWorkRepor
     }
   }
 
-  if (queryOptions?._id) {
-    const _id: string[] = replaceQuotesAndSplit(queryOptions._id);
-    mongoOptionsFilter = { ...mongoOptionsFilter, _id: { $in: _id } };
-
-  }
   const limit: number = getLimit(queryOptions?.limit);
-  console.log(` queryOptions ${JSON.stringify(queryOptions)} : mongoOptionsFilter: ${JSON.stringify(mongoOptionsFilter)}`)
-
+  console.log(`mongoOptionsFilter: ${JSON.stringify(mongoOptionsFilter)}`)
+  console.log(`User dispatched queryOptions ${JSON.stringify(queryOptions)}`)
   return { limit, mongoOptionsFilter };
 }
-
 
 export async function getListOfDailyWorkReport(queryOptions: ItemsListOptionsType) {
   const { limit, mongoOptionsFilter } = setOptionsForDailyWorkReportListing(queryOptions)
@@ -121,4 +138,16 @@ export const generateCSVAsFile = async (res: Response, data: mongoose.Document[]
     console.error('Error writing CSV:', error);
     res.status(500).send('Internal Server Error');
   }
+}
+
+
+export const deleteRowsByIds = async (_itemIds: string[]) => {
+  // Define your criteria for deletion
+  const deleteCriteria = {
+    _id: { $in: _itemIds }
+  };
+  // Delete the rows based on the criteria
+  const res = await DailyWorkReport.deleteMany(deleteCriteria);
+  console.log(`delete res ${JSON.stringify(res)}`)
+  return res;
 }
