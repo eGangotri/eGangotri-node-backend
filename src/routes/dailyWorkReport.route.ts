@@ -1,10 +1,11 @@
 const express = require("express");
 import { DailyWorkReport } from "../models/dailyWorkReport";
 import { generateCSV, generateCSVApi2 } from "../services/CsvUtil";
-import { generateCSVAsFile, getListOfDailyWorkReport } from "../services/dailyWorkReportService";
+import { deleteRowsByIds, generateCSVAsFile, getListOfDailyWorkReport } from "../services/dailyWorkReportService";
 import { Request, Response } from "express";
-import { validateUserFromRequest } from "./utils";
+import { validateSuperAdminUserFromRequest, validateUserFromRequest } from "./utils";
 import { getDateTwoHoursBeforeNow } from "../services/Util";
+import _ from "lodash";
 
 export const dailyWorkReportRoute = express.Router();
 
@@ -85,7 +86,7 @@ dailyWorkReportRoute.post("/add", async (req: Request, resp: Response) => {
     }
   } catch (err: any) {
     console.log("Error", err);
-    resp.status(400).send({ error:err});
+    resp.status(400).send({ error: err });
   }
 });
 
@@ -104,6 +105,63 @@ dailyWorkReportRoute.get("/list", async (req: Request, resp: Response) => {
   }
 });
 
+
+dailyWorkReportRoute.get("/listIds", async (req: Request, resp: Response) => {
+  try {
+    const items = await getListOfDailyWorkReport(req?.query);
+    console.log(
+      `after getListOfDailyWorkReport retrieved item count: ${items.length}`
+    );
+    resp.status(200).send({
+      response: items?.map((item) => item._id),
+    });
+  } catch (err: any) {
+    console.log("Error", err);
+    resp.status(400).send(err);
+  }
+});
+
+
+dailyWorkReportRoute.delete("/delete", async (req: Request, resp: Response) => {
+  try {
+    const _id = req.body?._id;
+
+    const _validate = await validateSuperAdminUserFromRequest(req);
+    if (_validate[0]) {
+      if (_.isEmpty(_id)) {
+        console.log(`cannot proceed _id not provided`);
+        resp.status(300).send({
+          response: `Must have param _ids containing one or more _id as coma-separated value`,
+        });
+      }
+      else {
+        const items = await getListOfDailyWorkReport(req.body);
+        console.log(
+          `after getListOfDailyWorkReport retrieved item count: ${items.length}`
+        );
+
+        if (_.isEmpty(items)) {
+          resp.status(200).send({
+            response: "No _ids matching found. No deletion",
+          });
+        }
+        else {
+          const _ids = items.map((item) => item._id.toString())
+          const status = await deleteRowsByIds(_ids);
+          resp.status(200).send({
+            response: `Deleted ${status.deletedCount} items`,
+          });
+        }
+      }
+    }
+    else {
+      resp.status(200).send({ error: _validate[1] });
+    }
+  } catch (err: any) {
+    console.log("Error", err);
+    resp.status(400).send(err);
+  }
+});
 //localhost/dailyWorkReport/csv?startDate="1-Jan-2023"&endDate="31-Jun-2023"
 dailyWorkReportRoute.get("/csv", async (req: Request, resp: Response) => {
   try {
