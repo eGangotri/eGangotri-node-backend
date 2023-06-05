@@ -55,6 +55,8 @@ userRoute.get("/list", async (req: Request, resp: Response) => {
   try {
     console.log(`req?.query ${JSON.stringify(req?.query)}`);
     const users: LoginUsersDocument[] = await getUsers(req?.query);
+    console.log(`users ${JSON.stringify(users)}`);
+
     resp.status(200).send({
       response: stripPassword(users),
     });
