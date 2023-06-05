@@ -85,7 +85,7 @@ dailyWorkReportRoute.post("/add", async (req: Request, resp: Response) => {
     }
   } catch (err: any) {
     console.log("Error", err);
-    resp.status(400).send(err);
+    resp.status(400).send({ error:err});
   }
 });
 
