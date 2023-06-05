@@ -48,3 +48,16 @@ import moment from 'moment';
   export function addSizeStrings() {
     
   }
+
+  
+export const replaceQuotes = (replaceable: string) => {
+  return replaceable?.replace(/"|'/g, "")
+}
+
+export const replaceQuotesAndSplit = (replaceable: string) => {
+  return replaceQuotes(replaceable).split(",");
+}
+
+export function getDateTwoHoursBeforeNow(_date: Date = new Date()): Date {
+  return new Date(_date.getTime() - (2 * 60 * 60 * 1000));
+}

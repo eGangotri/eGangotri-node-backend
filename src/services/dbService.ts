@@ -31,20 +31,20 @@ export async function addItemstoMongoBulk(
   console.log(
     `adding ${itemsArray.length} items for ${csvForInsertion} to Mongo`
   );
-  const mongooseModel: Model<Document> =
-    docType === DOC_TYPE.IQ ? ItemsQueued : ItemsUshered;
-  try {
-    const result = await mongooseModel.insertMany(itemsArray).catch((err) => {
-      console.log(
-        `insertMany err (${csvForInsertion})  (${typeof itemsArray}) : ${err}`
-      );
-    });
-    console.log(`addItemstoMongoBulk:result ${JSON.stringify(result)}`);
-    return result;
-  } catch (err) {
-    console.log(`err((${csvForInsertion})) in addItemsUsheredBulk:`, err);
-    throw err;
-  }
+  // const mongooseModel: Model<Document> =
+  //   docType === DOC_TYPE.IQ ? ItemsQueued : ItemsUshered;
+  // try {
+  //   const result = await mongooseModel.insertMany(itemsArray).catch((err) => {
+  //     console.log(
+  //       `insertMany err (${csvForInsertion})  (${typeof itemsArray}) : ${err}`
+  //     );
+  //   });
+  //   console.log(`addItemstoMongoBulk:result ${JSON.stringify(result)}`);
+  //   return result;
+  // } catch (err) {
+  //   console.log(`err((${csvForInsertion})) in addItemsUsheredBulk:`, err);
+  //   throw err;
+  // }
 }
 
 export function setOptionsForItemListing(queryOptions: ItemsListOptionsType) {
@@ -83,13 +83,14 @@ export async function connectToMongo() {
   console.log("\nAttempting to connect to DB:", MONGO_DB_URL);
   if (MONGO_DB_URL) {
     try {
-      await mongoose.connect(MONGO_DB_URL, MONGO_OPTIONS);
+      await mongoose.connect(MONGO_DB_URL);
       const db = mongoose.connection;
       db.on("error", () => {
         console.log("connection error:");
       });
       db.once("open", () => {
         // we're connected!
+        mongoose.set('debug', true)
         console.log(`we are connected to ${MONGO_DB_URL}`);
       });
     } catch (err) {
