@@ -32,9 +32,11 @@ userRoute.post("/add", async (req: Request, resp: Response) => {
     else {
       resp.status(200).send({ error: _validate[1] });
     }
-  } catch (err: any) {
+  } catch (err) {
     console.log("Error", err);
-    resp.status(400).send(err);
+    resp.status(400).send({
+      error:err
+    });
   }
 });
 

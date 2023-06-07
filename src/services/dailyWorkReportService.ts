@@ -21,18 +21,7 @@ export function setOptionsForDailyWorkReportListing(queryOptions: DailyWorkRepor
   // Empty `filter` means "match all documents"
   // mongoOptionsFilter: {"dateOfReport":{"$gte":"2023-06-22T18:30:00.000Z","$lte":"2023-06-24T18:29:59.000Z"}}
   let mongoOptionsFilter = {};
-  if (queryOptions?.startDate && queryOptions?.endDate) {
-    // const startDateWithTimeComponent =  new Date(replaceQuotes(queryOptions?.startDate))
-    // startDateWithTimeComponent.setHours(0);
-    // startDateWithTimeComponent.setMinutes(0);
-    // startDateWithTimeComponent.setSeconds(0);
-    // console.log(`startDateWithTimeComponent ${startDateWithTimeComponent}`)
-
-    // const endDateWithTimeComponent =  new Date(replaceQuotes(queryOptions?.endDate))
-    // endDateWithTimeComponent.setHours(23);
-    // endDateWithTimeComponent.setMinutes(59);
-    // endDateWithTimeComponent.setSeconds(59);
-    
+  if (queryOptions?.startDate && queryOptions?.endDate && moment(queryOptions?.startDate).isValid() && moment(queryOptions?.endDate).isValid()) {
     const startDateWithTimeComponent = new Date(replaceQuotes(queryOptions?.startDate) + " 00:00:00");
     const endDateWithTimeComponent = new Date(replaceQuotes(queryOptions?.endDate) + " 23:59:59");
     console.log(`endDateWithTimeComponent ${endDateWithTimeComponent}  ${new Date()}`)
