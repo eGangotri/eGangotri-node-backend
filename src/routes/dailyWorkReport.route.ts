@@ -112,8 +112,10 @@ dailyWorkReportRoute.get("/listIds", async (req: Request, resp: Response) => {
     console.log(
       `after getListOfDailyWorkReport retrieved item count: ${items.length}`
     );
+    const itemIds = items?.map((item) => item._id);
     resp.status(200).send({
-      response: items?.map((item) => item._id),
+      response: itemIds,
+      responseAsCsv: itemIds?.join(","),
     });
   } catch (err: any) {
     console.log("Error", err);
