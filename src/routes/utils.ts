@@ -1,6 +1,6 @@
 import { LoginUsersDocument, UserListOptionsType } from "../services/types";
 import { getUsers } from "../services/userService";
-import { MAX_ITEMS_LISTABLE } from "../utils/constants";
+import { MAX_ITEMS_LISTABLE, SUPERADMIN_ROLE } from "../utils/constants";
 import { Request } from "express";
 
 export const getLimit = (limit: string | undefined | number): number => {
@@ -48,7 +48,7 @@ export const validateSuperAdminUserFromRequest = async (req: Request) => {
   if (users?.length === 0) {
     return [false, `Login failed for User "${username}"`];
   }
-  else if (users[0].role !== "superadmin"){
+  else if (users[0].role !== SUPERADMIN_ROLE){
     return [false, `Username "${username}" doesnt have relevant privileges`];
   }
   else {
