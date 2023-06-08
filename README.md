@@ -101,7 +101,7 @@ gcloud auth login
 gcloud init
 
 
-gcloud app deploy
+gcloud app deploy ( doesnt work from bash.only cmd)
 gcloud app browse
 
 The Site is available here.

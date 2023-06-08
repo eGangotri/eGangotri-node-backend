@@ -1,10 +1,7 @@
-import { subDays } from "date-fns";
 import { User } from "../models/user";
 import { getLimit } from "../routes/utils";
-import { DEFAULT_DAYS_BEFORE_CURRENT_FOR_SEARCH } from "../utils/constants";
 import { UserListOptionsType } from "./types";
-
-
+import { replaceQuotesAndSplit } from "./Util";
 
 export function setOptionsForUserListing(queryOptions: UserListOptionsType) {
   // Empty `filter` means "match all documents"
@@ -20,7 +17,7 @@ export function setOptionsForUserListing(queryOptions: UserListOptionsType) {
   }
 
   if (queryOptions?.username) {
-    const _username: string[] = queryOptions?.username.split(",");
+    const _username: string[] = replaceQuotesAndSplit(queryOptions?.username);
 
     //This wil make the username case-independent
     var regexArray = _username.map(pattern => new RegExp(pattern, 'i'));
@@ -30,8 +27,13 @@ export function setOptionsForUserListing(queryOptions: UserListOptionsType) {
   }
 
   if (queryOptions?.password) {
-    const _pwd: string[] = queryOptions?.password.split(",");
+    const _pwd: string[] = replaceQuotesAndSplit(queryOptions?.password);
     mongoOptionsFilter = { ...mongoOptionsFilter, password: { $in: _pwd } };
+  }
+  
+  if (queryOptions?.role) {
+    const _role: string[] = replaceQuotesAndSplit(queryOptions?.role);
+    mongoOptionsFilter = { ...mongoOptionsFilter, role: { $in: _role } };
   }
   console.log(`mongoOptionsFilter ${JSON.stringify(mongoOptionsFilter)}`)
   const limit: number = getLimit(queryOptions?.limit);

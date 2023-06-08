@@ -35,11 +35,75 @@ userRoute.post("/add", async (req: Request, resp: Response) => {
   } catch (err) {
     console.log("Error", err);
     resp.status(400).send({
-      error:err
+      error: err
     });
   }
 });
 
+
+/**
+ * localhost:80/user/patch/delete
+ * {
+ * {
+	"superadmin_user": "XXXX",
+	"superadmin_password": "",
+	"username": "YYYYY"
+}}
+ */
+userRoute.delete("/delete", async (req: Request, resp: Response) => {
+  try {
+    const _validate = await validateSuperAdminUserFromRequest(req);
+    if (_validate[0]) {
+      const users: LoginUsersDocument[] = await getUsers({ username: req.body.username });
+      if (users && users.length >= 1) {
+        console.log(`userRoute /delete ${JSON.stringify(users[0])}`);
+        const _delete = await User.deleteMany({ username: req.body.username });
+        resp.status(200).send(_delete?.deletedCount);
+      }
+      else {
+        resp.status(200).send({ error: _validate[1] });
+      }
+    }
+  } catch (err) {
+    console.log("Error", err);
+    resp.status(400).send({
+      error: err
+    });
+  }
+});
+
+/**
+ * localhost:80/user/patch/test
+ * {
+ * {
+	"superadmin_user": "XXXX",
+	"superadmin_password": "",
+	"role": "Superadmin"
+}}
+ */
+userRoute.patch("/patch/:username", async (req: Request, resp: Response) => {
+  try {
+    const { username } = req.params;
+
+    const _validate = await validateSuperAdminUserFromRequest(req);
+    if (_validate[0]) {
+      const users: LoginUsersDocument[] = await getUsers({ username: req.body.username });
+      if (users && users.length >= 1) {
+        console.log(`userRoute /patch ${JSON.stringify(users[0])}`);
+        const _update = await User.findOneAndUpdate({ username: username }, req.body);
+        resp.status(200).send(_update);
+      }
+      else {
+        resp.status(200).send({ error: _validate[1] });
+      }
+    }
+  } catch (err) {
+    console.log("Error", err);
+    resp.status(400).send({
+      error: err
+    });
+  }
+});
 /**
  * 	This "response": [
     {
