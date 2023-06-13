@@ -14,12 +14,12 @@ const path = require('path');
  * @param text 
  * @param finalDumpGround 
  */
-export const createVanityPdf = async (imagePath: string, pdfToVanitize: string, text: string, finalDumpGround:string) => {
+export const createVanityPdf = async (imagePath: string, pdfToVanitize: string, text: string, finalDumpGround: string) => {
     try {
         const introPdf = await createIntroPageWithImage(imagePath, pdfToVanitize, text);
         console.log(`merge vanity pdf ${introPdf} pdfName ${pdfToVanitize} `);
         console.log(`dim:${introPdf}`, await PdfLibUtils.getPdfFirstPageDimensionsUsingPdfLib(introPdf))
-       await mergeVanityPdf(introPdf, pdfToVanitize,finalDumpGround)
+        await mergeVanityPdf(introPdf, pdfToVanitize, finalDumpGround)
     }
     catch (err) {
         console.log(`createVanityPdf:err ${err}`)
@@ -34,7 +34,7 @@ const createIntroPageWithImage = async (imagePath: string, pdfToVanitize: string
     const pdfToVanitizeNameWithoutExt = path.parse(pdfToVanitize).name.trim()
     const introPDfName = pdfToVanitizeNameWithoutExt.split(" ").join("-") + "-intro.pdf";
 
-    const doc:PDFKit.PDFDocument = await prepareDocument(_introPath, introPDfName);
+    const doc: PDFKit.PDFDocument = await prepareDocument(_introPath, introPDfName);
     console.log(`imageFolderPath ${imageFolderPath} 
                 pdfToVanitize ${pdfToVanitize} `)
 
@@ -81,19 +81,19 @@ const text = `This PDF you are browsing is in a series of several scanned docume
 the collation of all research material of Prof. Kul Bhushan Mohtra ji.Mohtra ji is currently the State 
 Incharge Library and Documentation Department, J&K BJP Headquarters, Nanaji 
 Deshmukh Library..This material was gathered while he was working on his multiple books on J&K History.
-All this rare material is now offered to the Community freely..
+All this rare material is now offered to the Community freely.<br>
 
-CV:..
-Kul Bhushan Mohtra was born on 9th Sep, 1957 in a village Amuwala in Kathua district..
-Matric from BOSE, Jammu and Adeeb from AMU. Has been awarded Honorary Professor by School of Liberal Art & Languages, Shobhit University, Gangoh, Distt. Saharanpur, U.P..
-Director General, Raja Ram Mohan Roy Library Foundation nominated him as his nominee in the Committee for purchasing of Books for UT Jammu & Kashmir. Incharge of Nanaji Deshmukh Library & Documentation Department at BJP state HQ in J&K..
-Actively engaged in political, social, charitable and religious activities. Always striving to serve the poor and downtrodden of the society.
-Main works-..
-A saga of Sacrifices: Praja Parishad Movement in J&K..
-100 Documents: A reference book J&K, Mission Accomplished..
-A Compendium of Icons of Jammu & Kashmir & our Inspiration (English)..
-Jammu Kashmir ki Sangarsh Gatha (Hindi)..
-Scanning and upload by eGangotri Foundation.Prof`.replace(/\n/g, '').replace(/\.\./g, '\n\n');
+CV:<br>
+Kul Bhushan Mohtra was born on 9th Sep, 1957 in a village Amuwala in Kathua district.<br>
+Matric from BOSE, Jammu and Adeeb from AMU. Has been awarded Honorary Professor by School of Liberal Art & Languages, Shobhit University, Gangoh, Distt. Saharanpur, U.P.<br>
+Director General, Raja Ram Mohan Roy Library Foundation nominated him as his nominee in the Committee for purchasing of Books for UT Jammu & Kashmir. Incharge of Nanaji Deshmukh Library & Documentation Department at BJP state HQ in J&K.<br>
+Actively engaged in political, social, charitable and religious activities. Always striving to serve the poor and downtrodden of the society
+Main works-<br>
+A saga of Sacrifices: Praja Parishad Movement in J&K<br>
+100 Documents: A reference book J&K, Mission Accomplished<br>
+A Compendium of Icons of Jammu & Kashmir & our Inspiration (English)<br>
+Jammu Kashmir ki Sangarsh Gatha (Hindi)<br>
+Scanning and upload by eGangotri Foundation.Prof<br>`.replace(/\n/g, '').replace(/<br>/g, '\n\n');
 
 
 const mergeVanityPdf = async (_introPdf: string, origPdf: string, finalDumpGround: string) => {
@@ -117,20 +117,15 @@ const mergeVanityPdf = async (_introPdf: string, origPdf: string, finalDumpGroun
     const imgFile = "C:\\Users\\chetan\\Documents\\_testPDF\\mohtra.jpg";
 
     const _pdfs = await getAllPdfsInFolders([pdfRoot])
-    const intros:string[] = []
-    for (let i = 0; i < _pdfs.length; i++) {
-        console.log(`creating vanity for: ${_pdfs[i]}`, await PdfLibUtils.getPdfFirstPageDimensionsUsingPdfLib(_pdfs[i]))
-        intros.push(await createIntroPageWithImage(imgFile, _pdfs[i], text));
-    }
+    const intros: string[] = []
+    // for (let i = 0; i < _pdfs.length; i++) {
+    //     console.log(`creating vanity for: ${_pdfs[i]}`, await PdfLibUtils.getPdfFirstPageDimensionsUsingPdfLib(_pdfs[i]))
+    //     intros.push(await createIntroPageWithImage(imgFile, _pdfs[i], text));
+    // }
+    // for (let i = 0; i < _pdfs.length; i++) {
+    //     console.log(`creating vanity for: ${_pdfs[i]}`, await PdfLibUtils.getPdfFirstPageDimensionsUsingPdfLib(_pdfs[i]))
+    //     await mergeVanityPdf(intros[i], _pdfs[i], `${pdfRoot}\\2`)
+    // }
+    await createIntroPageWithImage(imgFile, "_pdfs[i]", text);
 
-    
-    for (let i = 0; i < _pdfs.length; i++) {
-        console.log(`creating vanity for: ${_pdfs[i]}`, await PdfLibUtils.getPdfFirstPageDimensionsUsingPdfLib(_pdfs[i]))
-        await mergeVanityPdf(intros[i], _pdfs[i],`${pdfRoot}\\2`)
-    }
-
-    // const introPdf = await createIntroPageWithImage(imagePath, pdfToVanitize, text);
-    //    console.log(`merge vanity pdf ${introPdf} pdfName ${pdfToVanitize} `);
-      //  console.log(`dim:${introPdf}`, await PdfLibUtils.getPdfFirstPageDimensionsUsingPdfLib(introPdf))
-   // await createVanityPdf(imgFile, `${pdfRoot}\\_Up Gyan Amrit.pdf`, text);
 })();
