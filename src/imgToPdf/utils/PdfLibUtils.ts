@@ -13,7 +13,7 @@ import * as path from 'path';
 
 export async function getPdfPageCountUsingPdfLib(pdfPath: string) {
     if (getFilzeSize(pdfPath) <= 2) {
-        const pdfDoc = await PDFDocument.load(fs.readFileSync(pdfPath));
+        const pdfDoc = await PDFDocument.load(fs.readFileSync(pdfPath), { ignoreEncryption: true });
         return pdfDoc.getPages().length
     }
     else return -1;
@@ -21,7 +21,7 @@ export async function getPdfPageCountUsingPdfLib(pdfPath: string) {
 
 export async function getPdfFirstPageDimensionsUsingPdfLib(pdfPath: string) {
     if (getFilzeSize(pdfPath) <= 2) {
-        const pdfDoc = await PDFDocument.load(fs.readFileSync(pdfPath));
+        const pdfDoc = await PDFDocument.load(fs.readFileSync(pdfPath), { ignoreEncryption: true });
         return [pdfDoc.getPages()[0].getWidth(), pdfDoc.getPages()[0].getHeight()]
     }
     else return [];
@@ -38,7 +38,7 @@ export async function mergePDFDocuments(documents: Array<any>, pdfName: string) 
     const mergedPdf = await PDFDocument.create();
     let counter = 0
     for (let document of documents) {
-        document = await PDFDocument.load(document);
+        document = await PDFDocument.load(document, { ignoreEncryption: true });
         const copiedPages = await mergedPdf.copyPages(document, document.getPageIndices());
         copiedPages.forEach((page) => mergedPdf.addPage(page));
         console.log(` copiedPage ${++counter} to ${path.parse(pdfName).name}`)

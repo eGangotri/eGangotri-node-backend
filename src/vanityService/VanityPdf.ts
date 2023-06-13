@@ -1,39 +1,45 @@
 import { PDF_FONT } from "../imgToPdf/utils/PdfDecoratorUtils";
-import { calculateFontSize, prepareDocument } from "../imgToPdf/utils/PdfUtils";
-const PDFDocument = require('pdfkit');
 import * as PdfLibUtils from '../imgToPdf/utils/PdfLibUtils';
 import * as fs from 'fs';
+import { getAllPdfsInFolders, mkDirIfDoesntExists } from "../imgToPdf/utils/Utils";
+import { prepareDocument } from "../imgToPdf/utils/PdfUtils";
 const path = require('path');
 
-
-export const createVanityPdf = async (imagePath: string,
-    pdfToVanitize: string, text: string) => {
-
-    const introPdf = await createIntroPageWithImage(imagePath,pdfToVanitize, text);
-    console.log(`merge vanity pdf ${introPdf} pdfName ${pdfToVanitize} `)
-
-    mergeVanityPdf(introPdf, pdfToVanitize)
+export const createVanityPdf = async (imagePath: string, pdfToVanitize: string, text: string, finalDumpGround:string) => {
+    try {
+        const introPdf = await createIntroPageWithImage(imagePath, pdfToVanitize, text);
+        console.log(`merge vanity pdf ${introPdf} pdfName ${pdfToVanitize} `);
+        console.log(`dim:${introPdf}`, await PdfLibUtils.getPdfFirstPageDimensionsUsingPdfLib(introPdf))
+       await mergeVanityPdf(introPdf, pdfToVanitize,finalDumpGround)
+    }
+    catch (err) {
+        console.log(`createVanityPdf:err ${err}`)
+    }
 }
 
-const createIntroPageWithImage = async (imagePath: string,
-    pdfToVanitize: string, text: string) => {
+const createIntroPageWithImage = async (imagePath: string, pdfToVanitize: string, text: string) => {
     var imageFolderPath = path.dirname(imagePath);
+    var _introPath = `${imageFolderPath}\\_intros`;
+    await mkDirIfDoesntExists(_introPath);
 
-    const filenameWithoutExt = path.parse(pdfToVanitize).name
-    const introFileName = filenameWithoutExt + "-intro.pdf";
+    const pdfToVanitizeNameWithoutExt = path.parse(pdfToVanitize).name.trim()
+    const introPDfName = pdfToVanitizeNameWithoutExt.split(" ").join("-") + "-intro.pdf";
 
-    const doc = await prepareDocument(imageFolderPath, introFileName);
-    console.log(`pathToImg ${imageFolderPath} pdfName ${pdfToVanitize} `)
+    const doc:PDFKit.PDFDocument = await prepareDocument(_introPath, introPDfName);
+    console.log(`imageFolderPath ${imageFolderPath} 
+                pdfToVanitize ${pdfToVanitize} `)
 
     const [width, height] = await PdfLibUtils.getPdfFirstPageDimensionsUsingPdfLib(pdfToVanitize);
 
-    addImageToFirstPage(doc, imagePath, width, height)
+    await addImageToFirstPage(doc, imagePath, width, height)
     addTextToSecondPage(doc, text, width, height)
     doc.save()
 
     // finalize the PDF and end the stream
     doc.end();
-    return `${imageFolderPath}\\${introFileName}`
+    console.log(`returning ${_introPath}\\${introPDfName}`)
+
+    return `${_introPath}\\${introPDfName}`
 }
 
 export const addImageToFirstPage = async (doc: any, pathToImg: string, width: number, height: number) => {
@@ -47,7 +53,7 @@ export const addImageToFirstPage = async (doc: any, pathToImg: string, width: nu
         })
 }
 
-export function addTextToSecondPage(doc: any, text: string, width: number, height: number) {
+export const addTextToSecondPage = (doc: any, text: string, width: number, height: number) => {
     doc.addPage({ size: [width, height] });
 
     let oldBottomMargin = doc.page.margins.bottom;
@@ -81,37 +87,41 @@ Jammu Kashmir ki Sangarsh Gatha (Hindi)..
 Scanning and upload by eGangotri Foundation.Prof`.replace(/\n/g, '').replace(/\.\./g, '\n\n');
 
 
-const mergeVanityPdf = async (_introPdf: string, origPdf: string) => {
+const mergeVanityPdf = async (_introPdf: string, origPdf: string, finalDumpGround: string) => {
     var origFileName = path.basename(origPdf);
     var destDir = path.dirname(_introPdf);
 
-    const pdfsForMerge = [_introPdf, origPdf].map((x) => {
-        console.log(`x: ${x}`)
-        return fs.readFileSync(x)
+    await mkDirIfDoesntExists(finalDumpGround);
+
+    const pdfsForMerge = [_introPdf, origPdf].map((_pdf) => {
+        console.log(`_pdf: ${_pdf}`)
+        return fs.readFileSync(_pdf)
     });
-    await PdfLibUtils.mergePDFDocuments(pdfsForMerge, `${destDir}\\${origFileName}`)
+    const finalPdfPath = `${finalDumpGround}\\${origFileName}`
+    await PdfLibUtils.mergePDFDocuments(pdfsForMerge, finalPdfPath)
     console.log(`${_introPdf}`, await PdfLibUtils.getPdfFirstPageDimensionsUsingPdfLib(_introPdf));
-    console.log(`dim::${destDir}\\${origFileName}`, await PdfLibUtils.getPdfFirstPageDimensionsUsingPdfLib(`${destDir}\\${origFileName}`));
-
+    console.log(`dim::${finalPdfPath}`, await PdfLibUtils.getPdfFirstPageDimensionsUsingPdfLib(finalPdfPath));
 }
 
-const func = async () => {
-    const pdfRoot = "C:\\Users\\chetan\\Documents\\_testPDF\\\pdfs\\"
-    const file1 = `${pdfRoot}\\16-04-2023 anaqntnag.pdf`;
-    const file2 = `${pdfRoot}\\_Up Gyan Amrit.pdf`;
-    const file3 = `${pdfRoot}\\Bhrahat Shabdendu Shekhar II - Nagesh Bhatt.pdf`;
-    const file4 = `${pdfRoot}\\Definitional Dictionary of Archaeology_compressed.pdf`;
-    const file5 = `${pdfRoot}\\Bhaskar Prakash.pdf`;
+(async () => {
+    const pdfRoot = "C:\\Users\\chetan\\Documents\\_testPDF\\pdfs"
+    const imgFile = "C:\\Users\\chetan\\Documents\\_testPDF\\mohtra.jpg";
 
-    console.log(`dim:${file1}`, await PdfLibUtils.getPdfFirstPageDimensionsUsingPdfLib(file1))
-    console.log(`dim:${file2}`, await PdfLibUtils.getPdfFirstPageDimensionsUsingPdfLib(file2))
-    console.log(`dim:${file3}`, await PdfLibUtils.getPdfFirstPageDimensionsUsingPdfLib(file3))
-    console.log(`dim:${file4}`, await PdfLibUtils.getPdfFirstPageDimensionsUsingPdfLib(file4))
-    console.log(`dim:${file5}`, await PdfLibUtils.getPdfFirstPageDimensionsUsingPdfLib(file5))
+    const _pdfs = await getAllPdfsInFolders([pdfRoot])
+    const intros:string[] = []
+    for (let i = 0; i < _pdfs.length; i++) {
+        console.log(`creating vanity for: ${_pdfs[i]}`, await PdfLibUtils.getPdfFirstPageDimensionsUsingPdfLib(_pdfs[i]))
+        intros.push(await createIntroPageWithImage(imgFile, _pdfs[i], text));
+    }
 
+    
+    for (let i = 0; i < _pdfs.length; i++) {
+        console.log(`creating vanity for: ${_pdfs[i]}`, await PdfLibUtils.getPdfFirstPageDimensionsUsingPdfLib(_pdfs[i]))
+        await mergeVanityPdf(intros[i], _pdfs[i],`${pdfRoot}\\2`)
+    }
 
-    const imgFile = "C:\\Users\\chetan\\Documents\\_testPDF\\introPdfDimAdjustedFolder\\mohtra.jpg";
-    await createVanityPdf(imgFile, file1, text);
-}
-
-func();
+    // const introPdf = await createIntroPageWithImage(imagePath, pdfToVanitize, text);
+    //    console.log(`merge vanity pdf ${introPdf} pdfName ${pdfToVanitize} `);
+      //  console.log(`dim:${introPdf}`, await PdfLibUtils.getPdfFirstPageDimensionsUsingPdfLib(introPdf))
+   // await createVanityPdf(imgFile, `${pdfRoot}\\_Up Gyan Amrit.pdf`, text);
+})();
