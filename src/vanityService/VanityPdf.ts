@@ -5,6 +5,15 @@ import { getAllPdfsInFolders, mkDirIfDoesntExists } from "../imgToPdf/utils/Util
 import { prepareDocument } from "../imgToPdf/utils/PdfUtils";
 const path = require('path');
 
+/**
+ * This was casuing race issues.
+ * where intro pdfs were not ready while merging.
+ * so better to use independently
+ * @param imagePath 
+ * @param pdfToVanitize 
+ * @param text 
+ * @param finalDumpGround 
+ */
 export const createVanityPdf = async (imagePath: string, pdfToVanitize: string, text: string, finalDumpGround:string) => {
     try {
         const introPdf = await createIntroPageWithImage(imagePath, pdfToVanitize, text);
