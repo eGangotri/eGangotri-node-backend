@@ -13,7 +13,8 @@
     "alpha": "node -r ts-node/register ./src/imgToPdf/utils/PngUtils.ts",
     "convert": "node -r ts-node/register --max-old-space-size=2048 --inspect --expose-gc ./src/imgToPdf/conversionService/convert.ts",
     "tally-post-conversion": "node -r ts-node/register ./src/imgToPdf/conversionService/postConversionTally.ts",
-    "move-merged-pdfs": "node -r ts-node/register ./src/imgToPdf/conversionService/moveMergedPdfs.ts"
+    "move-merged-pdfs": "node -r ts-node/register ./src/imgToPdf/conversionService/moveMergedPdfs.ts",
+    "vanity": "ts-node ./src/vanityService/VanityPdf.ts"
   },
   "repository": {
     "type": "git",
@@ -63,6 +64,7 @@
     "@types/fs-extra": "^11.0.1",
     "@types/lodash": "^4.14.178",
     "@types/mongodb": "",
+    "@types/pdfkit": "^0.12.10",
     "@types/underscore": "^1.11.4",
     "@types/uuid": "^8.3.4",
     "ts-node": "^10.9.1"

@@ -57,9 +57,10 @@ export function setOptionsForItemListing(queryOptions: ItemsListOptionsType) {
         $lte: new Date(queryOptions?.endDate),
       },
     };
-  } else {
-    mongoOptionsFilter = { createdAt: { $gte: subDays(new Date(), DEFAULT_DAYS_BEFORE_CURRENT_FOR_SEARCH) } };
   }
+   //else {
+  //   mongoOptionsFilter = { createdAt: { $gte: subDays(new Date(), DEFAULT_DAYS_BEFORE_CURRENT_FOR_SEARCH) } };
+  // }
 
   console.log(`ids ${JSON.stringify(queryOptions)}`)
 
