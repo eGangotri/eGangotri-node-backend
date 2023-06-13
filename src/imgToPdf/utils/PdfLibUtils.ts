@@ -19,12 +19,21 @@ export async function getPdfPageCountUsingPdfLib(pdfPath: string) {
     else return -1;
 }
 
+export async function getPdfFirstPageDimensionsUsingPdfLib(pdfPath: string) {
+    if (getFilzeSize(pdfPath) <= 2) {
+        const pdfDoc = await PDFDocument.load(fs.readFileSync(pdfPath));
+        return [pdfDoc.getPages()[0].getWidth(), pdfDoc.getPages()[0].getHeight()]
+    }
+    else return [];
+}
+
 
 export function getFilzeSize(pdfPath: string) {
     let stats = fs.statSync(pdfPath)
     let fileSizeInBytes = stats.size;
     return fileSizeInBytes / (1024 * 1024 * 1024);
 }
+
 export async function mergePDFDocuments(documents: Array<any>, pdfName: string) {
     const mergedPdf = await PDFDocument.create();
     let counter = 0

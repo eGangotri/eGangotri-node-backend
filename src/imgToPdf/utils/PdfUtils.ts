@@ -93,7 +93,7 @@ export async function pngToPdf(pngSrc: string, pdfDumpFolder:string,
     doc.end();
 }
 
-function addBanner(doc: any, img: any) {
+export function addBanner(doc: any, img: any) {
     doc.addPage({ size: [img.width, img.height] });
     const banner = doc.openImage(INTRO_BANNER)
     doc.image(banner, doc.page.margins.left, doc.page.margins.top,
@@ -109,7 +109,7 @@ function addBanner(doc: any, img: any) {
     addFooter(doc);
 }
 
-function calculateFontSize(pageHeight: number, ratio: number = 0.02) {
+export function calculateFontSize(pageHeight: number, ratio: number = 0.02) {
     return (pageHeight * ratio > 14) ? pageHeight * ratio : 14;
 }
 
@@ -117,7 +117,7 @@ function footerFontSize(pageHeight: number) {
     return calculateFontSize(pageHeight, 0.015);
 }
 
-function addFooter(doc: any) {
+export function addFooter(doc: any) {
     let oldBottomMargin = doc.page.margins.bottom;
     doc.page.margins.bottom = 0 //Dumb: Have to remove bottom margin in order to write into it
     const pageHeight = doc.page.height
