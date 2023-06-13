@@ -4,7 +4,10 @@ import * as fs from 'fs';
 import { getAllPdfsInFolders, mkDirIfDoesntExists } from "../imgToPdf/utils/Utils";
 import { prepareDocument } from "../imgToPdf/utils/PdfUtils";
 const path = require('path');
+import PDFKit from 'pdfkit';
 
+/** This should be dynamic based on the Width/height */
+const FONT_SIZE = 16
 /**
  * This was casuing race issues.
  * where intro pdfs were not ready while merging.
@@ -14,6 +17,7 @@ const path = require('path');
  * @param text 
  * @param finalDumpGround 
  */
+
 export const createVanityPdf = async (imagePath: string, pdfToVanitize: string, text: string, finalDumpGround: string) => {
     try {
         const introPdf = await createIntroPageWithImage(imagePath, pdfToVanitize, text);
@@ -71,7 +75,7 @@ export const addTextToSecondPage = (doc: any, text: string, width: number, heigh
     const pageHeight = doc.page.height
     const xCoordinate = doc.page.margins.left / 2
     const yCoordinate = doc.page.margins.top / 2
-    doc.font(PDF_FONT).fontSize(10)
+    doc.font(PDF_FONT).fontSize(FONT_SIZE)
         .fillColor('black')
         .text(text, xCoordinate, yCoordinate)
     doc.page.margins.bottom = oldBottomMargin; // ReProtect bottom margin
@@ -87,13 +91,13 @@ CV:<br>
 Kul Bhushan Mohtra was born on 9th Sep, 1957 in a village Amuwala in Kathua district.<br>
 Matric from BOSE, Jammu and Adeeb from AMU. Has been awarded Honorary Professor by School of Liberal Art & Languages, Shobhit University, Gangoh, Distt. Saharanpur, U.P.<br>
 Director General, Raja Ram Mohan Roy Library Foundation nominated him as his nominee in the Committee for purchasing of Books for UT Jammu & Kashmir. Incharge of Nanaji Deshmukh Library & Documentation Department at BJP state HQ in J&K.<br>
-Actively engaged in political, social, charitable and religious activities. Always striving to serve the poor and downtrodden of the society
+Actively engaged in political, social, charitable and religious activities. Always striving to serve the poor and downtrodden of the society.<br>
 Main works-<br>
 A saga of Sacrifices: Praja Parishad Movement in J&K<br>
 100 Documents: A reference book J&K, Mission Accomplished<br>
 A Compendium of Icons of Jammu & Kashmir & our Inspiration (English)<br>
-Jammu Kashmir ki Sangarsh Gatha (Hindi)<br>
-Scanning and upload by eGangotri Foundation.Prof<br>`.replace(/\n/g, '').replace(/<br>/g, '\n\n');
+Jammu Kashmir ki Sangarsh Gatha (Hindi)<br><br><br>
+Scanning and upload by eGangotri Foundation.<br>`.replace(/\n/g, '').replace(/<br>/g, '\n\n');
 
 
 const mergeVanityPdf = async (_introPdf: string, origPdf: string, finalDumpGround: string) => {
@@ -113,19 +117,18 @@ const mergeVanityPdf = async (_introPdf: string, origPdf: string, finalDumpGroun
 }
 
 (async () => {
-    const pdfRoot = "C:\\Users\\chetan\\Documents\\_testPDF\\pdfs"
-    const imgFile = "C:\\Users\\chetan\\Documents\\_testPDF\\mohtra.jpg";
+    const _root = "D:\\_Treasures59\\_data\\bjpjammu"
+    const _pdfRoot = `${_root}\\MohtraArchives`
+    const imgFile = `${_root}\\mohtra.jpg`
 
-    const _pdfs = await getAllPdfsInFolders([pdfRoot])
+    const _pdfs = await getAllPdfsInFolders([_pdfRoot]);
     const intros: string[] = []
-    // for (let i = 0; i < _pdfs.length; i++) {
-    //     console.log(`creating vanity for: ${_pdfs[i]}`, await PdfLibUtils.getPdfFirstPageDimensionsUsingPdfLib(_pdfs[i]))
-    //     intros.push(await createIntroPageWithImage(imgFile, _pdfs[i], text));
-    // }
-    // for (let i = 0; i < _pdfs.length; i++) {
-    //     console.log(`creating vanity for: ${_pdfs[i]}`, await PdfLibUtils.getPdfFirstPageDimensionsUsingPdfLib(_pdfs[i]))
-    //     await mergeVanityPdf(intros[i], _pdfs[i], `${pdfRoot}\\2`)
-    // }
-    await createIntroPageWithImage(imgFile, "_pdfs[i]", text);
-
+    for (let i = 0; i < _pdfs.length; i++) {
+        console.log(`creating vanity for: ${_pdfs[i]}`, await PdfLibUtils.getPdfFirstPageDimensionsUsingPdfLib(_pdfs[i]))
+        intros.push(await createIntroPageWithImage(imgFile, _pdfs[i], text));
+    }
+    for (let i = 0; i < _pdfs.length; i++) {
+        console.log(`creating vanity for: ${_pdfs[i]}`, await PdfLibUtils.getPdfFirstPageDimensionsUsingPdfLib(_pdfs[i]))
+        await mergeVanityPdf(intros[i], _pdfs[i], `${_pdfRoot}\\1`)
+    }
 })();
