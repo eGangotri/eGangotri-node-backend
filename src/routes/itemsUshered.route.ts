@@ -4,7 +4,7 @@ import { Request, Response } from 'express';
 import { validateSuperAdminUserFromRequest } from './utils';
 import { getListOfItemsUshered } from '../services/itemsUsheredService';
 import * as _ from 'lodash';
-import { ArchiveProfileAndCount, UploadCycleTableData } from '../mirror/types';
+import { ArchiveProfileAndCount, UploadCycleTableData, UploadCycleTableDataResponse } from '../mirror/types';
 
 /**
  * INSOMNIA POST Request Sample
@@ -85,48 +85,26 @@ itemsUsheredRoute.get('/list', async (req: Request, resp: Response) => {
 itemsUsheredRoute.get('/listForUploadCycle', async (req: Request, resp: Response) => {
     try {
         const items = await getListOfItemsUshered(req?.query);
-        // 
-        // uploadCycleId
-        // archiveProfile
-        console.log(`after getListOfItemsUshered retirieved item count: ${JSON.stringify(items)}`)
+        //console.log(`after getListOfItemsUshered retirieved item count: ${JSON.stringify(items)}`)
 
         const groupedItems = _.groupBy(items, function (item: any) {
-            return item.archiveProfile;
+            return item.uploadCycleId;
         });
-       
-        const archiveProfileAndCount: ArchiveProfileAndCount[] = []
-        let totalCount = 0
-        let dateTimeUploadStarted = new Date();
+
+        const uploadCycleIdAndData:UploadCycleTableDataResponse[] = []
         for (const key in groupedItems) {
             const usheredRow = groupedItems[key]
-            console.log(`${key}: ${groupedItems[key]}`);
-            archiveProfileAndCount.push({
-                archiveProfile: key,
-                count: usheredRow.length
-            }) 
-            totalCount += usheredRow.length
-            dateTimeUploadStarted = usheredRow[0].datetimeUploadStarted
-        }
-        const uploadCycleData:UploadCycleTableData = {
-            uploadCycleId: req?.query?.uploadCycleId as string,
-            archiveProfileAndCount: archiveProfileAndCount,
-            dateTimeUploadStarted: dateTimeUploadStarted,
-            totalCount: totalCount
-        }
+            const groubpedByArchiveProfiles = _.groupBy(usheredRow, function (item: any) {
+                return item.archiveProfile;
+            });
+            const _cycle_and_profiles = handleEachRow(key, groubpedByArchiveProfiles)
 
-        console.log(
-            `listForUploadCycle ${JSON.stringify(
-                groupedItems
-            )}`
-        );
-        
-        console.log(
-            `uploadCycleData ${JSON.stringify(
-                uploadCycleData
-            )}`
-        );
+            uploadCycleIdAndData.push({
+                uploadCycle: _cycle_and_profiles
+            })
+        }
         resp.status(200).send({
-            "response": uploadCycleData
+            "response": uploadCycleIdAndData
         });
     }
     catch (err: any) {
@@ -134,3 +112,28 @@ itemsUsheredRoute.get('/listForUploadCycle', async (req: Request, resp: Response
         resp.status(400).send(err);
     }
 })
+
+const handleEachRow = (uploadCycleId: string, usheredRow: _.Dictionary<UploadCycleTableData[]>) => {
+    const archiveProfileAndCount: ArchiveProfileAndCount[] = []
+    let totalCount = 0
+    let dateTimeUploadStarted = new Date();
+    for (const key in usheredRow) {
+        const row = usheredRow[key]
+        console.log(`handleEachRow: ${key}: ${row}`);
+        archiveProfileAndCount.push({
+            archiveProfile: key,
+            count: row.length
+        })
+        totalCount += row.length
+        dateTimeUploadStarted = row[0]?.datetimeUploadStarted
+    }
+
+    const uploadCycleData: UploadCycleTableData = {
+        uploadCycleId,
+        archiveProfileAndCount,
+        datetimeUploadStarted: dateTimeUploadStarted,
+        totalCount
+    }
+
+    return uploadCycleData
+}

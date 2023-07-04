@@ -6,6 +6,10 @@ export interface ArchiveProfileAndCount {
 export interface UploadCycleTableData {
     uploadCycleId: string;
     archiveProfileAndCount: ArchiveProfileAndCount[];
-    dateTimeUploadStarted: Date;
+    datetimeUploadStarted: Date;
     totalCount: number;
+}
+
+export interface UploadCycleTableDataResponse {
+    uploadCycle: UploadCycleTableData
 }
