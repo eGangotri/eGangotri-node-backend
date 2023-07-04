@@ -75,6 +75,13 @@ export function setOptionsForItemListing(queryOptions: ItemsListOptionsType) {
     console.log(`archiveProfiles ${archiveProfiles}`)
     mongoOptionsFilter = {archiveProfile : { $in: archiveProfiles }}
   }
+
+  if (queryOptions?.uploadCycleId){
+    const uploadCycleIds:string[] = queryOptions?.uploadCycleId.split(",")
+    console.log(`uploadCycleIds ${uploadCycleIds}`)
+    mongoOptionsFilter = {uploadCycleId : { $in: uploadCycleIds }}
+  }
+  
   const limit: number = getLimit(queryOptions?.limit);
   return {limit, mongoOptionsFilter};
 }

@@ -26,6 +26,7 @@ export type UserListOptionsType = {
     startDate?: string,
     endDate?: string,
     archiveProfile?: string,
+    uploadCycleId?: string,
   };
   
   export type DailyWorkReportListOptionsType = {

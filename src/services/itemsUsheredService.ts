@@ -10,4 +10,3 @@ export async function getListOfItemsUshered(queryOptions: ItemsListOptionsType) 
     return items;
   }
   
-  
