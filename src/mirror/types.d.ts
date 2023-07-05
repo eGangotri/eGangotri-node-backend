@@ -10,6 +10,10 @@ export interface UploadCycleTableData {
     totalCount: number;
 }
 
+export interface UploadCycleTableDataDictionary {
+    uploadCycle: UploadCycleTableData;
+}
+
 export interface UploadCycleTableDataResponse {
-    uploadCycle: UploadCycleTableData
+    response: UploadCycleTableDataDictionary[]
 }

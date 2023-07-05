@@ -4,7 +4,7 @@ import { Request, Response } from 'express';
 import { validateSuperAdminUserFromRequest } from './utils';
 import { getListOfItemsUshered } from '../services/itemsUsheredService';
 import * as _ from 'lodash';
-import { ArchiveProfileAndCount, UploadCycleTableData, UploadCycleTableDataResponse } from '../mirror/types';
+import { ArchiveProfileAndCount, UploadCycleTableData, UploadCycleTableDataDictionary, UploadCycleTableDataResponse } from '../mirror/types';
 
 /**
  * INSOMNIA POST Request Sample
@@ -91,7 +91,7 @@ itemsUsheredRoute.get('/listForUploadCycle', async (req: Request, resp: Response
             return item.uploadCycleId;
         });
 
-        const uploadCycleIdAndData:UploadCycleTableDataResponse[] = []
+        const uploadCycleIdAndData:UploadCycleTableDataDictionary[] = []
         for (const key in groupedItems) {
             const usheredRow = groupedItems[key]
             const groubpedByArchiveProfiles = _.groupBy(usheredRow, function (item: any) {
