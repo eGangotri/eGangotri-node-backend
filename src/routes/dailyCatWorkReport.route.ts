@@ -15,34 +15,12 @@ export const dailyCatWorkReportRoute = express.Router();
  * INSOMNIA POST Request Sample
 POST http://localhost/dailyWorkReport/add 
 JSON Body 
-{
-  "operatorName": "test2",
-  "center": "Haridwar",
-  "lib": "Gurukul-Kangri",
-  "totalPdfCount": 3,
-  "totalPageCount": 896,
-  "totalSize": "460.3 MB",
-  "totalSizeRaw": "3333333333",
-  "dateOfReport": "2023-05-30T17:11:57.792Z",
-  "pageCountStats": [
-    {
-      "fileName": "The complete works of the swami vivekananda).pdf",
-      "pageCount": 471,
-      "fileSize": "234.58 MB"
-    },
-    {
-      "fileName": "Sharika leela.pdf",
-      "pageCount": 284,
-      "fileSize": "111.25 MB"
-    },
-    {
-      "fileName": "The temples of india).pdf",
-      "pageCount": 141,
-      "fileSize": "114.47 MB"
-    }
-  ],
-  "password": "22222"
-}
+{"title":"eGangotri Daily Catalog Work Report","operatorName":"admin","catalogProfile":"Treasures-3","entryFrom":1,"entryTo":22,
+"timeOfRequest":"2023-07-12T17:36:04.549Z",
+"entryCount":21,
+"link":"....",
+"notes":".....","password":""}
+  
  */
 
 dailyCatWorkReportRoute.post("/add", async (req: Request, resp: Response) => {
