@@ -4,6 +4,8 @@ const { itemsQueuedRoute }  = require("./routes/itemsQueued.route");
 const { itemsUsheredRoute }  = require( "./routes/itemsUshered.route");
 const { launchGradleRoute } = require("./routes/launchGradle.route");
 const { dailyWorkReportRoute } = require("./routes/dailyWorkReport.route");
+const { dailyCatWorkReportRoute } = require("./routes/dailyCatWorkReportRoute.route");
+
 const { userRoute } = require("./routes/userRoute.route");
 
 const{ connectToMongo } = require("./services/dbService");
@@ -32,6 +34,7 @@ app.use("/itemsQueued", itemsQueuedRoute);
 app.use("/itemsUshered", itemsUsheredRoute);
 app.use("/launchGradle", launchGradleRoute);
 app.use("/dailyWorkReport", dailyWorkReportRoute);
+app.use("/dailyCatWorkReport", dailyCatWorkReportRoute);
 app.use("/user", userRoute);
 
 app.listen(port, async () => {
