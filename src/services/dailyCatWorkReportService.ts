@@ -10,7 +10,7 @@ import { createObjectCsvWriter } from "csv-writer";
 import { createReadStream } from "fs";
 import * as fsExtra from "fs-extra";
 import * as fs from "fs";
-import { CSV_HEADER_API2 } from "./constants";
+import { CSV_CAT_HEADER_API2, CSV_HEADER_API2 } from "./constants";
 import * as Mirror from "../mirror/FrontEndBackendCommonCode"
 import * as _ from 'lodash';
 import { getDateTwoHoursBeforeNow, replaceQuotes, replaceQuotesAndSplit } from "./Util";
@@ -82,7 +82,7 @@ export async function getListOfDailyCatWorkReport(queryOptions: DailyCatWorkRepo
 }
 
 
-export const generateCSVAsFile = async (res: Response, data: mongoose.Document[]) => {
+export const generateCatCSVAsFile = async (res: Response, data: mongoose.Document[]) => {
   const CSVS_DIR = ".//_csvs"
   fsExtra.emptyDirSync(CSVS_DIR);
   if (!fs.existsSync(CSVS_DIR)) {
@@ -95,25 +95,19 @@ export const generateCSVAsFile = async (res: Response, data: mongoose.Document[]
     // Define the CSV file headers
     const csvWriter = createObjectCsvWriter({
       path: csvFileName,
-      header: CSV_HEADER_API2
+      header: CSV_CAT_HEADER_API2
     });
 
-    const pdfCountSum = _.sum(data.map(x => x.get("totalPdfCount")))
-    const pageCountSum = _.sum(data.map(x => x.get("totalPageCount")));
-    const sizeCountRawSum = _.sum(data.map(x => x.get("totalSizeRaw") || 0));
+    const entryCountSum:number = _.sum(data.map(x => parseInt(x.get("entryCount").toString())))
 
-
-    console.log(`_toObj ${pdfCountSum} ${pageCountSum} ${sizeCountRawSum} ${Mirror.sizeInfo(sizeCountRawSum)}}`);
+    console.log(`_toObj ${entryCountSum}`);
     await csvWriter.writeRecords(data);
     await csvWriter.writeRecords([{
-      dateOfReport: "Totals",
-      operatorName: "",
-      center: "",
-      lib: "",
-      totalPdfCount: pdfCountSum,
-      totalPageCount: pageCountSum,
-      totalSize: Mirror.sizeInfo(sizeCountRawSum),
-      totalSizeRaw: sizeCountRawSum,
+      timeOfRequest: "Totals",
+      catalogProfile: "",
+      entryFrom: "",
+      entryTo: "",
+      entryCount: entryCountSum,
     }]);
 
     // Set the response headers to indicate that the response is a CSV file
