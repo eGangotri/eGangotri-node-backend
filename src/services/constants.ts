@@ -36,6 +36,7 @@ export const CSV_HEADER = [
   
   export const CSV_HEADER_API2 = 
   [
+    
     {
       id: "dateOfReport",
       title: "Date of Report",
@@ -89,3 +90,74 @@ export const CSV_HEADER = [
     },
   ];
   
+
+  export const CAT_CSV_HEADER = [
+    {
+      key: "timeOfRequest",
+      label: "DATE",
+    },
+    {
+      key: "operatorName",
+      label: "NAME",
+    },
+    {
+      key: "catalogProfile",
+      label: "catalogProfile",
+    },
+    {
+      key: "entryFrom",
+      label: "entryFrom",
+    },
+    {
+      key: "entryTo",
+      label: "entryTo",
+    },
+    {
+      key: "entryCount",
+      label: "entryCount",
+    },
+    {
+      key: "link",
+      label: "link",
+    },
+    {
+      key: "notes",
+      label: "notes",
+    },
+  ];
+  
+  export const CSV_CAT_HEADER_API2 = 
+  [
+    {
+      id: "timeOfRequest",
+      title: "Date of Report",
+    },
+    {
+      id: "operatorName",
+      title: "Operator Name",
+    },
+    {
+      id: "catalogProfile",
+      title: "catalogProfile",
+    },
+    {
+      id: "entryFrom",
+      title: "Entry From",
+    },
+    {
+      id: "entryTo",
+      title: "Entry To ",
+    },
+    {
+      id: "entryCount",
+      title: "Entry Count",
+    },
+    {
+      id: "link",
+      title: "link",
+    },
+    {
+      id: "notes",
+      title: "notes",
+    }
+  ]

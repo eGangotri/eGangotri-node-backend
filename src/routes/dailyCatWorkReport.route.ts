@@ -1,13 +1,12 @@
 const express = require("express");
-import { DailyWorkReport } from "../models/dailyWorkReport";
-import { generateCSV, generateCSVApi2 } from "../services/CsvUtil";
-import { deleteRowsByIds, generateCSVAsFile, getListOfDailyWorkReport } from "../services/dailyWorkReportService";
+import { generateCatWorkReportCSV, generateCatWorkReportCSVApi2 } from "../services/CsvUtil";
+import { deleteRowsByIds } from "../services/dailyWorkReportService";
 import { Request, Response } from "express";
 import { validateSuperAdminUserFromRequest, validateUserFromRequest } from "../services/userService"
 import { getDateTwoHoursBeforeNow } from "../services/Util";
 import _ from "lodash";
 import { DailyCatWorkReport } from "../models/dailyCatWorkReport";
-import { getListOfDailyCatWorkReport } from "../services/dailyCatWorkReportService";
+import { generateCatCSVAsFile, getListOfDailyCatWorkReport } from "../services/dailyCatWorkReportService";
 
 export const dailyCatWorkReportRoute = express.Router();
 
@@ -148,11 +147,11 @@ dailyCatWorkReportRoute.delete("/delete", async (req: Request, resp: Response) =
 //localhost/dailyWorkReport/csv?startDate="1-Jan-2023"&endDate="31-Jun-2023"
 dailyCatWorkReportRoute.get("/csv", async (req: Request, resp: Response) => {
   try {
-    const items = await getListOfDailyWorkReport(req?.query);
+    const items = await getListOfDailyCatWorkReport(req?.query);
     console.log(
-      `after getListOfDailyWorkReport retrieved item count: ${items[0]}`
+      `after getListOfDailyCatWorkReport retrieved item count: ${items[0]}`
     );
-    const _csv = generateCSV(items)
+    const _csv = generateCatWorkReportCSV(items)
     resp.status(200).send(_csv);
   } catch (err: any) {
     console.log("Error", err);
@@ -163,11 +162,11 @@ dailyCatWorkReportRoute.get("/csv", async (req: Request, resp: Response) => {
 //localhost/dailyWorkReport/csvAsJsonArray?startDate="1-Jan-2023"&endDate="31-Jun-2023"
 dailyCatWorkReportRoute.get("/csvAsJsonArray", async (req: Request, resp: Response) => {
   try {
-    const items = await getListOfDailyWorkReport(req?.query);
+    const items = await getListOfDailyCatWorkReport(req?.query);
     console.log(
       `after getListOfDailyWorkReport retrieved item count: ${items[0]}`
     );
-    const _csv = generateCSVApi2(items)
+    const _csv = generateCatWorkReportCSVApi2(items)
     resp.status(200).send(_csv);
   } catch (err: any) {
     console.log("Error", err);
@@ -177,12 +176,12 @@ dailyCatWorkReportRoute.get("/csvAsJsonArray", async (req: Request, resp: Respon
 
 dailyCatWorkReportRoute.get("/csvAsFile", async (req: Request, resp: Response) => {
   try {
-    const items = await getListOfDailyWorkReport(req?.query);
+    const items = await getListOfDailyCatWorkReport(req?.query);
     console.log(
       `after getListOfDailyWorkReport retrieved item count: ${items.length}`
     );
 
-    generateCSVAsFile(resp, items)
+    generateCatCSVAsFile(resp, items)
   } catch (err: any) {
     console.log("Error", err);
     resp.status(400).send(err);
