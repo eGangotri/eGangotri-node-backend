@@ -1,9 +1,9 @@
 const express = require("express");
 import { User } from "../models/user";
-import { Request, Response } from "express";
-import { getUsers } from "../services/userService";
+import e, { Request, Response } from "express";
+import { _userExists, getUsers, validateSuperAdminUserFromRequest } from "../services/userService";
 import { LoginUsersDocument } from "../services/types";
-import { stripPassword, validateSuperAdminUserFromRequest } from "./utils";
+import { stripPassword  } from "./utils";
 
 /**
  * INSOMNIA POST Request Sample
@@ -26,8 +26,16 @@ userRoute.post("/add", async (req: Request, resp: Response) => {
     if (_validate[0]) {
       const user = new User(req.body);
       console.log(`userRoute /add ${JSON.stringify(user)}`);
-      await user.save();
-      resp.status(200).send(stripPassword([user])[0]);
+
+      //Check if User exists
+      const userExists = await _userExists(req)
+      if (userExists) {
+        resp.status(200).send({ error: `User with username ${user.username} already exists`});
+      }
+      else {
+        await user.save();
+        resp.status(200).send(stripPassword([user])[0]);
+      }
     }
     else {
       resp.status(200).send({ error: _validate[1] });
@@ -35,7 +43,7 @@ userRoute.post("/add", async (req: Request, resp: Response) => {
   } catch (err) {
     console.log("Error", err);
     resp.status(400).send({
-      error: err
+      error: `exception thrown: ${err}`
     });
   }
 });
@@ -45,24 +53,30 @@ userRoute.post("/add", async (req: Request, resp: Response) => {
  * localhost:80/user/patch/delete
  * {
  * {
-	"superadmin_user": "XXXX",
-	"superadmin_password": "",
-	"username": "YYYYY"
+  "superadmin_user": "XXXX",
+  "superadmin_password": "",
+  "username": "YYYYY"
 }}
  */
 userRoute.delete("/delete", async (req: Request, resp: Response) => {
   try {
     const _validate = await validateSuperAdminUserFromRequest(req);
+    console.log(`userRoute:_validate /delete ${"" +  _validate}`);
+
     if (_validate[0]) {
       const users: LoginUsersDocument[] = await getUsers({ username: req.body.username });
       if (users && users.length >= 1) {
         console.log(`userRoute /delete ${JSON.stringify(users[0])}`);
         const _delete = await User.deleteMany({ username: req.body.username });
-        resp.status(200).send(_delete?.deletedCount);
+        resp.sendStatus(200).send(_delete?.deletedCount);
       }
       else {
-        resp.status(200).send({ error: _validate[1] });
+        resp.sendStatus(200).send({ error: _validate[1] });
       }
+    }
+    else {
+      resp.sendStatus(200).send({ error: `Something went wrong ${_validate}`});
+
     }
   } catch (err) {
     console.log("Error", err);
@@ -76,9 +90,9 @@ userRoute.delete("/delete", async (req: Request, resp: Response) => {
  * localhost:80/user/patch/test
  * {
  * {
-	"superadmin_user": "XXXX",
-	"superadmin_password": "",
-	"role": "Superadmin"
+  "superadmin_user": "XXXX",
+  "superadmin_password": "",
+  "role": "Superadmin"
 }}
  */
 userRoute.patch("/patch/:username", async (req: Request, resp: Response) => {

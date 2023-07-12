@@ -3,7 +3,6 @@
  * @param num All Code in this file should be same in both FE and BE Code.
  * @returns 
  */
-
 export function roundOff(num: number) {
     return Math.round((num + Number.EPSILON) * 100) / 100;
   }

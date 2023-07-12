@@ -83,7 +83,6 @@ export async function getListOfDailyCatWorkReport(queryOptions: DailyCatWorkRepo
 
 
 export const generateCSVAsFile = async (res: Response, data: mongoose.Document[]) => {
-
   const CSVS_DIR = ".//_csvs"
   fsExtra.emptyDirSync(CSVS_DIR);
   if (!fs.existsSync(CSVS_DIR)) {
@@ -91,7 +90,7 @@ export const generateCSVAsFile = async (res: Response, data: mongoose.Document[]
     fs.mkdirSync(CSVS_DIR)
   }
 
-  const csvFileName = `${CSVS_DIR}//eGangotri-Staff-DWR-On-${moment(new Date()).format(DD_MM_YYYY_FORMAT)}.csv`
+  const csvFileName = `${CSVS_DIR}//eGangotri-Staff-Catalog-DWR-On-${moment(new Date()).format(DD_MM_YYYY_FORMAT)}.csv`
   try {
     // Define the CSV file headers
     const csvWriter = createObjectCsvWriter({
@@ -137,7 +136,7 @@ export const deleteRowsByIds = async (_itemIds: string[]) => {
     _id: { $in: _itemIds }
   };
   // Delete the rows based on the criteria
-  const res = await DailyWorkReport.deleteMany(deleteCriteria);
+  const res = await DailyCatWorkReport.deleteMany(deleteCriteria);
   console.log(`delete res ${JSON.stringify(res)}`)
   return res;
 }

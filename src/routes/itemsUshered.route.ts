@@ -1,10 +1,10 @@
 const express = require("express");
 import { ItemsUshered } from '../models/itemsUshered';
 import { Request, Response } from 'express';
-import { validateSuperAdminUserFromRequest } from './utils';
 import { getListOfItemsUshered } from '../services/itemsUsheredService';
 import * as _ from 'lodash';
 import { ArchiveProfileAndCount, UploadCycleTableData, UploadCycleTableDataDictionary, UploadCycleTableDataResponse } from '../mirror/types';
+import { validateSuperAdminUserFromRequest } from '../services/userService';
 
 /**
  * INSOMNIA POST Request Sample

@@ -3,7 +3,7 @@ import { DailyWorkReport } from "../models/dailyWorkReport";
 import { generateCSV, generateCSVApi2 } from "../services/CsvUtil";
 import { deleteRowsByIds, generateCSVAsFile, getListOfDailyWorkReport } from "../services/dailyWorkReportService";
 import { Request, Response } from "express";
-import { validateSuperAdminUserFromRequest, validateUserFromRequest } from "./utils";
+import { validateSuperAdminUserFromRequest, validateUserFromRequest } from "../services/userService"
 import { getDateTwoHoursBeforeNow } from "../services/Util";
 import _ from "lodash";
 import { DailyCatWorkReport } from "../models/dailyCatWorkReport";
@@ -94,7 +94,7 @@ dailyCatWorkReportRoute.post("/add", async (req: Request, resp: Response) => {
 
 dailyCatWorkReportRoute.get("/list", async (req: Request, resp: Response) => {
   try {
-    const items = await getListOfDailyWorkReport(req?.query);
+    const items = await getListOfDailyCatWorkReport(req?.query);
     console.log(
       `after getListOfDailyWorkReport retrieved item count: ${items.length}`
     );
@@ -110,7 +110,7 @@ dailyCatWorkReportRoute.get("/list", async (req: Request, resp: Response) => {
 
 dailyCatWorkReportRoute.get("/listIds", async (req: Request, resp: Response) => {
   try {
-    const items = await getListOfDailyWorkReport(req?.query);
+    const items = await getListOfDailyCatWorkReport(req?.query);
     console.log(
       `after getListOfDailyWorkReport retrieved item count: ${items.length}`
     );
@@ -139,7 +139,7 @@ dailyCatWorkReportRoute.delete("/delete", async (req: Request, resp: Response) =
         });
       }
       else {
-        const items = await getListOfDailyWorkReport(req.body);
+        const items = await getListOfDailyCatWorkReport(req.body);
         console.log(
           `after getListOfDailyWorkReport retrieved item count: ${items.length}`
         );
