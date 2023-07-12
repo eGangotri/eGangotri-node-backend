@@ -39,3 +39,16 @@ export type UserListOptionsType = {
     limit?: number,
   };
   
+  
+  export type DailyCatWorkReportListOptionsType = {
+    _id?: string,
+    startDate?: string,
+    endDate?: string,
+    operatorName?: string,
+    catalogProfile?: string,
+    link?: string,
+    notes?: string,
+    isLastTwoHours?: string, //true or false as string
+    limit?: number,
+  };
+  
