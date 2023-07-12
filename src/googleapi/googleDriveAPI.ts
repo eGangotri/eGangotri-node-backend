@@ -1,61 +1,51 @@
 import { google } from 'googleapis';
+import { _credentials } from './credentials_gitignore';
 
-/**
- * Obtain the credentials JSON file:
-Go to the Google Cloud Console (console.cloud.google.com).
-Create a new project and enable the Google Drive API.
-Create OAuth 2.0 credentials and download the JSON file.
- */
-// Load the credentials from the JSON file
-import credentials from './credentials.json';
+// Set up OAuth2 credentials
+const credentials = {
+    ..._credentials,
+  refresh_token: '1//0gNBMXupFzUULCgYIARAAGBASNwF-L9IrnF4rkWHpvRSV1TqBV7ujMRHZP-biHpMFJQvpWW-4e5dlNGlNyGfnCW0ywWv3XLkHtmc',  
+};
 
-
-// Create an OAuth2 client using the credentials
-const client = new google.auth.OAuth2(
-  credentials.installed.client_id,
-  credentials.installed.client_secret,
-  credentials.installed.redirect_uris[0]
+// Create an OAuth2 client
+const oauth2Client = new google.auth.OAuth2(
+  credentials.client_id,
+  credentials.client_secret,
+  credentials.redirect_uris[0]
 );
 
-// Set the access token
-client.setCredentials({
-  access_token: credentials.installed.access_token,
-  refresh_token: credentials.installed.refresh_token,
-  scope: credentials.installed.scope
+// Set the credentials for the OAuth2 client
+oauth2Client.setCredentials({
+  refresh_token: credentials.refresh_token,
 });
 
-// Create an instance of the Google Drive API
-const drive = google.drive({ version: 'v3', auth: client });
+// Create a new Google Drive instance
+const drive = google.drive({ version: 'v3', auth: oauth2Client });
 
-// Function to get all file metadata in a folder
-async function getFileMetadataInFolder(folderId: string) {
+async function listFolderContents(folderId: string) {
   try {
-    const response = await drive.files.list({
-      q: `'${folderId}' in parents`,
-      fields: 'files(name, id, mimeType)'
+    // Retrieve the files from the folder
+    const res = await drive.files.list({
+      q: `'${folderId}' in parents and trashed = false`,
+      fields: 'files(name, id, mimeType)',
     });
 
-    const files = response.data.files;
-    return files;
-  } catch (error) {
-    console.error('Error retrieving file metadata:', error.message);
-    throw error;
+    // Display the files' information
+    const files = res.data.files;
+    if (files && files.length) {
+      console.log('Files:');
+      files.forEach((file: any) => {
+        console.log(`${file.name} (${file.id}) - ${file.mimeType}\n
+        https://drive.google.com/file/d/${file.id}/view?usp=drive_link`);
+      });
+    } else {
+      console.log('No files found.');
+    }
+  } catch (err) {
+    console.error('Error retrieving folder contents:', err);
   }
 }
 
-// Usage example
-const folderId = 'YOUR_FOLDER_ID'; // Replace with the actual folder ID
-
-getFileMetadataInFolder(folderId)
-  .then((files) => {
-    console.log('Files in the folder:');
-    files.forEach((file: any) => {
-      console.log('Name:', file.name);
-      console.log('ID:', file.id);
-      console.log('MIME Type:', file.mimeType);
-      console.log('------------------------');
-    });
-  })
-  .catch((error) => {
-    console.error('Error:', error);
-  });
+// Replace 'FOLDER_ID' with the ID of the folder you want to list
+const folderId = '1pxxhV2BkyTZgq34InhTuwDh-szU0jvY4';
+listFolderContents(folderId);

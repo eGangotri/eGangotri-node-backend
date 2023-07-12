@@ -14,7 +14,9 @@
     "convert": "node -r ts-node/register --max-old-space-size=2048 --inspect --expose-gc ./src/imgToPdf/conversionService/convert.ts",
     "tally-post-conversion": "node -r ts-node/register ./src/imgToPdf/conversionService/postConversionTally.ts",
     "move-merged-pdfs": "node -r ts-node/register ./src/imgToPdf/conversionService/moveMergedPdfs.ts",
-    "vanity": "ts-node ./src/vanityService/VanityPdf.ts"
+    "vanity": "ts-node ./src/vanityService/VanityPdf.ts",
+    "catalog": "ts-node ./src/googleapi/googleDriveAPI.ts",
+    "refresh": "ts-node ./src/googleapi/getRefreshToken.ts"
   },
   "repository": {
     "type": "git",
@@ -44,7 +46,7 @@
     "fs-extra": "^11.1.1",
     "g": "^2.0.1",
     "google-auth-library": "^8.8.0",
-    "googleapis": "^118.0.0",
+    "googleapis": "^121.0.0",
     "lodash": "^4.17.21",
     "moment": "^2.29.1",
     "mongoose": "^7.2.2",
