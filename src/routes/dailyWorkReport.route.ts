@@ -3,9 +3,9 @@ import { DailyWorkReport } from "../models/dailyWorkReport";
 import { generateCSV, generateCSVApi2 } from "../services/CsvUtil";
 import { deleteRowsByIds, generateCSVAsFile, getListOfDailyWorkReport } from "../services/dailyWorkReportService";
 import { Request, Response } from "express";
-import { validateSuperAdminUserFromRequest, validateUserFromRequest } from "./utils";
 import { getDateTwoHoursBeforeNow } from "../services/Util";
 import _ from "lodash";
+import { validateSuperAdminUserFromRequest, validateUserFromRequest } from "../services/userService";
 
 export const dailyWorkReportRoute = express.Router();
 

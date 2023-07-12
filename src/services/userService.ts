@@ -1,7 +1,9 @@
 import { User } from "../models/user";
 import { getLimit } from "../routes/utils";
-import { UserListOptionsType } from "./types";
 import { replaceQuotesAndSplit } from "./Util";
+import { SUPERADMIN_ROLE } from "../mirror/FrontEndBackendCommonCodeConsts";
+import { Request } from "express";
+import { LoginUsersDocument, UserListOptionsType } from "../services/types";
 
 export function setOptionsForUserListing(queryOptions: UserListOptionsType) {
   // Empty `filter` means "match all documents"
@@ -46,4 +48,55 @@ export async function getUsers(queryOptions: UserListOptionsType) {
     .sort({ createdAt: -1 })
     .limit(limit);
   return items;
+}
+
+export const userExists = async (username:string) => {
+  const users = await getUsers({ username:username })
+  console.log(`${users[0]} userExists`)
+  return users?.length > 0;
+}
+
+
+export const _userExists = async (req: Request) => {
+  return userExists(req?.body?.username)
+}
+
+export const validateUser = async (username: string, password: string) => {
+  const userListOption = {
+    username,
+    password
+  } as UserListOptionsType;
+  console.log(`userListOption${JSON.stringify(userListOption)}/n username:${username}/password${password}`);
+  const users: LoginUsersDocument[] = await getUsers(userListOption);
+  console.log(`users: ${users.length} ${JSON.stringify(users)}`);
+  return users;
+}
+
+
+export const validateUserFromRequest = async (req: Request) => {
+  const username = req?.body?.operatorName;
+  const password = req?.body?.password;
+  const _user = await validateUser(username, password);
+  return _user?.length > 0
+}
+
+export const validateSuperAdminUserFromRequest = async (req: Request) => {
+  const username = req?.body?.superadmin_user;
+  const password = req?.body?.superadmin_password;
+  if (!username || !password) {
+    return [false, "Superadmin Username or password missing"];
+  }
+  const _user = await validateUser(username, password);
+  const users = _user.map(document => document.toObject());
+  console.log(`_user${JSON.stringify(_user)}`);
+  if (users?.length === 0) {
+    return [false, `Login failed for User "${username}"`];
+  }
+  else if (users[0].role !== SUPERADMIN_ROLE){
+    return [false, `Username "${username}" doesnt have relevant privileges`];
+  }
+  else {
+    return [true, ""];
+  }
+
 }
