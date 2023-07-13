@@ -1,21 +1,18 @@
 import * as fs from 'fs';
-const csvtojson = require('csvtojson');
 import * as xlsx from 'xlsx';
 
-export const convertCsvToXlsx = async (csvData: Array<Array<string>>, xlsxFilePath: string) => {
+export const dataToXslx = async (googleDrivePdfData: Array<Array<string|number>>, xlsxFilePath: string) => {
   try {
-    // Convert CSV to JSON
-    //const jsonArray = await csvtojson().fromFile(csvFilePath);
     const jsonArray = [{}]
-    for(const csvRow of csvData){
+    for(const dataRow of googleDrivePdfData){
         let x = 0
         jsonArray.push({
-            title:csvRow[x++],
-            link:csvRow[x++],
-            mimeType:csvRow[x++],
-            size:csvRow[x++],
-            sizeRaw:csvRow[x++],
-            folder:csvRow[x++],
+            "S.No":dataRow[x++],
+            "Title in Google Drive":dataRow[x++],
+            "Link to File Location":dataRow[x++],
+            "Size with Units":dataRow[x++],
+            "Size in Bytes":dataRow[x++],
+            "Folder Name":dataRow[x++],
         })
     }
 
