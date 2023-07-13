@@ -5,15 +5,15 @@ import moment from 'moment';
 import { DD_MM_YYYY_FORMAT } from '../utils/utils';
 import { readPdfFromDriveAndMerge } from './GoogleDrivePdfReader';
 import { sizeInfo } from '../mirror/FrontEndBackendCommonCode';
-import { convertCsvToXlsx } from './XlsxUtils';
+import { dataToXslx } from './XlsxUtils';
 import { fi } from 'date-fns/locale';
 
 const HOME_DIR = os.homedir();
 export const CSV_SEPARATOR = ";"
 export const SEPARATOR_SPECIFICATION = `sep=${CSV_SEPARATOR}\n`
 
-const csvData: Array<Array<string>> = []
-
+const csvData: Array<Array<string | number>> = []
+let ROW_COUNTER = 0;
 
 export async function listFolderContentsSingle(folderId: string, drive: drive_v3.Drive) {
     try {
@@ -41,14 +41,14 @@ export async function listFolderContentsSingle(folderId: string, drive: drive_v3
 
 export async function listFolderContentsAndGenerateCSV(folderId: string, drive: drive_v3.Drive, umbrellaFolder: string = "") {
     const _umbrellaFolder = umbrellaFolder?.length > 0 ? umbrellaFolder : await getFolderName(folderId, drive) || "";
-    await listFolderContents(folderId, drive,umbrellaFolder);
-    const fileNameWithPath = createFileNameWithPathForExport(folderId,umbrellaFolder);
+    await listFolderContents(folderId, drive, umbrellaFolder);
+    const fileNameWithPath = createFileNameWithPathForExport(folderId, umbrellaFolder);
     writeDataToCSV(csvData, `${fileNameWithPath}.csv`)
     // Convert CSV to XLSX
-    convertCsvToXlsx(csvData,`${fileNameWithPath}.xlsx`);
+    dataToXslx(csvData, `${fileNameWithPath}.xlsx`);
 }
 
-export async function listFolderContents(folderId: string, drive: drive_v3.Drive,umbrellaFolder: string) {
+export async function listFolderContents(folderId: string, drive: drive_v3.Drive, umbrellaFolder: string) {
     const folderName = await getFolderName(folderId, drive) || "";
     let idFolderNameMap = new Map<string, string>();
 
@@ -77,18 +77,13 @@ export async function listFolderContents(folderId: string, drive: drive_v3.Drive
                 const fileSizeRaw = file.size || "0";
                 const fileSize = parseInt(fileSizeRaw);
                 const parents = file.parents?.map(x => idFolderNameMap.get(x) || x).join("/") || "/"
-
-                console.log(`${fileName}, ${googleDriveLinkFromId(fileId)} , ${filemimeType},${fileSize},${fileSizeRaw},${parents} `);
+                console.log(`${ROW_COUNTER}, ${fileName}, ${googleDriveLinkFromId(fileId)},${fileSize},${fileSizeRaw},${parents} `);
                 if (filemimeType === 'application/pdf') {
-                    csvData.push([fileName, googleDriveLinkFromId(fileId), filemimeType, sizeInfo(fileSize),fileSizeRaw, parents])
-
-                   if(x++ <2){
-                   // await readPdfFromDriveAndMerge(drive,parents,'1zaAbe-16sfksUxpFO-Ql9TI5ayLMnp00',umbrellaFolder);
-                   }
+                    csvData.push([++ROW_COUNTER, fileName, googleDriveLinkFromId(fileId), sizeInfo(fileSize), fileSizeRaw, parents])
                 }
 
                 if (file.mimeType === 'application/vnd.google-apps.folder') {
-                    await listFolderContents(file?.id || '', drive,umbrellaFolder); // Recursively call the function for subfolders
+                    await listFolderContents(file?.id || '', drive, umbrellaFolder); // Recursively call the function for subfolders
                 }
             }
         } else {
@@ -99,9 +94,9 @@ export async function listFolderContents(folderId: string, drive: drive_v3.Drive
     }
 }
 
-function createFileNameWithPathForExport(folderId:string, _umbrellaFolder: string) {
-    const _csvDumpFolder = `${HOME_DIR}\\${_umbrellaFolder}`; 
-    if (!fs.existsSync(_csvDumpFolder)){
+function createFileNameWithPathForExport(folderId: string, _umbrellaFolder: string) {
+    const _csvDumpFolder = `${HOME_DIR}\\${_umbrellaFolder}`;
+    if (!fs.existsSync(_csvDumpFolder)) {
         fs.mkdirSync(_csvDumpFolder);
     }
     const timeComponent = moment(new Date()).format(DD_MM_YYYY_FORMAT)
