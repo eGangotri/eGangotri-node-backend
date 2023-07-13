@@ -16,7 +16,8 @@
     "move-merged-pdfs": "node -r ts-node/register ./src/imgToPdf/conversionService/moveMergedPdfs.ts",
     "vanity": "ts-node ./src/vanityService/VanityPdf.ts",
     "catalog": "ts-node ./src/googleapi/googleDriveAPI.ts",
-    "refresh": "ts-node ./src/googleapi/getRefreshToken.ts"
+    "refresh": "ts-node ./src/googleapi/getRefreshToken.ts",
+    "CsvtoXlsx": "ts-node ./src/googleapi/CsvtoXlsx.ts"
   },
   "repository": {
     "type": "git",
@@ -39,6 +40,7 @@
     "cors": "^2.8.5",
     "csv-parse": "latest",
     "csv-writer": "^1.6.0",
+    "csvtojson": "^2.0.10",
     "date-fns": "^2.29.3",
     "dotenv": "^16.0.3",
     "easy-pdf-merge": "^0.2.6",
@@ -61,6 +63,7 @@
     "typescript": "5.0.4",
     "underscore": "^1.13.1",
     "uuid": "^8.3.2",
+    "xlsx": "^0.18.5",
     "yarn": "^1.22.17"
   },
   "devDependencies": {
