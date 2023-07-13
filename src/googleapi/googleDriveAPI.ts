@@ -1,5 +1,6 @@
 import { google } from 'googleapis';
 import { _credentials } from './credentials_gitignore';
+import { listFolderContents, listFolderContentsAndGenerateCSV } from './GoogleDriveUtil';
 
 // Set up OAuth2 credentials
 const credentials = {
@@ -21,31 +22,6 @@ oauth2Client.setCredentials({
 
 // Create a new Google Drive instance
 const drive = google.drive({ version: 'v3', auth: oauth2Client });
-
-async function listFolderContents(folderId: string) {
-  try {
-    // Retrieve the files from the folder
-    const res = await drive.files.list({
-      q: `'${folderId}' in parents and trashed = false`,
-      fields: 'files(name, id, mimeType)',
-    });
-
-    // Display the files' information
-    const files = res.data.files;
-    if (files && files.length) {
-      console.log('Files:');
-      files.forEach((file: any) => {
-        console.log(`${file.name} (${file.id}) - ${file.mimeType}\n
-        https://drive.google.com/file/d/${file.id}/view?usp=drive_link`);
-      });
-    } else {
-      console.log('No files found.');
-    }
-  } catch (err) {
-    console.error('Error retrieving folder contents:', err);
-  }
-}
-
 // Replace 'FOLDER_ID' with the ID of the folder you want to list
 const folderId = '1pxxhV2BkyTZgq34InhTuwDh-szU0jvY4';
-listFolderContents(folderId);
+listFolderContentsAndGenerateCSV(folderId, drive, 'Treasures-59');
