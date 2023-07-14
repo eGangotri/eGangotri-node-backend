@@ -23,5 +23,9 @@ oauth2Client.setCredentials({
 // Create a new Google Drive instance
 const drive = google.drive({ version: 'v3', auth: oauth2Client });
 // Replace 'FOLDER_ID' with the ID of the folder you want to list
-const folderId = '1pxxhV2BkyTZgq34InhTuwDh-szU0jvY4';
-listFolderContentsAndGenerateCSV(folderId, drive, 'Treasures-59');
+// const folderId = '1pxxhV2BkyTZgq34InhTuwDh-szU0jvY4';
+// listFolderContentsAndGenerateCSV(folderId, drive, 'Treasures-59');
+
+
+const folderId = '1afC1184y_9Z1S1y1srp9_iLYqsQyYqFj'
+listFolderContentsAndGenerateCSV(folderId, drive, 'test');

@@ -12,7 +12,7 @@ const HOME_DIR = os.homedir();
 export const CSV_SEPARATOR = ";"
 export const SEPARATOR_SPECIFICATION = `sep=${CSV_SEPARATOR}\n`
 
-const csvData: Array<Array<string | number>> = []
+const googleDrivePdfData: Array<Array<string | number>> = []
 let ROW_COUNTER = 0;
 
 export async function listFolderContentsSingle(folderId: string, drive: drive_v3.Drive) {
@@ -43,9 +43,9 @@ export async function listFolderContentsAndGenerateCSV(folderId: string, drive: 
     const _umbrellaFolder = umbrellaFolder?.length > 0 ? umbrellaFolder : await getFolderName(folderId, drive) || "";
     await listFolderContents(folderId, drive, umbrellaFolder);
     const fileNameWithPath = createFileNameWithPathForExport(folderId, umbrellaFolder);
-    writeDataToCSV(csvData, `${fileNameWithPath}.csv`)
+    writeDataToCSV(googleDrivePdfData, `${fileNameWithPath}.csv`)
     // Convert CSV to XLSX
-    dataToXslx(csvData, `${fileNameWithPath}.xlsx`);
+    dataToXslx(googleDrivePdfData, `${fileNameWithPath}.xlsx`);
 }
 
 export async function listFolderContents(folderId: string, drive: drive_v3.Drive, umbrellaFolder: string) {
@@ -79,7 +79,7 @@ export async function listFolderContents(folderId: string, drive: drive_v3.Drive
                 const parents = file.parents?.map(x => idFolderNameMap.get(x) || x).join("/") || "/"
                 console.log(`${ROW_COUNTER}, ${fileName}, ${googleDriveLinkFromId(fileId)},${fileSize},${fileSizeRaw},${parents} `);
                 if (filemimeType === 'application/pdf') {
-                    csvData.push([++ROW_COUNTER, fileName, googleDriveLinkFromId(fileId), sizeInfo(fileSize), fileSizeRaw, parents])
+                    googleDrivePdfData.push([++ROW_COUNTER, fileName, googleDriveLinkFromId(fileId), sizeInfo(fileSize), fileSizeRaw, parents])
                 }
 
                 if (file.mimeType === 'application/vnd.google-apps.folder') {
@@ -95,7 +95,7 @@ export async function listFolderContents(folderId: string, drive: drive_v3.Drive
 }
 
 function createFileNameWithPathForExport(folderId: string, _umbrellaFolder: string) {
-    const _csvDumpFolder = `${HOME_DIR}\\${_umbrellaFolder}`;
+    const _csvDumpFolder = `${HOME_DIR}\\_catExcels\\${_umbrellaFolder}`;
     if (!fs.existsSync(_csvDumpFolder)) {
         fs.mkdirSync(_csvDumpFolder);
     }
@@ -103,6 +103,7 @@ function createFileNameWithPathForExport(folderId: string, _umbrellaFolder: stri
     const fileNameWithPath = `${_csvDumpFolder}\\csv-ggl-drv-${folderId}-${_umbrellaFolder}-${timeComponent}`;
     return fileNameWithPath;
 }
+
 function writeDataToCSV(data: any[], fileNameWithPath: string): void {
     // Convert the data array to a CSV-formatted string
     console.log(`${data[0]} ${data.length}`);

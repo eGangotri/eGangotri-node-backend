@@ -1,21 +1,52 @@
 import * as fs from 'fs';
 import * as xlsx from 'xlsx';
 
-export const dataToXslx = async (googleDrivePdfData: Array<Array<string|number>>, xlsxFilePath: string) => {
-  try {
-    const jsonArray = [{}]
-    for(const dataRow of googleDrivePdfData){
-        let x = 0
-        jsonArray.push({
-            "S.No":dataRow[x++],
-            "Title in Google Drive":dataRow[x++],
-            "Link to File Location":dataRow[x++],
-            "Size with Units":dataRow[x++],
-            "Size in Bytes":dataRow[x++],
-            "Folder Name":dataRow[x++],
-        })
-    }
+const setHeadersForExcel = () => {
+  const headerArray = [
+    "S.No", "Title in Google Drive", "Link to File Location",
+    "Title	in English", "Title in Original Script ( Devanagari etc )",
+    "Sub-Title", "Author",
+    "Commentator/ Translator/Editor", "Language(s)", "Script", "Subject/ Descriptor", "Publisher", "Edition",
+    "Statement", "Place of Publication", "Year of Publication", "No. of Pages", "ISBN", "Remarks",
+    "Size with Units", "Size in Bytes", "Folder Name"
+  ]
+}
 
+const convertDatatoJson = (googleDrivePdfData: Array<Array<string | number>>) => {
+  const jsonArray = [{}]
+  for (const dataRow of googleDrivePdfData) {
+    let x = 0
+    jsonArray.push({
+      "S.No": dataRow[x++],
+      "Title in Google Drive": dataRow[x++],
+      "Link to File Location": dataRow[x++],
+
+      "Title	in English": "*",
+      "Title in Original Script ( Devanagari etc )": "*",
+      "Sub-Title": "*",
+      "Author": "*",
+      "Commentator/ Translator/Editor": "*",
+      "Language(s)": "*",
+      "Script": "*",
+      "Subject/ Descriptor": "*",
+      "Publisher": "*",
+      "Edition/Statement": "*",
+      "Place of Publication": "*",
+      "Year of Publication": "*",
+      "No. of Pages": "*",
+      "ISBN": "*",
+      "Remarks": "*",
+
+      "Size with Units": dataRow[x++],
+      "Size in Bytes": dataRow[x++],
+      "Folder Name": dataRow[x++],
+    })
+  }
+  return jsonArray
+}
+export const dataToXslx = async (googleDrivePdfData: Array<Array<string | number>>, xlsxFilePath: string) => {
+  try {
+    const jsonArray = convertDatatoJson(googleDrivePdfData);
     console.log(`jsonArray ${JSON.stringify(jsonArray[1])}`)
     console.log(`jsonArray ${JSON.stringify(jsonArray[2])}`)
     // Create a new workbook

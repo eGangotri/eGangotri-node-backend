@@ -17,6 +17,7 @@
     "vanity": "ts-node ./src/vanityService/VanityPdf.ts",
     "catalog": "ts-node ./src/googleapi/googleDriveAPI.ts",
     "refresh": "ts-node ./src/googleapi/getRefreshToken.ts",
+    "downloadPdf": "ts-node ./src/googleapi/DownloadPdfFromGoogleDrive.ts"
   },
   "repository": {
     "type": "git",
