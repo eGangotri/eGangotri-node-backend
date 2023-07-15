@@ -1,7 +1,7 @@
 import { PDFDocument, PDFPage } from 'pdf-lib';
 import fs from 'fs';
 import * as _ from 'lodash';
-import Path from 'path'
+import * as path from 'path';
 import { createFolderIfNotExists, getAllPDFFiles } from '../imgToPdf/utils/FileUtils';
 import { initForm } from 'pdfkit';
 const fsPromises = require('fs').promises;
@@ -9,15 +9,17 @@ const fsPromises = require('fs').promises;
 
 const firstNPages = 10
 const lastNPages = 10
+let FINAL_REPORT:string[] = [];
+let PDF_PROCESSING_COUNTER = 0;
 
-async function createPartialPdf(inputPath: string, outputPath: string): Promise<number> {
+async function createPartialPdf(inputPath: string, outputPath: string, pdfsToBeProcessedCount:number, index:number): Promise<number> {
     const existingPdfBytes = await fsPromises.readFile(inputPath)
 
     const pdfDoc = await PDFDocument.load(existingPdfBytes);
     let range: number[] = []
     const pdfPageCount = pdfDoc.getPages().length
 
-    console.log(`Pdf No. ${++counter} pdfPageCount ${pdfPageCount}`);
+    console.log(`Folder # (${index}) Pdf No. ${++counter}/${pdfsToBeProcessedCount} pdfPageCount ${pdfPageCount}`);
 
     if (pdfPageCount < (firstNPages + lastNPages)) {
         range = _.range(0, pdfPageCount);
@@ -32,34 +34,33 @@ async function createPartialPdf(inputPath: string, outputPath: string): Promise<
 
     const newPdfBytes = await newPdf.save();
 
-    const filename = Path.parse(inputPath).name
-    const newOutputFileName = padNumbersWithZeros(pdfPageCount)
-    fs.writeFile(`${outputPath}//${filename}_${newOutputFileName}.pdf`, newPdfBytes, (err) => {
-        if (err)
-            console.log(err);
-        else {
-            console.log(` ${newOutputFileName} File written successfully\n`);
-        }
-    });
+    const filename = path.parse(inputPath).name
+    const suffixWithPageCount = padNumbersWithZeros(pdfPageCount)
+    await fsPromises.writeFile(`${outputPath}//${filename}_${suffixWithPageCount}.pdf`, newPdfBytes);
     return pdfPageCount
 }
 
-const inputPathWithName = 'C:\\Users\\chetan\\Documents\\_testPDF\\pdfs\\t2.pdf';
-let counter = 0;
-export const loopForExtraction = async () => {
-    const outputPath = 'C:\\tmp\\Treasures7';
-    const rootFolder = "D:\\eG-tr1-30\\Treasures6\\amit\\malhotra"
+export const loopForExtraction = async (rootFolder:string, outputRoot:string,index:number ) => {
+    const outputPath = `${outputRoot}\\${path.parse(rootFolder).name}`;
+
     const allPdfs = getAllPDFFiles(rootFolder)
+    const pdfsToBeProcessedCount = allPdfs.length;
+    
     createFolderIfNotExists(outputPath)
     for (const pdf of allPdfs) {
         try {
-            await createPartialPdf(pdf, outputPath)
+            await createPartialPdf(pdf, outputPath,pdfsToBeProcessedCount,index);
+            PDF_PROCESSING_COUNTER++;
         }
         catch (error) {
             console.error('Error creating PDF:', error);
         }
     }
-    console.log(`allPdfs ${allPdfs.length} ${allPdfs.length === 277} allPdfs[0] ${allPdfs[0]}`);
+    const consoleLog:string =
+     `\nFolder # (${index}). PDF Count ${pdfsToBeProcessedCount} == PDF_PROCESSING_COUNTER ${PDF_PROCESSING_COUNTER} Match ${pdfsToBeProcessedCount === PDF_PROCESSING_COUNTER}`
+
+    FINAL_REPORT.push(consoleLog);
+    console.log(consoleLog);
 }
 
 const padNumbersWithZeros = (num: number) => {
@@ -77,4 +78,23 @@ const padNumbersWithZeros = (num: number) => {
 
     return num
 }
-loopForExtraction()
+let counter = 0;
+
+const loopFolders = async () => {
+    
+    const rootFolder = 'D:\\eG-tr1-30';
+    //const rootFolder = 'C:\\Users\\chetan\\Documents\\_testPDF\\pdfs';
+    //const _folders = ["1", "2"]
+    const _folders = ["Treasures-3","Treasures4","Treasures5", "Treasures6","Treasures7", "Treasures8", "Treasures9","Treasures10"]
+    const _foldersWithPath = _folders.map(x =>`${rootFolder}\\${x}`)
+    
+    for( const [index, folder] of _foldersWithPath.entries()) {
+        console.log(`Started processing ${folder}`)
+        PDF_PROCESSING_COUNTER = 0;
+        counter = 0
+        await loopForExtraction(folder,"E:\\tmpReducedPdfs",index+1);
+    }
+    console.log(`FINAL_REPORT: ${FINAL_REPORT.map(x=>x+"\n")}`)
+}
+
+loopFolders()
