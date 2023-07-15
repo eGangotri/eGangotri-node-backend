@@ -3,7 +3,6 @@ import fs from 'fs';
 import * as _ from 'lodash';
 import * as path from 'path';
 import { createFolderIfNotExists, getAllPDFFiles } from '../imgToPdf/utils/FileUtils';
-import { initForm } from 'pdfkit';
 const fsPromises = require('fs').promises;
 
 
@@ -81,20 +80,20 @@ const padNumbersWithZeros = (num: number) => {
 let counter = 0;
 
 const loopFolders = async () => {
-    
-    const rootFolder = 'D:\\eG-tr1-30';
-    //const rootFolder = 'C:\\Users\\chetan\\Documents\\_testPDF\\pdfs';
-    //const _folders = ["1", "2"]
-    const _folders = ["Treasures-3","Treasures4","Treasures5", "Treasures6","Treasures7", "Treasures8", "Treasures9","Treasures10"]
-    const _foldersWithPath = _folders.map(x =>`${rootFolder}\\${x}`)
-    
     for( const [index, folder] of _foldersWithPath.entries()) {
         console.log(`Started processing ${folder}`)
         PDF_PROCESSING_COUNTER = 0;
         counter = 0
-        await loopForExtraction(folder,"E:\\tmpReducedPdfs",index+1);
+        await loopForExtraction(folder,destRootFolder,index+1);
     }
     console.log(`FINAL_REPORT: ${FINAL_REPORT.map(x=>x+"\n")}`)
 }
+//const rootFolder = 'D:\\eG-tr1-30';
+const srcRootFolder = 'E:\\MASTER_BACKUP';
+const destRootFolder = "E:\\tmpReducedPdfs";
+//const _folders = ["1", "2"]
+const _folders = ["Treasures59"]
+const _foldersWithPath = _folders.map(x =>`${srcRootFolder}\\${x}`)
+
 
 loopFolders()
