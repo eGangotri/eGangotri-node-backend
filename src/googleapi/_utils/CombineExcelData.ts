@@ -34,15 +34,13 @@ export const combineExcels = () => {
     const mainExcelData: ExcelHeaders[] = excelToJson(mainExcelFileName);
     const secondaryExcelData: ExcelHeaders[] = excelToJson(secondaryExcelFileName);
 
-    const secondaryExcelDataAdjusted: ExcelHeaders[] = fillPageCountAndTruncatedLink(secondaryExcelData);
-    console.log(`secondaryExcelDataAdjusted: ${JSON.stringify(secondaryExcelDataAdjusted[0])}`);
+    const secondaryExcelDataAdjusted: ExcelHeaders[] = fillPageCount(secondaryExcelData);
 
     if (mainExcelData.length != secondaryExcelData.length) {
         console.log("Cant proceed Data Length in Main and Secondary dont match");
         //process.exit(0);
     }
     const combinedExcelJsons = combineExcelJsons(mainExcelData, secondaryExcelDataAdjusted)
-    console.log(`combinedExcelJsons ${JSON.stringify(combinedExcelJsons[0])}`);
 
     jsonToExcel(combinedExcelJsons, combinedExcelFileName);
 }
@@ -50,24 +48,25 @@ export const combineExcels = () => {
 const combineExcelJsons = (mainExcelData: ExcelHeaders[], secondaryExcelDataAdjusted: ExcelHeaders[]) => {
     const combinedExcelJsons = mainExcelData.map((firstExcel: ExcelHeaders) => {
         const combinedObject = firstExcel;
-        secondaryExcelDataAdjusted.find((secondExcel: ExcelHeaders) => {
-            if (secondExcel[titleInGoogleDrive] === firstExcel[titleInGoogleDrive])
+        secondaryExcelDataAdjusted?.find((secondExcel: ExcelHeaders) => {
+            if (firstExcel[titleInGoogleDrive] === secondExcel[titleInGoogleDrive]) {
+             //   console.log(`is a match ${secondExcel[titleInGoogleDrive]} ${firstExcel[titleInGoogleDrive]}`)
+                combinedObject[numPages] = secondExcel[numPages] || "*"
+                combinedObject[linkToTruncatedFileLocation] = secondExcel[linkToFileLocation] || "*"
                 return secondExcel;
-        });
-        combinedObject[numPages] = secondaryExcelDataAdjusted[0][numPages] || "0"
-        combinedObject[linkToTruncatedFileLocation] = secondaryExcelDataAdjusted[0][linkToFileLocation] || "0"
-
+            }
+        })
+       
         return combinedObject;
     });
     return combinedExcelJsons
 }
 
-const fillPageCountAndTruncatedLink = (excelJson: ExcelHeaders[]) => {
+const fillPageCount = (excelJson: ExcelHeaders[]) => {
     return excelJson.map((row: ExcelHeaders) => {
         const titleWithPageCount = row["Title in Google Drive"]
-        row[titleInGoogleDrive] = titleWithPageCount.slice(0, titleWithPageCount.length - 9);
+        row[titleInGoogleDrive] = titleWithPageCount.slice(0, titleWithPageCount.length - 9) + ".pdf";
         row[numPages] = parseInt(titleWithPageCount.slice(-8, -4)).toString();
-        row[linkToTruncatedFileLocation] = row[linkToFileLocation];
         return row;
     })
 }
