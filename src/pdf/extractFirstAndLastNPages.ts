@@ -95,12 +95,10 @@ const loopFolders = async () => {
     }
     console.log(`FINAL_REPORT: ${FINAL_REPORT.map(x=>x+"\n")}`)
 }
-//const rootFolder = 'D:\\eG-tr1-30';
-const srcRootFolder = 'D:\\eG-tr1-30';
-///'E:\\MASTER_BACKUP';
+//const srcRootFolder = 'D:\\eG-tr1-30';
+const srcRootFolder = 'E:\\MASTER_BACKUP';
 const destRootFolder = "E:\\_catalogWork\\_reducedPdfs";
-const _folders = ["Treasures 2"]
+const _folders = ["Treasures59"]
 const _foldersWithPath = _folders.map(x =>`${srcRootFolder}\\${x}`)
-
 
 loopFolders()
