@@ -18,10 +18,13 @@ let ROW_COUNTER = 0;
 export async function listFolderContentsAndGenerateCSVAndExcel(_folderId: string, drive: drive_v3.Drive, umbrellaFolder: string = "") {
     const folderId = extractFolderId(_folderId)
     const _umbrellaFolder = umbrellaFolder?.length > 0 ? umbrellaFolder : await getFolderName(folderId, drive) || "";
+
     console.log(`drive api folder extracTion process initiated: \
     from (${_umbrellaFolder}) ${_folderId} destined to ${EXPORT_DEST_FOLDER}\n`)
+
     await listFolderContents(folderId, drive, umbrellaFolder);
-    const fileNameWithPath = createFileNameWithPathForExport(folderId, umbrellaFolder);
+
+    const fileNameWithPath = createFileNameWithPathForExport(folderId, umbrellaFolder) + `_${ROW_COUNTER-1}`;
     writeDataToCSV(googleDrivePdfData, `${fileNameWithPath}.csv`)
     // Convert CSV to XLSX
     dataToXslx(googleDrivePdfData, `${fileNameWithPath}.xlsx`);
