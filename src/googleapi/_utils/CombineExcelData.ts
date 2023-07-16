@@ -6,7 +6,7 @@ import * as fs from 'fs';
 import { DD_MM_YYYY_HH_MMFORMAT } from "../../utils/utils";
 import moment from "moment";
 
-const _root = "E:\\tmpReducedPdfs\\_collation";
+const _root = "E:\\_catalogWork\\_collation";
 
 const treasureFolder = "Treasures"
 

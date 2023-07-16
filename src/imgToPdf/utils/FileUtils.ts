@@ -49,7 +49,7 @@ export function createFolderIfNotExists(folderPath: string): void {
       fs.mkdirSync(folderPath);
       console.log(`Folder created: ${folderPath}`);
     } else {
-      console.log(`Folder already exists: ${folderPath}`);
+     // console.log(`Folder already exists: ${folderPath}`);
     }
   }
 

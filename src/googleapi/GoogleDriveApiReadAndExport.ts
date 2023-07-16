@@ -63,8 +63,8 @@ const drive = google.drive({ version: 'v3', auth: oauth2Client });
 // const driveLink = "https://drive.google.com/drive/folders/15TIpx8gHsMP7ARkUt6KkErRmUBZn0w1Y?usp=drive_link"
 // listFolderContentsAndGenerateCSVAndExcel(driveLink, drive, 'Treasures 10');
 
-//export const EXPORT_DEST_FOLDER = `E:\\tmpReducedPdfs\\_collation\\_catExcels`;
-export const EXPORT_DEST_FOLDER = `E:\\tmpReducedPdfs\\_collation\\_catReducedPdfExcels`;
+//export const EXPORT_DEST_FOLDER = `E:\\_catalogWork\\_collation\\_catExcels`;
 
-const driveLink = "https://drive.google.com/drive/folders/1A61-czz5acFuHPrP_gw8hIxnrZ56Itex?usp=drive_link"
-listFolderContentsAndGenerateCSVAndExcel(driveLink, drive, 'Treasures');
+export const EXPORT_DEST_FOLDER = `E:\\_catalogWork\\_collation\\_catReducedPdfExcels`;
+const driveLink = "https://drive.google.com/drive/folders/1OKuJ-Ec7kmBAV2ad0TKps5ROElzXRsdN?usp=drive_link"
+listFolderContentsAndGenerateCSVAndExcel(driveLink, drive, 'Treasures-2');

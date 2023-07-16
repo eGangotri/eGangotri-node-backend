@@ -40,15 +40,22 @@ async function createPartialPdf(inputPath: string, outputPath: string, pdfsToBeP
 }
 
 export const loopForExtraction = async (rootFolder:string, outputRoot:string,index:number ) => {
-    const outputPath = `${outputRoot}\\${path.parse(rootFolder).name}`;
 
     const allPdfs = getAllPDFFiles(rootFolder)
     const pdfsToBeProcessedCount = allPdfs.length;
+    const outputPath = `${outputRoot}\\${path.parse(rootFolder).name} (${pdfsToBeProcessedCount})`;
     
     createFolderIfNotExists(outputPath)
-    for (const pdf of allPdfs) {
+    let folderIndex = 1;
+    for (const [index, pdf] of allPdfs.entries()) {
+        let _subFolder = `${outputPath}\\${folderIndex}`
+        createFolderIfNotExists(_subFolder)
+        if(index!==0 && index % 100 == 0){
+            folderIndex++
+        }
+
         try {
-            await createPartialPdf(pdf, outputPath,pdfsToBeProcessedCount,index);
+            await createPartialPdf(pdf, _subFolder,pdfsToBeProcessedCount,index);
             PDF_PROCESSING_COUNTER++;
         }
         catch (error) {
@@ -89,10 +96,11 @@ const loopFolders = async () => {
     console.log(`FINAL_REPORT: ${FINAL_REPORT.map(x=>x+"\n")}`)
 }
 //const rootFolder = 'D:\\eG-tr1-30';
-const srcRootFolder = 'E:\\MASTER_BACKUP';
-const destRootFolder = "E:\\tmpReducedPdfs";
+const srcRootFolder = 'D:\\eG-tr1-30';
+///'E:\\MASTER_BACKUP';
+const destRootFolder = "E:\\_catalogWork\\_reducedPdfs";
 //const _folders = ["1", "2"]
-const _folders = ["Treasures59"]
+const _folders = ["Treasures"]
 const _foldersWithPath = _folders.map(x =>`${srcRootFolder}\\${x}`)
 
 
