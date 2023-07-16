@@ -5,12 +5,12 @@ import moment from 'moment';
 import { DD_MM_YYYY_HH_MMFORMAT } from '../../utils/utils';
 import { sizeInfo } from '../../mirror/FrontEndBackendCommonCode';
 import { dataToXslx } from './XlsxUtils';
+import { EXPORT_DEST_FOLDER } from '../GoogleDriveApiReadAndExport';
 
 const HOME_DIR = os.homedir();
 export const CSV_SEPARATOR = ";"
 export const SEPARATOR_SPECIFICATION = `sep=${CSV_SEPARATOR}\n`
 
-const EXPORT_DEST_FOLDER = `E:\\tmpReducedPdfs\\_collation\\_catExcels`;
 
 const googleDrivePdfData: Array<Array<string | number>> = []
 let ROW_COUNTER = 0;
