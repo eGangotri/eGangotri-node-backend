@@ -4,7 +4,6 @@
   "description": "eGangotri Upload Monitoring and Reporting Tool",
   "main": "index.ts",
   "scripts": {
-    "1": "ts-node ./src/googleapi/1.ts",
     "test": "npm test",
     "flatfile-to-mongo": "ts-node ./src/tasks/flatfile-to-mongo.ts \"C:/Users/Chetan Pandey/eGangotri\"",
     "start": "ts-node ./src/index.ts",
@@ -16,10 +15,9 @@
     "tally-post-conversion": "node -r ts-node/register ./src/imgToPdf/conversionService/postConversionTally.ts",
     "move-merged-pdfs": "node -r ts-node/register ./src/imgToPdf/conversionService/moveMergedPdfs.ts",
     "vanity": "ts-node ./src/vanityService/VanityPdf.ts",
-    "catalog": "ts-node ./src/googleapi/googleDriveAPI.ts",
-    "refresh": "ts-node ./src/googleapi/getRefreshToken.ts",
-    "downloadPdf": "ts-node ./src/googleapi/DownloadPdfFromGoogleDrive.ts",
-    "extractFirstAndLastNPages": "ts-node ./src/googleapi/extractFirstAndLastNPages.ts"
+    "catalog": "ts-node ./src/googleapi/GoogleDriveApiReadAndExport.ts",
+    "refresh": "ts-node ./src/googleapi/utils/getRefreshToken.ts",
+    "extractFirstAndLastNPages": "ts-node ./src/pdf/extractFirstAndLastNPages.ts"
   },
   "repository": {
     "type": "git",
@@ -59,7 +57,7 @@
     "nodemon": "^2.0.22",
     "pdf-export-images": "^1.0.9",
     "pdf-lib": "^1.17.1",
-    "pdfjs-dist": "^2.10.377",
+    "pdfjs-dist": "^3.8.162",
     "pdfkit": "^0.13.0",
     "puppeteer": "^13.0.0",
     "readline-sync": "^1.4.10",

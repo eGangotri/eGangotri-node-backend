@@ -21,7 +21,8 @@ const convertDatatoJson = (googleDrivePdfData: Array<Array<string | number>>) =>
       "Title in Google Drive": dataRow[x++],
       "Link to File Location": dataRow[x++],
 
-      "Title	in English": "*",
+      "Link to Truncated File Location": "*",
+      "Title in English": "*",
       "Title in Original Script ( Devanagari etc )": "*",
       "Sub-Title": "*",
       "Author": "*",
@@ -36,6 +37,8 @@ const convertDatatoJson = (googleDrivePdfData: Array<Array<string | number>>) =>
       "No. of Pages": "*",
       "ISBN": "*",
       "Remarks": "*",
+      "Commentairies": "*",
+      "Commentator": "*",
 
       "Size with Units": dataRow[x++],
       "Size in Bytes": dataRow[x++],
@@ -47,8 +50,6 @@ const convertDatatoJson = (googleDrivePdfData: Array<Array<string | number>>) =>
 export const dataToXslx = async (googleDrivePdfData: Array<Array<string | number>>, xlsxFilePath: string) => {
   try {
     const jsonArray = convertDatatoJson(googleDrivePdfData);
-    console.log(`jsonArray ${JSON.stringify(jsonArray[1])}`)
-    console.log(`jsonArray ${JSON.stringify(jsonArray[2])}`)
     // Create a new workbook
     const workbook = xlsx.utils.book_new();
 
@@ -61,12 +62,8 @@ export const dataToXslx = async (googleDrivePdfData: Array<Array<string | number
     // Write the workbook to a file
     xlsx.writeFile(workbook, xlsxFilePath);
 
-    console.log(`Written to ${xlsxFilePath}!`);
+    console.log(`Excel File Written to ${xlsxFilePath}!`);
   } catch (error) {
     console.error('An error occurred:', error);
   }
 };
-
-//const fileNameWithPath = `C:\\Users\\chetan\\Treasures-59\\csv-ggl-drv-1pxxhV2BkyTZgq34InhTuwDh-szU0jvY4-Treasures-59-14-Jul-2023`;
-const fileNameWithPath = "C:\\Users\\chetan\\Treasures-59\\1"
-//convertCsvToXlsx(`${fileNameWithPath}.csv`,`${fileNameWithPath}.xlsx`);

@@ -2,45 +2,24 @@ import { drive_v3 } from 'googleapis';
 import fs from 'fs';
 import * as os from 'os';
 import moment from 'moment';
-import { DD_MM_YYYY_FORMAT } from '../utils/utils';
-import { readPdfFromDriveAndMerge } from './GoogleDrivePdfReader';
-import { sizeInfo } from '../mirror/FrontEndBackendCommonCode';
+import { DD_MM_YYYY_HH_MMFORMAT } from '../../utils/utils';
+import { sizeInfo } from '../../mirror/FrontEndBackendCommonCode';
 import { dataToXslx } from './XlsxUtils';
-import { fi } from 'date-fns/locale';
 
 const HOME_DIR = os.homedir();
 export const CSV_SEPARATOR = ";"
 export const SEPARATOR_SPECIFICATION = `sep=${CSV_SEPARATOR}\n`
 
+const EXPORT_DEST_FOLDER = `E:\\tmpReducedPdfs\\_collation\\_catExcels`;
+
 const googleDrivePdfData: Array<Array<string | number>> = []
 let ROW_COUNTER = 0;
 
-export async function listFolderContentsSingle(folderId: string, drive: drive_v3.Drive) {
-    try {
-        // Retrieve the files from the folder
-        const res = await drive.files.list({
-            q: `'${folderId}' in parents and trashed = false`,
-            fields: 'files(name, id, mimeType)',
-        });
-
-        // Display the files' information
-        const files = res.data.files;
-        if (files && files.length) {
-            console.log('Files:');
-            files.forEach((file: any) => {
-                console.log(`${file.name} (${file.id}) - ${file.mimeType}\n
-          https://drive.google.com/file/d/${file.id}/view?usp=drive_link`);
-            });
-        } else {
-            console.log('No files found.');
-        }
-    } catch (err) {
-        console.error('Error retrieving folder contents:', err);
-    }
-}
-
-export async function listFolderContentsAndGenerateCSV(folderId: string, drive: drive_v3.Drive, umbrellaFolder: string = "") {
+export async function listFolderContentsAndGenerateCSVAndExcel(_folderId: string, drive: drive_v3.Drive, umbrellaFolder: string = "") {
+    const folderId = extractFolderId(_folderId)
     const _umbrellaFolder = umbrellaFolder?.length > 0 ? umbrellaFolder : await getFolderName(folderId, drive) || "";
+    console.log(`drive api folder extracTion process initiated: \
+    from (${_umbrellaFolder}) ${_folderId} destined to ${EXPORT_DEST_FOLDER}\n`)
     await listFolderContents(folderId, drive, umbrellaFolder);
     const fileNameWithPath = createFileNameWithPathForExport(folderId, umbrellaFolder);
     writeDataToCSV(googleDrivePdfData, `${fileNameWithPath}.csv`)
@@ -77,7 +56,7 @@ export async function listFolderContents(folderId: string, drive: drive_v3.Drive
                 const fileSizeRaw = file.size || "0";
                 const fileSize = parseInt(fileSizeRaw);
                 const parents = file.parents?.map(x => idFolderNameMap.get(x) || x).join("/") || "/"
-                console.log(`${ROW_COUNTER}, ${fileName}, ${googleDriveLinkFromId(fileId)},${fileSize},${fileSizeRaw},${parents} `);
+                console.log(`\t${ROW_COUNTER}, ${fileName}, ${googleDriveLinkFromId(fileId)},${fileSize},${fileSizeRaw},${parents} `);
                 if (filemimeType === 'application/pdf') {
                     googleDrivePdfData.push([++ROW_COUNTER, fileName, googleDriveLinkFromId(fileId), sizeInfo(fileSize), fileSizeRaw, parents])
                 }
@@ -95,24 +74,22 @@ export async function listFolderContents(folderId: string, drive: drive_v3.Drive
 }
 
 function createFileNameWithPathForExport(folderId: string, _umbrellaFolder: string) {
-    const _csvDumpFolder = `${HOME_DIR}\\_catExcels\\${_umbrellaFolder}`;
+    const _csvDumpFolder = `${EXPORT_DEST_FOLDER}\\${_umbrellaFolder}`;
     if (!fs.existsSync(_csvDumpFolder)) {
         fs.mkdirSync(_csvDumpFolder);
     }
-    const timeComponent = moment(new Date()).format(DD_MM_YYYY_FORMAT)
-    const fileNameWithPath = `${_csvDumpFolder}\\csv-ggl-drv-${folderId}-${_umbrellaFolder}-${timeComponent}`;
+    const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)
+    const fileNameWithPath = `${_csvDumpFolder}\\${_umbrellaFolder}-${folderId}-${timeComponent}`;
     return fileNameWithPath;
 }
 
 function writeDataToCSV(data: any[], fileNameWithPath: string): void {
     // Convert the data array to a CSV-formatted string
-    console.log(`${data[0]} ${data.length}`);
-
     const csvContent = SEPARATOR_SPECIFICATION + data.map(row => row.join(CSV_SEPARATOR)).join('\n');
 
     // Write the CSV content to the file
     fs.writeFileSync(fileNameWithPath, csvContent, 'utf-8');
-    console.log(`file written to ${fileNameWithPath}`)
+    console.log(`CSV File written to ${fileNameWithPath}`)
 }
 
 const googleDriveLinkFromId = (fileId: string) => {
@@ -127,3 +104,20 @@ const getFolderName = async (folderId: string, drive: drive_v3.Drive) => {
     const folderName = res.data.name;
     return folderName;
 }
+
+
+
+const regex = new RegExp(`(?<=folders\/)[^? \n\r\t]*`);
+
+function extractFolderId(folderIdOrUrl: string) {
+    if(folderIdOrUrl.startsWith("http")){
+        const match = regex.exec(folderIdOrUrl);
+        if (match) {
+          return match[0];
+        } else {
+          return "";
+        }
+    }
+    return folderIdOrUrl
+}
+
