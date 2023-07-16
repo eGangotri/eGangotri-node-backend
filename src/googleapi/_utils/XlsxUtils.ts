@@ -1,5 +1,6 @@
-import * as fs from 'fs';
 import * as xlsx from 'xlsx';
+import { ExcelHeaders } from './types';
+import { SHEET_NAME } from './constants';
 
 const setHeadersForExcel = () => {
   const headerArray = [
@@ -12,8 +13,8 @@ const setHeadersForExcel = () => {
   ]
 }
 
-const convertDatatoJson = (googleDrivePdfData: Array<Array<string | number>>) => {
-  const jsonArray = [{}]
+const convertDatatoJson = (googleDrivePdfData: Array<Array<any>>) => {
+  const jsonArray: ExcelHeaders[] = []
   for (const dataRow of googleDrivePdfData) {
     let x = 0
     jsonArray.push({
@@ -39,6 +40,7 @@ const convertDatatoJson = (googleDrivePdfData: Array<Array<string | number>>) =>
       "Remarks": "*",
       "Commentairies": "*",
       "Commentator": "*",
+      "Series ( KSTS/Kavyamala/Chowkhamba etc": "*",
 
       "Size with Units": dataRow[x++],
       "Size in Bytes": dataRow[x++],
@@ -49,21 +51,26 @@ const convertDatatoJson = (googleDrivePdfData: Array<Array<string | number>>) =>
 }
 export const dataToXslx = async (googleDrivePdfData: Array<Array<string | number>>, xlsxFilePath: string) => {
   try {
-    const jsonArray = convertDatatoJson(googleDrivePdfData);
-    // Create a new workbook
-    const workbook = xlsx.utils.book_new();
-
-    // Convert JSON to worksheet
-    const worksheet = xlsx.utils.json_to_sheet(jsonArray);
-
-    // Add the worksheet to the workbook
-    xlsx.utils.book_append_sheet(workbook, worksheet, 'Sheet 1');
-
-    // Write the workbook to a file
-    xlsx.writeFile(workbook, xlsxFilePath);
+    const jsonArray: ExcelHeaders[] = convertDatatoJson(googleDrivePdfData);
+    jsonToExcel(jsonArray, xlsxFilePath)
 
     console.log(`Excel File Written to ${xlsxFilePath}!`);
   } catch (error) {
     console.error('An error occurred:', error);
   }
 };
+
+export const jsonToExcel = (jsonArray: ExcelHeaders[], xlsxFilePath: string) => {
+
+  // Create a new workbook
+  const workbook = xlsx.utils.book_new();
+
+  // Convert JSON to worksheet
+  const worksheet = xlsx.utils.json_to_sheet(jsonArray);
+
+  // Add the worksheet to the workbook
+  xlsx.utils.book_append_sheet(workbook, worksheet, SHEET_NAME);
+
+  // Write the workbook to a file
+  xlsx.writeFile(workbook, xlsxFilePath);
+}

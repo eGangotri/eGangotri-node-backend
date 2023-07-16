@@ -16,8 +16,9 @@
     "move-merged-pdfs": "node -r ts-node/register ./src/imgToPdf/conversionService/moveMergedPdfs.ts",
     "vanity": "ts-node ./src/vanityService/VanityPdf.ts",
     "catalog": "ts-node ./src/googleapi/GoogleDriveApiReadAndExport.ts",
-    "refresh": "ts-node ./src/googleapi/utils/getRefreshToken.ts",
-    "extractFirstAndLastNPages": "ts-node ./src/pdf/extractFirstAndLastNPages.ts"
+    "refresh": "ts-node ./src/googleapi/_utils/getRefreshToken.ts",
+    "extractFirstAndLastNPages": "ts-node ./src/pdf/extractFirstAndLastNPages.ts",
+    "combineExcels": "ts-node ./src/googleapi/_utils/CombineExcelData"
   },
   "repository": {
     "type": "git",
