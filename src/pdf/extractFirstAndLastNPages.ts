@@ -39,7 +39,7 @@ async function createPartialPdf(inputPath: string, outputPath: string, pdfsToBeP
     return pdfPageCount
 }
 
-export const loopForExtraction = async (rootFolder:string, outputRoot:string,index:number ) => {
+export const loopForExtraction = async (rootFolder:string, outputRoot:string,loopIndex:number ) => {
 
     const allPdfs = getAllPDFFiles(rootFolder)
     const pdfsToBeProcessedCount = allPdfs.length;
@@ -55,7 +55,7 @@ export const loopForExtraction = async (rootFolder:string, outputRoot:string,ind
         }
 
         try {
-            await createPartialPdf(pdf, _subFolder,pdfsToBeProcessedCount,index);
+            await createPartialPdf(pdf, _subFolder,pdfsToBeProcessedCount,loopIndex);
             PDF_PROCESSING_COUNTER++;
         }
         catch (error) {
@@ -63,7 +63,7 @@ export const loopForExtraction = async (rootFolder:string, outputRoot:string,ind
         }
     }
     const consoleLog:string =
-     `\nFolder # (${index}).${path.parse(rootFolder).name} PDF Count ${pdfsToBeProcessedCount} == PDF_PROCESSING_COUNTER ${PDF_PROCESSING_COUNTER} Match ${pdfsToBeProcessedCount === PDF_PROCESSING_COUNTER}`
+     `\nFolder # (${loopIndex}).${path.parse(rootFolder).name} PDF Count ${pdfsToBeProcessedCount} == PDF_PROCESSING_COUNTER ${PDF_PROCESSING_COUNTER} Match ${pdfsToBeProcessedCount === PDF_PROCESSING_COUNTER}`
 
     FINAL_REPORT.push(consoleLog);
     console.log(consoleLog);
@@ -99,8 +99,7 @@ const loopFolders = async () => {
 const srcRootFolder = 'D:\\eG-tr1-30';
 ///'E:\\MASTER_BACKUP';
 const destRootFolder = "E:\\_catalogWork\\_reducedPdfs";
-//const _folders = ["1", "2"]
-const _folders = ["Treasures"]
+const _folders = ["Treasures 2"]
 const _foldersWithPath = _folders.map(x =>`${srcRootFolder}\\${x}`)
 
 
