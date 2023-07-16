@@ -56,7 +56,7 @@ export const loopForExtraction = async (rootFolder:string, outputRoot:string,ind
         }
     }
     const consoleLog:string =
-     `\nFolder # (${index}). PDF Count ${pdfsToBeProcessedCount} == PDF_PROCESSING_COUNTER ${PDF_PROCESSING_COUNTER} Match ${pdfsToBeProcessedCount === PDF_PROCESSING_COUNTER}`
+     `\nFolder # (${index}).${path.parse(rootFolder).name} PDF Count ${pdfsToBeProcessedCount} == PDF_PROCESSING_COUNTER ${PDF_PROCESSING_COUNTER} Match ${pdfsToBeProcessedCount === PDF_PROCESSING_COUNTER}`
 
     FINAL_REPORT.push(consoleLog);
     console.log(consoleLog);
