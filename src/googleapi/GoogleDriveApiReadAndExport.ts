@@ -1,6 +1,6 @@
 import { google } from 'googleapis';
-import { _credentials } from './credentials_gitignore';
-import { listFolderContents, listFolderContentsAndGenerateCSV } from './GoogleDriveUtil';
+import { _credentials } from './_utils/credentials_gitignore';
+import { listFolderContentsAndGenerateCSVAndExcel } from './_utils/GoogleDriveUtil';
 
 // Set up OAuth2 credentials
 const credentials = {
@@ -26,6 +26,7 @@ const drive = google.drive({ version: 'v3', auth: oauth2Client });
 // const folderId = '1pxxhV2BkyTZgq34InhTuwDh-szU0jvY4';
 // listFolderContentsAndGenerateCSV(folderId, drive, 'Treasures-59');
 
-
-const folderId = '1afC1184y_9Z1S1y1srp9_iLYqsQyYqFj'
-listFolderContentsAndGenerateCSV(folderId, drive, 'test');
+const driveLink2 = "https://drive.google.com/drive/folders/1G6A8zbbiLHFlqgNnPosq1q6JbOoI2dI-?usp=drive_link"
+const driveLink = "https://drive.google.com/drive/folders/1C5UPGe9AJM1ibTd6BHQfR3exYGHEmwxR?usp=drive_link"
+//const folderId = '1afC1184y_9Z1S1y1srp9_iLYqsQyYqFj'
+listFolderContentsAndGenerateCSVAndExcel(driveLink, drive, 'TreasuresTmp');
