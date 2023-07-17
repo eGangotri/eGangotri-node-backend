@@ -29,18 +29,13 @@ const drive = google.drive({ version: 'v3', auth: oauth2Client });
 // const driveLink = "https://drive.google.com/drive/folders/1G6A8zbbiLHFlqgNnPosq1q6JbOoI2dI-?usp=drive_link"
 // listFolderContentsAndGenerateCSVAndExcel(driveLink, drive, 'Treasures');
 
-//testlink
-//const driveLink = "https://drive.google.com/drive/folders/1C5UPGe9AJM1ibTd6BHQfR3exYGHEmwxR?usp=drive_link"
-
-//const folderId = '1afC1184y_9Z1S1y1srp9_iLYqsQyYqFj'
+ export const EXPORT_DEST_FOLDER = `E:\\_catalogWork\\_collation\\_catExcels`;
 
 // const driveLink = "https://drive.google.com/drive/folders/1CuXlQEPC06pYPo9QxcgtblJWUETfE1T7?usp=drive_link"
-// listFolderContentsAndGenerateCSVAndExcel(driveLink, drive, 'Treasures 2');
+//listFolderContentsAndGenerateCSVAndExcel(driveLink, drive, 'Treasures 2');
 
-
-
-// const driveLink = "https://drive.google.com/drive/folders/1kSd34UyuhMwKjXAbLbkbHFDtGOGkxJXR?usp=drive_link"
-// listFolderContentsAndGenerateCSVAndExcel(driveLink, drive, 'Treasures 3');
+const driveLink = "https://drive.google.com/drive/folders/1kSd34UyuhMwKjXAbLbkbHFDtGOGkxJXR?usp=drive_link"
+listFolderContentsAndGenerateCSVAndExcel(driveLink, drive, 'Treasures 3');
 
 // const driveLink = "https://drive.google.com/drive/folders/1OtZJAHryspt3hUvnr9q76wYVHLPVYH86?usp=drive_link"
 // listFolderContentsAndGenerateCSVAndExcel(driveLink, drive, 'Treasures 4');
@@ -63,8 +58,7 @@ const drive = google.drive({ version: 'v3', auth: oauth2Client });
 // const driveLink = "https://drive.google.com/drive/folders/15TIpx8gHsMP7ARkUt6KkErRmUBZn0w1Y?usp=drive_link"
 // listFolderContentsAndGenerateCSVAndExcel(driveLink, drive, 'Treasures 10');
 
-//export const EXPORT_DEST_FOLDER = `E:\\_catalogWork\\_collation\\_catExcels`;
 
-export const EXPORT_DEST_FOLDER = `E:\\_catalogWork\\_collation\\_catReducedPdfExcels`;
-const driveLink = "https://drive.google.com/drive/folders/1OKuJ-Ec7kmBAV2ad0TKps5ROElzXRsdN?usp=drive_link"
-listFolderContentsAndGenerateCSVAndExcel(driveLink, drive, 'Treasures-2');
+// export const EXPORT_DEST_FOLDER = `E:\\_catalogWork\\_collation\\_catReducedPdfExcels`;
+// const driveLink = "https://drive.google.com/drive/folders/1Nlcx96VxWbOeR13fkJS1KvcS0lf3bhxv?usp=drive_link"
+// listFolderContentsAndGenerateCSVAndExcel(driveLink, drive, 'Treasures-2');

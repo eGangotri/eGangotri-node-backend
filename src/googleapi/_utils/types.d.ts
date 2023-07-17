@@ -1,5 +1,5 @@
 export interface ExcelHeaders {
-    "S.No": number;
+    "S.No": number|string;
     "Title in Google Drive": string;
     "Link to File Location": string;
     "Link to Truncated File Location": string;
@@ -15,7 +15,7 @@ export interface ExcelHeaders {
     "Edition/Statement": string;
     "Place of Publication": string;
     "Year of Publication": string;
-    "No. of Pages": string;
+    "No. of Pages": string|number;
     "ISBN": string;
     "Remarks": string;
     "Commentairies": string;

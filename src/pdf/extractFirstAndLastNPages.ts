@@ -8,10 +8,10 @@ const fsPromises = require('fs').promises;
 
 const firstNPages = 10
 const lastNPages = 10
-let FINAL_REPORT:string[] = [];
+let FINAL_REPORT: string[] = [];
 let PDF_PROCESSING_COUNTER = 0;
 
-async function createPartialPdf(inputPath: string, outputPath: string, pdfsToBeProcessedCount:number, index:number): Promise<number> {
+async function createPartialPdf(inputPath: string, outputPath: string, pdfsToBeProcessedCount: number, index: number): Promise<number> {
     const existingPdfBytes = await fsPromises.readFile(inputPath)
 
     const pdfDoc = await PDFDocument.load(existingPdfBytes);
@@ -39,31 +39,31 @@ async function createPartialPdf(inputPath: string, outputPath: string, pdfsToBeP
     return pdfPageCount
 }
 
-export const loopForExtraction = async (rootFolder:string, outputRoot:string,loopIndex:number ) => {
+export const loopForExtraction = async (rootFolder: string, outputRoot: string, loopIndex: number) => {
 
     const allPdfs = getAllPDFFiles(rootFolder)
     const pdfsToBeProcessedCount = allPdfs.length;
     const outputPath = `${outputRoot}\\${path.parse(rootFolder).name} (${pdfsToBeProcessedCount})`;
-    
+
     createFolderIfNotExists(outputPath)
     let folderIndex = 1;
     for (const [index, pdf] of allPdfs.entries()) {
         let _subFolder = `${outputPath}\\${folderIndex}`
         createFolderIfNotExists(_subFolder)
-        if(index!==0 && index % 100 == 0){
+        if (index !== 0 && index % 100 == 0) {
             folderIndex++
         }
 
         try {
-            await createPartialPdf(pdf, _subFolder,pdfsToBeProcessedCount,loopIndex);
+            await createPartialPdf(pdf, _subFolder, pdfsToBeProcessedCount, loopIndex);
             PDF_PROCESSING_COUNTER++;
         }
         catch (error) {
             console.error('Error creating PDF:', error);
         }
     }
-    const consoleLog:string =
-     `\nFolder # (${loopIndex}).${path.parse(rootFolder).name} PDF Count ${pdfsToBeProcessedCount} == PDF_PROCESSING_COUNTER ${PDF_PROCESSING_COUNTER} Match ${pdfsToBeProcessedCount === PDF_PROCESSING_COUNTER}`
+    const consoleLog: string =
+        `\nFolder # (${loopIndex}).${path.parse(rootFolder).name} PDF Count ${pdfsToBeProcessedCount} == PDF_PROCESSING_COUNTER ${PDF_PROCESSING_COUNTER} Match ${pdfsToBeProcessedCount === PDF_PROCESSING_COUNTER}`
 
     FINAL_REPORT.push(consoleLog);
     console.log(consoleLog);
@@ -87,18 +87,23 @@ const padNumbersWithZeros = (num: number) => {
 let counter = 0;
 
 const loopFolders = async () => {
-    for( const [index, folder] of _foldersWithPath.entries()) {
-        console.log(`Started processing ${folder}`)
-        PDF_PROCESSING_COUNTER = 0;
-        counter = 0
-        await loopForExtraction(folder,destRootFolder,index+1);
+    try {
+        for (const [index, folder] of _foldersWithPath.entries()) {
+            console.log(`Started processing ${folder}`)
+            PDF_PROCESSING_COUNTER = 0;
+            counter = 0
+            await loopForExtraction(folder, destRootFolder, index + 1);
+        }
+        console.log(`FINAL_REPORT(extractPages): ${FINAL_REPORT.map(x => x + "\n")}`)
     }
-    console.log(`FINAL_REPORT: ${FINAL_REPORT.map(x=>x+"\n")}`)
+    catch (err) {
+        console.log(err)
+    }
 }
-//const srcRootFolder = 'D:\\eG-tr1-30';
-const srcRootFolder = 'E:\\MASTER_BACKUP';
+const srcRootFolder = 'D:\\eG-tr1-30';
+//const srcRootFolder = 'E:\\MASTER_BACKUP';
 const destRootFolder = "E:\\_catalogWork\\_reducedPdfs";
-const _folders = ["Treasures59"]
-const _foldersWithPath = _folders.map(x =>`${srcRootFolder}\\${x}`)
+const _folders = ["Treasures10", "Treasures11", "Treasures12", "Treasures13", "Treasures14"]
+const _foldersWithPath = _folders.map(x => `${srcRootFolder}\\${x}`)
 
 loopFolders()
