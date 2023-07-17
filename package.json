@@ -19,7 +19,8 @@
     "refresh": "ts-node ./src/googleapi/_utils/getRefreshToken.ts",
     "extractFirstAndLastNPages": "ts-node ./src/pdf/extractFirstAndLastNPages.ts",
     "combineExcels": "ts-node ./src/googleapi/_utils/CombineExcelData",
-    "excelutil": "ts-node ./src/googleapi/_utils/ExcelUtils"
+    "excelutil": "ts-node ./src/googleapi/_utils/ExcelUtils",
+    "findLongestFileName": "ts-node ./src/utils/utils"
   },
   "repository": {
     "type": "git",
