@@ -1,20 +1,19 @@
 import * as XLSX from "xlsx";
-import { jsonToExcel } from "./XlsxUtils";
+import { jsonToExcel } from "./ExcelUtils";
 import { ExcelHeaders } from "./types";
-import { SHEET_NAME } from "./constants";
+import { SHEET_NAME, emptyExcelHeaderObj } from "./constants";
 import * as fs from 'fs';
 import { DD_MM_YYYY_HH_MMFORMAT } from "../../utils/utils";
 import moment from "moment";
 
 const _root = "E:\\_catalogWork\\_collation";
-
-const treasureFolder = "Treasures"
+const treasureFolder = "Treasures 2"
 
 const mainExcelPath = `${_root}\\_catExcels\\${treasureFolder}`
-const mainExcelFileName = `${mainExcelPath}\\Treasures-1G6A8zbbiLHFlqgNnPosq1q6JbOoI2dI--16-Jul-2023-16-02 (2674 items).xlsx`;
+const mainExcelFileName = `${mainExcelPath}\\Treasures 2-1CuXlQEPC06pYPo9QxcgtblJWUETfE1T7-17-Jul-2023-04-21_692.xlsx`;
 
 const secondaryExcelPath = `${_root}\\_catReducedPdfExcels\\${treasureFolder}`
-const secondaryExcelFileName = `${secondaryExcelPath}\\Treasures-1A61-czz5acFuHPrP_gw8hIxnrZ56Itex-16-Jul-2023-22-06.xlsx`;
+const secondaryExcelFileName = `${secondaryExcelPath}\\Treasures-2-1Nlcx96VxWbOeR13fkJS1KvcS0lf3bhxv-17-Jul-2023-04-10_692.xlsx`;
 
 const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)
 
@@ -50,23 +49,27 @@ const combineExcelJsons = (mainExcelData: ExcelHeaders[], secondaryExcelDataAdju
         const combinedObject = firstExcel;
         secondaryExcelDataAdjusted?.find((secondExcel: ExcelHeaders) => {
             if (firstExcel[titleInGoogleDrive] === secondExcel[titleInGoogleDrive]) {
-             //   console.log(`is a match ${secondExcel[titleInGoogleDrive]} ${firstExcel[titleInGoogleDrive]}`)
-                combinedObject[numPages] = secondExcel[numPages] || "*"
                 combinedObject[linkToTruncatedFileLocation] = secondExcel[linkToFileLocation] || "*"
+                combinedObject[numPages] = secondExcel[numPages] || "*"
                 return secondExcel;
             }
         })
        
         return combinedObject;
     });
-    return combinedExcelJsons
+
+    return [
+        emptyExcelHeaderObj,
+        emptyExcelHeaderObj,
+        ...combinedExcelJsons
+    ]
 }
 
 const fillPageCount = (excelJson: ExcelHeaders[]) => {
     return excelJson.map((row: ExcelHeaders) => {
         const titleWithPageCount = row["Title in Google Drive"]
         row[titleInGoogleDrive] = titleWithPageCount.slice(0, titleWithPageCount.length - 9) + ".pdf";
-        row[numPages] = parseInt(titleWithPageCount.slice(-8, -4)).toString();
+        row[numPages] = parseInt(titleWithPageCount.slice(-8, -4))
         return row;
     })
 }
@@ -76,7 +79,6 @@ export const excelToJson = (excelName: string) => {
     const sheet = workbook.Sheets[SHEET_NAME];
     const jsonData: ExcelHeaders[] = XLSX.utils.sheet_to_json(sheet);
     console.log(`Json Data Length ${jsonData.length}`);
-    console.log(`Json Data Item 1 ${JSON.stringify(jsonData[0])}`);
     return jsonData
 }
 

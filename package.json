@@ -18,7 +18,8 @@
     "catalog": "ts-node ./src/googleapi/GoogleDriveApiReadAndExport.ts",
     "refresh": "ts-node ./src/googleapi/_utils/getRefreshToken.ts",
     "extractFirstAndLastNPages": "ts-node ./src/pdf/extractFirstAndLastNPages.ts",
-    "combineExcels": "ts-node ./src/googleapi/_utils/CombineExcelData"
+    "combineExcels": "ts-node ./src/googleapi/_utils/CombineExcelData",
+    "excelutil": "ts-node ./src/googleapi/_utils/ExcelUtils"
   },
   "repository": {
     "type": "git",
@@ -45,6 +46,7 @@
     "date-fns": "^2.29.3",
     "dotenv": "^16.0.3",
     "easy-pdf-merge": "^0.2.6",
+    "exceljs": "^4.3.0",
     "express": "^4.18.2",
     "fs-extra": "^11.1.1",
     "g": "^2.0.1",

@@ -4,7 +4,7 @@ import * as os from 'os';
 import moment from 'moment';
 import { DD_MM_YYYY_HH_MMFORMAT } from '../../utils/utils';
 import { sizeInfo } from '../../mirror/FrontEndBackendCommonCode';
-import { dataToXslx } from './XlsxUtils';
+import { dataToXslx } from './ExcelUtils';
 import { EXPORT_DEST_FOLDER } from '../GoogleDriveApiReadAndExport';
 
 const HOME_DIR = os.homedir();
