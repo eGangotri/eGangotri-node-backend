@@ -8,3 +8,8 @@ runtime_config:
   operating_system: "ubuntu22"
 skip_files:
 - package-lock.json
+
+# This section is optional, but it is recommended to set it
+# so that your application can be monitored by App Engine.
+readiness_check:
+  app_start_timeout_sec: 60
