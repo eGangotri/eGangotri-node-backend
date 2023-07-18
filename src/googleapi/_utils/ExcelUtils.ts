@@ -26,6 +26,7 @@ const convertDatatoJson = (googleDrivePdfData: Array<Array<any>>) => {
       "Link to File Location": dataRow[x++],
 
       "Link to Truncated File Location": "*",
+      "Book / Manuscript": "*",
       "Title in English": "*",
       "Title in Original Script ( Devanagari etc )": "*",
       "Sub-Title": "*",
@@ -63,7 +64,7 @@ export const dataToXslx = async (googleDrivePdfData: Array<Array<string | number
   }
 };
 
-export const jsonToExcel = (jsonArray: ExcelHeaders[], xlsxFilePath: string) => {
+export const jsonToExcel = (jsonArray: ExcelHeaders[], xlsxFileNameWithPath: string) => {
 
   // Create a new workbook
   const workbook = xlsx.utils.book_new();
@@ -75,7 +76,8 @@ export const jsonToExcel = (jsonArray: ExcelHeaders[], xlsxFilePath: string) => 
   xlsx.utils.book_append_sheet(workbook, worksheet, SHEET_NAME);
 
   // Write the workbook to a file
-  xlsx.writeFile(workbook, xlsxFilePath);
+  xlsx.writeFile(workbook, xlsxFileNameWithPath);
+  console.log(`created ${xlsxFileNameWithPath}`)
 }
 
 

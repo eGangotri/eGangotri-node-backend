@@ -25,7 +25,7 @@ export async function listFolderContentsAndGenerateCSVAndExcel(_folderId: string
     await listFolderContents(folderId, drive, umbrellaFolder);
 
     const fileNameWithPath = createFileNameWithPathForExport(folderId, umbrellaFolder) + `_${ROW_COUNTER-1}`;
-    writeDataToCSV(googleDrivePdfData, `${fileNameWithPath}.csv`)
+    //writeDataToCSV(googleDrivePdfData, `${fileNameWithPath}.csv`)
     // Convert CSV to XLSX
     dataToXslx(googleDrivePdfData, `${fileNameWithPath}.xlsx`);
 }

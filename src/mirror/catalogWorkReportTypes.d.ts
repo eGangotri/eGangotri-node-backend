@@ -6,6 +6,7 @@ export interface DailyCatalogWorkReportType {
   catalogProfile: string;
   entryFrom: number;
   entryTo: number;
+  skipped: number;
   entryCount: number;
   timeOfRequest: Date;
   link: string;

@@ -7,6 +7,7 @@ const schema = new mongoose.Schema(
     catalogProfile: { type: String, required: true },
     entryFrom: { type: Number, required: true },
     entryTo: { type: Number, required: true },
+    skipped: { type: Number, required: true, default: 0 },
     entryCount: { type: String, required: true },
     timeOfRequest: { type: Date, required: true },
     link: { type: String, required: false },

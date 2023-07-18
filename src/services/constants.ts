@@ -113,6 +113,10 @@ export const CSV_HEADER = [
       label: "entryTo",
     },
     {
+      key: "skipped",
+      label: "skipped",
+    },
+    {
       key: "entryCount",
       label: "entryCount",
     },
