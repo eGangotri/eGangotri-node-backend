@@ -32,7 +32,7 @@ export const EXPORT_DEST_FOLDER = `E:\\_catalogWork\\_collation\\_catExcels\\_te
 if (!fs.existsSync(EXPORT_DEST_FOLDER)) {
   fs.mkdirSync(EXPORT_DEST_FOLDER);
 }
-const driveLink = "https://drive.google.com/drive/folders/1xXKJ3sBoTE-gQT1RTLh-HQrqmFoVDmhD?usp=drive_link"
+const driveLink = "https://drive.google.com/drive/folders/1wgDm7EkxcKjYiwpkFcfZ56Gd0S4KUZ-a?usp=drive_link"
 listFolderContentsAndGenerateCSVAndExcel(driveLink, drive, 'Test');
 
 // export const EXPORT_DEST_FOLDER = `E:\\_catalogWork\\_collation\\_catReducedPdfExcels`;

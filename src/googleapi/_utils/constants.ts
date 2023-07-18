@@ -9,6 +9,9 @@ export const linkToFileLocation = "Link to File Location"
 export const linkToTruncatedFileLocation = "Link to Truncated File Location";
 export const bookOrManuscript = "Book / Manuscript"
 
+export const CSV_SEPARATOR = ";"
+export const SEPARATOR_SPECIFICATION = `sep=${CSV_SEPARATOR}\n`
+
 export const emptyExcelHeaderObj = {
     "S.No": '',
     "Title in Google Drive": "",
