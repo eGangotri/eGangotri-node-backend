@@ -1,6 +1,6 @@
 export const SHEET_NAME = "Sheet 1";
 
-export const FILE_MIME_TYPE = 'application/vnd.google-apps.folder';
+export const FOLDER_MIME_TYPE = 'application/vnd.google-apps.folder';
 export const PDF_MIME_TYPE = 'application/pdf';
 
 export const numPages = "No. of Pages"

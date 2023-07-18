@@ -1,5 +1,5 @@
 import * as xlsx from 'xlsx';
-import { ExcelHeaders, GoogleApiData } from './types';
+import { ExcelHeaders, GoogleApiData } from '../types';
 import { SHEET_NAME } from './constants';
 import * as ExcelJS from 'exceljs';
 import * as path from 'path';
