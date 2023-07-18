@@ -4,6 +4,7 @@ import { SHEET_NAME } from './constants';
 import * as ExcelJS from 'exceljs';
 import * as path from 'path';
 import * as _ from 'lodash';
+import * as XLSX from "xlsx";
 
 const setHeadersForExcel = () => {
   const headerArray = [
@@ -138,8 +139,11 @@ async function editExistingExcelSheet(excelSheetPath:string) {
   await workbook.xlsx.writeFile(`${parentDirname}\\1-${newFileName}.xlsx`);
 }
 
-// editExistingExcelSheet("E:\\_catalogWork\\_collation\\_catCombinedExcels\\Treasures\\Treasures-Catalog-17-Jul-2023-01-09.xlsx").then(() => {
-//   console.log('Excel sheet has been modified and saved!');
-// }).catch((error) => {
-//   console.error('Error occurred:', error);
-// });
+
+export const excelToJson = (excelName: string) => {
+  const workbook = XLSX.readFile(excelName);
+  const sheet = workbook.Sheets[SHEET_NAME];
+  const jsonData: ExcelHeaders[] = XLSX.utils.sheet_to_json(sheet);
+  console.log(`Converted ${excelName} to Json with Data Length ${jsonData.length}`);
+  return jsonData
+}

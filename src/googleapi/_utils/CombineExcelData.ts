@@ -1,13 +1,13 @@
 import * as XLSX from "xlsx";
-import { jsonToExcel } from "./ExcelUtils";
+import { excelToJson, jsonToExcel } from "./ExcelUtils";
 import { ExcelHeaders } from "./types";
-import { SHEET_NAME, emptyExcelHeaderObj } from "./constants";
+import { SHEET_NAME, emptyExcelHeaderObj, linkToFileLocation, linkToTruncatedFileLocation, numPages, titleInGoogleDrive } from "./constants";
 import * as fs from 'fs';
 import { DD_MM_YYYY_HH_MMFORMAT } from "../../utils/utils";
 import moment from "moment";
 
 const _root = "E:\\_catalogWork\\_collation";
-const treasureFolder = "Treasures 19"
+const treasureFolder = "Treasures 18"
 
 const mainExcelPath = `${_root}\\_catExcels\\${treasureFolder}`
 const mainExcelFileName = `${mainExcelPath}\\${fs.readdirSync(mainExcelPath)[0]}`;
@@ -24,14 +24,7 @@ if (!fs.existsSync(combinedExcelPath)) {
 }
 const combinedExcelFileName = `${combinedExcelPath}\\${treasureFolder}-Catalog-${timeComponent}`;
 
-
-const numPages = "No. of Pages"
-const titleInGoogleDrive = "Title in Google Drive"
-const linkToFileLocation = "Link to File Location"
-const linkToTruncatedFileLocation = "Link to Truncated File Location";
-const bookOrManuscript = "Book / Manuscript"
-
-export const combineExcels = () => {
+const combineExcels = () => {
     const mainExcelData: ExcelHeaders[] = excelToJson(mainExcelFileName);
     const secondaryExcelData: ExcelHeaders[] = excelToJson(secondaryExcelFileName);
 
@@ -79,13 +72,4 @@ const fillPageCount = (excelJson: ExcelHeaders[]) => {
     })
 }
 
-export const excelToJson = (excelName: string) => {
-    const workbook = XLSX.readFile(excelName);
-    const sheet = workbook.Sheets[SHEET_NAME];
-    const jsonData: ExcelHeaders[] = XLSX.utils.sheet_to_json(sheet);
-    console.log(`Converted ${excelName} to Json with Data Length ${jsonData.length}`);
-    return jsonData
-}
-
-//8-9-10-12-13 done
 combineExcels()
