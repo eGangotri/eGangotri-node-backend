@@ -107,6 +107,7 @@ export const generateCatCSVAsFile = async (res: Response, data: mongoose.Documen
       catalogProfile: "",
       entryFrom: "",
       entryTo: "",
+      skipped: "",
       entryCount: entryCountSum,
     }]);
 

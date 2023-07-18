@@ -3,6 +3,7 @@ export interface ExcelHeaders {
     "Title in Google Drive": string;
     "Link to File Location": string;
     "Link to Truncated File Location": string;
+    "Book / Manuscript": string;
     "Title in English": string;
     "Title in Original Script ( Devanagari etc )": string;
     "Sub-Title": string;

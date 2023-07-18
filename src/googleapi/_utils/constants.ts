@@ -5,6 +5,7 @@ export const emptyExcelHeaderObj = {
         "Title in Google Drive": "",
         "Link to File Location": "",
         "Link to Truncated File Location": "",
+        "Book / Manuscript": "",
         "Title in English": "",
         "Title in Original Script ( Devanagari etc )": "",
         "Sub-Title": "",

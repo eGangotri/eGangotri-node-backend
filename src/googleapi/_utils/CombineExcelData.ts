@@ -7,62 +7,67 @@ import { DD_MM_YYYY_HH_MMFORMAT } from "../../utils/utils";
 import moment from "moment";
 
 const _root = "E:\\_catalogWork\\_collation";
-const treasureFolder = "Treasures 2"
+const treasureFolder = "Treasures 19"
 
 const mainExcelPath = `${_root}\\_catExcels\\${treasureFolder}`
-const mainExcelFileName = `${mainExcelPath}\\Treasures 2-1CuXlQEPC06pYPo9QxcgtblJWUETfE1T7-17-Jul-2023-04-21_692.xlsx`;
+const mainExcelFileName = `${mainExcelPath}\\${fs.readdirSync(mainExcelPath)[0]}`;
 
 const secondaryExcelPath = `${_root}\\_catReducedPdfExcels\\${treasureFolder}`
-const secondaryExcelFileName = `${secondaryExcelPath}\\Treasures-2-1Nlcx96VxWbOeR13fkJS1KvcS0lf3bhxv-17-Jul-2023-04-10_692.xlsx`;
+const secondaryExcelFileName = `${secondaryExcelPath}\\${fs.readdirSync(secondaryExcelPath)[0]}`;
 
 const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)
 
 const combinedExcelPath = `${_root}\\_catCombinedExcels\\${treasureFolder}`;
+
 if (!fs.existsSync(combinedExcelPath)) {
     fs.mkdirSync(combinedExcelPath);
 }
-const combinedExcelFileName = `${combinedExcelPath}\\${treasureFolder}-Catalog-${timeComponent}.xlsx`;
+const combinedExcelFileName = `${combinedExcelPath}\\${treasureFolder}-Catalog-${timeComponent}`;
 
 
 const numPages = "No. of Pages"
 const titleInGoogleDrive = "Title in Google Drive"
 const linkToFileLocation = "Link to File Location"
 const linkToTruncatedFileLocation = "Link to Truncated File Location";
+const bookOrManuscript = "Book / Manuscript"
 
 export const combineExcels = () => {
     const mainExcelData: ExcelHeaders[] = excelToJson(mainExcelFileName);
     const secondaryExcelData: ExcelHeaders[] = excelToJson(secondaryExcelFileName);
 
     const secondaryExcelDataAdjusted: ExcelHeaders[] = fillPageCount(secondaryExcelData);
-
     if (mainExcelData.length != secondaryExcelData.length) {
         console.log("Cant proceed Data Length in Main and Secondary dont match");
         //process.exit(0);
     }
     const combinedExcelJsons = combineExcelJsons(mainExcelData, secondaryExcelDataAdjusted)
+    const fileNameWithLengh = `${combinedExcelFileName}-${mainExcelData.length}.xlsx`;
 
-    jsonToExcel(combinedExcelJsons, combinedExcelFileName);
+    jsonToExcel(combinedExcelJsons, fileNameWithLengh);
 }
 
 const combineExcelJsons = (mainExcelData: ExcelHeaders[], secondaryExcelDataAdjusted: ExcelHeaders[]) => {
-    const combinedExcelJsons = mainExcelData.map((firstExcel: ExcelHeaders) => {
-        const combinedObject = firstExcel;
-        secondaryExcelDataAdjusted?.find((secondExcel: ExcelHeaders) => {
-            if (firstExcel[titleInGoogleDrive] === secondExcel[titleInGoogleDrive]) {
-                combinedObject[linkToTruncatedFileLocation] = secondExcel[linkToFileLocation] || "*"
-                combinedObject[numPages] = secondExcel[numPages] || "*"
-                return secondExcel;
-            }
-        })
-       
-        return combinedObject;
-    });
 
+    const combinedExcelJsons = mainExcelData.map(x=>findCorrespondingExcelHeader(x,secondaryExcelDataAdjusted));
+    console.log(`Combining JSON Data: `)
     return [
         emptyExcelHeaderObj,
         emptyExcelHeaderObj,
         ...combinedExcelJsons
     ]
+}
+
+const findCorrespondingExcelHeader = (firstExcel: ExcelHeaders, secondaryExcelDataAdjusted: ExcelHeaders[]) => {
+    const combinedObject:ExcelHeaders = firstExcel;
+    secondaryExcelDataAdjusted?.find((secondExcel: ExcelHeaders) => {
+        if (firstExcel[titleInGoogleDrive] === secondExcel[titleInGoogleDrive]) {
+            combinedObject[linkToTruncatedFileLocation] = secondExcel[linkToFileLocation] || "*"
+            combinedObject[numPages] = secondExcel[numPages] || "*"
+            return secondExcel;
+        }
+    })
+   
+    return combinedObject;
 }
 
 const fillPageCount = (excelJson: ExcelHeaders[]) => {
@@ -78,8 +83,9 @@ export const excelToJson = (excelName: string) => {
     const workbook = XLSX.readFile(excelName);
     const sheet = workbook.Sheets[SHEET_NAME];
     const jsonData: ExcelHeaders[] = XLSX.utils.sheet_to_json(sheet);
-    console.log(`Json Data Length ${jsonData.length}`);
+    console.log(`Converted ${excelName} to Json with Data Length ${jsonData.length}`);
     return jsonData
 }
 
+//8-9-10-12-13 done
 combineExcels()
