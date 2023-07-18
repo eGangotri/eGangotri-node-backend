@@ -20,7 +20,8 @@
     "extractFirstAndLastNPages": "ts-node ./src/pdf/extractFirstAndLastNPages.ts",
     "combineExcels": "ts-node ./src/googleapi/_utils/CombineExcelData",
     "excelutil": "ts-node ./src/googleapi/_utils/ExcelUtils",
-    "findLongestFileName": "ts-node ./src/utils/utils"
+    "findLongestFileName": "ts-node ./src/utils/utils",
+    "mergeExcels":"ts-node ./src/googleapi/_utils/MergeExcels"
   },
   "repository": {
     "type": "git",
