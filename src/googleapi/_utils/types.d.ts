@@ -1,5 +1,16 @@
+export interface GoogleApiData {
+    index: number,
+    fileName: string,
+    googleDriveLink: string,
+    sizeInfo: string,
+    fileSizeRaw: string,
+    parents: string,
+    createdTime: string,
+    thumbnailLink: string,
+}
+
 export interface ExcelHeaders {
-    "S.No": number|string;
+    "S.No": number | string;
     "Title in Google Drive": string;
     "Link to File Location": string;
     "Link to Truncated File Location": string;
@@ -16,7 +27,7 @@ export interface ExcelHeaders {
     "Edition/Statement": string;
     "Place of Publication": string;
     "Year of Publication": string;
-    "No. of Pages": string|number;
+    "No. of Pages": string | number;
     "ISBN": string;
     "Remarks": string;
     "Commentairies": string;
@@ -25,4 +36,6 @@ export interface ExcelHeaders {
     "Size with Units": string;
     "Size in Bytes": string;
     "Folder Name": string;
+    "Thumbnail": string;
+    "Created Time": string;
 }

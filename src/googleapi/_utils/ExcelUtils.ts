@@ -1,5 +1,5 @@
 import * as xlsx from 'xlsx';
-import { ExcelHeaders } from './types';
+import { ExcelHeaders, GoogleApiData } from './types';
 import { SHEET_NAME } from './constants';
 import * as ExcelJS from 'exceljs';
 import * as path from 'path';
@@ -17,14 +17,14 @@ const setHeadersForExcel = () => {
   ]
 }
 
-const convertDatatoJson = (googleDrivePdfData: Array<Array<any>>) => {
+const convertDatatoJson = (googleDrivePdfData:  Array<GoogleApiData>) => {
   const jsonArray: ExcelHeaders[] = []
   for (const dataRow of googleDrivePdfData) {
     let x = 0
     jsonArray.push({
-      "S.No": dataRow[x++],
-      "Title in Google Drive": dataRow[x++],
-      "Link to File Location": dataRow[x++],
+      "S.No": dataRow.index,
+      "Title in Google Drive": dataRow.fileName,
+      "Link to File Location": dataRow.googleDriveLink,
 
       "Link to Truncated File Location": "*",
       "Book / Manuscript": "*",
@@ -47,14 +47,16 @@ const convertDatatoJson = (googleDrivePdfData: Array<Array<any>>) => {
       "Commentator": "*",
       "Series ( KSTS/Kavyamala/Chowkhamba etc": "*",
 
-      "Size with Units": dataRow[x++],
-      "Size in Bytes": dataRow[x++],
-      "Folder Name": dataRow[x++],
+      "Size with Units": dataRow.sizeInfo,
+      "Size in Bytes": dataRow.fileSizeRaw,
+      "Folder Name": dataRow.parents,
+      "Thumbnail": dataRow.thumbnailLink,
+      "Created Time": dataRow.createdTime,
     })
   }
   return jsonArray
 }
-export const dataToXslx = async (googleDrivePdfData: Array<Array<string | number>>, xlsxFilePath: string) => {
+export const dataToXslx = async (googleDrivePdfData: Array<GoogleApiData>, xlsxFilePath: string) => {
   try {
     const jsonArray: ExcelHeaders[] = convertDatatoJson(googleDrivePdfData);
     jsonToExcel(jsonArray, xlsxFilePath)

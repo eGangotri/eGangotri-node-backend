@@ -1,22 +1,18 @@
 import { drive_v3 } from 'googleapis';
 import fs from 'fs';
-import * as os from 'os';
 import moment from 'moment';
 import { DD_MM_YYYY_HH_MMFORMAT } from '../../utils/utils';
 import { sizeInfo } from '../../mirror/FrontEndBackendCommonCode';
 import { dataToXslx } from './ExcelUtils';
 import { EXPORT_DEST_FOLDER } from '../GoogleDriveApiReadAndExport';
-import { FILE_MIME_TYPE, PDF_MIME_TYPE } from './constants';
+import { CSV_SEPARATOR, FILE_MIME_TYPE, PDF_MIME_TYPE, SEPARATOR_SPECIFICATION } from './constants';
 import * as path from "path";
-
-const HOME_DIR = os.homedir();
-export const CSV_SEPARATOR = ";"
-export const SEPARATOR_SPECIFICATION = `sep=${CSV_SEPARATOR}\n`
+import { GoogleApiData } from './types';
 
 
-const googleDrivePdfData: Array<Array<string | number>> = []
 let ROW_COUNTER = 0;
 let ROOT_FOLDER_NAME = ""
+
 export async function listFolderContentsAndGenerateCSVAndExcel(_folderId: string, drive: drive_v3.Drive, umbrellaFolder: string = "") {
     const folderId = extractFolderId(_folderId)
     const _umbrellaFolder = umbrellaFolder?.length > 0 ? umbrellaFolder : await getFolderName(folderId, drive) || "";
@@ -24,32 +20,32 @@ export async function listFolderContentsAndGenerateCSVAndExcel(_folderId: string
     console.log(`drive api folder extracTion process initiated: \
     from (${_umbrellaFolder}) ${_folderId} destined to ${EXPORT_DEST_FOLDER}\n`)
 
-    await listFolderContents(folderId, drive, umbrellaFolder);
+    const googleDrivePdfData: Array<GoogleApiData> = []
+    await listFolderContents(folderId, drive, umbrellaFolder, googleDrivePdfData);
 
     const fileNameWithPath = createFileNameWithPathForExport(folderId, umbrellaFolder) + `_${ROW_COUNTER}`;
+
     //writeDataToCSV(googleDrivePdfData, `${fileNameWithPath}.csv`)
     // Convert data to XLSX
     dataToXslx(googleDrivePdfData, `${fileNameWithPath}.xlsx`);
 }
 
-export async function listFolderContents(folderId: string, drive: drive_v3.Drive, umbrellaFolder: string) {
-    const folderName = await getFolderName(folderId, drive) || "";
+export async function listFolderContents(folderId: string, drive: drive_v3.Drive, umbrellaFolder: string, googleDrivePdfData: GoogleApiData[]) {
     let idFolderNameMap = new Map<string, string>();
 
     if (!idFolderNameMap.has(folderId)) {
         const folderPath = await getFolderPathRelativeToRootFolder(folderId, drive)
         var index = folderPath.indexOf(ROOT_FOLDER_NAME);  // Gets the first index where a space occours
-        idFolderNameMap.set(folderId,folderPath.slice(index))
+        idFolderNameMap.set(folderId, folderPath.slice(index))
     }
 
     try {
         const response = await drive.files.list({
             q: `'${folderId}' in parents and trashed = false and (mimeType='${PDF_MIME_TYPE}' or mimeType='${FILE_MIME_TYPE}')`,
-            fields: 'files(id, name, mimeType,size,parents)',
+            fields: 'files(id, name, mimeType,size,parents,webViewLink,thumbnailLink,createdTime)',
             pageSize: 1000, // Increase the page size to retrieve more files if necessary
         });
         let x = 0;
-
         const files = response.data.files;
         if (files && files.length) {
             for (const file of files) {
@@ -62,15 +58,29 @@ export async function listFolderContents(folderId: string, drive: drive_v3.Drive
                 const filemimeType = file.mimeType || "";
                 const fileSizeRaw = file.size || "0";
                 const fileSize = parseInt(fileSizeRaw);
+                const webViewLink = file.webViewLink || "/"
+                const thumbnailLink = file.thumbnailLink || "/"
+                const createdTime = file.createdTime || "/"
                 const parents = idFolderNameMap.get(folderId) || "/"
-                console.log(`\t${ROW_COUNTER+1}, ${fileName}, ${googleDriveLinkFromId(fileId)},${fileSize},${fileSizeRaw},${parents} `);
+
+                console.log(`\t${ROW_COUNTER + 1}, ${fileName},${fileSize},,"${parents}",${webViewLink},${thumbnailLink},${createdTime}
+                 ${googleDriveLinkFromId(fileId)} `);
 
                 if (filemimeType === PDF_MIME_TYPE) {
-                    googleDrivePdfData.push([++ROW_COUNTER, fileName, googleDriveLinkFromId(fileId), sizeInfo(fileSize), fileSizeRaw, parents])
+                    googleDrivePdfData.push({
+                        index: ++ROW_COUNTER,
+                        fileName: fileName,
+                        googleDriveLink: webViewLink,
+                        sizeInfo: sizeInfo(fileSize),
+                        fileSizeRaw: fileSizeRaw,
+                        parents: parents,
+                        createdTime: createdTime,
+                        thumbnailLink: thumbnailLink,
+                    });
                 }
 
                 if (file.mimeType === FILE_MIME_TYPE) {
-                    await listFolderContents(file?.id || '', drive, umbrellaFolder); // Recursively call the function for subfolders
+                    await listFolderContents(file?.id || '', drive, umbrellaFolder, googleDrivePdfData); // Recursively call the function for subfolders
                 }
             }
         } else {
