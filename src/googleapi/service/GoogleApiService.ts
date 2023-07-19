@@ -36,7 +36,6 @@ export async function listFolderContents(folderId: string, drive: drive_v3.Drive
         const folderPath = await getFolderPathRelativeToRootFolder(folderId, drive)
         var index = folderPath.indexOf(ROOT_FOLDER_NAME);
         const _trimmed = folderPath.slice(index);
-        console.log(`folderPath ${folderPath} : ${_trimmed}: ${ROOT_FOLDER_NAME}`)
         idFolderNameMap.set(folderId, _trimmed)
     }
 
