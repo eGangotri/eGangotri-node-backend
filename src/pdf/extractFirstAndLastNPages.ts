@@ -18,7 +18,7 @@ async function createPartialPdf(inputPath: string, outputPath: string, pdfsToBeP
     let range: number[] = []
     const pdfPageCount = pdfDoc.getPages().length
 
-    console.log(`Folder # (${index}) Pdf No. ${++counter}/${pdfsToBeProcessedCount} pdfPageCount ${pdfPageCount}`);
+    console.log(`Pdf Trim: Folder # (${index}) Pdf No. ${++counter}/${pdfsToBeProcessedCount} pdfPageCount ${pdfPageCount}`);
 
     if (pdfPageCount < (firstNPages + lastNPages)) {
         range = _.range(0, pdfPageCount);
@@ -103,7 +103,7 @@ const loopFolders = async () => {
 const srcRootFolder = 'D:\\eG-tr1-30';
 //const srcRootFolder = 'E:\\MASTER_BACKUP';
 const destRootFolder = "E:\\_catalogWork\\_reducedPdfs";
-const _folders = ["Treasures15", "Treasures16", "Treasures17", "Treasures18", "Treasures19"]
+const _folders = ["Treasures"]
 const _foldersWithPath = _folders.map(x => `${srcRootFolder}\\${x}`)
 
 loopFolders()
