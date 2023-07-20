@@ -1,13 +1,13 @@
 import * as fs from 'fs';
 import { DD_MM_YYYY_HH_MMFORMAT } from "../../utils/utils";
 import moment from "moment";
-import { ExcelHeaders } from './types';
+import { ExcelHeaders } from '../types';
 import { excelToJson } from './ExcelUtils';
 
 const _root = "E:\\_catalogWork\\_collation";
-const treasureFolder = "Treasures 1"
+const treasureFolder = "Treasures"
 
-const mainExcelPath = `${_root}\\_catExcels\\${treasureFolder}`
+const mainExcelPath = `${_root}\\_catCombinedExcels\\${treasureFolder}`
 const mainExcelFileName = `${mainExcelPath}\\${fs.readdirSync(mainExcelPath)[0]}`;
 
 const secondaryExcelPath = `${_root}\\forMerge\\${treasureFolder}`

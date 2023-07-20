@@ -12,6 +12,7 @@ export const bookOrManuscript = "Book / Manuscript"
 export const CSV_SEPARATOR = ";"
 export const SEPARATOR_SPECIFICATION = `sep=${CSV_SEPARATOR}\n`
 
+export const MAX_FILE_NAME_LENGTH = 160
 export const emptyExcelHeaderObj = {
     "S.No": '',
     "Title in Google Drive": "",
@@ -39,4 +40,6 @@ export const emptyExcelHeaderObj = {
     "Size with Units": "",
     "Size in Bytes": "",
     "Folder Name": "",
+    "Thumbnail": "",
+    "Created Time": ""
 }

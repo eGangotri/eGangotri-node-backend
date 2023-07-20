@@ -86,8 +86,8 @@ export const addFileMetadataToArray = (file: drive_v3.Schema$File, folderId:stri
             thumbnailLink: thumbnailLink,
         });
         
-    console.log(` ${ROW_COUNTER}, ${fileName},${fileSize} ,${createdTime} "${_parents}"
-    ${thumbnailLink}
-     ${webViewLink} `);
+    console.log(`(${ROW_COUNTER}_. ${fileName} "${fileSize}" "${createdTime}" "${_parents}"
+    \tThumbnail: ${thumbnailLink}
+    \Weblink: ${webViewLink} `);
     }
 }
