@@ -32,6 +32,11 @@ export const CSV_HEADER = [
       key: "totalSizeRaw",
       label: "TOTAL SIZE (Raw)",
     },
+    {
+      key: "workFromHome",
+      label: "Work From Home",
+    },
+    
   ];
   
   export const CSV_HEADER_API2 = 
@@ -68,6 +73,10 @@ export const CSV_HEADER = [
     {
       id: "totalSizeRaw",
       title: "TOTAL SIZE (Raw)",
+    },
+    {
+      id: "workFromHome",
+      title: "Work From Home",
     }
   ]
   

@@ -38,6 +38,7 @@ export const generateCSV = (reports: mongoose.Document[]) => {
           totalPageCount: dailyWorkReport.totalPageCount,
           totalSize: dailyWorkReport.totalSize,
           totalSizeRaw: dailyWorkReport.totalSizeRaw,
+          workFromHome:dailyWorkReport.workFromHome
         },
       ]);
     });
@@ -52,6 +53,7 @@ export const generateCSV = (reports: mongoose.Document[]) => {
         totalPageCount: pageCountSum,
         totalSize: Mirror.sizeInfo(sizeRawSum),
         totalSizeRaw: sizeRawSum,
+        workFromHome:""
       },
     ]);
   
@@ -84,6 +86,7 @@ export const generateCSV = (reports: mongoose.Document[]) => {
         totalPdfCount: dailyWorkReport.totalPdfCount,
         totalPageCount: dailyWorkReport.totalPageCount,
         totalSize: dailyWorkReport.totalSize,
+        workFromHome: dailyWorkReport.workFromHome,
       },
       );
     });
@@ -96,6 +99,7 @@ export const generateCSV = (reports: mongoose.Document[]) => {
       totalPdfCount: pdfCountSum,
       totalPageCount: pageCountSum,
       totalSize: Mirror.sizeInfo(sizeCountSum),
+      workFromHome:""
     },
     );
     console.log(`csvData ${JSON.stringify(csvData)}`)
@@ -126,7 +130,7 @@ export const generateCatWorkReportCSV = (reports: mongoose.Document[]) => {
         skipped: dailyWorkReport.skipped,
         entryCount: dailyWorkReport.entryCount,
         link: dailyWorkReport.link,
-        notes: dailyWorkReport.notes,
+        notes: dailyWorkReport.notes
       },
     ]);
   });

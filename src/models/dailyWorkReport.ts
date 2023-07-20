@@ -11,6 +11,7 @@ const schema = new mongoose.Schema(
     totalSizeRaw: { type: Number, required: true },
     dateOfReport: { type: Date, required: true },
     notes: { type: String, required: false, default:"" },
+    workFromHome: { type: Boolean, required: false, default:false },
     pageCountStats: { type: [{
       fileName: String,
       pageCount: Number,

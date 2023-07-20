@@ -10,6 +10,6 @@ export interface DailyCatalogWorkReportType {
   entryCount: number;
   timeOfRequest: Date;
   link: string;
-  notes: string
+  notes: string;
 }
 
