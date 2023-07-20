@@ -1,7 +1,7 @@
 const express = require("express");
 import { DailyWorkReport } from "../models/dailyWorkReport";
 import { generateCSV, generateCSVApi2 } from "../services/CsvUtil";
-import { deleteRowsByIds, generateCSVAsFile, getListOfDailyWorkReport } from "../services/dailyWorkReportService";
+import { deleteRowsByIds, generateCSVAsFile, generateCsvAsFileOnlyOperatorAndPdfCount, getListOfDailyWorkReport } from "../services/dailyWorkReportService";
 import { Request, Response } from "express";
 import { getDateTwoHoursBeforeNow } from "../services/Util";
 import _ from "lodash";
@@ -21,6 +21,7 @@ JSON Body
   "totalPageCount": 896,
   "totalSize": "460.3 MB",
   "totalSizeRaw": "3333333333",
+  "notes":"",
   "dateOfReport": "2023-05-30T17:11:57.792Z",
   "pageCountStats": [
     {
@@ -202,6 +203,20 @@ dailyWorkReportRoute.get("/csvAsFile", async (req: Request, resp: Response) => {
     );
 
     generateCSVAsFile(resp, items)
+  } catch (err: any) {
+    console.log("Error", err);
+    resp.status(400).send(err);
+  }
+});
+
+dailyWorkReportRoute.get("/csvAsFileOnlyOperatorAndPdfCount", async (req: Request, resp: Response) => {
+  try {
+    const items = await getListOfDailyWorkReport(req?.query);
+    console.log(
+      `after getListOfDailyWorkReport retrieved item count: ${items.length}`
+    );
+
+    generateCsvAsFileOnlyOperatorAndPdfCount(resp, items)
   } catch (err: any) {
     console.log("Error", err);
     resp.status(400).send(err);

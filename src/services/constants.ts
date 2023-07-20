@@ -71,6 +71,21 @@ export const CSV_HEADER = [
     }
   ]
   
+  export const CSV_HEADER_THREE_FIELDS_ONLYAPI2 = 
+  [
+    {
+      id: "operatorName",
+      title: "Operator Name",
+    },
+    {
+      id: "totalPdfCount",
+      title: "TOTAL PDF COUNT",
+    },
+    {
+      id: "totalPageCount",
+      title: "TOTAL PAGE COUNT(Pages)",
+    },
+  ]
   export const dailyDetailReportHeader = [
     {
       key: "operatorName",
@@ -167,5 +182,17 @@ export const CSV_HEADER = [
     {
       id: "notes",
       title: "notes",
+    }
+  ]
+
+  export const CSV_CAT_HEADER_FOR_OPERATOR_NAME_AND_ENTRY_COUNT_API2 = [
+    {
+      id: "operatorName",
+      title: "Operator Name",
+    },
+    
+    {
+      id: "entryCount",
+      title: "Entry Count",
     }
   ]

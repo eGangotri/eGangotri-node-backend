@@ -9,6 +9,7 @@ export type DailyWorkReportType = {
   totalSizeRaw: number;
   dateOfReport: Date;
   pageCountStats: PageCountStatsType[];
+  notes:string;
 };
 
 export type PageCountStatsType = {

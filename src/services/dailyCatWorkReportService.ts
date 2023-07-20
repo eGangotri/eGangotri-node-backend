@@ -1,18 +1,15 @@
 import mongoose from "mongoose";
 import moment from 'moment';
-import { DD_MM_YYYY_FORMAT } from "../utils/utils";
-import { DailyWorkReport } from "../models/dailyWorkReport";
 import { DailyCatWorkReportListOptionsType, DailyWorkReportListOptionsType, ItemsListOptionsType } from "./types";
 import { getLimit } from "../routes/utils";
 
 import { Response } from "express";
 import { createObjectCsvWriter } from "csv-writer";
 import { createReadStream } from "fs";
-import * as fsExtra from "fs-extra";
 import * as fs from "fs";
-import { CSV_CAT_HEADER_API2, CSV_HEADER_API2 } from "./constants";
+import { CSV_CAT_HEADER_API2, CSV_CAT_HEADER_FOR_OPERATOR_NAME_AND_ENTRY_COUNT_API2 } from "./constants";
 import * as _ from 'lodash';
-import { getDateTwoHoursBeforeNow, replaceQuotes, replaceQuotesAndSplit } from "./Util";
+import { generateCsvDirAndName, getDateTwoHoursBeforeNow, replaceQuotes, replaceQuotesAndSplit } from "./Util";
 import { DailyCatWorkReport } from "../models/dailyCatWorkReport";
 
 
@@ -82,14 +79,7 @@ export async function getListOfDailyCatWorkReport(queryOptions: DailyCatWorkRepo
 
 
 export const generateCatCSVAsFile = async (res: Response, data: mongoose.Document[]) => {
-  const CSVS_DIR = ".//_csvs"
-  fsExtra.emptyDirSync(CSVS_DIR);
-  if (!fs.existsSync(CSVS_DIR)) {
-    console.log('creating: ', CSVS_DIR);
-    fs.mkdirSync(CSVS_DIR)
-  }
-
-  const csvFileName = `${CSVS_DIR}//eGangotri-Staff-Catalog-DWR-On-${moment(new Date()).format(DD_MM_YYYY_FORMAT)}.csv`
+  const csvFileName = generateCsvDirAndName("CatalogStaff");
   try {
     // Define the CSV file headers
     const csvWriter = createObjectCsvWriter({
@@ -124,6 +114,37 @@ export const generateCatCSVAsFile = async (res: Response, data: mongoose.Documen
   }
 }
 
+
+export const generateCatCSVAsFileForOperatorAndEntryCountOnly = async (res: Response, data: mongoose.Document[]) => {
+  const csvFileName = generateCsvDirAndName("CatalogStaff");
+  try {
+    // Define the CSV file headers
+    const csvWriter = createObjectCsvWriter({
+      path: csvFileName,
+      header: CSV_CAT_HEADER_FOR_OPERATOR_NAME_AND_ENTRY_COUNT_API2
+    });
+
+    const entryCountSum:number = _.sum(data.map(x => parseInt(x.get("entryCount").toString())))
+
+    console.log(`_toObj ${entryCountSum}`);
+    await csvWriter.writeRecords(data);
+    await csvWriter.writeRecords([{
+      timeOfRequest: "Totals",
+      entryCount: entryCountSum,
+    }]);
+
+    // Set the response headers to indicate that the response is a CSV file
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename=${csvFileName}`);
+
+    // Stream the CSV file as the response
+    const fileStream = createReadStream(csvFileName);
+    fileStream.pipe(res);
+  } catch (error) {
+    console.error('Error writing CSV:', error);
+    res.status(500).send('Internal Server Error');
+  }
+}
 
 export const deleteRowsByIds = async (_itemIds: string[]) => {
   // Define your criteria for deletion
