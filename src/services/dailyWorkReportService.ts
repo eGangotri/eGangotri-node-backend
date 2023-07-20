@@ -10,10 +10,10 @@ import { createObjectCsvWriter } from "csv-writer";
 import { createReadStream } from "fs";
 import * as fsExtra from "fs-extra";
 import * as fs from "fs";
-import { CSV_HEADER_API2 } from "./constants";
+import { CSV_HEADER_API2, CSV_HEADER_THREE_FIELDS_ONLYAPI2 } from "./constants";
 import * as Mirror from "../mirror/FrontEndBackendCommonCode"
 import * as _ from 'lodash';
-import { getDateTwoHoursBeforeNow, replaceQuotes, replaceQuotesAndSplit } from "./Util";
+import { generateCsvDirAndName, getDateTwoHoursBeforeNow, replaceQuotes, replaceQuotesAndSplit } from "./Util";
 
 
 
@@ -81,16 +81,9 @@ export async function getListOfDailyWorkReport(queryOptions: ItemsListOptionsTyp
 }
 
 
+
 export const generateCSVAsFile = async (res: Response, data: mongoose.Document[]) => {
-
-  const CSVS_DIR = ".//_csvs"
-  fsExtra.emptyDirSync(CSVS_DIR);
-  if (!fs.existsSync(CSVS_DIR)) {
-    console.log('creating: ', CSVS_DIR);
-    fs.mkdirSync(CSVS_DIR)
-  }
-
-  const csvFileName = `${CSVS_DIR}//eGangotri-Staff-DWR-On-${moment(new Date()).format(DD_MM_YYYY_FORMAT)}.csv`
+  const csvFileName = generateCsvDirAndName("ScanOpStaff");
   try {
     // Define the CSV file headers
     const csvWriter = createObjectCsvWriter({
@@ -129,6 +122,29 @@ export const generateCSVAsFile = async (res: Response, data: mongoose.Document[]
   }
 }
 
+
+export const generateCsvAsFileOnlyOperatorAndPdfCount = async (res: Response, data: mongoose.Document[]) => {
+  const csvFileName = generateCsvDirAndName("ScanOpStaff");
+  try {
+    // Define the CSV file headers
+    const csvWriter = createObjectCsvWriter({
+      path: csvFileName,
+      header: CSV_HEADER_THREE_FIELDS_ONLYAPI2
+    });
+
+    await csvWriter.writeRecords(data);
+    // Set the response headers to indicate that the response is a CSV file
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename=${csvFileName}`);
+
+    // Stream the CSV file as the response
+    const fileStream = createReadStream(csvFileName);
+    fileStream.pipe(res);
+  } catch (error) {
+    console.error('Error writing CSV:', error);
+    res.status(500).send('Internal Server Error');
+  }
+}
 
 export const deleteRowsByIds = async (_itemIds: string[]) => {
   // Define your criteria for deletion

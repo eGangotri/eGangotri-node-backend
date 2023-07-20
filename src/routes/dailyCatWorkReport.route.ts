@@ -6,7 +6,7 @@ import { validateSuperAdminUserFromRequest, validateUserFromRequest } from "../s
 import { getDateTwoHoursBeforeNow } from "../services/Util";
 import _ from "lodash";
 import { DailyCatWorkReport } from "../models/dailyCatWorkReport";
-import { generateCatCSVAsFile, getListOfDailyCatWorkReport } from "../services/dailyCatWorkReportService";
+import { generateCatCSVAsFile, generateCatCSVAsFileForOperatorAndEntryCountOnly, getListOfDailyCatWorkReport } from "../services/dailyCatWorkReportService";
 
 export const dailyCatWorkReportRoute = express.Router();
 
@@ -194,3 +194,18 @@ dailyCatWorkReportRoute.get("/csvAsFile", async (req: Request, resp: Response) =
     resp.status(400).send(err);
   }
 });
+
+dailyCatWorkReportRoute.get("/csvAsFileOnlyOperatorAndPdfCount", async (req: Request, resp: Response) => {
+  try {
+    const items = await getListOfDailyCatWorkReport(req?.query);
+    console.log(
+      `after getListOfDailyWorkReport retrieved item count: ${items.length}`
+    );
+
+    generateCatCSVAsFileForOperatorAndEntryCountOnly(resp, items)
+  } catch (err: any) {
+    console.log("Error", err);
+    resp.status(400).send(err);
+  }
+});
+

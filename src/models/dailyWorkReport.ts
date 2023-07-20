@@ -10,6 +10,7 @@ const schema = new mongoose.Schema(
     totalSize: { type: String, required: true },
     totalSizeRaw: { type: Number, required: true },
     dateOfReport: { type: Date, required: true },
+    notes: { type: String, required: false, default:"" },
     pageCountStats: { type: [{
       fileName: String,
       pageCount: Number,

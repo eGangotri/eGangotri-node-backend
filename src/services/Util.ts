@@ -1,6 +1,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import moment from 'moment';
+import * as fsExtra from "fs-extra";
+import { DD_MM_YYYY_FORMAT } from '../utils/utils';
 
 /**
  * 
@@ -28,6 +30,19 @@ import moment from 'moment';
       //console.log(`${fileName}`);
     })
     return processableFiles;
+  }
+  
+  export const generateCsvDirAndName = (infix:string) => {
+  
+    const CSVS_DIR = ".//_csvs"
+    fsExtra.emptyDirSync(CSVS_DIR);
+    if (!fs.existsSync(CSVS_DIR)) {
+      console.log('creating: ', CSVS_DIR);
+      fs.mkdirSync(CSVS_DIR)
+    }
+  
+    const csvFileName = `${CSVS_DIR}//eGangotri-${infix}-DailyWorkReport${moment(new Date()).format(DD_MM_YYYY_FORMAT)}.csv`
+    return csvFileName;
   }
   
 
