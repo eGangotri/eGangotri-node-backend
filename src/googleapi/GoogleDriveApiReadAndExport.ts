@@ -32,9 +32,9 @@ export const EXPORT_DEST_FOLDER = `E:\\_catalogWork\\_collation\\_catExcels`;
 if (!fs.existsSync(EXPORT_DEST_FOLDER)) {
   fs.mkdirSync(EXPORT_DEST_FOLDER);
 }
-const driveLink = "https://drive.google.com/drive/folders/1G6A8zbbiLHFlqgNnPosq1q6JbOoI2dI-?usp=drive_link"
+const driveLink = "https://drive.google.com/drive/folders/1G6A8zbbiLHFlqgNnPosq1q6JbOoI2dI-?usp=sharing"
 listFolderContentsAndGenerateCSVAndExcel(driveLink, drive, 'Treasures');
 
 // export const EXPORT_DEST_FOLDER = `E:\\_catalogWork\\_collation\\_catReducedPdfExcels`;
-// const driveLink = "https://drive.google.com/drive/folders/1YkRGsyWfFDQK1CKj2RD1kZea_fnJvOo7?usp=drive_link"
-// listFolderContentsAndGenerateCSVAndExcel(driveLink, drive, 'Treasures 17');
+// const driveLink = "https://drive.google.com/drive/u/0/folders/1xJQ15hZhd1v0gTL0RYN_Cww9R7Uakcwa"
+// listFolderContentsAndGenerateCSVAndExcel(driveLink, drive, 'test');

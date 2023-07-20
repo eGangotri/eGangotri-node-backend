@@ -11,7 +11,6 @@ import { createReadStream } from "fs";
 import * as fsExtra from "fs-extra";
 import * as fs from "fs";
 import { CSV_CAT_HEADER_API2, CSV_HEADER_API2 } from "./constants";
-import * as Mirror from "../mirror/FrontEndBackendCommonCode"
 import * as _ from 'lodash';
 import { getDateTwoHoursBeforeNow, replaceQuotes, replaceQuotesAndSplit } from "./Util";
 import { DailyCatWorkReport } from "../models/dailyCatWorkReport";
