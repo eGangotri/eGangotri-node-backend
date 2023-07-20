@@ -22,6 +22,7 @@ JSON Body
   "totalSize": "460.3 MB",
   "totalSizeRaw": "3333333333",
   "notes":"",
+  "workFromHome":"",
   "dateOfReport": "2023-05-30T17:11:57.792Z",
   "pageCountStats": [
     {
