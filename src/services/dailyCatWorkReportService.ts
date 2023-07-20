@@ -103,6 +103,7 @@ export const generateCatCSVAsFile = async (res: Response, data: mongoose.Documen
     await csvWriter.writeRecords(data);
     await csvWriter.writeRecords([{
       timeOfRequest: "Totals",
+      operatorName:"",
       catalogProfile: "",
       entryFrom: "",
       entryTo: "",
