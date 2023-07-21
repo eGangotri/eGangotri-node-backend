@@ -6,7 +6,7 @@ import { validateSuperAdminUserFromRequest, validateUserFromRequest } from "../s
 import { getDateTwoHoursBeforeNow } from "../services/Util";
 import _ from "lodash";
 import { DailyCatWorkReport } from "../models/dailyCatWorkReport";
-import { generateCatCSVAsFile, generateCatCSVAsFileForOperatorAndEntryCountOnly, getListOfDailyCatWorkReport } from "../services/dailyCatWorkReportService";
+import { generateCatCSVAsFile, generateCatCSVAsFileForOperatorAndEntryCountOnly, generateCatCSVAsFileOfAggregates, getListOfDailyCatWorkReport } from "../services/dailyCatWorkReportService";
 
 export const dailyCatWorkReportRoute = express.Router();
 
@@ -15,17 +15,17 @@ export const dailyCatWorkReportRoute = express.Router();
 POST http://localhost/dailyWorkReport/add 
 JSON Body 
 {
-	"title": "eGangotri Daily Catalog Work Report",
-	"operatorName": "admin",
-	"catalogProfile": "Treasures-8",
-	"entryFrom": 1,
-	"entryTo": 11,
-	"skipped": 2,
-	"timeOfRequest": "2023-07-18T09:30:20.401Z",
-	"entryCount": 8,
-	"link": "https://docs.google.com/spreadsheets/d/1masb0zc_bvOYU1r70cjf6sPvExbF5bF6s_VDPeBH4KY/edit#gid=0",
-	"notes": "",
-	"password": ""
+  "title": "eGangotri Daily Catalog Work Report",
+  "operatorName": "admin",
+  "catalogProfile": "Treasures-8",
+  "entryFrom": 1,
+  "entryTo": 11,
+  "skipped": 2,
+  "timeOfRequest": "2023-07-18T09:30:20.401Z",
+  "entryCount": 8,
+  "link": "https://docs.google.com/spreadsheets/d/1masb0zc_bvOYU1r70cjf6sPvExbF5bF6s_VDPeBH4KY/edit#gid=0",
+  "notes": "",
+  "password": ""
 }
 */
 
@@ -188,7 +188,12 @@ dailyCatWorkReportRoute.get("/csvAsFile", async (req: Request, resp: Response) =
       `after getListOfDailyWorkReport retrieved item count: ${items.length}`
     );
 
-    generateCatCSVAsFile(resp, items)
+    if (req?.query?.aggregations === "true") {
+      generateCatCSVAsFileOfAggregates(resp, items)
+    }
+    else {
+      generateCatCSVAsFile(resp, items)
+    }
   } catch (err: any) {
     console.log("Error", err);
     resp.status(400).send(err);

@@ -202,22 +202,12 @@ dailyWorkReportRoute.get("/csvAsFile", async (req: Request, resp: Response) => {
     console.log(
       `after getListOfDailyWorkReport retrieved item count: ${items.length}`
     );
-
-    generateCSVAsFile(resp, items)
-  } catch (err: any) {
-    console.log("Error", err);
-    resp.status(400).send(err);
-  }
-});
-
-dailyWorkReportRoute.get("/csvAsFileOfAggregates", async (req: Request, resp: Response) => {
-  try {
-    const items = await getListOfDailyWorkReport(req?.query);
-    console.log(
-      `after getListOfDailyWorkReport retrieved item count: ${items.length}`
-    );
-
-    generateCSVAsFileOfAggregates(resp, items)
+    if (req?.query?.aggregations === "true") {
+      generateCSVAsFileOfAggregates(resp, items)
+    }
+    else{
+      generateCSVAsFile(resp, items)
+    }
   } catch (err: any) {
     console.log("Error", err);
     resp.status(400).send(err);

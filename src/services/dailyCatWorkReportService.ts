@@ -7,7 +7,7 @@ import { Response } from "express";
 import { createObjectCsvWriter } from "csv-writer";
 import { createReadStream } from "fs";
 import * as fs from "fs";
-import { CSV_CAT_HEADER_API2, CSV_CAT_HEADER_FOR_OPERATOR_NAME_AND_ENTRY_COUNT_API2 } from "./constants";
+import { CSV_CAT_HEADER_API2, CSV_CAT_HEADER_FOR_AGGREGATES_API2, CSV_CAT_HEADER_FOR_OPERATOR_NAME_AND_ENTRY_COUNT_API2 } from "./constants";
 import * as _ from 'lodash';
 import { generateCsvDirAndName, getDateTwoHoursBeforeNow, replaceQuotes, replaceQuotesAndSplit } from "./Util";
 import { DailyCatWorkReport } from "../models/dailyCatWorkReport";
@@ -87,13 +87,13 @@ export const generateCatCSVAsFile = async (res: Response, data: mongoose.Documen
       header: CSV_CAT_HEADER_API2
     });
 
-    const entryCountSum:number = _.sum(data.map(x => parseInt(x.get("entryCount").toString())))
+    const entryCountSum: number = _.sum(data.map(x => parseInt(x.get("entryCount").toString())))
 
     console.log(`_toObj ${entryCountSum}`);
     await csvWriter.writeRecords(data);
     await csvWriter.writeRecords([{
       timeOfRequest: "Totals",
-      operatorName:"",
+      operatorName: "",
       catalogProfile: "",
       entryFrom: "",
       entryTo: "",
@@ -115,6 +115,50 @@ export const generateCatCSVAsFile = async (res: Response, data: mongoose.Documen
 }
 
 
+export const generateCatCSVAsFileOfAggregates = async (res: Response, data: mongoose.Document[]) => {
+  const csvFileName = generateCsvDirAndName("CatalogStaffAggregates");
+  try {
+    // Define the CSV file headers
+    const csvWriter = createObjectCsvWriter({
+      path: csvFileName,
+      header: CSV_CAT_HEADER_FOR_AGGREGATES_API2
+    });
+
+    const grouped_data = _.groupBy(data, 'operatorName')
+    const refinedData: Array<any> = []
+    for (let [key, value] of Object.entries(grouped_data)) {
+      const numOfEntries = value.length;
+      const entryCountSum = _.sum(value.map(x => parseInt(x.get("entryCount")) || 0));
+      const _row = {
+        numEntries: numOfEntries,
+        operatorName: key,
+        entryCount: entryCountSum,
+      }
+      refinedData.push(_row)
+    }
+    const entryCountSum: number = _.sum(refinedData.map(x => parseInt(x["entryCount"]?.toString())))
+    const numEntriesSum: number = _.sum(refinedData.map(x => x["numEntries"]))
+
+    console.log(`_toObj ${entryCountSum} numEntriesSum ${numEntriesSum}`);
+    await csvWriter.writeRecords(refinedData);
+    await csvWriter.writeRecords([{
+      numEntries: numEntriesSum,
+      operatorName: "",
+      entryCount: entryCountSum,
+    }]);
+
+    // Set the response headers to indicate that the response is a CSV file
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename=${csvFileName}`);
+
+    // Stream the CSV file as the response
+    const fileStream = createReadStream(csvFileName);
+    fileStream.pipe(res);
+  } catch (error) {
+    console.error('Error writing CSV:', error);
+    res.status(500).send('Internal Server Error');
+  }
+}
 export const generateCatCSVAsFileForOperatorAndEntryCountOnly = async (res: Response, data: mongoose.Document[]) => {
   const csvFileName = generateCsvDirAndName("CatalogStaff");
   try {
@@ -124,7 +168,7 @@ export const generateCatCSVAsFileForOperatorAndEntryCountOnly = async (res: Resp
       header: CSV_CAT_HEADER_FOR_OPERATOR_NAME_AND_ENTRY_COUNT_API2
     });
 
-    const entryCountSum:number = _.sum(data.map(x => parseInt(x.get("entryCount").toString())))
+    const entryCountSum: number = _.sum(data.map(x => parseInt(x.get("entryCount").toString())))
 
     console.log(`_toObj ${entryCountSum}`);
     await csvWriter.writeRecords(data);
