@@ -142,9 +142,9 @@ async function editExistingExcelSheet(excelSheetPath:string) {
 }
 
 
-export const excelToJson = (excelName: string) => {
+export const excelToJson = (excelName: string, sheetName:string = SHEET_NAME) => {
   const workbook = XLSX.readFile(excelName);
-  const sheet = workbook.Sheets[SHEET_NAME];
+  const sheet = workbook.Sheets[sheetName];
   const jsonData: ExcelHeaders[] = XLSX.utils.sheet_to_json(sheet);
   console.log(`Converted ${excelName} to Json with Data Length ${jsonData.length}`);
   return jsonData
