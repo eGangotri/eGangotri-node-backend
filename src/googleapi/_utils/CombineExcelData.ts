@@ -32,14 +32,14 @@ const combineExcels = () => {
     const secondaryExcelDataAdjusted: ExcelHeaders[] = fillPageCount(secondaryExcelData);
     if (mainExcelData.length != secondaryExcelData.length) {
         console.log(`Cant proceed Data Length in Main and Secondary (${mainExcelData.length}!=${secondaryExcelData.length})dont match`);
-        //process.exit(0);
+        process.exit(0);
     }
     const combinedExcelJsons = combineExcelJsons(mainExcelData, secondaryExcelDataAdjusted)
     checkErroneous(secondaryExcelDataAdjusted,mainExcelData)
 
-    const fileNameWithLengh = `${combinedExcelFileName}-${mainExcelData.length}.xlsx`;
+    const fileNameWithLength = `${combinedExcelFileName}-${mainExcelData.length}.xlsx`;
 
-    jsonToExcel(combinedExcelJsons, fileNameWithLengh);
+    jsonToExcel(combinedExcelJsons, fileNameWithLength);
 }
 
 const checkErroneous = (mainExcelData: ExcelHeaders[], secondaryExcelDataAdjusted: ExcelHeaders[]) => {
