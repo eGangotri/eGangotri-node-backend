@@ -147,6 +147,9 @@ export const generateCSVAsFileOfAggregates = async (res: Response, data: mongoos
       const pdfCountSum = _.sum(value.map(x => x.get("totalPdfCount")))
       const pageCountSum = _.sum(value.map(x => x.get("totalPageCount")));
       const sizeCountRawSum = _.sum(value.map(x => x.get("totalSizeRaw") || 0));
+      const averageByPages = Math.round(pageCountSum / numOfEntries)
+      const averageByPdfs = Math.round(pdfCountSum / numOfEntries)
+
       const _row = {
         numEntries: numOfEntries,
         operatorName: key,
@@ -156,7 +159,9 @@ export const generateCSVAsFileOfAggregates = async (res: Response, data: mongoos
         totalPageCount: pageCountSum,
         totalSize: Mirror.sizeInfo(sizeCountRawSum),
         totalSizeRaw: sizeCountRawSum,
-        workFromHome: `${_wFHPercentage}%`
+        workFromHome: `${_wFHPercentage}%`,
+        averageByPages,
+        averageByPdfs
       }
       refinedData.push(_row)
     }
@@ -166,6 +171,8 @@ export const generateCSVAsFileOfAggregates = async (res: Response, data: mongoos
     const totalPdfCountSum = _.sum(refinedData.map(x => x["totalPdfCount"] || 0));
     const totlaPageCountSum = _.sum(refinedData.map(x => x["totalPageCount"] || 0));
     const totalSizeRawSum = _.sum(refinedData.map(x => x["totalSizeRaw"] || 0));
+    const averageByPagesSum: number = _.sum(refinedData.map(x => x["averageByPages"]))
+    const averageByPdfsSum: number = _.sum(refinedData.map(x => x["averageByPdfs"]))
 
     await csvWriter.writeRecords([{
       numEntries: numEntriesSum,
@@ -176,7 +183,9 @@ export const generateCSVAsFileOfAggregates = async (res: Response, data: mongoos
       totalPageCount: totlaPageCountSum,
       totalSize: Mirror.sizeInfo(totalSizeRawSum),
       totalSizeRaw: totalSizeRawSum,
-      workFromHome: ""
+      workFromHome: "",
+      averageByPages:averageByPagesSum,
+      averageByPdfs:averageByPdfsSum
     }]);
 
     // Set the response headers to indicate that the response is a CSV file

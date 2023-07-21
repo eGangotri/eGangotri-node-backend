@@ -46,7 +46,7 @@ export function getAllPDFFiles(directoryPath: string): string[] {
 
 export function createFolderIfNotExists(folderPath: string): void {
     if (!fs.existsSync(folderPath)) {
-      fs.mkdirSync(folderPath);
+      fs.mkdirSync(folderPath, { recursive: true });
       console.log(`Folder created: ${folderPath}`);
     } else {
      // console.log(`Folder already exists: ${folderPath}`);

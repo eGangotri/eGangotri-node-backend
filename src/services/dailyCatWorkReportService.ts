@@ -93,7 +93,7 @@ export const generateCatCSVAsFile = async (res: Response, data: mongoose.Documen
     await csvWriter.writeRecords(data);
     await csvWriter.writeRecords([{
       timeOfRequest: "Totals",
-      operatorName: "",
+      operatorName: data.length,
       catalogProfile: "",
       entryFrom: "",
       entryTo: "",
@@ -129,22 +129,26 @@ export const generateCatCSVAsFileOfAggregates = async (res: Response, data: mong
     for (let [key, value] of Object.entries(grouped_data)) {
       const numOfEntries = value.length;
       const entryCountSum = _.sum(value.map(x => parseInt(x.get("entryCount")) || 0));
+      const average = Math.round(entryCountSum/numOfEntries)
       const _row = {
         numEntries: numOfEntries,
         operatorName: key,
         entryCount: entryCountSum,
+        average
       }
       refinedData.push(_row)
     }
     const entryCountSum: number = _.sum(refinedData.map(x => parseInt(x["entryCount"]?.toString())))
     const numEntriesSum: number = _.sum(refinedData.map(x => x["numEntries"]))
+    const averageSum: number = _.sum(refinedData.map(x => x["average"]))
 
     console.log(`_toObj ${entryCountSum} numEntriesSum ${numEntriesSum}`);
     await csvWriter.writeRecords(refinedData);
     await csvWriter.writeRecords([{
       numEntries: numEntriesSum,
-      operatorName: "",
+      operatorName: refinedData.length,
       entryCount: entryCountSum,
+      average: averageSum,
     }]);
 
     // Set the response headers to indicate that the response is a CSV file
@@ -173,7 +177,7 @@ export const generateCatCSVAsFileForOperatorAndEntryCountOnly = async (res: Resp
     console.log(`_toObj ${entryCountSum}`);
     await csvWriter.writeRecords(data);
     await csvWriter.writeRecords([{
-      timeOfRequest: "Totals",
+      operatorName: data.length,
       entryCount: entryCountSum,
     }]);
 

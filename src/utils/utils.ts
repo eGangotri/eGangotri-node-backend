@@ -57,25 +57,6 @@ function findHighestFileSize(directory: string): number {
   return highestSize;
 }
 
-export function findNonMatchingElements(arr1: string[], arr2: string[]): string[] {
-  const nonMatchingElements: string[] = [];
-
-  // Check elements in arr1 that are not present in arr2
-  arr1.forEach((element) => {
-    if (!arr2.includes(element)) {
-      nonMatchingElements.push(element);
-    }
-  });
-
-  // Check elements in arr2 that are not present in arr1
-  arr2.forEach((element) => {
-    if (!arr1.includes(element) && !nonMatchingElements.includes(element)) {
-      nonMatchingElements.push(element);
-    }
-  });
-
-  return nonMatchingElements;
-}
 /*
 const folderPath = "D:\\eG-tr1-30\\Treasures"
 const longestFileName = findLongestFileName(folderPath);
