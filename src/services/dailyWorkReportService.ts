@@ -141,7 +141,6 @@ export const generateCSVAsFileOfAggregates = async (res: Response, data: mongoos
       const libs = [..._libs].join(",")
 
       const _workFromHome = _.countBy((value.map(x => (x.get("workFromHome") || false).toString())));
-      console.log(`_workFromHome ${key} ${JSON.stringify(_workFromHome)}`);
 
       const _wFHPercentage = Math.floor(((_workFromHome["true"] || 0) * 100 / numOfEntries));
 
