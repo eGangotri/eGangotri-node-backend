@@ -10,11 +10,10 @@ import { createObjectCsvWriter } from "csv-writer";
 import { createReadStream } from "fs";
 import * as fsExtra from "fs-extra";
 import * as fs from "fs";
-import { CSV_HEADER_API2, CSV_HEADER_THREE_FIELDS_ONLYAPI2 } from "./constants";
+import { CSV_HEADER_API2, CSV_HEADER_API2_FOR_AGGREGATES, CSV_HEADER_API2_SUBSET, CSV_HEADER_THREE_FIELDS_ONLYAPI2 } from "./constants";
 import * as Mirror from "../mirror/FrontEndBackendCommonCode"
 import * as _ from 'lodash';
 import { generateCsvDirAndName, getDateTwoHoursBeforeNow, replaceQuotes, replaceQuotesAndSplit } from "./Util";
-
 
 
 export function setOptionsForDailyWorkReportListing(queryOptions: DailyWorkReportListOptionsType) {
@@ -95,8 +94,6 @@ export const generateCSVAsFile = async (res: Response, data: mongoose.Document[]
     const pageCountSum = _.sum(data.map(x => x.get("totalPageCount")));
     const sizeCountRawSum = _.sum(data.map(x => x.get("totalSizeRaw") || 0));
 
-
-    console.log(`_toObj ${pdfCountSum} ${pageCountSum} ${sizeCountRawSum} ${Mirror.sizeInfo(sizeCountRawSum)}}`);
     await csvWriter.writeRecords(data);
     await csvWriter.writeRecords([{
       dateOfReport: "Totals",
@@ -123,6 +120,79 @@ export const generateCSVAsFile = async (res: Response, data: mongoose.Document[]
 }
 
 
+export const generateCSVAsFileOfAggregates = async (res: Response, data: mongoose.Document[]) => {
+  const csvFileName = generateCsvDirAndName("ScanOpStaff-Aggr");
+  try {
+    // Define the CSV file headers
+    const csvWriter = createObjectCsvWriter({
+      path: csvFileName,
+      header: CSV_HEADER_API2_FOR_AGGREGATES
+    });
+
+    const grouped_data = _.groupBy(data, 'operatorName')
+    const refinedData: Array<any> = []
+    for (let [key, value] of Object.entries(grouped_data)) {
+      const numOfEntries = value.length;
+
+      const _centers = new Set<string>(value.map(x => x.get("center")));
+      const centers = [..._centers].join(",")
+
+      const _libs = new Set<string>(value.map(x => x.get("lib")));
+      const libs = [..._libs].join(",")
+
+      const _workFromHome = _.countBy((value.map(x => (x.get("workFromHome") || false).toString())));
+      console.log(`_workFromHome ${key} ${JSON.stringify(_workFromHome)}`);
+
+      const _wFHPercentage = Math.floor(((_workFromHome["true"] || 0) * 100 / numOfEntries));
+
+      const pdfCountSum = _.sum(value.map(x => x.get("totalPdfCount")))
+      const pageCountSum = _.sum(value.map(x => x.get("totalPageCount")));
+      const sizeCountRawSum = _.sum(value.map(x => x.get("totalSizeRaw") || 0));
+      const _row = {
+        numEntries: numOfEntries,
+        operatorName: key,
+        center: centers,
+        lib: libs,
+        totalPdfCount: pdfCountSum,
+        totalPageCount: pageCountSum,
+        totalSize: Mirror.sizeInfo(sizeCountRawSum),
+        totalSizeRaw: sizeCountRawSum,
+        workFromHome: `${_wFHPercentage}%`
+      }
+      refinedData.push(_row)
+    }
+
+    await csvWriter.writeRecords(refinedData);
+    const numEntriesSum = _.sum(refinedData.map(x => x["numEntries"] || 0));
+    const totalPdfCountSum = _.sum(refinedData.map(x => x["totalPdfCount"] || 0));
+    const totlaPageCountSum = _.sum(refinedData.map(x => x["totalPageCount"] || 0));
+    const totalSizeRawSum = _.sum(refinedData.map(x => x["totalSizeRaw"] || 0));
+
+    await csvWriter.writeRecords([{
+      numEntries: numEntriesSum,
+      operatorName: "",
+      center: "",
+      lib: "",
+      totalPdfCount: totalPdfCountSum,
+      totalPageCount: totlaPageCountSum,
+      totalSize: Mirror.sizeInfo(totalSizeRawSum),
+      totalSizeRaw: totalSizeRawSum,
+      workFromHome: ""
+    }]);
+
+    // Set the response headers to indicate that the response is a CSV file
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename=${csvFileName}`);
+
+    // Stream the CSV file as the response
+    const fileStream = createReadStream(csvFileName);
+    fileStream.pipe(res);
+  } catch (error) {
+    console.error('Error writing CSV:', error);
+    res.status(500).send('Internal Server Error');
+  }
+}
+
 export const generateCsvAsFileOnlyOperatorAndPdfCount = async (res: Response, data: mongoose.Document[]) => {
   const csvFileName = generateCsvDirAndName("ScanOpStaff");
   try {
@@ -146,6 +216,51 @@ export const generateCsvAsFileOnlyOperatorAndPdfCount = async (res: Response, da
   }
 }
 
+export const generateCsvAsFileOnlyOperatorAndPdfCountAggregate = async (res: Response, data: mongoose.Document[]) => {
+  const csvFileName = generateCsvDirAndName("ScanOpStaffAgg");
+  try {
+    // Define the CSV file headers
+    const csvWriter = createObjectCsvWriter({
+      path: csvFileName,
+      header: CSV_HEADER_THREE_FIELDS_ONLYAPI2
+    });
+
+    const grouped_data = _.groupBy(data, 'operatorName')
+    const refinedData: Array<any> = []
+
+    for (let [key, value] of Object.entries(grouped_data)) {
+      const pdfCountSum = _.sum(value.map(x => x.get("totalPdfCount")))
+      const pageCountSum = _.sum(value.map(x => x.get("totalPageCount")));
+      const _row = {
+        operatorName: key,
+        totalPdfCount: pdfCountSum,
+        totalPageCount: pageCountSum,
+      }
+      refinedData.push(_row)
+    }
+
+    await csvWriter.writeRecords(refinedData);
+    const totalPdfCountSum = _.sum(refinedData.map(x => x["totalPdfCount"] || 0));
+    const totlaPageCountSum = _.sum(refinedData.map(x => x["totalPageCount"] || 0));
+
+    await csvWriter.writeRecords([{
+      operatorName: "",
+      totalPdfCount: totalPdfCountSum,
+      totalPageCount: totlaPageCountSum,
+    }]);
+
+    // Set the response headers to indicate that the response is a CSV file
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename=${csvFileName}`);
+
+    // Stream the CSV file as the response
+    const fileStream = createReadStream(csvFileName);
+    fileStream.pipe(res);
+  } catch (error) {
+    console.error('Error writing CSV:', error);
+    res.status(500).send('Internal Server Error');
+  }
+}
 export const deleteRowsByIds = async (_itemIds: string[]) => {
   // Define your criteria for deletion
   const deleteCriteria = {

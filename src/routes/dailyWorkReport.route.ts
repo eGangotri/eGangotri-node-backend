@@ -1,7 +1,7 @@
 const express = require("express");
 import { DailyWorkReport } from "../models/dailyWorkReport";
 import { generateCSV, generateCSVApi2 } from "../services/CsvUtil";
-import { deleteRowsByIds, generateCSVAsFile, generateCsvAsFileOnlyOperatorAndPdfCount, getListOfDailyWorkReport } from "../services/dailyWorkReportService";
+import { deleteRowsByIds, generateCSVAsFile, generateCSVAsFileOfAggregates, generateCsvAsFileOnlyOperatorAndPdfCount, generateCsvAsFileOnlyOperatorAndPdfCountAggregate, getListOfDailyWorkReport } from "../services/dailyWorkReportService";
 import { Request, Response } from "express";
 import { getDateTwoHoursBeforeNow } from "../services/Util";
 import _ from "lodash";
@@ -210,6 +210,20 @@ dailyWorkReportRoute.get("/csvAsFile", async (req: Request, resp: Response) => {
   }
 });
 
+dailyWorkReportRoute.get("/csvAsFileOfAggregates", async (req: Request, resp: Response) => {
+  try {
+    const items = await getListOfDailyWorkReport(req?.query);
+    console.log(
+      `after getListOfDailyWorkReport retrieved item count: ${items.length}`
+    );
+
+    generateCSVAsFileOfAggregates(resp, items)
+  } catch (err: any) {
+    console.log("Error", err);
+    resp.status(400).send(err);
+  }
+});
+
 dailyWorkReportRoute.get("/csvAsFileOnlyOperatorAndPdfCount", async (req: Request, resp: Response) => {
   try {
     const items = await getListOfDailyWorkReport(req?.query);
@@ -218,6 +232,20 @@ dailyWorkReportRoute.get("/csvAsFileOnlyOperatorAndPdfCount", async (req: Reques
     );
 
     generateCsvAsFileOnlyOperatorAndPdfCount(resp, items)
+  } catch (err: any) {
+    console.log("Error", err);
+    resp.status(400).send(err);
+  }
+});
+
+dailyWorkReportRoute.get("/csvAsFileOnlyOperatorAndPdfCountAggregate", async (req: Request, resp: Response) => {
+  try {
+    const items = await getListOfDailyWorkReport(req?.query);
+    console.log(
+      `after getListOfDailyWorkReport retrieved item count: ${items.length}`
+    );
+
+    generateCsvAsFileOnlyOperatorAndPdfCountAggregate(resp, items)
   } catch (err: any) {
     console.log("Error", err);
     resp.status(400).send(err);
