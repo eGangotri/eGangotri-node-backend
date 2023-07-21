@@ -205,7 +205,7 @@ dailyWorkReportRoute.get("/csvAsFile", async (req: Request, resp: Response) => {
     if (req?.query?.aggregations === "true") {
       generateCSVAsFileOfAggregates(resp, items)
     }
-    else{
+    else {
       generateCSVAsFile(resp, items)
     }
   } catch (err: any) {

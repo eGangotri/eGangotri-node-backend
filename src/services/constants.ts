@@ -78,7 +78,15 @@ export const CSV_HEADER_API2_FOR_AGGREGATES =
       id: "numEntries",
       title: "Number of Entries",
     },
-    ...CSV_HEADER_API2_SUBSET
+    ...CSV_HEADER_API2_SUBSET,
+    {
+      id: "averageByPages",
+      title: "Num of Pages/Divided by Number of Entries",
+    },
+    {
+      id: "averageByPdfs",
+      title: "Num of Pdfs/Divided by Number of Entries",
+    }
   ]
 
 export const CSV_HEADER_API2 =
@@ -218,6 +226,10 @@ export const CSV_CAT_HEADER_FOR_AGGREGATES_API2 = [
   {
     id: "entryCount",
     title: "Entry Count",
+  },
+  {
+    id: "average",
+    title: "Entry Count/Num of Entries",
   }
 ]
 export const CSV_CAT_HEADER_FOR_OPERATOR_NAME_AND_ENTRY_COUNT_API2 = [
