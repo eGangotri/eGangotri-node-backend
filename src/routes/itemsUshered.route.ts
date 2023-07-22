@@ -119,7 +119,7 @@ const handleEachRow = (uploadCycleId: string, usheredRow: _.Dictionary<UploadCyc
     let dateTimeUploadStarted = new Date();
     for (const key in usheredRow) {
         const row = usheredRow[key]
-        console.log(`handleEachRow: ${key}: ${row}`);
+       // console.log(`handleEachRow: ${key}: ${row}`);
         archiveProfileAndCount.push({
             archiveProfile: key,
             count: row.length
