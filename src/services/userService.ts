@@ -22,7 +22,8 @@ export function setOptionsForUserListing(queryOptions: UserListOptionsType) {
     const _username: string[] = replaceQuotesAndSplit(queryOptions?.username);
 
     //This wil make the username case-independent
-    var regexArray = _username.map(pattern => new RegExp(pattern, 'i'));
+    var regexArray = _username.map(pattern => new RegExp(`^${pattern}$`, 'i'));
+
     console.log(` queryOptions?.username ${queryOptions?.username} : regexArray: ${regexArray}`)
     mongoOptionsFilter = { username: { $in: regexArray } };
     console.log(`mongoOptionsFilter ${JSON.stringify(mongoOptionsFilter)}`)

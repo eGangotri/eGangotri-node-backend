@@ -34,16 +34,16 @@ export function setOptionsForDailyWorkReportListing(queryOptions: DailyWorkRepor
 
   if (queryOptions?.operatorName) {
     const operatorName: string[] = replaceQuotesAndSplit(queryOptions.operatorName)
-    //This wil make the username case-independent
-    var regexArray = operatorName.map(pattern => new RegExp(pattern, 'i'));
+    //This wil make the operatorName case-independent
+    var regexArray = operatorName.map(pattern => new RegExp(`^${pattern}$`, 'i'));
     mongoOptionsFilter = { ...mongoOptionsFilter, operatorName: { $in: regexArray } };
   }
 
 
   if (queryOptions?.centers) {
     const centers: string[] = replaceQuotesAndSplit(queryOptions.centers)
-    //This wil make the username case-independent
-    var regexArray = centers.map(pattern => new RegExp(pattern, 'i'));
+    //This wil make the centers case-independent
+    var regexArray = centers.map(pattern => new RegExp(`^${pattern}$`, 'i'));
     mongoOptionsFilter = { ...mongoOptionsFilter, center: { $in: regexArray } };
   }
 

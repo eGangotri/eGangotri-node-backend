@@ -32,8 +32,8 @@ export function setOptionsForDailyCatWorkReportListing(queryOptions: DailyCatWor
 
   if (queryOptions?.operatorName) {
     const operatorName: string[] = replaceQuotesAndSplit(queryOptions.operatorName)
-    //This wil make the username case-independent
-    var regexArray = operatorName.map(pattern => new RegExp(pattern, 'i'));
+    //This wil make the operatorName case-independent
+    var regexArray = operatorName.map(pattern => new RegExp(`^${pattern}$`, 'i'));
     mongoOptionsFilter = { ...mongoOptionsFilter, operatorName: { $in: regexArray } };
   }
 
@@ -41,7 +41,7 @@ export function setOptionsForDailyCatWorkReportListing(queryOptions: DailyCatWor
   if (queryOptions?.catalogProfile) {
     const centers: string[] = replaceQuotesAndSplit(queryOptions.catalogProfile)
     //This wil make the username case-independent
-    var regexArray = centers.map(pattern => new RegExp(pattern, 'i'));
+    var regexArray = centers.map(pattern => new RegExp(`^${pattern}$`, 'i'));
     mongoOptionsFilter = { ...mongoOptionsFilter, centcatalogProfileer: { $in: regexArray } };
   }
 
