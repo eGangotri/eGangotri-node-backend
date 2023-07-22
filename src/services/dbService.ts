@@ -62,24 +62,24 @@ export function setOptionsForItemListing(queryOptions: ItemsListOptionsType) {
   //   mongoOptionsFilter = { createdAt: { $gte: subDays(new Date(), DEFAULT_DAYS_BEFORE_CURRENT_FOR_SEARCH) } };
   // }
 
-  console.log(`ids ${JSON.stringify(queryOptions)}`)
+  console.log(`queryOptions ${JSON.stringify(queryOptions)}`)
 
   if(queryOptions?.ids){
     const ids:string[] = queryOptions?.ids.split(",")
     console.log(`ids ${ids}`)
-    mongoOptionsFilter = {_id : { $in: ids }}
+    mongoOptionsFilter = { ...mongoOptionsFilter, id : { $in: ids } };
   }
 
   if (queryOptions?.archiveProfile){
     const archiveProfiles:string[] = queryOptions?.archiveProfile.split(",")
     console.log(`archiveProfiles ${archiveProfiles}`)
-    mongoOptionsFilter = {archiveProfile : { $in: archiveProfiles }}
+    mongoOptionsFilter = { ...mongoOptionsFilter, archiveProfile : { $in: archiveProfiles }};
   }
 
   if (queryOptions?.uploadCycleId){
     const uploadCycleIds:string[] = queryOptions?.uploadCycleId.split(",")
     console.log(`uploadCycleIds ${uploadCycleIds}`)
-    mongoOptionsFilter = {uploadCycleId : { $in: uploadCycleIds }}
+    mongoOptionsFilter = { ...mongoOptionsFilter, uploadCycleId : { $in: uploadCycleIds }};
   }
   
   const limit: number = getLimit(queryOptions?.limit);

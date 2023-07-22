@@ -85,7 +85,7 @@ itemsUsheredRoute.get('/list', async (req: Request, resp: Response) => {
 itemsUsheredRoute.get('/listForUploadCycle', async (req: Request, resp: Response) => {
     try {
         const items = await getListOfItemsUshered(req?.query);
-        //console.log(`after getListOfItemsUshered retirieved item count: ${JSON.stringify(items)}`)
+        console.log(`req?.query: ${JSON.stringify(req?.query)}`)
 
         const groupedItems = _.groupBy(items, function (item: any) {
             return item.uploadCycleId;
