@@ -65,3 +65,19 @@ console.log('Longest file name:', longestFileName, longestFileName.length);
 const highestSize = findHighestFileSize(folderPath);
 console.log('Highest file size:', sizeInfo(highestSize));
 */
+
+export async function checkUrlValidity(url: string): Promise<boolean> {
+  try {
+    const response = await fetch(url, { method: 'HEAD' });
+
+    // Check if the response status code indicates success (2xx) or redirection (3xx)
+    if (response.ok || (response.status >= 300 && response.status < 400)) {
+      return true; // The URL is valid
+    } else {
+      return false; // The URL is invalid
+    }
+  } catch (error) {
+    return false; // An error occurred, so the URL is invalid
+  }
+}
+

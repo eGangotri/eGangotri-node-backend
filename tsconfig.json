@@ -5,6 +5,7 @@
     "allowSyntheticDefaultImports": true,
     "sourceMap":  true, 
     "baseUrl":"./src",
+    "lib": ["DOM"],
   },
   "include": ["src/*.ts", "*.d.ts"],
   "exclude": ["node_modules", "**/*.spec.ts", "**/*.js"],

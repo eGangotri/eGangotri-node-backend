@@ -5,6 +5,7 @@ import { getListOfItemsUshered } from '../services/itemsUsheredService';
 import * as _ from 'lodash';
 import { ArchiveProfileAndCount, UploadCycleTableData, UploadCycleTableDataDictionary, UploadCycleTableDataResponse } from '../mirror/types';
 import { validateSuperAdminUserFromRequest } from '../services/userService';
+import { checkUrlValidity } from '../utils/utils';
 
 /**
  * INSOMNIA POST Request Sample
@@ -57,9 +58,15 @@ itemsUsheredRoute.post('/verifyUploadStatus', async (req: any, resp: any) => {
     try {
         console.log("req.body:verifyUploadStatus")
         const items = req.body;
-        console.log(`verifiableUploads ${items.verifiableUploads}`);
-        const itemsUshered = await getListOfItemsUshered({ ids: items?.verifiableUploads })
-        resp.status(200).send(`We received :${itemsUshered}`);
+        const uploadsForVerification:string[] = items.uploadsForVerification
+        console.log(`verifiableUploads ${uploadsForVerification}`);
+
+        const promisesArray = uploadsForVerification.map((url:string) => checkUrlValidity(url));
+
+        // Use Promise.all to wait for all the async calls to complete
+        const results = await Promise.all(promisesArray);
+        console.log(`url validations ${JSON.stringify(results)}`)
+        resp.status(200).send({results});
     }
     catch (err: any) {
         console.log('Error', err);
@@ -91,7 +98,7 @@ itemsUsheredRoute.get('/listForUploadCycle', async (req: Request, resp: Response
             return item.uploadCycleId;
         });
 
-        const uploadCycleIdAndData:UploadCycleTableDataDictionary[] = []
+        const uploadCycleIdAndData: UploadCycleTableDataDictionary[] = []
         for (const key in groupedItems) {
             const usheredRow = groupedItems[key]
             const groubpedByArchiveProfiles = _.groupBy(usheredRow, function (item: any) {
@@ -119,7 +126,7 @@ const handleEachRow = (uploadCycleId: string, usheredRow: _.Dictionary<UploadCyc
     let dateTimeUploadStarted = new Date();
     for (const key in usheredRow) {
         const row = usheredRow[key]
-       // console.log(`handleEachRow: ${key}: ${row}`);
+        // console.log(`handleEachRow: ${key}: ${row}`);
         archiveProfileAndCount.push({
             archiveProfile: key,
             count: row.length
