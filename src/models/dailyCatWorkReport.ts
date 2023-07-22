@@ -2,7 +2,6 @@ import * as mongoose from "mongoose";
 
 const schema = new mongoose.Schema(
   {
-    title: { type: String, required: true },
     operatorName: { type: String, required: true },
     catalogProfile: { type: String, required: true },
     entryFrom: { type: Number, required: true },
