@@ -39,17 +39,21 @@ async function createPartialPdf(inputPath: string, outputPath: string, pdfsToBeP
     return pdfPageCount
 }
 
-export const loopForExtraction = async (rootFolder: string, outputRoot: string, loopIndex: string) => {
+export const loopFolderForExtraction = async (rootFolder: string, outputRoot: string, loopIndex: string) => {
 
     const allPdfs = getAllPDFFiles(rootFolder)
     const pdfsToBeProcessedCount = allPdfs.length;
     const outputPath = `${outputRoot}\\${path.parse(rootFolder).name} (${pdfsToBeProcessedCount})`;
-
+    console.log(`rootFolder ${rootFolder} ${outputRoot} ${loopIndex}`);
     createFolderIfNotExists(outputPath)
     for (const [index, pdf] of allPdfs.entries()) {
         const _path = path.parse(pdf);
-        const subDir = _path.dir.replace(rootFolder + "\\", '')
+        const subDir = _path.dir.replace(rootFolder, '')
         let _subFolder = `${outputPath}\\${subDir}`
+        console.log(`_subFolder ${_subFolder}
+        _path ${_path.name} ${_path.dir}
+         ${outputPath} ${subDir}`);
+
         createFolderIfNotExists(_subFolder)
         try {
             await createPartialPdf(pdf, _subFolder, pdfsToBeProcessedCount, loopIndex);
@@ -83,13 +87,13 @@ const padNumbersWithZeros = (num: number) => {
 }
 let counter = 0;
 
-const loopFolders = async () => {
+const loopFolders = async (_srcFoldersWithPath: string[], destRootFolder: string) => {
     try {
-        for (const [index, folder] of _foldersWithPath.entries()) {
+        for (const [index, folder] of _srcFoldersWithPath.entries()) {
             console.log(`Started processing ${folder}`)
             PDF_PROCESSING_COUNTER = 0;
             counter = 0
-            await loopForExtraction(folder, destRootFolder, `${index + 1}/${_foldersWithPath.length}}`);
+            await loopFolderForExtraction(folder, destRootFolder, `${index + 1}/${_srcFoldersWithPath.length}}`);
         }
         console.log(`FINAL_REPORT(extractPages): ${FINAL_REPORT.map(x => x + "\n")}`)
     }
@@ -97,11 +101,12 @@ const loopFolders = async () => {
         console.log(err)
     }
 }
-const srcRootFolder = 'D:\\eG-tr1-30';
-//const srcRootFolder = 'E:\\MASTER_BACKUP';
+// const srcRootFolder = 'D:\\eG-tr1-30';
+// //const srcRootFolder = 'E:\\MASTER_BACKUP';
 const destRootFolder = "E:\\_catalogWork\\_reducedPdfs";
-const _folders = ["Treasures 2", "Treasures-3", "Treasures4", "Treasures5",
- "Treasures6", "Treasures7", "Treasures8", "Treasures9"]
-const _foldersWithPath = _folders.map(x => `${srcRootFolder}\\${x}`)
+// const _folders = ["Treasures 2", "Treasures-3", "Treasures4", "Treasures5",
+//  "Treasures6", "Treasures7", "Treasures8", "Treasures9"]
+// const _srcFoldersWithPath = _folders.map(x => `${srcRootFolder}\\${x}`)
 
-loopFolders()
+const _srcFoldersWithPath = ["E:\\_catalogWork\\test"]
+loopFolders(_srcFoldersWithPath, destRootFolder)

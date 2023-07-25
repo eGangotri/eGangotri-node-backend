@@ -33,7 +33,7 @@ export function setOptionsForUserListing(queryOptions: UserListOptionsType) {
     const _pwd: string[] = replaceQuotesAndSplit(queryOptions?.password);
     mongoOptionsFilter = { ...mongoOptionsFilter, password: { $in: _pwd } };
   }
-  
+
   if (queryOptions?.role) {
     const _role: string[] = replaceQuotesAndSplit(queryOptions?.role);
     mongoOptionsFilter = { ...mongoOptionsFilter, role: { $in: _role } };
@@ -51,8 +51,8 @@ export async function getUsers(queryOptions: UserListOptionsType) {
   return items;
 }
 
-export const userExists = async (username:string) => {
-  const users = await getUsers({ username:username })
+export const userExists = async (username: string) => {
+  const users = await getUsers({ username: username })
   console.log(`${users[0]} userExists`)
   return users?.length > 0;
 }
@@ -93,7 +93,7 @@ export const validateSuperAdminUserFromRequest = async (req: Request) => {
   if (users?.length === 0) {
     return [false, `Login failed for User "${username}"`];
   }
-  else if (users[0].role !== SUPERADMIN_ROLE){
+  else if (users[0].role !== SUPERADMIN_ROLE) {
     return [false, `Username "${username}" doesnt have relevant privileges`];
   }
   else {

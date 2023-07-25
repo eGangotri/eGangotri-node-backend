@@ -27,14 +27,14 @@ const drive = google.drive({ version: 'v3', auth: oauth2Client });
 // const folderId = '1pxxhV2BkyTZgq34InhTuwDh-szU0jvY4';
 // listFolderContentsAndGenerateCSV(folderId, drive, 'Treasures-59');
 
-export const EXPORT_DEST_FOLDER = `E:\\_catalogWork\\_collation\\_catExcels`;
+// export const EXPORT_DEST_FOLDER = `E:\\_catalogWork\\_collation\\_catExcels`;
 
-if (!fs.existsSync(EXPORT_DEST_FOLDER)) {
-  fs.mkdirSync(EXPORT_DEST_FOLDER);
-}
-const driveLink = "https://drive.google.com/drive/folders/1G6A8zbbiLHFlqgNnPosq1q6JbOoI2dI-?usp=sharing"
+// if (!fs.existsSync(EXPORT_DEST_FOLDER)) {
+//   fs.mkdirSync(EXPORT_DEST_FOLDER);
+// }
+// const driveLink = "https://drive.google.com/drive/folders/1G6A8zbbiLHFlqgNnPosq1q6JbOoI2dI-?usp=sharing"
+// listFolderContentsAndGenerateCSVAndExcel(driveLink, drive, 'Treasures');
+
+export const EXPORT_DEST_FOLDER = `E:\\_catalogWork\\_collation\\_catReducedPdfExcels`;
+const driveLink = "https://drive.google.com/drive/folders/1f1tJogxJJCpzo_oXrgMRNuXN5v9H58Hd?usp=drive_link"
 listFolderContentsAndGenerateCSVAndExcel(driveLink, drive, 'Treasures');
-
-// export const EXPORT_DEST_FOLDER = `E:\\_catalogWork\\_collation\\_catReducedPdfExcels`;
-// const driveLink = "https://drive.google.com/drive/u/0/folders/1xJQ15hZhd1v0gTL0RYN_Cww9R7Uakcwa"
-// listFolderContentsAndGenerateCSVAndExcel(driveLink, drive, 'test');

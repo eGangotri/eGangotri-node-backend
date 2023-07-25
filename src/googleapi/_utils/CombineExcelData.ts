@@ -1,9 +1,8 @@
-import * as XLSX from "xlsx";
 import { excelToJson, jsonToExcel } from "./ExcelUtils";
 import { ExcelHeaders } from "../types";
-import { MAX_FILE_NAME_LENGTH, emptyExcelHeaderObj, linkToFileLocation, linkToTruncatedFileLocation, numPages, titleInGoogleDrive } from "./constants";
+import { emptyExcelHeaderObj, linkToFileLocation, linkToTruncatedFileLocation, numPages, titleInGoogleDrive } from "./constants";
 import * as fs from 'fs';
-import { DD_MM_YYYY_HH_MMFORMAT, findNonMatchingElements } from "../../utils/utils";
+import { DD_MM_YYYY_HH_MMFORMAT } from "../../utils/utils";
 import moment from "moment";
 
 const _root = "E:\\_catalogWork\\_collation";
@@ -24,7 +23,7 @@ if (!fs.existsSync(combinedExcelPath)) {
 }
 const combinedExcelFileName = `${combinedExcelPath}\\${treasureFolder}-Catalog-${timeComponent}`;
 
-const foundItems:string[] = [];
+const foundItems: string[] = [];
 const combineExcels = () => {
     const mainExcelData: ExcelHeaders[] = excelToJson(mainExcelFileName);
     const secondaryExcelData: ExcelHeaders[] = excelToJson(secondaryExcelFileName);
@@ -32,22 +31,24 @@ const combineExcels = () => {
     const secondaryExcelDataAdjusted: ExcelHeaders[] = fillPageCount(secondaryExcelData);
     if (mainExcelData.length != secondaryExcelData.length) {
         console.log(`Cant proceed Data Length in Main and Secondary (${mainExcelData.length}!=${secondaryExcelData.length})dont match`);
+        combineExcelJsons(mainExcelData, secondaryExcelDataAdjusted)
+        checkErroneous(secondaryExcelDataAdjusted, mainExcelData);
         process.exit(0);
     }
-    const combinedExcelJsons = combineExcelJsons(mainExcelData, secondaryExcelDataAdjusted)
-    checkErroneous(secondaryExcelDataAdjusted,mainExcelData)
 
     const fileNameWithLength = `${combinedExcelFileName}-${mainExcelData.length}.xlsx`;
 
+    const combinedExcelJsons = combineExcelJsons(mainExcelData, secondaryExcelDataAdjusted)
+    checkErroneous(secondaryExcelDataAdjusted, mainExcelData)
     jsonToExcel(combinedExcelJsons, fileNameWithLength);
 }
 
 const checkErroneous = (mainExcelData: ExcelHeaders[], secondaryExcelDataAdjusted: ExcelHeaders[]) => {
-    const _erroneous = secondaryExcelDataAdjusted.filter(x=> !foundItems.includes(x[titleInGoogleDrive]));
-    console.log("errorneous items in Main",JSON.stringify(_erroneous.map(x=> `${x[titleInGoogleDrive]} ${x[numPages]}`)));
-    const secondary = secondaryExcelDataAdjusted.map(x=>x[titleInGoogleDrive]);
-    const main  = new Set<string>(mainExcelData.map(x=>x[titleInGoogleDrive]));
-   // const errorneous = findNonMatchingElements(main,secondary)
+    const _erroneous = secondaryExcelDataAdjusted.filter(x => !foundItems.includes(x[titleInGoogleDrive]));
+    console.log("errorneous items in Main", JSON.stringify(_erroneous.map(x => `${x[titleInGoogleDrive]}`)));
+    const secondary = secondaryExcelDataAdjusted.map(x => x[titleInGoogleDrive]);
+    const main = new Set<string>(mainExcelData.map(x => x[titleInGoogleDrive]));
+    // const errorneous = findNonMatchingElements(main,secondary)
     console.log(`errorneous ${main.size} ${secondary.length} `)
 }
 
