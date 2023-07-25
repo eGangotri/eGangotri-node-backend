@@ -124,12 +124,17 @@ export const generateCatCSVAsFileOfAggregates = async (res: Response, data: mong
       header: CSV_CAT_HEADER_FOR_AGGREGATES_API2
     });
 
-    const grouped_data = _.groupBy(data, 'operatorName')
+    const grouped_data = _.groupBy(data, (doc) => {
+      return _.capitalize(doc.get("operatorName").toString().toLowerCase())
+    });
+
+    console.log(`grouped_data ${JSON.stringify(grouped_data)}`);
+
     const refinedData: Array<any> = []
     for (let [key, value] of Object.entries(grouped_data)) {
       const numOfEntries = value.length;
       const entryCountSum = _.sum(value.map(x => parseInt(x.get("entryCount")) || 0));
-      const average = Math.round(entryCountSum/numOfEntries)
+      const average = Math.round(entryCountSum / numOfEntries)
       const _row = {
         numEntries: numOfEntries,
         operatorName: key,
