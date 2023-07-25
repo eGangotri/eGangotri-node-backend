@@ -129,7 +129,10 @@ export const generateCSVAsFileOfAggregates = async (res: Response, data: mongoos
       header: CSV_HEADER_API2_FOR_AGGREGATES
     });
 
-    const grouped_data = _.groupBy(data, 'operatorName')
+    const grouped_data = _.groupBy(data, (doc) => {
+      return _.capitalize(doc.get("operatorName").toString().toLowerCase())
+    });
+
     const refinedData: Array<any> = []
     for (let [key, value] of Object.entries(grouped_data)) {
       const numOfEntries = value.length;
@@ -184,8 +187,8 @@ export const generateCSVAsFileOfAggregates = async (res: Response, data: mongoos
       totalSize: Mirror.sizeInfo(totalSizeRawSum),
       totalSizeRaw: totalSizeRawSum,
       workFromHome: "",
-      averageByPages:averageByPagesSum,
-      averageByPdfs:averageByPdfsSum
+      averageByPages: averageByPagesSum,
+      averageByPdfs: averageByPdfsSum
     }]);
 
     // Set the response headers to indicate that the response is a CSV file
@@ -233,7 +236,9 @@ export const generateCsvAsFileOnlyOperatorAndPdfCountAggregate = async (res: Res
       header: CSV_HEADER_THREE_FIELDS_ONLYAPI2
     });
 
-    const grouped_data = _.groupBy(data, 'operatorName')
+    const grouped_data = _.groupBy(data, (doc) => {
+      return _.capitalize(doc.get("operatorName").toString().toLowerCase())
+    });
     const refinedData: Array<any> = []
 
     for (let [key, value] of Object.entries(grouped_data)) {
