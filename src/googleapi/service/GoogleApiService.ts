@@ -10,12 +10,12 @@ import { createFileNameWithPathForExport, extractFolderId, getFolderName, getFol
 let ROW_COUNTER = 0;
 let ROOT_FOLDER_NAME = ""
 
-export async function listFolderContentsAndGenerateCSVAndExcel(_folderId: string, drive: drive_v3.Drive, umbrellaFolder: string = "") {
-    const folderId = extractFolderId(_folderId)
+export async function listFolderContentsAndGenerateCSVAndExcel(_folderIdOrUrl: string, drive: drive_v3.Drive, umbrellaFolder: string = "") {
+    const folderId = extractFolderId(_folderIdOrUrl)
     const _umbrellaFolder = umbrellaFolder?.length > 0 ? umbrellaFolder : await getFolderName(folderId, drive) || "";
     ROOT_FOLDER_NAME = await getFolderName(folderId, drive) || "";
     console.log(`drive api folder extracTion process initiated: \
-    from (${_umbrellaFolder}) ${_folderId} destined to ${EXPORT_DEST_FOLDER}\n`)
+    from (${_umbrellaFolder}) ${_folderIdOrUrl} destined to ${EXPORT_DEST_FOLDER}\n`)
 
     const googleDrivePdfData: Array<GoogleApiData> = []
     let idFolderNameMap = new Map<string, string>();
@@ -86,7 +86,7 @@ export const addFileMetadataToArray = (file: drive_v3.Schema$File, folderId:stri
             thumbnailLink: thumbnailLink,
         });
         
-    console.log(`(${ROW_COUNTER}_. ${fileName} "${fileSize}" "${createdTime}" "${_parents}"
+    console.log(`(${ROW_COUNTER}). ${fileName} "${fileSize}" "${createdTime}" "${_parents}"
     \tThumbnail: ${thumbnailLink}
     \Weblink: ${webViewLink} `);
     }

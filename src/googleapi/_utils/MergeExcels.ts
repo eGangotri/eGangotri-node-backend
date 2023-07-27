@@ -16,7 +16,7 @@ import {
 
 const mergeExcelJsons = (mainExcelData: ExcelHeaders[], secondaryExcelDataAdjusted: ExcelHeaders[]) => {
   const combinedExcelJsons = mainExcelData.map(x => findCorrespondingExcelHeader(x, secondaryExcelDataAdjusted));
-  console.log(`Combining JSON Data: `)
+  console.log(`Merging JSON Data: `)
   return combinedExcelJsons
 }
 
@@ -41,7 +41,7 @@ const findCorrespondingExcelHeader = (firstExcelRow: ExcelHeaders, secondaryExce
       combinedObject[yearOfPublication] = secondExcelRow[yearOfPublication] || "*"
       combinedObject[isbn] = secondExcelRow[isbn] || "*"
       combinedObject[remarks] = secondExcelRow[remarks] || "*"
-    //  console.log(`folderidInGoogleDrivePrimary ${folderidInGoogleDriveSecondary} ${MATCH_COUNTER} ${secondExcelRow[titleInEnglish]}`)
+      //  console.log(`folderidInGoogleDrivePrimary ${folderidInGoogleDriveSecondary} ${MATCH_COUNTER} ${secondExcelRow[titleInEnglish]}`)
       return secondExcelRow;
     }
   })
@@ -54,32 +54,45 @@ const mergeExcels = (mainExcelFileName: string, secondaryExcelFileName: string) 
   const secondaryExcelData: ExcelHeaders[] = excelToJson(secondaryExcelFileName, "Published Books");
 
   SECONDARY_EXCEL_GOOGLE_FOLDER_IDS_LIST = secondaryExcelData.map(y => getGoogleDriveId(y[linkToFileLocation]))?.filter(x => !_.isEmpty(x) && x?.length > 0);
+
+  const mainExcelNonEmptyRowCount = mainExcelData.filter(x => !_.isEmpty(x[linkToFileLocation])).length
+  console.log(`mainExcelDatas ${mainExcelNonEmptyRowCount}`);
   console.log(`${SECONDARY_EXCEL_GOOGLE_FOLDER_IDS_LIST.length} will be injected from secondary file to the merged file`);
-  console.log(`Merge Excel for ${mainExcelFileName} (${mainExcelData.length}) ${secondaryExcelFileName}(${secondaryExcelData.length}) started `);
+  console.log(`Merge Excel for ${mainExcelFileName}(${mainExcelNonEmptyRowCount})
+              to ${secondaryExcelFileName}(${secondaryExcelData.length}) started `);
   const _mergedExcelJsons = mergeExcelJsons(mainExcelData, secondaryExcelData);
 
-  if (secondaryExcelData.length !== MATCH_COUNTER) {
-    console.log(`mainExcelDatas ${ mainExcelData.length} ( includes 2 empty rows)`);
-    console.log(`Matched Items ${ MATCH_COUNTER}/${SECONDARY_EXCEL_GOOGLE_FOLDER_IDS_LIST.length}`);
-
-    const mergedExcelJsonFolderIds = _mergedExcelJsons.map(x => getGoogleDriveId(x[linkToFileLocation])).filter(y=>!_.isEmpty(y));
-    console.log(`mergedExcelJsonFolderIds ${mergedExcelJsonFolderIds.length}`);
- 
-    const _matchedOnes = mergedExcelJsonFolderIds.filter(x => SECONDARY_EXCEL_GOOGLE_FOLDER_IDS_LIST.includes(x));
-    let _missedOnes = _.difference(SECONDARY_EXCEL_GOOGLE_FOLDER_IDS_LIST, _matchedOnes);
-    let _missedOnes2 = _.difference(_matchedOnes, SECONDARY_EXCEL_GOOGLE_FOLDER_IDS_LIST);
-
-    console.log(`_matchedOnes 
-        ${_matchedOnes.length}
-        missed out ${SECONDARY_EXCEL_GOOGLE_FOLDER_IDS_LIST.length - _matchedOnes.length}        
-        ${_missedOnes.length} ${_missedOnes2.length}
-        Missed Ones: ${JSON.stringify(_missedOnes)} ${JSON.stringify(_missedOnes2)}
-        `);
+  if (SECONDARY_EXCEL_GOOGLE_FOLDER_IDS_LIST.length !== MATCH_COUNTER) {
+    findErroneous(_mergedExcelJsons)
     //process.exit(0);
   }
 
-  const fileNameWithLength = createMergedExcelFilePathName(mainExcelData.length);
+  const fileNameWithLength = createMergedExcelFilePathName(mainExcelNonEmptyRowCount);
   jsonToExcel(_mergedExcelJsons, fileNameWithLength);
+}
+
+const findErroneous = (_mergedExcelJsons: ExcelHeaders[]) => {
+  console.log(`Mismatch found. identifying .....\nMatched Items ${MATCH_COUNTER}/${SECONDARY_EXCEL_GOOGLE_FOLDER_IDS_LIST.length}`);
+
+  const mergedExcelJsonFolderIds = _mergedExcelJsons.map(x => getGoogleDriveId(x[linkToFileLocation])).filter(y => !_.isEmpty(y));
+  console.log(`mergedExcelJsonFolderIds ${mergedExcelJsonFolderIds.length}`);
+
+  const _matchedOnes = mergedExcelJsonFolderIds.filter(x => SECONDARY_EXCEL_GOOGLE_FOLDER_IDS_LIST.includes(x));
+  let _missedOnes = _.difference(SECONDARY_EXCEL_GOOGLE_FOLDER_IDS_LIST, _matchedOnes);
+
+
+  console.log(`_matchedOnes : ${_matchedOnes.length}
+      missed out ${(new Set<string>(SECONDARY_EXCEL_GOOGLE_FOLDER_IDS_LIST)).size - _matchedOnes.length}        
+      Missed Ones: ${JSON.stringify(_missedOnes)}  ${_missedOnes.length} 
+      `);
+
+  const secondListCount = SECONDARY_EXCEL_GOOGLE_FOLDER_IDS_LIST.length
+  const secondListRepeatsRemovedCount = (new Set<string>(SECONDARY_EXCEL_GOOGLE_FOLDER_IDS_LIST)).size
+  if (secondListRepeatsRemovedCount === _matchedOnes.length) {
+    console.log(`count appears to be different but there are two repeats in SecondaryExcel 
+      ${secondListCount} - ${secondListRepeatsRemovedCount} = ${_matchedOnes.length}
+      `)
+  }
 }
 
 const createMergedExcelFilePathName = (mainExcelDataLength: number) => {
@@ -95,7 +108,7 @@ const createMergedExcelFilePathName = (mainExcelDataLength: number) => {
 let MATCH_COUNTER = 0
 let SECONDARY_EXCEL_GOOGLE_FOLDER_IDS_LIST: string[] = []
 const _root = "E:\\_catalogWork\\_collation";
-const treasureFolder = "Treasures"
+const treasureFolder = "Treasures-2"
 
 const mainExcelPath = `${_root}\\_catCombinedExcels\\${treasureFolder}`
 const _mainExcelFileName = `${mainExcelPath}\\${fs.readdirSync(mainExcelPath)[0]}`;
