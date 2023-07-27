@@ -149,3 +149,12 @@ export const excelToJson = (excelName: string, sheetName:string = SHEET_NAME) =>
   console.log(`Converted ${excelName} to Json with Data Length ${jsonData.length}`);
   return jsonData
 }
+
+    
+export function getGoogleDriveId(link: string): string {
+  // Regular expression to match Google Drive link ID
+  const regex = /\/d\/(.*?)\//;
+  const match = link.match(regex);
+  return match ? match[1] : "";
+}
+

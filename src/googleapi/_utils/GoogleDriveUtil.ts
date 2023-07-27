@@ -4,6 +4,7 @@ import moment from 'moment';
 import { DD_MM_YYYY_HH_MMFORMAT } from '../../utils/utils';
 import { EXPORT_DEST_FOLDER } from '../GoogleDriveApiReadAndExport';
 import * as path from "path";
+import { getGoogleDriveId } from './ExcelUtils';
 
 export function createFileNameWithPathForExport(folderId: string, _umbrellaFolder: string) {
     const _csvDumpFolder = `${EXPORT_DEST_FOLDER}\\${_umbrellaFolder}`;
@@ -34,12 +35,7 @@ const regex = new RegExp(`(?<=folders\/)[^? \n\r\t]*`);
 
 export function extractFolderId(folderIdOrUrl: string) {
     if (folderIdOrUrl.startsWith("http")) {
-        const match = regex.exec(folderIdOrUrl);
-        if (match) {
-            return match[0];
-        } else {
-            return "";
-        }
+        getGoogleDriveId(folderIdOrUrl)
     }
     return folderIdOrUrl
 }

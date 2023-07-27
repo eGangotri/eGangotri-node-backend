@@ -2,6 +2,7 @@ import { excelToJson, jsonToExcel } from "./ExcelUtils";
 import { ExcelHeaders } from "../types";
 import { emptyExcelHeaderObj, linkToFileLocation, linkToTruncatedFileLocation, numPages, titleInGoogleDrive } from "./constants";
 import * as fs from 'fs';
+import * as _ from 'lodash';
 import { DD_MM_YYYY_HH_MMFORMAT } from "../../utils/utils";
 import moment from "moment";
 
@@ -32,24 +33,22 @@ const combineExcels = () => {
     if (mainExcelData.length != secondaryExcelData.length) {
         console.log(`Cant proceed Data Length in Main and Secondary (${mainExcelData.length}!=${secondaryExcelData.length})dont match`);
         combineExcelJsons(mainExcelData, secondaryExcelDataAdjusted)
-        checkErroneous(secondaryExcelDataAdjusted, mainExcelData);
+        checkErroneous(mainExcelData);
         process.exit(0);
     }
 
-    const fileNameWithLength = `${combinedExcelFileName}-${mainExcelData.length}.xlsx`;
 
     const combinedExcelJsons = combineExcelJsons(mainExcelData, secondaryExcelDataAdjusted)
-    checkErroneous(secondaryExcelDataAdjusted, mainExcelData)
+    const getTrueLength = combinedExcelJsons.filter(x => !_.isEmpty(x[linkToFileLocation]))?.length || 0;
+
+    const fileNameWithLength = `${combinedExcelFileName}-${getTrueLength}.xlsx`;
+    checkErroneous(mainExcelData)
     jsonToExcel(combinedExcelJsons, fileNameWithLength);
 }
 
-const checkErroneous = (mainExcelData: ExcelHeaders[], secondaryExcelDataAdjusted: ExcelHeaders[]) => {
-    const _erroneous = secondaryExcelDataAdjusted.filter(x => !foundItems.includes(x[titleInGoogleDrive]));
+const checkErroneous = (_excelData: ExcelHeaders[]) => {
+    const _erroneous = _excelData.filter(x => !foundItems.includes(x[titleInGoogleDrive]));
     console.log("errorneous items in Main", JSON.stringify(_erroneous.map(x => `${x[titleInGoogleDrive]}`)));
-    const secondary = secondaryExcelDataAdjusted.map(x => x[titleInGoogleDrive]);
-    const main = new Set<string>(mainExcelData.map(x => x[titleInGoogleDrive]));
-    // const errorneous = findNonMatchingElements(main,secondary)
-    console.log(`errorneous ${main.size} ${secondary.length} `)
 }
 
 const combineExcelJsons = (mainExcelData: ExcelHeaders[], secondaryExcelDataAdjusted: ExcelHeaders[]) => {
