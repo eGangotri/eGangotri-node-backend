@@ -146,7 +146,7 @@ export const excelToJson = (excelName: string, sheetName:string = SHEET_NAME) =>
   const workbook = XLSX.readFile(excelName);
   const sheet = workbook.Sheets[sheetName];
   const jsonData: ExcelHeaders[] = XLSX.utils.sheet_to_json(sheet);
-  console.log(`Converted ${excelName} to Json with Data Length ${jsonData.length}`);
+  console.log(`Converted ${excelName} to Json with Data Length ${jsonData.length}(figure may include empty rows)`);
   return jsonData
 }
 
@@ -155,6 +155,7 @@ export function getGoogleDriveId(link: string): string {
   // Regular expression to match Google Drive link ID
   const regex = /\/d\/(.*?)\//;
   const match = link.match(regex);
+  console.log(`${link}\nmatch ? match[1] : "" ->${match ? match[1] : ""}<-`)
   return match ? match[1] : "";
 }
 

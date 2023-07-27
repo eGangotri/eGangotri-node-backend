@@ -35,7 +35,12 @@ const regex = new RegExp(`(?<=folders\/)[^? \n\r\t]*`);
 
 export function extractFolderId(folderIdOrUrl: string) {
     if (folderIdOrUrl.startsWith("http")) {
-        getGoogleDriveId(folderIdOrUrl)
+        const match = regex.exec(folderIdOrUrl);
+        if (match) {
+            return match[0];
+        } else {
+            return "";
+        }
     }
     return folderIdOrUrl
 }
