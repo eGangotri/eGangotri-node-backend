@@ -3,9 +3,10 @@ import { ItemsUshered } from '../models/itemsUshered';
 import { Request, Response } from 'express';
 import { getListOfItemsUshered } from '../services/itemsUsheredService';
 import * as _ from 'lodash';
-import { ArchiveProfileAndCount, UploadCycleTableData, UploadCycleTableDataDictionary, UploadCycleTableDataResponse } from '../mirror/types';
+import { ArchiveProfileAndCount, SelectedUploadItem, UploadCycleTableData, UploadCycleTableDataDictionary, UploadCycleTableDataResponse } from '../mirror/types';
 import { validateSuperAdminUserFromRequest } from '../services/userService';
 import { checkUrlValidity } from '../utils/utils';
+import { createArchiveLink } from '../mirror';
 
 /**
  * INSOMNIA POST Request Sample
@@ -58,15 +59,16 @@ itemsUsheredRoute.post('/verifyUploadStatus', async (req: any, resp: any) => {
     try {
         console.log("req.body:verifyUploadStatus")
         const items = req.body;
-        const uploadsForVerification:string[] = items.uploadsForVerification
+        const uploadsForVerification: SelectedUploadItem[] = items.uploadsForVerification
         console.log(`verifiableUploads ${uploadsForVerification}`);
 
-        const promisesArray = uploadsForVerification.map((url:string) => checkUrlValidity(url));
+        const promisesArray = uploadsForVerification.map((forVerification: SelectedUploadItem) =>
+            checkUrlValidity(forVerification));
 
         // Use Promise.all to wait for all the async calls to complete
         const results = await Promise.all(promisesArray);
         console.log(`url validations ${JSON.stringify(results)}`)
-        resp.status(200).send({results});
+        resp.status(200).send({ results });
     }
     catch (err: any) {
         console.log('Error', err);

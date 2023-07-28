@@ -17,3 +17,9 @@ export interface UploadCycleTableDataDictionary {
 export interface UploadCycleTableDataResponse {
     response: UploadCycleTableDataDictionary[]
 }
+
+export interface SelectedUploadItem {
+    id:number;
+    archiveId:string;
+    isError?: boolean;
+}
