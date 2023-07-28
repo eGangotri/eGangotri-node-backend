@@ -1,5 +1,7 @@
 import fs from 'fs';
-import path from 'path';import { sizeInfo } from '../mirror/FrontEndBackendCommonCode';
+import path from 'path'; import { sizeInfo } from '../mirror/FrontEndBackendCommonCode';
+import { SelectedUploadItem } from '../mirror/types';
+import { createArchiveLink } from '../mirror';
 export const Utils = {};
 
 export const DD_MM_YYYY_FORMAT = 'DD-MMM-YYYY'
@@ -66,18 +68,25 @@ const highestSize = findHighestFileSize(folderPath);
 console.log('Highest file size:', sizeInfo(highestSize));
 */
 
-export async function checkUrlValidity(url: string): Promise<boolean> {
+interface VerfiyUrlType {
+  url: string;
+  success: boolean;
+}
+export async function checkUrlValidity(_forVerfication: SelectedUploadItem): Promise<SelectedUploadItem> {
+  const url = createArchiveLink(_forVerfication.archiveId);
+  const result = {
+    success: false,
+    ..._forVerfication
+  }
   try {
     const response = await fetch(url, { method: 'HEAD' });
-
     // Check if the response status code indicates success (2xx) or redirection (3xx)
     if (response.ok || (response.status >= 300 && response.status < 400)) {
-      return true; // The URL is valid
-    } else {
-      return false; // The URL is invalid
+      result.success = true
     }
   } catch (error) {
-    return false; // An error occurred, so the URL is invalid
+    return result; // An error occurred, so the URL is invalid
   }
+  return result;
 }
 

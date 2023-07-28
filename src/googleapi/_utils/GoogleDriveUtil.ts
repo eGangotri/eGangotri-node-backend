@@ -2,12 +2,10 @@ import { drive_v3 } from 'googleapis';
 import fs from 'fs';
 import moment from 'moment';
 import { DD_MM_YYYY_HH_MMFORMAT } from '../../utils/utils';
-import { EXPORT_DEST_FOLDER } from '../GoogleDriveApiReadAndExport';
 import * as path from "path";
-import { getGoogleDriveId } from './ExcelUtils';
 
-export function createFileNameWithPathForExport(folderId: string, _umbrellaFolder: string) {
-    const _csvDumpFolder = `${EXPORT_DEST_FOLDER}\\${_umbrellaFolder}`;
+export function createFileNameWithPathForExport(folderId: string, _umbrellaFolder: string, exportDestFolder:string) {
+    const _csvDumpFolder = `${exportDestFolder}\\${_umbrellaFolder}`;
     if (!fs.existsSync(_csvDumpFolder)) {
         fs.mkdirSync(_csvDumpFolder);
     }

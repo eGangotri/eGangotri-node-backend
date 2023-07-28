@@ -1,12 +1,9 @@
 import { Model, Document } from "mongoose";
-import { ItemsQueued } from "../models/itemsQueued";
-import { ItemsUshered } from "../models/itemsUshered";
 import { DOC_TYPE } from "../common";
-import { MONGO_DB_URL, MONGO_OPTIONS } from "../db/connection";
+import { mongoDbUrlWithDbName, MONGO_OPTIONS } from "../db/connection";
 import mongoose from "mongoose";
-import { subDays } from "date-fns";
 
-import * as _ from "underscore";
+import * as _ from "lodash";
 import { getLimit } from "../routes/utils";
 import { DEFAULT_DAYS_BEFORE_CURRENT_FOR_SEARCH } from "../utils/constants";
 import { ItemsListOptionsType } from "./types";
@@ -87,11 +84,12 @@ export function setOptionsForItemListing(queryOptions: ItemsListOptionsType) {
 }
 
 
-export async function connectToMongo() {
-  console.log("\nAttempting to connect to DB:", MONGO_DB_URL);
-  if (MONGO_DB_URL) {
+export async function connectToMongo(_args:string[] = []) {
+  const mongoDbUrl = mongoDbUrlWithDbName(!_.isEmpty(_args) ? _args[0]: "");
+  console.log("\nAttempting to connect to DB:", mongoDbUrl);
+  if (mongoDbUrl) {
     try {
-      await mongoose.connect(MONGO_DB_URL);
+      await mongoose.connect(mongoDbUrl);
       const db = mongoose.connection;
       db.on("error", () => {
         console.log("connection error:");
@@ -99,12 +97,12 @@ export async function connectToMongo() {
       db.once("open", () => {
         // we're connected!
         mongoose.set('debug', true)
-        console.log(`we are connected to ${MONGO_DB_URL}`);
+        console.log(`we are connected to ${mongoDbUrl}`);
       });
     } catch (err) {
       console.log("could not connect to mongoose DB\n", err);
     }
   } else {
-    console.log(`No ${MONGO_DB_URL}`);
+    console.log(`No ${mongoDbUrl}`);
   }
 }

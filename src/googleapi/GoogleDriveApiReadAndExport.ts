@@ -23,19 +23,24 @@ oauth2Client.setCredentials({
 
 // Create a new Google Drive instance
 const drive = google.drive({ version: 'v3', auth: oauth2Client });
-// Replace 'FOLDER_ID' with the ID of the folder you want to list
-// const folderId = '1pxxhV2BkyTZgq34InhTuwDh-szU0jvY4';
-// listFolderContentsAndGenerateCSV(folderId, drive, 'Treasures-59');
 
-export const EXPORT_DEST_FOLDER = `E:\\_catalogWork\\_collation\\_catExcels`;
-// export const EXPORT_DEST_FOLDER = `E:\\_catalogWork\\_collation\\_catReducedPdfExcels`;
-if (!fs.existsSync(EXPORT_DEST_FOLDER)) {
-  fs.mkdirSync(EXPORT_DEST_FOLDER);
+const EXPORT_ROOT_FOLDER = `E:\\_catalogWork\\_collation\\`
+async function procOrigGoogleDrive(driveLinkOrFolderID: string, folderName: string) {
+  await listFolderContentsAndGenerateCSVAndExcel(driveLinkOrFolderID, drive, `${EXPORT_ROOT_FOLDER}_catExcels`, folderName);
 }
 
-//change EXPORT_DEST_FOLDER
-function procOrigGoogleDrive(driveLinkOrFolderID: string, folderName: string) {
-  listFolderContentsAndGenerateCSVAndExcel(driveLinkOrFolderID, drive, folderName);
+async function procReducedPdfGoogleDrive(driveLinkOrFolderID: string, folderName: string) {
+  /**
+   * https://drive.google.com/drive/folders/?usp=drive_link, 
+   * https://drive.google.com/drive/folders/?usp=drive_link, 
+   * https://drive.google.com/drive/folders/?usp=drive_link, 
+   * https://drive.google.com/drive/folders/?usp=drive_link, 
+   * https://drive.google.com/drive/folders/?usp=drive_link, 
+   * https://drive.google.com/drive/folders/?usp=drive_link, 
+   * https://drive.google.com/drive/folders/?usp=drive_link, 
+   * https://drive.google.com/drive/folders/?usp=drive_link
+   */
+  await listFolderContentsAndGenerateCSVAndExcel(driveLinkOrFolderID, drive, `${EXPORT_ROOT_FOLDER}_catReducedPdfExcels`, folderName);
 }
 
-procOrigGoogleDrive("https://drive.google.com/drive/folders/1CuXlQEPC06pYPo9QxcgtblJWUETfE1T7?usp=drive_link", 'Treasures 2');
+procReducedPdfGoogleDrive("1-WJOcYk7DQnxrt47z3StRr9W5t9JCL_X", 'Treasures 9');
