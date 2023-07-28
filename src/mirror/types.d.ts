@@ -21,5 +21,5 @@ export interface UploadCycleTableDataResponse {
 export interface SelectedUploadItem {
     id:number;
     archiveId:string;
-    isError?: boolean;
+    isValid?: boolean;
 }

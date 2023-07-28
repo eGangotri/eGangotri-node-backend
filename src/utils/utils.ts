@@ -74,19 +74,26 @@ interface VerfiyUrlType {
 }
 export async function checkUrlValidity(_forVerfication: SelectedUploadItem): Promise<SelectedUploadItem> {
   const url = createArchiveLink(_forVerfication.archiveId);
-  const result = {
-    success: false,
+  let result = {
+    isValid: false,
     ..._forVerfication
   }
   try {
     const response = await fetch(url, { method: 'HEAD' });
     // Check if the response status code indicates success (2xx) or redirection (3xx)
-    if (response.ok || (response.status >= 300 && response.status < 400)) {
-      result.success = true
+    if (response.ok && response.status === 200) {
+      result.isValid = true
+      return result;
+    }
+    else {
+      console.log(`*******response.status ${url} ${response.status} ${response.statusText}`)
+      result.isValid = false;
+      return result;
     }
   } catch (error) {
+    console.log(`checkUrlValidity error ${error} `)
+    result.isValid = true
     return result; // An error occurred, so the URL is invalid
   }
-  return result;
 }
 

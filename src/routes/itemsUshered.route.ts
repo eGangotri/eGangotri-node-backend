@@ -50,25 +50,18 @@ itemsUsheredRoute.post('/add', async (req: any, resp: any) => {
 
 /**
  * 	
-  {
-  "verifiableUploads": "645cf758fca4f605585473d1,645cf6fafca4f605585473c1"
-  }
-
  */
 itemsUsheredRoute.post('/verifyUploadStatus', async (req: any, resp: any) => {
     try {
-        console.log("req.body:verifyUploadStatus")
         const items = req.body;
         const uploadsForVerification: SelectedUploadItem[] = items.uploadsForVerification
-        console.log(`verifiableUploads ${uploadsForVerification}`);
+        const results: SelectedUploadItem[] = [];
 
-        const promisesArray = uploadsForVerification.map((forVerification: SelectedUploadItem) =>
-            checkUrlValidity(forVerification));
-
-        // Use Promise.all to wait for all the async calls to complete
-        const results = await Promise.all(promisesArray);
-        console.log(`url validations ${JSON.stringify(results)}`)
-        resp.status(200).send({ results });
+        for (const forVerification of uploadsForVerification) {
+            const res = await checkUrlValidity(forVerification);
+            results.push(res);
+        }
+        resp.status(200).send({ response: results });
     }
     catch (err: any) {
         console.log('Error', err);
