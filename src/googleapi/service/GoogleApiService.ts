@@ -4,7 +4,7 @@ import { dataToXslx } from '../_utils/ExcelUtils';
 import { FOLDER_MIME_TYPE, PDF_MIME_TYPE } from '../_utils/constants';
 import { GoogleApiData } from '../types';
 import { createFileNameWithPathForExport, extractFolderId, getFolderName, getFolderPathRelativeToRootFolder } from '../_utils/GoogleDriveUtil';
-
+import * as _ from 'lodash';
 
 let ROW_COUNTER = 0;
 let ROOT_FOLDER_NAME = ""
@@ -28,7 +28,12 @@ export async function listFolderContentsAndGenerateCSVAndExcel(_folderIdOrUrl: s
 
     //writeDataToCSV(googleDrivePdfData, `${fileNameWithPath}.csv`)
     // Convert data to XLSX
-    dataToXslx(googleDrivePdfData, `${fileNameWithPath}.xlsx`);
+    if (!_.isEmpty(googleDrivePdfData)) {
+        dataToXslx(googleDrivePdfData, `${fileNameWithPath}.xlsx`);
+    }
+    else {
+       console.log("No Date retrieved. No File will be created");
+    }
 }
 
 export async function listFolderContents(folderId: string, drive: drive_v3.Drive, umbrellaFolder:
@@ -48,6 +53,7 @@ export async function listFolderContents(folderId: string, drive: drive_v3.Drive
             pageSize: 1000, // Increase the page size to retrieve more files if necessary
         });
         const files = response.data.files;
+        console.log(`files from google drive count including folders and non-pdf: ${files?.length}`)
         if (files && files.length) {
             for (const file of files) {
                 addFileMetadataToArray(file, folderId, googleDrivePdfData, idFolderNameMap);
