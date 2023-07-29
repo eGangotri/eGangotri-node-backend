@@ -31,16 +31,9 @@ async function procOrigGoogleDrive(driveLinkOrFolderID: string, folderName: stri
 
 async function procReducedPdfGoogleDrive(driveLinkOrFolderID: string, folderName: string) {
   /**
-   * https://drive.google.com/drive/folders/?usp=drive_link, 
-   * https://drive.google.com/drive/folders/?usp=drive_link, 
-   * https://drive.google.com/drive/folders/?usp=drive_link, 
-   * https://drive.google.com/drive/folders/?usp=drive_link, 
-   * https://drive.google.com/drive/folders/?usp=drive_link, 
-   * https://drive.google.com/drive/folders/?usp=drive_link, 
-   * https://drive.google.com/drive/folders/?usp=drive_link, 
-   * https://drive.google.com/drive/folders/?usp=drive_link
+     https://drive.google.com/drive/folders/?usp=drive_link
    */
   await listFolderContentsAndGenerateCSVAndExcel(driveLinkOrFolderID, drive, `${EXPORT_ROOT_FOLDER}_catReducedPdfExcels`, folderName);
 }
 
-procReducedPdfGoogleDrive("1-WJOcYk7DQnxrt47z3StRr9W5t9JCL_X", 'Treasures 9');
+procReducedPdfGoogleDrive("https://drive.google.com/drive/folders/1NQ4IbteBU07U2tu0jnNBP2kZ4UM8y0i4?usp=drive_link", 'Treasures 2');
