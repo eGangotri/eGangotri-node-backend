@@ -21,9 +21,9 @@ JSON Body
 	"superadmin_password": "XXXXX",
 	"uploadCycleId": "2",
 	"uploadCount": 4,
-	"archiveProfile": [
+	"archiveProfiles": [
 		{
-			"profileName": "VT",
+			"archiveProfile": "VT",
 			"count": 4
 		}
 	],

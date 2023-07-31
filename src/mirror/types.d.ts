@@ -3,6 +3,12 @@ export interface ArchiveProfileAndCount {
     count: number;
 }
 
+
+export interface UploadCycleTypes {
+    countIntended?: number;
+    archiveProfileAndCountIntended?: ArchiveProfileAndCount[]; 
+}
+
 export interface UploadCycleTableData {
     uploadCycleId: string;
     archiveProfileAndCount: ArchiveProfileAndCount[];
@@ -12,7 +18,11 @@ export interface UploadCycleTableData {
     archiveProfileAndCountForQueue?: ArchiveProfileAndCount[];
     totalQueueCount?:number;
     dateTimeQueueUploadStarted?:Date;
+
+    countIntended?: number;
+    archiveProfileAndCountIntended?: ArchiveProfileAndCount[]; 
 }
+
 
 export interface UploadCycleTableDataDictionary {
     uploadCycle: UploadCycleTableData;

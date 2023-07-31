@@ -3,11 +3,12 @@ import { ItemsUshered } from '../models/itemsUshered';
 import { Request, Response } from 'express';
 import { getListOfItemsUshered } from '../services/itemsUsheredService';
 import * as _ from 'lodash';
-import { ArchiveProfileAndCount, SelectedUploadItem, UploadCycleTableData, UploadCycleTableDataDictionary, UploadCycleTableDataResponse } from '../mirror/types';
+import { ArchiveProfileAndCount, SelectedUploadItem, UploadCycleTableData, UploadCycleTableDataDictionary, UploadCycleTableDataResponse, UploadCycleTypes } from '../mirror/types';
 import { validateSuperAdminUserFromRequest } from '../services/userService';
 import { checkUrlValidity } from '../utils/utils';
 import { createArchiveLink } from '../mirror';
 import { getListOfItemsQueued } from '../services/itemsQueuedService';
+import { getListOfUploadCycles } from '../services/uploadCycleService';
 
 /**
  * INSOMNIA POST Request Sample
@@ -89,6 +90,7 @@ itemsUsheredRoute.get('/listForUploadCycle', async (req: Request, resp: Response
     try {
         const items = await getListOfItemsUshered(req?.query);
         const queuedItems = await getListOfItemsQueued(req?.query)
+        const uploadCycles = await getListOfUploadCycles(req?.query)
         console.log(`req?.query: ${JSON.stringify(req?.query)}`)
 
         const groupedItems = _.groupBy(items, function (item: any) {
@@ -99,11 +101,18 @@ itemsUsheredRoute.get('/listForUploadCycle', async (req: Request, resp: Response
             return item.uploadCycleId;
         });
 
+        const groupedUploadCycles = _.groupBy(uploadCycles, function (item: any) {
+            return item.uploadCycleId;
+        });
+
         const uploadCycleIdAndData: UploadCycleTableDataDictionary[] = []
         for (const key in groupedItems) {
             const usheredRow = groupedItems[key]
             const queuedRow = groupedQueuedItems[key];
-            console.log(`queuedRow ${JSON.stringify(queuedRow)}`)
+            const uploadCycleRow = groupedUploadCycles[key] || [];
+
+            console.log(`uploadCycle ${JSON.stringify(uploadCycleRow)}`);
+
             const groupedByArchiveProfiles = _.groupBy(usheredRow, function (item: any) {
                 return item.archiveProfile;
             });
@@ -111,7 +120,7 @@ itemsUsheredRoute.get('/listForUploadCycle', async (req: Request, resp: Response
                 return item.archiveProfile;
             });
 
-            const _cycle_and_profiles = handleEachRow(key, groupedByArchiveProfiles,queuedRowGroupedByArchiveProfiles)
+            const _cycle_and_profiles = handleEachRow(key, groupedByArchiveProfiles, queuedRowGroupedByArchiveProfiles, uploadCycleRow)
 
             uploadCycleIdAndData.push({
                 uploadCycle: _cycle_and_profiles
@@ -127,9 +136,11 @@ itemsUsheredRoute.get('/listForUploadCycle', async (req: Request, resp: Response
     }
 })
 
-const handleEachRow = (uploadCycleId: string, 
+const handleEachRow = (uploadCycleId: string,
     usheredRow: _.Dictionary<UploadCycleTableData[]>,
-    queuedRow: _.Dictionary<UploadCycleTableData[]>) => {
+    queuedRow: _.Dictionary<UploadCycleTableData[]>,
+    uploadCycleRow: any[]) => {
+
     const archiveProfileAndCount: ArchiveProfileAndCount[] = []
     let totalCount = 0
     let dateTimeUploadStarted = new Date();
@@ -158,6 +169,7 @@ const handleEachRow = (uploadCycleId: string,
         dateTimeQueueUploadStarted = row[0]?.datetimeUploadStarted
     }
 
+
     const uploadCycleData: UploadCycleTableData = {
         uploadCycleId,
         archiveProfileAndCount,
@@ -165,8 +177,10 @@ const handleEachRow = (uploadCycleId: string,
         totalCount,
         archiveProfileAndCountForQueue,
         totalQueueCount,
-        dateTimeQueueUploadStarted
+        dateTimeQueueUploadStarted,
+        countIntended: _.isEmpty(uploadCycleRow) ? 0 : uploadCycleRow[0]?.uploadCount,
+        archiveProfileAndCountIntended: _.isEmpty(uploadCycleRow) ? [] : uploadCycleRow[0]?.archiveProfiles
     }
 
-    return uploadCycleData
+    return uploadCycleData;
 }
