@@ -12,11 +12,11 @@ const schema = new mongoose.Schema(
         uploadCount: { type: Number, required: true },
         datetimeUploadStarted: { type: Date, required: true }
     }, {
-    collection: 'Items_Ushered',
+    collection: 'Upload_Cycle',
     timestamps: true
 }
 );
 
-export const ItemsUshered = mongoose.model('Items_Ushered', schema);
+export const UploadCycle = mongoose.model('Upload_Cycle', schema);
 
 
