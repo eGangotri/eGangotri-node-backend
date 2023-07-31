@@ -7,6 +7,7 @@
     "test": "npm test",
     "flatfile-to-mongo": "ts-node ./src/tasks/flatfile-to-mongo.ts \"C:/Users/Chetan Pandey/eGangotri\"",
     "start": "ts-node ./src/index.ts",
+    "upload_db": "ts-node ./src/index.ts forUpload",
     "web-scrap": "ts-node ./src/downloadLinks.ts",
     "exec": "ts-node ./src/exec/exec.ts",
     "png2pdf": "node -r ts-node/register --max-old-space-size=2048 --inspect --expose-gc ./src/imgToPdf/pngToPdf.ts",

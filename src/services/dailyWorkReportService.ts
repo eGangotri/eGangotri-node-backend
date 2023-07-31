@@ -1,4 +1,6 @@
 import mongoose from "mongoose";
+import { ObjectId } from 'mongodb';
+
 import moment from 'moment';
 import { DD_MM_YYYY_FORMAT } from "../utils/utils";
 import { DailyWorkReport } from "../models/dailyWorkReport";
@@ -275,12 +277,28 @@ export const generateCsvAsFileOnlyOperatorAndPdfCountAggregate = async (res: Res
   }
 }
 export const deleteRowsByIds = async (_itemIds: string[]) => {
+  if (_itemIds?.length > 10) {
+    return {
+      message: "Deletion of more than 10 not allowed",
+      deletedCount: 0
+    }
+  }
+  console.log(`_itemIds ${JSON.stringify(_itemIds)}`)
   // Define your criteria for deletion
   const deleteCriteria = {
-    _id: { $in: _itemIds }
+    _id: { $in: _itemIds.map(x => new ObjectId(x)) }
   };
   // Delete the rows based on the criteria
-  const res = await DailyWorkReport.deleteMany(deleteCriteria);
-  console.log(`delete res ${JSON.stringify(res)}`)
-  return res;
+  try {
+    const res = await DailyWorkReport.deleteOne(deleteCriteria);
+    console.log(`delete res ${JSON.stringify(res)}`)
+    return res;
+  } catch (error) {
+    console.error(error);
+    return {
+      message: error,
+      deletedCount: 0
+    }
+  }
+
 }
