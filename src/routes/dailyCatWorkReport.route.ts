@@ -3,7 +3,7 @@ import { generateCatWorkReportCSV, generateCatWorkReportCSVApi2 } from "../servi
 import { deleteRowsByIds } from "../services/dailyWorkReportService";
 import { Request, Response } from "express";
 import { validateSuperAdminUserFromRequest, validateUserFromRequest } from "../services/userService"
-import { getDateTwoHoursBeforeNow } from "../services/Util";
+import { getDateTwoHoursBeforeNow, replaceQuotesAndSplit } from "../services/Util";
 import _ from "lodash";
 import { DailyCatWorkReport } from "../models/dailyCatWorkReport";
 import { generateCatCSVAsFile, generateCatCSVAsFileForOperatorAndEntryCountOnly, generateCatCSVAsFileOfAggregates, getListOfDailyCatWorkReport } from "../services/dailyCatWorkReportService";
@@ -108,21 +108,33 @@ dailyCatWorkReportRoute.get("/listIds", async (req: Request, resp: Response) => 
     resp.status(400).send(err);
   }
 });
-
-
+/**
+ * 
+ * {
+	"_ids": "64bf2382c0a3e0e17c64b472,64bbc572c0a3e0e17c64b124,64bbc542c0a3e0e17c64b123",
+	"superadmin_user": "",
+	"superadmin_password": ""
+}
+ */
+//non-functional
 dailyCatWorkReportRoute.delete("/delete", async (req: Request, resp: Response) => {
   try {
-    const _id = req.body?._id;
-
+    const _ids = req.body?._ids || "";
+    const idsAsCSV = replaceQuotesAndSplit(_ids);
     const _validate = await validateSuperAdminUserFromRequest(req);
     if (_validate[0]) {
-      if (_.isEmpty(_id)) {
+      if (_.isEmpty(_ids)) {
         console.log(`cannot proceed _id not provided`);
         resp.status(300).send({
-          response: `Must have param _ids containing one or more _id as coma-separated value`,
+          response: `Must have param '_ids' containing one or more id as coma-separated value`,
         });
       }
       else {
+        if(idsAsCSV.length > 10){
+          resp.status(300).send({
+            response: `Expected deletion of ${idsAsCSV.length} items but more than 10 is not allowed`,
+          });
+        }
         const items = await getListOfDailyCatWorkReport(req.body);
         console.log(
           `after getListOfDailyWorkReport retrieved item count: ${items.length}`
@@ -134,10 +146,12 @@ dailyCatWorkReportRoute.delete("/delete", async (req: Request, resp: Response) =
           });
         }
         else {
-          const _ids = items.map((item) => item._id.toString())
-          const status = await deleteRowsByIds(_ids);
+          const _idsfiltered = items.filter((item) => idsAsCSV.includes(item._id.toString()) ).map((x)=> x._id.toString())
+          console.log(`_ids2 ${_idsfiltered.length} idsAsCSV.length ${idsAsCSV.length}`)
+          const status = await deleteRowsByIds(_idsfiltered);
           resp.status(200).send({
-            response: `Deleted ${status.deletedCount} items`,
+            response: `Deleted ${status.deletedCount} items from ${idsAsCSV.length} _ids provided`,
+            message: `${JSON.stringify(status)}`
           });
         }
       }

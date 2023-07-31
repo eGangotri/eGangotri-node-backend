@@ -45,8 +45,8 @@ export function setOptionsForDailyCatWorkReportListing(queryOptions: DailyCatWor
     mongoOptionsFilter = { ...mongoOptionsFilter, centcatalogProfileer: { $in: regexArray } };
   }
 
-  if (queryOptions?._id) {
-    const _id: string[] = replaceQuotesAndSplit(queryOptions._id);
+  if (queryOptions?._ids) {
+    const _id: string[] = replaceQuotesAndSplit(queryOptions._ids);
     mongoOptionsFilter = { ...mongoOptionsFilter, _id: { $in: _id } };
   }
   if (queryOptions?.isLastTwoHours) {

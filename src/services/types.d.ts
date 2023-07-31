@@ -41,7 +41,7 @@ export type UserListOptionsType = {
   
   
   export type DailyCatWorkReportListOptionsType = {
-    _id?: string,
+    _ids?: string,
     startDate?: string,
     endDate?: string,
     operatorName?: string,

@@ -24,16 +24,13 @@ oauth2Client.setCredentials({
 // Create a new Google Drive instance
 const drive = google.drive({ version: 'v3', auth: oauth2Client });
 
-const EXPORT_ROOT_FOLDER = `E:\\_catalogWork\\_collation\\`
+const EXPORT_ROOT_FOLDER = `C:\\_catalogWork\\_collation\\`
 async function procOrigGoogleDrive(driveLinkOrFolderID: string, folderName: string) {
   await listFolderContentsAndGenerateCSVAndExcel(driveLinkOrFolderID, drive, `${EXPORT_ROOT_FOLDER}_catExcels`, folderName);
 }
 
 async function procReducedPdfGoogleDrive(driveLinkOrFolderID: string, folderName: string) {
-  /**
-     https://drive.google.com/drive/folders/?usp=drive_link
-   */
   await listFolderContentsAndGenerateCSVAndExcel(driveLinkOrFolderID, drive, `${EXPORT_ROOT_FOLDER}_catReducedPdfExcels`, folderName);
 }
 
-procReducedPdfGoogleDrive("https://drive.google.com/drive/folders/1NQ4IbteBU07U2tu0jnNBP2kZ4UM8y0i4?usp=drive_link", 'Treasures 2');
+procReducedPdfGoogleDrive("https://drive.google.com/drive/folders/1fbNJcPex7ZP3K7mu1UDKBGF0c1QV3ozl?usp=drive_link", 'Treasures 8');
