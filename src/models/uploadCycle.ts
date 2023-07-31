@@ -4,7 +4,7 @@ const schema = new mongoose.Schema(
     {
         archiveProfiles: {
             type: [{
-                profileName: String,
+                archiveProfile: String,
                 count: Number,
             }], required: true
         },
