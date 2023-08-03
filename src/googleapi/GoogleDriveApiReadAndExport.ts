@@ -33,6 +33,6 @@ async function procReducedPdfGoogleDrive(driveLinkOrFolderID: string, folderName
   await listFolderContentsAndGenerateCSVAndExcel(driveLinkOrFolderID, drive, `${EXPORT_ROOT_FOLDER}_catReducedPdfExcels`, folderName);
 }
 
-procReducedPdfGoogleDrive("https://drive.google.com/drive/folders/1YNp7xmxEIaBPoiF8WaDxWSDflHm3R_HH?usp=drive_link", 'Treasures 21');
+procOrigGoogleDrive("https://drive.google.com/drive/folders/1Awz_gaPHTAETm4Wzal2pVBpMtSyIvRNU?usp=drive_link", 'Treasures 21');
 
 //yarn run catalog

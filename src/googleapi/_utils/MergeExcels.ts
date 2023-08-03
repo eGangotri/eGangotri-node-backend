@@ -107,7 +107,7 @@ const createMergedExcelFilePathName = (mainExcelDataLength: number) => {
 
 let MATCH_COUNTER = 0
 let SECONDARY_EXCEL_GOOGLE_FOLDER_IDS_LIST: string[] = []
-const _root = "E:\\_catalogWork\\_collation";
+const _root = "C:\\_catalogWork\\_collation";
 const treasureFolder = "Treasures-2"
 
 const mainExcelPath = `${_root}\\_catCombinedExcels\\${treasureFolder}`
