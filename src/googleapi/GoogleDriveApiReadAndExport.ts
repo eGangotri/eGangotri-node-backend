@@ -33,4 +33,4 @@ async function procReducedPdfGoogleDrive(driveLinkOrFolderID: string, folderName
   await listFolderContentsAndGenerateCSVAndExcel(driveLinkOrFolderID, drive, `${EXPORT_ROOT_FOLDER}_catReducedPdfExcels`, folderName);
 }
 
-procReducedPdfGoogleDrive("https://drive.google.com/drive/folders/1fbNJcPex7ZP3K7mu1UDKBGF0c1QV3ozl?usp=drive_link", 'Treasures 8');
+procOrigGoogleDrive("1lFmwnKzVmkaD0oNX2qols66I5ifc1kS_", 'Treasures 60');

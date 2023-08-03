@@ -51,6 +51,8 @@ export async function listFolderContents(folderId: string, drive: drive_v3.Drive
             q: `'${folderId}' in parents and trashed = false and (mimeType='${PDF_MIME_TYPE}' or mimeType='${FOLDER_MIME_TYPE}')`,
             fields: 'files(id, name, mimeType,size,parents,webViewLink,thumbnailLink,createdTime)',
             pageSize: 1000, // Increase the page size to retrieve more files if necessary
+            includeItemsFromAllDrives: true,
+            supportsAllDrives: true
         });
         const files = response.data.files;
         console.log(`files from google drive count including folders and non-pdf: ${files?.length}`)
