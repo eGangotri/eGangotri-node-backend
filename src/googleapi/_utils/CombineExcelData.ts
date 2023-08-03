@@ -6,8 +6,8 @@ import * as _ from 'lodash';
 import { DD_MM_YYYY_HH_MMFORMAT } from "../../utils/utils";
 import moment from "moment";
 
-const _root = "E:\\_catalogWork\\_collation";
-const treasureFolder = "Treasures"
+const _root = "C:\\_catalogWork\\_collation";
+const treasureFolder = "Treasures 21"
 
 const mainExcelPath = `${_root}\\_catExcels\\${treasureFolder}`
 const mainExcelFileName = `${mainExcelPath}\\${fs.readdirSync(mainExcelPath)[0]}`;
@@ -104,3 +104,4 @@ const fillPageCount = (excelJson: ExcelHeaders[]) => {
 }
 
 combineExcels()
+//yarn run combineExcels

@@ -23,7 +23,8 @@
     "excelutil": "ts-node ./src/googleapi/_utils/ExcelUtils",
     "findLongestFileName": "ts-node ./src/utils/utils",
     "mergeExcels": "ts-node ./src/googleapi/_utils/MergeExcels",
-    "callUrl": "ts-node ./src/googleapi/_utils/ExcelUtils"
+    "callUrl": "ts-node ./src/googleapi/_utils/ExcelUtils",
+    "moveLongNames":"ts-node ./src/googleapi/_utils/MoveLongFileNamesToRoot"
   },
   "repository": {
     "type": "git",
