@@ -7,7 +7,7 @@ import * as path from 'path';
 import fs from 'fs';
 import { move } from "fs-extra";
 
-const MAX_FILE_NAME_PERMITTED = 170
+const MAX_FILE_NAME_PERMITTED = 190
 
 const MOVED_FILE_LIST:string[] = []
 const CANT_MOVE_FILE_LIST:string[] = []
@@ -47,7 +47,7 @@ const _execute = (rootFolder: string) => {
     }
 }
 //const rootFolder = "C:\\_catalogWork\\_reducedPdfs\\Treasures28 (1253)"
-const rootFolder = "C:\\tmp"
+const rootFolder = "E:\\_catalogWork\\_reducedPdfs\\Treasures60 (1694)"
 _execute(rootFolder)
 console.log(`Final Report
 TOTAL (${TOTAL_FILE_COUNT})
