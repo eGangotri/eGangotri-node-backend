@@ -101,12 +101,11 @@ const loopFolders = async (_srcFoldersWithPath: string[], destRootFolder: string
         console.log(err)
     }
 }
-// const srcRootFolder = 'D:\\eG-tr1-30';
-// //const srcRootFolder = 'E:\\MASTER_BACKUP';
-const destRootFolder = "E:\\_catalogWork\\_reducedPdfs";
-// const _folders = ["Treasures 2", "Treasures-3", "Treasures4", "Treasures5",
-//  "Treasures6", "Treasures7", "Treasures8", "Treasures9"]
-// const _srcFoldersWithPath = _folders.map(x => `${srcRootFolder}\\${x}`)
+const destRootFolder = "C:\\_catalogWork\\_reducedPdfs";
 
-const _srcFoldersWithPath = ["E:\\_catalogWork\\test"]
+const srcRootFolder = 'D:\\eG-tr1-30';
+const _folders = ["Treasures26", "Treasures27", "Treasures28", "Treasures29", "Treasures30", "Treasures31"]
+const _srcFoldersWithPath = _folders.map(x => `${srcRootFolder}\\${x}`)
+
+//yarn run extractFirstAndLastNPages
 loopFolders(_srcFoldersWithPath, destRootFolder)

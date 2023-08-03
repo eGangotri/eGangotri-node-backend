@@ -1,15 +1,17 @@
 const express = require("express");
 
-const { itemsQueuedRoute }  = require("./routes/itemsQueued.route");
-const { itemsUsheredRoute }  = require( "./routes/itemsUshered.route");
+const { itemsQueuedRoute } = require("./routes/itemsQueued.route");
+const { itemsUsheredRoute } = require("./routes/itemsUshered.route");
 const { launchGradleRoute } = require("./routes/launchGradle.route");
 const { dailyWorkReportRoute } = require("./routes/dailyWorkReport.route");
 const { dailyCatWorkReportRoute } = require("./routes/dailyCatWorkReport.route");
 const { uploadCycleRoute } = require("./routes/uploadCycle.route");
 
 const { userRoute } = require("./routes/userRoute.route");
-const{ connectToMongo } = require("./services/dbService");
-const fs  = require("fs");
+const { connectToMongo } = require("./services/dbService");
+const fs = require("fs");
+
+import { GLOBAL_DB_NAME } from './db/connection';
 
 const app = express();
 const hostname = "127.0.0.1";
@@ -28,7 +30,7 @@ app.use((req: any, res: any, next: any) => {
 
 app.get("/", function (req: any, res: any) {
   res.send({
-    response:"eGangotri-node-backend"
+    response: `eGangotri-node-backend (${GLOBAL_DB_NAME})`
   });
 });
 
