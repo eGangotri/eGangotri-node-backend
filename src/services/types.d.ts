@@ -60,3 +60,12 @@ export type DailyCatWorkReportListOptionsType = {
   isLastTwoHours?: string, //true or false as string
   limit?: number,
 };
+
+export type ReuploadType = {
+  ids?: string,
+  limit?: number,
+  archiveProfiles?: string,
+  uploadCycleId?: string,
+  localPath?: string,
+  uploadLink?: string
+};
