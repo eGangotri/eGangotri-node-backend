@@ -7,7 +7,7 @@ import * as path from 'path';
 import fs from 'fs';
 import { move } from "fs-extra";
 
-const MAX_FILE_NAME_PERMITTED = 190
+const MAX_FILE_NAME_PERMITTED = 170
 
 const MOVED_FILE_LIST:string[] = []
 const CANT_MOVE_FILE_LIST:string[] = []
