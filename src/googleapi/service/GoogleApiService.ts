@@ -13,6 +13,7 @@ export async function listFolderContentsAndGenerateCSVAndExcel(_folderIdOrUrl: s
     drive: drive_v3.Drive,
     exportDestFolder: string,
     umbrellaFolder: string = "") {
+
     const folderId = extractFolderId(_folderIdOrUrl)
     const _umbrellaFolder = umbrellaFolder?.length > 0 ? umbrellaFolder : await getFolderName(folderId, drive) || "";
     ROOT_FOLDER_NAME = await getFolderName(folderId, drive) || "";
@@ -32,7 +33,7 @@ export async function listFolderContentsAndGenerateCSVAndExcel(_folderIdOrUrl: s
         dataToXslx(googleDrivePdfData, `${fileNameWithPath}.xlsx`);
     }
     else {
-       console.log("No Date retrieved. No File will be created");
+        console.log("No Date retrieved. No File will be created");
     }
 }
 
@@ -58,9 +59,14 @@ export async function listFolderContents(folderId: string, drive: drive_v3.Drive
         console.log(`files from google drive count including folders and non-pdf: ${files?.length}`)
         if (files && files.length) {
             for (const file of files) {
-                addFileMetadataToArray(file, folderId, googleDrivePdfData, idFolderNameMap);
-                if (file.mimeType === FOLDER_MIME_TYPE) {
-                    await listFolderContents(file?.id || '', drive, umbrellaFolder, googleDrivePdfData, idFolderNameMap); // Recursively call the function for subfolders
+                try {
+                    addFileMetadataToArray(file, folderId, googleDrivePdfData, idFolderNameMap);
+                    if (file.mimeType === FOLDER_MIME_TYPE) {
+                        await listFolderContents(file?.id || '', drive, umbrellaFolder, googleDrivePdfData, idFolderNameMap); // Recursively call the function for subfolders
+                    }
+                }
+                catch (err) {
+                    console.log(`Error reading file. ${file?.name}`, err);
                 }
             }
         } else {

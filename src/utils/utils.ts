@@ -60,9 +60,9 @@ function findHighestFileSize(directory: string): number {
   return highestSize;
 }
 
-const folderPath = "E:\\_catalogWork\\_reducedPdfs\\Treasures60 (1694)"
-const longestFileName = findLongestFileName(folderPath, 196);
-console.log('Longest file name:', longestFileName, longestFileName.length);
+// const folderPath = "E:\\_catalogWork\\_reducedPdfs\\Treasures60 (1694)"
+// const longestFileName = findLongestFileName(folderPath, 196);
+// console.log('Longest file name:', longestFileName, longestFileName.length);
 
 /*
 

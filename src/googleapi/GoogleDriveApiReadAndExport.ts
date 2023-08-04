@@ -33,6 +33,12 @@ async function procReducedPdfGoogleDrive(driveLinkOrFolderID: string, folderName
   await listFolderContentsAndGenerateCSVAndExcel(driveLinkOrFolderID, drive, `${EXPORT_ROOT_FOLDER}_catReducedPdfExcels`, folderName);
 }
 
-procOrigGoogleDrive("https://drive.google.com/drive/folders/1Awz_gaPHTAETm4Wzal2pVBpMtSyIvRNU?usp=drive_link", 'Treasures 21');
-
-//yarn run catalog
+ //procOrigGoogleDrive("https://drive.google.com/drive/folders/1gPM3J5fMahkBSuOJXqH730K82ddY_8kA?usp=drive_link", 'Treasures 23');
+  // procOrigGoogleDrive("1JKy71EWtREKtLb60Bg6X3uBb6Zf2_JhK", 'Treasures 24');
+   //procOrigGoogleDrive("https://drive.google.com/drive/folders/15LrBVDpXteKpvD8Q8-cT0GuR-U91z6yd?usp=drive_link", 'Treasures 25');
+  //procOrigGoogleDrive("1PT3m9-8Obj6AiBfrWYeXazfKDrjeMRJI", 'Treasures 26');
+   //procOrigGoogleDrive("1JTE35Py5f263RGjvjAbqbJMCu5dvoRe0", 'Treasures 27');
+//   procOrigGoogleDrive("1Heb53B7ymtdcW4cSgLG5Y12xDPALX3sI", 'Treasures 29');
+   procOrigGoogleDrive("15vNpsd_W4GWBCqOnKbe5ad9ddFX9Ep3W", 'Treasures 30');
+  //procReducedPdfGoogleDrive("https://drive.google.com/drive/folders/1Nox5h2CYgIrGcd73JswHk0_q05y0W-b7?usp=drive_link", 'Treasures 60')
+  //yarn run catalog
