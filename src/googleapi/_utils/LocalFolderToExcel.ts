@@ -41,12 +41,12 @@ export const convertLocalPdfsToJson = (rootFolder: string) => {
     return pdfTuple
 }
 
-const folderToExcel = () => {
-    const jsonArray = convertLocalPdfsToJson("D:\\eG-tr1-30\\Treasures30")
+const folderToExcel = (folder:string) => {
+    const jsonArray = convertLocalPdfsToJson(folder)
     const _fileName = createExcelFilePathName(jsonArray.length);
     jsonToExcel(jsonArray, _fileName)
 }
 
-folderToExcel();
+folderToExcel("D:\\eG-tr1-30\\Treasures30");
 
 //yarn run localToExcel
