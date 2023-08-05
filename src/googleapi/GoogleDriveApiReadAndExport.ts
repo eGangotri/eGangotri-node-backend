@@ -24,7 +24,8 @@ oauth2Client.setCredentials({
 // Create a new Google Drive instance
 const drive = google.drive({ version: 'v3', auth: oauth2Client });
 
-const EXPORT_ROOT_FOLDER = `C:\\_catalogWork\\_collation\\`
+const EXPORT_ROOT_FOLDER = `C:\\_catalogWork\\_collation\\`;
+
 async function procOrigGoogleDrive(driveLinkOrFolderID: string, folderName: string) {
   await listFolderContentsAndGenerateCSVAndExcel(driveLinkOrFolderID, drive, `${EXPORT_ROOT_FOLDER}_catExcels`, folderName);
 }
@@ -39,6 +40,6 @@ async function procReducedPdfGoogleDrive(driveLinkOrFolderID: string, folderName
   //procOrigGoogleDrive("1PT3m9-8Obj6AiBfrWYeXazfKDrjeMRJI", 'Treasures 26');
    //procOrigGoogleDrive("1JTE35Py5f263RGjvjAbqbJMCu5dvoRe0", 'Treasures 27');
 //   procOrigGoogleDrive("1Heb53B7ymtdcW4cSgLG5Y12xDPALX3sI", 'Treasures 29');
-   procOrigGoogleDrive("15vNpsd_W4GWBCqOnKbe5ad9ddFX9Ep3W", 'Treasures 30');
+  // procOrigGoogleDrive("15vNpsd_W4GWBCqOnKbe5ad9ddFX9Ep3W", 'Treasures 30');
   //procReducedPdfGoogleDrive("https://drive.google.com/drive/folders/1Nox5h2CYgIrGcd73JswHk0_q05y0W-b7?usp=drive_link", 'Treasures 60')
   //yarn run catalog

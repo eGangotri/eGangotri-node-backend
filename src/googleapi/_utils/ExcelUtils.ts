@@ -67,7 +67,7 @@ export const dataToXslx = async (googleDrivePdfData: Array<GoogleApiData>, xlsxF
   }
 };
 
-export const jsonToExcel = (jsonArray: ExcelHeaders[], xlsxFileNameWithPath: string) => {
+export const jsonToExcel = (jsonArray: any[], xlsxFileNameWithPath: string) => {
 
   // Create a new workbook
   const workbook = xlsx.utils.book_new();
