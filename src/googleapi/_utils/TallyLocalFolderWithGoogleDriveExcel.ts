@@ -29,8 +29,7 @@ const convertLocalPdfsToJson = (rootFolder: string) => {
 
 const _excelToJson = () => {
     const _root = "C:\\_catalogWork\\_collation";
-    const treasureFolder = "Treasures 21"
-
+    const treasureFolder = "Treasures 60"
     const mainExcelPath = `${_root}\\_catExcels\\${treasureFolder}`
     const mainExcelFileName = `${mainExcelPath}\\${fs.readdirSync(mainExcelPath)[0]}`;
     const mainExcelData: ExcelHeaders[] = excelToJson(mainExcelFileName);
