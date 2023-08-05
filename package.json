@@ -24,7 +24,8 @@
     "findLongestFileName": "ts-node ./src/utils/utils",
     "mergeExcels": "ts-node ./src/googleapi/_utils/MergeExcels",
     "callUrl": "ts-node ./src/googleapi/_utils/ExcelUtils",
-    "moveLongNames":"ts-node ./src/googleapi/_utils/MoveLongFileNamesToRoot"
+    "moveLongNames":"ts-node ./src/googleapi/_utils/MoveLongFileNamesToRoot",
+    "tallyWithLocal":"ts-node ./src/googleapi/_utils/TallyLocalFolderWithGoogleDriveExcel"
   },
   "repository": {
     "type": "git",
