@@ -39,3 +39,8 @@ export interface ExcelHeaders {
     "Thumbnail": string;
     "Created Time": string;
 }
+
+type PdfFolderTitleType = {
+    folder: string,
+    fileName: string
+}

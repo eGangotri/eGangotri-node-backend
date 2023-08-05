@@ -2,30 +2,13 @@ import { getAllPDFFiles } from "../../imgToPdf/utils/FileUtils"
 import path from 'path';
 import * as fs from 'fs';
 import * as _ from 'lodash';
-import { ExcelHeaders } from "../types";
+import { ExcelHeaders, PdfFolderTitleType } from "../types";
 import { excelToJson } from "./ExcelUtils";
 import { titleInGoogleDrive } from "./constants";
+import { convertLocalPdfsToJson } from "./LocalFolderToExcel";
 
-type PdfFolderTitleType = {
-    folder: string,
-    fileName: string
-}
 
-const convertLocalPdfsToJson = (rootFolder: string) => {
-    const allPdfs = getAllPDFFiles(rootFolder)
-    let pdfTuple: Array<PdfFolderTitleType> = []
-    for (const [index, pdf] of allPdfs.entries()) {
-        const _path = path.parse(pdf);
-        pdfTuple.push({
-            folder: _path.dir,
-            fileName: _path.base
-        })
-        console.log(`${index + 1}) ${_path.base}
-       `);
-    }
-    console.log(`pdfTuple ${pdfTuple[0]} ${pdfTuple.length}`)
-    return pdfTuple
-}
+
 
 const _excelToJson = () => {
     const _root = "C:\\_catalogWork\\_collation";

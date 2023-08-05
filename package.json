@@ -25,7 +25,8 @@
     "mergeExcels": "ts-node ./src/googleapi/_utils/MergeExcels",
     "callUrl": "ts-node ./src/googleapi/_utils/ExcelUtils",
     "moveLongNames":"ts-node ./src/googleapi/_utils/MoveLongFileNamesToRoot",
-    "tallyWithLocal":"ts-node ./src/googleapi/_utils/TallyLocalFolderWithGoogleDriveExcel"
+    "tallyWithLocal":"ts-node ./src/googleapi/_utils/TallyLocalFolderWithGoogleDriveExcel",
+    "localToExcel":"ts-node ./src/googleapi/_utils/LocalFolderToExcel"
   },
   "repository": {
     "type": "git",
