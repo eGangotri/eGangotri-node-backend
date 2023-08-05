@@ -5,6 +5,7 @@ import { FOLDER_MIME_TYPE, PDF_MIME_TYPE } from '../_utils/constants';
 import { GoogleApiData } from '../types';
 import { createFileNameWithPathForExport, extractFolderId, getFolderName, getFolderPathRelativeToRootFolder } from '../_utils/GoogleDriveUtil';
 import * as _ from 'lodash';
+import { GaxiosResponse } from 'gaxios';
 
 let ROW_COUNTER = 0;
 let ROOT_FOLDER_NAME = ""
@@ -48,14 +49,23 @@ export async function listFolderContents(folderId: string, drive: drive_v3.Drive
     }
 
     try {
-        const response = await drive.files.list({
-            q: `'${folderId}' in parents and trashed = false and (mimeType='${PDF_MIME_TYPE}' or mimeType='${FOLDER_MIME_TYPE}')`,
-            fields: 'files(id, name, mimeType,size,parents,webViewLink,thumbnailLink,createdTime)',
-            pageSize: 1000, // Increase the page size to retrieve more files if necessary
-            includeItemsFromAllDrives: true,
-            supportsAllDrives: true
-        });
-        const files = response.data.files;
+        let files: drive_v3.Schema$File[] = [];
+        let pageToken: string | undefined = undefined;
+        do {
+            const response:GaxiosResponse = await drive.files.list({
+                q: `'${folderId}' in parents and trashed = false and (mimeType='${PDF_MIME_TYPE}' or mimeType='${FOLDER_MIME_TYPE}')`,
+                fields: 'nextPageToken, files(id, name, mimeType,size,parents,webViewLink,thumbnailLink,createdTime)',
+                pageSize: 1000, // Increase the page size to retrieve more files if necessary
+                pageToken: pageToken,
+                includeItemsFromAllDrives: true,
+                supportsAllDrives: true
+            });
+            // files = response.data.files;
+            files = files.concat(response.data.files || []);
+            pageToken = response.data.nextPageToken;
+        } while (pageToken);
+
+
         console.log(`files from google drive count including folders and non-pdf: ${files?.length}`)
         if (files && files.length) {
             for (const file of files) {

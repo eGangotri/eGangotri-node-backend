@@ -41,5 +41,5 @@ async function procReducedPdfGoogleDrive(driveLinkOrFolderID: string, folderName
    //procOrigGoogleDrive("1JTE35Py5f263RGjvjAbqbJMCu5dvoRe0", 'Treasures 27');
 //   procOrigGoogleDrive("1Heb53B7ymtdcW4cSgLG5Y12xDPALX3sI", 'Treasures 29');
   // procOrigGoogleDrive("15vNpsd_W4GWBCqOnKbe5ad9ddFX9Ep3W", 'Treasures 30');
-  //procReducedPdfGoogleDrive("https://drive.google.com/drive/folders/1Nox5h2CYgIrGcd73JswHk0_q05y0W-b7?usp=drive_link", 'Treasures 60')
+  procOrigGoogleDrive("1Nox5h2CYgIrGcd73JswHk0_q05y0W-b7", 'Treasures 60')
   //yarn run catalog
