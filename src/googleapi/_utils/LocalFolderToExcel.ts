@@ -23,7 +23,7 @@ const createExcelFilePathName = (mainExcelDataLength: number, folderName: String
 
 const folderToExcel = async (folder: string, _excelRoot: string) => {
     console.log(`folderToExcel ${folder}`)
-    FileUtils.resetRowCounter()
+    FileUtils.incrementRowCounter()
     const jsonArray = await FileUtils.getAllPDFFilesWithMedata(folder)
     const _fileName = createExcelFilePathName(jsonArray.length, path.parse(folder)?.base, _excelRoot);
     jsonToExcel(jsonArray, _fileName)
