@@ -20,10 +20,10 @@ const tifFolderMain = "D:\\NMM\\August-2019\\03-08-2019";
 const pdfFolder = "E:\\ramtek-3";
 
 (async () => {
-    let NOT_CREATED = [];
-    let NON_MATCHING = [];
-    let MATCHING = [];
-    let UNCHECKABLE = [];
+    let NOT_CREATED:string[] = [];
+    let NON_MATCHING:string[] = [];
+    let MATCHING:string[] = [];
+    let UNCHECKABLE:string[] = [];
 
     heapStats();
     garbageCollect()

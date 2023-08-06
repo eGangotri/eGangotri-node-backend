@@ -4,25 +4,26 @@ import { pdfPageCountUsingPdfJs } from "./PdfJsUtil";
 
 import { addReport, INTRO_PAGE_ADJUSTMENT } from "..";
 import { getAllTifs } from "./ImgUtils";
+const buffer = require('buffer');
+const ALGORITHMS = ["PDF_JS", "PDF_LIB"]
 
-const ALGORITHMS = ["PDF_JS","PDF_LIB"]
-export async function getPdfPageCount(pdfPath: string, algorithm:string = ALGORITHMS[1]) {
+export const PDF_SIZE_LIMITATIONS = buffer.constants.MAX_LENGTH + 1
+
+export async function getPdfPageCount(pdfPath: string, algorithm: string = ALGORITHMS[1]) {
     let pageCount = -1
-    if (getFilzeSize(pdfPath) <= 2) {
-        if(algorithm === "PDF_JS"){
-            try{
-                pageCount = await pdfPageCountUsingPdfJs(pdfPath);
-            }
-            catch(e:any){
-                console.log(`pageCount Error, $e`)
-            }
+    if (algorithm === "PDF_JS") {
+        try {
+            pageCount = await pdfPageCountUsingPdfJs(pdfPath);
         }
-        else if (algorithm  === "PDF_LIB") {
-            pageCount = await getPdfPageCountUsingPdfLib(pdfPath)
+        catch (e: any) {
+            console.log(`pageCount Error, $e`)
         }
-        else {
-            return -100;
-        }
+    }
+    else if (algorithm === "PDF_LIB") {
+        pageCount = await getPdfPageCountUsingPdfLib(pdfPath)
+    }
+    else {
+        return -100;
     }
     return pageCount;
 }

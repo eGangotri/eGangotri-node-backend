@@ -1,14 +1,11 @@
-import { getAllPDFFiles } from "../../imgToPdf/utils/FileUtils"
 import path from 'path';
 import * as fs from 'fs';
 import * as _ from 'lodash';
-import { ExcelHeaders, PdfFolderTitleType } from "../types";
+import { ExcelHeaders } from "../types";
 import { excelToJson } from "./ExcelUtils";
 import { titleInGoogleDrive } from "./constants";
-import { convertLocalPdfsToJson } from "./LocalFolderToExcel";
-
-
-
+import { getAllPDFFilesWithMedata } from '../../imgToPdf/utils/FileUtils';
+import { PdfStats } from '../../imgToPdf/utils/types';
 
 const _excelToJson = () => {
     const _root = "C:\\_catalogWork\\_collation";
@@ -20,8 +17,8 @@ const _excelToJson = () => {
 
 }
 
-const findCorrespondingExcelHeader = (local: PdfFolderTitleType, excelJson: ExcelHeaders[]) => {
-    const combinedObject: PdfFolderTitleType = local;
+const findCorrespondingExcelHeader = (local: PdfStats, excelJson: ExcelHeaders[]) => {
+    const combinedObject: PdfStats = local;
     let localTitle = local.fileName;
 
     excelJson?.find((_excel: ExcelHeaders) => {
@@ -37,8 +34,10 @@ const findCorrespondingExcelHeader = (local: PdfFolderTitleType, excelJson: Exce
 const MISSING_PDFS: string[] = []
 const FOUND_PDFS: string[] = [];
 
-const tally = (rootFolder: string) => {
-    const localJson = convertLocalPdfsToJson(rootFolder)
+const tally = async (rootFolder: string) => {
+   // const localJson = await convertLocalPdfsToJson(rootFolder)
+    const localJson = await getAllPDFFilesWithMedata(rootFolder)
+
     const excelJson = _excelToJson();
     const matchedItems = localJson.filter(local => findCorrespondingExcelHeader(local, excelJson));
 

@@ -1,6 +1,13 @@
 import * as fs from 'fs';
+import { getPdfPageCount } from './PdfUtil';
+import { getFilzeSize } from './PdfLibUtils';
 const path = require("path")
+import * as Mirror from "../../mirror/FrontEndBackendCommonCode"
+import { PdfStats } from './types';
+import { ellipsis } from '../../mirror/utils';
 
+export let ROW_COUNTER = 0;
+export const resetRowCounter = () => { ROW_COUNTER = 0 }
 export function removeFolderWithContents(folder: string) {
     fs.rm(folder, { recursive: true, force: true }, (err) => {
         if (err) {
@@ -23,8 +30,14 @@ export const removeExcept = async (folder: any, except: Array<string>) => {
 }
 
 
-export function getAllPDFFiles(directoryPath: string): string[] {
-    let pdfFiles: string[] = [];
+export async function getAllPDFFiles(directoryPath: string): Promise<string[]> {
+    const allPdfs = await getAllPDFFilesWithMedata(directoryPath)
+    return allPdfs.map((x) => x.absPath)
+}
+
+
+export async function getAllPDFFilesWithMedata(directoryPath: string): Promise<PdfStats[]> {
+    let pdfFiles: PdfStats[] = [];
 
     // Read all items in the directory
     const items = fs.readdirSync(directoryPath);
@@ -35,23 +48,35 @@ export function getAllPDFFiles(directoryPath: string): string[] {
 
         if (stat.isDirectory()) {
             // Recursively call the function for subdirectories
-            pdfFiles = pdfFiles.concat(getAllPDFFiles(itemPath));
+            pdfFiles = pdfFiles.concat(await getAllPDFFilesWithMedata(itemPath));
         } else if (path.extname(itemPath).toLowerCase() === '.pdf') {
             // Add PDF files to the array
-            pdfFiles.push(itemPath);
+            const _path = path.parse(itemPath);
+            const rawSize = getFilzeSize(itemPath);
+            const pageCount = await getPdfPageCount(itemPath)
+            const pdfStats = {
+                pageCount,
+                rawSize,
+                size: Mirror.sizeInfo(rawSize),
+                absPath: itemPath,
+                folder: _path.dir,
+                fileName: _path.base
+            }
+            console.log(`${++ROW_COUNTER}). ${JSON.stringify(ellipsis(pdfStats.fileName, 40))} ${pageCount}pages ${Mirror.sizeInfo(rawSize)}`);
+            pdfFiles.push(pdfStats)
         }
+
     }
     return pdfFiles;
 }
-
 export function createFolderIfNotExists(folderPath: string): void {
     if (!fs.existsSync(folderPath)) {
-      fs.mkdirSync(folderPath, { recursive: true });
-      console.log(`Folder created: ${folderPath}`);
+        fs.mkdirSync(folderPath, { recursive: true });
+        console.log(`Folder created: ${folderPath}`);
     } else {
-     // console.log(`Folder already exists: ${folderPath}`);
+        // console.log(`Folder already exists: ${folderPath}`);
     }
-  }
+}
 
 
 

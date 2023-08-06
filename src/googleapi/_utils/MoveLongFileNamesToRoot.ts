@@ -9,8 +9,8 @@ import { move } from "fs-extra";
 
 const MAX_FILE_NAME_PERMITTED = 170
 
-const MOVED_FILE_LIST:string[] = []
-const CANT_MOVE_FILE_LIST:string[] = []
+const MOVED_FILE_LIST: string[] = []
+const CANT_MOVE_FILE_LIST: string[] = []
 let TOTAL_FILE_COUNT = 0;
 
 function moveFile(sourcePath: string, destinationPath: string) {
@@ -19,14 +19,14 @@ function moveFile(sourcePath: string, destinationPath: string) {
         fs.renameSync(sourcePath, destinationPath);
         console.log(`File ${destinationPath} moved successfully.`);
         MOVED_FILE_LIST.push(destinationPath)
-      } catch (err) {
+    } catch (err) {
         console.error(`Error ${destinationPath} moving the file:`, err);
         CANT_MOVE_FILE_LIST.push(destinationPath)
-      }
+    }
 }
 
-const _execute = (rootFolder: string) => {
-    const allPdfs = getAllPDFFiles(rootFolder)
+const _execute = async (rootFolder: string) => {
+    const allPdfs = await getAllPDFFiles(rootFolder)
     TOTAL_FILE_COUNT = allPdfs.length
     console.log(`allPdfs length in ${rootFolder}: ${TOTAL_FILE_COUNT}`)
     const rootFolderBase = path.basename(rootFolder)
@@ -48,10 +48,12 @@ const _execute = (rootFolder: string) => {
 }
 //const rootFolder = "C:\\_catalogWork\\_reducedPdfs\\Treasures28 (1253)"
 const rootFolder = "E:\\_catalogWork\\_reducedPdfs\\Treasures60 (1694)"
-_execute(rootFolder)
-console.log(`Final Report
+_execute(rootFolder).then(() => {
+    console.log(`Final Report
 TOTAL (${TOTAL_FILE_COUNT})
 CANT(${CANT_MOVE_FILE_LIST.length}): ${CANT_MOVE_FILE_LIST.join("\n")}
 MOVED(${MOVED_FILE_LIST.length}):${MOVED_FILE_LIST.join("\n")}
 `)
+})
+
 //yarn run moveLongNames
