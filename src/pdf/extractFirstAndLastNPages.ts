@@ -41,7 +41,7 @@ async function createPartialPdf(inputPath: string, outputPath: string, pdfsToBeP
 
 export const loopFolderForExtraction = async (rootFolder: string, outputRoot: string, loopIndex: string) => {
 
-    const allPdfs = getAllPDFFiles(rootFolder)
+    const allPdfs = await getAllPDFFiles(rootFolder)
     const pdfsToBeProcessedCount = allPdfs.length;
     const outputPath = `${outputRoot}\\${path.parse(rootFolder).name} (${pdfsToBeProcessedCount})`;
     console.log(`rootFolder ${rootFolder} ${outputRoot} ${loopIndex}`);

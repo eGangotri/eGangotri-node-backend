@@ -1,52 +1,49 @@
 import path from "path";
-import { getAllPDFFiles } from "../../imgToPdf/utils/FileUtils";
-import { PdfFolderTitleType } from "../types";
+import * as FileUtils from "../../imgToPdf/utils/FileUtils";
 import * as fs from 'fs';
 import { DD_MM_YYYY_HH_MMFORMAT } from "../../utils/utils";
 import moment from "moment";
 import { jsonToExcel } from "./ExcelUtils";
 
-const _root = "C:\\_catalogWork\\_collation";
-const treasureFolder = "Treasures-2"
+const createExcelFilePathName = (mainExcelDataLength: number, folderName: String, _excelRoot: string) => {
+    const _excelPath = `${_excelRoot}\\local`;
 
-const createExcelFilePathName = (mainExcelDataLength: number) => {
-    const _localPath = `${_root}\\local`;
-
-    if (!fs.existsSync(_localPath)) {
-        fs.mkdirSync(_localPath);
+    if (!fs.existsSync(_excelPath)) {
+        fs.mkdirSync(_excelPath);
     }
-    const mergedExcelPath = `${_localPath}\\${treasureFolder}`;
+    const excelPathWithFolderName = `${_excelPath}\\${folderName}`;
 
     const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)
-    if (!fs.existsSync(mergedExcelPath)) {
-        fs.mkdirSync(mergedExcelPath);
+    if (!fs.existsSync(excelPathWithFolderName)) {
+        fs.mkdirSync(excelPathWithFolderName);
     }
-    const mergedExcelFileName = `${mergedExcelPath}\\${treasureFolder}-Final-Merged-Catalog-${timeComponent}`;
+    const mergedExcelFileName = `${excelPathWithFolderName}\\${folderName}-Final-Merged-Catalog-${timeComponent}`;
     return `${mergedExcelFileName}-${mainExcelDataLength}.xlsx`;
 }
 
-export const convertLocalPdfsToJson = (rootFolder: string) => {
-    const allPdfs = getAllPDFFiles(rootFolder)
-    let pdfTuple: Array<PdfFolderTitleType> = []
-    for (const [index, pdf] of allPdfs.entries()) {
-        const _path = path.parse(pdf);
-        pdfTuple.push({
-            folder: _path.dir,
-            fileName: _path.base
-        })
-        console.log(`${index + 1}) ${_path.base}
-       `);
-    }
-    console.log(`pdfTuple ${JSON.stringify(pdfTuple[0])} ${pdfTuple.length}`)
-    return pdfTuple
-}
-
-const folderToExcel = (folder:string) => {
-    const jsonArray = convertLocalPdfsToJson(folder)
-    const _fileName = createExcelFilePathName(jsonArray.length);
+const folderToExcel = async (folder: string, _excelRoot: string) => {
+    console.log(`folderToExcel ${folder}`)
+    FileUtils.resetRowCounter()
+    const jsonArray = await FileUtils.getAllPDFFilesWithMedata(folder)
+    const _fileName = createExcelFilePathName(jsonArray.length, path.parse(folder)?.base, _excelRoot);
     jsonToExcel(jsonArray, _fileName)
 }
 
-folderToExcel("D:\\eG-tr1-30\\Treasures30");
+
+(async () => {
+    const _excelRoot = "C:\\_catalogWork\\_collation";
+    const localRoot = "G:\\eGangotri-Tr-31-39"
+
+    const localSubFolder = [31, 32, 33, 34, 35, 36, 37].map(x => `Treasures${x}`);
+
+    for (let folder of localSubFolder) {
+        try {
+            await folderToExcel(`${localRoot}\\${folder}`, _excelRoot);
+        }
+        catch (err) {
+            console.log(err, "foderToExcel")
+        }
+    }
+})();
 
 //yarn run localToExcel

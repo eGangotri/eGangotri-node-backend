@@ -4,6 +4,7 @@ import { formatTime, getAllPdfs } from './Utils';
 import { addReport, INTRO_PAGE_ADJUSTMENT } from '../index';
 import { getAllTifs } from './ImgUtils';
 import * as path from 'path';
+import { PDF_SIZE_LIMITATIONS } from './PdfUtil';
 
 /**
  * Uses https://pdf-lib.js.org/#examples
@@ -12,15 +13,16 @@ import * as path from 'path';
 
 
 export async function getPdfPageCountUsingPdfLib(pdfPath: string) {
-    if (getFilzeSize(pdfPath) <= 2) {
-        const pdfDoc = await PDFDocument.load(fs.readFileSync(pdfPath), { ignoreEncryption: true });
-        return pdfDoc.getPages().length
+    if (getFilzeSize(pdfPath) <= PDF_SIZE_LIMITATIONS) {
+        const fileBuffer = await fs.promises.readFile(pdfPath);
+        const pdfDoc = await PDFDocument.load(fileBuffer);
+        return pdfDoc.getPageCount();
     }
     else return -1;
 }
 
 export async function getPdfFirstPageDimensionsUsingPdfLib(pdfPath: string) {
-    if (getFilzeSize(pdfPath) <= 2) {
+    if (getFilzeSize(pdfPath) <= PDF_SIZE_LIMITATIONS) {
         const pdfDoc = await PDFDocument.load(fs.readFileSync(pdfPath), { ignoreEncryption: true });
         return [pdfDoc.getPages()[0].getWidth(), pdfDoc.getPages()[0].getHeight()]
     }
@@ -31,7 +33,7 @@ export async function getPdfFirstPageDimensionsUsingPdfLib(pdfPath: string) {
 export function getFilzeSize(pdfPath: string) {
     let stats = fs.statSync(pdfPath)
     let fileSizeInBytes = stats.size;
-    return fileSizeInBytes / (1024 * 1024 * 1024);
+    return fileSizeInBytes;
 }
 
 export async function mergePDFDocuments(documents: Array<any>, pdfName: string) {
@@ -42,7 +44,6 @@ export async function mergePDFDocuments(documents: Array<any>, pdfName: string) 
         const copiedPages = await mergedPdf.copyPages(document, document.getPageIndices());
         copiedPages.forEach((page) => mergedPdf.addPage(page));
         console.log(` copiedPage ${++counter} to ${path.parse(pdfName).name}`)
-
     }
 
     return await fs.promises.writeFile(pdfName, await mergedPdf.save());
@@ -70,5 +71,5 @@ export async function mergePdfsInList(pdfFolders: Array<any>, pdfName: string) {
 
 export async function mergeAllPdfsInFolder(pdfFolder: string, pdfName: string) {
     const pdfs = await getAllPdfs(pdfFolder);
-    mergePdfsInList([pdfs],pdfName);
+    mergePdfsInList([pdfs], pdfName);
 }
