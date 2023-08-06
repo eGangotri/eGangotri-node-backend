@@ -14,11 +14,17 @@ import { PDF_SIZE_LIMITATIONS } from './PdfUtil';
 
 export async function getPdfPageCountUsingPdfLib(pdfPath: string) {
     if (getFilzeSize(pdfPath) <= PDF_SIZE_LIMITATIONS) {
-        const fileBuffer = await fs.promises.readFile(pdfPath);
-        const pdfDoc = await PDFDocument.load(fileBuffer);
-        return pdfDoc.getPageCount();
+        try {
+            const fileBuffer = await fs.promises.readFile(pdfPath);
+            const pdfDoc = await PDFDocument.load(fileBuffer);
+            return pdfDoc.getPageCount();
+        }
+        catch (err) {
+            return 0;
+            console.log(err)
+        }
     }
-    else return -1;
+    else return 0;
 }
 
 export async function getPdfFirstPageDimensionsUsingPdfLib(pdfPath: string) {
