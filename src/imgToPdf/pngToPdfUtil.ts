@@ -6,8 +6,6 @@ import * as path from 'path';
 import { CHUNK_SIZE, HANDLE_CHECKSUM, INTRO_PAGE_ADJUSTMENT, REDUNDANT_FOLDER } from '.';
 import { PDF_SUB_FOLDER, PNG_SUB_FOLDER } from './utils/constants';
 import { appendAlphaCodeForNum } from './utils/PngUtils';
-import { getPdfPageCount } from './utils/PdfUtil';
-import { isReturnStatement } from 'typescript';
 
 
 /**

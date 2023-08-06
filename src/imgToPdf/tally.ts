@@ -9,8 +9,7 @@ import {
     heapStats
 } from './utils/Utils';
 import { addReport, INTRO_PAGE_ADJUSTMENT, printReport } from './index';
-import { pdfPageCountUsingPdfJs } from './utils/PdfJsUtil';
-import { getPdfPageCount } from './utils/PdfUtil';
+import {  getPdfPageCountUsingPdfLib } from "./utils/PdfLibUtils";
 
 
 // const tifFolderMain = "D:\\NMM\\August-2019\\02-08-2019";
@@ -47,7 +46,7 @@ const pdfFolder = "E:\\ramtek-3";
             NOT_CREATED.push(folderForChecking);
             continue;
         }
-        const pdfPageCount = (await getPdfPageCount(pdfPath)) - INTRO_PAGE_ADJUSTMENT;
+        const pdfPageCount = (await getPdfPageCountUsingPdfLib(pdfPath)) - INTRO_PAGE_ADJUSTMENT;
         const tifCount = (await getAllTifs(folderForChecking)).length;
 
         if ((pdfPageCount) === tifCount) {

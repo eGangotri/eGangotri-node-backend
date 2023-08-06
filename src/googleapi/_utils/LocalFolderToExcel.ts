@@ -36,6 +36,7 @@ const folderToExcel = async (folder: string, _excelRoot: string) => {
 
     const localSubFolder = [31, 32, 33, 34, 35, 36, 37].map(x => `Treasures${x}`);
 
+    // folderToExcel(`G:\\eGangotri-Tr-31-39\\Treasures33\\_freeze\\Jngm_Books`, _excelRoot);
     for (let folder of localSubFolder) {
         try {
             await folderToExcel(`${localRoot}\\${folder}`, _excelRoot);

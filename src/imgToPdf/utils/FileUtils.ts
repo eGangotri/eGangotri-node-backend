@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import { getPdfPageCount } from './PdfUtil';
+import {  getPdfPageCountUsingPdfLib } from "./PdfLibUtils";
 import { getFilzeSize } from './PdfLibUtils';
 const path = require("path")
 import * as Mirror from "../../mirror/FrontEndBackendCommonCode"
@@ -54,7 +54,7 @@ export async function getAllPDFFilesWithMedata(directoryPath: string): Promise<P
             // Add PDF files to the array
             const _path = path.parse(itemPath);
             const rawSize = getFilzeSize(itemPath);
-            const pageCount = await getPdfPageCount(itemPath)
+            const pageCount = await getPdfPageCountUsingPdfLib(itemPath)
             const pdfStats = {
                 pageCount,
                 rawSize,
@@ -63,7 +63,7 @@ export async function getAllPDFFilesWithMedata(directoryPath: string): Promise<P
                 folder: _path.dir,
                 fileName: _path.base
             }
-            console.log(`${ROW_COUNTER[0]}/${++ROW_COUNTER[1]}). ${JSON.stringify(ellipsis(pdfStats.fileName, 40))} ${pageCount}pages ${Mirror.sizeInfo(rawSize)}`);
+            console.log(`${ROW_COUNTER[0]}/${++ROW_COUNTER[1]}). ${JSON.stringify(ellipsis(pdfStats.fileName, 40))} ${pageCount} pages ${Mirror.sizeInfo(rawSize)}`);
             pdfFiles.push(pdfStats)
         }
 
