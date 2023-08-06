@@ -35,12 +35,12 @@ async function procReducedPdfGoogleDrive(driveLinkOrFolderID: string, folderName
 }
 
 (async () =>{
-  await procOrigGoogleDrive("https://drive.google.com/drive/folders/1RNqkZAsxUshRoNIBwHet314ISQtqY5Fc?usp=drive_link", 'Treasures 33');
-  await procOrigGoogleDrive("https://drive.google.com/drive/folders/1xdXI2_sUpnHf2lU6UhDLwzDtf7WTyF8k?usp=drive_link", 'Treasures 34');
-  await procOrigGoogleDrive("https://drive.google.com/drive/folders/1A3EhS2C2GmvbNLkM4SyEL4H8Y5703-cO?usp=drive_link", 'Treasures 35');
-  await procOrigGoogleDrive("https://drive.google.com/drive/folders/13yG1LqFHZyzFx8sgSMENNOEVtrz8JoQs?usp=drive_link", 'Treasures 36');
-  await procOrigGoogleDrive("https://drive.google.com/drive/folders/1lrrTCTLNROEw8pvj4f84XKjN6Ar1S0Ag?usp=drive_link", 'Treasures 37');
-
+  // await procOrigGoogleDrive("https://drive.google.com/drive/folders/1RNqkZAsxUshRoNIBwHet314ISQtqY5Fc?usp=drive_link", 'Treasures 33');
+  // await procOrigGoogleDrive("https://drive.google.com/drive/folders/1xdXI2_sUpnHf2lU6UhDLwzDtf7WTyF8k?usp=drive_link", 'Treasures 34');
+  // await procOrigGoogleDrive("https://drive.google.com/drive/folders/1A3EhS2C2GmvbNLkM4SyEL4H8Y5703-cO?usp=drive_link", 'Treasures 35');
+  // await procOrigGoogleDrive("https://drive.google.com/drive/folders/13yG1LqFHZyzFx8sgSMENNOEVtrz8JoQs?usp=drive_link", 'Treasures 36');
+  // await procOrigGoogleDrive("https://drive.google.com/drive/folders/1lrrTCTLNROEw8pvj4f84XKjN6Ar1S0Ag?usp=drive_link", 'Treasures 37');
+  await procOrigGoogleDrive("https://drive.google.com/drive/folders/1QlIHHH4xCNOY5jkuN5JMShZW7zWXfcjO?usp=drive_link", 'VirendraAgarwal');
 })();
 
    ///procReducedPdfGoogleDrive("https://drive.google.com/drive/folders/1Nox5h2CYgIrGcd73JswHk0_q05y0W-b7?usp=drive_link", 'Treasures 60')

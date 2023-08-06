@@ -6,8 +6,9 @@ import * as Mirror from "../../mirror/FrontEndBackendCommonCode"
 import { PdfStats } from './types';
 import { ellipsis } from '../../mirror/utils';
 
-export let ROW_COUNTER = 0;
-export const resetRowCounter = () => { ROW_COUNTER = 0 }
+export let ROW_COUNTER = [0,0];
+export const incrementRowCounter = () => { ROW_COUNTER = [++ROW_COUNTER[0],0] }
+
 export function removeFolderWithContents(folder: string) {
     fs.rm(folder, { recursive: true, force: true }, (err) => {
         if (err) {
@@ -62,7 +63,7 @@ export async function getAllPDFFilesWithMedata(directoryPath: string): Promise<P
                 folder: _path.dir,
                 fileName: _path.base
             }
-            console.log(`${++ROW_COUNTER}). ${JSON.stringify(ellipsis(pdfStats.fileName, 40))} ${pageCount}pages ${Mirror.sizeInfo(rawSize)}`);
+            console.log(`${ROW_COUNTER[0]}/${++ROW_COUNTER[1]}). ${JSON.stringify(ellipsis(pdfStats.fileName, 40))} ${pageCount}pages ${Mirror.sizeInfo(rawSize)}`);
             pdfFiles.push(pdfStats)
         }
 
