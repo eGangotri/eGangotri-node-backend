@@ -9,7 +9,7 @@ import moment from "moment";
 const _root = "C:\\_catalogWork\\_collation";
 const treasureFolder = "Treasures 21"
 
-const mainExcelPath = `${_root}\\_catExcels\\${treasureFolder}`
+const mainExcelPath = `${_root}\\_googleDriveExcels\\${treasureFolder}`
 const mainExcelFileName = `${mainExcelPath}\\${fs.readdirSync(mainExcelPath)[0]}`;
 
 const secondaryExcelPath = `${_root}\\_catReducedPdfExcels\\${treasureFolder}`
