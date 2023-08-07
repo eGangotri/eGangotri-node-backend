@@ -2,29 +2,23 @@ import { PDFDocument } from 'pdf-lib'
 import * as fs from 'fs';
 import { formatTime, getAllPdfs } from './Utils';
 import { addReport, INTRO_PAGE_ADJUSTMENT } from '../index';
-import { getAllTifs } from './ImgUtils';
-import * as path from 'path';
 import { PDF_SIZE_LIMITATIONS } from './PdfUtil';
 
 /**
- * Uses https://pdf-lib.js.org/#examples
- * https://www.npmjs.com/package/pdf-lib
+ *  Only handles files < 2 GB
  */
-
-
 export async function getPdfPageCountUsingPdfLib(pdfPath: string) {
-    if (getFilzeSize(pdfPath) <= PDF_SIZE_LIMITATIONS) {
-        try {
+    try {
+        if (getFilzeSize(pdfPath) <= PDF_SIZE_LIMITATIONS) {
             const fileBuffer = await fs.promises.readFile(pdfPath);
             const pdfDoc = await PDFDocument.load(fileBuffer);
             return pdfDoc.getPageCount();
         }
-        catch (err) {
-            return 0;
-            console.log(err)
-        }
     }
-    else return 0;
+    catch (err) {
+        console.log(err)
+    }
+    return 0;
 }
 
 export async function getPdfFirstPageDimensionsUsingPdfLib(pdfPath: string) {

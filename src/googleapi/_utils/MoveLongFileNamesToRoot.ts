@@ -31,7 +31,7 @@ const _execute = async (rootFolder: string) => {
     console.log(`allPdfs length in ${rootFolder}: ${TOTAL_FILE_COUNT}`)
     const rootFolderBase = path.basename(rootFolder)
     for (const [index, pdf] of allPdfs.entries()) {
-        const filePath = path.parse(pdf);
+        const filePath = path.parse(pdf.absPath);
         const pdfName = filePath.name
 
         if (pdfName.length > MAX_FILE_NAME_PERMITTED) {
@@ -41,7 +41,7 @@ const _execute = async (rootFolder: string) => {
                 CANT_MOVE_FILE_LIST.push(`${rootFolder}\\${pdfName}.pdf`)
             }
             else {
-                moveFile(pdf, `${rootFolder}\\${pdfName}.pdf`)
+                moveFile(pdf.absPath, `${rootFolder}\\${pdfName}.pdf`)
             }
         }
     }
