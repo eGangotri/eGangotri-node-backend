@@ -47,7 +47,7 @@ export const loopFolderForExtraction = async (rootFolder: string, outputRoot: st
     console.log(`rootFolder ${rootFolder} ${outputRoot} ${loopIndex}`);
     createFolderIfNotExists(outputPath)
     for (const [index, pdf] of allPdfs.entries()) {
-        const _path = path.parse(pdf);
+        const _path = path.parse(pdf.absPath);
         const subDir = _path.dir.replace(rootFolder, '')
         let _subFolder = `${outputPath}\\${subDir}`
         console.log(`_subFolder ${_subFolder}
@@ -56,7 +56,7 @@ export const loopFolderForExtraction = async (rootFolder: string, outputRoot: st
 
         createFolderIfNotExists(_subFolder)
         try {
-            await createPartialPdf(pdf, _subFolder, pdfsToBeProcessedCount, loopIndex);
+            await createPartialPdf(pdf.absPath, _subFolder, pdfsToBeProcessedCount, loopIndex);
             PDF_PROCESSING_COUNTER++;
         }
         catch (error) {

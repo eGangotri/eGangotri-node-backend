@@ -4,7 +4,7 @@ import * as _ from 'lodash';
 import { ExcelHeaders } from "../types";
 import { excelToJson } from "./ExcelUtils";
 import { titleInGoogleDrive } from "./constants";
-import { getAllPDFFilesWithMedata } from '../../imgToPdf/utils/FileUtils';
+import { getAllPDFFiles } from '../../imgToPdf/utils/FileUtils';
 import { PdfStats } from '../../imgToPdf/utils/types';
 
 const _excelToJson = () => {
@@ -35,8 +35,7 @@ const MISSING_PDFS: string[] = []
 const FOUND_PDFS: string[] = [];
 
 const tally = async (rootFolder: string) => {
-   // const localJson = await convertLocalPdfsToJson(rootFolder)
-    const localJson = await getAllPDFFilesWithMedata(rootFolder)
+    const localJson = await getAllPDFFiles(rootFolder)
 
     const excelJson = _excelToJson();
     const matchedItems = localJson.filter(local => findCorrespondingExcelHeader(local, excelJson));

@@ -7,8 +7,7 @@ import { createFileNameWithPathForExport, extractFolderId, getFolderName, getFol
 import * as _ from 'lodash';
 import { GaxiosResponse } from 'gaxios';
 import { ellipsis } from '../../mirror/utils';
-
-let ROW_COUNTER = 0;
+import * as FileUtils from '../../imgToPdf/utils/FileUtils';
 
 export async function listFolderContentsAndGenerateCSVAndExcel(_folderIdOrUrl: string,
     drive: drive_v3.Drive,
@@ -26,8 +25,8 @@ export async function listFolderContentsAndGenerateCSVAndExcel(_folderIdOrUrl: s
 
     await listFolderContents(folderId, drive, umbrellaFolder, googleDrivePdfData, idFolderNameMap,rootFolderName);
 
-    const fileNameWithPath = createFileNameWithPathForExport(folderId, umbrellaFolder, exportDestFolder) + `_${ROW_COUNTER}`;
-    ROW_COUNTER=0;
+    const fileNameWithPath = createFileNameWithPathForExport(folderId, umbrellaFolder, exportDestFolder) + `_${FileUtils.ROW_COUNTER[1]}`;
+    FileUtils.incrementRowCounter()
     //writeDataToCSV(googleDrivePdfData, `${fileNameWithPath}.csv`)
     // Convert data to XLSX
     if (!_.isEmpty(googleDrivePdfData)) {
@@ -102,7 +101,7 @@ export const addFileMetadataToArray = (file: drive_v3.Schema$File, folderId: str
 
     if (filemimeType === PDF_MIME_TYPE) {
         googleDrivePdfData.push({
-            index: ++ROW_COUNTER,
+            index: ++FileUtils.ROW_COUNTER[1],
             fileName: fileName,
             googleDriveLink: webViewLink,
             sizeInfo: sizeInfo(fileSize),
@@ -112,6 +111,6 @@ export const addFileMetadataToArray = (file: drive_v3.Schema$File, folderId: str
             thumbnailLink: thumbnailLink,
         });
 
-        console.log(`(${ROW_COUNTER}). ${ellipsis(fileName,40)} `);
+        console.log(`${FileUtils.ROW_COUNTER[0]}/${FileUtils.ROW_COUNTER[1]}). ${ellipsis(fileName,40)} `);
     }
 }

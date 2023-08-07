@@ -2,6 +2,7 @@ import { google } from 'googleapis';
 import { _credentials } from './_utils/credentials_gitignore';
 import * as fs from 'fs';
 import { listFolderContentsAndGenerateCSVAndExcel } from './service/GoogleApiService';
+import * as FileUtils from "../imgToPdf/utils/FileUtils";
 
 // Set up OAuth2 credentials
 const credentials = {
@@ -35,12 +36,20 @@ async function procReducedPdfGoogleDrive(driveLinkOrFolderID: string, folderName
 }
 
 (async () => {
-  await procOrigGoogleDrive("1tD49TdNG_m_2R74AS_VpBkoAcWGw4-LT", 'Treasures 40');
-  await procOrigGoogleDrive("1n3A4Edtqz6lWoyZNKUBINfUcfzpQ0UW6", 'Treasures 41');
-  await procOrigGoogleDrive("1303P0EJY6ooJVb06Fo7XQGoL-HjvG4q7", 'Treasures 42');
-  await procOrigGoogleDrive("1NppbAHIi1auKMgDsKmsZbkUfJTkdjdg0", 'Treasures 43');
-  await procOrigGoogleDrive("1GvLF-GV_7U7BqPxyoIjSjxurIhcfvf3m", 'Treasures 44');
-  await procOrigGoogleDrive("1WiIzzj0CKBEOSUg0dbW8NIYmRcpOGqDP", 'Treasures 45');
+  await procOrigGoogleDrive("1bIwH9eD_F5qVv5u2rbedeoSIu0dkZzxP", 'Treasures 46');
+  await procOrigGoogleDrive("1Wh_pNnqZq4MprnnbjbveZEQSwN3T5_yQ", 'Treasures 47');
+  await procOrigGoogleDrive("1g8Kc0M6jfEDOX_BTX-014jQwL56T-nRD", 'Treasures 48');
+  await procOrigGoogleDrive("1CAU2oq40DR4A5ZNIveWqw4oOMLZgkFW4", 'Treasures 49');
+  await procOrigGoogleDrive("1saOD3zWKZrDfMWT086tPqVFmjOTrtdMn", 'Treasures 50');
+  await procOrigGoogleDrive("1ZVcABu3G1HQNLSvUOD9hZG8lvYMi2yp7", 'Treasures 51');
+  await procOrigGoogleDrive("1jjJIkcfXzewXeftMeErWRG-Yw51wBEZa", 'Treasures 52');
+  await procOrigGoogleDrive("1QZcOJ0lKUNZuN_tNk6BXfypYB4zOOh34", 'Treasures 53');
+  await procOrigGoogleDrive("1nSwJ7j3w4gXvuLnhUwus3LZxDrVbrPyy", 'Treasures 54');
+  await procOrigGoogleDrive("1tFOSD3avUyb0Uia1Zu1oGPyzuCLrYJ4N", 'Treasures 55');
+  await procOrigGoogleDrive("1gkvQtEDXvur6fgBFajPiX6J96GHYtOyi", 'Treasures 56');
+  await procOrigGoogleDrive("1FnH3_020ZIV2IQbZWr7A2o85g2svdXLR", 'Treasures 57');
+  await procOrigGoogleDrive("1D5fWH7K6nA93R3O_2NngJLFL5z5zK1oN", 'Treasures 58');
+  await procOrigGoogleDrive("1bxAMIEFAEO-SerkV_2ZzxiFgn3uobDII", 'Treasures 59');
 })();
 
   //yarn run catalog
