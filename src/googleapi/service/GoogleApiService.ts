@@ -66,7 +66,7 @@ export async function listFolderContents(folderId: string, drive: drive_v3.Drive
         } while (pageToken);
 
 
-        console.log(`Reading folder (${idFolderNameMap?.get(folderId)} containing PDF+FOLDER Count): ${files?.length}`)
+        console.log(`Reading folder (${idFolderNameMap?.get(folderId)} containing items:(PDF+FOLDER Count): ${files?.length}`)
         if (files && files.length) {
             for (const file of files) {
                 try {
@@ -112,6 +112,6 @@ export const addFileMetadataToArray = (file: drive_v3.Schema$File, folderId: str
             thumbnailLink: thumbnailLink,
         });
 
-        console.log(`(${ROW_COUNTER}). ${ellipsis(fileName),40} "${_parents}"`);
+        console.log(`(${ROW_COUNTER}). ${ellipsis(fileName,40)} `);
     }
 }
