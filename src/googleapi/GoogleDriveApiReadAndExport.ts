@@ -36,20 +36,16 @@ async function procReducedPdfGoogleDrive(driveLinkOrFolderID: string, folderName
 }
 
 (async () => {
-  await procOrigGoogleDrive("1bIwH9eD_F5qVv5u2rbedeoSIu0dkZzxP", 'Treasures 46');
-  await procOrigGoogleDrive("1Wh_pNnqZq4MprnnbjbveZEQSwN3T5_yQ", 'Treasures 47');
-  await procOrigGoogleDrive("1g8Kc0M6jfEDOX_BTX-014jQwL56T-nRD", 'Treasures 48');
-  await procOrigGoogleDrive("1CAU2oq40DR4A5ZNIveWqw4oOMLZgkFW4", 'Treasures 49');
-  await procOrigGoogleDrive("1saOD3zWKZrDfMWT086tPqVFmjOTrtdMn", 'Treasures 50');
-  await procOrigGoogleDrive("1ZVcABu3G1HQNLSvUOD9hZG8lvYMi2yp7", 'Treasures 51');
-  await procOrigGoogleDrive("1jjJIkcfXzewXeftMeErWRG-Yw51wBEZa", 'Treasures 52');
-  await procOrigGoogleDrive("1QZcOJ0lKUNZuN_tNk6BXfypYB4zOOh34", 'Treasures 53');
-  await procOrigGoogleDrive("1nSwJ7j3w4gXvuLnhUwus3LZxDrVbrPyy", 'Treasures 54');
-  await procOrigGoogleDrive("1tFOSD3avUyb0Uia1Zu1oGPyzuCLrYJ4N", 'Treasures 55');
-  await procOrigGoogleDrive("1gkvQtEDXvur6fgBFajPiX6J96GHYtOyi", 'Treasures 56');
-  await procOrigGoogleDrive("1FnH3_020ZIV2IQbZWr7A2o85g2svdXLR", 'Treasures 57');
-  await procOrigGoogleDrive("1D5fWH7K6nA93R3O_2NngJLFL5z5zK1oN", 'Treasures 58');
-  await procOrigGoogleDrive("1bxAMIEFAEO-SerkV_2ZzxiFgn3uobDII", 'Treasures 59');
+  await procOrigGoogleDrive("1G6A8zbbiLHFlqgNnPosq1q6JbOoI2dI-", 'Treasures');
+  await procOrigGoogleDrive("1CuXlQEPC06pYPo9QxcgtblJWUETfE1T7", 'Treasures 2');
+  await procOrigGoogleDrive("1kSd34UyuhMwKjXAbLbkbHFDtGOGkxJXR", 'Treasures 3');
+  await procOrigGoogleDrive("1OtZJAHryspt3hUvnr9q76wYVHLPVYH86", 'Treasures 4');
+  await procOrigGoogleDrive("1mmYsZulrzhJHqz_h967jEcvqu5sKfwso", 'Treasures 5');
+  await procOrigGoogleDrive("1wGVqEBDHwlygu3aONf4aMMjWpXsFNI59", 'Treasures 6');
+  await procOrigGoogleDrive("1p65_gIL0l4CgJFZlqLlmkNo6bXOwVhE5", 'Treasures 7');
+  await procOrigGoogleDrive("1kQo5u6h7GnrGWyhUuQ9aYkA_HZEIv59E", 'Treasures 8');
+  await procOrigGoogleDrive("1v8BiXws4uSfYKteXWxpJLhK44Ugct8FJ", 'Treasures 9');
+  await procOrigGoogleDrive("15TIpx8gHsMP7ARkUt6KkErRmUBZn0w1Y", 'Treasures 10');
 })();
 
   //yarn run catalog
