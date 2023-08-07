@@ -6,7 +6,7 @@ import * as Mirror from "../../mirror/FrontEndBackendCommonCode"
 import { PdfStats } from './types';
 import { ellipsis } from '../../mirror/utils';
 
-export let ROW_COUNTER = [0, 0];
+export let ROW_COUNTER = [1, 0];
 export const incrementRowCounter = () => { ROW_COUNTER = [++ROW_COUNTER[0], 0] }
 
 export function removeFolderWithContents(folder: string) {

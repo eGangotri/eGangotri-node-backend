@@ -28,7 +28,7 @@ const drive = google.drive({ version: 'v3', auth: oauth2Client });
 const EXPORT_ROOT_FOLDER = `C:\\_catalogWork\\_collation\\`;
 
 async function procOrigGoogleDrive(driveLinkOrFolderID: string, folderName: string) {
-  await listFolderContentsAndGenerateCSVAndExcel(driveLinkOrFolderID, drive, `${EXPORT_ROOT_FOLDER}_catExcels`, folderName);
+  await listFolderContentsAndGenerateCSVAndExcel(driveLinkOrFolderID, drive, `${EXPORT_ROOT_FOLDER}_googleDriveExcels`, folderName);
 }
 
 async function procReducedPdfGoogleDrive(driveLinkOrFolderID: string, folderName: string) {

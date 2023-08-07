@@ -10,7 +10,7 @@ import { PdfStats } from '../../imgToPdf/utils/types';
 const _excelToJson = () => {
     const _root = "C:\\_catalogWork\\_collation";
     const treasureFolder = "Treasures 60"
-    const mainExcelPath = `${_root}\\_catExcels\\${treasureFolder}`
+    const mainExcelPath = `${_root}\\_googleDriveExcels\\${treasureFolder}`
     const mainExcelFileName = `${mainExcelPath}\\${fs.readdirSync(mainExcelPath)[0]}`;
     const mainExcelData: ExcelHeaders[] = excelToJson(mainExcelFileName);
     return mainExcelData
