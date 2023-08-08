@@ -1,6 +1,6 @@
 import * as xlsx from 'xlsx';
-import { ExcelHeaders, GoogleApiData } from '../types';
-import { SHEET_NAME } from './constants';
+import { ExcelHeaders, GoogleApiData } from '../googleapi/types';
+import { SHEET_NAME } from '../googleapi/_utils/constants';
 import * as ExcelJS from 'exceljs';
 import * as path from 'path';
 import * as _ from 'lodash';
@@ -144,13 +144,12 @@ async function editExistingExcelSheet(excelSheetPath:string) {
 
 export const excelToJson = (excelName: string, sheetName:string = SHEET_NAME) => {
   const workbook = XLSX.readFile(excelName);
-  const sheet = workbook.Sheets[sheetName];
-  const jsonData: ExcelHeaders[] = XLSX.utils.sheet_to_json(sheet);
+  const sheet = workbook.Sheets[sheetName] || workbook.Sheets[workbook.SheetNames[0]];
+  const jsonData:any[] = XLSX.utils.sheet_to_json(sheet);
   console.log(`Converted ${excelName} to Json with Data Length ${jsonData.length}(figure may include empty rows)`);
   return jsonData
 }
 
-    
 export function getGoogleDriveId(link: string): string {
   // Regular expression to match Google Drive link ID
   const regex = /\/d\/(.*?)\//;

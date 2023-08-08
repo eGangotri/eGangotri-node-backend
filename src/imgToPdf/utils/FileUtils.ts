@@ -31,7 +31,7 @@ export const removeExcept = async (folder: any, except: Array<string>) => {
 }
 
 
-export async function getAllPDFFiles(directoryPath: string): Promise<PdfStats[]> {
+export async function getAllPDFFiles(directoryPath: string, withLogs: boolean = false): Promise<PdfStats[]> {
     let pdfFiles: PdfStats[] = [];
 
     // Read all items in the directory
@@ -42,15 +42,18 @@ export async function getAllPDFFiles(directoryPath: string): Promise<PdfStats[]>
         const stat = fs.statSync(itemPath);
         if (stat.isDirectory()) {
             // Recursively call the function for subdirectories
-            pdfFiles = pdfFiles.concat(await getAllPDFFiles(itemPath));
+            pdfFiles = pdfFiles.concat(await getAllPDFFiles(itemPath,withLogs));
         } else if (path.extname(itemPath).toLowerCase() === '.pdf') {
             const _path = path.parse(itemPath);
             pdfFiles.push({
+                rowCounter: ++ROW_COUNTER[1],
                 absPath: itemPath,
                 folder: _path.dir,
                 fileName: _path.base
             })
-
+            if (withLogs) {
+                console.log(`${ROW_COUNTER[0]}/${ROW_COUNTER[1]}). ${JSON.stringify(ellipsis(_path.base, 40))}`);
+            }
         }
     }
     return pdfFiles;
