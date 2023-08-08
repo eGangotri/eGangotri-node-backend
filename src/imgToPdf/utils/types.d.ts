@@ -1,6 +1,6 @@
 export interface PdfStats {
     rowCounter?: number;
-    fileNamepa: string;
+    fileName: string;
     pageCount?: number;
     size?: string;
     rawSize?: number;
