@@ -19,7 +19,7 @@
     "catalog": "ts-node ./src/googleapi/GoogleDriveApiReadAndExport.ts",
     "refresh": "ts-node ./src/googleapi/_utils/getRefreshToken.ts",
     "extractFirstAndLastNPages": "ts-node ./src/pdf/extractFirstAndLastNPages.ts",
-    "combineExcels": "ts-node ./src/googleapi/_utils/CombineExcelData",
+    "combineExcels": "ts-node ./src/googleapi/_utils/CombineMainAndReducedExcelData",
     "excelutil": "ts-node ./src/googleapi/_utils/ExcelUtils",
     "findLongestFileName": "ts-node ./src/utils/utils",
     "mergeExcels": "ts-node ./src/googleapi/_utils/MergeExcels",
