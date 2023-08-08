@@ -6,26 +6,9 @@ import * as _ from 'lodash';
 import { DD_MM_YYYY_HH_MMFORMAT } from "../../utils/utils";
 import moment from "moment";
 
-const _root = "C:\\_catalogWork\\_collation";
-const treasureFolder = "Treasures 21"
-
-const mainExcelPath = `${_root}\\_googleDriveExcels\\${treasureFolder}`
-const mainExcelFileName = `${mainExcelPath}\\${fs.readdirSync(mainExcelPath)[0]}`;
-
-const secondaryExcelPath = `${_root}\\_catReducedPdfExcels\\${treasureFolder}`
-const secondaryExcelFileName = `${secondaryExcelPath}\\${fs.readdirSync(secondaryExcelPath)[0]}`;
-
-const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)
-
-const combinedExcelPath = `${_root}\\_catCombinedExcels\\${treasureFolder}`;
-
-if (!fs.existsSync(combinedExcelPath)) {
-    fs.mkdirSync(combinedExcelPath);
-}
-const combinedExcelFileName = `${combinedExcelPath}\\${treasureFolder}-Catalog-${timeComponent}`;
 
 const foundItems: string[] = [];
-const combineExcels = () => {
+const combineExcels = (mainExcelFileName: string, secondaryExcelFileName: string, combinedExcelFileName: string) => {
     const mainExcelData: ExcelHeaders[] = excelToJson(mainExcelFileName);
     const secondaryExcelData: ExcelHeaders[] = excelToJson(secondaryExcelFileName);
 
@@ -103,5 +86,27 @@ const fillPageCount = (excelJson: ExcelHeaders[]) => {
     })
 }
 
-combineExcels()
+const exec = () => {
+    const _root = "C:\\_catalogWork\\_collation";
+    const treasureFolder = "Treasures 22"
+
+    const mainExcelPath = `${_root}\\_googleDriveExcels\\${treasureFolder}`
+    const mainExcelFileName = `${mainExcelPath}\\${fs.readdirSync(mainExcelPath)[0]}`;
+
+    const secondaryExcelPath = `${_root}\\_catReducedPdfExcels\\${treasureFolder}`
+    const secondaryExcelFileName = `${secondaryExcelPath}\\${fs.readdirSync(secondaryExcelPath)[0]}`;
+
+    const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)
+
+    const combinedExcelPath = `${_root}\\_catCombinedExcels\\${treasureFolder}`;
+
+    if (!fs.existsSync(combinedExcelPath)) {
+        fs.mkdirSync(combinedExcelPath);
+    }
+    const combinedExcelFileName = `${combinedExcelPath}\\${treasureFolder}-Catalog-${timeComponent}`;
+
+    combineExcels(mainExcelFileName, secondaryExcelFileName, combinedExcelFileName)
+}
+exec()
+
 //yarn run combineExcels
