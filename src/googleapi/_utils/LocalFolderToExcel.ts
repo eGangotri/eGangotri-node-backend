@@ -3,7 +3,7 @@ import * as FileUtils from "../../imgToPdf/utils/FileUtils";
 import * as fs from 'fs';
 import { DD_MM_YYYY_HH_MMFORMAT } from "../../utils/utils";
 import moment from "moment";
-import { jsonToExcel } from "./ExcelUtils";
+import { jsonToExcel } from "../../excel/ExcelUtils";
 import * as _ from 'lodash';
 import { sizeInfo } from "../../mirror/FrontEndBackendCommonCode";
 

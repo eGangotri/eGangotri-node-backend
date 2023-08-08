@@ -1,6 +1,6 @@
 import { drive_v3 } from 'googleapis';
 import { sizeInfo } from '../../mirror/FrontEndBackendCommonCode';
-import { dataToXslx } from '../_utils/ExcelUtils';
+import { dataToXslx } from '../../excel/ExcelUtils';
 import { FOLDER_MIME_TYPE, PDF_MIME_TYPE } from '../_utils/constants';
 import { GoogleApiData } from '../types';
 import { createFileNameWithPathForExport, extractFolderId, getFolderName, getFolderPathRelativeToRootFolder } from '../_utils/GoogleDriveUtil';

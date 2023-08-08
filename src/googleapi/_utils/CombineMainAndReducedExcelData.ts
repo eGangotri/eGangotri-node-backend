@@ -1,4 +1,4 @@
-import { excelToJson, jsonToExcel } from "./ExcelUtils";
+import { excelToJson, jsonToExcel } from "../../excel/ExcelUtils";
 import { ExcelHeaders } from "../types";
 import { emptyExcelHeaderObj, linkToFileLocation, linkToTruncatedFileLocation, numPages, titleInGoogleDrive } from "./constants";
 import * as fs from 'fs';

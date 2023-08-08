@@ -26,7 +26,9 @@
     "callUrl": "ts-node ./src/googleapi/_utils/ExcelUtils",
     "moveLongNames": "ts-node ./src/googleapi/_utils/MoveLongFileNamesToRoot",
     "tallyWithLocal": "ts-node ./src/googleapi/_utils/TallyLocalFolderWithGoogleDriveExcel",
-    "localToExcel": "ts-node ./src/googleapi/_utils/LocalFolderToExcel"
+    "localToExcel": "ts-node ./src/googleapi/_utils/LocalFolderToExcel",
+    "syncFolders": "ts-node ./src/folderSync",
+    "compareExcels": "ts-node ./src/excel/CompareTwoExcels"
   },
   "repository": {
     "type": "git",
