@@ -28,7 +28,7 @@
     "tallyWithLocal": "ts-node ./src/googleapi/_utils/TallyLocalFolderWithGoogleDriveExcel",
     "localToExcel": "ts-node ./src/googleapi/_utils/LocalFolderToExcel",
     "syncFolders": "ts-node ./src/folderSync",
-    "compareExcels": "ts-node ./src/excel/CompareTwoExcels"
+    "compareExcels": "ts-node ./src/excel/CompareDriveToLocalExcels"
   },
   "repository": {
     "type": "git",
