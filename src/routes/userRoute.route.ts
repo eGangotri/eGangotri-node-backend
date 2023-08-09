@@ -1,9 +1,9 @@
 const express = require("express");
 import { User } from "../models/user";
 import e, { Request, Response } from "express";
-import { _userExists, getUsers, validateSuperAdminUserFromRequest } from "../services/userService";
+import { _userExists, _validateCredentials, getUsers, validateSuperAdminUserFromRequest } from "../services/userService";
 import { LoginUsersDocument } from "../services/types";
-import { stripPassword  } from "./utils";
+import { stripPassword } from "./utils";
 
 /**
  * INSOMNIA POST Request Sample
@@ -30,7 +30,7 @@ userRoute.post("/add", async (req: Request, resp: Response) => {
       //Check if User exists
       const userExists = await _userExists(req)
       if (userExists) {
-        resp.status(200).send({ error: `User with username ${user.username} already exists`});
+        resp.status(200).send({ error: `User with username ${user.username} already exists` });
       }
       else {
         await user.save();
@@ -61,7 +61,7 @@ userRoute.post("/add", async (req: Request, resp: Response) => {
 userRoute.delete("/delete", async (req: Request, resp: Response) => {
   try {
     const _validate = await validateSuperAdminUserFromRequest(req);
-    console.log(`userRoute:_validate /delete ${"" +  _validate}`);
+    console.log(`userRoute:_validate /delete ${"" + _validate}`);
 
     if (_validate[0]) {
       const users: LoginUsersDocument[] = await getUsers({ username: req.body.username });
@@ -75,7 +75,7 @@ userRoute.delete("/delete", async (req: Request, resp: Response) => {
       }
     }
     else {
-      resp.sendStatus(200).send({ error: `Something went wrong ${_validate}`});
+      resp.sendStatus(200).send({ error: `Something went wrong ${_validate}` });
 
     }
   } catch (err) {
@@ -157,22 +157,9 @@ userRoute.get("/list", async (req: Request, resp: Response) => {
 userRoute.post(
   "/checkValidCredentials",
   async (req: Request, resp: Response) => {
+    let response = {}
     try {
-      console.log(`checkValidCredentials:req?.body ${JSON.stringify(req?.body)}`);
-      const users: LoginUsersDocument[] = await getUsers(req?.body);
-      console.log(`checkValidCredentials:${JSON.stringify(users)}`);
-      let response = {}
-      if (users && users?.length === 1) {
-        response = {
-          success: true,
-          role: users[0].get("role")
-        }
-      }
-      else {
-        response = {
-          success: false
-        }
-      }
+      response = await _validateCredentials(req);
       resp.status(200).send(response);
     } catch (err: any) {
       console.log("Error", err);

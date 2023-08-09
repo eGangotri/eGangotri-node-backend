@@ -4,6 +4,7 @@ import { replaceQuotesAndSplit } from "./Util";
 import { SUPERADMIN_ROLE } from "../mirror/FrontEndBackendCommonCodeConsts";
 import { Request } from "express";
 import { LoginUsersDocument, UserListOptionsType } from "../services/types";
+import * as _ from 'lodash';
 
 export function setOptionsForUserListing(queryOptions: UserListOptionsType) {
   // Empty `filter` means "match all documents"
@@ -62,12 +63,43 @@ export const _userExists = async (req: Request) => {
   return userExists(req?.body?.username)
 }
 
-export const validateUser = async (username: string, password: string) => {
+export const _validateCredentials = async (req: Request) => {
+  const body = req?.body
+  let response = {}
+  console.log(`checkValidCredentials:req?.body ${JSON.stringify(body)}`);
+  if (_.isEmpty(body.password)) {
+    response = {
+      success: false,
+      message: "Empty password"
+    }
+  }
+  else {
+    const users: LoginUsersDocument[] = await getUsers(body);
+    console.log(`checkValidCredentials:${JSON.stringify(users)}`);
+    if (users && users?.length === 1) {
+      response = {
+        success: true,
+        role: users[0].get("role")
+      }
+    }
+    else {
+      response = {
+        success: false
+      }
+    }
+  }
+  return response;
+}
+
+const getUser = async (username: string, password: string): Promise<LoginUsersDocument[]> => {
   const userListOption = {
     username,
     password
   } as UserListOptionsType;
   console.log(`userListOption${JSON.stringify(userListOption)}/n username:${username}/password${password}`);
+  if (_.isEmpty(password) || _.isEmpty(username)) {
+    return [];
+  }
   const users: LoginUsersDocument[] = await getUsers(userListOption);
   console.log(`users: ${users.length} ${JSON.stringify(users)}`);
   return users;
@@ -77,8 +109,8 @@ export const validateUser = async (username: string, password: string) => {
 export const validateUserFromRequest = async (req: Request) => {
   const username = req?.body?.operatorName;
   const password = req?.body?.password;
-  const _user = await validateUser(username, password);
-  return _user?.length > 0
+  const _user = await getUser(username, password);
+  return _user && _user?.length > 0;
 }
 
 export const validateSuperAdminUserFromRequest = async (req: Request) => {
@@ -87,10 +119,10 @@ export const validateSuperAdminUserFromRequest = async (req: Request) => {
   if (!username || !password) {
     return [false, "Superadmin Username or password missing"];
   }
-  const _user = await validateUser(username, password);
-  const users = _user.map(document => document.toObject());
+  const _user = await getUser(username, password);
+  const users = _user?.map(document => document.toObject());
   console.log(`_user${JSON.stringify(_user)}`);
-  if (users?.length === 0) {
+  if (_.isEmpty(users)) {
     return [false, `Login failed for User "${username}"`];
   }
   else if (users[0].role !== SUPERADMIN_ROLE) {
@@ -99,5 +131,4 @@ export const validateSuperAdminUserFromRequest = async (req: Request) => {
   else {
     return [true, ""];
   }
-
 }

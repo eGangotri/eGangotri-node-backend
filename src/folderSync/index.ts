@@ -37,7 +37,7 @@ const matchOneWay = (firstJsonArray: PdfStats[], firstFolderRoot: string, second
     Json Array-1:${firstJsonArray.length}
     Json Array-2:${secondJsonArray.length}
     Diff:${firstJsonArray.length - secondJsonArray.length}
-    MatchedMap-1:${matchedMap.length} ${matchedMap[0]?.absPath}
+    MatchedMap-1:${matchedMap.length}
     Matched:${matched.length}
     Unmatched:${unmatched.length}
     Unmatched Length:${umMatchedItems.length}
@@ -68,7 +68,7 @@ const findMatching = (src: PdfStats, srcRoot: string, dest: PdfStats[], destRoot
     return _found
 }
 
-const _root = "Noida-HD-9-4TB-Otro-1-Otro-2\\Otro-1"
+const _root = "Otro-1-Otro-2\\Otro-2"
 const _src = `D:\\${_root}`
 const _dest = `F:\\${_root}`;
 
