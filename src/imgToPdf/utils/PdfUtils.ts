@@ -30,7 +30,7 @@ export async function createPdf(pngSrc: string, pdfDestFolder: string, firstPage
     }
 }
 export async function createRedundantPdf(pdfPath: string, redundantPdfName: string = "") {
-    const doc = await prepareDocument(pdfPath , redundantPdfName?redundantPdfName:`redundant${Number(Date.now())}.pdf`)
+    const doc = await prepareDocument(pdfPath , redundantPdfName?redundantPdfName:`redundant${Number(Date.now())}clear`)
     doc.addPage();
     doc.text("redundant");
     doc.save()

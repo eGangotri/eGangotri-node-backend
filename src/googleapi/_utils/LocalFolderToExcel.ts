@@ -6,6 +6,7 @@ import moment from "moment";
 import { jsonToExcel } from "../../excel/ExcelUtils";
 import * as _ from 'lodash';
 import { sizeInfo } from "../../mirror/FrontEndBackendCommonCode";
+import { FileStats } from "../../imgToPdf/utils/types";
 
 const createExcelFilePathName = (mainExcelDataLength: number, folderName: String, _excelRoot: string) => {
     const _excelPath = `${_excelRoot}\\local`;
@@ -26,7 +27,8 @@ const createExcelFilePathName = (mainExcelDataLength: number, folderName: String
 const folderToExcel = async (folder: string, _excelRoot: string) => {
     console.log(`folderToExcel ${folder}`);
     FileUtils.incrementRowCounter()
-    const jsonArray = await FileUtils.getAllPDFFilesWithMedata(folder)
+    const jsonArray:FileStats[] = await FileUtils.getAllPDFFilesWithMedata(folder,true)
+    //const jsonArray: FileStats[] = await FileUtils.getAllFileStats(folder, "", false, true, true);
     jsonArray.push({
         size: "",
         absPath: "",
@@ -55,11 +57,13 @@ const folderToExcel = async (folder: string, _excelRoot: string) => {
     const _excelRoot = "C:\\_catalogWork\\_collation";
     const localRoot = "G:\\eGangotri-Tr-31-39"
 
-    const localSubFolder = [31, 32, 33, 34, 35, 36, 37,38,39].map(x => `Treasures${x}`);
+    const localSubFolder: string[] = [] //[31, 32, 33, 34, 35, 36, 37,38,39].map(x => `Treasures${x}`);
+
+    await folderToExcel("C:\\Users\\chetan\\Documents\\_testPDF", "C:\\Users\\chetan\\Documents");
 
     for (let folder of localSubFolder) {
         try {
-          //  await folderToExcel(`${localRoot}\\${folder}`, _excelRoot);
+            await folderToExcel(`${localRoot}\\${folder}`, _excelRoot);
         }
         catch (err) {
             console.log(err, "foderToExcel")
