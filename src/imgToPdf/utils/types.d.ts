@@ -1,4 +1,4 @@
-export interface PdfStats {
+export interface FileStats {
     rowCounter?: number;
     fileName: string;
     pageCount?: number;
@@ -6,4 +6,5 @@ export interface PdfStats {
     rawSize?: number;
     absPath: string;
     folder: string;
+    ext?: string;
 }
