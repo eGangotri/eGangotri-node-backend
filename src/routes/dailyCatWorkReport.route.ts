@@ -34,7 +34,7 @@ dailyCatWorkReportRoute.post("/add", async (req: Request, resp: Response) => {
     const operatorName = req.body.operatorName
 
     if (await validateUserFromRequest(req)) {
-      const wr = new DailyCatWorkReport(req.body);
+      const dailyCatWorkReport = new DailyCatWorkReport(req.body);
 
       //Check if any request was sent in Last 2 hours
       const _query: typeof req.query = {};
@@ -53,17 +53,17 @@ dailyCatWorkReportRoute.post("/add", async (req: Request, resp: Response) => {
           },
         };
         await DailyCatWorkReport.deleteMany(filter);
-        await wr.save();
+        await dailyCatWorkReport.save();
         resp.status(200).send({
           "warning": `Since Last Submission Request < 2 Hours. exisiting Data is merely overwritten not inserted. for ${operatorName}`
         });
 
       }
       else {
-        console.log(`dailyCatWorkReportRoute /add ${JSON.stringify(wr)}`);
-        await wr.save();
+        console.log(`dailyCatWorkReportRoute /add ${JSON.stringify(dailyCatWorkReport)}`);
+        await dailyCatWorkReport.save();
         resp.status(200).send({
-          "success": `Added Daily Report Stats with Id ${wr._id} for ${operatorName}`
+          "success": `Added Daily Report Stats with Id ${dailyCatWorkReport._id} for ${operatorName}`
         });
       }
     }

@@ -89,7 +89,15 @@ export async function connectToMongo(_args:string[] = []) {
   console.log("\nAttempting to connect to DB:", mongoDbUrl);
   if (mongoDbUrl) {
     try {
-      await mongoose.connect(mongoDbUrl);
+      await mongoose.connect(mongoDbUrl,
+        {
+          socketTimeoutMS: 100000,
+          useUnifiedTopology:true,
+          // useNewUrlParser: true,
+          // useCreateIndex: true,
+          // useFindAndModify: false,
+          // poolSize: parseInt(process.env.POOL_SIZE!),
+        } as mongoose.ConnectOptions);
       const db = mongoose.connection;
       db.on("error", () => {
         console.log("connection error:");
