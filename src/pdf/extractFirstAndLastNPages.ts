@@ -18,7 +18,7 @@ async function createPartialPdf(inputPath: string, outputPath: string, pdfsToBeP
     let range: number[] = []
     const pdfPageCount = pdfDoc.getPages().length
 
-    console.log(`Pdf Trim: Folder # (${index}) Pdf No. ${++counter}/${pdfsToBeProcessedCount} pdfPageCount ${pdfPageCount}`);
+    console.log(`Pdf Extraction: Folder # (${index}) Pdf No. ${++counter}/${pdfsToBeProcessedCount} pdfPageCount ${pdfPageCount}`);
 
     if (pdfPageCount < (firstNPages + lastNPages)) {
         range = _.range(0, pdfPageCount);
