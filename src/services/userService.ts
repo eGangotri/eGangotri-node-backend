@@ -46,10 +46,18 @@ export function setOptionsForUserListing(queryOptions: UserListOptionsType) {
 
 export async function getUsers(queryOptions: UserListOptionsType) {
   const { limit, mongoOptionsFilter } = setOptionsForUserListing(queryOptions);
-  const items = await User.find(mongoOptionsFilter)
-    .sort({ createdAt: -1 })
-    .limit(limit);
-  return items;
+
+  try {
+    const users: LoginUsersDocument[] = await User.find(mongoOptionsFilter)
+      .sort({ createdAt: -1 })
+      .limit(limit);
+    return users;
+  } catch (err) {
+    console.error('An error occurred in User.find:', err);
+    return [];
+    // Additional logging here, e.g., saving to a log file
+  }
+
 }
 
 export const userExists = async (username: string) => {
