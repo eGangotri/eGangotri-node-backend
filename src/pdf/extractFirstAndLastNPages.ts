@@ -50,9 +50,9 @@ export const loopFolderForExtraction = async (rootFolder: string, outputRoot: st
         const _path = path.parse(pdf.absPath);
         const subDir = _path.dir.replace(rootFolder, '')
         let _subFolder = `${outputPath}\\${subDir}`
-        console.log(`_subFolder ${_subFolder}
-        _path ${_path.name} ${_path.dir}
-         ${outputPath} ${subDir}`);
+        // console.log(`_subFolder ${_subFolder}
+        // _path ${_path.name} ${_path.dir}
+        //  ${outputPath} ${subDir}`);
 
         createFolderIfNotExists(_subFolder)
         try {
@@ -93,7 +93,7 @@ const loopFolders = async (_srcFoldersWithPath: string[], destRootFolder: string
             console.log(`Started processing ${folder}`)
             PDF_PROCESSING_COUNTER = 0;
             counter = 0
-            await loopFolderForExtraction(folder, destRootFolder, `${index + 1}/${_srcFoldersWithPath.length}}`);
+            await loopFolderForExtraction(folder, destRootFolder, `${index + 1}/${_srcFoldersWithPath.length}`);
         }
         console.log(`FINAL_REPORT(extractPages): ${FINAL_REPORT.map(x => x + "\n")}`)
     }
@@ -101,10 +101,10 @@ const loopFolders = async (_srcFoldersWithPath: string[], destRootFolder: string
         console.log(err)
     }
 }
-const destRootFolder = "E:\\_catalogWork\\_reducedPdfs";
+const destRootFolder = "C:\\_catalogWork\\_reducedPdfs";
 
-const srcRootFolder = 'E:\\eG-tr1-30';
-const _folders = ["Treasures22"]
+const srcRootFolder = 'H:\\eg_tr-36-37';
+const _folders = ["Treasures36"]
 const _srcFoldersWithPath = _folders.map(x => `${srcRootFolder}\\${x}`)
 
 loopFolders(_srcFoldersWithPath, destRootFolder)

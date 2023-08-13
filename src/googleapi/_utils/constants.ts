@@ -58,3 +58,8 @@ export const emptyExcelHeaderObj = {
     "Thumbnail": "",
     "Created Time": ""
 }
+
+//Local Excel Title
+export const LOCAL_FILE_NAME_HEADER = "File Name" 
+export const TOTAL_FILE_SIZE_IN_KB = "Total File Size in KB";
+export const FILE_SIZE = "File Size";

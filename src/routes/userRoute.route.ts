@@ -4,7 +4,8 @@ import e, { Request, Response } from "express";
 import { _userExists, _validateCredentials, getUsers, validateSuperAdminUserFromRequest } from "../services/userService";
 import { LoginUsersDocument } from "../services/types";
 import { stripPassword } from "./utils";
-
+import { SUPERADMIN_ROLE } from "../mirror/FrontEndBackendCommonCodeConsts";
+import * as _ from 'lodash';
 /**
  * INSOMNIA POST Request Sample
 POST http://localhost/user/add 
@@ -66,9 +67,15 @@ userRoute.delete("/delete", async (req: Request, resp: Response) => {
     if (_validate[0]) {
       const users: LoginUsersDocument[] = await getUsers({ username: req.body.username });
       if (users && users.length >= 1) {
-        console.log(`userRoute /delete ${JSON.stringify(users[0])}`);
-        const _delete = await User.deleteMany({ username: req.body.username });
-        resp.sendStatus(200).send(_delete?.deletedCount);
+        const userRoleMap = users.filter(x=>x.role === SUPERADMIN_ROLE)
+        if(_.isEmpty(userRoleMap)){
+          console.log(`userRoute /delete ${JSON.stringify(users[0])}`);
+          const _delete = await User.deleteMany({ username: req.body.username });
+          resp.sendStatus(200).send(_delete?.deletedCount);
+        }
+        else {
+          resp.sendStatus(200).send({ error: "One or More Users requested for deletion is a superadmin.Cannot proceed."});
+        }
       }
       else {
         resp.sendStatus(200).send({ error: _validate[1] });

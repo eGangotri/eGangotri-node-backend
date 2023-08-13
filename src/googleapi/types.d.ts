@@ -39,3 +39,13 @@ export interface ExcelHeaders {
     "Thumbnail": string;
     "Created Time": string;
 }
+
+
+export interface LocalFileHeaders {
+    "Serial No.": string,
+    "File Name": string,
+    "Number of Pages": number,
+    "File Size": string,
+    "Units": string,
+    "Total File Size in KB": number,
+}
