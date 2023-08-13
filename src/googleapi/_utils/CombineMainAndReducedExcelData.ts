@@ -93,7 +93,7 @@ const exec = () => {
     const mainExcelPath = `${_root}\\_googleDriveExcels\\${treasureFolder}`
     const mainExcelFileName = `${mainExcelPath}\\${fs.readdirSync(mainExcelPath)[0]}`;
 
-    const secondaryExcelPath = `${_root}\\_catReducedPdfExcels\\${treasureFolder}`
+    const secondaryExcelPath = `${_root}\\_catReducedDrivePdfExcels\\${treasureFolder}`
     const secondaryExcelFileName = `${secondaryExcelPath}\\${fs.readdirSync(secondaryExcelPath)[0]}`;
 
     const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)

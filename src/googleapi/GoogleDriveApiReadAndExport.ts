@@ -32,7 +32,7 @@ async function procOrigGoogleDrive(driveLinkOrFolderID: string, folderName: stri
 }
 
 async function procReducedPdfGoogleDrive(driveLinkOrFolderID: string, folderName: string) {
-  await listFolderContentsAndGenerateCSVAndExcel(driveLinkOrFolderID, drive, `${EXPORT_ROOT_FOLDER}_catReducedPdfExcels`, folderName);
+  await listFolderContentsAndGenerateCSVAndExcel(driveLinkOrFolderID, drive, `${EXPORT_ROOT_FOLDER}_catReducedDrivePdfExcels`, folderName);
 }
 
 (async () => {
