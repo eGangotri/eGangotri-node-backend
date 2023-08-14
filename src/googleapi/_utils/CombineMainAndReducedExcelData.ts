@@ -31,7 +31,8 @@ const combineExcels = (mainExcelFileName: string, secondaryExcelFileName: string
 
 const checkErroneous = (_excelData: ExcelHeaders[]) => {
     const _erroneous = _excelData.filter(x => !foundItems.includes(x[titleInGoogleDrive]));
-    console.log("errorneous items in Main", JSON.stringify(_erroneous.map(x => `${x[titleInGoogleDrive]}`)));
+    const errMsg = _.isEmpty(_erroneous) ? "None" : JSON.stringify(_erroneous.map(x => `${x[titleInGoogleDrive]}`))
+    console.log("errorneous items in Main: ", errMsg);
 }
 
 const combineExcelJsons = (mainExcelData: ExcelHeaders[], secondaryExcelDataAdjusted: ExcelHeaders[]) => {
@@ -88,7 +89,7 @@ const fillPageCount = (excelJson: ExcelHeaders[]) => {
 
 const exec = () => {
     const _root = "C:\\_catalogWork\\_collation";
-    const treasureFolder = "Treasures 22"
+    const treasureFolder = "Treasures 36"
 
     const mainExcelPath = `${_root}\\_googleDriveExcels\\${treasureFolder}`
     const mainExcelFileName = `${mainExcelPath}\\${fs.readdirSync(mainExcelPath)[0]}`;
