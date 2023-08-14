@@ -36,7 +36,7 @@ async function procReducedPdfGoogleDrive(driveLinkOrFolderID: string, folderName
 }
 
 (async () => {
-   await procOrigGoogleDrive("1uBpIqQGKL3s3uSkzybCW1eDfE6Zbgbge", 'Treasures 31');
+   await procReducedPdfGoogleDrive("1qDjBCUC-qJPIM4c_jCYbqwWGDREA53Wv", '  36');
 })();
 
   //yarn run catalog

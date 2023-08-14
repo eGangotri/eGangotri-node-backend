@@ -104,7 +104,7 @@ const loopFolders = async (_srcFoldersWithPath: string[], destRootFolder: string
 const destRootFolder = "C:\\_catalogWork\\_reducedPdfs";
 
 const srcRootFolder = 'H:\\eg_tr-36-37';
-const _folders = ["Treasures36"]
+const _folders = ["Treasures37"]
 const _srcFoldersWithPath = _folders.map(x => `${srcRootFolder}\\${x}`)
 
 loopFolders(_srcFoldersWithPath, destRootFolder)
