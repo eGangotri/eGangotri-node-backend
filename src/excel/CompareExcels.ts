@@ -103,9 +103,9 @@ const compareLocalToReduced = (localArray: LocalFileHeaders[], localReducedArray
     report();
 }
 
-const leftExcelPath = "C:\\_catalogWork\\_collation\\local\\Treasures23"
+const leftExcelPath = "C:\\_catalogWork\\_collation\\local\\Treasures24"
 //"C:\\_catalogWork\\_collation\\_googleDriveExcels\\Treasures 32";
-const rightExcelPath = "C:\\_catalogWork\\_collation\\_catReducedLocalPdfExcels\\Treasures23 (684)"
+const rightExcelPath = "C:\\_catalogWork\\_collation\\_catReducedLocalPdfExcels\\Treasures24 (1174)"
 // C:\\_catalogWork\\_collation\\local\\Treasures32";
 
 const leftExcel = `${leftExcelPath}\\${fs.readdirSync(leftExcelPath).find(x => x.includes(".xlsx"))}`;

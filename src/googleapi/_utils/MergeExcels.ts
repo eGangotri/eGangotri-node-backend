@@ -3,7 +3,7 @@ import * as _ from 'lodash';
 import { DD_MM_YYYY_HH_MMFORMAT } from "../../utils/utils";
 import moment from "moment";
 import { ExcelHeaders } from '../types';
-import { excelToJson, getGoogleDriveId, jsonToExcel } from './ExcelUtils';
+import { excelToJson, getGoogleDriveId, jsonToExcel } from '../../excel/ExcelUtils';
 import {
   author, edition, editor,
   isbn,
@@ -119,3 +119,6 @@ const _secondaryExcelFileName = `${secondaryExcelPath}\\${fs.readdirSync(seconda
 const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)
 
 mergeExcels(_mainExcelFileName, _secondaryExcelFileName)
+//Caution !!! this is for the Old Excel pre-Google-Drive-Reduced Mechanism to New Mechanism
+
+//yarn run mergeExcels

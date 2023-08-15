@@ -46,8 +46,7 @@ const _execute = async (rootFolder: string) => {
         }
     }
 }
-//const rootFolder = "C:\\_catalogWork\\_reducedPdfs\\Treasures28 (1253)"
-const rootFolder = "E:\\_catalogWork\\_reducedPdfs\\Treasures60 (1694)"
+const rootFolder = "C:\\_catalogWork\\_reducedPdfs\\Treasures34 (979)"
 _execute(rootFolder).then(() => {
     console.log(`Final Report
 TOTAL (${TOTAL_FILE_COUNT})
