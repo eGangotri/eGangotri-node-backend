@@ -89,7 +89,7 @@ const fillPageCount = (excelJson: ExcelHeaders[]) => {
 
 const exec = () => {
     const _root = "C:\\_catalogWork\\_collation";
-    const treasureFolder = "Treasures 36"
+    const treasureFolder = "Treasures 34"
 
     const mainExcelPath = `${_root}\\_googleDriveExcels\\${treasureFolder}`
     const mainExcelFileName = `${mainExcelPath}\\${fs.readdirSync(mainExcelPath)[0]}`;
@@ -109,5 +109,5 @@ const exec = () => {
     combineExcels(mainExcelFileName, secondaryExcelFileName, combinedExcelFileName)
 }
 exec()
-
+//Combined google drive excel with reduced pdf drive excels
 //yarn run combineExcels

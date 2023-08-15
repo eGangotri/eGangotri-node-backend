@@ -50,10 +50,6 @@ export const loopFolderForExtraction = async (rootFolder: string, outputRoot: st
         const _path = path.parse(pdf.absPath);
         const subDir = _path.dir.replace(rootFolder, '')
         let _subFolder = `${outputPath}\\${subDir}`
-        // console.log(`_subFolder ${_subFolder}
-        // _path ${_path.name} ${_path.dir}
-        //  ${outputPath} ${subDir}`);
-
         createFolderIfNotExists(_subFolder)
         try {
             await createPartialPdf(pdf.absPath, _subFolder, pdfsToBeProcessedCount, loopIndex);
@@ -103,9 +99,9 @@ const loopFolders = async (_srcFoldersWithPath: string[], destRootFolder: string
 }
 const destRootFolder = "C:\\_catalogWork\\_reducedPdfs";
 
-const srcRootFolder = 'H:\\eg_tr-36-37';
-const _folders = ["Treasures37"]
-const _srcFoldersWithPath = _folders.map(x => `${srcRootFolder}\\${x}`)
+const srcRootFolder = 'F:\\eGangotri-Tr-31-39';
+const _folders = [31,32,33,34,35,36,37,38,39]
+const _srcFoldersWithPath = _folders.map(x => `${srcRootFolder}\\Treasures${x}`)
 
 loopFolders(_srcFoldersWithPath, destRootFolder)
 //yarn run extractFirstAndLastNPages
