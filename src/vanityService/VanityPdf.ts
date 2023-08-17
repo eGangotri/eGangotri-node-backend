@@ -5,10 +5,9 @@ import { getAllPdfsInFolders, mkDirIfDoesntExists } from "../imgToPdf/utils/Util
 import { prepareDocument } from "../imgToPdf/utils/PdfUtils";
 const path = require('path');
 import PDFKit from 'pdfkit';
-import { MAX_IMG_WIDTH, _pdfRoot, imgFile, introText } from "./constants";
+import { FONT_SIZE, MAX_IMG_WIDTH, _pdfRoot, imgFile, introText } from "./vanityConstants";
 
-/** This should be dynamic based on the Width/height */
-const FONT_SIZE = 16
+
 /**
  * This was casuing race issues.
  * where intro pdfs were not ready while merging.
@@ -81,8 +80,6 @@ export const addTextToSecondPage = (doc: any, text: string, width: number, heigh
 
     let oldBottomMargin = doc.page.margins.bottom;
     doc.page.margins.bottom = 0 //Dumb: Have to remove bottom margin in order to write into it
-    const pageWidth = doc.page.width;
-    const pageHeight = doc.page.height
     const xCoordinate = doc.page.margins.left / 2
     const yCoordinate = doc.page.margins.top / 2
     doc.font(PDF_FONT).fontSize(FONT_SIZE)
@@ -90,9 +87,6 @@ export const addTextToSecondPage = (doc: any, text: string, width: number, heigh
         .text(text, xCoordinate, yCoordinate)
     doc.page.margins.bottom = oldBottomMargin; // ReProtect bottom margin
 }
-
-
-
 
 const mergeVanityPdf = async (_introPdf: string, origPdf: string, finalDumpGround: string) => {
     var origFileName = path.basename(origPdf);
@@ -111,7 +105,7 @@ const mergeVanityPdf = async (_introPdf: string, origPdf: string, finalDumpGroun
 }
 
 (async () => {
-    //Change values in constants.ts and then run yarn run vanity 
+    //Change values in vanityConstants.ts and then run yarn run vanity 
 
     const _pdfs = await getAllPdfsInFolders([_pdfRoot]);
     const intros: string[] = []
@@ -124,3 +118,4 @@ const mergeVanityPdf = async (_introPdf: string, origPdf: string, finalDumpGroun
         await mergeVanityPdf(intros[i], _pdfs[i], `${_pdfRoot}\\1`)
     }
 })();
+//yarn run vanity 

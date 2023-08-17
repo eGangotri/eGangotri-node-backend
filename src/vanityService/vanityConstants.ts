@@ -1,10 +1,32 @@
- // const _root = "D:\\_Treasures59\\_data\\bjpjammu"
- export const _root = "D:\\_Treasures59\\_data\\eg_books"
- export const _pdfRoot = `${_root}`
- export const imgFile = `${_root}\\Shail.jpg`
+// const _root = "D:\\_Treasures59\\_data\\bjpjammu"
+export const _root = "D:\\_Treasures61\\_data\\pz"
+export const _pdfRoot = `${_root}`
+export const imgFile = `${_root}\\peerzada2.jpg`
 export const MAX_IMG_WIDTH = 700;
+/** This should be dynamic based on the Width/height */
+export const FONT_SIZE = 13
 
- const text = `This PDF you are browsing is in a series of several scanned documents containing 
+const text = `This PDF you are browsing is in a series of several scanned documents containing 
+the collection of Peerzada Muhammad Ashraf Sahib. b 1958<br>
+CV:<br>
+Residence: Towheed Abad Bemina, Srinagar<br>
+https://www.facebook.com/peerzadamohd.ashraf.16<br>
+
+Former Deputy Director Archives, Archaeology and Museums Deptt. J&K Govt.<br>
+Former State Coordinator National Manuscripts Mission GoI.<br>
+Former Registering Officer Antiquities, Jammu and Kashmir Govt.<br>
+Former Registar National Records, Jammu and Kashmir Govt.<br>
+Worked as Lecturer Arabic in Higher Education Department.<br>
+Studied at Aligarh Muslim University.<br>
+Lives in Srinagar, Jammu and Kashmir.<br>
+From Anantnag.<br>
+
+Peerzada Muhammad Ashraf Sahib has an ancestral Collection of Rare Books and Manuscripts in Sharada, Sanskrit, Persian, Arabic, Urdu, Kashmiri in his Home Town Srinagar.<br>
+Besides manuscripts, he also has many rare paintings (60+).<br>
+Collectors and Art/Literature  Lovers can contact him if they wish through his facebook page<br><br>
+Scanning and upload by eGangotri Foundation.<br>`
+
+const text3 = `This PDF you are browsing is in a series of several scanned documents containing 
  the personal colleciton of Shailendra Ghulati ji from Jammu.<br>
  CV:<br>
  Shailendra Gulhati who is a Shaivite author of 6 books, used to learn finer aspects of Kashmir Shaiv Darsana from 
