@@ -29,7 +29,8 @@
     "localToExcel": "ts-node ./src/googleapi/_utils/LocalFolderToExcel",
     "syncFolders": "ts-node ./src/folderSync",
     "compareExcels": "ts-node ./src/excel/CompareExcels",
-    "findNonLatin": "ts-node ./src/excel/FindNonLatinCharactersInName"
+    "findNonLatin": "ts-node ./src/excel/FindNonLatinCharactersInName",
+    "searchArchive": "ts-node ./src/search/searchArchive"
 
   },
   "repository": {
