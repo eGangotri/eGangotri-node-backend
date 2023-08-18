@@ -19,31 +19,36 @@ const searchArchive = async (leftExcel: string) => {
 
     for (const entry of excelAsJson) {
         const _title = entry[titleInGoogleDrive];
-        const query = _archiveQuery("Sanskrit Vangmaya")
-        // const query = _archiveQuery(_title)
+        const query = _archiveQuery(_title)
         // const query = "https://www.google.com"
         console.log(`entry: ${_title} query\n ${query}`);
         const response: Response = await fetch(`${query}`)
         console.log(`response ${response.status}`)
         if (response.ok) {
-            const _resp = await response.text(); //"callback("
-            console.log(`response  ${_resp}`) //.response.docs}`)
-            const _jsonAsString = replaceTerminalCharIfClosingParenthesis(_resp.replace("callback(", ""))
-            const _docs = JSON.parse(_jsonAsString)["response"]["docs"][0]["identifier"]
-            console.log(`_docs  ${_docs}`)
-            console.log(`_archiveUrl  ${JSON.stringify(_archiveUrl(_docs))}`)
+            const _resp = await response.text();
+            console.log(`response  ${_resp}`)
+            const _jsonAsString = doReplacements(_resp)
+            const jsonResp = JSON.parse(_jsonAsString)["response"]
+            const numFound = jsonResp["numFound"]
+            console.log(`response  ${_resp} ${numFound}`)
+
+            if (numFound != 0) {
+                const _docs = jsonResp["docs"][0]["identifier"]
+                console.log(`_docs  ${_docs}`)
+                console.log(`_archiveUrl  ${JSON.stringify(_archiveUrl(_docs))}`)
+            }
         }
         break;
     }
 }
-
-function replaceTerminalCharIfClosingParenthesis(input: string): string {
-    if (input.length === 0) {
-        return input; // The string is empty.
-    }
-    const terminalChar = input[input.length - 1];
-    if (terminalChar === ")") {
-        return input.slice(0, input.length - 1)
+const ARCHIVE_TEXT_RESPONSE_BEGINNING = "callback(";
+function doReplacements(input: string): string {
+    if (input?.length > 0 && input.startsWith(ARCHIVE_TEXT_RESPONSE_BEGINNING)) {
+        input = input.replace(ARCHIVE_TEXT_RESPONSE_BEGINNING, "")
+        const terminalChar = input[input.length - 1];
+        if (terminalChar === ")") {
+            return input.slice(0, input.length - 1)
+        }
     }
     return input;
 }
@@ -54,3 +59,4 @@ const leftExcel = `${_excelPath}\\${fs.readdirSync(_excelPath).find(x => x.inclu
 console.log(`leftExcel ${leftExcel}`)
 
 searchArchive(leftExcel);
+//yarn run searchArchive
