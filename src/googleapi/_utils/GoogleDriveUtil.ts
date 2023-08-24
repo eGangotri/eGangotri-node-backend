@@ -18,16 +18,35 @@ export const googleDriveLinkFromId = (fileId: string) => {
     return `https://drive.google.com/file/d/${fileId}/view?usp=drive_link`
 }
 
-export const getFolderName = async (folderId: string, drive: drive_v3.Drive) => {
+export const getDriveFileDetails = async (folderId: string, drive: drive_v3.Drive) => {
     const res = await drive.files
         .get({ fileId: folderId })
+        .catch((err) => console.log(err.errors));
+    if (!res) return undefined;
+    return res;
+}
+
+export const getFolderName = async (folderId: string, drive: drive_v3.Drive) => {
+    const res = await getDriveFileDetails(folderId, drive)
         .catch((err) => console.log(err.errors));
     if (!res) return "";
     const folderName = res.data.name;
     return folderName;
 }
+export const getWebContentLinkAndFileName = async (folderId: string, drive: drive_v3.Drive) => {
+    const res = await getDriveFileDetails(folderId, drive)
+        .catch((err) => console.log(err.errors));
+    if (!res) return ["",""];
+    return [ res.data.name, res.data.webViewLink];
+}
 
-
+export const getWebContentLink = async (folderId: string, drive: drive_v3.Drive) => {
+    const res = await getDriveFileDetails(folderId, drive)
+        .catch((err) => console.log(err.errors));
+    if (!res) return "";
+    const webContentLink = res.data.webContentLink; //webViewLink
+    return webContentLink;
+}
 
 const regex = new RegExp(`(?<=folders\/)[^? \n\r\t]*`);
 

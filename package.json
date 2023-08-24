@@ -31,7 +31,6 @@
     "compareExcels": "ts-node ./src/excel/CompareExcels",
     "findNonLatin": "ts-node ./src/excel/FindNonLatinCharactersInName",
     "searchArchive": "ts-node ./src/search/searchArchive"
-
   },
   "repository": {
     "type": "git",
