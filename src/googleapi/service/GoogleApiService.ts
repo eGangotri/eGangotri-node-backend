@@ -59,7 +59,6 @@ export async function listFolderContents(folderId: string, drive: drive_v3.Drive
                 includeItemsFromAllDrives: true,
                 supportsAllDrives: true
             });
-            // files = response.data.files;
             files = files.concat(response.data.files || []);
             pageToken = response.data.nextPageToken;
         } while (pageToken);

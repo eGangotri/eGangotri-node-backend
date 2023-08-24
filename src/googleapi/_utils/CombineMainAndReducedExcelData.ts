@@ -6,15 +6,21 @@ import * as _ from 'lodash';
 import { DD_MM_YYYY_HH_MMFORMAT } from "../../utils/utils";
 import moment from "moment";
 
-
+const ignoreDiff = true;
 const foundItems: string[] = [];
 const combineExcels = (mainExcelFileName: string, secondaryExcelFileName: string, combinedExcelFileName: string) => {
     const mainExcelData: ExcelHeaders[] = excelToJson(mainExcelFileName);
     const secondaryExcelData: ExcelHeaders[] = excelToJson(secondaryExcelFileName);
 
     const secondaryExcelDataAdjusted: ExcelHeaders[] = fillPageCount(secondaryExcelData);
-    if (mainExcelData.length != secondaryExcelData.length) {
-        console.log(`Cant proceed Data Length in Main and Secondary (${mainExcelData.length}!=${secondaryExcelData.length})dont match`);
+    const dataMisMatchDiff = mainExcelData.length - secondaryExcelData.length
+    const dataMismatch = dataMisMatchDiff !== 0
+    if (dataMismatch ) {
+        console.log(`Item Length List Mismatch by ${dataMisMatchDiff} :(${mainExcelData.length}!=${secondaryExcelData.length}) being ignored`);
+    }
+
+    if (dataMismatch && !ignoreDiff) {
+        console.log(`Cant proceed Data Mismatch`);
         combineExcelJsons(mainExcelData, secondaryExcelDataAdjusted)
         checkErroneous(mainExcelData);
         process.exit(0);
@@ -89,12 +95,14 @@ const fillPageCount = (excelJson: ExcelHeaders[]) => {
 
 const exec = () => {
     const _root = "C:\\_catalogWork\\_collation";
-    const treasureFolder = "Treasures 34"
+    const trCount = 60
+    const treasureFolder = `Treasures ${trCount}`
+    const treasureFolder2 = `Treasures${trCount}`
 
     const mainExcelPath = `${_root}\\_googleDriveExcels\\${treasureFolder}`
     const mainExcelFileName = `${mainExcelPath}\\${fs.readdirSync(mainExcelPath)[0]}`;
 
-    const secondaryExcelPath = `${_root}\\_catReducedDrivePdfExcels\\${treasureFolder}`
+    const secondaryExcelPath = `${_root}\\_catReducedDrivePdfExcels\\${treasureFolder2}`
     const secondaryExcelFileName = `${secondaryExcelPath}\\${fs.readdirSync(secondaryExcelPath)[0]}`;
 
     const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)
@@ -111,3 +119,4 @@ const exec = () => {
 exec()
 //Combined google drive excel with reduced pdf drive excels
 //yarn run combineExcels
+
