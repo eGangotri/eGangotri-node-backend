@@ -6,6 +6,7 @@ const schema = new mongoose.Schema(
             type: [{
                 archiveProfile: String,
                 count: Number,
+                titles: [{ type: String }]
             }], required: true
         },
         uploadCycleId: { type: String, required: true },
