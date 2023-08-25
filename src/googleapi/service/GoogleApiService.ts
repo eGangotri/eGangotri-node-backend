@@ -9,22 +9,32 @@ import { GaxiosResponse } from 'gaxios';
 import { ellipsis } from '../../mirror/utils';
 import * as FileUtils from '../../imgToPdf/utils/FileUtils';
 
-export async function listFolderContentsAndGenerateCSVAndExcel(_folderIdOrUrl: string,
+export async function listFolderContentsAsArrayOfData(folderId: string,
     drive: drive_v3.Drive,
     exportDestFolder: string,
     umbrellaFolder: string = "") {
 
-    const folderId = extractFolderId(_folderIdOrUrl)
-    const _umbrellaFolder = umbrellaFolder?.length > 0 ? umbrellaFolder : await getFolderName(folderId, drive) || "";
+    FileUtils.createFolderIfNotExists(exportDestFolder);
     const rootFolderName = await getFolderName(folderId, drive) || "";
+    const _umbrellaFolder = umbrellaFolder?.length > 0 ? umbrellaFolder : rootFolderName;
+
     console.log(`drive api folder extracTion process initiated: \
-    from (${_umbrellaFolder}) ${_folderIdOrUrl} \n`)
+    from (${_umbrellaFolder}) ${folderId} \n`)
 
     const googleDrivePdfData: Array<GoogleApiData> = []
     let idFolderNameMap = new Map<string, string>();
 
-    await listFolderContents(folderId, drive, umbrellaFolder, googleDrivePdfData, idFolderNameMap,rootFolderName);
+    await listFolderContents(folderId, drive, umbrellaFolder, googleDrivePdfData, idFolderNameMap, rootFolderName);
+    return googleDrivePdfData
+}
 
+export async function listFolderContentsAndGenerateCSVAndExcel(_folderIdOrUrl: string,
+    drive: drive_v3.Drive,
+    exportDestFolder: string,
+    umbrellaFolder: string = "") {
+    const folderId = extractFolderId(_folderIdOrUrl)
+
+    const googleDrivePdfData: Array<GoogleApiData> = await listFolderContentsAsArrayOfData(folderId,drive, exportDestFolder,umbrellaFolder)
     const fileNameWithPath = createFileNameWithPathForExport(folderId, umbrellaFolder, exportDestFolder) + `_${FileUtils.ROW_COUNTER[1]}`;
     FileUtils.incrementRowCounter()
     //writeDataToCSV(googleDrivePdfData, `${fileNameWithPath}.csv`)
@@ -33,12 +43,11 @@ export async function listFolderContentsAndGenerateCSVAndExcel(_folderIdOrUrl: s
         dataToXslx(googleDrivePdfData, `${fileNameWithPath}.xlsx`);
     }
     else {
-        console.log("No Date retrieved. No File will be created");
+        console.log("No Data retrieved. No File will be created");
     }
 }
-
 export async function listFolderContents(folderId: string, drive: drive_v3.Drive, umbrellaFolder:
-    string, googleDrivePdfData: GoogleApiData[], idFolderNameMap: Map<string, string>, rootFolderName:string) {
+    string, googleDrivePdfData: GoogleApiData[], idFolderNameMap: Map<string, string>, rootFolderName: string) {
 
     if (!idFolderNameMap.has(folderId)) {
         const folderPath = await getFolderPathRelativeToRootFolder(folderId, drive)
@@ -51,7 +60,7 @@ export async function listFolderContents(folderId: string, drive: drive_v3.Drive
         let files: drive_v3.Schema$File[] = [];
         let pageToken: string | undefined = undefined;
         do {
-            const response:GaxiosResponse = await drive.files.list({
+            const response: GaxiosResponse = await drive.files.list({
                 q: `'${folderId}' in parents and trashed = false and (mimeType='${PDF_MIME_TYPE}' or mimeType='${FOLDER_MIME_TYPE}')`,
                 fields: 'nextPageToken, files(id, name, mimeType,size,parents,webViewLink,thumbnailLink,createdTime)',
                 pageSize: 1000, // Increase the page size to retrieve more files if necessary
@@ -110,6 +119,6 @@ export const addFileMetadataToArray = (file: drive_v3.Schema$File, folderId: str
             thumbnailLink: thumbnailLink,
         });
 
-        console.log(`${FileUtils.ROW_COUNTER[0]}/${FileUtils.ROW_COUNTER[1]}). ${ellipsis(fileName,40)} `);
+        console.log(`${FileUtils.ROW_COUNTER[0]}/${FileUtils.ROW_COUNTER[1]}). ${ellipsis(fileName, 40)} `);
     }
 }
