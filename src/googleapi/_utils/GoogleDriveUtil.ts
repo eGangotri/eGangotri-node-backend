@@ -36,8 +36,8 @@ export const getFolderName = async (folderId: string, drive: drive_v3.Drive) => 
 export const getWebContentLinkAndFileName = async (folderId: string, drive: drive_v3.Drive) => {
     const res = await getDriveFileDetails(folderId, drive)
         .catch((err) => console.log(err.errors));
-    if (!res) return ["",""];
-    return [ res.data.name, res.data.webViewLink];
+    if (!res) return ["", ""];
+    return [res.data.name, res.data.webViewLink];
 }
 
 export const getWebContentLink = async (folderId: string, drive: drive_v3.Drive) => {
@@ -48,13 +48,29 @@ export const getWebContentLink = async (folderId: string, drive: drive_v3.Drive)
     return webContentLink;
 }
 
-const regex = new RegExp(`(?<=folders\/)[^? \n\r\t]*`);
+//Sample:  https://drive.google.com/file/d/11ovaMqoQxVe06gzjPmLkFlbk2-ghHSrr/view?usp=drivesdk
+const regex1 = /\/d\/([^/]+)\/view/;
+
+//Sample: https://drive.google.com/drive/folders/1eJnYKRgZIyPO2s-BgsJ4ozhCEuH3i_lQ?usp=drive_link
+const regex2 = /\/folders\/([^?/]+)(?:\?|$)/;
 
 export function extractGoogleDriveId(folderIdOrUrl: string) {
+
     if (folderIdOrUrl.startsWith("http")) {
-        const match = regex.exec(folderIdOrUrl);
+        let match: RegExpMatchArray | null;
+        if (folderIdOrUrl.includes("/d/")) {
+            console.log("folderIdOrUrl contains /d" )
+            match = folderIdOrUrl.match(regex1);
+        }
+        else {
+            match = folderIdOrUrl.match(regex2);
+        }
+        console.log("match" + match)
+
         if (match) {
-            return match[0];
+            console.log("m[0]" + match[0])
+            console.log("m[1]" + match[1])
+            return match[1];
         } else {
             return "";
         }
