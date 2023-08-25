@@ -4,13 +4,16 @@ const { DownloaderHelper } = require('node-downloader-helper');
 const dumpFolder = "C:\\Users\\chetan\\Documents\\_personal";
 
 export const downloadPdfFromGoogleDrive = (driveLinkOrFolderId: string) => {
+    console.log(`downloadPdfFromGoogleDrive ${driveLinkOrFolderId}`)
     const driveId = extractGoogleDriveId(driveLinkOrFolderId)
     const _pdfDlUrl = `https://drive.usercontent.google.com/download?id=${driveId}&export=download&authuser=0&confirm=t`
+    console.log(`downloading ${_pdfDlUrl}`)
+
     const dl = new DownloaderHelper(_pdfDlUrl, dumpFolder);//
 
     dl.on('end', () => console.log('Download Completed'));
-    dl.on('error', (err: any) => console.log('Download Failed', err));
-    dl.start().catch((err: any) => console.error(err));
+    dl.on('error', (err: Error) => console.log('Download Failed', err.message));
+    dl.start().catch((err: Error) => console.error(err));
 }
 
 //{"scanResult":"OK","disposition":"SCAN_CLEAN","fileName":"Anang Rito Dwanda.pdf","sizeBytes":827924,"downloadUrl":"https:\/\/drive.usercontent.google.com\/download?id=17OsRNBJC4OSPZ8EAqtxIYu_mWQkpSP96&export=download&authuser=0&confirm=t&uuid=3e023e6b-413f-43f8-8c0e-4feccac88c33&at=APZUnTWJITyGBCb64CIGROZM-l95:1692979966504"}
