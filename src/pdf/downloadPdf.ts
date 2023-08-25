@@ -3,7 +3,7 @@ const { DownloaderHelper } = require('node-downloader-helper');
 
 const dumpFolder = "C:\\Users\\chetan\\Documents\\_personal";
 
-const downloadPdfFromGoogleDrive = (driveLinkOrFolderId: string) => {
+export const downloadPdfFromGoogleDrive = (driveLinkOrFolderId: string) => {
     const driveId = extractGoogleDriveId(driveLinkOrFolderId)
     const _pdfDlUrl = `https://drive.usercontent.google.com/download?id=${driveId}&export=download&authuser=0&confirm=t`
     const dl = new DownloaderHelper(_pdfDlUrl, dumpFolder);//
