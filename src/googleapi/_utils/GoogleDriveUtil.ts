@@ -50,7 +50,7 @@ export const getWebContentLink = async (folderId: string, drive: drive_v3.Drive)
 
 const regex = new RegExp(`(?<=folders\/)[^? \n\r\t]*`);
 
-export function extractFolderId(folderIdOrUrl: string) {
+export function extractGoogleDriveId(folderIdOrUrl: string) {
     if (folderIdOrUrl.startsWith("http")) {
         const match = regex.exec(folderIdOrUrl);
         if (match) {

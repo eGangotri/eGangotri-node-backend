@@ -30,6 +30,7 @@
     "syncFolders": "ts-node ./src/folderSync",
     "compareExcels": "ts-node ./src/excel/CompareExcels",
     "findNonLatin": "ts-node ./src/excel/FindNonLatinCharactersInName",
+    "downloadPdf": "ts-node ./src/pdf/downloadPdf.ts",
     "searchArchive": "ts-node ./src/search/searchArchive"
   },
   "repository": {
@@ -70,6 +71,7 @@
     "moment": "^2.29.1",
     "mongoose": "^7.4.3",
     "node-csv": "latest",
+    "node-downloader-helper": "^2.1.9",
     "nodemon": "^3.0.1",
     "pdf-export-images": "^1.0.9",
     "pdf-lib": "^1.17.1",
@@ -78,6 +80,7 @@
     "puppeteer": "^13.0.0",
     "readline-sync": "^1.4.10",
     "sharp": "^0.29.3",
+    "stream-to-buffer": "^0.1.0",
     "typescript": "5.0.4",
     "underscore": "^1.13.1",
     "uuid": "^8.3.2",

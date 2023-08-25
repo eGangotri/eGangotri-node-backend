@@ -3,7 +3,7 @@ import { sizeInfo } from '../../mirror/FrontEndBackendCommonCode';
 import { dataToXslx } from '../../excel/ExcelUtils';
 import { FOLDER_MIME_TYPE, PDF_MIME_TYPE } from '../_utils/constants';
 import { GoogleApiData } from '../types';
-import { createFileNameWithPathForExport, extractFolderId, getFolderName, getFolderPathRelativeToRootFolder } from '../_utils/GoogleDriveUtil';
+import { createFileNameWithPathForExport, extractGoogleDriveId, getFolderName, getFolderPathRelativeToRootFolder } from '../_utils/GoogleDriveUtil';
 import * as _ from 'lodash';
 import { GaxiosResponse } from 'gaxios';
 import { ellipsis } from '../../mirror/utils';
@@ -32,7 +32,7 @@ export async function listFolderContentsAndGenerateCSVAndExcel(_folderIdOrUrl: s
     drive: drive_v3.Drive,
     exportDestFolder: string,
     umbrellaFolder: string = "") {
-    const folderId = extractFolderId(_folderIdOrUrl)
+    const folderId = extractGoogleDriveId(_folderIdOrUrl)
 
     const googleDrivePdfData: Array<GoogleApiData> = await listFolderContentsAsArrayOfData(folderId,drive, exportDestFolder,umbrellaFolder)
     const fileNameWithPath = createFileNameWithPathForExport(folderId, umbrellaFolder, exportDestFolder) + `_${FileUtils.ROW_COUNTER[1]}`;
