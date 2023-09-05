@@ -17,6 +17,7 @@ RUN yarn add tsc
 # Copy the rest of your application code to the working directory
 COPY . .
 COPY .env .env
+COPY .dockerignore .dockerignore
 
 # Build your TypeScript code
 RUN yarn run build
