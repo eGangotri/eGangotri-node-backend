@@ -50,8 +50,7 @@
   },
   "homepage": "https://github.com/eGangotri/egangotri-node-backend#readme",
   "dependencies": {
-    "@csv-js/csv": "^0.0.3",
-    "@types/node": "^16.11.12",
+    "@csv-js/csv": "0.0.2",
     "body-parser": "^1.20.1",
     "child_process": "^1.0.2",
     "cors": "^2.8.5",
@@ -80,7 +79,7 @@
     "pdf-lib": "^1.17.1",
     "pdfjs-dist": "^3.8.162",
     "pdfkit": "^0.13.0",
-    "puppeteer": "^13.0.0",
+    "puppeteer": "^21.1.1",
     "readline-sync": "^1.4.10",
     "sharp": "^0.29.3",
     "stream-to-buffer": "^0.1.0",
@@ -96,8 +95,10 @@
     "@types/pdfkit": "^0.12.10",
     "@types/underscore": "^1.11.4",
     "@types/uuid": "^8.3.4",
+    "@types/node":"18.x.x",
     "ts-node": "^10.9.1",
-    "typescript": "5.0.4"
+    "typescript": "^5.2.2",
+    "tsc":"^2.0.4"
   },
   "engines": {
     "node": "18.x.x"
