@@ -111,7 +111,7 @@ itemsUsheredRoute.get('/listForUploadCycle', async (req: Request, resp: Response
         for (const key in groupedItems) {
             const usheredRow = groupedItems[key]
             const queuedRow = groupedQueuedItems[key];
-            const uploadCycleRow:[any, ...any[]] = groupedUploadCycles[key] || [];
+            const uploadCycleRow:[any, ...any[]]| undefined = groupedUploadCycles[key];
 
             console.log(`uploadCycle ${JSON.stringify(uploadCycleRow)}`);
 
