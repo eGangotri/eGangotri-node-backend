@@ -1,11 +1,11 @@
 import path from 'path';
 import * as fs from 'fs';
 import * as _ from 'lodash';
-import { ExcelHeaders } from "../types";
-import { excelToJson } from "./ExcelUtils";
+import { ExcelHeaders } from "googleapi/types";
+import { excelToJson } from "excel/ExcelUtils";
 import { titleInGoogleDrive } from "./constants";
-import { getAllPDFFiles } from '../../imgToPdf/utils/FileUtils';
-import { PdfStats } from '../../imgToPdf/utils/types';
+import { getAllPDFFiles } from 'imgToPdf/utils/FileUtils';
+import { FileStats } from 'imgToPdf/utils/types';
 
 const _excelToJson = () => {
     const _root = "C:\\_catalogWork\\_collation";
@@ -17,8 +17,8 @@ const _excelToJson = () => {
 
 }
 
-const findCorrespondingExcelHeader = (local: PdfStats, excelJson: ExcelHeaders[]) => {
-    const combinedObject: PdfStats = local;
+const findCorrespondingExcelHeader = (local: FileStats, excelJson: ExcelHeaders[]) => {
+    const combinedObject: FileStats = local;
     let localTitle = local.fileName;
 
     excelJson?.find((_excel: ExcelHeaders) => {

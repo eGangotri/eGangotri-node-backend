@@ -1,20 +1,20 @@
 {
-  "extends": "@tsconfig/node16/tsconfig.json",
   "compileOnSave": true,
   "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "nodenext", 
+    "outDir": "./dist", // Output directory for JavaScript files
+    "rootDir": "./src",
+    "baseUrl":"./src",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
     "noEmit": false,
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
-    "sourceMap":  true, 
-    "baseUrl":"./src",
-    "rootDir": "./src",
     "lib": ["DOM"],
-    "outDir": "./dist5", // Output directory for JavaScript files
-    "stripInternal": true,
-    "target": "es6",
-    "module": "commonjs",
-    "moduleResolution": "node",
+    "strict": false
   },
-  //"include": ["src/*.ts", "*.d.ts","src/*.js",],
+  "include": ["src/**/*.ts" , "*.d.ts"],
   "exclude": ["node_modules", "**/*.spec.ts"],
 }

@@ -3,7 +3,7 @@ import {
     getDirectoriesWithFullPath, getUploadableFolders, mkDirIfDoesntExists
 } from '../utils/Utils';
 import * as fs from 'fs';
-import { tifToPdf } from '../TifToPdf';
+import { tifToPdf } from 'imgToPdf/tifToPdf';
 import * as path from 'path';
 import { addReport, printReport } from '..';
 import * as _ from 'lodash';
