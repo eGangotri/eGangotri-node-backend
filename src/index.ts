@@ -43,18 +43,5 @@ app.use("/uploadCycleRoute", uploadCycleRoute);
 app.use("/user", userRoute);
 
 app.listen(port, async () => {
-  console.log(`Server running at http://${hostname}:${port}/`);
-  const file = "C:/tmp/failedUploadsFixing";
-  try {
-    if (fs.existsSync(file)) {
-      const fileModifiedDate: Date = fs.statSync(file).birthtime;
-      const ctime: Date = fs.statSync(file).ctime;
-      const birthtime: Date = fs.statSync(file).birthtime;
-      console.log(
-        `birthtime ${birthtime} \n fileModifiedDate:${fileModifiedDate} \nctime ${ctime}`
-      );
-    }
-  } catch (err) {
-    console.error(`err: ${err}`);
-  }
+  console.log(`Server running at http://${hostname}:${port}/`, new Date());
 });
