@@ -1,12 +1,20 @@
 {
   "extends": "@tsconfig/node16/tsconfig.json",
+  "compileOnSave": true,
   "compilerOptions": {
-    "noEmit": true,
+    "noEmit": false,
+    "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "sourceMap":  true, 
     "baseUrl":"./src",
+    "rootDir": "./src",
     "lib": ["DOM"],
+    "outDir": "./dist5", // Output directory for JavaScript files
+    "stripInternal": true,
+    "target": "es6",
+    "module": "commonjs",
+    "moduleResolution": "node",
   },
-  "include": ["src/*.ts", "*.d.ts"],
-  "exclude": ["node_modules", "**/*.spec.ts", "**/*.js"],
+  //"include": ["src/*.ts", "*.d.ts","src/*.js",],
+  "exclude": ["node_modules", "**/*.spec.ts"],
 }

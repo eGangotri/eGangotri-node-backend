@@ -37,7 +37,7 @@ import fs from 'fs';
                             const fileName = splitArray[splitArray.length-1];
                             console.log(`folderName fileName ${folderName} ${fileName}`);
                             await page.goto(subHref);
-                            const _content = await page.$eval('pre', el => el.innerText);
+                            const _content = await page.$eval('pre', (el:any) => el.innerText);
                             console.log(`_content ${_content}`)
                             fs.writeFile(`./downloads/${folderName}_${fileName}`, _content, 'utf8', function (err) {
                                 if (err) return console.log(err);
@@ -80,5 +80,5 @@ import fs from 'fs';
 })();
 
 async function getHrefs(page: any) {
-    return await page.$$eval('a', links => links.map(a => a.href));
+    return await page.$$eval('a', (links:any) => links.map((a:any) => a.href));
 }
