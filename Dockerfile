@@ -23,7 +23,7 @@ COPY .dockerignore .dockerignore
 RUN yarn run build
 
 # Expose a port (if your app listens on a specific port)
-EXPOSE 4000
+EXPOSE 80
 
 # Define the command to start your application
 CMD ["node", "dist/index.js"]
