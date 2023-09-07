@@ -2,7 +2,7 @@
 //so by moving them to the Root folder.
 //they will be pushed to google drive. as google drive counts all folders char length + file name length
 
-import { getAllPDFFiles } from "../../imgToPdf/utils/FileUtils";
+import { getAllPDFFiles } from "../../../imgToPdf/utils/FileUtils";
 import * as path from 'path';
 import fs from 'fs';
 import { move } from "fs-extra";

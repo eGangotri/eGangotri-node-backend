@@ -1,13 +1,13 @@
 import { drive_v3 } from 'googleapis';
-import { sizeInfo } from '../../mirror/FrontEndBackendCommonCode';
 import { dataToXslx } from '../../excel/ExcelUtils';
+import { sizeInfo } from '../../../mirror/FrontEndBackendCommonCode'; 
 import { FOLDER_MIME_TYPE, PDF_MIME_TYPE } from '../_utils/constants';
 import { GoogleApiData } from '../types';
 import { createFileNameWithPathForExport, extractGoogleDriveId, getFolderName, getFolderPathRelativeToRootFolder } from '../_utils/GoogleDriveUtil';
 import * as _ from 'lodash';
 import { GaxiosResponse } from 'gaxios';
-import { ellipsis } from '../../mirror/utils';
-import * as FileUtils from '../../imgToPdf/utils/FileUtils';
+import { ellipsis } from '../../../mirror/utils';
+import * as FileUtils from '../../../imgToPdf/utils/FileUtils';
 
 export async function listFolderContentsAsArrayOfData(folderId: string,
     drive: drive_v3.Drive,

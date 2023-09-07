@@ -1,12 +1,12 @@
 import path from "path";
-import * as FileUtils from "../../imgToPdf/utils/FileUtils";
+import * as FileUtils from "../../../imgToPdf/utils/FileUtils";
 import * as fs from 'fs';
-import { DD_MM_YYYY_HH_MMFORMAT } from "../../utils/utils";
+import { DD_MM_YYYY_HH_MMFORMAT } from "../../../utils/utils";
 import moment from "moment";
 import { jsonToExcel } from "../../excel/ExcelUtils";
 import * as _ from 'lodash';
-import { sizeInfo } from "../../mirror/FrontEndBackendCommonCode";
-import { FileStats } from "../../imgToPdf/utils/types";
+import { sizeInfo } from "../../../mirror/FrontEndBackendCommonCode";
+import { FileStats } from "../../../imgToPdf/utils/types";
 
 const createExcelFilePathName = (mainExcelDataLength: number, folderName: String, _excelRoot: string) => {
     const _excelPath = `${_excelRoot}\\local`;

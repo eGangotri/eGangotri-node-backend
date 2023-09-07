@@ -1,11 +1,11 @@
 import path from 'path';
 import * as fs from 'fs';
 import * as _ from 'lodash';
-import { ExcelHeaders } from "googleapi/types";
-import { excelToJson } from "excel/ExcelUtils";
+import { ExcelHeaders } from "../types";
+import { excelToJson } from "../../excel/ExcelUtils";
 import { titleInGoogleDrive } from "./constants";
-import { getAllPDFFiles } from 'imgToPdf/utils/FileUtils';
-import { FileStats } from 'imgToPdf/utils/types';
+import { getAllPDFFiles } from '../../../imgToPdf/utils/FileUtils';
+import { FileStats } from '../../../imgToPdf/utils/types';
 
 const _excelToJson = () => {
     const _root = "C:\\_catalogWork\\_collation";

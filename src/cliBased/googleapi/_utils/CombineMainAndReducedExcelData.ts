@@ -3,7 +3,7 @@ import { ExcelHeaders } from "../types";
 import { emptyExcelHeaderObj, linkToFileLocation, linkToTruncatedFileLocation, numPages, titleInGoogleDrive } from "./constants";
 import * as fs from 'fs';
 import * as _ from 'lodash';
-import { DD_MM_YYYY_HH_MMFORMAT } from "../../utils/utils";
+import { DD_MM_YYYY_HH_MMFORMAT } from "../../../utils/utils";
 import moment from "moment";
 
 const ignoreDiff = true;

@@ -1,4 +1,4 @@
-import { FILE_SIZE, LOCAL_FILE_NAME_HEADER, TOTAL_FILE_SIZE_IN_KB } from "../googleapi/_utils/constants";
+import { FILE_SIZE, LOCAL_FILE_NAME_HEADER } from "../googleapi/_utils/constants";
 import { LocalFileHeaders } from "../googleapi/types";
 import { excelToJson } from "./ExcelUtils";
 import * as fs from 'fs';
