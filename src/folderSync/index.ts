@@ -64,7 +64,7 @@ const findMatching = (src: FileStats, srcRoot: string, dest: FileStats[], destRo
 const _root = "Otro-1-Otro-2\\Otro-2"
 //\\Sanskrit Academy Hyd Manuscripts Processed\\Skt Academy Hyd-Sanskrit Manuscript_016
 const _src = `D:\\${_root}`
-const _dest = `F:\\${_root}`;
+const _dest = `E:\\${_root}`;
 
 sync(_src, _dest)
 //yarn run syncFolders

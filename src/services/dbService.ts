@@ -7,6 +7,7 @@ import * as _ from "lodash";
 import { getLimit } from "../routes/utils";
 import { DEFAULT_DAYS_BEFORE_CURRENT_FOR_SEARCH } from "../utils/constants";
 import { ItemsListOptionsType } from "./types";
+import { ellipsis } from "../mirror/utils";
 
 
 export async function addItemsQueuedBulk(itemsArray: any[]) {
@@ -86,7 +87,7 @@ export function setOptionsForItemListing(queryOptions: ItemsListOptionsType) {
 
 export async function connectToMongo(_args:string[] = []) {
   const mongoDbUrl = mongoDbUrlWithDbName(!_.isEmpty(_args) ? _args[0]: "");
-  console.log("\nAttempting to connect to DB:", mongoDbUrl);
+  console.log("\nAttempting to connect to DB:", ellipsis(mongoDbUrl));
   if (mongoDbUrl) {
     try {
       await mongoose.connect(mongoDbUrl,
