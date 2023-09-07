@@ -15,7 +15,7 @@ import { GLOBAL_DB_NAME } from './db/connection';
 
 const app = express();
 const hostname = "127.0.0.1";
-const port = process.env.PORT || 80;
+const port = process.env.PORT || 3000;
 const args = process.argv.slice(2);
 console.log("Command-line arguments:", args);
 

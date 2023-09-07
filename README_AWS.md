@@ -3,10 +3,19 @@ So in
 package.json remove
     "googleapis": "^121.0.0",
 
+
+git rm -r --cached cliBased
+
 in .gitignore
 /src/cliBased
 
-git rm -r --cached cliBased
+git add .
+git commit/push
+
+Go to cyclic and deploy
+add env variables:
+https://app.cyclic.sh/#/app/egangotri-egangotri-node-backend/vars
+
 
 
 
