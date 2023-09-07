@@ -1,15 +1,14 @@
 const express = require("express");
 
-const { itemsQueuedRoute } = require("./routes/itemsQueued.route");
-const { itemsUsheredRoute } = require("./routes/itemsUshered.route");
-const { launchGradleRoute } = require("./routes/launchGradle.route");
-const { dailyWorkReportRoute } = require("./routes/dailyWorkReport.route");
-const { dailyCatWorkReportRoute } = require("./routes/dailyCatWorkReport.route");
-const { uploadCycleRoute } = require("./routes/uploadCycle.route");
+import {itemsQueuedRoute} from "./routes/itemsQueued.route";
+import {itemsUsheredRoute} from "./routes/itemsUshered.route";
+import {launchGradleRoute} from "./routes/launchGradle.route";
+import {dailyWorkReportRoute} from "./routes/dailyWorkReport.route";
+import {dailyCatWorkReportRoute} from "./routes/dailyCatWorkReport.route";
+import {uploadCycleRoute} from "./routes/uploadCycle.route";
 
-const { userRoute } = require("./routes/userRoute.route");
-const { connectToMongo } = require("./services/dbService");
-const fs = require("fs");
+import {userRoute} from "./routes/userRoute.route";
+import {connectToMongo} from "./services/dbService";
 
 import { GLOBAL_DB_NAME } from './db/connection';
 
@@ -19,7 +18,7 @@ const port = process.env.PORT || 3000;
 const args = process.argv.slice(2);
 console.log("Command-line arguments:", args);
 
-connectToMongo(args);
+//connectToMongo(args);
 app.use(express.json());
 app.use((req: any, res: any, next: any) => {
   res.append("Access-Control-Allow-Origin", ["*"]);
@@ -42,6 +41,10 @@ app.use("/dailyCatWorkReport", dailyCatWorkReportRoute);
 app.use("/uploadCycleRoute", uploadCycleRoute);
 app.use("/user", userRoute);
 
-app.listen(port, async () => {
-  console.log(`Server running at http://${hostname}:${port}/`, new Date());
-});
+connectToMongo(args).then(() => {
+  app.listen(port, async () => {
+    console.log(`Server running at http://${hostname}:${port}/`, new Date());
+  });
+})
+
+
