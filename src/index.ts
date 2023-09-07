@@ -18,7 +18,6 @@ const port = process.env.PORT || 80;
 const args = process.argv.slice(2);
 console.log("Command-line arguments:", args);
 
-//connectToMongo(args);
 app.use(express.json());
 app.use((req: any, res: any, next: any) => {
   res.append("Access-Control-Allow-Origin", ["*"]);
