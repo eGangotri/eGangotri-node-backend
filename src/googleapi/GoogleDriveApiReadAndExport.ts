@@ -1,7 +1,6 @@
 import { _credentials } from './_utils/credentials_googleapi';
 import { listFolderContentsAndGenerateCSVAndExcel, listFolderContentsAsArrayOfData } from './service/GoogleApiService';
 import { getGoogleDriveInstance } from './service/CreateGoogleDrive';
-import { downloadPdfFromGoogleDrive } from '../pdf/downloadPdf';
 
 // Create a new Google Drive instance
 const drive = getGoogleDriveInstance();
