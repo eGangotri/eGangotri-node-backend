@@ -1,5 +1,5 @@
 import { google } from 'googleapis';
-import { _credentials } from './credentials_gitignore';
+import { _credentials } from './credentials_googleapi';
 
 // Set up OAuth2 credentials
 const credentials = {
