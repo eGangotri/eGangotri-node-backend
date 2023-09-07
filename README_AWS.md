@@ -3,8 +3,10 @@ So in
 package.json remove
     "googleapis": "^121.0.0",
 
-.gitignore
+in .gitignore
+/src/googleapi
 
+git rm -r --cached googleapi
 
 
 
