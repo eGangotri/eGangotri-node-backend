@@ -1,4 +1,4 @@
-import { extractGoogleDriveId } from "../googleapi/_utils/GoogleDriveUtil";
+import { extractGoogleDriveId } from "../../googleapi/_utils/GoogleDriveUtil";
 const { DownloaderHelper } = require('node-downloader-helper');
 
 const dumpFolder = "C:\\Users\\chetan\\Documents\\_personal";
