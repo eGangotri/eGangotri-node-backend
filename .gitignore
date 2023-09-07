@@ -1,3 +1,4 @@
+googleapi/*.ts
 *.csv
 # Logs
 logs
