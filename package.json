@@ -76,7 +76,6 @@
     "node-downloader-helper": "^2.1.9",
     "pdf-export-images": "^1.0.9",
     "pdf-lib": "^1.17.1",
-    "pdfjs-dist": "^3.8.162",
     "pdfkit": "^0.13.0",
     "readline-sync": "^1.4.10",
     "puppeteer": "^21.1.1",
