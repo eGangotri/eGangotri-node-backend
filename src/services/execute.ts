@@ -2,7 +2,6 @@ import fs from "fs";
 var fsPromises = require("fs").promises;
 const csv = require("csv-parse");
 
-import * as _ from "underscore";
 import { ItemsQueued } from "../models/itemsQueued";
 import { v4 as uuidv4 } from "uuid";
 import { addItemstoMongoBulk } from "./dbService";
