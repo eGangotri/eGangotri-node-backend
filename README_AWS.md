@@ -3,9 +3,9 @@ So in
 package.json remove
     "googleapis": "^121.0.0",
 
-
 git rm -r --cached cliBased
-
+rm ./yarn.lock
+yarn install
 in .gitignore
 /src/cliBased
 
@@ -15,9 +15,6 @@ git commit/push
 Go to cyclic and deploy
 add env variables:
 https://app.cyclic.sh/#/app/egangotri-egangotri-node-backend/vars
-
-
-
 
 ##Dockerize
 Create DockerFile
