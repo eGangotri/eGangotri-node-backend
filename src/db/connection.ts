@@ -13,7 +13,10 @@ export const mongoDbUrlWithDbName = (dbName: string) => {
         GLOBAL_DB_NAME = CONFS.MONGO_DB_NAME || ""
     }
 
-    return `${CONFS.MONGO_DB_PROTOCOL}${CONFS.MONGO_ATLAS_USER}:${CONFS.MONGO_ATLAS_PWD}@${CONFS.MONGO_DB_PATH}/${GLOBAL_DB_NAME}${CONFS.MONGO_DB_SUFFIXES}`;
+    const _protocol = CONFS.MONGO_DB_PROTOCOL || "mongodb+srv://";
+    const _suffix = CONFS.MONGO_DB_SUFFIXES || "?retryWrites=true&w=majority";
+
+    return `${_protocol}${CONFS.MONGO_ATLAS_USER}:${CONFS.MONGO_ATLAS_PWD}@${CONFS.MONGO_DB_PATH}/${GLOBAL_DB_NAME}${_suffix}`;
 }
 export const MONGO_OPTIONS = {
     useNewUrlParser: true,
