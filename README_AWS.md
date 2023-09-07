@@ -4,9 +4,9 @@ package.json remove
     "googleapis": "^121.0.0",
 
 in .gitignore
-/src/googleapi
+/src/cliBased
 
-git rm -r --cached googleapi
+git rm -r --cached cliBased
 
 
 
