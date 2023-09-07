@@ -2,7 +2,6 @@ import mongoose from "mongoose";
 import { ObjectId } from 'mongodb';
 
 import moment from 'moment';
-import { DD_MM_YYYY_FORMAT } from "../utils/utils";
 import { DailyWorkReport } from "../models/dailyWorkReport";
 import { DailyWorkReportListOptionsType, ItemsListOptionsType } from "./types";
 import { getLimit } from "../routes/utils";
@@ -10,8 +9,6 @@ import { getLimit } from "../routes/utils";
 import { Response } from "express";
 import { createObjectCsvWriter } from "csv-writer";
 import { createReadStream } from "fs";
-import * as fsExtra from "fs-extra";
-import * as fs from "fs";
 import { CSV_HEADER_API2, CSV_HEADER_API2_FOR_AGGREGATES, CSV_HEADER_API2_SUBSET, CSV_HEADER_THREE_FIELDS_ONLYAPI2 } from "./constants";
 import * as Mirror from "../mirror/FrontEndBackendCommonCode"
 import * as _ from 'lodash';
