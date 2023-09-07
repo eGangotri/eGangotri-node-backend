@@ -1,3 +1,13 @@
+cyclic package limit is 240 MB
+So in 
+package.json remove
+    "googleapis": "^121.0.0",
+
+.gitignore
+
+
+
+
 ##Dockerize
 Create DockerFile
 Docker:
