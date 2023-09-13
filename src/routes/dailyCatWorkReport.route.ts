@@ -32,6 +32,9 @@ JSON Body
 dailyCatWorkReportRoute.post("/add", async (req: Request, resp: Response) => {
   try {
     const operatorName = req.body.operatorName
+    if (operatorName) {
+      resp.status(400).send({ error: "non-functional" });
+    }
 
     if (await validateUserFromRequest(req)) {
       const dailyCatWorkReport = new DailyCatWorkReport(req.body);
@@ -111,9 +114,9 @@ dailyCatWorkReportRoute.get("/listIds", async (req: Request, resp: Response) => 
 /**
  * 
  * {
-	"_ids": "64bf2382c0a3e0e17c64b472,64bbc572c0a3e0e17c64b124,64bbc542c0a3e0e17c64b123",
-	"superadmin_user": "",
-	"superadmin_password": ""
+  "_ids": "64bf2382c0a3e0e17c64b472,64bbc572c0a3e0e17c64b124,64bbc542c0a3e0e17c64b123",
+  "superadmin_user": "",
+  "superadmin_password": ""
 }
  */
 //non-functional
@@ -130,7 +133,7 @@ dailyCatWorkReportRoute.delete("/delete", async (req: Request, resp: Response) =
         });
       }
       else {
-        if(idsAsCSV.length > 10){
+        if (idsAsCSV.length > 10) {
           resp.status(300).send({
             response: `Expected deletion of ${idsAsCSV.length} items but more than 10 is not allowed`,
           });
@@ -146,7 +149,7 @@ dailyCatWorkReportRoute.delete("/delete", async (req: Request, resp: Response) =
           });
         }
         else {
-          const _idsfiltered = items.filter((item) => idsAsCSV.includes(item._id.toString()) ).map((x)=> x._id.toString())
+          const _idsfiltered = items.filter((item) => idsAsCSV.includes(item._id.toString())).map((x) => x._id.toString())
           console.log(`_ids2 ${_idsfiltered.length} idsAsCSV.length ${idsAsCSV.length}`)
           const status = await deleteRowsByIds(_idsfiltered);
           resp.status(200).send({
