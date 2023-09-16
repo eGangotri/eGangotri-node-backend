@@ -74,6 +74,7 @@ interface VerfiyUrlType {
   url: string;
   success: boolean;
 }
+
 export async function checkUrlValidity(_forVerfication: SelectedUploadItem): Promise<SelectedUploadItem> {
   const url = createArchiveLink(_forVerfication.archiveId);
   let result = {
