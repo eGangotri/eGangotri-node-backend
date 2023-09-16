@@ -1,3 +1,5 @@
+import { Types } from "mongoose";
+
 export interface ArchiveProfileAndCount {
     archiveProfile: string;
     count: number;
@@ -33,7 +35,7 @@ export interface UploadCycleTableDataResponse {
 }
 
 export interface SelectedUploadItem {
-    id:number;
+    id:Types.ObjectId;
     archiveId:string;
     isValid?: boolean;
 }

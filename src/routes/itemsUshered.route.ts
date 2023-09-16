@@ -58,14 +58,30 @@ itemsUsheredRoute.post('/add', async (req: any, resp: any) => {
 itemsUsheredRoute.post('/verifyUploadStatus', async (req: any, resp: any) => {
     try {
         const items = req.body;
-        const uploadsForVerification: SelectedUploadItem[] = items.uploadsForVerification
-        const results: SelectedUploadItem[] = [];
-
-        for (const forVerification of uploadsForVerification) {
-            const res = await checkUrlValidity(forVerification);
-            results.push(res);
+        if (items.uploadCycleIdForVerification) {
+            //get all Items_Ushered for uploadCycleIdForVerification
+            const itemsUshered = await getListOfItemsUshered({ uploadCycleId: items.uploadCycleIdForVerification });
+            const results: SelectedUploadItem[] = [];
+            for (const item of itemsUshered) {
+                const res = await checkUrlValidity({
+                    id: item._id,
+                    archiveId: `${item.archiveItemId}`,
+                    isValid: true
+                });
+                results.push(res);
+            }
+            resp.status(200).send({ response: results });
         }
-        resp.status(200).send({ response: results });
+        else {
+            const uploadsForVerification: SelectedUploadItem[] = items.uploadsForVerification
+            const results: SelectedUploadItem[] = [];
+
+            for (const forVerification of uploadsForVerification) {
+                const res = await checkUrlValidity(forVerification);
+                results.push(res);
+            }
+            resp.status(200).send({ response: results });
+        }
     }
     catch (err: any) {
         console.log('Error', err);
@@ -111,7 +127,7 @@ itemsUsheredRoute.get('/listForUploadCycle', async (req: Request, resp: Response
         for (const key in groupedItems) {
             const usheredRow = groupedItems[key]
             const queuedRow = groupedQueuedItems[key];
-            const uploadCycleRow:any = groupedUploadCycles[key];
+            const uploadCycleRow: any = groupedUploadCycles[key];
 
             console.log(`uploadCycle ${JSON.stringify(uploadCycleRow)}`);
 
@@ -141,7 +157,7 @@ itemsUsheredRoute.get('/listForUploadCycle', async (req: Request, resp: Response
 const handleEachRow = (uploadCycleId: string,
     usheredRow: _.Dictionary<UploadCycleTableData[]>,
     queuedRow: _.Dictionary<UploadCycleTableData[]>,
-    uploadCycleRow: [any, ...any[]] ) => {
+    uploadCycleRow: [any, ...any[]]) => {
 
     const archiveProfileAndCount: ArchiveProfileAndCount[] = []
     let totalCount = 0
@@ -191,14 +207,14 @@ const handleEachRow = (uploadCycleId: string,
 itemsUsheredRoute.post('/reUploadMissed', async (req: any, resp: any) => {
     try {
         const items = req.body;
-        const itemsForReupload:ReuploadType[] = items.itemsForReupload;
+        const itemsForReupload: ReuploadType[] = items.itemsForReupload;
         const res = gradleLaunchArchiveUpload(itemsForReupload);
         const first = itemsForReupload[0]
 
-        const itemsByAcrhiveProfiles = _.groupBy(itemsForReupload,'archiveProfile')
+        const itemsByAcrhiveProfiles = _.groupBy(itemsForReupload, 'archiveProfile')
         console.log(`archiveProfiles:: ${JSON.stringify(itemsByAcrhiveProfiles)}`)
-       // const command = 'gradle loginToArchive --args="SPS VT  PANINI"';
-       // const command = 'gradle uploadToArchive --args="SPS VT  PANINI"';
+        // const command = 'gradle loginToArchive --args="SPS VT  PANINI"';
+        // const command = 'gradle uploadToArchive --args="SPS VT  PANINI"';
 
         resp.status(200).send({ response: res });
     }
