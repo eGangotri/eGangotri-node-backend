@@ -34,7 +34,7 @@ app.get("/", function (req: any, res: any) {
 
 app.use("/itemsQueued", itemsQueuedRoute);
 app.use("/itemsUshered", itemsUsheredRoute);
-app.use("/launchGradle", launchGradleRoute);
+app.use("/execLauncher", launchGradleRoute);
 app.use("/dailyWorkReport", dailyWorkReportRoute);
 app.use("/dailyCatWorkReport", dailyCatWorkReportRoute);
 app.use("/uploadCycleRoute", uploadCycleRoute);
