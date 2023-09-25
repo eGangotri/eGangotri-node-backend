@@ -3,16 +3,20 @@ import { WORKING_DIR } from '../common';
 
 
 export function launchUploader(args: any): Promise<string> {
+    const _query = args.split(",").map((x: string)=>x.trim())._query.join(" ")
     console.log(`args ${args}`);
-    const _cmd = `gradle uploadToArchive --args=${args.split(",").map((x: string)=>x.trim()).join(",")}`
+
+    const _cmd = `gradle uploadToArchive --args='${_query}'`
     return makeGradleCall(_cmd)
 }
 
 //localhost/launchGradle/moveToFreeze?profiles="TEST,TMP"
 export function moveToFreeze(args: any): Promise<string> {
+    const _query = args.split(",").map((x: string)=>x.trim())._query.join(" ")
     console.log(`args ${args}`);
+
     //gradle fileMover --args=JNGM_BEN JNGM_TAMIL JNGM_TEL JNGM BVT
-    const _cmd = `gradle fileMover --args=${args.split(",").join(" ")}`
+    const _cmd = `gradle uploadToArchive --args='${_query}'`
     return makeGradleCall(_cmd)
 }
 
