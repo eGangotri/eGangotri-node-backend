@@ -2,25 +2,25 @@ import { exec, spawn } from 'child_process';
 import { WORKING_DIR } from '../common';
 
 
-export function launchUploader(args: any): Promise<string> {
-    const _query = args.split(",").map((x: string)=>x.trim())._query.join(" ")
+const generateGradleCommand = (args: string, gradleCommand: string) => {
+    const _query = args.split(",").map((x: string) => x.trim()).join(" ")
     console.log(`args ${args}`);
-
-    const _cmd = `gradle uploadToArchive --args='${_query}'`
-    return makeGradleCall(_cmd)
+    const _cmd = `gradle ${gradleCommand} --args="${_query}"`
+    console.log(`_cmd ${_cmd}`);
+    return _cmd
+}
+export function launchUploader(args: any): Promise<string> {
+    return makeGradleCall(generateGradleCommand(args, "uploadToArchive"))
 }
 
 //localhost/launchGradle/moveToFreeze?profiles="TEST,TMP"
 export function moveToFreeze(args: any): Promise<string> {
-    const _query = args.split(",").map((x: string)=>x.trim())._query.join(" ")
-    console.log(`args ${args}`);
-
     //gradle fileMover --args=JNGM_BEN JNGM_TAMIL JNGM_TEL JNGM BVT
-    const _cmd = `gradle uploadToArchive --args='${_query}'`
-    return makeGradleCall(_cmd)
+    return makeGradleCall(generateGradleCommand(args, "fileMover"))
+
 }
 
-function makeGradleCall( _cmd: string): Promise<string> {
+function makeGradleCall(_cmd: string): Promise<string> {
     return new Promise((resolve, reject) => {
         exec(_cmd, {
             cwd: `${WORKING_DIR}`
