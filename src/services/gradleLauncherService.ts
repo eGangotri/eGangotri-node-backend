@@ -4,7 +4,7 @@ import { WORKING_DIR } from '../common';
 
 export function launchUploader(args: any): Promise<string> {
     console.log(`args ${args}`);
-    const _cmd = `gradle uploadToArchiveArgs --args=${args.split(",").map((x: string)=>x.trim()).join(" ")}`
+    const _cmd = `gradle uploadToArchive --args=${args.split(",").map((x: string)=>x.trim()).join(" ")}`
     return makeGradleCall(_cmd)
 }
 
