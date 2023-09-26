@@ -17,7 +17,10 @@ export function launchUploader(args: any): Promise<string> {
 export function moveToFreeze(args: any): Promise<string> {
     //gradle fileMover --args=JNGM_BEN JNGM_TAMIL JNGM_TEL JNGM BVT
     return makeGradleCall(generateGradleCommand(args, "fileMover"))
-
+}
+export function loginToArchive(args: any): Promise<string> {
+    //gradle loginToArchive --args=JNGM_BEN JNGM_TAMIL JNGM_TEL JNGM BVT
+    return makeGradleCall(generateGradleCommand(args, "loginToArchive"))
 }
 
 function makeGradleCall(_cmd: string): Promise<string> {
