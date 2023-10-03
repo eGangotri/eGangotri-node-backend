@@ -1,5 +1,4 @@
-// const _root = "D:\\_Treasures59\\_data\\bjpjammu"
-export const _root = "D:\\_Treasures62\\_data\\pz"
+export const _root = "D:\\_Treasures63\\_data\\pz"
 export const _pdfRoot = `${_root}`
 export const imgFile = `${_root}\\peerzada2.jpg`
 export const MAX_IMG_WIDTH = 700;
