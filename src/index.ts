@@ -12,36 +12,36 @@ import {connectToMongo} from "./services/dbService";
 
 import { GLOBAL_DB_NAME } from './db/connection';
 
-const app = express();
+const egangotri = express();
 const hostname = "127.0.0.1";
 const port = process.env.PORT || 80;
 const args = process.argv.slice(2);
 console.log("Command-line arguments:", args);
 
-app.use(express.json());
-app.use((req: any, res: any, next: any) => {
+egangotri.use(express.json());
+egangotri.use((req: any, res: any, next: any) => {
   res.append("Access-Control-Allow-Origin", ["*"]);
   res.append("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE");
   res.append("Access-Control-Allow-Headers", "Content-Type");
   next();
 });
 
-app.get("/", function (req: any, res: any) {
+egangotri.get("/", function (req: any, res: any) {
   res.send({
     response: `eGangotri-node-backend (${GLOBAL_DB_NAME})`
   });
 });
 
-app.use("/itemsQueued", itemsQueuedRoute);
-app.use("/itemsUshered", itemsUsheredRoute);
-app.use("/execLauncher", launchGradleRoute);
-app.use("/dailyWorkReport", dailyWorkReportRoute);
-app.use("/dailyCatWorkReport", dailyCatWorkReportRoute);
-app.use("/uploadCycleRoute", uploadCycleRoute);
-app.use("/user", userRoute);
+egangotri.use("/itemsQueued", itemsQueuedRoute);
+egangotri.use("/itemsUshered", itemsUsheredRoute);
+egangotri.use("/execLauncher", launchGradleRoute);
+egangotri.use("/dailyWorkReport", dailyWorkReportRoute);
+egangotri.use("/dailyCatWorkReport", dailyCatWorkReportRoute);
+egangotri.use("/uploadCycleRoute", uploadCycleRoute);
+egangotri.use("/user", userRoute);
 
 connectToMongo(args).then(() => {
-  app.listen(port, async () => {
+  egangotri.listen(port, async () => {
     console.log(`Server running at http://${hostname}:${port}/`, new Date());
   });
 })
