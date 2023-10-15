@@ -88,6 +88,7 @@ export async function getFolderPathRelativeToRootFolder(folderId: string, drive:
         const folder = response.data;
         const folderName = folder.name || "";
         const folderPath = ""
+        console.log("folderName " + folderName)
         if (folder.parents && folder.parents.length > 0) {
             // If the folder has a parent, recursively get its path
             const parentPath = await getFolderPathRelativeToRootFolder(folder.parents[0], drive);

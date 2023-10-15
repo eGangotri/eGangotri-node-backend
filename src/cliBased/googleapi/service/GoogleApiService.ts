@@ -1,6 +1,6 @@
 import { drive_v3 } from 'googleapis';
 import { dataToXslx } from '../../excel/ExcelUtils';
-import { sizeInfo } from '../../../mirror/FrontEndBackendCommonCode'; 
+import { sizeInfo } from '../../../mirror/FrontEndBackendCommonCode';
 import { FOLDER_MIME_TYPE, PDF_MIME_TYPE } from '../_utils/constants';
 import { GoogleApiData } from '../types';
 import { createFileNameWithPathForExport, extractGoogleDriveId, getFolderName, getFolderPathRelativeToRootFolder } from '../_utils/GoogleDriveUtil';
@@ -12,7 +12,8 @@ import * as FileUtils from '../../../imgToPdf/utils/FileUtils';
 export async function listFolderContentsAsArrayOfData(folderId: string,
     drive: drive_v3.Drive,
     exportDestFolder: string,
-    umbrellaFolder: string = "") {
+    umbrellaFolder: string = "",
+    ignoreFolder="") {
 
     FileUtils.createFolderIfNotExists(exportDestFolder);
     const rootFolderName = await getFolderName(folderId, drive) || "";
@@ -24,7 +25,7 @@ export async function listFolderContentsAsArrayOfData(folderId: string,
     const googleDrivePdfData: Array<GoogleApiData> = []
     let idFolderNameMap = new Map<string, string>();
 
-    await listFolderContents(folderId, drive, umbrellaFolder, googleDrivePdfData, idFolderNameMap, rootFolderName);
+    await listFolderContents(folderId, drive, umbrellaFolder, googleDrivePdfData, idFolderNameMap, rootFolderName,ignoreFolder);
     return googleDrivePdfData
 }
 
@@ -34,7 +35,7 @@ export async function listFolderContentsAndGenerateCSVAndExcel(_folderIdOrUrl: s
     umbrellaFolder: string = "") {
     const folderId = extractGoogleDriveId(_folderIdOrUrl)
 
-    const googleDrivePdfData: Array<GoogleApiData> = await listFolderContentsAsArrayOfData(folderId,drive, exportDestFolder,umbrellaFolder)
+    const googleDrivePdfData: Array<GoogleApiData> = await listFolderContentsAsArrayOfData(folderId, drive, exportDestFolder, umbrellaFolder)
     const fileNameWithPath = createFileNameWithPathForExport(folderId, umbrellaFolder, exportDestFolder) + `_${FileUtils.ROW_COUNTER[1]}`;
     FileUtils.incrementRowCounter()
     //writeDataToCSV(googleDrivePdfData, `${fileNameWithPath}.csv`)
@@ -46,8 +47,13 @@ export async function listFolderContentsAndGenerateCSVAndExcel(_folderIdOrUrl: s
         console.log("No Data retrieved. No File will be created");
     }
 }
-export async function listFolderContents(folderId: string, drive: drive_v3.Drive, umbrellaFolder:
-    string, googleDrivePdfData: GoogleApiData[], idFolderNameMap: Map<string, string>, rootFolderName: string) {
+export async function listFolderContents(folderId: string,
+    drive: drive_v3.Drive,
+    umbrellaFolder: string,
+    googleDrivePdfData: GoogleApiData[],
+    idFolderNameMap: Map<string, string>,
+    rootFolderName: string,
+    ignoreFolder = "") {
 
     if (!idFolderNameMap.has(folderId)) {
         const folderPath = await getFolderPathRelativeToRootFolder(folderId, drive)
@@ -59,9 +65,13 @@ export async function listFolderContents(folderId: string, drive: drive_v3.Drive
     try {
         let files: drive_v3.Schema$File[] = [];
         let pageToken: string | undefined = undefined;
+        //
+        const conditionForIgnoreFolder = ignoreFolder?.length > 0 ? ` and not name contains '${ignoreFolder}'` : "";
+        const _query = `'${folderId}' in parents and trashed = false and (mimeType='${PDF_MIME_TYPE}' or (mimeType='${FOLDER_MIME_TYPE}' ${conditionForIgnoreFolder} ))`
+        console.log(`_query ${_query}`)
         do {
             const response: GaxiosResponse = await drive.files.list({
-                q: `'${folderId}' in parents and trashed = false and (mimeType='${PDF_MIME_TYPE}' or mimeType='${FOLDER_MIME_TYPE}')`,
+                q: _query,
                 fields: 'nextPageToken, files(id, name, mimeType,size,parents,webViewLink,thumbnailLink,createdTime)',
                 pageSize: 1000, // Increase the page size to retrieve more files if necessary
                 pageToken: pageToken,
@@ -79,7 +89,7 @@ export async function listFolderContents(folderId: string, drive: drive_v3.Drive
                 try {
                     addFileMetadataToArray(file, folderId, googleDrivePdfData, idFolderNameMap);
                     if (file.mimeType === FOLDER_MIME_TYPE) {
-                        await listFolderContents(file?.id || '', drive, umbrellaFolder, googleDrivePdfData, idFolderNameMap, rootFolderName); // Recursively call the function for subfolders
+                        await listFolderContents(file?.id || '', drive, umbrellaFolder, googleDrivePdfData, idFolderNameMap, rootFolderName, ignoreFolder); // Recursively call the function for subfolders
                     }
                 }
                 catch (err) {
