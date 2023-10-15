@@ -1,13 +1,17 @@
-import { extractGoogleDriveId } from "cliBased/googleapi/_utils/GoogleDriveUtil";
+import { extractGoogleDriveId } from "../googleapi/_utils/GoogleDriveUtil";
 const { DownloaderHelper } = require('node-downloader-helper');
 
-const dumpFolder = "C:\\Users\\chetan\\Documents\\_personal";
+const dumpFolder = "D:\\_playground\\_dwnldPlayground";
 
+export const genDownloadLink = (driveId:string) => {
+    return `https://drive.usercontent.google.com/download?id=${driveId}&export=download&authuser=0&confirm=t`
+
+}
 export const downloadPdfFromGoogleDrive = (driveLinkOrFolderId: string) => {
     console.log(`downloadPdfFromGoogleDrive ${driveLinkOrFolderId}`)
     const driveId = extractGoogleDriveId(driveLinkOrFolderId)
-    const _pdfDlUrl = `https://drive.usercontent.google.com/download?id=${driveId}&export=download&authuser=0&confirm=t`
-    console.log(`downloading ${_pdfDlUrl}`)
+    const _pdfDlUrl = genDownloadLink(driveId)
+    console.log(`downloading ${_pdfDlUrl} to ${dumpFolder}`)
 
     const dl = new DownloaderHelper(_pdfDlUrl, dumpFolder);//
 

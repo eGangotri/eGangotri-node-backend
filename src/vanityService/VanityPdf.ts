@@ -32,7 +32,7 @@ export const createVanityPdf = async (imagePath: string, pdfToVanitize: string, 
 
 const createIntroPageWithImage = async (imagePath: string, pdfToVanitize: string, text: string) => {
     var imageFolderPath = path.dirname(imagePath);
-    var _introPath = `${imageFolderPath}\\_intros`;
+    var _introPath = `${imageFolderPath}\\_intros_dont`;
     await mkDirIfDoesntExists(_introPath);
 
     const pdfToVanitizeNameWithoutExt = path.parse(pdfToVanitize).name.trim()
