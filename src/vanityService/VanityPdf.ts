@@ -4,7 +4,6 @@ import * as fs from 'fs';
 import { getAllPdfsInFolders, mkDirIfDoesntExists } from "../imgToPdf/utils/Utils";
 import { prepareDocument } from "../imgToPdf/utils/PdfUtils";
 const path = require('path');
-import PDFKit from 'pdfkit';
 import { FONT_SIZE, MAX_IMG_WIDTH, _pdfRoot, imgFile, introText } from "./vanityConstants";
 
 
@@ -18,6 +17,10 @@ import { FONT_SIZE, MAX_IMG_WIDTH, _pdfRoot, imgFile, introText } from "./vanity
  * @param finalDumpGround 
  */
 
+const _intros_dont = "_intros_dont"
+const _orig_dont = "_orig_dont"
+const _vanitized = "_vanitized"
+
 export const createVanityPdf = async (imagePath: string, pdfToVanitize: string, text: string, finalDumpGround: string) => {
     try {
         const introPdf = await createIntroPageWithImage(imagePath, pdfToVanitize, text);
@@ -30,9 +33,21 @@ export const createVanityPdf = async (imagePath: string, pdfToVanitize: string, 
     }
 }
 
+export const moveOrignalToSeparateFolder = async ( pdfToVanitize: string, finalDumpGround: string) => {
+    try {
+        await mkDirIfDoesntExists(finalDumpGround);
+        const newName = finalDumpGround + "\\" + path.parse(pdfToVanitize).name.trim() + path.parse(pdfToVanitize).ext
+        console.log(`renaming ${pdfToVanitize} to ${newName}`)
+        fs.renameSync(pdfToVanitize, newName);
+    }
+    catch (err) {
+        console.log(`createVanityPdf:err ${err}`)
+    }
+}
+// _orig_dont
 const createIntroPageWithImage = async (imagePath: string, pdfToVanitize: string, text: string) => {
     var imageFolderPath = path.dirname(imagePath);
-    var _introPath = `${imageFolderPath}\\_intros_dont`;
+    var _introPath = `${imageFolderPath}\\${_intros_dont}`;
     await mkDirIfDoesntExists(_introPath);
 
     const pdfToVanitizeNameWithoutExt = path.parse(pdfToVanitize).name.trim()
@@ -115,7 +130,8 @@ const mergeVanityPdf = async (_introPdf: string, origPdf: string, finalDumpGroun
     }
     for (let i = 0; i < _pdfs.length; i++) {
         console.log(`creating vanity for: ${_pdfs[i]}`, await PdfLibUtils.getPdfFirstPageDimensionsUsingPdfLib(_pdfs[i]))
-        await mergeVanityPdf(intros[i], _pdfs[i], `${_pdfRoot}\\1`)
+        await mergeVanityPdf(intros[i], _pdfs[i], `${_pdfRoot}\\${_vanitized}`)
+        moveOrignalToSeparateFolder(_pdfs[i], `${_pdfRoot}\\${_orig_dont}`)
     }
 })();
 //yarn run vanity 
