@@ -7,7 +7,6 @@ import { getFolderInSrcRootForProfile } from '../../cliBased/utils';
 import fs from 'fs';
 import path from 'path';
 
-
 // Create a new Google Drive instance
 const drive = getGoogleDriveInstance();
 
@@ -23,7 +22,9 @@ async function getAllPdfs(driveLinkOrFolderID: string, folderName: string, pdfDu
     console.log("restriction to 100 items only for now. exiting")
     process.exit(0);
   }
-  googleDriveData.map((_data) => downloadPdfFromGoogleDrive(_data.googleDriveLink, pdfDumpFolder))
+  const promises = googleDriveData.map(_data => downloadPdfFromGoogleDrive(_data.googleDriveLink, pdfDumpFolder));
+  const results = await Promise.all(promises);
+  return results;
 }
 
 
@@ -32,10 +33,11 @@ export const downloadPdfFromGoogleDriveToProfile = async (driveLinkOrFolderId: s
   console.log(`pdfDumpFolder ${pdfDumpFolder}`)
   try {
     if (fs.existsSync(pdfDumpFolder)) {
-      await getAllPdfs(driveLinkOrFolderId, "",
+      const _results = await getAllPdfs(driveLinkOrFolderId, "",
         pdfDumpFolder);
       return {
-        "status": "success"
+        "status": "success",
+        _results : _results
       }
     }
     console.log(`No corresponding folder ${pdfDumpFolder} to profile  ${profile} exists`)
