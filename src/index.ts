@@ -14,7 +14,7 @@ import {connectToMongo} from "./services/dbService";
 import { GLOBAL_DB_NAME } from './db/connection';
 
 const egangotri = express();
-const hostname = "127.0.0.1";
+const hostname = "localhost";
 const port = process.env.PORT || 8000;
 const args = process.argv.slice(2);
 console.log("Command-line arguments:", args);
@@ -43,7 +43,7 @@ egangotri.use("/user", userRoute);
 egangotri.use("/yarn", launchYarnRoute);
 
 connectToMongo(args).then(() => {
-  egangotri.listen(port, async () => {
+  egangotri.listen(port,hostname, async () => {
     console.log(`Server running at http://${hostname}:${port}/`, new Date());
   });
 })
