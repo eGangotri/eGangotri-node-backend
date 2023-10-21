@@ -4,10 +4,10 @@
   "description": "eGangotri Upload Monitoring and Reporting Tool",
   "main": "index.ts",
   "scripts": {
+    "dev_start": "ts-node ./src/index.ts",
+    "start": " node ./dist/index.js",
     "test": "npm test",
     "flatfile-to-mongo": "ts-node ./src/tasks/flatfile-to-mongo.ts \"C:/Users/Chetan Pandey/eGangotri\"",
-    "start": " node ./index.js",
-    "dev_start": "ts-node ./src/index.ts",
     "upload_db": "ts-node ./src/index.ts forUpload",
     "web-scrap": "ts-node ./src/downloadLinks.ts",
     "exec": "ts-node ./src/exec/exec.ts",

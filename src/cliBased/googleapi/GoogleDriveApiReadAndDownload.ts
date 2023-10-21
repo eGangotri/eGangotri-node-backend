@@ -11,8 +11,6 @@ import path from 'path';
 // Create a new Google Drive instance
 const drive = getGoogleDriveInstance();
 
-const EXPORT_ROOT_FOLDER = `D:\\_playground\\_dwnldPlayground\\`;
-
 async function getAllPdfs(driveLinkOrFolderID: string, folderName: string, pdfDumpFolder: string) {
   const folderId = extractGoogleDriveId(driveLinkOrFolderID)
   const googleDriveData = await listFolderContentsAsArrayOfData(folderId,
@@ -32,20 +30,41 @@ async function getAllPdfs(driveLinkOrFolderID: string, folderName: string, pdfDu
 export const downloadPdfFromGoogleDriveToProfile = async (driveLinkOrFolderId: string, profile: string) => {
   const pdfDumpFolder = getFolderInSrcRootForProfile(profile)
   console.log(`pdfDumpFolder ${pdfDumpFolder}`)
-  if (fs.existsSync(pdfDumpFolder)) {
-    await getAllPdfs(driveLinkOrFolderId, "",
-      pdfDumpFolder);
-  }
-  else {
+  try {
+    if (fs.existsSync(pdfDumpFolder)) {
+      await getAllPdfs(driveLinkOrFolderId, "",
+        pdfDumpFolder);
+      return {
+        "status": "success"
+      }
+    }
     console.log(`No corresponding folder ${pdfDumpFolder} to profile  ${profile} exists`)
+    return {
+      "status": "failed"
+    }
+  }
+  catch (err) {
+    console.log(`Error ${err}`)
+    return {
+      "status": "failed" + err
+    }
   }
 }
 
-
 //all entries must have await in front
 (async () => {
-  const _url = "https://drive.google.com/drive/folders/1bBScm1NxfJQD16Ry-oG7XsSbTYFi0AMY?usp=share_link"
-  await downloadPdfFromGoogleDriveToProfile(_url, 'TMP');
+
+  const args = process.argv.slice(2);
+  console.log("Command-line arguments:", args);
+  if (args.length < 2) {
+    const _url = "https://drive.google.com/drive/folders/1bBScm1NxfJQD16Ry-oG7XsSbTYFi0AMY?usp=share_link"
+    //  await downloadPdfFromGoogleDriveToProfile(_url, 'TMP');
+  }
+  else {
+    const _url = args[0];
+    const _profile = args[1];
+ //   await downloadPdfFromGoogleDriveToProfile(_url, _profile);
+  }
 })();
 
-//yarn run downloadFromGoogle
+//yarn run downloadFromGoogle "google url" "TMP"

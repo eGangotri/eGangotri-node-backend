@@ -6,6 +6,7 @@ import {launchGradleRoute} from "./routes/launchGradle.route";
 import {dailyWorkReportRoute} from "./routes/dailyWorkReport.route";
 import {dailyCatWorkReportRoute} from "./routes/dailyCatWorkReport.route";
 import {uploadCycleRoute} from "./routes/uploadCycle.route";
+import { launchYarnRoute } from "./routes/launchYarn.route";
 
 import {userRoute} from "./routes/userRoute.route";
 import {connectToMongo} from "./services/dbService";
@@ -39,6 +40,7 @@ egangotri.use("/dailyWorkReport", dailyWorkReportRoute);
 egangotri.use("/dailyCatWorkReport", dailyCatWorkReportRoute);
 egangotri.use("/uploadCycleRoute", uploadCycleRoute);
 egangotri.use("/user", userRoute);
+egangotri.use("/yarn", launchYarnRoute);
 
 connectToMongo(args).then(() => {
   egangotri.listen(port, async () => {
