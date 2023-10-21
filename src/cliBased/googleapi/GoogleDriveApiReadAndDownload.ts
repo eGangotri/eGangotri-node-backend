@@ -33,7 +33,7 @@ export const downloadPdfFromGoogleDriveToProfile = async (driveLinkOrFolderId: s
   const pdfDumpFolder = getFolderInSrcRootForProfile(profile)
   console.log(`pdfDumpFolder ${pdfDumpFolder}`)
   if (fs.existsSync(pdfDumpFolder)) {
-    await getAllPdfs(driveLinkOrFolderId, "SalimSalik",
+    await getAllPdfs(driveLinkOrFolderId, "",
       pdfDumpFolder);
   }
   else {
