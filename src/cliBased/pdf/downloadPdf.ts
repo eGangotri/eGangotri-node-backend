@@ -1,19 +1,22 @@
+import { LOCAL_FOLDERS_PROPERTIES_FILE_FOR_SRC, getFolderInSrcRootForProfile } from "../../cliBased/utils";
 import { extractGoogleDriveId } from "../googleapi/_utils/GoogleDriveUtil";
+import fs from 'fs';
+
 const { DownloaderHelper } = require('node-downloader-helper');
 
-const dumpFolder = "D:\\_playground\\_dwnldPlayground";
+const DEFAULT_DUMP_FOLDER = "D:\\_playground\\_dwnldPlayground";
 
-export const genDownloadLink = (driveId:string) => {
+export const getPdfDownloadLink = (driveId: string) => {
     return `https://drive.usercontent.google.com/download?id=${driveId}&export=download&authuser=0&confirm=t`
 
 }
-export const downloadPdfFromGoogleDrive = (driveLinkOrFolderId: string) => {
+export const downloadPdfFromGoogleDrive = (driveLinkOrFolderId: string, pdfDumpFolder: string) => {
     console.log(`downloadPdfFromGoogleDrive ${driveLinkOrFolderId}`)
     const driveId = extractGoogleDriveId(driveLinkOrFolderId)
-    const _pdfDlUrl = genDownloadLink(driveId)
-    console.log(`downloading ${_pdfDlUrl} to ${dumpFolder}`)
+    const _pdfDlUrl = getPdfDownloadLink(driveId)
+    console.log(`downloading ${_pdfDlUrl} to ${pdfDumpFolder}`)
 
-    const dl = new DownloaderHelper(_pdfDlUrl, dumpFolder);//
+    const dl = new DownloaderHelper(_pdfDlUrl, pdfDumpFolder);//
 
     dl.on('end', () => console.log('Download Completed'));
     dl.on('error', (err: Error) => console.log('Download Failed', err.message));
@@ -40,4 +43,8 @@ const getFileDetailsFromGoogleUrl = async (driveLinkOrFolderId: string) => {
 
 //getFileDetailsFromGoogleUrl("1M0Xk75dlVz6GHaXaKEsp3uwr-RBG0-eJ")
 
+
+
+// downloadPdfFromGoogleDrive(
+//     "https://drive.google.com/drive/folders/1bBScm1NxfJQD16Ry-oG7XsSbTYFi0AMY?usp=share_link")
 //yarn run downloadPdf

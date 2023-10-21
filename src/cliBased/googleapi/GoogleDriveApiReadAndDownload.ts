@@ -3,16 +3,21 @@ import { listFolderContentsAsArrayOfData } from './service/GoogleApiService';
 import { getGoogleDriveInstance } from './service/CreateGoogleDrive';
 import { downloadPdfFromGoogleDrive } from '../pdf/downloadPdf';
 import { extractGoogleDriveId } from './_utils/GoogleDriveUtil';
+import { getFolderInSrcRootForProfile } from '../../cliBased/utils';
+import fs from 'fs';
+import path from 'path';
 
 
 // Create a new Google Drive instance
 const drive = getGoogleDriveInstance();
 
-async function getAllPdfs(driveLinkOrFolderID: string, folderName: string) {
+const EXPORT_ROOT_FOLDER = `D:\\_playground\\_dwnldPlayground\\`;
+
+async function getAllPdfs(driveLinkOrFolderID: string, folderName: string, pdfDumpFolder: string) {
   const folderId = extractGoogleDriveId(driveLinkOrFolderID)
   const googleDriveData = await listFolderContentsAsArrayOfData(folderId,
     drive,
-    `${EXPORT_ROOT_FOLDER}_googleDriveExcels`,
+    `${pdfDumpFolder}${path.sep}_googleDriveExcels`,
     folderName,
     "proc");
 
@@ -20,14 +25,27 @@ async function getAllPdfs(driveLinkOrFolderID: string, folderName: string) {
     console.log("restriction to 100 items only for now. exiting")
     process.exit(0);
   }
-  googleDriveData.map((x) => downloadPdfFromGoogleDrive(x.googleDriveLink))
+  googleDriveData.map((_data) => downloadPdfFromGoogleDrive(_data.googleDriveLink, pdfDumpFolder))
 }
 
-const EXPORT_ROOT_FOLDER = `D:\\_playground\\_dwnldPlayground\\`;
+
+export const downloadPdfFromGoogleDriveToProfile = async (driveLinkOrFolderId: string, profile: string) => {
+  const pdfDumpFolder = getFolderInSrcRootForProfile(profile)
+  console.log(`pdfDumpFolder ${pdfDumpFolder}`)
+  if (fs.existsSync(pdfDumpFolder)) {
+    await getAllPdfs(driveLinkOrFolderId, "SalimSalik",
+      pdfDumpFolder);
+  }
+  else {
+    console.log(`No corresponding folder ${pdfDumpFolder} to profile  ${profile} exists`)
+  }
+}
+
+
 //all entries must have await in front
 (async () => {
-  await getAllPdfs("https://drive.google.com/drive/folders/1XkiB0iLlbufmbPhIwEl2f17a89cW-Dlu?usp=drive_link",
-    'SalimSaliqSahib');
+  const _url = "https://drive.google.com/drive/folders/1bBScm1NxfJQD16Ry-oG7XsSbTYFi0AMY?usp=share_link"
+  await downloadPdfFromGoogleDriveToProfile(_url, 'TMP');
 })();
 
 //yarn run downloadFromGoogle
