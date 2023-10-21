@@ -8,19 +8,39 @@ const DEFAULT_DUMP_FOLDER = "D:\\_playground\\_dwnldPlayground";
 
 export const getPdfDownloadLink = (driveId: string) => {
     return `https://drive.usercontent.google.com/download?id=${driveId}&export=download&authuser=0&confirm=t`
-
 }
-export const downloadPdfFromGoogleDrive = (driveLinkOrFolderId: string, pdfDumpFolder: string) => {
+export const downloadPdfFromGoogleDrive = async (driveLinkOrFolderId: string, pdfDumpFolder: string) => {
     console.log(`downloadPdfFromGoogleDrive ${driveLinkOrFolderId}`)
     const driveId = extractGoogleDriveId(driveLinkOrFolderId)
     const _pdfDlUrl = getPdfDownloadLink(driveId)
     console.log(`downloading ${_pdfDlUrl} to ${pdfDumpFolder}`)
 
     const dl = new DownloaderHelper(_pdfDlUrl, pdfDumpFolder);//
+    let _result = {};
+    try {
+        await new Promise((resolve, reject) => {
+            dl.on('end', () => {
+                console.log('Download Completed');
+                _result = {
+                    "status": `${driveId} downloaded to ${pdfDumpFolder}`
+                };
+                resolve(_result);
+            });
 
-    dl.on('end', () => console.log('Download Completed'));
-    dl.on('error', (err: Error) => console.log('Download Failed', err.message));
-    dl.start().catch((err: Error) => console.error(err));
+            dl.on('error', (err: Error) => {
+                console.log('Download Failed', err.message);
+                reject(_result = {
+                    "error": `${driveId} failed download to ${pdfDumpFolder} with ${err.message}`
+                });
+            });
+
+            dl.start();
+        });
+    } catch (err) {
+        console.error(err);
+    }
+
+    return _result;
 }
 
 //{"scanResult":"OK","disposition":"SCAN_CLEAN","fileName":"Anang Rito Dwanda.pdf","sizeBytes":827924,"downloadUrl":"https:\/\/drive.usercontent.google.com\/download?id=17OsRNBJC4OSPZ8EAqtxIYu_mWQkpSP96&export=download&authuser=0&confirm=t&uuid=3e023e6b-413f-43f8-8c0e-4feccac88c33&at=APZUnTWJITyGBCb64CIGROZM-l95:1692979966504"}
