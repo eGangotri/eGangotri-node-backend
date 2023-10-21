@@ -32,8 +32,9 @@
     "compareExcels": "ts-node ./src/cliBased/excel/CompareExcels",
     "findNonLatin": "ts-node ./src/cliBased/excel/FindNonLatinCharactersInName",
     "downloadPdf": "ts-node ./src/cliBased/pdf/downloadPdf.ts",
-    "downloadFromGoogle": "ts-node ./src/cliBased/googleapi/GoogleDriveApiReadAndDownload.ts",
+    "downloadFromGoogle": "ts-node ./src/cliBased/googleapi/GoogleDriveApiReadAndDownload", 
     "searchArchive": "ts-node ./src/cliBased/search/searchArchive",
+    "profileFolder":"ts-node ./src/cliBased/utils",
     "build": "tsc"
   },
   "repository": {
