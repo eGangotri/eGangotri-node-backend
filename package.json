@@ -32,9 +32,9 @@
     "compareExcels": "ts-node ./src/cliBased/excel/CompareExcels",
     "findNonLatin": "ts-node ./src/cliBased/excel/FindNonLatinCharactersInName",
     "downloadPdf": "ts-node ./src/cliBased/pdf/downloadPdf.ts",
-    "downloadFromGoogle": "ts-node ./src/cliBased/googleapi/GoogleDriveApiReadAndDownload", 
+    "downloadFromGoogle": "ts-node ./src/cliBased/googleapi/GoogleDriveApiReadAndDownload",
     "searchArchive": "ts-node ./src/cliBased/search/searchArchive",
-    "profileFolder":"ts-node ./src/cliBased/utils",
+    "profileFolder": "ts-node ./src/cliBased/utils",
     "build": "tsc"
   },
   "repository": {
@@ -76,13 +76,13 @@
     "@types/express": "^4.17.13",
     "@types/fs-extra": "^11.0.1",
     "@types/lodash": "^4.14.178",
+    "@types/node": "18.x.x",
     "@types/pdfkit": "^0.12.10",
     "@types/uuid": "^8.3.4",
-    "@types/node":"18.x.x",
     "nodemon": "^3.0.1",
     "ts-node": "^10.9.1",
+    "tsc": "^2.0.4",
     "typescript": "^5.2.2",
-    "tsc":"^2.0.4",
     "yarn": "^1.22.17"
   },
   "engines": {

@@ -44,5 +44,6 @@ export const getFolderInSrcRootForProfile = (profile:string) => {
     return  LOCAL_FOLDERS_PROPERTIES_FILE_FOR_SRC.get(profile)
 }
 
-const pdfDumpFolder = LOCAL_FOLDERS_PROPERTIES_FILE_FOR_SRC.get("TMP")
+const pdfDumpFolder = LOCAL_FOLDERS_PROPERTIES_FILE_FOR_SRC.get("GANESH")
+console.log(`pdfDumpFolder ${pdfDumpFolder}`)
 //yarn run profileFolder
