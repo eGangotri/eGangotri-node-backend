@@ -6,6 +6,8 @@ import { extractGoogleDriveId } from './_utils/GoogleDriveUtil';
 import { getFolderInSrcRootForProfile } from '../../cliBased/utils';
 import fs from 'fs';
 import path from 'path';
+import * as fsExtra from 'fs-extra';
+import { countBy } from 'lodash';
 
 // Create a new Google Drive instance
 const drive = getGoogleDriveInstance();
@@ -22,7 +24,16 @@ async function getAllPdfs(driveLinkOrFolderID: string, folderName: string, pdfDu
     console.log("restriction to 100 items only for now. exiting")
     process.exit(0);
   }
-  const promises = googleDriveData.map(_data => downloadPdfFromGoogleDrive(_data.googleDriveLink, pdfDumpFolder));
+  const promises = googleDriveData.map(_data => {
+    console.log(`_data: ${JSON.stringify(_data)}}`);
+    const pdfDumpWithPathAppended = pdfDumpFolder + path.sep + _data.parents;
+    console.log(`pdfDumpFolder: ${pdfDumpWithPathAppended}`);
+    if (!fs.existsSync(pdfDumpWithPathAppended)) {
+      fsExtra.ensureDirSync(pdfDumpWithPathAppended);
+    }
+    return downloadPdfFromGoogleDrive(_data.googleDriveLink,
+      pdfDumpWithPathAppended)
+  });
   const results = await Promise.all(promises);
   return results;
 }
@@ -35,9 +46,17 @@ export const downloadPdfFromGoogleDriveToProfile = async (driveLinkOrFolderId: s
     if (fs.existsSync(pdfDumpFolder)) {
       const _results = await getAllPdfs(driveLinkOrFolderId, "",
         pdfDumpFolder);
+
+
+      const counts = countBy(_results, 'status');
+      const successCount = counts['success'] || 0;
+      const errorCount = counts['error'] || 0;
+
+      console.log(`Success count: ${successCount}`);
+      console.log(`Error count: ${errorCount}`);
       return {
         "status": "success",
-        _results : _results
+        _results: _results
       }
     }
     console.log(`No corresponding folder ${pdfDumpFolder} to profile  ${profile} exists`)
@@ -65,7 +84,7 @@ export const downloadPdfFromGoogleDriveToProfile = async (driveLinkOrFolderId: s
   else {
     const _url = args[0];
     const _profile = args[1];
- //   await downloadPdfFromGoogleDriveToProfile(_url, _profile);
+    await downloadPdfFromGoogleDriveToProfile(_url, _profile);
   }
 })();
 
