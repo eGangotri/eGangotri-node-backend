@@ -52,30 +52,39 @@ export const getWebContentLink = async (folderId: string, drive: drive_v3.Drive)
 const regex1 = /\/d\/([^/]+)\/view/;
 
 //Sample: https://drive.google.com/drive/folders/1eJnYKRgZIyPO2s-BgsJ4ozhCEuH3i_lQ?usp=drive_link
-const regex2 = /\/folders\/([^?/]+)(?:\?|$)/;
+const regex2 = /\/folders\/([^/?]+)/;
 
 export function extractGoogleDriveId(folderIdOrUrl: string) {
+    console.log("extractGoogleDriveId", folderIdOrUrl)
+    folderIdOrUrl = folderIdOrUrl.trim()
+    try {
+        if (folderIdOrUrl.startsWith("http")) {
+            folderIdOrUrl = folderIdOrUrl?.split("?")[0]
+            let match: RegExpMatchArray | null;
+            if (folderIdOrUrl.includes("/d/")) {
+                console.log("folderIdOrUrl contains /d")
+                match = folderIdOrUrl.match(regex1);
+            }
+            else {
+                console.log("folderIdOrUrl contains /folders")
+                match = folderIdOrUrl.match(regex2);
+            }
+            console.log("match" + match)
 
-    if (folderIdOrUrl.startsWith("http")) {
-        let match: RegExpMatchArray | null;
-        if (folderIdOrUrl.includes("/d/")) {
-            console.log("folderIdOrUrl contains /d" )
-            match = folderIdOrUrl.match(regex1);
-        }
-        else {
-            match = folderIdOrUrl.match(regex2);
-        }
-        console.log("match" + match)
-
-        if (match) {
-            console.log("m[0]" + match[0])
-            console.log("m[1]" + match[1])
-            return match[1];
-        } else {
-            return "";
+            if (match) {
+                console.log("m[0]" + match[0])
+                console.log("m[1]" + match[1])
+                return match[1];
+            } else {
+                return "";
+            }
         }
     }
-    return folderIdOrUrl
+    catch (err: any) {
+        console.log("Error in extractGoogleDriveId", err.message);
+    }
+    return folderIdOrUrl;
+
 }
 
 export async function getFolderPathRelativeToRootFolder(folderId: string, drive: drive_v3.Drive): Promise<string> {
@@ -87,7 +96,6 @@ export async function getFolderPathRelativeToRootFolder(folderId: string, drive:
 
         const folder = response.data;
         const folderName = folder.name || "";
-        const folderPath = ""
         console.log("folderName " + folderName)
         if (folder.parents && folder.parents.length > 0) {
             // If the folder has a parent, recursively get its path

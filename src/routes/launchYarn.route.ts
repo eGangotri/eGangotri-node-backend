@@ -5,8 +5,6 @@ import { downloadPdfFromGoogleDriveToProfile } from '../cliBased/googleapi/Googl
 export const launchYarnRoute = express.Router();
 
 launchYarnRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
-    console.log(`googleDriveLink }`)
-
     try {
         const googleDriveLink = req?.body?.googleDriveLink;
         const profile = req?.body?.profile;

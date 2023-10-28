@@ -14,6 +14,7 @@ const drive = getGoogleDriveInstance();
 
 async function getAllPdfs(driveLinkOrFolderID: string, folderName: string, pdfDumpFolder: string) {
   const folderId = extractGoogleDriveId(driveLinkOrFolderID)
+  console.log(`folderId: ${folderId}`)
   const googleDriveData = await listFolderContentsAsArrayOfData(folderId,
     drive,
     `${pdfDumpFolder}${path.sep}_googleDriveExcels`,
