@@ -1,5 +1,5 @@
 import * as express from 'express';
-import { launchUploader, loginToArchive, moveToFreeze } from '../services/gradleLauncherService';
+import { launchUploader, loginToArchive, moveToFreeze, reuploadMissed } from '../services/gradleLauncherService';
 
 export const launchGradleRoute = express.Router();
 
