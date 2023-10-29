@@ -5,6 +5,10 @@ export interface ArchiveProfileAndCount {
     count: number;
 }
 
+export interface ArchiveProfileAndTitle {
+    archiveProfile: string;
+    title: string;
+}
 
 export interface UploadCycleTypes {
     countIntended?: number;
