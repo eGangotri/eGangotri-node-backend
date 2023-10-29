@@ -1,5 +1,6 @@
 import * as express from 'express';
 import { launchUploader, loginToArchive, moveToFreeze, reuploadMissed } from '../services/gradleLauncherService';
+import { ArchiveProfileAndCount, ArchiveProfileAndTitle } from 'mirror/types';
 
 export const launchGradleRoute = express.Router();
 
@@ -21,14 +22,11 @@ launchGradleRoute.get('/launchUploader', async (req: any, resp: any) => {
 
 launchGradleRoute.post('/reuploadMissed', async (req: any, resp: any) => {
     try {
-        const itemsForReupload = req.body.itemsForReupload
-
-        console.log(`reuploadMissed ${JSON.stringify(itemsForReupload)}`);
+        const itemsForReupload:ArchiveProfileAndTitle[] = req.body.itemsForReupload
         const res = await reuploadMissed(itemsForReupload)
         resp.status(200).send({
             response: res
         });
-
     }
     catch (err: any) {
         console.log('Error', err);
