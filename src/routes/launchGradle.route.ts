@@ -6,7 +6,7 @@ export const launchGradleRoute = express.Router();
 launchGradleRoute.get('/launchUploader', async (req: any, resp: any) => {
     try {
         const _profiles = req.query.profiles
-        console.log(`moveToFreeze ${_profiles}`)
+        console.log(`launchUploader ${_profiles}`)
         const res = await launchUploader(req.query.profiles)
         resp.status(200).send({
             response: res
@@ -18,6 +18,24 @@ launchGradleRoute.get('/launchUploader', async (req: any, resp: any) => {
         resp.status(400).send(err);
     }
 })
+
+launchGradleRoute.post('/reuploadMissed', async (req: any, resp: any) => {
+    try {
+        const itemsForReupload = req.body.itemsForReupload
+
+        console.log(`reuploadMissed ${JSON.stringify(itemsForReupload)}`);
+        const res = await reuploadMissed(itemsForReupload)
+        resp.status(200).send({
+            response: res
+        });
+
+    }
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})
+
 
 launchGradleRoute.get('/moveToFreeze', async (req: any, resp: any) => {
     try {
