@@ -13,6 +13,11 @@ export function launchUploader(args: any): Promise<string> {
     return makeGradleCall(generateGradleCommand(args, "uploadToArchive"))
 }
 
+export function reuploadMissed(args: any): Promise<string> {
+    return makeGradleCall(generateGradleCommand(args, "reuploadMissed"))
+}
+
+
 //localhost/launchGradle/moveToFreeze?profiles="TEST,TMP"
 export function moveToFreeze(args: any): Promise<string> {
     //gradle fileMover --args=JNGM_BEN JNGM_TAMIL JNGM_TEL JNGM BVT
