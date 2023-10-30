@@ -8,6 +8,7 @@ import fs from 'fs';
 import path from 'path';
 import * as fsExtra from 'fs-extra';
 import { countBy } from 'lodash';
+import { DOWNLOAD_COMPLETED_COUNT, DOWNLOAD_FAILED_COUNT, resetDownloadCounters } from '../../cliBased/pdf/utils';
 
 // Create a new Google Drive instance
 const drive = getGoogleDriveInstance();
@@ -21,7 +22,8 @@ async function getAllPdfs(driveLinkOrFolderID: string, folderName: string, pdfDu
     folderName,
     "proc");
 
-  if (googleDriveData.length > 100) {
+  const dataLength = googleDriveData.length;
+  if (dataLength > 100) {
     console.log("restriction to 100 items only for now. exiting")
     process.exit(0);
   }
@@ -33,10 +35,13 @@ async function getAllPdfs(driveLinkOrFolderID: string, folderName: string, pdfDu
       fsExtra.ensureDirSync(pdfDumpWithPathAppended);
     }
     return downloadPdfFromGoogleDrive(_data.googleDriveLink,
-      pdfDumpWithPathAppended)
+      pdfDumpWithPathAppended, _data.fileName, dataLength)
   });
   const results = await Promise.all(promises);
-  return results;
+  return {
+    totalPdfsToDownload: googleDriveData.length,
+    results
+  }
 }
 
 
@@ -45,20 +50,20 @@ export const downloadPdfFromGoogleDriveToProfile = async (driveLinkOrFolderId: s
   console.log(`pdfDumpFolder ${pdfDumpFolder}`)
   try {
     if (fs.existsSync(pdfDumpFolder)) {
+      resetDownloadCounters()
       const _results = await getAllPdfs(driveLinkOrFolderId, "",
         pdfDumpFolder);
 
-
-      const counts = countBy(_results, 'status');
-      const successCount = counts['success'] || 0;
-      const errorCount = counts['error'] || 0;
-
-      console.log(`Success count: ${successCount}`);
-      console.log(`Error count: ${errorCount}`);
-      return {
-        "status": "success",
-        _results: _results
+      console.log(`Success count: ${DOWNLOAD_COMPLETED_COUNT}`);
+      console.log(`Error count: ${DOWNLOAD_FAILED_COUNT}`);
+      const _resp =  {
+        status: `${DOWNLOAD_COMPLETED_COUNT} out of ${DOWNLOAD_COMPLETED_COUNT + DOWNLOAD_FAILED_COUNT} made it`,
+        success_count: DOWNLOAD_COMPLETED_COUNT,
+        error_count: DOWNLOAD_FAILED_COUNT,
+        ..._results
       }
+      console.log(`_resp : ${_resp}`);
+      return _resp;
     }
     console.log(`No corresponding folder ${pdfDumpFolder} to profile  ${profile} exists`)
     return {

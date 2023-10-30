@@ -62,18 +62,13 @@ export function extractGoogleDriveId(folderIdOrUrl: string) {
             folderIdOrUrl = folderIdOrUrl?.split("?")[0]
             let match: RegExpMatchArray | null;
             if (folderIdOrUrl.includes("/d/")) {
-                console.log("folderIdOrUrl contains /d")
                 match = folderIdOrUrl.match(regex1);
             }
             else {
-                console.log("folderIdOrUrl contains /folders")
                 match = folderIdOrUrl.match(regex2);
             }
-            console.log("match" + match)
 
             if (match) {
-                console.log("m[0]" + match[0])
-                console.log("m[1]" + match[1])
                 return match[1];
             } else {
                 return "";

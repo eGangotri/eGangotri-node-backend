@@ -1,6 +1,7 @@
 import { LOCAL_FOLDERS_PROPERTIES_FILE_FOR_SRC, getFolderInSrcRootForProfile } from "../../cliBased/utils";
 import { extractGoogleDriveId } from "../googleapi/_utils/GoogleDriveUtil";
 import fs from 'fs';
+import { DOWNLOAD_COMPLETED_COUNT, incrementDownloadComplete, incrementDownloadFailed } from "./utils";
 
 const { DownloaderHelper } = require('node-downloader-helper');
 
@@ -9,7 +10,11 @@ const DEFAULT_DUMP_FOLDER = "D:\\_playground\\_dwnldPlayground";
 export const getPdfDownloadLink = (driveId: string) => {
     return `https://drive.usercontent.google.com/download?id=${driveId}&export=download&authuser=0&confirm=t`
 }
-export const downloadPdfFromGoogleDrive = async (driveLinkOrFolderId: string, pdfDumpFolder: string) => {
+
+export const downloadPdfFromGoogleDrive = async (driveLinkOrFolderId: string,
+    pdfDumpFolder: string,
+    fileName: string = "",
+    dataLength:number = 0) => {
     console.log(`downloadPdfFromGoogleDrive ${driveLinkOrFolderId}`)
     const driveId = extractGoogleDriveId(driveLinkOrFolderId)
     const _pdfDlUrl = getPdfDownloadLink(driveId)
@@ -20,17 +25,22 @@ export const downloadPdfFromGoogleDrive = async (driveLinkOrFolderId: string, pd
     try {
         await new Promise((resolve, reject) => {
             dl.on('end', () => {
-                console.log('Download Completed');
+                const index = `(${DOWNLOAD_COMPLETED_COUNT+1}${dataLength>0?"/"+dataLength:""})`;
+                console.log(`${index}. Downloaded ${fileName}`);
+                incrementDownloadComplete();
                 _result = {
-                    "status": `${driveId} downloaded to ${pdfDumpFolder}`
+                    "status": `${driveId} downloaded ${fileName} to ${pdfDumpFolder}`,
+                    success: true
                 };
                 resolve(_result);
             });
 
             dl.on('error', (err: Error) => {
-                console.log('Download Failed', err.message);
+                incrementDownloadFailed();
+                console.log(`Download Failed ${fileName}`, err.message);
                 reject(_result = {
-                    "error": `${driveId} failed download to ${pdfDumpFolder} with ${err.message}`
+                    success: false,
+                    "error": `${driveId} failed download of ${fileName} to ${pdfDumpFolder} with ${err.message}`
                 });
             });
 
@@ -38,6 +48,11 @@ export const downloadPdfFromGoogleDrive = async (driveLinkOrFolderId: string, pd
         });
     } catch (err) {
         console.error(err);
+        incrementDownloadFailed();
+        _result = {
+            success: false,
+            "error": `${driveId} failed download try/catch for ${fileName} to ${pdfDumpFolder} with ${err.message}`
+        };
     }
 
     return _result;
