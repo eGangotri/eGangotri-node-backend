@@ -11,11 +11,9 @@ import * as FileUtils from '../../../imgToPdf/utils/FileUtils';
 
 export async function listFolderContentsAsArrayOfData(folderId: string,
     drive: drive_v3.Drive,
-    exportDestFolder: string,
     umbrellaFolder: string = "",
     ignoreFolder="") {
 
-    FileUtils.createFolderIfNotExists(exportDestFolder);
     const rootFolderName = await getFolderName(folderId, drive) || "";
     const _umbrellaFolder = umbrellaFolder?.length > 0 ? umbrellaFolder : rootFolderName;
 
@@ -34,8 +32,9 @@ export async function listFolderContentsAndGenerateCSVAndExcel(_folderIdOrUrl: s
     exportDestFolder: string,
     umbrellaFolder: string = "") {
     const folderId = extractGoogleDriveId(_folderIdOrUrl)
+    FileUtils.createFolderIfNotExists(exportDestFolder);
 
-    const googleDrivePdfData: Array<GoogleApiData> = await listFolderContentsAsArrayOfData(folderId, drive, exportDestFolder, umbrellaFolder)
+    const googleDrivePdfData: Array<GoogleApiData> = await listFolderContentsAsArrayOfData(folderId, drive, umbrellaFolder)
     const fileNameWithPath = createFileNameWithPathForExport(folderId, umbrellaFolder, exportDestFolder) + `_${FileUtils.ROW_COUNTER[1]}`;
     FileUtils.incrementRowCounter()
     //writeDataToCSV(googleDrivePdfData, `${fileNameWithPath}.csv`)

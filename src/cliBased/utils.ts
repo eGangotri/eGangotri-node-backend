@@ -41,7 +41,7 @@ function getFoldersCorrespondingToProfile(root: string): Map<string, string> {
 }
 
 export const getFolderInSrcRootForProfile = (profile:string) => {
-    return  LOCAL_FOLDERS_PROPERTIES_FILE_FOR_SRC.get(profile)
+    return LOCAL_FOLDERS_PROPERTIES_FILE_FOR_SRC.get(profile)
 }
 
 const pdfDumpFolder = LOCAL_FOLDERS_PROPERTIES_FILE_FOR_SRC.get("GANESH")
