@@ -9,7 +9,7 @@ launchYarnRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => 
         const googleDriveLink = req?.body?.googleDriveLink;
         const profile = req?.body?.profile;
         console.log(`googleDriveLink ${googleDriveLink} profile ${profile}`)
-        if(!googleDriveLink || !profile){
+        if (!googleDriveLink || !profile) {
             resp.status(300).send({
                 response: {
                     "status": "failed",
@@ -17,9 +17,19 @@ launchYarnRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => 
                 }
             });
         }
-        const res = await downloadPdfFromGoogleDriveToProfile(googleDriveLink, profile);
+        const results = [];
+        if (googleDriveLink.includes(",")) {
+            const links = googleDriveLink.split(",");
+            const promises = links.map(link => downloadPdfFromGoogleDriveToProfile(link.trim(), profile));
+            const allResults = await Promise.all(promises);
+            results.push(...allResults);
+        }
+        else {
+            const res = await downloadPdfFromGoogleDriveToProfile(googleDriveLink, profile);
+            results.push(res);
+        }
         resp.status(200).send({
-            response: res
+            response: results
         });
     }
 

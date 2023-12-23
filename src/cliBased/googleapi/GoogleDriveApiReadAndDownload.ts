@@ -56,13 +56,13 @@ export const downloadPdfFromGoogleDriveToProfile = async (driveLinkOrFolderId: s
 
       console.log(`Success count: ${DOWNLOAD_COMPLETED_COUNT}`);
       console.log(`Error count: ${DOWNLOAD_FAILED_COUNT}`);
-      const _resp =  {
+      const _resp = {
         status: `${DOWNLOAD_COMPLETED_COUNT} out of ${DOWNLOAD_COMPLETED_COUNT + DOWNLOAD_FAILED_COUNT} made it`,
         success_count: DOWNLOAD_COMPLETED_COUNT,
         error_count: DOWNLOAD_FAILED_COUNT,
         ..._results
       }
-      console.log(`_resp : ${_resp}`);
+      console.log(`_resp : ${JSON.stringify(_resp)}`);
       return _resp;
     }
     console.log(`No corresponding folder ${pdfDumpFolder} to profile  ${profile} exists`)
@@ -79,19 +79,12 @@ export const downloadPdfFromGoogleDriveToProfile = async (driveLinkOrFolderId: s
 }
 
 //all entries must have await in front
-(async () => {
-
-  const args = process.argv.slice(2);
-  console.log("Command-line arguments:", args);
-  if (args.length < 2) {
-    const _url = "https://drive.google.com/drive/folders/1bBScm1NxfJQD16Ry-oG7XsSbTYFi0AMY?usp=share_link"
-    //  await downloadPdfFromGoogleDriveToProfile(_url, 'TMP');
-  }
-  else {
-    const _url = args[0];
-    const _profile = args[1];
-    await downloadPdfFromGoogleDriveToProfile(_url, _profile);
-  }
-})();
+// (async () => {
+//   const args = process.argv.slice(2);
+//   console.log("Command-line arguments:", args);
+//   const _url = args[0];
+//   const _profile = args[1];
+//   await downloadPdfFromGoogleDriveToProfile(_url, _profile);
+// })();
 
 //yarn run downloadFromGoogle "google url" "TMP"
