@@ -78,7 +78,7 @@ const getFileDetailsFromGoogleUrl = async (driveLinkOrFolderId: string) => {
 
 //getFileDetailsFromGoogleUrl("1M0Xk75dlVz6GHaXaKEsp3uwr-RBG0-eJ")
 
-downloadPdfFromGoogleDrive("1zXosWPqnbz8FpDO2p3nt1S58AmqKJl1J", "D:\\_playground\\_ganeshPlayGround");
+//downloadPdfFromGoogleDrive("1zXosWPqnbz8FpDO2p3nt1S58AmqKJl1J", "D:\\_playground\\_ganeshPlayGround");
 // downloadPdfFromGoogleDrive(
 //     "https://drive.google.com/drive/folders/1bBScm1NxfJQD16Ry-oG7XsSbTYFi0AMY?usp=share_link")
 //yarn run downloadPdf
