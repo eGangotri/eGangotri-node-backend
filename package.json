@@ -35,7 +35,9 @@
     "downloadFromGoogle": "ts-node ./src/cliBased/googleapi/GoogleDriveApiReadAndDownload",
     "searchArchive": "ts-node ./src/cliBased/search/searchArchive",
     "profileFolder": "ts-node ./src/cliBased/utils",
-    "build": "tsc"
+    "build": "tsc",
+    "scraper": "ts-node ./src/archiveDotOrg/archiveScraper.ts",
+    "autoScroll": "ts-node ./src/archiveDotOrg/autoScrollTest.ts"
   },
   "repository": {
     "type": "git",
@@ -82,7 +84,7 @@
     "nodemon": "^3.0.1",
     "ts-node": "^10.9.1",
     "tsc": "^2.0.4",
-    "typescript": "^5.2.2",
+    "typescript": "^5.3.3",
     "yarn": "^1.22.17"
   },
   "engines": {
