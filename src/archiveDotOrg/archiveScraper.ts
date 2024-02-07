@@ -40,52 +40,65 @@ const archiveAcctName = () => {
   return portionAfterAt;
 }
 
-async function getResultsCount() {
+async function setArchiveItemCountAndScrollablePageCount() {
   const browser = await puppeteer.launch({ headless: "new" });
   const page = await browser.newPage();
   await page.goto(MAIN_URL);
   const resCountDivVal = await page.$eval('.results_count', element => element.textContent);
-  resCount = parseInt(resCountDivVal?.trim().split(/\s.*/g)[0].replace(",", "")) || 0;
+  archiveItemCount = parseInt(resCountDivVal?.trim().split(/\s.*/g)[0].replace(",", "")) || 0;
   await browser.close();
-  console.log(`resCount ${resCount}`);
-  return resCount;
+  console.log(`resCount ${archiveItemCount}`);
+  setScrollablePageCount();
+  return archiveItemCount;
 }
 
-async function generateExcel(links: LinkData[]): Promise<void> {
-  const worksheet = utils.json_to_sheet(links.map(link => ({ 'Link': link.link, 'Title': link.title })), { header: ["Link", "Title"] });
+async function generateExcel(links: LinkData[]): Promise<string> {
+  const worksheet = utils.json_to_sheet(links.map(link => (
+    { 'Link': link.link, 'Title': link.title })),
+    { header: ["Link", "Title"] });
+
   const workbook = utils.book_new();
   utils.book_append_sheet(workbook, worksheet, "Links");
-  const excelFileName = `${archiveAcctName()}(${resCount})`;
+  const excelFileName = `${archiveAcctName()}(${archiveItemCount})`;
   const excelPath = `C:\\Users\\chetan\\Downloads\\${excelFileName}.xlsx`
   console.log(`Writing to ${excelPath}`);
-  writeFile(workbook, excelPath);
+  await writeFile(workbook, excelPath);
+  return excelPath;
 }
 
-async function execute(): Promise<void> {
+export const scrapeArchive = async (archiveUrl: string): Promise<any> => {
+  MAIN_URL = archiveUrl;
+  await setArchiveItemCountAndScrollablePageCount();
+
   const links: LinkData[] = []
-  //https://archive.org/details/@mumukshu_bhawan?&sort=-publicdate&page=3
-  for (let i = 0; i < pageCount; i++) {
+  for (let i = 0; i < scrollablePageCount; i++) {
     const _link = await scrapeLinks(`${MAIN_URL}?&sort=-publicdate&page=${i + 1}`);
     links.push(..._link);
   }
-  await generateExcel(links);
+  const excelPath = await generateExcel(links);
   console.log('Done');
+  return {
+    excelPath,
+    archiveItemCount,
+    scrollablePageCount,
+    links
+  }
 }
 
-const getPageCount = () => {
-  pageCount = Math.ceil(resCount / 100);
-  console.log(`pageCount ${pageCount}`);
-  return pageCount;
+const setScrollablePageCount = () => {
+  scrollablePageCount = Math.ceil(archiveItemCount / 100);
+  console.log(`pageCount ${scrollablePageCount}`);
+  return scrollablePageCount;
 }
+
+
+let archiveItemCount = 0;
+let scrollablePageCount = 0;
+let MAIN_URL = "";
 
 (async () => {
-  await getResultsCount();
-  getPageCount();
-  execute();
+  scrapeArchive("https://archive.org/details/@egangotri_books");
 })();
 
-let resCount = 0;
-let pageCount = 0;
-const MAIN_URL = 'https://archive.org/details/@mumukshu_bhawan';
 
 //yarn run scraper

@@ -1,5 +1,6 @@
 import * as express from 'express';
 import { downloadPdfFromGoogleDriveToProfile } from '../cliBased/googleapi/GoogleDriveApiReadAndDownload';
+import { scrapeArchive } from 'archiveDotOrg/archiveScraper';
 
 export const launchYarnRoute = express.Router();
 
@@ -38,3 +39,30 @@ launchYarnRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => 
     }
 })
 
+
+launchYarnRoute.post('/getArchiveListing', async (req: any, resp: any) => {
+    try {
+        const archiveLink = req?.body?.googleDriveLink;
+        console.log(`googleDriveLink ${archiveLink} `)
+        if (!archiveLink) {
+            resp.status(300).send({
+                response: {
+                    "status": "failed",
+                    "message": "Pls. provide archive Link are mandatory"
+                }
+            });
+        }
+        const results = [];
+
+        const res = await scrapeArchive(archiveLink);
+        results.push(res);
+        resp.status(200).send({
+            response: results
+        });
+    }
+
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})
