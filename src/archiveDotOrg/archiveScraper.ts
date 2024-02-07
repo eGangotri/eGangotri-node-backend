@@ -76,7 +76,6 @@ export const scrapeArchive = async (archiveUrl: string): Promise<any> => {
     links.push(..._link);
   }
   const excelPath = await generateExcel(links);
-  console.log('Done');
   return {
     excelPath,
     archiveItemCount,

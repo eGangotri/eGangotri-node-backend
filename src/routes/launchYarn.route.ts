@@ -1,7 +1,7 @@
 import * as express from 'express';
 import { downloadPdfFromGoogleDriveToProfile } from '../cliBased/googleapi/GoogleDriveApiReadAndDownload';
 import { scrapeArchive } from 'archiveDotOrg/archiveScraper';
-
+import * as fs from 'fs';
 export const launchYarnRoute = express.Router();
 
 launchYarnRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
@@ -43,6 +43,7 @@ launchYarnRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => 
 launchYarnRoute.post('/getArchiveListing', async (req: any, resp: any) => {
     try {
         const archiveLink = req?.body?.googleDriveLink;
+        const details = req?.body?.details;
         console.log(`googleDriveLink ${archiveLink} `)
         if (!archiveLink) {
             resp.status(300).send({
@@ -52,13 +53,18 @@ launchYarnRoute.post('/getArchiveListing', async (req: any, resp: any) => {
                 }
             });
         }
-        const results = [];
-
-        const res = await scrapeArchive(archiveLink);
-        results.push(res);
-        resp.status(200).send({
-            response: results
-        });
+        const scrapeResult = await scrapeArchive(archiveLink);
+        if (details) {
+            resp.status(200).send({
+                response: scrapeResult
+            });
+        }
+        else {
+            // Send Excel file as response
+            resp.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            resp.setHeader("Content-Disposition", "attachment; filename=" + "links.xlsx");
+            resp.send(fs.readFileSync(scrapeResult.excelPath, 'binary'));
+        }
     }
 
     catch (err: any) {
