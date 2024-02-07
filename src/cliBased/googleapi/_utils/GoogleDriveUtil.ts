@@ -81,7 +81,15 @@ export function extractGoogleDriveId(folderIdOrUrl: string) {
     return folderIdOrUrl;
 
 }
-
+/**
+ * 
+ * @param folderId if you see ) as your fildername then the parent is not beign fetched correctly.
+ * just share the drive to the account that uses this api in my case
+ * ega***foundation@gmail.com
+ * then the parent will be calculated accurately.
+ * @param drive 
+ * @returns 
+ */
 export async function getFolderPathRelativeToRootFolder(folderId: string, drive: drive_v3.Drive): Promise<string> {
     try {
         const response = await drive.files.get({
