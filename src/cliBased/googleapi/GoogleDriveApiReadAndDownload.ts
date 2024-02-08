@@ -29,7 +29,7 @@ async function getAllPdfs(driveLinkOrFolderID: string, folderName: string, pdfDu
   const promises = googleDriveData.map(_data => {
     console.log(`_data: ${JSON.stringify(_data)}}`);
     const pdfDumpWithPathAppended = pdfDumpFolder + path.sep + _data.parents;
-    console.log(`pdfDumpFolder: ${pdfDumpWithPathAppended}`);
+    console.log(`pdfDumpWithPathAppended: ${pdfDumpWithPathAppended}`);
     if (!fs.existsSync(pdfDumpWithPathAppended)) {
       fsExtra.ensureDirSync(pdfDumpWithPathAppended);
     }
@@ -46,7 +46,7 @@ async function getAllPdfs(driveLinkOrFolderID: string, folderName: string, pdfDu
 
 export const downloadPdfFromGoogleDriveToProfile = async (driveLinkOrFolderId: string, profile: string) => {
   const pdfDumpFolder = getFolderInSrcRootForProfile(profile)
-  console.log(`pdfDumpFolder ${pdfDumpFolder}`)
+  console.log(`downloadPdfFromGoogleDriveToProfile:pdfDumpFolder ${pdfDumpFolder}`)
   try {
     if (fs.existsSync(pdfDumpFolder)) {
       resetDownloadCounters()

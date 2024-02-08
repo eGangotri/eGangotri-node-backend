@@ -12,7 +12,7 @@ import * as FileUtils from '../../../imgToPdf/utils/FileUtils';
 export async function listFolderContentsAsArrayOfData(folderId: string,
     drive: drive_v3.Drive,
     umbrellaFolder: string = "",
-    ignoreFolder="") {
+    ignoreFolder = "") {
 
     const rootFolderName = await getFolderName(folderId, drive) || "";
     const _umbrellaFolder = umbrellaFolder?.length > 0 ? umbrellaFolder : rootFolderName;
@@ -23,7 +23,7 @@ export async function listFolderContentsAsArrayOfData(folderId: string,
     const googleDrivePdfData: Array<GoogleApiData> = []
     let idFolderNameMap = new Map<string, string>();
 
-    await listFolderContents(folderId, drive, umbrellaFolder, googleDrivePdfData, idFolderNameMap, rootFolderName,ignoreFolder);
+    await listFolderContents(folderId, drive, umbrellaFolder, googleDrivePdfData, idFolderNameMap, rootFolderName, ignoreFolder);
     return googleDrivePdfData
 }
 
@@ -40,12 +40,21 @@ export async function listFolderContentsAndGenerateCSVAndExcel(_folderIdOrUrl: s
     //writeDataToCSV(googleDrivePdfData, `${fileNameWithPath}.csv`)
     // Convert data to XLSX
     if (!_.isEmpty(googleDrivePdfData)) {
-        dataToXslx(googleDrivePdfData, `${fileNameWithPath}.xlsx`);
+        const excelName = `${fileNameWithPath}.xlsx`;
+        await dataToXslx(googleDrivePdfData, excelName);
+        return {
+            msg: `Excel file created at ${excelName}`,
+            excelName
+        };
     }
     else {
         console.log("No Data retrieved. No File will be created");
+        return {
+            msg: `No Data retirved`,
+        }
     }
 }
+
 export async function listFolderContents(folderId: string,
     drive: drive_v3.Drive,
     umbrellaFolder: string,
