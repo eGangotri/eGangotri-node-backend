@@ -41,9 +41,9 @@ launchYarnRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => 
 
 launchYarnRoute.post('/getArchiveListing', async (req: any, resp: any) => {
     try {
-        const archiveLink = req?.body?.googleDriveLink;
+        const archiveLink = req?.body?.archiveLink;
         const details = req?.body?.details;
-        console.log(`googleDriveLink ${archiveLink} `)
+        console.log(`archiveLink ${archiveLink} `)
         if (!archiveLink) {
             resp.status(300).send({
                 response: {

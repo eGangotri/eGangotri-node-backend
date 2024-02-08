@@ -10,6 +10,7 @@
     "flatfile-to-mongo": "ts-node ./src/tasks/flatfile-to-mongo.ts \"C:/Users/Chetan Pandey/eGangotri\"",
     "upload_db": "ts-node ./src/index.ts forUpload",
     "web-scrap": "ts-node ./src/downloadLinks.ts",
+    "validateListOfArchiveUrlsAsValid": "ts-node ./src/validateListOfArchiveUrlsAsValid/index.ts",
     "exec": "ts-node ./src/exec/exec.ts",
     "png2pdf": "node -r ts-node/register --max-old-space-size=2048 --inspect --expose-gc ./src/imgToPdf/pngToPdf.ts",
     "alpha": "node -r ts-node/register ./src/imgToPdf/utils/PngUtils.ts",
