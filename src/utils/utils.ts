@@ -20,7 +20,7 @@ function findLongestFileName(directory: string, longestButLessThan: number = 300
       if (stat.isDirectory()) {
         processDirectory(filePath);
       } else {
-        const fileName = path.basename(filePath); 
+        const fileName = path.basename(filePath);
         const fileWithPathLength = path.resolve(filePath);
         if (fileName.length > longestFileName.length && (fileName.length < longestButLessThan)) {
           longestFileName = fileName;
@@ -75,28 +75,29 @@ interface VerfiyUrlType {
   success: boolean;
 }
 
-export async function checkUrlValidity(_forVerfication: SelectedUploadItem): Promise<SelectedUploadItem> {
+export async function checkUrlValidityForUploadItems(_forVerfication: SelectedUploadItem): Promise<SelectedUploadItem> {
   const url = createArchiveLink(_forVerfication.archiveId);
-  let result = {
-    isValid: false,
+  const _validity = await checkUrlValidity(url);
+  return {
+    isValid: _validity,
     ..._forVerfication
   }
+}
+
+export async function checkUrlValidity(url: string): Promise<boolean> {
   try {
     const response = await fetch(url, { method: 'HEAD' });
     // Check if the response status code indicates success (2xx) or redirection (3xx)
     if (response.ok && response.status === 200) {
-      result.isValid = true
-      return result;
+      return true;
     }
     else {
       console.log(`*******response.status ${url} ${response.status} ${response.statusText}`)
-      result.isValid = false;
-      return result;
+      return false;
     }
   } catch (error) {
     console.log(`checkUrlValidity error ${error} `)
-    result.isValid = true
-    return result; // An error occurred, so the URL is invalid
+    return false;
   }
 }
 

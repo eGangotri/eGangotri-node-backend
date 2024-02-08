@@ -5,7 +5,7 @@ import { getListOfItemsUshered } from '../services/itemsUsheredService';
 import * as _ from 'lodash';
 import { ArchiveProfileAndCount, SelectedUploadItem, UploadCycleTableData, UploadCycleTableDataDictionary, UploadCycleTableDataResponse, UploadCycleTypes } from '../mirror/types';
 import { validateSuperAdminUserFromRequest } from '../services/userService';
-import { checkUrlValidity } from '../utils/utils';
+import { checkUrlValidityForUploadItems } from '../utils/utils';
 import { createArchiveLink } from '../mirror';
 import { getListOfItemsQueued } from '../services/itemsQueuedService';
 import { getListOfUploadCycles } from '../services/uploadCycleService';
@@ -63,7 +63,7 @@ itemsUsheredRoute.post('/verifyUploadStatus', async (req: any, resp: any) => {
             const itemsUshered = await getListOfItemsUshered({ uploadCycleId: items.uploadCycleIdForVerification });
             const results: SelectedUploadItem[] = [];
             for (const item of itemsUshered) {
-                const res = await checkUrlValidity({
+                const res = await checkUrlValidityForUploadItems({
                     id: item._id,
                     archiveId: `${item.archiveItemId}`,
                     isValid: true
@@ -77,7 +77,7 @@ itemsUsheredRoute.post('/verifyUploadStatus', async (req: any, resp: any) => {
             const results: SelectedUploadItem[] = [];
 
             for (const forVerification of uploadsForVerification) {
-                const res = await checkUrlValidity(forVerification);
+                const res = await checkUrlValidityForUploadItems(forVerification);
                 results.push(res);
             }
             resp.status(200).send({ response: results });
