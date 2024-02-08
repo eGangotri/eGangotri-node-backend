@@ -1,5 +1,6 @@
 import puppeteer, { Page } from 'puppeteer';
 import { utils, writeFile } from 'xlsx';
+import os from 'os';
 
 interface LinkData {
   link: string;
@@ -52,21 +53,20 @@ async function setArchiveItemCountAndScrollablePageCount() {
   return archiveItemCount;
 }
 
-async function generateExcel(links: LinkData[]): Promise<string> {
+async function generateExcel(links: LinkData[], excelFileName: string): Promise<string> {
   const worksheet = utils.json_to_sheet(links.map(link => (
     { 'Link': link.link, 'Title': link.title })),
     { header: ["Link", "Title"] });
 
   const workbook = utils.book_new();
   utils.book_append_sheet(workbook, worksheet, "Links");
-  const excelFileName = `${archiveAcctName()}(${archiveItemCount})`;
-  const excelPath = `C:\\Users\\chetan\\Downloads\\${excelFileName}.xlsx`
+  const excelPath = `${os.homedir()}\\Downloads\\${excelFileName}.xlsx`
   console.log(`Writing to ${excelPath}`);
   await writeFile(workbook, excelPath);
   return excelPath;
 }
 
-export const scrapeArchive = async (archiveUrl: string): Promise<any> => {
+export const scrapeArchive = async (archiveUrl: string, onlyLinks: boolean = false): Promise<any> => {
   MAIN_URL = archiveUrl;
   await setArchiveItemCountAndScrollablePageCount();
 
@@ -75,13 +75,27 @@ export const scrapeArchive = async (archiveUrl: string): Promise<any> => {
     const _link = await scrapeLinks(`${MAIN_URL}?&sort=-publicdate&page=${i + 1}`);
     links.push(..._link);
   }
-  const excelPath = await generateExcel(links);
-  return {
-    excelPath,
-    archiveItemCount,
-    scrollablePageCount,
-    links
+
+  const excelFileName = `${archiveAcctName()}(${archiveItemCount})`;
+  if (onlyLinks) {
+    return {
+      archiveItemCount,
+      scrollablePageCount,
+      links,
+      excelFileName
+    }
   }
+  else {
+    const excelPath = await generateExcel(links, excelFileName);
+    return {
+      excelPath,
+      excelFileName,
+      archiveItemCount,
+      scrollablePageCount,
+      links
+    }
+  }
+
 }
 
 const setScrollablePageCount = () => {
@@ -95,9 +109,9 @@ let archiveItemCount = 0;
 let scrollablePageCount = 0;
 let MAIN_URL = "";
 
-(async () => {
-  scrapeArchive("https://archive.org/details/@egangotri_books");
-})();
+// (async () => {
+//   scrapeArchive("https://archive.org/details/@drnaithani");
+// })();
 
 
 //yarn run scraper

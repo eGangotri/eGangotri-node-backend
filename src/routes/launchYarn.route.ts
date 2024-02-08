@@ -1,14 +1,15 @@
 import * as express from 'express';
 import { downloadPdfFromGoogleDriveToProfile } from '../cliBased/googleapi/GoogleDriveApiReadAndDownload';
-import { scrapeArchive } from 'archiveDotOrg/archiveScraper';
+import { scrapeArchive } from '../archiveDotOrg/archiveScraper';
 import * as fs from 'fs';
+import { generateGoogleDriveListingExcel } from '../cliBased/googleapi/GoogleDriveApiReadAndExport';
 export const launchYarnRoute = express.Router();
 
 launchYarnRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
     try {
         const googleDriveLink = req?.body?.googleDriveLink;
         const profile = req?.body?.profile;
-        console.log(`googleDriveLink ${googleDriveLink} profile ${profile}`)
+        console.log(`:googleDriveLink ${googleDriveLink} profile ${profile}`)
         if (!googleDriveLink || !profile) {
             resp.status(300).send({
                 response: {
@@ -48,22 +49,48 @@ launchYarnRoute.post('/getArchiveListing', async (req: any, resp: any) => {
             resp.status(300).send({
                 response: {
                     "status": "failed",
+                    "success": false,
                     "message": "Pls. provide archive Link are mandatory"
                 }
             });
         }
-        const scrapeResult = await scrapeArchive(archiveLink);
-        if (details) {
-            resp.status(200).send({
-                response: scrapeResult
+        const scrapeResult = await scrapeArchive(archiveLink, true);
+        resp.status(200).send({
+            response: {
+                ...scrapeResult,
+                "success": true,
+            }
+        });
+    }
+
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})
+
+
+launchYarnRoute.post('/getGoogleDriveListing', async (req: any, resp: any) => {
+    console.log(`getGoogleDriveListing ${JSON.stringify(req.body)}`)
+    try {
+        const googleDriveLink = req?.body?.googleDriveLink;
+        const folderName = req?.body?.folderName || "";
+        console.log(`getGoogleDriveListing googleDriveLink ${googleDriveLink} `)
+        if (!googleDriveLink) {
+            resp.status(300).send({
+                response: {
+                    "status": "failed",
+                    "success": false,
+                    "message": "Pls. provide google drive Link"
+                }
             });
         }
-        else {
-            // Send Excel file as response
-            resp.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-            resp.setHeader("Content-Disposition", "attachment; filename=" + "links.xlsx");
-            resp.send(fs.readFileSync(scrapeResult.excelPath, 'binary'));
-        }
+        const listingResult = await generateGoogleDriveListingExcel(googleDriveLink, folderName);
+        resp.status(200).send({
+            response: {
+                ...listingResult
+            }
+        });
     }
 
     catch (err: any) {
