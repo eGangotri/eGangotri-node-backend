@@ -5,19 +5,11 @@ const schema = new mongoose.Schema(
     operatorName: { type: String, required: true },
     center: { type: String, required: true },
     lib: { type: String, required: false },
-    totalPdfCount: { type: Number, required: true },
-    totalPageCount: { type: Number, required: true },
-    totalSize: { type: String, required: true },
-    totalSizeRaw: { type: Number, required: true },
+    pdfsRenamedCount: { type: Number, required: true },
+    coverPagesRenamedCount: { type: Number, required: true },
+    coverPagesMoved: { type: Boolean, required: true },
     dateOfReport: { type: Date, required: true },
-    notes: { type: String, required: false, default:"" },
-    workFromHome: { type: Boolean, required: false, default:false },
-    pageCountStats: { type: [{
-      fileName: String,
-      pageCount: Number,
-      fileSize: String,
-      fileSizeRaw: Number,
-    }], required: true },
+    notes: { type: String, required: false, default:"" }
   },
   {
     collection: "Daily_QA_Work_Report",
@@ -25,4 +17,4 @@ const schema = new mongoose.Schema(
   }
 );
 
-export const DailyWorkReport = mongoose.model("Daily_QA_Work_Report", schema);
+export const DailyQAWorkReport = mongoose.model("Daily_QA_Work_Report", schema);

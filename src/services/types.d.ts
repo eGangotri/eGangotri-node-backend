@@ -61,6 +61,19 @@ export type DailyCatWorkReportListOptionsType = {
   limit?: number,
 };
 
+
+export type DailyQAWorkReportListOptionsType = {
+  _ids?: string,
+  startDate?: string,
+  endDate?: string,
+  operatorName?: string,
+  catalogProfile?: string,
+  link?: string,
+  notes?: string,
+  isLastTwoHours?: string, //true or false as string
+  limit?: number,
+};
+
 export type ReuploadType = {
   ids?: string,
   limit?: number,
