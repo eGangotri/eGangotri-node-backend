@@ -14,7 +14,7 @@ docker login -u "egangotrifoundation" -p "XXXXX" https://docker.io
 Save it as Dockerfile
 
 docker build -t egangotrifoundation/egangotri-node-backend:latest .
-Test it by running 
+Test it by running :
 docker run -p 80:80 egangotrifoundation/egangotri-node-backend:latest
 View at
 http://127.0.0.1:80/

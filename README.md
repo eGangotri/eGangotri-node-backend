@@ -77,10 +77,11 @@ Ref:
 
 
 ## Docker
-docker build . -t egangotri/egangotri-node-backend
-docker run -d -p 80:80  egangotri/egangotri-node-backend:latest
+docker build . -t egangotrifoundation/egangotri-node-backend
+docker run -d -p 80:80 egangotrifoundation/egangotri-node-backend:latest
 docker login
-docker push  egangotri/egangotri-node-backend
+docker push egangotrifoundation/egangotri-node-backend:latest
+
 ## access docker iamge via
 http://localhost:80/
 
