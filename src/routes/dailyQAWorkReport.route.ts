@@ -34,48 +34,42 @@ JSON Body
 dailyQAWorkReportRoute.post("/add", async (req: Request, resp: Response) => {
   try {
     const operatorName = req.body.operatorName
-    if (!operatorName) {
-      resp.status(400).send({ error: "Non-functional" });
-    }
+    if (await validateUserFromRequest(req)) {
+      const dailyQAWorkReport = new DailyQAWorkReport(req.body);
 
-    else {
-      if (await validateUserFromRequest(req)) {
-        const dailyQAWorkReport = new DailyQAWorkReport(req.body);
+      //Check if any request was sent in Last 2 hours
+      const _query: typeof req.query = {};
+      _query['isLastTwoHours'] = 'true';
+      _query['operatorName'] = operatorName;
 
-        //Check if any request was sent in Last 2 hours
-        const _query: typeof req.query = {};
-        _query['isLastTwoHours'] = 'true';
-        _query['operatorName'] = operatorName;
+      const preExisting = await getListOfDailyQAWorkReport(_query);
+      if (preExisting && preExisting.length >= 1) {
+        console.log(` preExisting[0]._id . ${preExisting.length}`);
+        const filter = {
+          _id: { $in: preExisting.map(x => x._id) },
+          //just to be extra safe
+          createdAt: {
+            $gte: new Date(getDateTwoHoursBeforeNow()),
+            $lte: new Date(new Date()),
+          },
+        };
+        await DailyQAWorkReport.deleteMany(filter);
+        await dailyQAWorkReport.save();
+        resp.status(200).send({
+          "warning": `Since Last Submission Request < 2 Hours. exisiting Data is merely overwritten not inserted. for ${operatorName}`
+        });
 
-        const preExisting = await getListOfDailyQAWorkReport(_query);
-        if (preExisting && preExisting.length >= 1) {
-          console.log(` preExisting[0]._id . ${preExisting.length}`);
-          const filter = {
-            _id: { $in: preExisting.map(x => x._id) },
-            //just to be extra safe
-            createdAt: {
-              $gte: new Date(getDateTwoHoursBeforeNow()),
-              $lte: new Date(new Date()),
-            },
-          };
-          await DailyQAWorkReport.deleteMany(filter);
-          await dailyQAWorkReport.save();
-          resp.status(200).send({
-            "warning": `Since Last Submission Request < 2 Hours. exisiting Data is merely overwritten not inserted. for ${operatorName}`
-          });
-
-        }
-        else {
-          console.log(`dailyQAWorkReportRoute /add ${JSON.stringify(dailyQAWorkReport)}`);
-          await dailyQAWorkReport.save();
-          resp.status(200).send({
-            "success": `Added Daily Report Stats with Id ${dailyQAWorkReport._id} for ${operatorName}`
-          });
-        }
       }
       else {
-        resp.status(200).send({ error: `Couldn't validate User ${operatorName}` });
+        console.log(`dailyQAWorkReportRoute /add ${JSON.stringify(dailyQAWorkReport)}`);
+        await dailyQAWorkReport.save();
+        resp.status(200).send({
+          "success": `Added Daily Report Stats with Id ${dailyQAWorkReport._id} for ${operatorName}`
+        });
       }
+    }
+    else {
+      resp.status(200).send({ error: `Couldn't validate User ${operatorName}` });
     }
   }
   catch (err: any) {
