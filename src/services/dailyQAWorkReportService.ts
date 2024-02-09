@@ -10,7 +10,7 @@ import * as fs from "fs";
 import { CSV_CAT_HEADER_API2, CSV_CAT_HEADER_FOR_AGGREGATES_API2, CSV_CAT_HEADER_FOR_OPERATOR_NAME_AND_ENTRY_COUNT_API2 } from "./constants";
 import * as _ from 'lodash';
 import { generateCsvDirAndName, getDateTwoHoursBeforeNow, replaceQuotes, replaceQuotesAndSplit } from "./Util";
-import { DailyQAWorkReport } from "models/dailyQAReport";
+import { DailyQAWorkReport } from "../models/dailyQAReport";
 
 
 

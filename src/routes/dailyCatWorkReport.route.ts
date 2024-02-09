@@ -33,7 +33,7 @@ dailyCatWorkReportRoute.post("/add", async (req: Request, resp: Response) => {
   try {
     const operatorName = req.body.operatorName
     if (operatorName) {
-      resp.status(400).send({ error: "Non-functional" });
+      resp.status(400).send({ error: "Cataloging is not working.Non-functional" });
     }
 
     else {

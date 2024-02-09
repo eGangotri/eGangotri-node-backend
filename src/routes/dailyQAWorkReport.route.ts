@@ -5,34 +5,36 @@ import { Request, Response } from "express";
 import { validateSuperAdminUserFromRequest, validateUserFromRequest } from "../services/userService"
 import { getDateTwoHoursBeforeNow, replaceQuotesAndSplit } from "../services/Util";
 import _ from "lodash";
-import { generateQACSVAsFile, generateQACSVAsFileForOperatorAndEntryCountOnly, generateQACSVAsFileOfAggregates, getListOfDailyQAWorkReport } from "services/dailyQAWorkReportService";
-import { DailyQAWorkReport } from "models/dailyQAReport";
+import { generateQACSVAsFile, generateQACSVAsFileForOperatorAndEntryCountOnly, generateQACSVAsFileOfAggregates, getListOfDailyQAWorkReport } from "../services/dailyQAWorkReportService";
+import { DailyQAWorkReport } from "../models/dailyQAReport";
 
 export const dailyQAWorkReportRoute = express.Router();
 
 /**
  * INSOMNIA POST Request Sample
-POST http://localhost/dailyWorkReport/add 
+POST http://localhost/dailyQAWorkReport/add 
 JSON Body 
 {
-  "title": "eGangotri Daily QA Work Report",
-  "operatorName": "admin",
-  "catalogProfile": "Treasures-8",
-  "entryFrom": 1,
-  "entryTo": 11,
-  "skipped": 2,
-  "timeOfRequest": "2023-07-18T09:30:20.401Z",
-  "entryCount": 8,
-  "link": "https://docs.google.com/spreadsheets/d/1masb0zc_bvOYU1r70cjf6sPvExbF5bF6s_VDPeBH4KY/edit#gid=0",
-  "notes": "",
+}
+{
+  "center": "Center Name",
+  "lib": "Library Name",
+  "dateOfReport": "2022-01-01T00:00:00.000Z",
+  "pdfsRenamedCount": 10,
+  "coverPagesRenamedCount": 5,
+  "coverPagesMoved": true,
+  "notes": "Some notes",
+  "folderNames": "Folder names",
+  "operatorName": "Operator Name",
   "password": ""
+
 }
 */
 
 dailyQAWorkReportRoute.post("/add", async (req: Request, resp: Response) => {
   try {
     const operatorName = req.body.operatorName
-    if (operatorName) {
+    if (!operatorName) {
       resp.status(400).send({ error: "Non-functional" });
     }
 
