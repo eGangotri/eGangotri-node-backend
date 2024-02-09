@@ -12,6 +12,7 @@ import {userRoute} from "./routes/userRoute.route";
 import {connectToMongo} from "./services/dbService";
 
 import { GLOBAL_DB_NAME } from './db/connection';
+import { dailyQAWorkReportRoute } from "./routes/dailyQAWorkReport.route";
 
 const egangotri = express();
 const hostname = "localhost";
@@ -38,6 +39,7 @@ egangotri.use("/itemsUshered", itemsUsheredRoute);
 egangotri.use("/execLauncher", launchGradleRoute);
 egangotri.use("/dailyWorkReport", dailyWorkReportRoute);
 egangotri.use("/dailyCatWorkReport", dailyCatWorkReportRoute);
+egangotri.use("/dailyQAWorkReport", dailyQAWorkReportRoute);
 egangotri.use("/uploadCycleRoute", uploadCycleRoute);
 egangotri.use("/user", userRoute);
 egangotri.use("/yarn", launchYarnRoute);
