@@ -30,7 +30,7 @@ egangotri.use((req: any, res: any, next: any) => {
 
 egangotri.get("/", function (req: any, res: any) {
   res.send({
-    response: `eGangotri-node-backend (${GLOBAL_DB_NAME})`
+    response: `eGangotri-node-backend 9-Feb-24 Deployed (${GLOBAL_DB_NAME})`
   });
 });
 
@@ -46,7 +46,7 @@ egangotri.use("/yarn", launchYarnRoute);
 
 connectToMongo(args).then(() => {
   egangotri.listen(port,hostname, async () => {
-    console.log(`Server running at http://${hostname}:${port}/`, new Date());
+    console.log(`Server -deployed 9-July-24- running at http://${hostname}:${port}/`, new Date());
   });
 })
 
