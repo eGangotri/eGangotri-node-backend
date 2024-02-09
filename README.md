@@ -84,7 +84,8 @@ docker push egangotrifoundation/egangotri-node-backend:latest
 
 ## access docker iamge via
 http://localhost:80/
-
+*** you need to be logged in with the correct acct egangotrifoundation@gmail.com
+otherwise you will keep getting access denied error.
 
 #ERRORS
 #1. If you are getting 
