@@ -2,9 +2,8 @@ import * as fs from 'fs';
 import path from 'path'
 import { LOCAL_FOLDERS_PROPERTIES_FILE, SRC_ROOT } from './constants';
 
-export const LOCAL_FOLDERS_PROPERTIES_FILE_FOR_SRC: Map<string, string> = getFoldersCorrespondingToProfile(SRC_ROOT);
 
-function getFoldersCorrespondingToProfile(root: string): Map<string, string> {
+const getFoldersCorrespondingToProfile = (root: string): Map<string, string> => {
     const properties = new Map<string, string>();
     if (!fs.existsSync(LOCAL_FOLDERS_PROPERTIES_FILE)) {
         console.log(`No Local Folder ${LOCAL_FOLDERS_PROPERTIES_FILE} found`);
@@ -39,11 +38,17 @@ function getFoldersCorrespondingToProfile(root: string): Map<string, string> {
     }
     return profileAndFolder;
 }
+export const LOCAL_FOLDERS_PROPERTIES_FILE_FOR_SRC: Map<string, string> = getFoldersCorrespondingToProfile(SRC_ROOT);
 
-export const getFolderInSrcRootForProfile = (profile:string) => {
+export const getFolderInSrcRootForProfile = (profile: string) => {
+    if(profile && profile.length > 0 && LOCAL_FOLDERS_PROPERTIES_FILE_FOR_SRC.has(profile)){
     return LOCAL_FOLDERS_PROPERTIES_FILE_FOR_SRC.get(profile)
+    }
+    else {
+        ""
+    }
 }
 
-const pdfDumpFolder = LOCAL_FOLDERS_PROPERTIES_FILE_FOR_SRC.get("GANESH") || "";
-console.log(`pdfDumpFolder ${pdfDumpFolder}`);
+// const pdfDumpFolder = LOCAL_FOLDERS_PROPERTIES_FILE_FOR_SRC.get("GANESH") || "";
+// console.log(`pdfDumpFolder ${pdfDumpFolder}`);
 //yarn run profileFolder
