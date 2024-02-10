@@ -13,15 +13,13 @@ COPY yarn.lock ./
 # Install dependencies
 RUN yarn install
 
-RUN yarn add tsc 
 # Copy the rest of your application code to the working directory
 COPY . .
 COPY .env .env
-COPY .dockerignore .dockerignore
 
 # Build your TypeScript code
 RUN yarn run build
-
+RUN yarn global add typescript
 # Expose a port (if your app listens on a specific port)
 EXPOSE 80
 
