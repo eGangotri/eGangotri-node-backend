@@ -34,6 +34,12 @@ export function moveToFreeze(args: any): Promise<string> {
     //gradle fileMover --args=JNGM_BEN JNGM_TAMIL JNGM_TEL JNGM BVT
     return makeGradleCall(generateGradleCommandForCSV(args, "fileMover"))
 }
+
+export function bookTitlesLaunchService(args: any): Promise<string> {
+    //gradle fileMover --args=JNGM_BEN JNGM_TAMIL JNGM_TEL JNGM BVT
+    return makeGradleCall(generateGradleCommandForCSV(args, "bookTitles"))
+}
+
 export function loginToArchive(args: any): Promise<string> {
     //gradle loginToArchive --args=JNGM_BEN JNGM_TAMIL JNGM_TEL JNGM BVT
     return makeGradleCall(generateGradleCommandForCSV(args, "loginToArchive"))

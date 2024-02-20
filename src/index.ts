@@ -47,7 +47,7 @@ egangotri.use("/user", userRoute);
 egangotri.use("/yarn", launchYarnRoute);
 
 connectToMongo(args).then(() => {
-  egangotri.listen(port,hostname, async () => {
+  egangotri.listen(port,'0.0.0.0', async () => {
     console.log(`Server - deployed ${deployDate} - running at http://${hostname}:${port}/`, new Date());
   });
 })

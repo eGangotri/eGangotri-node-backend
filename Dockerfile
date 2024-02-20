@@ -1,5 +1,5 @@
 # Use an official Node.js runtime as a parent image
-FROM node:18.16.0
+FROM node:18-bookworm-slim
 
 RUN apt-get clean && apt-get update
 
@@ -10,8 +10,10 @@ WORKDIR /app
 COPY package*.json ./
 COPY yarn.lock ./
 
-# Install dependencies
 RUN yarn install
+RUN yarn global add typescript
+
+# Install dependencies
 
 # Copy the rest of your application code to the working directory
 COPY . .
@@ -19,7 +21,6 @@ COPY .env .env
 
 # Build your TypeScript code
 RUN yarn run build
-RUN yarn global add typescript
 # Expose a port (if your app listens on a specific port)
 EXPOSE 80
 
