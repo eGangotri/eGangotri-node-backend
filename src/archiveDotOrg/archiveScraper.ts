@@ -2,6 +2,7 @@ import puppeteer, { Page } from 'puppeteer';
 import { utils, writeFile } from 'xlsx';
 import os from 'os';
 
+export const ARCHIVE_EXCEL_PATH = `${os.homedir()}\\Downloads`;
 interface LinkData {
   link: string;
   title: string;
@@ -27,6 +28,7 @@ const extractLinkData = async (page: Page): Promise<LinkData[]> => {
 async function scrapeLinks(url: string): Promise<LinkData[]> {
   const browser = await puppeteer.launch({ headless: "new" });
   const page = await browser.newPage();
+  page.setDefaultNavigationTimeout(0);
   await page.goto(url);
 
   const links = await extractLinkData(page);
@@ -44,7 +46,11 @@ const archiveAcctName = () => {
 async function setArchiveItemCountAndScrollablePageCount() {
   const browser = await puppeteer.launch({ headless: "new" });
   const page = await browser.newPage();
+  page.setDefaultNavigationTimeout(0);
+
   await page.goto(MAIN_URL);
+  console.log(`MAIN_URL page.goto ${MAIN_URL}`);
+
   const resCountDivVal = await page.$eval('.results_count', element => element.textContent);
   archiveItemCount = parseInt(resCountDivVal?.trim().split(/\s.*/g)[0].replace(",", "")) || 0;
   await browser.close();
@@ -60,7 +66,7 @@ async function generateExcel(links: LinkData[], excelFileName: string): Promise<
 
   const workbook = utils.book_new();
   utils.book_append_sheet(workbook, worksheet, "Links");
-  const excelPath = `${os.homedir()}\\Downloads\\${excelFileName}.xlsx`
+  const excelPath = `${ARCHIVE_EXCEL_PATH}\\${excelFileName}.xlsx`
   console.log(`Writing to ${excelPath}`);
   await writeFile(workbook, excelPath);
   return excelPath;
@@ -68,6 +74,8 @@ async function generateExcel(links: LinkData[], excelFileName: string): Promise<
 
 export const scrapeArchive = async (archiveUrl: string, onlyLinks: boolean = false): Promise<any> => {
   MAIN_URL = archiveUrl;
+  console.log(`MAIN_URL ${MAIN_URL}`);
+  console.log(`archiveUrl ${archiveUrl}`);
   await setArchiveItemCountAndScrollablePageCount();
 
   const links: LinkData[] = []
@@ -86,7 +94,10 @@ export const scrapeArchive = async (archiveUrl: string, onlyLinks: boolean = fal
     }
   }
   else {
-    const excelPath = await generateExcel(links, excelFileName);
+    const excelPath = `${ARCHIVE_EXCEL_PATH}\\${excelFileName}.xlsx`
+
+    //not using await so that the response is sent back immediately
+    await generateExcel(links, excelFileName);
     return {
       excelPath,
       excelFileName,

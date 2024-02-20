@@ -1,6 +1,6 @@
 import * as express from 'express';
 import { downloadPdfFromGoogleDriveToProfile } from '../cliBased/googleapi/GoogleDriveApiReadAndDownload';
-import { scrapeArchive } from '../archiveDotOrg/archiveScraper';
+import { ARCHIVE_EXCEL_PATH, scrapeArchive } from '../archiveDotOrg/archiveScraper';
 import * as fs from 'fs';
 import { generateGoogleDriveListingExcel } from '../cliBased/googleapi/GoogleDriveApiReadAndExport';
 export const launchYarnRoute = express.Router();
@@ -43,8 +43,8 @@ launchYarnRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => 
 launchYarnRoute.post('/getArchiveListing', async (req: any, resp: any) => {
     try {
         const archiveLink = req?.body?.archiveLink;
-        const details = req?.body?.details;
-        console.log(`archiveLink ${archiveLink} `)
+        const onlyLinks = req?.body?.onlyLinks;
+
         if (!archiveLink) {
             resp.status(300).send({
                 response: {
@@ -54,10 +54,10 @@ launchYarnRoute.post('/getArchiveListing', async (req: any, resp: any) => {
                 }
             });
         }
-        const scrapeResult = await scrapeArchive(archiveLink, true);
+        scrapeArchive(archiveLink, onlyLinks);
         resp.status(200).send({
             response: {
-                ...scrapeResult,
+                msg: `Request Recieved. Excel file will be created in folder ${ARCHIVE_EXCEL_PATH} in few minutes`,
                 "success": true,
             }
         });
