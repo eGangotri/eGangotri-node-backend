@@ -79,4 +79,4 @@ const pdfContainingFolder = "C:\\Users\\chetan\\Documents\\_testPDF";
 const _srcPdfPath = `${pdfContainingFolder}\\output-t1-2-reduced-manually.pdf`
 const _destPdfPath = _srcPdfPath.replace(".pdf", "-withFooter2.pdf");
 
-addHeaderAndFooterToPDF(" ", footerText, _srcPdfPath, _destPdfPath);
+//addHeaderAndFooterToPDF(" ", footerText, _srcPdfPath, _destPdfPath);

@@ -3,7 +3,7 @@ import { downloadPdfFromGoogleDriveToProfile } from '../cliBased/googleapi/Googl
 import { ARCHIVE_EXCEL_PATH, scrapeArchive } from '../archiveDotOrg/archiveScraper';
 import * as fs from 'fs';
 import { generateGoogleDriveListingExcel } from '../cliBased/googleapi/GoogleDriveApiReadAndExport';
-import { getFolderInSrcRootForProfile } from 'cliBased/utils';
+import { getFolderInSrcRootForProfile } from '../cliBased/utils';
 export const launchYarnRoute = express.Router();
 
 launchYarnRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
