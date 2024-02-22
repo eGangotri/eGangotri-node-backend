@@ -3,6 +3,7 @@ import { downloadPdfFromGoogleDriveToProfile } from '../cliBased/googleapi/Googl
 import { ARCHIVE_EXCEL_PATH, scrapeArchive } from '../archiveDotOrg/archiveScraper';
 import * as fs from 'fs';
 import { generateGoogleDriveListingExcel } from '../cliBased/googleapi/GoogleDriveApiReadAndExport';
+import { getFolderInSrcRootForProfile } from 'cliBased/utils';
 export const launchYarnRoute = express.Router();
 
 launchYarnRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
@@ -69,7 +70,6 @@ launchYarnRoute.post('/getArchiveListing', async (req: any, resp: any) => {
     }
 })
 
-
 launchYarnRoute.post('/getGoogleDriveListing', async (req: any, resp: any) => {
     console.log(`getGoogleDriveListing ${JSON.stringify(req.body)}`)
     try {
@@ -89,6 +89,35 @@ launchYarnRoute.post('/getGoogleDriveListing', async (req: any, resp: any) => {
         resp.status(200).send({
             response: {
                 ...listingResult
+            }
+        });
+    }
+
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})
+
+launchYarnRoute.post('/addHeaderFooter', async (req: any, resp: any) => {
+    try {
+        const profile = req?.body?.profile;
+
+        if (!profile) {
+            resp.status(300).send({
+                response: {
+                    "status": "failed",
+                    "success": false,
+                    "message": "Pls. provide profile. it is mandatory"
+                }
+            });
+        }
+        const pdfDumpFolder = getFolderInSrcRootForProfile(profile)
+
+        resp.status(200).send({
+            response: {
+                msg: `Request Recieved. Excel file will be created in folder ${ARCHIVE_EXCEL_PATH} in few minutes`,
+                "success": true,
             }
         });
     }

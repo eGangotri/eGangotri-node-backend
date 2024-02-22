@@ -7,8 +7,10 @@ import { getFolderInSrcRootForProfile } from '../../cliBased/utils';
 import fs from 'fs';
 import path from 'path';
 import * as fsExtra from 'fs-extra';
-import { countBy } from 'lodash';
+import { add, countBy } from 'lodash';
 import { DOWNLOAD_COMPLETED_COUNT, DOWNLOAD_FAILED_COUNT, resetDownloadCounters } from '../../cliBased/pdf/utils';
+import { getAllPdfsInFolders, getDirectoriesWithFullPath } from 'imgToPdf/utils/Utils';
+import { addHeaderAndFooterToPDF } from 'pdfHeaderFooter';
 
 // Create a new Google Drive instance
 const drive = getGoogleDriveInstance();
@@ -43,6 +45,43 @@ async function getAllPdfs(driveLinkOrFolderID: string, folderName: string, pdfDu
   }
 }
 
+export const addHeaderFooterToPDFsInProfile = async (profile: string) => {
+  const pdfDumpFolder = getFolderInSrcRootForProfile(profile)
+  console.log(`downloadPdfFromGoogleDriveToProfile:pdfDumpFolder ${pdfDumpFolder}`)
+  try {
+    if (fs.existsSync(pdfDumpFolder)) {
+      const _folders = (await getDirectoriesWithFullPath(pdfDumpFolder)).filter(
+        (dir: any) => !dir.match(/ignore/)
+      );
+      const pdfsInFolders = await getAllPdfsInFolders(_folders);
+      for (let pdf of pdfsInFolders) {
+        console.log(`pdf: ${pdf}`);
+        const _destPdfPath = pdf.replace(".pdf", "-withFooter.pdf");
+
+        addHeaderAndFooterToPDF("", "", pdf, _destPdfPath);
+      }
+      const _resp = {
+        "msg": `Adding Header and Footer to PDFs in profile (${profile})`,
+        status: true
+      }
+
+      return _resp;
+    }
+    else {
+      return {
+        "msg": `No corresponding folder to profile (${profile}) exists`,
+        status: false
+      }
+    }
+  }
+  catch (err) {
+    console.log(`Error ${err}`)
+    return {
+      "mdg": "failed" + err,
+      status: false
+    }
+  }
+}
 
 export const downloadPdfFromGoogleDriveToProfile = async (driveLinkOrFolderId: string, profile: string) => {
   const pdfDumpFolder = getFolderInSrcRootForProfile(profile)
