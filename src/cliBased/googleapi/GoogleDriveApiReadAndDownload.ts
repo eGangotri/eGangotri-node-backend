@@ -10,7 +10,7 @@ import * as fsExtra from 'fs-extra';
 import { add, countBy } from 'lodash';
 import { DOWNLOAD_COMPLETED_COUNT, DOWNLOAD_FAILED_COUNT, resetDownloadCounters } from '../../cliBased/pdf/utils';
 import { getAllPdfsInFolders, getDirectoriesWithFullPath } from '../../imgToPdf/utils/Utils';
-import { addHeaderAndFooterToPDF } from 'pdfHeaderFooter';
+import { addHeaderAndFooterToPDF } from '../../pdfHeaderFooter';
 
 // Create a new Google Drive instance
 const drive = getGoogleDriveInstance();
