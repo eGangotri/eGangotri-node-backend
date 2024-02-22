@@ -41,8 +41,20 @@ const getFoldersCorrespondingToProfile = (root: string): Map<string, string> => 
 export const LOCAL_FOLDERS_PROPERTIES_FILE_FOR_SRC: Map<string, string> = getFoldersCorrespondingToProfile(SRC_ROOT);
 
 export const getFolderInSrcRootForProfile = (profile: string) => {
-    if(profile && profile.length > 0 && LOCAL_FOLDERS_PROPERTIES_FILE_FOR_SRC.has(profile)){
-    return LOCAL_FOLDERS_PROPERTIES_FILE_FOR_SRC.get(profile)
+    if (profile && profile.length > 0 && LOCAL_FOLDERS_PROPERTIES_FILE_FOR_SRC.has(profile)) {
+        return LOCAL_FOLDERS_PROPERTIES_FILE_FOR_SRC.get(profile)
+    }
+    else {
+        ""
+    }
+}
+
+//create this
+export const HEADER_FOOTER_PROPERTIES_FILE: Map<string, string> = getFoldersCorrespondingToProfile(SRC_ROOT);
+
+export const getHeaderAndFooterTextForProfile = (profile: string) => {
+    if (profile && profile.length > 0 && HEADER_FOOTER_PROPERTIES_FILE.has(profile)) {
+        return HEADER_FOOTER_PROPERTIES_FILE.get(profile)
     }
     else {
         ""

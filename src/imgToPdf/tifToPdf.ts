@@ -1,7 +1,6 @@
 import { genPngFolderNameAndCreateIfNotExists, tiftoPngs } from './utils/PngUtils';
 import { addReport, HANDLE_CHECKSUM } from './index';
 import { getAllTifs } from './utils/ImgUtils';
-import * as fs from 'fs';
 import { distributedLoadBasedPngToPdfConverter } from './pngToPdfUtil';
 import { formatTime, getAllDotSumFiles, mkDirIfDoesntExists } from './utils/Utils';
 

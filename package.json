@@ -15,7 +15,7 @@
     "exec": "ts-node ./src/exec/exec.ts",
     "png2pdf": "node -r ts-node/register --max-old-space-size=2048 --inspect --expose-gc ./src/imgToPdf/pngToPdf.ts",
     "alpha": "node -r ts-node/register ./src/imgToPdf/utils/PngUtils.ts",
-    "convert": "node -r ts-node/register --max-old-space-size=2048 --inspect --expose-gc ./src/imgToPdf/conversionService/convert.ts",
+    "convert": "node -r ts-node/register --max-old-space-size=2048 --inspect --expose-gc ./src/imgToPdf/conversionService/convertTifToPDF.ts",
     "tally-post-conversion": "node -r ts-node/register ./src/imgToPdf/conversionService/postConversionTally.ts",
     "move-merged-pdfs": "node -r ts-node/register ./src/imgToPdf/conversionService/moveMergedPdfs.ts",
     "vanity": "ts-node ./src/vanityService/VanityPdf.ts",
@@ -37,8 +37,8 @@
     "downloadFromGoogle": "ts-node ./src/cliBased/googleapi/GoogleDriveApiReadAndDownload",
     "searchArchive": "ts-node ./src/cliBased/search/searchArchive",
     "profileFolder": "ts-node ./src/cliBased/utils",
-    "scraper": "ts-node ./src/archiveDotOrg/archiveScraper.ts",
-    "autoScroll": "ts-node ./src/archiveDotOrg/autoScrollTest.ts"
+    "scraper": "ts-node ./src/archiveDotOrg/archiveScraper",
+    "addFooter":"ts-node ./src/footerToPdf/index2"
   },
   "repository": {
     "type": "git",

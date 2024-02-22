@@ -5,7 +5,6 @@ import * as path from 'path';
 import { createFolderIfNotExists, getAllPDFFiles } from 'imgToPdf/utils/FileUtils';
 const fsPromises = require('fs').promises;
 
-
 const firstNPages = 10
 const lastNPages = 10
 let FINAL_REPORT: string[] = [];
@@ -40,7 +39,6 @@ async function createPartialPdf(inputPath: string, outputPath: string, pdfsToBeP
 }
 
 export const loopFolderForExtraction = async (rootFolder: string, outputRoot: string, loopIndex: string) => {
-
     const allPdfs = await getAllPDFFiles(rootFolder)
     const pdfsToBeProcessedCount = allPdfs.length;
     const outputPath = `${outputRoot}\\${path.parse(rootFolder).name} (${pdfsToBeProcessedCount})`;

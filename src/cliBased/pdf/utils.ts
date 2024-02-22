@@ -1,5 +1,3 @@
-import e from "express";
-
 export let DOWNLOAD_COMPLETED_COUNT = 0;
 export let DOWNLOAD_FAILED_COUNT = 0;
 

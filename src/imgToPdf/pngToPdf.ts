@@ -1,14 +1,9 @@
 import { chunkedPngsToChunkedPdfs, distributedLoadBasedPngToPdfConverter } from "./pngToPdfUtil";
 import {
-    formatTime, getAllDotSumFiles, getDirectories, getDirectoriesWithFullPath
+    formatTime, getAllDotSumFiles, getDirectoriesWithFullPath
 } from './utils/Utils';
-import * as fs from 'fs';
 import * as path from 'path';
 import { addReport, HANDLE_CHECKSUM, printReport } from '.';
-import { PNG_SUB_FOLDER } from "./utils/constants";
-import { genPngFolderNameAndCreateIfNotExists } from "./utils/PngUtils";
-
-
 
 async function exec(rootFoldersForConversion: Array<string>, procChunkedPngs:boolean = true) {
     const rootFoldersForConversionCount = rootFoldersForConversion.length;
