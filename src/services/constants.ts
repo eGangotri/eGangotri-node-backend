@@ -214,6 +214,65 @@ export const CSV_CAT_HEADER_API2 =
   ]
 
 
+export const CSV_QA_HEADER_API2 =
+  [
+    {
+      id: "dateOfReport",
+      title: "Date of Report",
+    },
+    {
+      id: "operatorName",
+      title: "Operator Name",
+    },
+    {
+      id: "center",
+      title: "Center",
+    },
+    {
+      id: "coverPagesRenamedCount",
+      title: "Cover Pages Renamed Count",
+    },
+    {
+      id: "pdfsRenamedCount",
+      title: "PDFs Renamed Count",
+    },
+    {
+      id: "folderNames",
+      title: "Folder Names",
+    },
+    {
+      id: "notes",
+      title: "notes",
+    }
+  ]
+
+export const CSV_QA_HEADER_FOR_AGGREGATES_API2 = [
+  {
+    id: "numEntries",
+    title: "Num of Entries",
+  },
+  {
+    id: "operatorName",
+    title: "Operator Name",
+  },
+  {
+    id: "coverPagesRenamedCount",
+    title: "Cover Pages Renamed Count",
+  },
+  {
+    id: "pdfsRenamedCount",
+    title: "PDFs Renamed Count",
+  },
+  {
+    id: "averagePDfsRenamed",
+    title: "PDFs Renamed Count/Num of Entries",
+  },
+  {
+    id: "averageCPsRenamed",
+    title: "PDFs Renamed Count/Num of Entries",
+  }
+]
+
 export const CSV_CAT_HEADER_FOR_AGGREGATES_API2 = [
   {
     id: "numEntries",

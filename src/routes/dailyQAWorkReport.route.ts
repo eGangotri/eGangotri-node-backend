@@ -201,7 +201,9 @@ dailyQAWorkReportRoute.get("/csvAsFile", async (req: Request, resp: Response) =>
   try {
     const items = await getListOfDailyQAWorkReport(req?.query);
     console.log(
-      `after getListOfDailyWorkReport retrieved item count: ${items.length}`
+      `after getListOfDailyQAWorkReport retrieved item count: ${items.length}
+      
+      ${JSON.stringify(items)}`
     );
 
     if (req?.query?.aggregations === "true") {
