@@ -45,7 +45,7 @@ export function loginToArchive(args: any): Promise<string> {
     return makeGradleCall(generateGradleCommandForCSV(args, "loginToArchive"))
 }
 
-function makeGradleCall(_cmd: string): Promise<string> {
+export function makeGradleCall(_cmd: string): Promise<string> {
     return new Promise((resolve, reject) => {
         exec(_cmd, {
             cwd: `${WORKING_DIR}`

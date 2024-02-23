@@ -1,5 +1,5 @@
 import * as express from 'express';
-import { bookTitlesLaunchService, launchUploader, loginToArchive, moveToFreeze, reuploadMissed } from '../services/gradleLauncherService';
+import { bookTitlesLaunchService, launchUploader, loginToArchive, makeGradleCall, moveToFreeze, reuploadMissed } from '../services/gradleLauncherService';
 import { ArchiveProfileAndCount, ArchiveProfileAndTitle } from 'mirror/types';
 
 export const launchGradleRoute = express.Router();
@@ -56,8 +56,13 @@ launchGradleRoute.get('/moveToFreeze', async (req: any, resp: any) => {
 launchGradleRoute.get('/bookTitles', async (req: any, resp: any) => {
     try {
         const argFirst = req.query.argFirst
+        const pdfsOnly = req.query.pdfsOnly
+        
         console.log(`bookTitles ${argFirst}`)
-        const res = await bookTitlesLaunchService(argFirst)
+        const _cmd = `gradle bookTitles --args="paths='${argFirst}', pdfsOnly=${pdfsOnly}"`
+        console.log(`_cmd ${_cmd}`)
+
+        const res = await makeGradleCall(_cmd)
         resp.status(200).send({
             response: res
         });

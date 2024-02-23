@@ -7,7 +7,7 @@ import { Response } from "express";
 import { createObjectCsvWriter } from "csv-writer";
 import { createReadStream } from "fs";
 import * as fs from "fs";
-import { CSV_CAT_HEADER_API2, CSV_CAT_HEADER_FOR_AGGREGATES_API2, CSV_CAT_HEADER_FOR_OPERATOR_NAME_AND_ENTRY_COUNT_API2 } from "./constants";
+import { CSV_CAT_HEADER_API2, CSV_CAT_HEADER_FOR_AGGREGATES_API2, CSV_CAT_HEADER_FOR_OPERATOR_NAME_AND_ENTRY_COUNT_API2, CSV_QA_HEADER_API2, CSV_QA_HEADER_FOR_AGGREGATES_API2 } from "./constants";
 import * as _ from 'lodash';
 import { generateCsvDirAndName, getDateTwoHoursBeforeNow, replaceQuotes, replaceQuotesAndSplit } from "./Util";
 import { DailyQAWorkReport } from "../models/dailyQAReport";
@@ -84,21 +84,23 @@ export const generateQACSVAsFile = async (res: Response, data: mongoose.Document
     // Define the CSV file headers
     const csvWriter = createObjectCsvWriter({
       path: csvFileName,
-      header: CSV_CAT_HEADER_API2
+      header: CSV_QA_HEADER_API2
     });
 
-    const entryCountSum: number = _.sum(data.map(x => parseInt(x.get("entryCount").toString())))
+    const pdfsRenamedCountSum: number = _.sum(data.map(x => parseInt(x.get("pdfsRenamedCount").toString())));
+    const coverPagesRenamedCountSum: number = _.sum(data.map(x => parseInt(x.get("pdfsRenamedCount").toString())));
 
-    console.log(`_toObj ${entryCountSum}`);
+    console.log(`_toObj ${pdfsRenamedCountSum}`);
     await csvWriter.writeRecords(data);
     await csvWriter.writeRecords([{
-      timeOfRequest: "Totals",
+      dateOfReport: "Totals",
       operatorName: data.length,
-      catalogProfile: "",
+      notes: "",
       entryFrom: "",
       entryTo: "",
-      skipped: "",
-      entryCount: entryCountSum,
+      folderNames: "",
+      pdfsRenamedCount: pdfsRenamedCountSum,
+      coverPagesRenamedCount: coverPagesRenamedCountSum,
     }]);
 
     // Set the response headers to indicate that the response is a CSV file
@@ -121,7 +123,7 @@ export const generateQACSVAsFileOfAggregates = async (res: Response, data: mongo
     // Define the CSV file headers
     const csvWriter = createObjectCsvWriter({
       path: csvFileName,
-      header: CSV_CAT_HEADER_FOR_AGGREGATES_API2
+      header: CSV_QA_HEADER_FOR_AGGREGATES_API2
     });
 
     const grouped_data = _.groupBy(data, (doc) => {
@@ -133,19 +135,23 @@ export const generateQACSVAsFileOfAggregates = async (res: Response, data: mongo
     const refinedData: Array<any> = []
     for (let [key, value] of Object.entries(grouped_data)) {
       const numOfEntries = value.length;
-      const entryCountSum = _.sum(value.map(x => parseInt(x.get("entryCount")) || 0));
-      const average = Math.round(entryCountSum / numOfEntries)
+      const pdfsRenamedCountSum = _.sum(value.map(x => parseInt(x.get("pdfsRenamedCount")) || 0));
+      const coverPagesRenamedCountSum = _.sum(value.map(x => parseInt(x.get("coverPagesRenamedCount")) || 0));
+
+      const averagePDfsRenamed = Math.round(pdfsRenamedCountSum / numOfEntries)
+      const averageCPsRenamed = Math.round(coverPagesRenamedCountSum / numOfEntries)
       const _row = {
         numEntries: numOfEntries,
         operatorName: key,
-        entryCount: entryCountSum,
-        average
+        averagePDfsRenamed: averagePDfsRenamed,
+        averageCPsRenamed: averageCPsRenamed,
       }
       refinedData.push(_row)
     }
     const entryCountSum: number = _.sum(refinedData.map(x => parseInt(x["entryCount"]?.toString())))
     const numEntriesSum: number = _.sum(refinedData.map(x => x["numEntries"]))
-    const averageSum: number = _.sum(refinedData.map(x => x["average"]))
+    const averagePDfsRenamedSum: number = _.sum(refinedData.map(x => x["averagePDfsRenamed"]))
+    const averageCPsRenamedSum: number = _.sum(refinedData.map(x => x["averageCPsRenamedSum"]))
 
     console.log(`_toObj ${entryCountSum} numEntriesSum ${numEntriesSum}`);
     await csvWriter.writeRecords(refinedData);
@@ -153,7 +159,8 @@ export const generateQACSVAsFileOfAggregates = async (res: Response, data: mongo
       numEntries: numEntriesSum,
       operatorName: refinedData.length,
       entryCount: entryCountSum,
-      average: averageSum,
+      averageCPsRenamedSum: averageCPsRenamedSum,
+      averagePDfsRenamedSum: averagePDfsRenamedSum,
     }]);
 
     // Set the response headers to indicate that the response is a CSV file
