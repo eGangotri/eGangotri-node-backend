@@ -129,8 +129,6 @@ itemsUsheredRoute.get('/listForUploadCycle', async (req: Request, resp: Response
             const queuedRow = groupedQueuedItems[key];
             const uploadCycleRow: any = groupedUploadCycles[key];
 
-            console.log(`uploadCycle ${JSON.stringify(uploadCycleRow)}`);
-
             const groupedByArchiveProfiles = _.groupBy(usheredRow, function (item: any) {
                 return item.archiveProfile;
             });
