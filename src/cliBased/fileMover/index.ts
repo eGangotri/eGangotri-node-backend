@@ -2,12 +2,7 @@ const path = require('path');
 const fs = require('fs');
 import { getFolderInSrcRootForProfile } from "../../cliBased/utils";
 
-const filePath = "D:\\_playground\\_dhanuShriPlayground\\DONE_RENAMING\\15-Feb-(53)-DHANU";
-const profile = "KANGRI";
-
-const destPath = getFolderInSrcRootForProfile(profile);
-
-function moveFilesWithFolders(sourceDir: string, targetDir: string): void {
+export function moveFilesWithFolders(sourceDir: string, targetDir: string) {
     fs.readdir(sourceDir, { withFileTypes: true }, (err, files) => {
         if (err) {
             console.error(`Unable to read directory: ${err}`);
@@ -45,11 +40,11 @@ function moveFilesWithFolders(sourceDir: string, targetDir: string): void {
     });
 }
 
-function moveFilesAndFlatten(sourceDir: string, targetDir: string): void {
+export function moveFilesAndFlatten(sourceDir: string, targetDir: string) {
+    console.log(`sourceDir ${sourceDir} targetDir ${targetDir}`)
     fs.readdir(sourceDir, { withFileTypes: true }, (err, files) => {
         if (err) {
             console.error(`Unable to read directory: ${err}`);
-            return;
         }
 
         for (let file of files) {
@@ -60,9 +55,9 @@ function moveFilesAndFlatten(sourceDir: string, targetDir: string): void {
                 moveFilesAndFlatten(sourceFile, targetDir);
             } else {
                 // Check if file is a PDF
-                if (path.extname(file.name) !== '.pdf') {
-                    continue;
-                }
+                // if (path.extname(file.name) !== '.pdf') {
+                //     continue;
+                // }
 
                 const targetFile = path.join(targetDir, file.name);
 
@@ -85,6 +80,11 @@ function moveFilesAndFlatten(sourceDir: string, targetDir: string): void {
     });
 }
 
+
+// const filePath = "D:\\_playground\\_dhanuShriPlayground\\DONE_RENAMING\\15-Feb-(53)-DHANU";
+// const profile = "KANGRI";
+// const destPath = getFolderInSrcRootForProfile(profile)
 // Usage
-moveFilesAndFlatten(filePath,destPath);
+//moveFilesAndFlatten(filePath, destPath);
 //moveFilesWithFolders(filePath,destPath);
+//yarn run moveFilesToProfile
