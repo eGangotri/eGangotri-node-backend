@@ -5,13 +5,18 @@ import * as fs from 'fs';
 import { generateGoogleDriveListingExcel } from '../cliBased/googleapi/GoogleDriveApiReadAndExport';
 import { getFolderInSrcRootForProfile } from '../cliBased/utils';
 import { moveFileSrcToDest } from '../services/yarnService';
+import { link } from 'pdfkit';
+import { resetDownloadCounters } from '../cliBased/pdf/utils';
 export const launchYarnRoute = express.Router();
 
 launchYarnRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
     try {
         const googleDriveLink = req?.body?.googleDriveLink;
         const profile = req?.body?.profile;
-        console.log(`:googleDriveLink ${googleDriveLink} profile ${profile}`)
+        console.log(`:downloadFromGoogleDrive:
+        googleDriveLink:
+         ${googleDriveLink?.split(",").map((link: string) => link + "\n ")} 
+        profile ${profile}`)
         if (!googleDriveLink || !profile) {
             resp.status(300).send({
                 response: {
@@ -21,14 +26,10 @@ launchYarnRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => 
             });
         }
         const results = [];
-        if (googleDriveLink.includes(",")) {
-            const links = googleDriveLink.split(",");
-            const promises = links.map(link => downloadPdfFromGoogleDriveToProfile(link.trim(), profile));
-            const allResults = await Promise.all(promises);
-            results.push(...allResults);
-        }
-        else {
-            const res = await downloadPdfFromGoogleDriveToProfile(googleDriveLink, profile);
+        const links = googleDriveLink.includes(",") ? googleDriveLink.split(",").map((link: string) => link.trim()) : [googleDriveLink.trim()];
+        resetDownloadCounters();
+        for (const [index, link] of links.entries()) {
+            const res = await downloadPdfFromGoogleDriveToProfile(link, profile);
             results.push(res);
         }
         resp.status(200).send({
