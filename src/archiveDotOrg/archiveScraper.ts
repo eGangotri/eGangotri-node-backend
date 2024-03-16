@@ -3,33 +3,36 @@ import { utils, writeFile } from 'xlsx';
 import os from 'os';
 
 export const ARCHIVE_EXCEL_PATH = `${os.homedir()}\\Downloads`;
+const ARCHIVE_DOT_ORG = "https://archive.org";
 interface LinkData {
   link: string;
   title: string;
+  acct?: string;
 }
 
 const extractLinkData = async (page: Page): Promise<LinkData[]> => {
-  return page.$$eval('a', (links) => {
-    return links
-      .map((link) => {
-        const ttlElement = link.querySelector('.ttl');
-        const textContent = ttlElement?.textContent?.trim() || ''
-        if (textContent && textContent.length > 0) {
-          return {
-            link: link.href,
-            title: textContent
-          };
-        }
-      })
-      .filter(Boolean) as LinkData[];
-  });
+  // >>> is piercing of ShadowRoot
+  const hrefs = await page.$$eval(
+    ">>> #container a[href]",
+    els => els.map(e => {
+      return {
+        link: e.getAttribute("href"),
+        title: e.getAttribute("aria-label"),
+      }
+    })
+  );
+
+  console.log(`hrefs ${JSON.stringify(hrefs)}`);
+  return hrefs
+
 }
 
 async function scrapeLinks(url: string): Promise<LinkData[]> {
   const browser = await puppeteer.launch({ headless: "new" });
   const page = await browser.newPage();
-  page.setDefaultNavigationTimeout(0);
-  await page.goto(url);
+  await page.goto(url, {
+    waitUntil: "networkidle0"
+  });
 
   const links = await extractLinkData(page);
   await browser.close();
@@ -44,25 +47,45 @@ const archiveAcctName = () => {
 }
 
 async function setArchiveItemCountAndScrollablePageCount() {
-  const browser = await puppeteer.launch({ headless: "new" });
-  const page = await browser.newPage();
-  page.setDefaultNavigationTimeout(0);
+  try {
+    const browser = await puppeteer.launch({
+      headless: "new"
+    });
 
-  await page.goto(MAIN_URL);
-  console.log(`MAIN_URL page.goto ${MAIN_URL}`);
+    const page = await browser.newPage();
 
-  const resCountDivVal = await page.$eval('.results_count', element => element.textContent);
-  archiveItemCount = parseInt(resCountDivVal?.trim().split(/\s.*/g)[0].replace(",", "")) || 0;
-  await browser.close();
-  console.log(`resCount ${archiveItemCount}`);
-  setScrollablePageCount();
-  return archiveItemCount;
+    await page.goto(MAIN_URL, {
+      waitUntil: "networkidle0"
+    });
+
+    console.log(`MAIN_URL page.goto ${MAIN_URL}`);
+    //Shadow-root issue
+    //https://stackoverflow.com/questions/68525115/puppeteer-not-giving-accurate-html-code-for-page-with-shadow-roots
+    const resultsCount = await page.$$eval(
+      ">>> span#big-results-count",
+      els => els.map(e => e.textContent.trim())
+    );
+
+    console.log(`resultsCount ${resultsCount}`);
+
+    archiveItemCount = (resultsCount && resultsCount.length > 0) ? (parseInt(resultsCount[0]?.trim().split(/\s.*/g)[0].replace(",", "")) || 0) : 0;
+    await browser.close();
+    console.log(`resCount ${archiveItemCount}`);
+    setScrollablePageCount();
+    return archiveItemCount;
+  }
+  catch (err) {
+    console.log(`Error in setArchiveItemCountAndScrollablePageCount ${err}`);
+    return 0;
+  }
+
 }
 
 async function generateExcel(links: LinkData[], excelFileName: string): Promise<string> {
-  const worksheet = utils.json_to_sheet(links.map(link => (
-    { 'Link': link.link, 'Title': link.title })),
-    { header: ["Link", "Title"] });
+  const _archiveAcctName = archiveAcctName();
+  const worksheet = utils.json_to_sheet(links.map((link, index) => (
+    { "Serial No.": index, 'Link': `${ARCHIVE_DOT_ORG}${link.link}`, 'Title': link.title, 'Acct': _archiveAcctName })),
+    { header: ["Serial No.", "Link", "Title", "Acct"] });
 
   const workbook = utils.book_new();
   utils.book_append_sheet(workbook, worksheet, "Links");
