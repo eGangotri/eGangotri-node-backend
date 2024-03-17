@@ -1,12 +1,13 @@
 import * as express from 'express';
 import { downloadPdfFromGoogleDriveToProfile } from '../cliBased/googleapi/GoogleDriveApiReadAndDownload';
-import { ARCHIVE_EXCEL_PATH, scrapeArchive } from '../archiveDotOrg/archiveScraper';
+import { scrapeArchiveOrgProfiles } from '../archiveDotOrg/archiveScraper';
 import * as fs from 'fs';
 import { generateGoogleDriveListingExcel } from '../cliBased/googleapi/GoogleDriveApiReadAndExport';
 import { getFolderInSrcRootForProfile } from '../cliBased/utils';
 import { moveFileSrcToDest } from '../services/yarnService';
 import { link } from 'pdfkit';
 import { resetDownloadCounters } from '../cliBased/pdf/utils';
+import { ARCHIVE_EXCEL_PATH } from '../archiveDotOrg/utils';
 export const launchYarnRoute = express.Router();
 
 launchYarnRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
@@ -46,22 +47,23 @@ launchYarnRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => 
 launchYarnRoute.post('/getArchiveListing', async (req: any, resp: any) => {
     try {
         const archiveLink = req?.body?.archiveLink;
-        const onlyLinks = req?.body?.onlyLinks;
+        const onlyLinks = req?.body?.onlyLinks || false;
 
         if (!archiveLink) {
             resp.status(300).send({
                 response: {
                     "status": "failed",
                     "success": false,
-                    "message": "Pls. provide archive Link are mandatory"
+                    "msg": "Pls. provide archive Link are mandatory"
                 }
             });
         }
-        scrapeArchive(archiveLink, onlyLinks);
+        const _resp = await scrapeArchiveOrgProfiles(archiveLink, onlyLinks);
         resp.status(200).send({
             response: {
-                msg: `Request Recieved. Excel file will be created in folder ${ARCHIVE_EXCEL_PATH} in few minutes`,
                 "success": true,
+                "msg": "Excels created",
+                _results: _resp
             }
         });
     }

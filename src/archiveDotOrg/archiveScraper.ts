@@ -1,151 +1,92 @@
-import puppeteer, { Page } from 'puppeteer';
-import { utils, writeFile } from 'xlsx';
-import os from 'os';
+import { LinkData } from './types';
+import { extractArchiveAcctName, extractEmail, extractLinkedData, generateExcel } from './utils';
 
-export const ARCHIVE_EXCEL_PATH = `${os.homedir()}\\Downloads`;
-const ARCHIVE_DOT_ORG = "https://archive.org";
-interface LinkData {
-  link: string;
-  title: string;
-  acct?: string;
-}
+const ARCHIVE_ORG_METADATA_API = 'https://archive.org/metadata';
 
-const extractLinkData = async (page: Page): Promise<LinkData[]> => {
-  // >>> is piercing of ShadowRoot
-  const hrefs = await page.$$eval(
-    ">>> #container a[href]",
-    els => els.map(e => {
-      return {
-        link: e.getAttribute("href"),
-        title: e.getAttribute("aria-label"),
-      }
-    })
-  );
+const callArchiveApi = async (username: string, pageIndex = 1) => {
+    const _url =
+        `https://archive.org/services/search/beta/page_production/?user_query=&page_type=account_details&page_target=@${username}&page_elements=[%22uploads%22]&hits_per_page=1000&page=${pageIndex}&sort=publicdate:desc&aggregations=false&client_url=https://archive.org/details/@${username}`;
 
-  console.log(`hrefs ${JSON.stringify(hrefs)}`);
-  return hrefs
+    const response = await fetch(_url);
+    const data = await response.json();
+    const _hits = data.response.body.page_elements.uploads.hits;
+    return _hits;
+};
 
-}
+const fetchUploads = async (username: string): Promise<LinkData[]> => {
+    username = username.startsWith('@') ? username.slice(1) : username;
+    let pageIndex = 1
+    let _hits = await callArchiveApi(username, pageIndex++);
 
-async function scrapeLinks(url: string): Promise<LinkData[]> {
-  const browser = await puppeteer.launch({ headless: "new" });
-  const page = await browser.newPage();
-  await page.goto(url, {
-    waitUntil: "networkidle0"
-  });
-
-  const links = await extractLinkData(page);
-  await browser.close();
-
-  return links;
-}
-
-const archiveAcctName = () => {
-  const parts = MAIN_URL.split('@');
-  const portionAfterAt = parts[1];
-  return portionAfterAt;
-}
-
-async function setArchiveItemCountAndScrollablePageCount() {
-  try {
-    const browser = await puppeteer.launch({
-      headless: "new"
-    });
-
-    const page = await browser.newPage();
-
-    await page.goto(MAIN_URL, {
-      waitUntil: "networkidle0"
-    });
-
-    console.log(`MAIN_URL page.goto ${MAIN_URL}`);
-    //Shadow-root issue
-    //https://stackoverflow.com/questions/68525115/puppeteer-not-giving-accurate-html-code-for-page-with-shadow-roots
-    const resultsCount = await page.$$eval(
-      ">>> span#big-results-count",
-      els => els.map(e => e.textContent.trim())
-    );
-
-    console.log(`resultsCount ${resultsCount}`);
-
-    archiveItemCount = (resultsCount && resultsCount.length > 0) ? (parseInt(resultsCount[0]?.trim().split(/\s.*/g)[0].replace(",", "")) || 0) : 0;
-    await browser.close();
-    console.log(`resCount ${archiveItemCount}`);
-    setScrollablePageCount();
-    return archiveItemCount;
-  }
-  catch (err) {
-    console.log(`Error in setArchiveItemCountAndScrollablePageCount ${err}`);
-    return 0;
-  }
-
-}
-
-async function generateExcel(links: LinkData[], excelFileName: string): Promise<string> {
-  const _archiveAcctName = archiveAcctName();
-  const worksheet = utils.json_to_sheet(links.map((link, index) => (
-    { "Serial No.": index, 'Link': `${ARCHIVE_DOT_ORG}${link.link}`, 'Title': link.title, 'Acct': _archiveAcctName })),
-    { header: ["Serial No.", "Link", "Title", "Acct"] });
-
-  const workbook = utils.book_new();
-  utils.book_append_sheet(workbook, worksheet, "Links");
-  const excelPath = `${ARCHIVE_EXCEL_PATH}\\${excelFileName}.xlsx`
-  console.log(`Writing to ${excelPath}`);
-  await writeFile(workbook, excelPath);
-  return excelPath;
-}
-
-export const scrapeArchive = async (archiveUrl: string, onlyLinks: boolean = false): Promise<any> => {
-  MAIN_URL = archiveUrl;
-  console.log(`MAIN_URL ${MAIN_URL}`);
-  console.log(`archiveUrl ${archiveUrl}`);
-  await setArchiveItemCountAndScrollablePageCount();
-
-  const links: LinkData[] = []
-  for (let i = 0; i < scrollablePageCount; i++) {
-    const _link = await scrapeLinks(`${MAIN_URL}?&sort=-publicdate&page=${i + 1}`);
-    links.push(..._link);
-  }
-
-  const excelFileName = `${archiveAcctName()}(${archiveItemCount})`;
-  if (onlyLinks) {
-    return {
-      archiveItemCount,
-      scrollablePageCount,
-      links,
-      excelFileName
+    const totalHits = _hits.total;
+    let totalHitsPickedCounter = _hits.total;
+    let _hitsHits = _hits.hits;
+    let email = '';
+    if (_hitsHits.length >= 0) {
+        email = await extractEmail(_hitsHits[0].fields.identifier);
     }
-  }
-  else {
-    const excelPath = `${ARCHIVE_EXCEL_PATH}\\${excelFileName}.xlsx`
 
-    //not using await so that the response is sent back immediately
-    await generateExcel(links, excelFileName);
-    return {
-      excelPath,
-      excelFileName,
-      archiveItemCount,
-      scrollablePageCount,
-      links
+    const _linkData: LinkData[] = [];
+    if (totalHitsPickedCounter > 0) {
+        _linkData.push(...extractLinkedData(_hitsHits, email));
     }
-  }
+    totalHitsPickedCounter = totalHitsPickedCounter - _hitsHits.length;
+    while (totalHitsPickedCounter > 0) {
+        _hits = await callArchiveApi(username, pageIndex++);
+        _hitsHits = _hits.hits;
+        if (_hitsHits.length > 0) {
+            _linkData.push(...extractLinkedData(_hitsHits, email));
+        }
+        totalHitsPickedCounter = totalHitsPickedCounter - _hitsHits.length;
+    }
+    return _linkData
+};
 
+export const scrapeArchiveOrgProfiles = async (archiveUrlsOrAcctNamesAsCSV: string, onlyLinks: boolean = false): Promise<any> => {
+    const archiveUrlsOrAcctNames = archiveUrlsOrAcctNamesAsCSV.includes(",") ? archiveUrlsOrAcctNamesAsCSV.split(",").map((link: string) => link.trim()) : [archiveUrlsOrAcctNamesAsCSV.trim()];
+
+    console.log(`archiveUrlsOrAcctNames ${archiveUrlsOrAcctNames} onlyLinks ${onlyLinks}`);
+    const _status = []
+
+    for (let i = 0; i < archiveUrlsOrAcctNames.length; i++) {
+        console.log(`Scraping Link # ${i}. ${archiveUrlsOrAcctNames[i]}`)
+        const _archiveAcctName = extractArchiveAcctName(archiveUrlsOrAcctNames[i]);
+        try {
+            const _linkData = await fetchUploads(_archiveAcctName);
+            //console.log(`_linkData ${JSON.stringify(_linkData)}`);
+            if (onlyLinks) {
+                _status.push({
+                    msg: {
+                        archiveAcctName: _archiveAcctName,
+                        archiveItemCount: _linkData.length,
+                        success: true,
+                        links: _linkData
+                    }
+                });
+            }
+            else {
+                const excelPath = await generateExcel(_linkData, _archiveAcctName);
+                _status.push({
+                    msg: {
+                        excelPath,
+                        success: true,
+                        archiveAcctName: _archiveAcctName,
+                        archiveItemCount: _linkData.length,
+                    }
+                });
+            }
+        }
+        catch (e) {
+            console.log(`Error in fetchUploads ${e}`);
+            _status.push({
+                msg: {
+                    success: false,
+                    archiveAcctName: _archiveAcctName,
+                    error: e.message,
+                }
+            });
+        }
+    }
+    console.log(`_status ${JSON.stringify(_status)}`)
+    return _status;
 }
-
-const setScrollablePageCount = () => {
-  scrollablePageCount = Math.ceil(archiveItemCount / 100);
-  console.log(`pageCount ${scrollablePageCount}`);
-  return scrollablePageCount;
-}
-
-
-let archiveItemCount = 0;
-let scrollablePageCount = 0;
-let MAIN_URL = "";
-
-// (async () => {
-//   scrapeArchive("https://archive.org/details/@drnaithani");
-// })();
-
-
-//yarn run scraper
