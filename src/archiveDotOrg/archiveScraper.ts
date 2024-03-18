@@ -1,4 +1,4 @@
-import { LinkData } from './types';
+import { ArchiveDataRetrievalStatus, LinkData } from './types';
 import { extractArchiveAcctName, extractEmail, extractLinkedData, generateExcel } from './utils';
 
 const ARCHIVE_ORG_METADATA_API = 'https://archive.org/metadata';
@@ -29,26 +29,26 @@ const fetchUploads = async (username: string): Promise<LinkData[]> => {
 
     const _linkData: LinkData[] = [];
     if (totalHitsPickedCounter > 0) {
-        _linkData.push(...extractLinkedData(_hitsHits, email));
+        _linkData.push(...(await extractLinkedData(_hitsHits, email)));
     }
     totalHitsPickedCounter = totalHitsPickedCounter - _hitsHits.length;
     while (totalHitsPickedCounter > 0) {
         _hits = await callArchiveApi(username, pageIndex++);
         _hitsHits = _hits.hits;
         if (_hitsHits.length > 0) {
-            _linkData.push(...extractLinkedData(_hitsHits, email));
+            _linkData.push(...(await extractLinkedData(_hitsHits, email)));
         }
         totalHitsPickedCounter = totalHitsPickedCounter - _hitsHits.length;
     }
     return _linkData
 };
 
-export const scrapeArchiveOrgProfiles = async (archiveUrlsOrAcctNamesAsCSV: string, onlyLinks: boolean = false): Promise<any> => {
-    const archiveUrlsOrAcctNames = archiveUrlsOrAcctNamesAsCSV.includes(",") ? archiveUrlsOrAcctNamesAsCSV.split(",").map((link: string) => link.trim().replace(/['"]/g,"")) : [archiveUrlsOrAcctNamesAsCSV.trim().replace(/['"]/g,"")];
-    
-    console.log(`archiveUrlsOrAcctNames ${archiveUrlsOrAcctNames} onlyLinks ${onlyLinks}`);
-    const _status = []
+export const scrapeArchiveOrgProfiles = async (archiveUrlsOrAcctNamesAsCSV: string,
+    onlyLinks: boolean = false): Promise<ArchiveDataRetrievalStatus[]> => {
+    const archiveUrlsOrAcctNames = archiveUrlsOrAcctNamesAsCSV.includes(",") ? archiveUrlsOrAcctNamesAsCSV.split(",").map((link: string) => link.trim().replace(/['"]/g, "")) : [archiveUrlsOrAcctNamesAsCSV.trim().replace(/['"]/g, "")];
 
+    console.log(`archiveUrlsOrAcctNames ${archiveUrlsOrAcctNames} onlyLinks ${onlyLinks}`);
+    const _status: ArchiveDataRetrievalStatus[] = []
     for (let i = 0; i < archiveUrlsOrAcctNames.length; i++) {
         console.log(`Scraping Link # ${i}. ${archiveUrlsOrAcctNames[i]}`)
         const _archiveAcctName = extractArchiveAcctName(archiveUrlsOrAcctNames[i]);
@@ -57,34 +57,28 @@ export const scrapeArchiveOrgProfiles = async (archiveUrlsOrAcctNamesAsCSV: stri
             console.log(`_linkData ${JSON.stringify(_linkData.length)}`);
             if (onlyLinks) {
                 _status.push({
-                    msg: {
-                        archiveAcctName: _archiveAcctName,
-                        archiveItemCount: _linkData.length,
-                        success: true,
-                        links: _linkData
-                    }
+                    archiveAcctName: _archiveAcctName,
+                    archiveItemCount: _linkData.length,
+                    success: true,
+                    links: _linkData
                 });
             }
             else {
                 const excelPath = await generateExcel(_linkData, _archiveAcctName);
                 _status.push({
-                    msg: {
-                        excelPath,
-                        success: true,
-                        archiveAcctName: _archiveAcctName,
-                        archiveItemCount: _linkData.length,
-                    }
+                    excelPath,
+                    success: true,
+                    archiveAcctName: _archiveAcctName,
+                    archiveItemCount: _linkData.length,
                 });
             }
         }
         catch (e) {
             console.log(`Error in fetchUploads ${e}`);
             _status.push({
-                msg: {
-                    success: false,
-                    archiveAcctName: _archiveAcctName,
-                    error: e.message,
-                }
+                success: false,
+                archiveAcctName: _archiveAcctName,
+                error: e.message,
             });
         }
     }

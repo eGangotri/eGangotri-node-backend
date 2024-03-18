@@ -1,6 +1,7 @@
 export interface LinkData {
     link: string;
     title: string;
+    originalTitle: string;
     uniqueIdentifier: string;
     allFilesDownloadUrl: string;
     pdfDownloadUrl: string;
@@ -13,6 +14,15 @@ export interface LinkData {
     item_size: number;
     item_size_formatted: string;
     email: string;
+}
+
+export interface ArchiveDataRetrievalStatus {
+    archiveAcctName: string,
+    archiveItemCount?: number,
+    success: boolean,
+    links?: LinkData[],
+    excelPath?: string,
+    error?: string,
 }
 
 export interface Hit {

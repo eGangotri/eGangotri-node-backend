@@ -8,6 +8,8 @@ import { moveFileSrcToDest } from '../services/yarnService';
 import { link } from 'pdfkit';
 import { resetDownloadCounters } from '../cliBased/pdf/utils';
 import { ARCHIVE_EXCEL_PATH } from '../archiveDotOrg/utils';
+import { ArchiveDataRetrievalStatus } from 'archiveDotOrg/types';
+import { downloadPdfFromArchiveToProfile } from 'archiveDotOrg/downloadUtil';
 export const launchYarnRoute = express.Router();
 
 launchYarnRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
@@ -54,7 +56,7 @@ launchYarnRoute.post('/getArchiveListing', async (req: any, resp: any) => {
                 response: {
                     "status": "failed",
                     "success": false,
-                    "msg": "Pls. provide archive Link are mandatory"
+                    "msg": "Pls. provide archive Links. At least one is mandatory"
                 }
             });
         }
@@ -73,6 +75,58 @@ launchYarnRoute.post('/getArchiveListing', async (req: any, resp: any) => {
         resp.status(400).send(err);
     }
 })
+
+
+launchYarnRoute.post('/downloadArchivePdfs', async (req: any, resp: any) => {
+    try {
+        const archiveLink = req?.body?.archiveLink;
+        const profile = req?.body?.profile;
+
+        if (!archiveLink || !profile) {
+            resp.status(300).send({
+                response: {
+                    "status": "failed",
+                    "success": false,
+                    "msg": "Pls. provide Archive Link(s) and profile. Both are mandatory"
+                }
+            });
+        }
+        const scrapedLinks: ArchiveDataRetrievalStatus[] = await scrapeArchiveOrgProfiles(archiveLink, true);
+        const results = []
+        resetDownloadCounters();
+        for (const entry of scrapedLinks) {
+            if (entry.success == false) {
+                results.push({
+                    "status": "failed",
+                    "error": entry.error,
+                    "success": false,
+                    msg: `Failed for ${entry.archiveAcctName}`,
+
+                });
+                continue;
+            }
+            const res = await downloadPdfFromArchiveToProfile(entry.links, profile);
+            results.push(res);
+        }
+        resp.status(200).send({
+            response: results
+        });
+
+        // resp.status(200).send({
+        //     response: {
+        //         "success": true,
+        //         "msg": "Excels created",
+        //         _results: _resp
+        //     }
+        // });
+    }
+
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})
+
 
 launchYarnRoute.post('/getGoogleDriveListing', async (req: any, resp: any) => {
     console.log(`getGoogleDriveListing ${JSON.stringify(req.body)}`)
