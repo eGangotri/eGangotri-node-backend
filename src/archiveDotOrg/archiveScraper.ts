@@ -29,14 +29,14 @@ const fetchUploads = async (username: string): Promise<LinkData[]> => {
 
     const _linkData: LinkData[] = [];
     if (totalHitsPickedCounter > 0) {
-        _linkData.push(...(await extractLinkedData(_hitsHits, email)));
+        _linkData.push(...(await extractLinkedData(_hitsHits, email, username)));
     }
     totalHitsPickedCounter = totalHitsPickedCounter - _hitsHits.length;
     while (totalHitsPickedCounter > 0) {
         _hits = await callArchiveApi(username, pageIndex++);
         _hitsHits = _hits.hits;
         if (_hitsHits.length > 0) {
-            _linkData.push(...(await extractLinkedData(_hitsHits, email)));
+            _linkData.push(...(await extractLinkedData(_hitsHits, email, username)));
         }
         totalHitsPickedCounter = totalHitsPickedCounter - _hitsHits.length;
     }
@@ -64,7 +64,7 @@ export const scrapeArchiveOrgProfiles = async (archiveUrlsOrAcctNamesAsCSV: stri
                 });
             }
             else {
-                const excelPath = await generateExcel(_linkData, _archiveAcctName);
+                const excelPath = await generateExcel(_linkData);
                 _status.push({
                     excelPath,
                     success: true,

@@ -14,7 +14,7 @@ export const getPdfDownloadLink = (driveId: string) => {
 export const downloadPdfFromGoogleDriveOriginal = async (driveLinkOrFolderId: string,
     pdfDumpFolder: string,
     fileName: string = "",
-    dataLength:number = 0) => {
+    dataLength: number = 0) => {
     console.log(`downloadPdfFromGoogleDrive ${driveLinkOrFolderId}`)
     const driveId = extractGoogleDriveId(driveLinkOrFolderId)
     const _pdfDlUrl = getPdfDownloadLink(driveId)
@@ -25,7 +25,7 @@ export const downloadPdfFromGoogleDriveOriginal = async (driveLinkOrFolderId: st
     try {
         await new Promise((resolve, reject) => {
             dl.on('end', () => {
-                const index = `(${DOWNLOAD_COMPLETED_COUNT+1}${dataLength>0?"/"+dataLength:""})`;
+                const index = `(${DOWNLOAD_COMPLETED_COUNT + 1}${dataLength > 0 ? "/" + dataLength : ""})`;
                 console.log(`${index}. Downloaded ${fileName}`);
                 incrementDownloadComplete();
                 _result = {
@@ -61,22 +61,22 @@ export const downloadPdfFromGoogleDriveOriginal = async (driveLinkOrFolderId: st
 export const downloadPdfFromGoogleDrive = async (driveLinkOrFolderId: string,
     pdfDumpFolder: string,
     fileName: string = "",
-    dataLength:number = 0) => {
+    dataLength: number = 0) => {
     console.log(`downloadPdfFromGoogleDrive ${driveLinkOrFolderId}`)
     const driveId = extractGoogleDriveId(driveLinkOrFolderId)
     const downloadUrl = getPdfDownloadLink(driveId)
     console.log(`downloading ${downloadUrl} to ${pdfDumpFolder}`)
 
-    const result = await downloadPdfFromUrl( pdfDumpFolder,driveId, downloadUrl, fileName, dataLength);
+    const result = await downloadPdfFromUrl(pdfDumpFolder, downloadUrl, driveId, fileName, dataLength);
     return result;
 }
 
 export const downloadPdfFromUrl = async (
     pdfDumpFolder: string,
     downloadUrl: string,
-    identifier:string,
+    identifier: string,
     fileName: string,
-    dataLength:number) => {
+    dataLength: number) => {
     console.log(`downloading ${downloadUrl} to ${pdfDumpFolder}`)
 
     const dl = new DownloaderHelper(downloadUrl, pdfDumpFolder);//
@@ -84,7 +84,7 @@ export const downloadPdfFromUrl = async (
     try {
         await new Promise((resolve, reject) => {
             dl.on('end', () => {
-                const index = `(${DOWNLOAD_COMPLETED_COUNT+1}${dataLength>0?"/"+dataLength:""})`;
+                const index = `(${DOWNLOAD_COMPLETED_COUNT + 1}${dataLength > 0 ? "/" + dataLength : ""})`;
                 console.log(`${index}. Downloaded ${fileName}`);
                 incrementDownloadComplete();
                 _result = {

@@ -19,9 +19,9 @@ const ARCHIVE_EXCEL_HEADER = ["Serial No.", "Link", "All Downloads Link Page", "
 "Subject","Date","Acct", "Identifier",
      "Type", "Media Type", "Size", "Size Formatted", "Email-User"];
 
-export const generateExcel = async (links: LinkData[], _archiveAcctName: string): Promise<string> => {
-    const excelFileName = `${_archiveAcctName}(${links.length})`;
-    const worksheet = utils.json_to_sheet(linkDataToExcelFormat(links, _archiveAcctName),
+export const generateExcel = async (links: LinkData[]): Promise<string> => {
+    const excelFileName = `${links[0].acct}(${links.length})`;
+    const worksheet = utils.json_to_sheet(linkDataToExcelFormat(links),
         { header: ARCHIVE_EXCEL_HEADER });
 
     const workbook = utils.book_new();
@@ -32,7 +32,7 @@ export const generateExcel = async (links: LinkData[], _archiveAcctName: string)
     return excelPath;
 }
 
-const linkDataToExcelFormat = (links: LinkData[], _archiveAcctName: string) => {
+const linkDataToExcelFormat = (links: LinkData[]) => {
     return links.map((link, index) => {
         let counter = 0;
         return {
@@ -45,7 +45,7 @@ const linkDataToExcelFormat = (links: LinkData[], _archiveAcctName: string) => {
             [ARCHIVE_EXCEL_HEADER[counter++]]: link.description,
             [ARCHIVE_EXCEL_HEADER[counter++]]: link.subject,
             [ARCHIVE_EXCEL_HEADER[counter++]]: link.publicdate,
-            [ARCHIVE_EXCEL_HEADER[counter++]]: _archiveAcctName,
+            [ARCHIVE_EXCEL_HEADER[counter++]]: link.acct,
             [ARCHIVE_EXCEL_HEADER[counter++]]: link.uniqueIdentifier,
             [ARCHIVE_EXCEL_HEADER[counter++]]: link.hit_type,
             [ARCHIVE_EXCEL_HEADER[counter++]]: link.mediatype,
@@ -73,7 +73,7 @@ export const extractPdfName = async (identifier: string) => {
     return ""
 }
 
-export const extractLinkedData = async (_hitsHits: Hit[], email: string) => {
+export const extractLinkedData = async (_hitsHits: Hit[], email: string, _archiveAcctName:string) => {
     const _linkData: LinkData[] = [];
     for (const hit of _hitsHits) {
         const identifier = hit.fields.identifier;
@@ -90,6 +90,7 @@ export const extractLinkedData = async (_hitsHits: Hit[], email: string) => {
                 pdfDownloadUrl: `${ARCHIVE_DOT_ORG_DWONLOAD_PREFIX}${identifier}/${pdfName}`,
                 publicdate: `${hit.fields.publicdate}`,
                 subject: hit.fields?.subject?.join(","),
+                acct: _archiveAcctName,
                 hit_type: hit.hit_type,
                 mediatype: hit.fields.mediatype,
                 item_size: hit.fields.item_size,
@@ -100,3 +101,4 @@ export const extractLinkedData = async (_hitsHits: Hit[], email: string) => {
     }
     return _linkData
 }
+

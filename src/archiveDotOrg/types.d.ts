@@ -6,7 +6,7 @@ export interface LinkData {
     allFilesDownloadUrl: string;
     pdfDownloadUrl: string;
     description: string;
-    acct?: string;
+    acct: string;
     publicdate?: string;
     subject?: string;
     hit_type: string;
