@@ -8,8 +8,8 @@ import { moveFileSrcToDest } from '../services/yarnService';
 import { link } from 'pdfkit';
 import { resetDownloadCounters } from '../cliBased/pdf/utils';
 import { ARCHIVE_EXCEL_PATH } from '../archiveDotOrg/utils';
-import { ArchiveDataRetrievalStatus } from 'archiveDotOrg/types';
-import { downloadPdfFromArchiveToProfile } from 'archiveDotOrg/downloadUtil';
+import { ArchiveDataRetrievalStatus } from '../archiveDotOrg/types';
+import { downloadPdfFromArchiveToProfile } from '../archiveDotOrg/downloadUtil';
 export const launchYarnRoute = express.Router();
 
 launchYarnRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
@@ -46,6 +46,37 @@ launchYarnRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => 
     }
 })
 
+
+launchYarnRoute.post('/getGoogleDriveListing', async (req: any, resp: any) => {
+    console.log(`getGoogleDriveListing ${JSON.stringify(req.body)}`)
+    try {
+        const googleDriveLink = req?.body?.googleDriveLink;
+        const folderName = req?.body?.folderName || "";
+        console.log(`getGoogleDriveListing googleDriveLink ${googleDriveLink} `)
+        if (!googleDriveLink) {
+            resp.status(300).send({
+                response: {
+                    "status": "failed",
+                    "success": false,
+                    "message": "Pls. provide google drive Link"
+                }
+            });
+        }
+        const listingResult = await generateGoogleDriveListingExcel(googleDriveLink, folderName);
+        resp.status(200).send({
+            response: {
+                ...listingResult
+            }
+        });
+    }
+
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})
+
+
 launchYarnRoute.post('/getArchiveListing', async (req: any, resp: any) => {
     try {
         const archiveLink = req?.body?.archiveLink;
@@ -76,14 +107,13 @@ launchYarnRoute.post('/getArchiveListing', async (req: any, resp: any) => {
     }
 })
 
-
 launchYarnRoute.post('/downloadArchivePdfs', async (req: any, resp: any) => {
     try {
         const archiveLink = req?.body?.archiveLink;
         const profile = req?.body?.profile;
 
         if (!archiveLink || !profile) {
-            resp.status(300).send({
+            return resp.status(300).send({
                 response: {
                     "status": "failed",
                     "success": false,
@@ -110,36 +140,6 @@ launchYarnRoute.post('/downloadArchivePdfs', async (req: any, resp: any) => {
         }
         resp.status(200).send({
             response: results
-        });
-    }
-
-    catch (err: any) {
-        console.log('Error', err);
-        resp.status(400).send(err);
-    }
-})
-
-
-launchYarnRoute.post('/getGoogleDriveListing', async (req: any, resp: any) => {
-    console.log(`getGoogleDriveListing ${JSON.stringify(req.body)}`)
-    try {
-        const googleDriveLink = req?.body?.googleDriveLink;
-        const folderName = req?.body?.folderName || "";
-        console.log(`getGoogleDriveListing googleDriveLink ${googleDriveLink} `)
-        if (!googleDriveLink) {
-            resp.status(300).send({
-                response: {
-                    "status": "failed",
-                    "success": false,
-                    "message": "Pls. provide google drive Link"
-                }
-            });
-        }
-        const listingResult = await generateGoogleDriveListingExcel(googleDriveLink, folderName);
-        resp.status(200).send({
-            response: {
-                ...listingResult
-            }
         });
     }
 

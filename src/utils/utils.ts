@@ -7,6 +7,16 @@ export const Utils = {};
 export const DD_MM_YYYY_FORMAT = 'DD-MMM-YYYY'
 export const DD_MM_YYYY_HH_MMFORMAT = 'DD-MMM-YYYY-HH-mm'
 
+
+export function isValidPath(path: string):boolean {
+  try {
+    fs.accessSync(path);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function findLongestFileName(directory: string, longestButLessThan: number = 300): string {
   let longestFileName = '';
 
