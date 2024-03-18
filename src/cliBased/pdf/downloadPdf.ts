@@ -79,7 +79,7 @@ export const downloadPdfFromUrl = async (
     dataLength: number) => {
     console.log(`downloading ${downloadUrl} to ${pdfDumpFolder}`)
 
-    const dl = new DownloaderHelper(downloadUrl, pdfDumpFolder);//
+    const dl = new DownloaderHelper(downloadUrl, pdfDumpFolder, { fileName: fileName });//
     let _result = {};
     try {
         await new Promise((resolve, reject) => {
