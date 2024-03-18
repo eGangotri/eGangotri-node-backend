@@ -47,7 +47,7 @@ async function getAllPdfs(driveLinkOrFolderID: string, folderName: string, pdfDu
 
 export const addHeaderFooterToPDFsInProfile = async (profile: string) => {
   const pdfDumpFolder = getFolderInSrcRootForProfile(profile)
-  console.log(`downloadPdfFromGoogleDriveToProfile:pdfDumpFolder ${pdfDumpFolder}`)
+  console.log(`addHeaderFooterToPDFsInProfile:pdfDumpFolder ${pdfDumpFolder}`)
   try {
     if (fs.existsSync(pdfDumpFolder)) {
       const _folders = (await getDirectoriesWithFullPath(pdfDumpFolder)).filter(
