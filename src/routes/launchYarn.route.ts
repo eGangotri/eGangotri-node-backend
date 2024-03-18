@@ -111,14 +111,6 @@ launchYarnRoute.post('/downloadArchivePdfs', async (req: any, resp: any) => {
         resp.status(200).send({
             response: results
         });
-
-        // resp.status(200).send({
-        //     response: {
-        //         "success": true,
-        //         "msg": "Excels created",
-        //         _results: _resp
-        //     }
-        // });
     }
 
     catch (err: any) {
