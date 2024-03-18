@@ -46,7 +46,6 @@ export const generateExcel = async (links: LinkData[], _archiveAcctName: string)
 export const extractEmail = async (identifier:string)=> {
     const response = await fetch(`https://archive.org/metadata/${identifier}`)
     const _email = await response.json();
-    console.log(`_email ${JSON.stringify(_email)}`);
     return _email.metadata.uploader
 }
 

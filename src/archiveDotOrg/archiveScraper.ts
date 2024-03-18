@@ -6,10 +6,11 @@ const ARCHIVE_ORG_METADATA_API = 'https://archive.org/metadata';
 const callArchiveApi = async (username: string, pageIndex = 1) => {
     const _url =
         `https://archive.org/services/search/beta/page_production/?user_query=&page_type=account_details&page_target=@${username}&page_elements=[%22uploads%22]&hits_per_page=1000&page=${pageIndex}&sort=publicdate:desc&aggregations=false&client_url=https://archive.org/details/@${username}`;
-
+    console.log(`_url ${_url}`);
     const response = await fetch(_url);
     const data = await response.json();
-    const _hits = data.response.body.page_elements.uploads.hits;
+
+    const _hits = data?.response?.body?.page_elements?.uploads?.hits || [];
     return _hits;
 };
 
@@ -19,10 +20,10 @@ const fetchUploads = async (username: string): Promise<LinkData[]> => {
     let _hits = await callArchiveApi(username, pageIndex++);
 
     const totalHits = _hits.total;
-    let totalHitsPickedCounter = _hits.total;
+    let totalHitsPickedCounter = _hits?.total;
     let _hitsHits = _hits.hits;
     let email = '';
-    if (_hitsHits.length >= 0) {
+    if (_hitsHits?.length >= 0) {
         email = await extractEmail(_hitsHits[0].fields.identifier);
     }
 
@@ -43,8 +44,8 @@ const fetchUploads = async (username: string): Promise<LinkData[]> => {
 };
 
 export const scrapeArchiveOrgProfiles = async (archiveUrlsOrAcctNamesAsCSV: string, onlyLinks: boolean = false): Promise<any> => {
-    const archiveUrlsOrAcctNames = archiveUrlsOrAcctNamesAsCSV.includes(",") ? archiveUrlsOrAcctNamesAsCSV.split(",").map((link: string) => link.trim()) : [archiveUrlsOrAcctNamesAsCSV.trim()];
-
+    const archiveUrlsOrAcctNames = archiveUrlsOrAcctNamesAsCSV.includes(",") ? archiveUrlsOrAcctNamesAsCSV.split(",").map((link: string) => link.trim().replace(/['"]/g,"")) : [archiveUrlsOrAcctNamesAsCSV.trim().replace(/['"]/g,"")];
+    
     console.log(`archiveUrlsOrAcctNames ${archiveUrlsOrAcctNames} onlyLinks ${onlyLinks}`);
     const _status = []
 
@@ -53,7 +54,7 @@ export const scrapeArchiveOrgProfiles = async (archiveUrlsOrAcctNamesAsCSV: stri
         const _archiveAcctName = extractArchiveAcctName(archiveUrlsOrAcctNames[i]);
         try {
             const _linkData = await fetchUploads(_archiveAcctName);
-            //console.log(`_linkData ${JSON.stringify(_linkData)}`);
+            console.log(`_linkData ${JSON.stringify(_linkData.length)}`);
             if (onlyLinks) {
                 _status.push({
                     msg: {
