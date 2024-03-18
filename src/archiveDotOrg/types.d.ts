@@ -1,6 +1,9 @@
 export interface LinkData {
     link: string;
     title: string;
+    uniqueIdentifier: string;
+    allFilesDownloadUrl: string;
+    pdfDownloadUrl: string;
     description: string;
     acct?: string;
     publicdate?: string;
