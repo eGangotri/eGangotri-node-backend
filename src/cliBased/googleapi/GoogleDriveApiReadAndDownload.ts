@@ -11,6 +11,7 @@ import { add, countBy } from 'lodash';
 import { DOWNLOAD_COMPLETED_COUNT, DOWNLOAD_FAILED_COUNT, resetDownloadCounters } from '../../cliBased/pdf/utils';
 import { getAllPdfsInFolders, getDirectoriesWithFullPath } from '../../imgToPdf/utils/Utils';
 import { addHeaderAndFooterToPDF } from '../../pdfHeaderFooter';
+import { isValidPath } from '../../utils/utils';
 
 // Create a new Google Drive instance
 const drive = getGoogleDriveInstance();
@@ -83,8 +84,9 @@ export const addHeaderFooterToPDFsInProfile = async (profile: string) => {
   }
 }
 
-export const downloadPdfFromGoogleDriveToProfile = async (driveLinkOrFolderId: string, profile: string) => {
-  const pdfDumpFolder = getFolderInSrcRootForProfile(profile)
+export const downloadPdfFromGoogleDriveToProfile = async (driveLinkOrFolderId: string, profileOrPath: string) => {
+  const pdfDumpFolder = isValidPath(profileOrPath) ? profileOrPath : getFolderInSrcRootForProfile(profileOrPath);
+
   console.log(`downloadPdfFromGoogleDriveToProfile:pdfDumpFolder ${pdfDumpFolder}`)
   try {
     if (fs.existsSync(pdfDumpFolder)) {
@@ -103,7 +105,7 @@ export const downloadPdfFromGoogleDriveToProfile = async (driveLinkOrFolderId: s
       console.log(`_resp : ${JSON.stringify(_resp)}`);
       return _resp;
     }
-    console.log(`No corresponding folder ${pdfDumpFolder} to profile  ${profile} exists`)
+    console.log(`No corresponding folder ${pdfDumpFolder} to profile  ${profileOrPath} exists`)
     return {
       "status": "failed"
     }

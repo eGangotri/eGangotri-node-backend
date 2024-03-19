@@ -55,7 +55,7 @@ const downloadArchivePdfs = async (linkData: LinkData[], pdfDumpFolder: string) 
     console.log(`_data: ${JSON.stringify(pdfLink)}}`);
     console.log(`pdfDumpFolder: ${pdfDumpFolder}`);
     return downloadPdfFromUrl(pdfDumpFolder,
-      pdfLink.pdfDownloadUrl, pdfLink.uniqueIdentifier, pdfLink.originalTitle + ".pdf", linkData.length)
+      pdfLink.pdfDownloadUrl, pdfLink.originalTitle + ".pdf", linkData.length)
   });
 
   const results = await Promise.all(promises);

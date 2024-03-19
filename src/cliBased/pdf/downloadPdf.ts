@@ -67,14 +67,13 @@ export const downloadPdfFromGoogleDrive = async (driveLinkOrFolderId: string,
     const downloadUrl = getPdfDownloadLink(driveId)
     console.log(`downloading ${downloadUrl} to ${pdfDumpFolder}`)
 
-    const result = await downloadPdfFromUrl(pdfDumpFolder, downloadUrl, driveId, fileName, dataLength);
+    const result = await downloadPdfFromUrl(pdfDumpFolder, downloadUrl, fileName, dataLength);
     return result;
 }
 
 export const downloadPdfFromUrl = async (
     pdfDumpFolder: string,
     downloadUrl: string,
-    identifier: string,
     fileName: string,
     dataLength: number) => {
     console.log(`downloading ${downloadUrl} to ${pdfDumpFolder}`)
@@ -88,7 +87,7 @@ export const downloadPdfFromUrl = async (
                 console.log(`${index}. Downloaded ${fileName}`);
                 incrementDownloadComplete();
                 _result = {
-                    "status": `${identifier} downloaded ${fileName} to ${pdfDumpFolder}`,
+                    "status": `Downloaded ${fileName} to ${pdfDumpFolder}`,
                     success: true
                 };
                 resolve(_result);
@@ -99,7 +98,7 @@ export const downloadPdfFromUrl = async (
                 console.log(`Download Failed ${fileName}`, err.message);
                 reject(_result = {
                     success: false,
-                    "error": `${identifier} failed download of ${fileName} to ${pdfDumpFolder} with ${err.message}`
+                    "error": `Failed download of ${fileName} to ${pdfDumpFolder} with ${err.message}`
                 });
             });
 
@@ -110,7 +109,7 @@ export const downloadPdfFromUrl = async (
         incrementDownloadFailed();
         _result = {
             success: false,
-            "error": `${identifier} failed download try/catch for ${fileName} to ${pdfDumpFolder} with ${err.message}`
+            "error": `Failed download try/catch for ${fileName} to ${pdfDumpFolder} with ${err.message}`
         };
     }
 
