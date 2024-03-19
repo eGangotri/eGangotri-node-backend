@@ -79,10 +79,10 @@ launchYarnRoute.post('/getGoogleDriveListing', async (req: any, resp: any) => {
 
 launchYarnRoute.post('/getArchiveListing', async (req: any, resp: any) => {
     try {
-        const archiveLink = req?.body?.archiveLink;
+        const archiveLinks = req?.body?.archiveLinks;
         const onlyLinks = req?.body?.onlyLinks || false;
-
-        if (!archiveLink) {
+        
+        if (!archiveLinks) {
             resp.status(300).send({
                 response: {
                     "status": "failed",
@@ -91,7 +91,7 @@ launchYarnRoute.post('/getArchiveListing', async (req: any, resp: any) => {
                 }
             });
         }
-        const _resp = await scrapeArchiveOrgProfiles(archiveLink, onlyLinks);
+        const _resp = await scrapeArchiveOrgProfiles(archiveLinks, onlyLinks);
         resp.status(200).send({
             response: {
                 "success": true,
