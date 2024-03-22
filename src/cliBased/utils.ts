@@ -51,8 +51,6 @@ export const getFolderInSrcRootForProfile = (profile: string) => {
 }
 
 export const getFolderInDestRootForProfile = (profile: string) => {
-    console.log(`LOCAL_FOLDERS_PROPERTIES_FILE_FOR_DEST(${profile}) ${JSON.stringify(LOCAL_FOLDERS_PROPERTIES_FILE_FOR_DEST)}`)
-    console.log(`LOCAL_FOLDERS_PROPERTIES_FILE_FOR_SRC ${JSON.stringify(LOCAL_FOLDERS_PROPERTIES_FILE_FOR_SRC)}`)
     if (profile && profile.length > 0 && LOCAL_FOLDERS_PROPERTIES_FILE_FOR_DEST.has(profile)) {
         return LOCAL_FOLDERS_PROPERTIES_FILE_FOR_DEST.get(profile)
     }

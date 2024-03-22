@@ -65,7 +65,7 @@ launchGradleRoute.get('/bookTitles', async (req: any, resp: any) => {
 
         const pdfDumpFolders = isValidPath(profileOrPaths[0]) ? profileOrPaths :
             profileOrPaths.map((_profileOrPath:string) => {
-                getFolderInDestRootForProfile(_profileOrPath)
+                return getFolderInDestRootForProfile(_profileOrPath)
             });
 
         console.log(`bookTitles ${pdfDumpFolders}`)
