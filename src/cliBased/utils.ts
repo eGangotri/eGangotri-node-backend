@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import path from 'path'
-import { LOCAL_FOLDERS_PROPERTIES_FILE, SRC_ROOT } from './constants';
+import { DEST_ROOT, LOCAL_FOLDERS_PROPERTIES_FILE, SRC_ROOT } from './constants';
 
 
 const getFoldersCorrespondingToProfile = (root: string): Map<string, string> => {
@@ -39,10 +39,22 @@ const getFoldersCorrespondingToProfile = (root: string): Map<string, string> => 
     return profileAndFolder;
 }
 export const LOCAL_FOLDERS_PROPERTIES_FILE_FOR_SRC: Map<string, string> = getFoldersCorrespondingToProfile(SRC_ROOT);
+export const LOCAL_FOLDERS_PROPERTIES_FILE_FOR_DEST: Map<string, string> = getFoldersCorrespondingToProfile(DEST_ROOT);
 
 export const getFolderInSrcRootForProfile = (profile: string) => {
     if (profile && profile.length > 0 && LOCAL_FOLDERS_PROPERTIES_FILE_FOR_SRC.has(profile)) {
         return LOCAL_FOLDERS_PROPERTIES_FILE_FOR_SRC.get(profile)
+    }
+    else {
+        ""
+    }
+}
+
+export const getFolderInDestRootForProfile = (profile: string) => {
+    console.log(`LOCAL_FOLDERS_PROPERTIES_FILE_FOR_DEST(${profile}) ${JSON.stringify(LOCAL_FOLDERS_PROPERTIES_FILE_FOR_DEST)}`)
+    console.log(`LOCAL_FOLDERS_PROPERTIES_FILE_FOR_SRC ${JSON.stringify(LOCAL_FOLDERS_PROPERTIES_FILE_FOR_SRC)}`)
+    if (profile && profile.length > 0 && LOCAL_FOLDERS_PROPERTIES_FILE_FOR_DEST.has(profile)) {
+        return LOCAL_FOLDERS_PROPERTIES_FILE_FOR_DEST.get(profile)
     }
     else {
         ""
