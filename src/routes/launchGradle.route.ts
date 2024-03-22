@@ -1,6 +1,8 @@
 import * as express from 'express';
-import { bookTitlesLaunchService, launchUploader, loginToArchive, makeGradleCall, moveToFreeze, reuploadMissed } from '../services/gradleLauncherService';
-import { ArchiveProfileAndCount, ArchiveProfileAndTitle } from 'mirror/types';
+import { launchUploader, loginToArchive, makeGradleCall, moveToFreeze, reuploadMissed } from '../services/gradleLauncherService';
+import { ArchiveProfileAndTitle } from '../mirror/types';
+import { isValidPath } from '../utils/utils';
+import { getFolderInDestRootForProfile } from '../cliBased/utils';
 
 export const launchGradleRoute = express.Router();
 
@@ -22,7 +24,7 @@ launchGradleRoute.get('/launchUploader', async (req: any, resp: any) => {
 
 launchGradleRoute.post('/reuploadMissed', async (req: any, resp: any) => {
     try {
-        const itemsForReupload:ArchiveProfileAndTitle[] = req.body.itemsForReupload
+        const itemsForReupload: ArchiveProfileAndTitle[] = req.body.itemsForReupload
         const res = await reuploadMissed(itemsForReupload)
         resp.status(200).send({
             response: res
@@ -57,9 +59,17 @@ launchGradleRoute.get('/bookTitles', async (req: any, resp: any) => {
     try {
         const argFirst = req.query.argFirst
         const pdfsOnly = req.query.pdfsOnly
-        
-        console.log(`bookTitles ${argFirst}`)
-        const _cmd = `gradle bookTitles --args="paths='${argFirst}', pdfsOnly=${pdfsOnly}"`
+
+        const profileOrPaths = argFirst.includes(",") ? argFirst.split(",").map((link: string) => link.trim()) : [argFirst.trim()];
+        console.log(`profileOrPaths ${profileOrPaths}`);
+
+        const pdfDumpFolders = isValidPath(profileOrPaths[0]) ? profileOrPaths :
+            profileOrPaths.map((_profileOrPath:string) => {
+                getFolderInDestRootForProfile(_profileOrPath)
+            });
+
+        console.log(`bookTitles ${pdfDumpFolders}`)
+        const _cmd = `gradle bookTitles --args="paths='${pdfDumpFolders.join(",")}', pdfsOnly=${pdfsOnly}"`
         console.log(`_cmd ${_cmd}`)
 
         const res = await makeGradleCall(_cmd)
