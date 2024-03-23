@@ -1,11 +1,12 @@
-export const _root = "D:\\_Treasures64\\_data\\pz"
-export const _pdfRoot = `${_root}`
-export const imgFile = `${_root}\\peerzada2.jpg`
+// export const _root = "D:\\_Treasures64\\_data\\pz"
+// export const _pdfRoot = `${_root}`
+// export const imgFile = `${_root}\\peerzada2.jpg`
 export const MAX_IMG_WIDTH = 700;
 /** This should be dynamic based on the Width/height */
 export const FONT_SIZE = 13
 
-const text = `This PDF you are browsing is in a series of several scanned documents containing 
+
+const text_Peerzada = `This PDF you are browsing is in a series of several scanned documents containing 
 the collection of Peerzada Muhammad Ashraf Sahib. b 1958<br>
 CV:<br>
 Residence: Towheed Abad Bemina, Srinagar<br>
@@ -25,7 +26,7 @@ Besides manuscripts, he also has many rare paintings (60+).<br>
 Collectors and Art/Literature  Lovers can contact him if they wish through his facebook page<br><br>
 Scanning and upload by eGangotri Foundation.<br>`
 
-const text3 = `This PDF you are browsing is in a series of several scanned documents containing 
+const text3_SGhulati = `This PDF you are browsing is in a series of several scanned documents containing 
  the personal colleciton of Shailendra Ghulati ji from Jammu.<br>
  CV:<br>
  Shailendra Gulhati who is a Shaivite author of 6 books, used to learn finer aspects of Kashmir Shaiv Darsana from 
@@ -37,7 +38,7 @@ https://www.facebook.com/shailgulhatishivapage<br>
 Whilst his books are available on Amazon.<br>
 Scanning and upload by eGangotri Foundation.<br>`
 
-const text2 = `This PDF you are browsing is in a series of several scanned documents containing 
+const text2_Mohtra = `This PDF you are browsing is in a series of several scanned documents containing 
 the collation of all research material of Prof. Kul Bhushan Mohtra ji.Mohtra ji is currently the State 
 Incharge Library and Documentation Department, J&K BJP Headquarters, Nanaji 
 Deshmukh Library..This material was gathered while he was working on his multiple books on J&K History.
@@ -55,5 +56,12 @@ A Compendium of Icons of Jammu & Kashmir & our Inspiration (English)<br>
 Jammu Kashmir ki Sangarsh Gatha (Hindi)<br><br><br>
 Scanning and upload by eGangotri Foundation.<br>`
 
-export const introText = text.replace(/\n/g, '').replace(/<br>/g, '\n\n');
+//export const introText = text.replace(/\n/g, '').replace(/<br>/g, '\n\n');
+export const formatIntroText = (_text: string) => _text.replace(/\n/g, '').replace(/<br>/g, '\n\n');
+export const profileVanityTextMap = {
+    "PZ": {
+        text: text_Peerzada,
+        imgFile: "peerzada2.jpg"
+    },
+}
 
