@@ -2,7 +2,7 @@ import { PDFDocument, PDFPage } from 'pdf-lib';
 import fs from 'fs';
 import * as _ from 'lodash';
 import * as path from 'path';
-import { createFolderIfNotExists, getAllPDFFiles } from 'imgToPdf/utils/FileUtils';
+import { createFolderIfNotExists, getAllPDFFiles } from '../../imgToPdf/utils/FileUtils';
 const fsPromises = require('fs').promises;
 
 const firstNPages = 10
