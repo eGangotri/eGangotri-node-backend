@@ -33,7 +33,7 @@ export const generateExcel = async (links: LinkData[],
 
     const workbook = utils.book_new();
     utils.book_append_sheet(workbook, worksheet, "Links");
-    const excelPath = `${ARCHIVE_EXCEL_PATH}\\${excelFileName}-${limitedFields?"":"-ltd"}.xlsx`
+    const excelPath = `${ARCHIVE_EXCEL_PATH}\\${excelFileName}${limitedFields?"-ltd":""}.xlsx`
     console.log(`Writing to ${excelPath}`);
     await writeFile(workbook, excelPath);
     return excelPath;
