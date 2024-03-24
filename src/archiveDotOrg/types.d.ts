@@ -1,10 +1,10 @@
 export interface LinkData {
     link: string;
-    title: string;
-    originalTitle: string;
+    titleArchive: string;
+    originalTitle?: string;
     uniqueIdentifier: string;
     allFilesDownloadUrl: string;
-    pdfDownloadUrl: string;
+    pdfDownloadUrl?: string;
     description: string;
     acct: string;
     publicdate?: string;
