@@ -1,8 +1,4 @@
-// export const _root = "D:\\_Treasures64\\_data\\pz"
-// export const _pdfRoot = `${_root}`
-// export const imgFile = `${_root}\\peerzada2.jpg`
 export const MAX_IMG_WIDTH = 700;
-/** This should be dynamic based on the Width/height */
 export const FONT_SIZE = 13
 
 
@@ -24,7 +20,7 @@ From Anantnag.<br>
 Peerzada Muhammad Ashraf Sahib has an ancestral Collection of Rare Books and Manuscripts in Sharada, Sanskrit, Persian, Arabic, Urdu, Kashmiri in his Home Town Srinagar.<br>
 Besides manuscripts, he also has many rare paintings (60+).<br>
 Collectors and Art/Literature  Lovers can contact him if they wish through his facebook page<br><br>
-Scanning and upload by eGangotri Foundation.<br>`
+Scanning and upload by eGangotri Trust.<br>`
 
 const text3_SGhulati = `This PDF you are browsing is in a series of several scanned documents containing 
  the personal colleciton of Shailendra Ghulati ji from Jammu.<br>
@@ -36,7 +32,7 @@ const text3_SGhulati = `This PDF you are browsing is in a series of several scan
  Shailendra is an online guide for Shaivism and may be reached on his Facebook page
 https://www.facebook.com/shailgulhatishivapage<br>
 Whilst his books are available on Amazon.<br>
-Scanning and upload by eGangotri Foundation.<br>`
+Scanning and upload by eGangotri Trust.<br>`
 
 const text2_Mohtra = `This PDF you are browsing is in a series of several scanned documents containing 
 the collation of all research material of Prof. Kul Bhushan Mohtra ji.Mohtra ji is currently the State 
@@ -47,16 +43,15 @@ All this rare material is now offered to the Community freely.<br>
 CV:<br>
 Kul Bhushan Mohtra was born on 9th Sep, 1957 in a village Amuwala in Kathua district.<br>
 Matric from BOSE, Jammu and Adeeb from AMU. Has been awarded Honorary Professor by School of Liberal Art & Languages, Shobhit University, Gangoh, Distt. Saharanpur, U.P.<br>
-Director General, Raja Ram Mohan Roy Library Foundation nominated him as his nominee in the Committee for purchasing of Books for UT Jammu & Kashmir. Incharge of Nanaji Deshmukh Library & Documentation Department at BJP state HQ in J&K.<br>
+Director General, Raja Ram Mohan Roy Library Trust nominated him as his nominee in the Committee for purchasing of Books for UT Jammu & Kashmir. Incharge of Nanaji Deshmukh Library & Documentation Department at BJP state HQ in J&K.<br>
 Actively engaged in political, social, charitable and religious activities. Always striving to serve the poor and downtrodden of the society.<br>
 Main works-<br>
 A saga of Sacrifices: Praja Parishad Movement in J&K<br>
 100 Documents: A reference book J&K, Mission Accomplished<br>
 A Compendium of Icons of Jammu & Kashmir & our Inspiration (English)<br>
 Jammu Kashmir ki Sangarsh Gatha (Hindi)<br><br><br>
-Scanning and upload by eGangotri Foundation.<br>`
+Scanning and upload by eGangotri Trust.<br>`
 
-//export const introText = text.replace(/\n/g, '').replace(/<br>/g, '\n\n');
 export const formatIntroText = (_text: string) => _text.replace(/\n/g, '').replace(/<br>/g, '\n\n');
 export const profileVanityTextMap = {
     "PZ": {
