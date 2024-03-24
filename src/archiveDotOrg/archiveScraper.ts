@@ -1,6 +1,6 @@
-import { ArchiveDataRetrievalStatus, LinkData } from './types';
+import { ArchiveDataRetrievalMsg, ArchiveDataRetrievalStatus, LinkData } from './types';
 import { extractArchiveAcctName, extractEmail, extractLinkedData, generateExcel } from './utils';
-
+import * as _ from 'lodash';
 const ARCHIVE_ORG_METADATA_API = 'https://archive.org/metadata';
 
 const callArchiveApi = async (username: string, pageIndex = 1) => {
@@ -31,20 +31,20 @@ const fetchUploads = async (username: string): Promise<LinkData[]> => {
     if (totalHitsPickedCounter > 0) {
         _linkData.push(...(await extractLinkedData(_hitsHits, email, username)));
     }
-    totalHitsPickedCounter = totalHitsPickedCounter - _hitsHits.length;
+    totalHitsPickedCounter = totalHitsPickedCounter - _hitsHits?.length;
     while (totalHitsPickedCounter > 0) {
         _hits = await callArchiveApi(username, pageIndex++);
         _hitsHits = _hits.hits;
-        if (_hitsHits.length > 0) {
+        if (_hitsHits?.length > 0) {
             _linkData.push(...(await extractLinkedData(_hitsHits, email, username)));
         }
-        totalHitsPickedCounter = totalHitsPickedCounter - _hitsHits.length;
+        totalHitsPickedCounter = totalHitsPickedCounter - _hitsHits?.length;
     }
     return _linkData
 };
 
 export const scrapeArchiveOrgProfiles = async (archiveUrlsOrAcctNamesAsCSV: string,
-    onlyLinks: boolean = false): Promise<ArchiveDataRetrievalStatus[]> => {
+    onlyLinks: boolean = false): Promise<ArchiveDataRetrievalMsg> => {
     const archiveUrlsOrAcctNames = archiveUrlsOrAcctNamesAsCSV.includes(",") ? archiveUrlsOrAcctNamesAsCSV.split(",").map((link: string) => link.trim().replace(/['"]/g, "")) : [archiveUrlsOrAcctNamesAsCSV.trim().replace(/['"]/g, "")];
 
     console.log(`archiveUrlsOrAcctNames ${archiveUrlsOrAcctNames} onlyLinks ${onlyLinks}`);
@@ -83,5 +83,11 @@ export const scrapeArchiveOrgProfiles = async (archiveUrlsOrAcctNamesAsCSV: stri
         }
     }
     console.log(`_status ${JSON.stringify(_status)}`)
-    return _status;
+    const numFailures = _status.filter(item => item.success === false).length;
+    return {
+        scrapedMetadata:_status,
+        numFailures,
+        numSuccess: _status.length - numFailures,
+        msg: `Success: ${_status.length - numFailures}, Failures: ${numFailures}`
+    };
 }

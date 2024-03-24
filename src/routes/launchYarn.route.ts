@@ -7,7 +7,7 @@ import { getFolderInSrcRootForProfile } from '../cliBased/utils';
 import { moveFileSrcToDest } from '../services/yarnService';
 import { resetDownloadCounters } from '../cliBased/pdf/utils';
 import { ARCHIVE_EXCEL_PATH } from '../archiveDotOrg/utils';
-import { ArchiveDataRetrievalStatus } from '../archiveDotOrg/types';
+import { ArchiveDataRetrievalMsg, ArchiveDataRetrievalStatus } from '../archiveDotOrg/types';
 import { downloadPdfFromArchiveToProfile } from '../archiveDotOrg/downloadUtil';
 import { vanitizePdfForProfile } from '../vanityService/VanityPdf';
 import { isValidPath } from '../utils/utils';
@@ -122,7 +122,9 @@ launchYarnRoute.post('/downloadArchivePdfs', async (req: any, resp: any) => {
                 }
             });
         }
-        const scrapedLinks: ArchiveDataRetrievalStatus[] = await scrapeArchiveOrgProfiles(archiveLink, true);
+        const _archiveScrappedData:ArchiveDataRetrievalMsg = await scrapeArchiveOrgProfiles(archiveLink, true);
+        
+        const scrapedLinks: ArchiveDataRetrievalStatus[] = _archiveScrappedData.scrapedMetadata
         const results = []
         resetDownloadCounters();
         for (const entry of scrapedLinks) {
