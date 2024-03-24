@@ -33,41 +33,11 @@ export const removeExcept = async (folder: any, except: Array<string>) => {
 }
 
 
-/**
- * export async function getAllPDFFiles(directoryPath: string, withLogs: boolean = false): Promise<FileStats[]> {
-    let pdfFiles: FileStats[] = [];
-
-    // Read all items in the directory
-    const items = fs.readdirSync(directoryPath);
-
-    for (const item of items) {
-        const itemPath = path.join(directoryPath, item);
-        const stat = fs.statSync(itemPath);
-        if (stat.isDirectory()) {
-            // Recursively call the function for subdirectories
-            pdfFiles = pdfFiles.concat(await getAllPDFFiles(itemPath, withLogs));
-        } else if (path.extname(itemPath).toLowerCase() === '.pdf') {
-            const _path = path.parse(itemPath);
-            pdfFiles.push({
-                rowCounter: ++ROW_COUNTER[1],
-                absPath: itemPath,
-                folder: _path.dir,
-                fileName: _path.base
-            })
-            if (withLogs) {
-                console.log(`${ROW_COUNTER[0]}/${ROW_COUNTER[1]}). ${JSON.stringify(ellipsis(_path.base, 40))}`);
-            }
-        }
-    }
-    return pdfFiles;
-}
-
- */
-
 export async function getAllPDFFiles(directoryPath: string, withLogs: boolean = false): Promise<FileStats[]> {
     return await getAllFileStats(directoryPath, PDF_EXT, true, withLogs);
 }
 
+//expensive operation
 export async function getAllPDFFilesWithMedata(directoryPath: string, withLogs: boolean = false): Promise<FileStats[]> {
     return await getAllFileStats(directoryPath, PDF_EXT, true, withLogs, true);
 }
@@ -165,44 +135,7 @@ export async function getAllFileStatsWithMetadata(directoryPath: string,
         ignoreFolders,
         withLogs, true)
 }
-/*
-export async function getAllPDFFilesWithMedata(directoryPath: string): Promise<FileStats[]> {
-    let pdfFiles: FileStats[] = [];
 
-    // Read all items in the directory
-    const items = fs.readdirSync(directoryPath);
-
-    for (const item of items) {
-        const itemPath = path.join(directoryPath, item);
-        const stat = fs.statSync(itemPath);
-        const ext = path.extname(itemPath);
-
-        if (stat.isDirectory()) {
-            // Recursively call the function for subdirectories
-            pdfFiles = pdfFiles.concat(await getAllPDFFilesWithMedata(itemPath));
-        } else if (ext.toLowerCase() === PDF_EXT) {
-
-            // Add PDF files to the array
-            const _path = path.parse(itemPath);
-            const rawSize = getFilzeSize(itemPath);
-            const pageCount = await getPdfPageCountUsingPdfLib(itemPath)
-            const pdfStats = {
-                rowCounter: ++ROW_COUNTER[1],
-                pageCount,
-                rawSize,
-                size: Mirror.sizeInfo(rawSize),
-                absPath: itemPath,
-                folder: _path.dir,
-                fileName: _path.base,
-                ext: ext
-            }
-            console.log(`${ROW_COUNTER[0]}/${ROW_COUNTER[1]}). ${JSON.stringify(ellipsis(pdfStats.fileName, 40))} ${pageCount} pages ${Mirror.sizeInfo(rawSize)}`);
-            pdfFiles.push(pdfStats)
-        }
-    }
-    return pdfFiles;
-}
-*/
 export function createFolderIfNotExists(folderPath: string): void {
     if (!fs.existsSync(folderPath)) {
         fs.mkdirSync(folderPath, { recursive: true });

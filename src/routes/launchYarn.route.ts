@@ -10,6 +10,7 @@ import { ARCHIVE_EXCEL_PATH } from '../archiveDotOrg/utils';
 import { ArchiveDataRetrievalStatus } from '../archiveDotOrg/types';
 import { downloadPdfFromArchiveToProfile } from '../archiveDotOrg/downloadUtil';
 import { vanitizePdfForProfile } from '../vanityService/VanityPdf';
+import { isValidPath } from '../utils/utils';
 export const launchYarnRoute = express.Router();
 
 launchYarnRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
@@ -154,20 +155,19 @@ launchYarnRoute.post('/qaToDestFileMover', async (req: any, resp: any) => {
     try {
         const qaPath = req?.body?.qaPath;
         const dest = req?.body?.dest || "";
-        const profile = req?.body?.profile === "false" ? false : true;
         const flatten = req?.body?.flatten === "false" ? false : true;
 
-        console.log(`qaToDestFileMover qaPath ${qaPath} `)
+        console.log(`qaToDestFileMover qaPath ${qaPath} for folder(${dest})`)
         if (!qaPath && !dest) {
             resp.status(300).send({
                 response: {
                     "status": "failed",
                     "success": false,
-                    "message": "Pls. provide google drive Link"
+                    "message": "Pls. provide Src and Dest Items"
                 }
             });
         }
-        const listingResult = await moveFileSrcToDest(qaPath, dest, profile, flatten);
+        const listingResult = await moveFileSrcToDest(qaPath, dest, flatten);
         resp.status(200).send({
             response: {
                 ...listingResult
