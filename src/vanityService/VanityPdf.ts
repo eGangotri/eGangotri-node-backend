@@ -110,7 +110,7 @@ const mergeVanityPdf = async (_introPdf: string, origPdf: string, finalDumpGroun
 
     await mkDirIfDoesntExists(finalDumpGround);
 
-    const pdfsForMerge = [_introPdf, origPdf].map((_pdf) => {
+    const pdfsForMerge = [origPdf, _introPdf].map((_pdf) => {
         console.log(`_pdf: ${_pdf}`)
         return fs.readFileSync(_pdf)
     });
@@ -121,7 +121,6 @@ const mergeVanityPdf = async (_introPdf: string, origPdf: string, finalDumpGroun
 }
 
 export const vanitizePdfForProfile = async (profile: string) => {
-
     try {
         const folder = getFolderInSrcRootForProfile(profile);
         const _pdfs = await getAllPdfsInFolders([folder]);
@@ -152,19 +151,4 @@ export const vanitizePdfForProfile = async (profile: string) => {
         }
     }
 }
-  //  (async () => {
-        //Change values in vanityConstants.ts and then run yarn run vanity 
-
-        // const _pdfs = await getAllPdfsInFolders([_pdfRoot]);
-        // const intros: string[] = []
-        // for (let i = 0; i < _pdfs.length; i++) {
-        //     console.log(`creating vanity for: ${_pdfs[i]}`, await PdfLibUtils.getPdfFirstPageDimensionsUsingPdfLib(_pdfs[i]))
-        //     intros.push(await createIntroPageWithImage(imgFile, _pdfs[i], introText));
-        // }
-        // for (let i = 0; i < _pdfs.length; i++) {
-        //     console.log(`creating vanity for: ${_pdfs[i]}`, await PdfLibUtils.getPdfFirstPageDimensionsUsingPdfLib(_pdfs[i]))
-        //     await mergeVanityPdf(intros[i], _pdfs[i], `${_pdfRoot}\\${_vanitized}`)
-        //     moveOrignalToSeparateFolder(_pdfs[i], `${_pdfRoot}\\${_orig_dont}`)
-        // }
-    //})();
 //yarn run vanity 
