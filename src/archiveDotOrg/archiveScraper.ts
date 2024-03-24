@@ -14,7 +14,7 @@ const callArchiveApi = async (username: string, pageIndex = 1) => {
     return _hits;
 };
 
-const fetchUploads = async (username: string): Promise<LinkData[]> => {
+const fetchUploads = async (username: string, limitedFields = false): Promise<LinkData[]> => {
     username = username.startsWith('@') ? username.slice(1) : username;
     let pageIndex = 1
     let _hits = await callArchiveApi(username, pageIndex++);
@@ -29,14 +29,14 @@ const fetchUploads = async (username: string): Promise<LinkData[]> => {
 
     const _linkData: LinkData[] = [];
     if (totalHitsPickedCounter > 0) {
-        _linkData.push(...(await extractLinkedData(_hitsHits, email, username)));
+        _linkData.push(...(await extractLinkedData(_hitsHits, email, username, limitedFields)));
     }
     totalHitsPickedCounter = totalHitsPickedCounter - _hitsHits?.length;
     while (totalHitsPickedCounter > 0) {
         _hits = await callArchiveApi(username, pageIndex++);
         _hitsHits = _hits.hits;
         if (_hitsHits?.length > 0) {
-            _linkData.push(...(await extractLinkedData(_hitsHits, email, username)));
+            _linkData.push(...(await extractLinkedData(_hitsHits, email, username, limitedFields)));
         }
         totalHitsPickedCounter = totalHitsPickedCounter - _hitsHits?.length;
     }
@@ -44,7 +44,8 @@ const fetchUploads = async (username: string): Promise<LinkData[]> => {
 };
 
 export const scrapeArchiveOrgProfiles = async (archiveUrlsOrAcctNamesAsCSV: string,
-    onlyLinks: boolean = false): Promise<ArchiveDataRetrievalMsg> => {
+    onlyLinks: boolean = false,
+    limitedFields: boolean = false): Promise<ArchiveDataRetrievalMsg> => {
     const archiveUrlsOrAcctNames = archiveUrlsOrAcctNamesAsCSV.includes(",") ? archiveUrlsOrAcctNamesAsCSV.split(",").map((link: string) => link.trim().replace(/['"]/g, "")) : [archiveUrlsOrAcctNamesAsCSV.trim().replace(/['"]/g, "")];
 
     console.log(`archiveUrlsOrAcctNames ${archiveUrlsOrAcctNames} onlyLinks ${onlyLinks}`);
@@ -53,7 +54,7 @@ export const scrapeArchiveOrgProfiles = async (archiveUrlsOrAcctNamesAsCSV: stri
         console.log(`Scraping Link # ${i}. ${archiveUrlsOrAcctNames[i]}`)
         const _archiveAcctName = extractArchiveAcctName(archiveUrlsOrAcctNames[i]);
         try {
-            const _linkData = await fetchUploads(_archiveAcctName);
+            const _linkData = await fetchUploads(_archiveAcctName, limitedFields);
             console.log(`_linkData ${JSON.stringify(_linkData.length)}`);
             if (onlyLinks) {
                 _status.push({
@@ -64,7 +65,7 @@ export const scrapeArchiveOrgProfiles = async (archiveUrlsOrAcctNamesAsCSV: stri
                 });
             }
             else {
-                const excelPath = await generateExcel(_linkData);
+                const excelPath = await generateExcel(_linkData,limitedFields);
                 _status.push({
                     excelPath,
                     success: true,
@@ -85,9 +86,14 @@ export const scrapeArchiveOrgProfiles = async (archiveUrlsOrAcctNamesAsCSV: stri
     console.log(`_status ${JSON.stringify(_status)}`)
     const numFailures = _status.filter(item => item.success === false).length;
     return {
-        scrapedMetadata:_status,
+        msg: `
+              Total: ${_status.length}
+              Success: ${_status.length - numFailures},
+              Failures: ${numFailures}
+              ${limitedFields === true ? "Limited Fields Only" : "No Restrictions. All fields were generated"}
+              `,
+        scrapedMetadata: _status,
         numFailures,
         numSuccess: _status.length - numFailures,
-        msg: `Success: ${_status.length - numFailures}, Failures: ${numFailures}`
     };
 }

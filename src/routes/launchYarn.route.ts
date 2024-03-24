@@ -81,7 +81,13 @@ launchYarnRoute.post('/getGoogleDriveListing', async (req: any, resp: any) => {
 launchYarnRoute.post('/getArchiveListing', async (req: any, resp: any) => {
     try {
         const archiveLinks = req?.body?.archiveLinks;
-        const onlyLinks = req?.body?.onlyLinks || false;
+        const onlyLinks = (req?.body?.onlyLinks == true) || false;
+        const limitedFields = (req?.body?.limitedFields == true) || false;
+        console.log(`getArchiveListing archiveLinks ${archiveLinks} 
+        onlyLinks ${onlyLinks}
+        req?.body?.limitedFields ${req?.body?.limitedFields}
+        req?.body?.limitedFields ${typeof req?.body?.limitedFields}
+         limitedFields ${limitedFields}`)
 
         if (!archiveLinks) {
             resp.status(300).send({
@@ -92,7 +98,7 @@ launchYarnRoute.post('/getArchiveListing', async (req: any, resp: any) => {
                 }
             });
         }
-        const _resp = await scrapeArchiveOrgProfiles(archiveLinks, onlyLinks);
+        const _resp = await scrapeArchiveOrgProfiles(archiveLinks, onlyLinks, limitedFields);
         resp.status(200).send({
             response: {
                 "success": true,
@@ -122,8 +128,8 @@ launchYarnRoute.post('/downloadArchivePdfs', async (req: any, resp: any) => {
                 }
             });
         }
-        const _archiveScrappedData:ArchiveDataRetrievalMsg = await scrapeArchiveOrgProfiles(archiveLink, true);
-        
+        const _archiveScrappedData: ArchiveDataRetrievalMsg = await scrapeArchiveOrgProfiles(archiveLink, true);
+
         const scrapedLinks: ArchiveDataRetrievalStatus[] = _archiveScrappedData.scrapedMetadata
         const results = []
         resetDownloadCounters();
