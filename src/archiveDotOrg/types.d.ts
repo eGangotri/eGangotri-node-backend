@@ -16,6 +16,12 @@ export interface LinkData {
     email: string;
 }
 
+export interface ArchiveDataRetrievalMsg {
+    scrapedMetadata:ArchiveDataRetrievalStatus[];
+    numFailures:number;
+    numSuccess:number;
+    msg:string;
+}
 export interface ArchiveDataRetrievalStatus {
     archiveAcctName: string,
     archiveItemCount?: number,
