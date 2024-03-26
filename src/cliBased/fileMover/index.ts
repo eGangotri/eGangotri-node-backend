@@ -21,7 +21,12 @@ export async function moveFilesAndFlatten(sourceDir: string, targetDir: string) 
     const filesMoved = [];
     const fileCollision = [];
     const allSrcPdfs: FileStats[] = await getAllPDFFiles(sourceDir);
-
+    if (allSrcPdfs.length === 0) {
+        return {
+            success: false,
+            msg: `Nothing-To-Move.No files found in source dir ${sourceDir}`
+        };
+    }
     //check if any is in use
     const filesInUse = allSrcPdfs.filter(file => isFileInUse(file.absPath));
     if (filesInUse.length > 0) {
