@@ -4,13 +4,14 @@ import { scrapeArchiveOrgProfiles } from '../archiveDotOrg/archiveScraper';
 import * as fs from 'fs';
 import { generateGoogleDriveListingExcel } from '../cliBased/googleapi/GoogleDriveApiReadAndExport';
 import { getFolderInSrcRootForProfile } from '../cliBased/utils';
-import { moveFileSrcToDest } from '../services/yarnService';
+import { moveFileSrcToDest, moveProfilesToFreeze } from '../services/yarnService';
 import { resetDownloadCounters } from '../cliBased/pdf/utils';
 import { ARCHIVE_EXCEL_PATH } from '../archiveDotOrg/utils';
 import { ArchiveDataRetrievalMsg, ArchiveDataRetrievalStatus } from '../archiveDotOrg/types';
 import { downloadPdfFromArchiveToProfile } from '../archiveDotOrg/downloadUtil';
 import { vanitizePdfForProfile } from '../vanityService/VanityPdf';
 import { isValidPath } from '../utils/utils';
+import { moveToFreeze } from 'services/gradleLauncherService';
 export const launchYarnRoute = express.Router();
 
 launchYarnRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
@@ -188,6 +189,33 @@ launchYarnRoute.post('/qaToDestFileMover', async (req: any, resp: any) => {
         resp.status(400).send(err);
     }
 })
+
+launchYarnRoute.post('/yarnMoveProfilesToFreeze', async (req: any, resp: any) => {
+    console.log(`moveProfilesToFreeze ${JSON.stringify(req.body)}`)
+    try {
+        const profileAsCSV = req?.body?.profileAsCSV;
+        const flatten = req?.body?.flatten === "false" ? false : true;
+
+        console.log(`moveProfilesToFreeze profilesAsCSV ${profileAsCSV}`)
+        if (!profileAsCSV) {
+            resp.status(300).send({
+                response: {
+                    "status": "failed",
+                    "success": false,
+                    "message": "Pls. provide Profile"
+                }
+            });
+        }
+        const _response = await moveProfilesToFreeze(profileAsCSV, flatten);
+        resp.status(200).send(_response);
+    }
+
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})
+
 
 launchYarnRoute.post('/addHeaderFooter', async (req: any, resp: any) => {
     try {
