@@ -78,9 +78,16 @@ export async function moveFilesAndFlatten(sourceDir: string, targetDir: string) 
     }
     const msg = `All files moved from Source dir ${sourceDir}(${_count})  to target dir ${targetDir}`
     console.log(msg);
+    const allSrcPdfsAfter: FileStats[] = await getAllPDFFiles(sourceDir);
+    const allDestPdfsAfter: FileStats[] = await getAllPDFFiles(targetDir);
+
     return {
+        success: (allSrcPdfsAfter?.length === 0 && ((allDestPdfsAfter?.length - allDestPdfs?.length) === _count)),
         msg,
-        filesMovedLength: filesMoved?.length,
+        srcPdfsBefore: _count,
+        srcPdfsAfter: allSrcPdfsAfter?.length,
+        destFilesBefore: allDestPdfs?.length,
+        destFilesAfter: allDestPdfsAfter?.length,
         filesMoved
     };
 }
