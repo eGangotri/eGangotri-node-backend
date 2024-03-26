@@ -196,7 +196,6 @@ launchYarnRoute.post('/yarnMoveProfilesToFreeze', async (req: any, resp: any) =>
         const profileAsCSV = req?.body?.profileAsCSV;
         const flatten = req?.body?.flatten === "false" ? false : true;
 
-        console.log(`moveProfilesToFreeze profilesAsCSV ${profileAsCSV}`)
         if (!profileAsCSV) {
             resp.status(300).send({
                 response: {

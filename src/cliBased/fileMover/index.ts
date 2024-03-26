@@ -2,8 +2,8 @@ import { isFileInUse } from "../../archiveDotOrg/fileUtils";
 import { getAllPDFFiles } from "../../imgToPdf/utils/FileUtils";
 import { FileStats } from "imgToPdf/utils/types";
 
-const path = require('path');
-const fs = require('fs');
+import * as path from 'path';
+import * as fs from 'fs';
 
 export async function moveFilesAndFlatten(sourceDir: string, targetDir: string) {
     //implement alogrithm
@@ -11,7 +11,7 @@ export async function moveFilesAndFlatten(sourceDir: string, targetDir: string) 
     // if yes then send msg otherwise continut
     if (sourceDir === targetDir) {
         return {
-            msg: `sourceDir and targetDir are same, cancelling move operation`,
+            msg: `sourceDir(${sourceDir}) and targetDir(${targetDir}) are same, cancelling move operation`,
             success: false
         };
     }
