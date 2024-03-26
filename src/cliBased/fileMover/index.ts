@@ -5,7 +5,7 @@ import { FileStats } from "imgToPdf/utils/types";
 import * as path from 'path';
 import * as fs from 'fs';
 
-export async function moveFilesAndFlatten(sourceDir: string, targetDir: string) {
+export async function moveFilesAndFlatten(sourceDir: string, targetDir: string, pdfOnly = true) {
     //implement alogrithm
     //(1) check if any file is open or any file is already present in source Dir
     // if yes then send msg otherwise continut
@@ -19,7 +19,6 @@ export async function moveFilesAndFlatten(sourceDir: string, targetDir: string) 
     let counter = 0;
     let dirs = [sourceDir];
     const filesMoved = [];
-    const fileCollision = [];
     const allSrcPdfs: FileStats[] = await getAllPDFFiles(sourceDir);
     if (allSrcPdfs.length === 0) {
         return {
@@ -27,32 +26,19 @@ export async function moveFilesAndFlatten(sourceDir: string, targetDir: string) 
             msg: `Nothing-To-Move.No files found in source dir ${sourceDir}`
         };
     }
-    //check if any is in use
-    const filesInUse = allSrcPdfs.filter(file => isFileInUse(file.absPath));
-    if (filesInUse.length > 0) {
-        console.error(`Following files are in use, cancelling move operation: ${filesInUse.map(file => file.fileName)}`);
-        return {
-            success: false,
-            msg: `Following files are in use, cancelling move operation`,
-            filesInUse: filesInUse.map(file => file.absPath)
-        };
-    }
 
+    const inUseCheck = checkIfAnyFileInUse(allSrcPdfs);
+    if (inUseCheck.success === false) {
+        return inUseCheck;
+    }
     //check for collisions
     const allDestPdfs: FileStats[] = await getAllPDFFiles(targetDir);
-    const allSrcFileNames = allSrcPdfs.map((x) => x.fileName);
-    const allDestFileNames = allDestPdfs.map((x) => x.fileName);
-    console.log(`allSrcFileNames ${allSrcFileNames}
-     allDestFileNames ${allDestFileNames}`)
-    const matchingFiles = allSrcFileNames.filter(file => allDestFileNames.includes(file));
-    if (matchingFiles.length > 0) {
-        console.error(`Following files are already present in target dir, cancelling move operation: ${matchingFiles}`);
-        return {
-            success: false,
-            msg: `Following files are already present in target dir, cancelling move operation`,
-            matchingFiles
-        };
+    const collisionCheck = checkCollision(allSrcPdfs, allDestPdfs);
+
+    if (collisionCheck.success === false) {
+        return collisionCheck;
     }
+    
     const _count = allSrcPdfs?.length;
     while (dirs.length > 0) {
         const currentDir = dirs.pop();
@@ -65,18 +51,10 @@ export async function moveFilesAndFlatten(sourceDir: string, targetDir: string) 
                 dirs.push(sourceFile);
             } else {
                 const targetFile = path.join(targetDir, file.name);
-
-                if (fs.existsSync(targetFile)) {
-                    console.error(`File collision detected, cancelling move operation: ${targetFile}`);
-                    fileCollision.push(file.name);
-                    return {
-                        filesMovedLength: filesMoved?.length,
-                        filesMoved,
-                        fileCollision
-                    };
+                if (!pdfOnly || (pdfOnly && file.name.endsWith('.pdf'))) {
+                    filesMoved.push(`${++counter}/${_count}). ${file.name}`);
+                    fs.renameSync(sourceFile, targetFile);
                 }
-                filesMoved.push(`${++counter}/${_count}). ${file.name}`);
-                fs.renameSync(sourceFile, targetFile);
                 //console.log(`Moved file: ${targetFile}`);
             }
         }
@@ -95,6 +73,35 @@ export async function moveFilesAndFlatten(sourceDir: string, targetDir: string) 
         destFilesAfter: allDestPdfsAfter?.length,
         filesMoved
     };
+}
+
+const checkIfAnyFileInUse = (allSrcPdfs: FileStats[]) => {
+    //check if any is in use
+    const filesInUse = allSrcPdfs.filter(file => isFileInUse(file.absPath));
+    if (filesInUse.length > 0) {
+        console.error(`Following files are in use, cancelling move operation: ${filesInUse.map(file => file.fileName)}`);
+        return {
+            success: false,
+            msg: `Following files are in use, cancelling move operation`,
+            filesInUse: filesInUse.map(file => file.absPath)
+        };
+    }
+}
+
+const checkCollision = (allSrcPdfs: FileStats[], allDestPdfs: FileStats[]) => {
+    const allSrcFileNames = allSrcPdfs.map((x) => x.fileName);
+    const allDestFileNames = allDestPdfs.map((x) => x.fileName);
+    console.log(`allSrcFileNames ${allSrcFileNames}
+     allDestFileNames ${allDestFileNames}`)
+    const matchingFiles = allSrcFileNames.filter(file => allDestFileNames.includes(file));
+    if (matchingFiles.length > 0) {
+        console.error(`Following files are already present in target dir, cancelling move operation: ${matchingFiles}`);
+        return {
+            success: false,
+            msg: `Following files are already present in target dir, cancelling move operation`,
+            matchingFiles
+        };
+    }
 }
 
 // const filePath = "D:\\_playground\\_dhanuShriPlayground\\DONE_RENAMING\\15-Feb-(53)-DHANU";
