@@ -1,12 +1,16 @@
 import { isValidPath } from "../utils/utils";
 import { moveFilesAndFlatten } from "../cliBased/fileMover";
 import { getFolderInDestRootForProfile, getFolderInSrcRootForProfile } from "../cliBased/utils";
+import * as fs from 'fs';
 
 export const moveProfilesToFreeze = async (profileAsCSV: string, flatten: boolean = true) => {
     const _response = []
     for (let profile of profileAsCSV.split(',')) {
         const srcPath = getFolderInSrcRootForProfile(profile.trim());
         const destPath = getFolderInDestRootForProfile(profile.trim());
+        if (!fs.existsSync(destPath)) {
+            fs.mkdirSync(destPath, { recursive: true });
+        }
         if (isValidPath(srcPath) && isValidPath(destPath)) {
             _response.push(await moveFileSrcToDest(srcPath, destPath, flatten));
         }
