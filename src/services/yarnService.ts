@@ -7,24 +7,32 @@ export const moveProfilesToFreeze = async (profileAsCSV: string, flatten: boolea
     for (let profile of profileAsCSV.split(',')) {
         const srcPath = getFolderInSrcRootForProfile(profile.trim());
         const destPath = getFolderInDestRootForProfile(profile.trim());
-        _response.push(await moveFileSrcToDest(srcPath, destPath, flatten));
+        if (isValidPath(srcPath) && isValidPath(destPath)) {
+            _response.push(await moveFileSrcToDest(srcPath, destPath, flatten));
+        }
+        else {
+            _response.push({
+                success: false,
+                msg: `Invalid srcPath ${srcPath} or destPath ${destPath} for PROFILE: ${profile}`
+            });
+        }
     }
     return {
         response: _response
     };
 }
 
-export const moveFileSrcToDest = async (qaPath: string, folderOrProfile: string, flatten: boolean = true) => {
-    const destPath = isValidPath(folderOrProfile) ? folderOrProfile : getFolderInSrcRootForProfile(folderOrProfile)
+export const moveFileSrcToDest = async (srcPath: string, destFolderOrProfile: string, flatten: boolean = true) => {
+    const destPath = isValidPath(destFolderOrProfile) ? destFolderOrProfile : getFolderInSrcRootForProfile(destFolderOrProfile)
     try {
-        console.log(`moveFileSrcToDest qaPath ${qaPath}/${folderOrProfile} destPath ${destPath}  flatten ${flatten}`)
+        console.log(`moveFileSrcToDest srcPath ${srcPath}/${destFolderOrProfile} destPath ${destPath}  flatten ${flatten}`)
         let _report
         if (flatten) {
-            _report = await moveFilesAndFlatten(qaPath, destPath);
+            _report = await moveFilesAndFlatten(srcPath, destPath);
         }
         else {
             //get this ready
-            _report = await moveFilesAndFlatten(qaPath, destPath);
+            _report = await moveFilesAndFlatten(srcPath, destPath);
         }
         return {
             ..._report
@@ -33,7 +41,7 @@ export const moveFileSrcToDest = async (qaPath: string, folderOrProfile: string,
     catch (err) {
         console.log('Error', err);
         return {
-            msg: `Error while moving files from ${qaPath} to ${destPath}`,
+            msg: `Error while moving files from ${srcPath} to ${destPath}`,
         };
     }
 }
