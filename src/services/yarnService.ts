@@ -41,7 +41,9 @@ export const moveFileSrcToDest = async (srcPath: string, destFolderOrProfile: st
     catch (err) {
         console.log('Error', err);
         return {
-            msg: `Error while moving files from ${srcPath} to ${destPath}`,
+            success: false,
+            msg: `Error while moving files from ${srcPath} to ${destPath} \n${err}`,
+            err: err
         };
     }
 }
