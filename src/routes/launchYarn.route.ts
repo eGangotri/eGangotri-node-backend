@@ -3,8 +3,8 @@ import { downloadPdfFromGoogleDriveToProfile } from '../cliBased/googleapi/Googl
 import { scrapeArchiveOrgProfiles } from '../archiveDotOrg/archiveScraper';
 import * as fs from 'fs';
 import { generateGoogleDriveListingExcel } from '../cliBased/googleapi/GoogleDriveApiReadAndExport';
-import { getFolderInSrcRootForProfile } from '../cliBased/utils';
-import { moveFileSrcToDest, moveProfilesToFreeze } from '../services/yarnService';
+import { getFolderInDestRootForProfile, getFolderInSrcRootForProfile } from '../cliBased/utils';
+import { moveFileSrcToDest, moveProfilesToFreeze, publishBookTitles } from '../services/yarnService';
 import { resetDownloadCounters } from '../cliBased/pdf/utils';
 import { ARCHIVE_EXCEL_PATH } from '../archiveDotOrg/utils';
 import { ArchiveDataRetrievalMsg, ArchiveDataRetrievalStatus } from '../archiveDotOrg/types';
@@ -212,6 +212,25 @@ launchYarnRoute.post('/yarnMoveProfilesToFreeze', async (req: any, resp: any) =>
     catch (err: any) {
         console.log('Error', err);
         resp.status(400).send(err);
+    }
+})
+
+launchYarnRoute.post('/yarnGetBookDetails', async (req: any, resp: any) => {
+    try {
+        const argFirst = req.body.argFirst
+        const pdfsOnly = req.body.pdfsOnly
+
+
+        const res = await publishBookTitles(argFirst, pdfsOnly);
+        resp.status(200).send({
+            response: res
+        });
+    }
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send({
+            response: err.message
+        });
     }
 })
 
