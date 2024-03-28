@@ -38,7 +38,7 @@ export async function moveFilesAndFlatten(sourceDir: string, targetDir: string, 
     if (collisionCheck.success === false) {
         return collisionCheck;
     }
-    
+
     const _count = allSrcPdfs?.length;
     while (dirs.length > 0) {
         const currentDir = dirs.pop();
@@ -86,6 +86,11 @@ const checkIfAnyFileInUse = (allSrcPdfs: FileStats[]) => {
             filesInUse: filesInUse.map(file => file.absPath)
         };
     }
+    else {
+        return {
+            success: true,
+        };
+    }
 }
 
 const checkCollision = (allSrcPdfs: FileStats[], allDestPdfs: FileStats[]) => {
@@ -101,6 +106,9 @@ const checkCollision = (allSrcPdfs: FileStats[], allDestPdfs: FileStats[]) => {
             msg: `Following files are already present in target dir, cancelling move operation`,
             matchingFiles
         };
+    }
+    return {
+        success: true
     }
 }
 
