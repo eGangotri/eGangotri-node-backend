@@ -10,53 +10,6 @@ const DEFAULT_DUMP_FOLDER = "D:\\_playground\\_dwnldPlayground";
 export const getPdfDownloadLink = (driveId: string) => {
     return `https://drive.usercontent.google.com/download?id=${driveId}&export=download&authuser=0&confirm=t`
 }
-//dont use-delete later
-export const downloadPdfFromGoogleDriveOriginal = async (driveLinkOrFolderId: string,
-    pdfDumpFolder: string,
-    fileName: string = "",
-    dataLength: number = 0) => {
-    console.log(`downloadPdfFromGoogleDrive ${driveLinkOrFolderId}`)
-    const driveId = extractGoogleDriveId(driveLinkOrFolderId)
-    const _pdfDlUrl = getPdfDownloadLink(driveId)
-    console.log(`downloading ${_pdfDlUrl} to ${pdfDumpFolder}`)
-
-    const dl = new DownloaderHelper(_pdfDlUrl, pdfDumpFolder);//
-    let _result = {};
-    try {
-        await new Promise((resolve, reject) => {
-            dl.on('end', () => {
-                const index = `(${DOWNLOAD_COMPLETED_COUNT + 1}${dataLength > 0 ? "/" + dataLength : ""})`;
-                console.log(`${index}. Downloaded ${fileName}`);
-                incrementDownloadComplete();
-                _result = {
-                    "status": `${driveId} downloaded ${fileName} to ${pdfDumpFolder}`,
-                    success: true
-                };
-                resolve(_result);
-            });
-
-            dl.on('error', (err: Error) => {
-                incrementDownloadFailed();
-                console.log(`Download Failed ${fileName}`, err.message);
-                reject(_result = {
-                    success: false,
-                    "error": `${driveId} failed download of ${fileName} to ${pdfDumpFolder} with ${err.message}`
-                });
-            });
-
-            dl.start();
-        });
-    } catch (err) {
-        console.error(err);
-        incrementDownloadFailed();
-        _result = {
-            success: false,
-            "error": `${driveId} failed download try/catch for ${fileName} to ${pdfDumpFolder} with ${err.message}`
-        };
-    }
-
-    return _result;
-}
 
 export const downloadPdfFromGoogleDrive = async (driveLinkOrFolderId: string,
     pdfDumpFolder: string,
@@ -69,7 +22,7 @@ export const downloadPdfFromGoogleDrive = async (driveLinkOrFolderId: string,
     return result;
 }
 
-export const downloadPdfFromUrlOld = async (
+export const downloadPdfFromUrl = async (
     pdfDumpFolder: string,
     downloadUrl: string,
     fileName: string,
@@ -114,7 +67,7 @@ export const downloadPdfFromUrlOld = async (
     return _result;
 }
 
-export const downloadPdfFromUrl = async (
+export const downloadPdfFromUrlSlow = async (
     pdfDumpFolder: string,
     downloadUrl: string,
     fileName: string,
@@ -136,7 +89,7 @@ export const downloadPdfFromUrl = async (
         await new Promise((resolve, reject) => {
             writer.on('finish', () => {
                 const index = `(${DOWNLOAD_COMPLETED_COUNT + 1}${dataLength > 0 ? "/" + dataLength : ""})`;
-                console.log(`${index}. Downloaded ${fileName}`);
+                console.log(`${index}. Downloaded: ${fileName}`);
                 incrementDownloadComplete();
                 _result = {
                     "status": `Downloaded ${fileName} to ${pdfDumpFolder}`,
