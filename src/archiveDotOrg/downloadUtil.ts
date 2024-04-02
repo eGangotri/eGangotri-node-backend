@@ -14,7 +14,8 @@ export const downloadPdfFromArchiveToProfile = async (pdfLinks: LinkData[], prof
   if (!fs.existsSync(pdfDumpFolder)) {
     console.log(`No corresponding folder ${pdfDumpFolder} to profile  ${profileOrPath} exists`)
     return {
-      "status": "failed"
+      "success": false,
+      msg: `No corresponding folder to profile (${profileOrPath}) exists`
     }
   }
 

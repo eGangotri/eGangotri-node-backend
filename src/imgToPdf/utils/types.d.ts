@@ -1,5 +1,5 @@
 export interface FileStats {
-    rowCounter?: number;
+    rowCounter?: number | string;
     fileName: string;
     pageCount?: number;
     size?: string;
