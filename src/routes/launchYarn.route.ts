@@ -117,6 +117,7 @@ launchYarnRoute.post('/getArchiveListing', async (req: any, resp: any) => {
 
 launchYarnRoute.post('/downloadArchivePdfs', async (req: any, resp: any) => {
     try {
+        const startTime = Date.now();
         const archiveLink = req?.body?.archiveLink;
         const profile = req?.body?.profile;
 
@@ -148,6 +149,10 @@ launchYarnRoute.post('/downloadArchivePdfs', async (req: any, resp: any) => {
             const res = await downloadPdfFromArchiveToProfile(entry.links, profile);
             results.push(res);
         }
+        
+        const endTime = Date.now();
+        const timeTaken = endTime - startTime;
+        console.log(`Time taken to download downloadArchivePdfs: ${timeTaken} ms`);
         resp.status(200).send({
             response: results
         });

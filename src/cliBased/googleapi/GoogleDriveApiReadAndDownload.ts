@@ -16,7 +16,7 @@ import { isValidPath } from '../../utils/utils';
 // Create a new Google Drive instance
 const drive = getGoogleDriveInstance();
 
-async function getAllPdfs(driveLinkOrFolderID: string, folderName: string, pdfDumpFolder: string) {
+async function getAllPdfsFromGDrive(driveLinkOrFolderID: string, folderName: string, pdfDumpFolder: string) {
   const folderId = extractGoogleDriveId(driveLinkOrFolderID)
   console.log(`folderId: ${folderId}`)
   const googleDriveData = await listFolderContentsAsArrayOfData(folderId,
@@ -25,9 +25,14 @@ async function getAllPdfs(driveLinkOrFolderID: string, folderName: string, pdfDu
     "proc");
 
   const dataLength = googleDriveData.length;
-  if (dataLength > 100) {
-    console.log("restriction to 100 items only for now. exiting")
-    process.exit(0);
+  const maxLimit = 200
+  if (dataLength > maxLimit) {
+    console.log(`restriction to ${maxLimit} items only for now. Cannot continue`);
+    return {
+      totalPdfsToDownload: googleDriveData.length,
+      success: false,
+      msg: `restriction to ${maxLimit} items only for now. Cannot continue`
+    }
   }
   const promises = googleDriveData.map(_data => {
     console.log(`_data: ${JSON.stringify(_data)}}`);
@@ -91,7 +96,7 @@ export const downloadPdfFromGoogleDriveToProfile = async (driveLinkOrFolderId: s
   try {
     if (fs.existsSync(pdfDumpFolder)) {
       resetDownloadCounters()
-      const _results = await getAllPdfs(driveLinkOrFolderId, "",
+      const _results = await getAllPdfsFromGDrive(driveLinkOrFolderId, "",
         pdfDumpFolder);
 
       console.log(`Success count: ${DOWNLOAD_COMPLETED_COUNT}`);
@@ -107,7 +112,8 @@ export const downloadPdfFromGoogleDriveToProfile = async (driveLinkOrFolderId: s
     }
     console.log(`No corresponding folder ${pdfDumpFolder} to profile  ${profileOrPath} exists`)
     return {
-      "status": "failed"
+      "success": false,
+      msg: `No corresponding folder to profile (${profileOrPath}) exists`
     }
   }
   catch (err) {

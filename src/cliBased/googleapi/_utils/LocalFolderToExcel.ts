@@ -7,8 +7,9 @@ import { jsonToExcel } from "../../excel/ExcelUtils";
 import * as _ from 'lodash';
 import { sizeInfo } from "../../../mirror/FrontEndBackendCommonCode";
 import { FileStats } from "../../../imgToPdf/utils/types";
+import { addSummaryToExcel, createMetadata } from "services/Util";
 
-const createExcelFilePathName = (mainExcelDataLength: number, folderName: String, _excelRoot: string) => {
+export const createExcelFilePathName = (mainExcelDataLength: number, folderName: String, _excelRoot: string, suffix: string) => {
     const _excelPath = `${_excelRoot}\\local`;
 
     if (!fs.existsSync(_excelPath)) {
@@ -20,35 +21,17 @@ const createExcelFilePathName = (mainExcelDataLength: number, folderName: String
     if (!fs.existsSync(excelPathWithFolderName)) {
         fs.mkdirSync(excelPathWithFolderName);
     }
-    const mergedExcelFileName = `${excelPathWithFolderName}\\${folderName}-Final-Merged-Catalog-${timeComponent}`;
+    const mergedExcelFileName = `${excelPathWithFolderName}\\${folderName}${timeComponent}-${suffix}`;
     return `${mergedExcelFileName}-${mainExcelDataLength}.xlsx`;
 }
 
 const folderToExcel = async (folder: string, _excelRoot: string) => {
     console.log(`folderToExcel ${folder}`);
     FileUtils.incrementRowCounter()
-    const jsonArray:FileStats[] = await FileUtils.getAllPDFFilesWithMedata(folder,true)
-    //const jsonArray: FileStats[] = await FileUtils.getAllFileStats(folder, "", false, true, true);
-    jsonArray.push({
-        size: "",
-        absPath: "",
-        folder: "",
-        fileName: ""
-    })
-    const pageCountTotal = _.sum(jsonArray.map(x => x.pageCount))
-    const rawSizeTotal = _.sum(jsonArray.map(x => x.rawSize))
-    const sizeTotal = sizeInfo(rawSizeTotal)
-
-    jsonArray.push({
-        pageCount: pageCountTotal,
-        rawSize: rawSizeTotal,
-        size: sizeTotal,
-        absPath: "",
-        folder: "",
-        fileName: ""
-    })
-
-    const _fileName = createExcelFilePathName(jsonArray.length, path.parse(folder)?.base, _excelRoot);
+    const jsonArray: FileStats[] = await FileUtils.getAllPDFFilesWithMedata(folder, true)
+    const { totalFileCount, totalPageCount, totalSizeRaw } = createMetadata(jsonArray);
+    addSummaryToExcel(jsonArray, totalFileCount, totalPageCount, totalSizeRaw);
+    const _fileName = createExcelFilePathName(jsonArray.length, path.parse(folder)?.base, _excelRoot, "-Final-Merged-Catalog-");
     jsonToExcel(jsonArray, _fileName)
 }
 
