@@ -3,6 +3,8 @@ import { utils, writeFile } from 'xlsx';
 import { ArchiveRes, ExcelHeaderType, Hit, LinkData } from './types';
 import { sizeInfo } from '../mirror/FrontEndBackendCommonCode';
 import { x } from 'pdfkit';
+import moment from 'moment';
+import { DD_MM_YYYY_FORMAT } from 'utils/constants';
 
 export const ARCHIVE_EXCEL_PATH = `${os.homedir()}\\Downloads`;
 export const ARCHIVE_DOT_ORG_PREFIX = "https://archive.org";
@@ -51,7 +53,8 @@ export const generateExcel = async (links: LinkData[],
 
         const workbook = utils.book_new();
         utils.book_append_sheet(workbook, worksheet, "Links");
-        const excelPath = `${ARCHIVE_EXCEL_PATH}\\${excelFileName}${limitedFields ? "-ltd" : ""}.xlsx`
+        const timeNow = moment().format(DD_MM_YYYY_FORMAT);
+        const excelPath = `${ARCHIVE_EXCEL_PATH}\\${excelFileName}${limitedFields ? "-ltd" : ""}-${timeNow}.xlsx`
         console.log(`Writing to ${excelPath}`);
         await writeFile(workbook, excelPath);
         return excelPath;
@@ -110,7 +113,6 @@ export const extractPdfMetaData = async (identifier: string) => {
     const zippedFile = metadata.files.filter((file: any) => {
         return file.format.startsWith("Single Page");
     });
-    console.log(`pdfRow ${(pdfRow && pdfRow.length > 0) ? pdfRow[0]?.name: "not retrieved"}`);
     return {
         pdfName: (pdfRow && pdfRow.length > 0) ? pdfRow[0]?.name: "",
         pdfPageCount: (zippedFile && zippedFile.length > 0) ? zippedFile[0]?.filecount : 0
