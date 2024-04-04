@@ -1,7 +1,8 @@
 import os from 'os';
 import { utils, writeFile } from 'xlsx';
-import { ArchiveRes, Hit, LinkData } from './types';
+import { ArchiveRes, ExcelHeaderType, Hit, LinkData } from './types';
 import { sizeInfo } from '../mirror/FrontEndBackendCommonCode';
+import { x } from 'pdfkit';
 
 export const ARCHIVE_EXCEL_PATH = `${os.homedir()}\\Downloads`;
 export const ARCHIVE_DOT_ORG_PREFIX = "https://archive.org";
@@ -9,75 +10,87 @@ export const ARCHIVE_DOT_ORG_DETAILS_PREFIX = "https://archive.org/details/";
 export const ARCHIVE_DOT_ORG_DWONLOAD_PREFIX = "https://archive.org/download/";
 
 export const extractArchiveAcctName = (_urlOrIdentifier: string) => {
-    if (_urlOrIdentifier.includes('@')) {
-        return _urlOrIdentifier.split('@')[1];
+    if (_urlOrIdentifier?.includes('@')) {
+        return _urlOrIdentifier?.split('@')[1];
     }
     return _urlOrIdentifier
 }
 
-let ARCHIVE_EXCEL_HEADER = ["Serial No.", "Link", "All Downloads Link Page", "Pdf Download Link",
-    "Original Title",
-    "Title-Archive",
-    "Description",
-    "Subject", "Date", "Acct", "Identifier",
-    "Type", "Media Type", "Size", "Size Formatted", "Email-User"];
+let ARCHIVE_EXCEL_HEADER =
+{
+    "serialNo": "Serial No.",
+    "link": "Link",
+    allDwnldsLink: "All Downloads Link Page",
+    "pdfDwnldLink": "Pdf Download Link",
+    "pageCount": "Page Count",
+    "originalTitle": "Original Title",
+    "titleArchive": "Title-Archive",
+    "size": "Size",
+    "sizeFormatted": "Size Formatted",
+    "subject": "Subject",
+    "description": "Description",
+    "date": "Date",
+    "acct": "Acct",
+    "identifier": "Identifier",
+    "type": "Type",
+    "mediaType": "Media Type",
+    "emailUser": "Email-User"
+};
 
 export const generateExcel = async (links: LinkData[],
     limitedFields = false): Promise<string> => {
-    const excelFileName = `${links[0].acct}(${links.length})`;
-    if (limitedFields) {
-        ARCHIVE_EXCEL_HEADER.splice(3, 2)
-    }
-    const worksheet = utils.json_to_sheet(linkDataToExcelFormat(links, ARCHIVE_EXCEL_HEADER, limitedFields),
-        { header: ARCHIVE_EXCEL_HEADER });
+    try {
 
-    const workbook = utils.book_new();
-    utils.book_append_sheet(workbook, worksheet, "Links");
-    const excelPath = `${ARCHIVE_EXCEL_PATH}\\${excelFileName}${limitedFields?"-ltd":""}.xlsx`
-    console.log(`Writing to ${excelPath}`);
-    await writeFile(workbook, excelPath);
-    return excelPath;
+        const excelFileName = `${links[0].acct}(${links.length})`;
+        const excelHeader = Object.values(ARCHIVE_EXCEL_HEADER);
+        if (limitedFields) {
+            excelHeader.splice(3, 3)
+        }
+        const worksheet = utils.json_to_sheet(linkDataToExcelFormat(links, ARCHIVE_EXCEL_HEADER, limitedFields),
+            { header: excelHeader });
+
+        const workbook = utils.book_new();
+        utils.book_append_sheet(workbook, worksheet, "Links");
+        const excelPath = `${ARCHIVE_EXCEL_PATH}\\${excelFileName}${limitedFields ? "-ltd" : ""}.xlsx`
+        console.log(`Writing to ${excelPath}`);
+        await writeFile(workbook, excelPath);
+        return excelPath;
+    }
+    catch (err) {
+        console.log(`Error while writing to excel ${err.message}`);
+        throw err;
+    }
 }
 
-const linkDataToExcelFormat = (links: LinkData[], archiveExcelHeader: string[],
+const linkDataToExcelFormat = (links: LinkData[], archiveExcelHeader: ExcelHeaderType,
     limitedFields = false) => {
     return links.map((link, index) => {
-        let counter = 0;
-        if (limitedFields) {
-            return {
-                [archiveExcelHeader[counter++]]: `${index + 1}`,
-                [archiveExcelHeader[counter++]]: link.link,
-                [archiveExcelHeader[counter++]]: link.allFilesDownloadUrl,
-                [archiveExcelHeader[counter++]]: link.titleArchive,
-                [archiveExcelHeader[counter++]]: link.description,
-                [archiveExcelHeader[counter++]]: link.subject,
-                [archiveExcelHeader[counter++]]: link.publicdate,
-                [archiveExcelHeader[counter++]]: link.acct,
-                [archiveExcelHeader[counter++]]: link.uniqueIdentifier,
-                [archiveExcelHeader[counter++]]: link.hit_type,
-                [archiveExcelHeader[counter++]]: link.mediatype,
-                [archiveExcelHeader[counter++]]: link.item_size,
-                [archiveExcelHeader[counter++]]: link.item_size_formatted,
-                [archiveExcelHeader[counter++]]: link.email,
-            }
+        const obj = {
+            [archiveExcelHeader.serialNo]: `${index + 1}`,
+            [archiveExcelHeader.link]: link.link,
+            [archiveExcelHeader.allDwnldsLink]: link.allFilesDownloadUrl,
+            [archiveExcelHeader.titleArchive]: link.titleArchive,
+            [archiveExcelHeader.description]: link.description,
+            [archiveExcelHeader.subject]: link.subject,
+            [archiveExcelHeader.date]: link.publicdate,
+            [archiveExcelHeader.acct]: link.acct,
+            [archiveExcelHeader.identifier]: link.uniqueIdentifier,
+            [archiveExcelHeader.type]: link.hit_type,
+            [archiveExcelHeader.mediaType]: link.mediatype,
+            [archiveExcelHeader.size]: link.item_size,
+            [archiveExcelHeader.sizeFormatted]: link.item_size_formatted,
+            [archiveExcelHeader.emailUser]: link.email,
         }
-        else return {
-            [archiveExcelHeader[counter++]]: `${index + 1}`,
-            [archiveExcelHeader[counter++]]: link.link,
-            [archiveExcelHeader[counter++]]: link.allFilesDownloadUrl,
-            [archiveExcelHeader[counter++]]: link.pdfDownloadUrl,
-            [archiveExcelHeader[counter++]]: link.originalTitle,
-            [archiveExcelHeader[counter++]]: link.titleArchive,
-            [archiveExcelHeader[counter++]]: link.description,
-            [archiveExcelHeader[counter++]]: link.subject,
-            [archiveExcelHeader[counter++]]: link.publicdate,
-            [archiveExcelHeader[counter++]]: link.acct,
-            [archiveExcelHeader[counter++]]: link.uniqueIdentifier,
-            [archiveExcelHeader[counter++]]: link.hit_type,
-            [archiveExcelHeader[counter++]]: link.mediatype,
-            [archiveExcelHeader[counter++]]: link.item_size,
-            [archiveExcelHeader[counter++]]: link.item_size_formatted,
-            [archiveExcelHeader[counter++]]: link.email,
+        if (limitedFields) {
+            return obj
+        }
+        else {
+            return {
+                ...obj,
+                [archiveExcelHeader.pdfDwnldLink]: link.pdfDownloadUrl,
+                [archiveExcelHeader.originalTitle]: link.originalTitle,
+                [archiveExcelHeader.pageCount]: link.pdfPageCount
+            }
         }
     })
 }
@@ -88,15 +101,20 @@ export const extractEmail = async (identifier: string) => {
     return _email.metadata.uploader
 }
 
-export const extractPdfName = async (identifier: string) => {
+export const extractPdfMetaData = async (identifier: string) => {
     const response = await fetch(`https://archive.org/metadata/${identifier}`)
     const metadata = await response.json();
-    for (const file of metadata.files) {
-        if (file.name.endsWith(".pdf")) {
-            return file.name
-        }
+    const pdfRow = metadata.files.filter((file: { format: string, name: string }) => {
+        return file.format.endsWith("PDF") && file.name.endsWith(".pdf") && !file.name.includes("_text.pdf");
+    });
+    const zippedFile = metadata.files.filter((file: any) => {
+        return file.format.startsWith("Single Page");
+    });
+    console.log(`pdfRow ${(pdfRow && pdfRow.length > 0) ? pdfRow[0]?.name: "not retrieved"}`);
+    return {
+        pdfName: (pdfRow && pdfRow.length > 0) ? pdfRow[0]?.name: "",
+        pdfPageCount: (zippedFile && zippedFile.length > 0) ? zippedFile[0]?.filecount : 0
     }
-    return ""
 }
 
 export const extractLinkedData = async (_hitsHits: Hit[],
@@ -107,11 +125,19 @@ export const extractLinkedData = async (_hitsHits: Hit[],
     for (const hit of _hitsHits) {
         const identifier = hit.fields.identifier;
         let pdfName = ""
-        console.log(`limitedFields ${limitedFields}`)
+        let pdfPageCount = 0
         if (!limitedFields) {
-            pdfName = await extractPdfName(identifier);
-            console.log(`extractPdfName ${limitedFields} ${pdfName}`)
+            try {
+                const pdfMetaData = await extractPdfMetaData(identifier);
+                pdfName = pdfMetaData.pdfName;
+                pdfPageCount = pdfMetaData.pdfPageCount;
+            }
+            catch (err) {
+                console.log(`Error while extracting pdf metadata ${err.message}`);
+                throw err;
+            }
         }
+
         const originalTitle = pdfName.replace(".pdf", "");
         const obj: LinkData = {
             link: `${ARCHIVE_DOT_ORG_DETAILS_PREFIX}${identifier}`,
@@ -126,7 +152,8 @@ export const extractLinkedData = async (_hitsHits: Hit[],
             mediatype: hit.fields.mediatype,
             item_size: hit.fields.item_size,
             item_size_formatted: sizeInfo(hit.fields.item_size),
-            email
+            email,
+            pdfPageCount: pdfPageCount
         }
         if (!limitedFields) {
             obj.originalTitle = originalTitle;
