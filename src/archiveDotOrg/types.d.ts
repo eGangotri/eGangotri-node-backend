@@ -1,7 +1,29 @@
+export interface ExcelHeaderType {
+    serialNo:      string;
+    link:          string;
+    allDwnldsLink: string;
+    pdfDwnldLink:  string;
+    originalTitle: string;
+    pageCount:     string;
+    titleArchive:  string;
+    size:          string;
+    sizeFormatted: string;
+    subject:       string;
+    description:   string;
+    date:          string;
+    acct:          string;
+    identifier:    string;
+    type:          string;
+    mediaType:     string;
+    emailUser:     string;
+}
+
+
 export interface LinkData {
     link: string;
     titleArchive: string;
     originalTitle?: string;
+    pdfPageCount?:number;
     uniqueIdentifier: string;
     allFilesDownloadUrl: string;
     pdfDownloadUrl?: string;

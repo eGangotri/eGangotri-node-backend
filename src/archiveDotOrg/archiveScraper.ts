@@ -1,48 +1,66 @@
 import { ArchiveDataRetrievalMsg, ArchiveDataRetrievalStatus, LinkData } from './types';
 import { extractArchiveAcctName, extractEmail, extractLinkedData, generateExcel } from './utils';
 import * as _ from 'lodash';
-const ARCHIVE_ORG_METADATA_API = 'https://archive.org/metadata';
 
-const callArchiveApi = async (username: string, pageIndex = 1) => {
-    const _url =
-        `https://archive.org/services/search/beta/page_production/?user_query=&page_type=account_details&page_target=@${username}&page_elements=[%22uploads%22]&hits_per_page=1000&page=${pageIndex}&sort=publicdate:desc&aggregations=false&client_url=https://archive.org/details/@${username}`;
-    console.log(`_url ${_url}`);
-    const response = await fetch(_url);
-    const data = await response.json();
+const callGenericArchiveApi = async (username: string, pageIndex = 1) => {
+    try {
+        const _url =
+            `https://archive.org/services/search/beta/page_production/?user_query=&page_type=account_details&page_target=@${username}&page_elements=[%22uploads%22]&hits_per_page=1000&page=${pageIndex}&sort=publicdate:desc&aggregations=false&client_url=https://archive.org/details/@${username}`;
+        console.log(`_url ${_url}`);
+        const response = await fetch(_url);
+        const data = await response.json();
 
-    const _hits = data?.response?.body?.page_elements?.uploads?.hits || [];
-    return _hits;
+        const _hits = data?.response?.body?.page_elements?.uploads?.hits || [];
+        console.log(`callGenericArchiveApi _hits.total ${_hits?.total}`)
+        return _hits;
+    }
+    catch (err) {
+        console.log(`Error in callGenericArchiveApi ${err.message}`);
+        throw err;
+    }
 };
 
-const fetchUploads = async (username: string, limitedFields = false): Promise<LinkData[]> => {
+const fetchArchiveMetadata = async (username: string, limitedFields = false): Promise<LinkData[]> => {
     username = username.startsWith('@') ? username.slice(1) : username;
-    let pageIndex = 1
-    let _hits = await callArchiveApi(username, pageIndex++);
+    try {
+        let pageIndex = 1
+        let _hits = await callGenericArchiveApi(username, pageIndex++);
 
-    const totalHits = _hits.total;
-    let totalHitsPickedCounter = _hits?.total;
-    let _hitsHits = _hits.hits;
-    let email = '';
-    if (_hitsHits?.length >= 0) {
-        email = await extractEmail(_hitsHits[0].fields.identifier);
-    }
+        let totalHitsPickedCounter = _hits?.total;
+        let _hitsHits = _hits.hits;
+        let email = '';
+        if (_hitsHits?.length >= 0) {
+            email = await extractEmail(_hitsHits[0].fields.identifier);
+        }
 
-    const _linkData: LinkData[] = [];
-    if (totalHitsPickedCounter > 0) {
-        _linkData.push(...(await extractLinkedData(_hitsHits, email, username, limitedFields)));
-    }
-    totalHitsPickedCounter = totalHitsPickedCounter - _hitsHits?.length;
-    while (totalHitsPickedCounter > 0) {
-        _hits = await callArchiveApi(username, pageIndex++);
-        _hitsHits = _hits.hits;
-        if (_hitsHits?.length > 0) {
-            _linkData.push(...(await extractLinkedData(_hitsHits, email, username, limitedFields)));
+        const _linkData: LinkData[] = [];
+        if (totalHitsPickedCounter > 0) {
+            const extractedData = await extractLinkedData(_hitsHits, email, username, limitedFields);
+            _linkData.push(...extractedData);
         }
         totalHitsPickedCounter = totalHitsPickedCounter - _hitsHits?.length;
+        while (totalHitsPickedCounter > 0) {
+            _hits = await callGenericArchiveApi(username, pageIndex++);
+            _hitsHits = _hits.hits;
+            if (_hitsHits?.length > 0) {
+                const extractedData = await extractLinkedData(_hitsHits, email, username, limitedFields);
+                _linkData.push(...extractedData);
+            }
+            totalHitsPickedCounter = totalHitsPickedCounter - _hitsHits?.length;
+        }
+        return _linkData;
     }
-    return _linkData
-};
+    catch (err) {
+        console.log(`Error in fetchArchiveMetadata ${err.message}`);
+        throw err;
+    };
+}
 
+const checkValidArchiveUrl = async (archiveIdentifier: string) => {
+    const isValid = await fetch(`https://archive.org/services/users/@${archiveIdentifier}/lists`);
+    console.log(`isValid ${isValid.ok}`)
+    return isValid.ok
+}
 export const scrapeArchiveOrgProfiles = async (archiveUrlsOrAcctNamesAsCSV: string,
     onlyLinks: boolean = false,
     limitedFields: boolean = false): Promise<ArchiveDataRetrievalMsg> => {
@@ -51,10 +69,19 @@ export const scrapeArchiveOrgProfiles = async (archiveUrlsOrAcctNamesAsCSV: stri
     console.log(`archiveUrlsOrAcctNames ${archiveUrlsOrAcctNames} onlyLinks ${onlyLinks}`);
     const _status: ArchiveDataRetrievalStatus[] = []
     for (let i = 0; i < archiveUrlsOrAcctNames.length; i++) {
-        console.log(`Scraping Link # ${i}. ${archiveUrlsOrAcctNames[i]}`)
+        console.log(`Scraping Link # ${i + 1}. ${archiveUrlsOrAcctNames[i]}`)
         const _archiveAcctName = extractArchiveAcctName(archiveUrlsOrAcctNames[i]);
+        if (!checkValidArchiveUrl(_archiveAcctName)) {
+            _status.push({
+                success: false,
+                archiveAcctName: _archiveAcctName,
+                error: "Invalid archive account name",
+            });
+            continue;
+        }
+
         try {
-            const _linkData = await fetchUploads(_archiveAcctName, limitedFields);
+            const _linkData = await fetchArchiveMetadata(_archiveAcctName, limitedFields);
             console.log(`_linkData ${JSON.stringify(_linkData.length)}`);
             if (onlyLinks) {
                 _status.push({
@@ -65,7 +92,7 @@ export const scrapeArchiveOrgProfiles = async (archiveUrlsOrAcctNamesAsCSV: stri
                 });
             }
             else {
-                const excelPath = await generateExcel(_linkData,limitedFields);
+                const excelPath = await generateExcel(_linkData, limitedFields);
                 _status.push({
                     excelPath,
                     success: true,
@@ -75,7 +102,7 @@ export const scrapeArchiveOrgProfiles = async (archiveUrlsOrAcctNamesAsCSV: stri
             }
         }
         catch (e) {
-            console.log(`Error in fetchUploads ${e}`);
+            console.log(`Error in fetchUploads ${e.message}`);
             _status.push({
                 success: false,
                 archiveAcctName: _archiveAcctName,

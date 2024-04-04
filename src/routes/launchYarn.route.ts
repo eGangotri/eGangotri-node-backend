@@ -102,8 +102,6 @@ launchYarnRoute.post('/getArchiveListing', async (req: any, resp: any) => {
         const _resp = await scrapeArchiveOrgProfiles(archiveLinks, onlyLinks, limitedFields);
         resp.status(200).send({
             response: {
-                "success": true,
-                "msg": "Excels created",
                 _results: _resp
             }
         });
