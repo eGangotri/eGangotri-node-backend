@@ -1,10 +1,9 @@
 import os from 'os';
 import { utils, writeFile } from 'xlsx';
-import { ArchiveRes, ExcelHeaderType, Hit, LinkData } from './types';
+import { ExcelHeaderType, Hit, LinkData } from './types';
 import { sizeInfo } from '../mirror/FrontEndBackendCommonCode';
-import { x } from 'pdfkit';
 import moment from 'moment';
-import { DD_MM_YYYY_FORMAT } from 'utils/constants';
+import { DD_MM_YYYY_FORMAT } from '../utils/constants';
 
 export const ARCHIVE_EXCEL_PATH = `${os.homedir()}\\Downloads`;
 export const ARCHIVE_DOT_ORG_PREFIX = "https://archive.org";
