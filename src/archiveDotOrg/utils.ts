@@ -133,11 +133,11 @@ export const extractLinkedData = async (_hitsHits: Hit[],
         if (!limitedFields) {
             try {
                 const pdfMetaData = await extractPdfMetaData(identifier);
-                pdfName = pdfMetaData.pdfName;
-                pdfPageCount = pdfMetaData.pdfPageCount;
+                pdfName = pdfMetaData?.pdfName;
+                pdfPageCount = pdfMetaData?.pdfPageCount;
             }
             catch (err) {
-                console.log(`Error while extracting pdf metadata ${err.message}`);
+                console.log(`Error while extracting pdf metadata ${err}`);
                 throw err;
             }
         }

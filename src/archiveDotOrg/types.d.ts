@@ -1,29 +1,32 @@
 export interface ExcelHeaderType {
-    serialNo:      string;
-    link:          string;
+    serialNo: string;
+    link: string;
     allDwnldsLink: string;
-    pdfDwnldLink:  string;
+    pdfDwnldLink: string;
     originalTitle: string;
-    pageCount:     string;
-    titleArchive:  string;
-    size:          string;
+    pageCount: string;
+    titleArchive: string;
+    size: string;
     sizeFormatted: string;
-    subject:       string;
-    description:   string;
-    date:          string;
-    acct:          string;
-    identifier:    string;
-    type:          string;
-    mediaType:     string;
-    emailUser:     string;
+    subject: string;
+    description: string;
+    date: string;
+    acct: string;
+    identifier: string;
+    type: string;
+    mediaType: string;
+    emailUser: string;
 }
 
-
+export interface ArchiveScrapReport {
+    linkData: LinkData[];
+    stats: string;
+}
 export interface LinkData {
     link: string;
     titleArchive: string;
     originalTitle?: string;
-    pdfPageCount?:number;
+    pdfPageCount?: number;
     uniqueIdentifier: string;
     allFilesDownloadUrl: string;
     pdfDownloadUrl?: string;
@@ -39,16 +42,16 @@ export interface LinkData {
 }
 
 export interface ArchiveDataRetrievalMsg {
-    scrapedMetadata:ArchiveDataRetrievalStatus[];
-    numFailures:number;
-    numSuccess:number;
-    msg:string|object;
+    scrapedMetadata?: ArchiveDataRetrievalStatus[];
+    numFailures: number;
+    numSuccess: number;
+    msg: string | object;
 }
 export interface ArchiveDataRetrievalStatus {
     archiveAcctName: string,
     archiveItemCount?: number,
     success: boolean,
-    links?: LinkData[],
+    archiveReport?: ArchiveScrapReport,
     excelPath?: string,
     error?: string,
 }
