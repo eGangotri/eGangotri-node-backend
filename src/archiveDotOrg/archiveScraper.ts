@@ -1,4 +1,4 @@
-import { ArchiveDataRetrievalMsg, ArchiveDataRetrievalStatus, LinkData } from './types';
+import { ArchiveDataRetrievalMsg, ArchiveDataRetrievalStatus, ArchiveScrapReport, LinkData } from './types';
 import { extractArchiveAcctName, extractEmail, extractLinkedData, generateExcel } from './utils';
 import * as _ from 'lodash';
 
@@ -22,11 +22,15 @@ const callGenericArchiveApi = async (username: string, pageIndex = 1) => {
 
 export const FETCH_ACRHIVE_METADATA_COUNTER = {
     value: 0,
-    hitsTotal: 0
+    hitsTotal: 0,
+    reset: () => {
+        FETCH_ACRHIVE_METADATA_COUNTER.value = 0;
+        FETCH_ACRHIVE_METADATA_COUNTER.hitsTotal = 0;
+    }
 }
-const fetchArchiveMetadata = async (username: string, limitedFields = false): Promise<LinkData[]> => {
+const fetchArchiveMetadata = async (username: string, limitedFields = false): Promise<ArchiveScrapReport> => {
     username = username.startsWith('@') ? username.slice(1) : username;
-    FETCH_ACRHIVE_METADATA_COUNTER.value = 0;
+    FETCH_ACRHIVE_METADATA_COUNTER.reset();
     try {
         let _hits = await callGenericArchiveApi(username, 1);
         let hitsTotal = _hits?.total;
@@ -52,7 +56,11 @@ const fetchArchiveMetadata = async (username: string, limitedFields = false): Pr
          _linkData ${JSON.stringify(_linkData.length)}
          FETCH_ACRHIVE_METADATA_COUNTER ${FETCH_ACRHIVE_METADATA_COUNTER.value}
          hitsTotal: ${hitsTotal}`);
-        return _linkData;
+        return {
+            linkData: _linkData,
+            stats: `Total Gen: () === ItemsInArchive(${FETCH_ACRHIVE_METADATA_COUNTER.hitsTotal})
+            === ItemsCounter(${FETCH_ACRHIVE_METADATA_COUNTER.value}) `
+        }
     }
     catch (err) {
         console.log(`Error in fetchArchiveMetadata ${err.message}`);
@@ -60,9 +68,15 @@ const fetchArchiveMetadata = async (username: string, limitedFields = false): Pr
     };
 }
 
-const checkValidArchiveUrl = async (archiveIdentifier: string) => {
+const checkValidArchiveUrlAndUpdateStatus = async (archiveIdentifier: string, _status: {}[]) => {
     const isValid = await fetch(`https://archive.org/services/users/@${archiveIdentifier}/lists`);
-    console.log(`isValid ${isValid.ok}`)
+    if (!isValid.ok) {
+        _status.push({
+            success: false,
+            archiveAcctName: archiveIdentifier,
+            error: "Invalid archive account name",
+        });
+    }
     return isValid.ok
 }
 export const scrapeArchiveOrgProfiles = async (archiveUrlsOrAcctNamesAsCSV: string,
@@ -75,33 +89,28 @@ export const scrapeArchiveOrgProfiles = async (archiveUrlsOrAcctNamesAsCSV: stri
     for (let i = 0; i < archiveUrlsOrAcctNames.length; i++) {
         console.log(`Scraping Link # ${i + 1}. ${archiveUrlsOrAcctNames[i]}`)
         const _archiveAcctName = extractArchiveAcctName(archiveUrlsOrAcctNames[i]);
-        if (!checkValidArchiveUrl(_archiveAcctName)) {
-            _status.push({
-                success: false,
-                archiveAcctName: _archiveAcctName,
-                error: "Invalid archive account name",
-            });
+        if (!checkValidArchiveUrlAndUpdateStatus(_archiveAcctName, _status)) {
             continue;
         }
 
         try {
-            const _linkData = await fetchArchiveMetadata(_archiveAcctName, limitedFields);
-            console.log(`Equality _linkData ${JSON.stringify(_linkData.length)} === ${FETCH_ACRHIVE_METADATA_COUNTER.value}`);
+            const archiveReport: ArchiveScrapReport = await fetchArchiveMetadata(_archiveAcctName, limitedFields);
+            console.log(`Equality _linkData ${JSON.stringify(archiveReport.linkData.length)} === ${FETCH_ACRHIVE_METADATA_COUNTER.value}`);
             if (onlyLinks) {
                 _status.push({
                     archiveAcctName: _archiveAcctName,
-                    archiveItemCount: _linkData.length,
+                    archiveItemCount: archiveReport.linkData.length,
                     success: true,
-                    links: _linkData
+                    archiveReport: archiveReport
                 });
             }
             else {
-                const excelPath = await generateExcel(_linkData, limitedFields);
+                const excelPath = await generateExcel(archiveReport.linkData, limitedFields);
                 _status.push({
                     excelPath,
                     success: true,
                     archiveAcctName: _archiveAcctName,
-                    archiveItemCount: _linkData.length,
+                    archiveItemCount: archiveReport.linkData.length,
                 });
             }
         }
@@ -110,7 +119,7 @@ export const scrapeArchiveOrgProfiles = async (archiveUrlsOrAcctNamesAsCSV: stri
             _status.push({
                 success: false,
                 archiveAcctName: _archiveAcctName,
-                error: e.message,
+                error: `${e}: ${e.message}`,
             });
         }
     }
@@ -121,7 +130,7 @@ export const scrapeArchiveOrgProfiles = async (archiveUrlsOrAcctNamesAsCSV: stri
             "Total": `${_status.length}`,
             "Success": `${_status.length - numFailures}`,
             "Failures": `${numFailures}`,
-            "All-Fields?": `${limitedFields === true ? "No" : "YES"}`,
+            "All-Fields?": `${limitedFields === true ? "No" : "YES"}`
         },
         scrapedMetadata: _status,
         numFailures,

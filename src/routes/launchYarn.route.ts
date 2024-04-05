@@ -1,17 +1,13 @@
 import * as express from 'express';
 import { downloadPdfFromGoogleDriveToProfile } from '../cliBased/googleapi/GoogleDriveApiReadAndDownload';
 import { scrapeArchiveOrgProfiles } from '../archiveDotOrg/archiveScraper';
-import * as fs from 'fs';
 import { generateGoogleDriveListingExcel } from '../cliBased/googleapi/GoogleDriveApiReadAndExport';
-import { getFolderInDestRootForProfile, getFolderInSrcRootForProfile } from '../cliBased/utils';
+import { getFolderInSrcRootForProfile } from '../cliBased/utils';
 import { moveFileSrcToDest, moveProfilesToFreeze, publishBookTitles } from '../services/yarnService';
 import { resetDownloadCounters } from '../cliBased/pdf/utils';
-import { ARCHIVE_EXCEL_PATH } from '../archiveDotOrg/utils';
-import { ArchiveDataRetrievalMsg, ArchiveDataRetrievalStatus } from '../archiveDotOrg/types';
+import { ArchiveDataRetrievalMsg, ArchiveDataRetrievalStatus, ArchiveScrapReport } from '../archiveDotOrg/types';
 import { downloadPdfFromArchiveToProfile } from '../archiveDotOrg/downloadUtil';
 import { vanitizePdfForProfile } from '../vanityService/VanityPdf';
-import { isValidPath } from '../utils/utils';
-import { moveToFreeze } from 'services/gradleLauncherService';
 export const launchYarnRoute = express.Router();
 
 launchYarnRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
@@ -99,7 +95,7 @@ launchYarnRoute.post('/getArchiveListing', async (req: any, resp: any) => {
                 }
             });
         }
-        const _resp = await scrapeArchiveOrgProfiles(archiveLinks, onlyLinks, limitedFields);
+        const _resp:ArchiveDataRetrievalMsg = await scrapeArchiveOrgProfiles(archiveLinks, onlyLinks, limitedFields);
         resp.status(200).send({
             response: {
                 _results: _resp
@@ -144,10 +140,10 @@ launchYarnRoute.post('/downloadArchivePdfs', async (req: any, resp: any) => {
                 });
                 continue;
             }
-            const res = await downloadPdfFromArchiveToProfile(entry.links, profile);
+            const res = await downloadPdfFromArchiveToProfile(entry.archiveReport.linkData, profile);
             results.push(res);
         }
-        
+
         const endTime = Date.now();
         const timeTaken = endTime - startTime;
         console.log(`Time taken to download downloadArchivePdfs: ${timeTaken} ms`);
@@ -255,7 +251,7 @@ launchYarnRoute.post('/addHeaderFooter', async (req: any, resp: any) => {
 
         resp.status(200).send({
             response: {
-                msg: `Request Recieved. Excel file will be created in folder ${ARCHIVE_EXCEL_PATH} in few minutes`,
+                msg: `Request Recieved. Header/Footer will be added in few minutes`,
                 "success": true,
             }
         });
