@@ -4,6 +4,7 @@ import { ExcelHeaderType, Hit, LinkData } from './types';
 import { sizeInfo } from '../mirror/FrontEndBackendCommonCode';
 import moment from 'moment';
 import { DD_MM_YYYY_FORMAT } from '../utils/constants';
+import { FETCH_ACRHIVE_METADATA_COUNTER } from './archiveScraper';
 
 export const ARCHIVE_EXCEL_PATH = `${os.homedir()}\\Downloads`;
 export const ARCHIVE_DOT_ORG_PREFIX = "https://archive.org";
@@ -113,7 +114,7 @@ export const extractPdfMetaData = async (identifier: string) => {
         return file.format.startsWith("Single Page");
     });
     return {
-        pdfName: (pdfRow && pdfRow.length > 0) ? pdfRow[0]?.name: "",
+        pdfName: (pdfRow && pdfRow.length > 0) ? pdfRow[0]?.name : "",
         pdfPageCount: (zippedFile && zippedFile.length > 0) ? zippedFile[0]?.filecount : 0
     }
 }
@@ -124,9 +125,11 @@ export const extractLinkedData = async (_hitsHits: Hit[],
     limitedFields = false) => {
     const _linkData: LinkData[] = [];
     for (const hit of _hitsHits) {
+        FETCH_ACRHIVE_METADATA_COUNTER.value++;
         const identifier = hit.fields.identifier;
         let pdfName = ""
         let pdfPageCount = 0
+        console.log(`${FETCH_ACRHIVE_METADATA_COUNTER.value}/${FETCH_ACRHIVE_METADATA_COUNTER.hitsTotal}).Fetching metadata for ${hit.fields.title} `)
         if (!limitedFields) {
             try {
                 const pdfMetaData = await extractPdfMetaData(identifier);

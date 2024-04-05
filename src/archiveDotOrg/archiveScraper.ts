@@ -6,7 +6,7 @@ const callGenericArchiveApi = async (username: string, pageIndex = 1) => {
     try {
         const _url =
             `https://archive.org/services/search/beta/page_production/?user_query=&page_type=account_details&page_target=@${username}&page_elements=[%22uploads%22]&hits_per_page=1000&page=${pageIndex}&sort=publicdate:desc&aggregations=false&client_url=https://archive.org/details/@${username}`;
-        console.log(`_url ${_url}`);
+        console.log(`callGenericArchiveApi:username(${pageIndex}) ${username}`);
         const response = await fetch(_url);
         const data = await response.json();
 
@@ -20,34 +20,38 @@ const callGenericArchiveApi = async (username: string, pageIndex = 1) => {
     }
 };
 
+export const FETCH_ACRHIVE_METADATA_COUNTER = {
+    value: 0,
+    hitsTotal: 0
+}
 const fetchArchiveMetadata = async (username: string, limitedFields = false): Promise<LinkData[]> => {
     username = username.startsWith('@') ? username.slice(1) : username;
+    FETCH_ACRHIVE_METADATA_COUNTER.value = 0;
     try {
-        let pageIndex = 1
-        let _hits = await callGenericArchiveApi(username, pageIndex++);
+        let _hits = await callGenericArchiveApi(username, 1);
+        let hitsTotal = _hits?.total;
+        FETCH_ACRHIVE_METADATA_COUNTER.hitsTotal = hitsTotal;
 
-        let totalHitsPickedCounter = _hits?.total;
         let _hitsHits = _hits.hits;
         let email = '';
+        const _linkData: LinkData[] = [];
         if (_hitsHits?.length >= 0) {
             email = await extractEmail(_hitsHits[0].fields.identifier);
-        }
-
-        const _linkData: LinkData[] = [];
-        if (totalHitsPickedCounter > 0) {
             const extractedData = await extractLinkedData(_hitsHits, email, username, limitedFields);
             _linkData.push(...extractedData);
         }
-        totalHitsPickedCounter = totalHitsPickedCounter - _hitsHits?.length;
-        while (totalHitsPickedCounter > 0) {
-            _hits = await callGenericArchiveApi(username, pageIndex++);
+        for (let i = 1; i < Math.ceil(hitsTotal / 1000); i++) {
+            _hits = await callGenericArchiveApi(username, (i + 1));
             _hitsHits = _hits.hits;
             if (_hitsHits?.length > 0) {
                 const extractedData = await extractLinkedData(_hitsHits, email, username, limitedFields);
                 _linkData.push(...extractedData);
             }
-            totalHitsPickedCounter = totalHitsPickedCounter - _hitsHits?.length;
         }
+        console.log(`Equality:
+         _linkData ${JSON.stringify(_linkData.length)}
+         FETCH_ACRHIVE_METADATA_COUNTER ${FETCH_ACRHIVE_METADATA_COUNTER.value}
+         hitsTotal: ${hitsTotal}`);
         return _linkData;
     }
     catch (err) {
@@ -82,7 +86,7 @@ export const scrapeArchiveOrgProfiles = async (archiveUrlsOrAcctNamesAsCSV: stri
 
         try {
             const _linkData = await fetchArchiveMetadata(_archiveAcctName, limitedFields);
-            console.log(`_linkData ${JSON.stringify(_linkData.length)}`);
+            console.log(`Equality _linkData ${JSON.stringify(_linkData.length)} === ${FETCH_ACRHIVE_METADATA_COUNTER.value}`);
             if (onlyLinks) {
                 _status.push({
                     archiveAcctName: _archiveAcctName,
@@ -113,12 +117,12 @@ export const scrapeArchiveOrgProfiles = async (archiveUrlsOrAcctNamesAsCSV: stri
     console.log(`_status ${JSON.stringify(_status)}`)
     const numFailures = _status.filter(item => item.success === false).length;
     return {
-        msg: `
-              Total: ${_status.length}
-              Success: ${_status.length - numFailures},
-              Failures: ${numFailures}
-              ${limitedFields === true ? "Limited Fields Only" : "No Restrictions. All fields were generated"}
-              `,
+        msg: {
+            "Total": `${_status.length}`,
+            "Success": `${_status.length - numFailures}`,
+            "Failures": `${numFailures}`,
+            "All-Fields?": `${limitedFields === true ? "No" : "YES"}`,
+        },
         scrapedMetadata: _status,
         numFailures,
         numSuccess: _status.length - numFailures,

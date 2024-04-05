@@ -42,7 +42,7 @@ export interface ArchiveDataRetrievalMsg {
     scrapedMetadata:ArchiveDataRetrievalStatus[];
     numFailures:number;
     numSuccess:number;
-    msg:string;
+    msg:string|object;
 }
 export interface ArchiveDataRetrievalStatus {
     archiveAcctName: string,
