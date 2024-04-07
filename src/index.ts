@@ -13,6 +13,7 @@ import {connectToMongo} from "./services/dbService";
 
 import { GLOBAL_DB_NAME } from './db/connection';
 import { dailyQAWorkReportRoute } from "./routes/dailyQAWorkReport.route";
+import { archiveItemRoute } from "./routes/archiveItem.route";
 
 const egangotri = express();
 const hostname = "localhost";
@@ -45,6 +46,7 @@ egangotri.use("/dailyQAWorkReport", dailyQAWorkReportRoute);
 egangotri.use("/uploadCycleRoute", uploadCycleRoute);
 egangotri.use("/user", userRoute);
 egangotri.use("/yarn", launchYarnRoute);
+egangotri.use("/searchArchives", archiveItemRoute);
 
 connectToMongo(args).then(() => {
   egangotri.listen(port,'0.0.0.0', async () => {
