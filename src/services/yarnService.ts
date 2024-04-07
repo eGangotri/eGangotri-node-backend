@@ -9,7 +9,7 @@ import * as path from 'path';
 import moment from "moment";
 import { DD_MM_YYYY_HH_MMFORMAT } from "../utils/constants";
 import * as _ from 'lodash';
-import { addSummaryToExcel, createMetadata } from "./Util";
+import { addSummaryToExcel, createMetadata } from "../excelToMongo/Util";
 import { jsonToExcel } from "../cliBased/excel/ExcelUtils";
 
 const _root = "C:\\_catalogWork\\_collation\\local";

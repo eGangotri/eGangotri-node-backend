@@ -1,6 +1,6 @@
 import { ArchiveItem } from "../models/ArchiveItem";
 import { getLimit } from "../routes/utils";
-import { replaceQuotes, replaceQuotesAndSplit } from "./Util";
+import { replaceQuotes, replaceQuotesAndSplit } from "../excelToMongo/Util";
 import { ArchiveItemListOptionsType } from "./types";
 
 export async function getListOfArchiveItems(queryOptions: ArchiveItemListOptionsType) {

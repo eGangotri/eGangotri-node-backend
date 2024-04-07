@@ -3,7 +3,7 @@ import { generateCatWorkReportCSV, generateCatWorkReportCSVApi2 } from "../servi
 import { deleteRowsByIds } from "../services/dailyWorkReportService";
 import { Request, Response } from "express";
 import { validateSuperAdminUserFromRequest, validateUserFromRequest } from "../services/userService"
-import { getDateTwoHoursBeforeNow, replaceQuotesAndSplit } from "../services/Util";
+import { getDateTwoHoursBeforeNow, replaceQuotesAndSplit } from "../excelToMongo/Util";
 import _ from "lodash";
 import { DailyCatWorkReport } from "../models/dailyCatWorkReport";
 import { generateCatCSVAsFile, generateCatCSVAsFileForOperatorAndEntryCountOnly, generateCatCSVAsFileOfAggregates, getListOfDailyCatWorkReport } from "../services/dailyCatWorkReportService";
