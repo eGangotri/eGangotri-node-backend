@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from "uuid";
 import { addItemstoMongoBulk } from "./dbService";
 import { ItemsUshered } from "../models/itemsUshered";
 import { DOC_TYPE } from "../common";
-import { stripQuotesForItemsInArray } from './Util';
+import { stripQuotesForItemsInArray } from '../excelToMongo/Util';
 
 export async function processCSV(
   csvFileName: string,

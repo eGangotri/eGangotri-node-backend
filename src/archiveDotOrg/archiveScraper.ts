@@ -1,5 +1,5 @@
 import { ArchiveDataRetrievalMsg, ArchiveDataRetrievalStatus, ArchiveScrapReport, LinkData } from './types';
-import { extractArchiveAcctName, extractEmail, extractLinkedData, generateExcel } from './utils';
+import { extractArchiveAcctName, extractEmail, extractLinkedData as extractLinkedDataAndSpecificFieldsFromAPI, generateExcel } from './utils';
 import * as _ from 'lodash';
 
 const callGenericArchiveApi = async (username: string, pageIndex = 1) => {
@@ -41,14 +41,14 @@ const fetchArchiveMetadata = async (username: string, limitedFields = false): Pr
         const _linkData: LinkData[] = [];
         if (_hitsHits?.length >= 0) {
             email = await extractEmail(_hitsHits[0].fields.identifier);
-            const extractedData = await extractLinkedData(_hitsHits, email, username, limitedFields);
+            const extractedData = await extractLinkedDataAndSpecificFieldsFromAPI(_hitsHits, email, username, limitedFields);
             _linkData.push(...extractedData);
         }
         for (let i = 1; i < Math.ceil(hitsTotal / 1000); i++) {
             _hits = await callGenericArchiveApi(username, (i + 1));
             _hitsHits = _hits.hits;
             if (_hitsHits?.length > 0) {
-                const extractedData = await extractLinkedData(_hitsHits, email, username, limitedFields);
+                const extractedData = await extractLinkedDataAndSpecificFieldsFromAPI(_hitsHits, email, username, limitedFields);
                 _linkData.push(...extractedData);
             }
         }

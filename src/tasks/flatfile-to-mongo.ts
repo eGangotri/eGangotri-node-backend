@@ -1,5 +1,5 @@
 
-import { filesOnGivenDate } from '../services/Util';
+import { filesOnGivenDate } from '../excelToMongo/Util';
 import { connectToMongo } from '../services/dbService';
 import { processCSVPair } from '../services/execute';
 import * as os from 'os';

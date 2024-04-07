@@ -1,50 +1,15 @@
 import { readFile, utils } from 'xlsx';
-import { connectToMongo } from './dbService';
+import { connectToMongo } from '../services/dbService';
 import { ArchiveItem } from '../models/ArchiveItem';
-import { MongoError } from 'mongodb';
+import { replaceExcelHeadersWithJsonKeys } from '../services/utils';
 
-const ExcelHeaderToJSONMAPPING = {
-    'Serial No.': 'serialNo',
-    Link: 'link',
-    'All Downloads Link Page': 'allDownloadsLinkPage',
-    'Pdf Download Link': 'pdfDownloadLink',
-    'Page Count': 'pageCount',
-    'Original Title': 'originalTitle',
-    'Title-Archive': 'titleArchive',
-    Size: 'size',
-    'Size Formatted': 'sizeFormatted',
-    Subject: 'subject',
-    Description: 'description',
-    Date: 'date',
-    Acct: 'acct',
-    Identifier: 'identifier',
-    Type: 'type',
-    'Media Type': 'mediaType',
-    'Email-User': 'emailUser'
-}
-
-const replaceExcelHeadersWithJsonKeys = (data: Object[]) => {
-    return data.map((row: Object) => {
-        const newRow = {};
-        Object.keys(row).forEach((key) => {
-            const dataRowKeyCorrespondingValue = row[key]
-            const jsonHeader = ExcelHeaderToJSONMAPPING[key]
-            newRow[jsonHeader] = dataRowKeyCorrespondingValue;
-        });
-        return newRow;
-    });
-}
-
-const excelToMongo = () => {
+const excelToMongo = (pathToExcel:string) => {
     // Read the Excel file
-    const workbook = readFile("C:\\tmp\\_data\\test\\drnaithani(15).xlsx");
+    const workbook = readFile(pathToExcel);
     const sheetNameList = workbook.SheetNames;
     const data = utils.sheet_to_json(workbook.Sheets[sheetNameList[0]]);
-    console.log("started inserting data...", JSON.stringify(data[0]));
     const newData = replaceExcelHeadersWithJsonKeys(data)
-    console.log(`started inserting
-    newData... ${JSON.stringify(newData[0])}`);
-
+    console.log(`started inserting newData (${newData?.length}) into mongo`);
 
     connectToMongo(["forUpload"]).then(async () => {
         // Prepare operations for bulkWrite
@@ -67,7 +32,6 @@ const excelToMongo = () => {
                 }
             });
     });
-
 }
 
 const printMongoTransactions = (res: any, error = false) => {
@@ -83,6 +47,6 @@ const printMongoTransactions = (res: any, error = false) => {
     console.log(msg);
 }
 
-excelToMongo();
-
+excelToMongo("C:\\Users\\chetan\\Downloads\\" + "upss_manuscripts(161)-08-Apr-2024" + ".xlsx");
+//process.exit(0);
 // yarn run excelToMongo

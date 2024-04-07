@@ -12,7 +12,7 @@ import { createReadStream } from "fs";
 import { CSV_HEADER_API2, CSV_HEADER_API2_FOR_AGGREGATES, CSV_HEADER_THREE_FIELDS_ONLYAPI2 } from "./constants";
 import * as Mirror from "../mirror/FrontEndBackendCommonCode"
 import * as _ from 'lodash';
-import { generateCsvDirAndName, getDateTwoHoursBeforeNow, replaceQuotes, replaceQuotesAndSplit } from "./Util";
+import { generateCsvDirAndName, getDateTwoHoursBeforeNow, replaceQuotes, replaceQuotesAndSplit } from "../excelToMongo/Util";
 
 
 export function setOptionsForDailyWorkReportListing(queryOptions: DailyWorkReportListOptionsType) {

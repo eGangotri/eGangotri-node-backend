@@ -1,6 +1,6 @@
 import { User } from "../models/user";
 import { getLimit } from "../routes/utils";
-import { replaceQuotesAndSplit } from "./Util";
+import { replaceQuotesAndSplit } from "../excelToMongo/Util";
 import { SUPERADMIN_ROLE } from "../mirror/FrontEndBackendCommonCodeConsts";
 import { Request } from "express";
 import { LoginUsersDocument, UserListOptionsType } from "../services/types";

@@ -3,7 +3,7 @@ import { generateQAWorkReportCSV, generateQAWorkReportCSVApi2 } from "../service
 import { deleteRowsByIds } from "../services/dailyWorkReportService";
 import { Request, Response } from "express";
 import { validateSuperAdminUserFromRequest, validateUserFromRequest } from "../services/userService"
-import { getDateTwoHoursBeforeNow, replaceQuotesAndSplit } from "../services/Util";
+import { getDateTwoHoursBeforeNow, replaceQuotesAndSplit } from "../excelToMongo/Util";
 import _ from "lodash";
 import { generateQACSVAsFile, generateQACSVAsFileForOperatorAndEntryCountOnly, generateQACSVAsFileOfAggregates, getListOfDailyQAWorkReport } from "../services/dailyQAWorkReportService";
 import { DailyQAWorkReport } from "../models/dailyQAReport";

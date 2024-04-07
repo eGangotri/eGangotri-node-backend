@@ -1,6 +1,6 @@
 import { UploadCycle } from "../models/uploadCycle";
 import { getLimit } from "../routes/utils";
-import { replaceQuotesAndSplit } from "./Util";
+import { replaceQuotesAndSplit } from "../excelToMongo/Util";
 import { UploadCycleListOptionsType } from "./types";
 
 export async function getListOfUploadCycles(queryOptions: UploadCycleListOptionsType) {

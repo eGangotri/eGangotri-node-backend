@@ -3,7 +3,7 @@ import { DailyWorkReport } from "../models/dailyWorkReport";
 import { generateCSV, generateCSVApi2 } from "../services/CsvUtil";
 import { deleteRowsByIds, generateCSVAsFile, generateCSVAsFileOfAggregates, generateCsvAsFileOnlyOperatorAndPdfCount, generateCsvAsFileOnlyOperatorAndPdfCountAggregate, getListOfDailyWorkReport } from "../services/dailyWorkReportService";
 import { Request, Response } from "express";
-import { getDateTwoHoursBeforeNow } from "../services/Util";
+import { getDateTwoHoursBeforeNow } from "../excelToMongo/Util";
 import _ from "lodash";
 import { validateSuperAdminUserFromRequest, validateUserFromRequest } from "../services/userService";
 

@@ -7,7 +7,7 @@ import { jsonToExcel } from "../../excel/ExcelUtils";
 import * as _ from 'lodash';
 import { sizeInfo } from "../../../mirror/FrontEndBackendCommonCode";
 import { FileStats } from "../../../imgToPdf/utils/types";
-import { addSummaryToExcel, createMetadata } from "services/Util";
+import { addSummaryToExcel, createMetadata } from "excelToMongo/Util";
 
 export const createExcelFilePathName = (mainExcelDataLength: number, folderName: String, _excelRoot: string, suffix: string) => {
     const _excelPath = `${_excelRoot}\\local`;
