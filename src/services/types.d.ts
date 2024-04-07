@@ -38,6 +38,17 @@ export type UploadCycleListOptionsType = {
   endDate?: string,
 };
 
+
+export type ArchiveItemListOptionsType = {
+  searchTerm?: string,
+  limit?: number,
+  archiveProfiles?: string,
+  wordBoundary?: string,
+  startDate?: string,
+  endDate?: string,
+};
+
+
 export type DailyWorkReportListOptionsType = {
   _id?: string,
   startDate?: string,
