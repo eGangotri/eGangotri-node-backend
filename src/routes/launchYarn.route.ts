@@ -3,7 +3,7 @@ import { downloadPdfFromGoogleDriveToProfile } from '../cliBased/googleapi/Googl
 import { scrapeArchiveOrgProfiles } from '../archiveDotOrg/archiveScraper';
 import { generateGoogleDriveListingExcel } from '../cliBased/googleapi/GoogleDriveApiReadAndExport';
 import { getFolderInSrcRootForProfile } from '../cliBased/utils';
-import { moveFileSrcToDest, moveProfilesToFreeze, publishBookTitles } from '../services/yarnService';
+import { moveFileSrcToDest, moveProfilesToFreeze, publishBookTitlesList } from '../services/yarnService';
 import { resetDownloadCounters } from '../cliBased/pdf/utils';
 import { ArchiveDataRetrievalMsg, ArchiveDataRetrievalStatus, ArchiveScrapReport } from '../archiveDotOrg/types';
 import { downloadPdfFromArchiveToProfile } from '../archiveDotOrg/downloadUtil';
@@ -214,13 +214,13 @@ launchYarnRoute.post('/yarnMoveProfilesToFreeze', async (req: any, resp: any) =>
     }
 })
 
-launchYarnRoute.post('/yarnGetBookDetails', async (req: any, resp: any) => {
+launchYarnRoute.post('/yarnGetTitleListings', async (req: any, resp: any) => {
     try {
         const argFirst = req.body.argFirst
         const pdfsOnly = req.body.pdfsOnly
-
-
-        const res = await publishBookTitles(argFirst, pdfsOnly);
+        const linksOnly = req.body.linksOnly
+        console.log(`yarnGetTitleListings argFirst ${argFirst} pdfsOnly ${pdfsOnly} linksOnly ${linksOnly}`)
+        const res = await publishBookTitlesList(argFirst, pdfsOnly, linksOnly);
         resp.status(200).send({
             response: res
         });
