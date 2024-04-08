@@ -2,7 +2,7 @@ import { isValidPath } from "../utils/utils";
 import { moveFilesAndFlatten } from "../cliBased/fileMover";
 import { getFolderInDestRootForProfile, getFolderInSrcRootForProfile } from "../cliBased/utils";
 import * as fs from 'fs';
-import { getAllPDFFilesWithMedata } from "../imgToPdf/utils/FileUtils";
+import { getAllPDFFiles, getAllPDFFilesWithMedata } from "../imgToPdf/utils/FileUtils";
 import { FileStats } from "../imgToPdf/utils/types";
 import { sizeInfo } from "../mirror/FrontEndBackendCommonCode";
 import * as path from 'path';
@@ -83,17 +83,19 @@ export const publishBookTitlesList = async (argFirst: string, pdfsOnly = true, l
     const _response = []
     for (let folder of pdfDumpFolders) {
         if (isValidPath(folder)) {
-            const metadata = await getAllPDFFilesWithMedata(folder);
             if (!linksOnly) {
+                const metadata = await getAllPDFFilesWithMedata(folder);
                 const textFileWrittenTo = createPdfReportAsText(metadata, pdfsOnly, path.basename(folder));
                 const excelWrittenTo = createExcelReport(metadata, pdfsOnly, path.basename(folder))
                 _response.push({
-                    success: true, msg: `Published Folder Contents for ${folder}\n
+                    success: true,
+                    msg: `Published Folder Contents for ${folder}\n
                 Text file: ${textFileWrittenTo}\n
                 Excel File: ${excelWrittenTo}`
                 });
             }
             else {
+                const metadata = await getAllPDFFiles(folder);
                 _response.push({
                     success: true,
                     msg: metadata.map((fileStats: FileStats) => fileStats.fileName)
