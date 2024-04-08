@@ -20,6 +20,7 @@ export async function moveFilesAndFlatten(sourceDir: string, targetDir: string, 
     let dirs = [sourceDir];
     const filesMoved = [];
     const allSrcPdfs: FileStats[] = await getAllPDFFiles(sourceDir);
+    const fileCollisionsResolvedByRename = [];
     if (allSrcPdfs.length === 0) {
         return {
             success: false,
@@ -53,7 +54,20 @@ export async function moveFilesAndFlatten(sourceDir: string, targetDir: string, 
                 const targetFile = path.join(targetDir, file.name);
                 if (!pdfOnly || (pdfOnly && file.name.endsWith('.pdf'))) {
                     filesMoved.push(`${++counter}/${_count}). ${file.name}`);
-                    fs.renameSync(sourceFile, targetFile);
+                    if (!fs.existsSync(targetFile)) {
+                        fs.renameSync(sourceFile, targetFile);
+                    }
+                    else {
+                        console.log(`File already exists in target dir ${targetFile}. renaming to ${targetFile}_1`);
+                        const extension = path.extname(targetFile);
+
+                        const newName = `${targetFile.replace(`.${extension}`,`_1.${extension}`)}`
+                        if (!fs.existsSync(newName)) {
+                            fs.renameSync(sourceFile, newName);
+                            fileCollisionsResolvedByRename.push(`${file.name}`);
+                        }
+
+                    }
                 }
                 //console.log(`Moved file: ${targetFile}`);
             }
@@ -71,6 +85,7 @@ export async function moveFilesAndFlatten(sourceDir: string, targetDir: string, 
         srcPdfsAfter: allSrcPdfsAfter?.length,
         destFilesBefore: allDestPdfs?.length,
         destFilesAfter: allDestPdfsAfter?.length,
+        fileCollisionsResolvedByRename,
         filesMoved
     };
 }
