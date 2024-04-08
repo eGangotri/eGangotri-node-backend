@@ -11,6 +11,7 @@ import { DD_MM_YYYY_HH_MMFORMAT } from "../utils/constants";
 import * as _ from 'lodash';
 import { addSummaryToExcel, createMetadata } from "../excelToMongo/Util";
 import { jsonToExcel } from "../cliBased/excel/ExcelUtils";
+import { link } from "pdfkit";
 
 const _root = "C:\\_catalogWork\\_collation\\local";
 
@@ -77,20 +78,28 @@ const getFoldersFromInput = (argFirst: string) => {
     return pdfDumpFolders
 }
 
-export const publishBookTitles = async (argFirst: string, pdfsOnly = true) => {
+export const publishBookTitlesList = async (argFirst: string, pdfsOnly = true, linksOnly: boolean) => {
     const pdfDumpFolders = getFoldersFromInput(argFirst);
-
     const _response = []
     for (let folder of pdfDumpFolders) {
         if (isValidPath(folder)) {
             const metadata = await getAllPDFFilesWithMedata(folder);
-            const textFileWrittenTo = createPdfReportAsText(metadata, pdfsOnly, path.basename(folder));
-            const excelWrittenTo = createExcelReport(metadata, pdfsOnly, path.basename(folder))
-            _response.push({
-                success: true, msg: `Published Folder Contents for ${folder}\n
+            if (!linksOnly) {
+                const textFileWrittenTo = createPdfReportAsText(metadata, pdfsOnly, path.basename(folder));
+                const excelWrittenTo = createExcelReport(metadata, pdfsOnly, path.basename(folder))
+                _response.push({
+                    success: true, msg: `Published Folder Contents for ${folder}\n
                 Text file: ${textFileWrittenTo}\n
                 Excel File: ${excelWrittenTo}`
-            });
+                });
+            }
+            else {
+                _response.push({
+                    success: true,
+                    msg: metadata.map((fileStats: FileStats) => fileStats.fileName)
+                });
+            }
+
         }
         else {
             _response.push({
@@ -105,13 +114,13 @@ export const publishBookTitles = async (argFirst: string, pdfsOnly = true) => {
 }
 
 function createPdfReportAsText(metadata: Array<FileStats>, pdfsOnly: boolean, folderBase: string) {
-    const report = generateTextFile(metadata, pdfsOnly);
+    const report = generateTextFileContent(metadata, pdfsOnly);
     const absPath = createFileName(pdfsOnly, folderBase, 'txt');
     fs.writeFileSync(absPath, report);
     return absPath;
 }
 
-function generateTextFile(metadata: Array<FileStats>, pdfsOnly: boolean) {
+function generateTextFileContent(metadata: Array<FileStats>, pdfsOnly: boolean) {
     console.log(`generateTextFile ${metadata.length} pdfsOnly ${pdfsOnly}`)
     let report = '';
     metadata.forEach((fileStats: FileStats) => {
@@ -144,7 +153,11 @@ const createMetadataSummary = (totalFileCount: number, totalPageCount: number, t
 function createFileName(pdfsOnly: boolean, folderBase: string, ext: string) {
     const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)
     const fileName = `${folderBase}_MegaList_${pdfsOnly ? 'pdfs_only' : 'all_files'}-${timeComponent}.${ext}`;
-    const absPath = `${_root}\\${folderBase}\\${fileName}`;
+    const filePath = `${_root}\\${folderBase}`;
+    if (!fs.existsSync(filePath)) {
+        fs.writeFileSync(filePath, '');
+    }
+    const absPath = `${filePath}\\${fileName}`;
     return absPath;
 }
 function createExcelReport(fileStats: Array<FileStats>, pdfsOnly: boolean, folderBase: string) {
