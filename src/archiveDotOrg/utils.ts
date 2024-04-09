@@ -138,7 +138,7 @@ export const extractLinkedData = async (_hitsHits: Hit[],
             }
             catch (err) {
                 console.log(`Error while extracting pdf metadata ${err}`);
-                throw err;
+                //throw err;
             }
         }
 
