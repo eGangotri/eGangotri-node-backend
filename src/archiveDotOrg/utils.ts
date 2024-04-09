@@ -22,13 +22,14 @@ let ARCHIVE_EXCEL_HEADER =
 {
     "serialNo": "Serial No.",
     "link": "Link",
-    allDwnldsLink: "All Downloads Link Page",
+    "allDwnldsLink": "All Downloads Link Page",
     "pdfDwnldLink": "Pdf Download Link",
     "pageCount": "Page Count",
     "originalTitle": "Original Title",
     "titleArchive": "Title-Archive",
     "size": "Size",
     "sizeFormatted": "Size Formatted",
+    "views": "Views",
     "subject": "Subject",
     "description": "Description",
     "date": "Date",
@@ -73,6 +74,7 @@ const linkDataToExcelFormat = (links: LinkData[], archiveExcelHeader: ExcelHeade
             [archiveExcelHeader.link]: link.link,
             [archiveExcelHeader.allDwnldsLink]: link.allFilesDownloadUrl,
             [archiveExcelHeader.titleArchive]: link.titleArchive,
+            [archiveExcelHeader.views]: link.downloads,
             [archiveExcelHeader.description]: link.description,
             [archiveExcelHeader.subject]: link.subject,
             [archiveExcelHeader.date]: link.publicdate,
@@ -157,7 +159,8 @@ export const extractLinkedData = async (_hitsHits: Hit[],
             item_size: hit.fields.item_size,
             item_size_formatted: sizeInfo(hit.fields.item_size),
             email,
-            pdfPageCount: pdfPageCount
+            pdfPageCount: pdfPageCount,
+            downloads: hit.fields.downloads
         }
         if (!limitedFields) {
             obj.originalTitle = originalTitle;

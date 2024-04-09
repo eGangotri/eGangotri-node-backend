@@ -8,6 +8,7 @@ export interface ExcelHeaderType {
     titleArchive: string;
     size: string;
     sizeFormatted: string;
+    views: string;
     subject: string;
     description: string;
     date: string;
@@ -39,6 +40,7 @@ export interface LinkData {
     item_size: number;
     item_size_formatted: string;
     email: string;
+    downloads: string;
 }
 
 export interface ArchiveDataRetrievalMsg {
@@ -71,7 +73,7 @@ export interface Fields {
     licenseurl: string;
     item_size: number;
     files_count: number;
-    downloads: number;
+    downloads: string;
     week: number;
     month: number;
     addeddate: Date;
