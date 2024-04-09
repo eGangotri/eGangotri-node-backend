@@ -5,6 +5,8 @@ set arg1WithoutQuotes=%arg1:"='%
 set commit_msg="Optimizations at %timestamp% %arg1WithoutQuotes%"
 git status
 git add src/*
+git add *.json
+git add yarn.lock
 git commit -m %commit_msg%
 git push origin master
 git status
