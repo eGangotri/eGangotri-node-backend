@@ -1,14 +1,14 @@
 import { readFile, utils } from 'xlsx';
 import { connectToMongo } from '../services/dbService';
 import { ArchiveItem } from '../models/ArchiveItem';
-import { replaceExcelHeadersWithJsonKeys } from '../services/utils';
+import { ArchiveExcelHeaderToJSONMAPPING, printMongoTransactions, replaceExcelHeadersWithJsonKeys } from './utils';
 
 const excelToMongo = (pathToExcel:string) => {
     // Read the Excel file
     const workbook = readFile(pathToExcel);
     const sheetNameList = workbook.SheetNames;
     const data = utils.sheet_to_json(workbook.Sheets[sheetNameList[0]]);
-    const newData = replaceExcelHeadersWithJsonKeys(data)
+    const newData = replaceExcelHeadersWithJsonKeys(data, ArchiveExcelHeaderToJSONMAPPING)
     console.log(`started inserting newData (${newData?.length}) into mongo`);
 
     connectToMongo(["forUpload"]).then(async () => {
@@ -34,19 +34,6 @@ const excelToMongo = (pathToExcel:string) => {
     });
 }
 
-const printMongoTransactions = (res: any, error = false) => {
-    const msg = `Number of documents inserted (${error ? 'with duplication-filtering' : 'without error'}): 
-    insertedCount: ${res.insertedCount}
-    matchedCount ${res.matchedCount}
-    modifiedCount: ${res.modifiedCount}
-    deletedCount: ${res.deletedCount}
-    upsertedCount: ${res.upsertedCount}
-    upsertedIds count: ${Object.keys(res?.upsertedIds)?.length}
-    insertedIds Intended count: ${Object.keys(res?.insertedIds)?.length}
-    `
-    console.log(msg);
-}
-
 excelToMongo("C:\\Users\\chetan\\Downloads\\" + "upss_manuscripts(161)-08-Apr-2024" + ".xlsx");
 //process.exit(0);
-// yarn run excelToMongo
+// yarn run excelToMongoArchive

@@ -40,7 +40,8 @@
     "scraper": "ts-node ./src/archiveDotOrg/archiveScraper",
     "addFooter": "ts-node ./src/footerToPdf/index2",
     "moveFilesToProfile": "ts-node ./src/cliBased/fileMover/index",
-    "excelToMongo":"ts-node ./src/excelToMongo/transferArchiveData.ts"
+    "excelToMongoArchive":"ts-node ./src/excelToMongo/transferArchiveExcelToMongo",
+    "excelToMongoGDrive":"ts-node ./src/excelToMongo/tranferGDriveExcelToMongo"
   },
   "repository": {
     "type": "git",
