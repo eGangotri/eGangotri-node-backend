@@ -1,7 +1,7 @@
 import { getLimit } from "../routes/utils";
 import { replaceQuotes, replaceQuotesAndSplit } from "../excelToMongo/Util";
 import { GDriveItemListOptionsType } from "./types";
-import { GDriveItem } from "models/GDriveItem";
+import { GDriveItem } from "../models/GDriveItem";
 
 export async function getListOfGDriveItems(queryOptions: GDriveItemListOptionsType) {
   const { limit, mongoOptionsFilter } = setOptionsForGDriveListing(queryOptions)
@@ -28,14 +28,14 @@ export function setOptionsForGDriveListing(queryOptions: GDriveItemListOptionsTy
     console.log(`searchTerm ${searchTerm}`)
     if (queryOptions?.wordBoundary) {
       mongoOptionsFilter = {
-        ...mongoOptionsFilter, titleArchive: {
+        ...mongoOptionsFilter, titleGDrive: {
           $regex: new RegExp("\\b" + searchTerm + "\\b", "i")
         }
       };
     }
     else {
       mongoOptionsFilter = {
-        ...mongoOptionsFilter, titleArchive: {
+        ...mongoOptionsFilter, titleGDrive: {
           $regex: new RegExp(searchTerm, "i")
         }
       }

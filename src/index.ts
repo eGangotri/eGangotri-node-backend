@@ -14,7 +14,7 @@ import {connectToMongo} from "./services/dbService";
 import { GLOBAL_DB_NAME } from './db/connection';
 import { dailyQAWorkReportRoute } from "./routes/dailyQAWorkReport.route";
 import { archiveItemRoute } from "./routes/archiveItem.route";
-import { GDriveItemRoute } from "./routes/GDriveItem.route"
+import { GDriveItemRoute } from "./routes/gDriveItem.route";
 
 const egangotri = express();
 const hostname = "localhost";

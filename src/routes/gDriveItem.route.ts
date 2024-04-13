@@ -1,6 +1,6 @@
 const express = require("express");
 import e, { Request, Response } from "express";
-import { getListOfArchiveItems } from "../services/archiveItemService";
+import { getListOfGDriveItems } from "../services/GDriveItemService";
 
 export const GDriveItemRoute = express.Router();
 
@@ -18,10 +18,10 @@ GDriveItemRoute.post("/search", async (req: Request, resp: Response) => {
         }
         else {
             console.log(`gDriveItemRoute /search ${JSON.stringify(searchTerm)}`);
-            const archiveItems = await getListOfArchiveItems({searchTerm});
-            console.log(`gDriveItemRoute /search ${JSON.stringify(archiveItems?.length > 0 ? archiveItems[0] : [])}`);
+            const gDriveItems = await getListOfGDriveItems({searchTerm});
+            console.log(`gDriveItemRoute /search ${JSON.stringify(gDriveItems?.length > 0 ? gDriveItems[0] : [])}`);
             resp.status(200).send({
-                response: archiveItems
+                response: gDriveItems
             });
         }
     } catch (err) {
