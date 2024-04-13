@@ -2,9 +2,9 @@ const express = require("express");
 import e, { Request, Response } from "express";
 import { getListOfArchiveItems } from "../services/archiveItemService";
 
-export const gDriveItemRoute = express.Router();
+export const GDriveItemRoute = express.Router();
 
-gDriveItemRoute.post("/search", async (req: Request, resp: Response) => {
+GDriveItemRoute.post("/search", async (req: Request, resp: Response) => {
     try {
         const searchTerm = req.body.searchTerm;
         if (!searchTerm?.trim()) {

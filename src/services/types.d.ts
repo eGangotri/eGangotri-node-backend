@@ -48,6 +48,15 @@ export type ArchiveItemListOptionsType = {
   endDate?: string,
 };
 
+export type GDriveItemListOptionsType = {
+  searchTerm?: string,
+  limit?: number,
+  archiveProfiles?: string,
+  wordBoundary?: string,
+  startDate?: string,
+  endDate?: string,
+};
+
 
 export type DailyWorkReportListOptionsType = {
   _id?: string,
