@@ -31,6 +31,8 @@ const schema = new mongoose.Schema(
         thumbnail: { type: String, required: false },
         createdTime: { type: String, required: true },
         source: { type: String, required: true },
+        identifier: { type: String, required: true },
+        identifierTruncFile: { type: String, required: true },
     },
     {
         collection: "GDriveItem",

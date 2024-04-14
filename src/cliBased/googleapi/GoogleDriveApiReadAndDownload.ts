@@ -2,7 +2,6 @@ import { _credentials } from './_utils/credentials_googleapi';
 import { listFolderContentsAsArrayOfData } from './service/GoogleApiService';
 import { getGoogleDriveInstance } from './service/CreateGoogleDrive';
 import { downloadPdfFromGoogleDrive } from '../pdf/downloadPdf';
-import { extractGoogleDriveId } from './_utils/GoogleDriveUtil';
 import { getFolderInSrcRootForProfile } from '../../cliBased/utils';
 import fs from 'fs';
 import path from 'path';
@@ -12,6 +11,7 @@ import { DOWNLOAD_COMPLETED_COUNT, DOWNLOAD_FAILED_COUNT, resetDownloadCounters 
 import { getAllPdfsInFolders, getDirectoriesWithFullPath } from '../../imgToPdf/utils/Utils';
 import { addHeaderAndFooterToPDF } from '../../pdfHeaderFooter';
 import { isValidPath } from '../../utils/utils';
+import { extractGoogleDriveId } from '../../mirror/GoogleDriveUtilsCommonCode';
 
 // Create a new Google Drive instance
 const drive = getGoogleDriveInstance();
