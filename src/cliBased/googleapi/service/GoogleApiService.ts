@@ -51,6 +51,7 @@ export async function listFolderContentsAndGenerateCSVAndExcel(_folderIdOrUrl: s
     else {
         console.log("No Data retrieved. No File will be created");
         return {
+            success:false,
             msg: `No Data retrieved.`,
         }
     }
