@@ -1,10 +1,11 @@
 import { excelToJson, jsonToExcel } from "../../excel/ExcelUtils";
 import { ExcelHeaders } from "../types";
-import { emptyExcelHeaderObj, linkToFileLocation, linkToTruncatedFileLocation, numPages, titleInGoogleDrive } from "./constants";
+import { emptyExcelHeaderObj, linkToFileLocation, linkToTruncatedFileLocation, numPages, thumbnail, titleInGoogleDrive } from "./constants";
 import * as fs from 'fs';
 import * as _ from 'lodash';
 import { DD_MM_YYYY_HH_MMFORMAT } from "../../../utils/utils";
 import moment from "moment";
+import path from "path";
 
 const ignoreDiff = true;
 const foundItems: string[] = [];
@@ -15,30 +16,58 @@ const combineExcels = (mainExcelFileName: string, secondaryExcelFileName: string
     const secondaryExcelDataAdjusted: ExcelHeaders[] = fillPageCount(secondaryExcelData);
     const dataMisMatchDiff = mainExcelData.length - secondaryExcelData.length
     const dataMismatch = dataMisMatchDiff !== 0
-    if (dataMismatch ) {
+    if (dataMismatch) {
         console.log(`Item Length List Mismatch by ${dataMisMatchDiff} :(${mainExcelData.length}!=${secondaryExcelData.length}) being ignored`);
     }
 
+    const subject = `Combining Excel Data: ${mainExcelFileName} and ${secondaryExcelFileName} to ${combinedExcelFileName}`
     if (dataMismatch && !ignoreDiff) {
         console.log(`Cant proceed Data Mismatch`);
         combineExcelJsons(mainExcelData, secondaryExcelDataAdjusted)
         checkErroneous(mainExcelData);
-        process.exit(0);
+        return {
+            errors: true,
+            errMsg: "Data Mismatch",
+            subject
+        }
     }
 
+    try {
+        const combinedExcelJsons = combineExcelJsons(mainExcelData, secondaryExcelDataAdjusted)
+        const getTrueLength = combinedExcelJsons.filter(x => !_.isEmpty(x[linkToFileLocation]))?.length || 0;
 
-    const combinedExcelJsons = combineExcelJsons(mainExcelData, secondaryExcelDataAdjusted)
-    const getTrueLength = combinedExcelJsons.filter(x => !_.isEmpty(x[linkToFileLocation]))?.length || 0;
+        const fileNameWithLength = `${combinedExcelFileName}-${getTrueLength}.xlsx`;
+        const _errorsCheck = checkErroneous(mainExcelData)
+        const res = jsonToExcel(combinedExcelJsons, fileNameWithLength);
 
-    const fileNameWithLength = `${combinedExcelFileName}-${getTrueLength}.xlsx`;
-    checkErroneous(mainExcelData)
-    jsonToExcel(combinedExcelJsons, fileNameWithLength);
+        return {
+            ..._errorsCheck,
+            ...res,
+            subject
+        }
+    }
+
+    catch (err) {
+        console.log(`Error: ${err}`)
+
+        return {
+            success: false,
+            errors: err,
+            subject
+        }
+    }
+
 }
 
 const checkErroneous = (_excelData: ExcelHeaders[]) => {
     const _erroneous = _excelData.filter(x => !foundItems.includes(x[titleInGoogleDrive]));
-    const errMsg = _.isEmpty(_erroneous) ? "None" : JSON.stringify(_erroneous.map(x => `${x[titleInGoogleDrive]}`))
-    console.log("errorneous items in Main: ", errMsg);
+    const errMsg = _.isEmpty(_erroneous) ? "" : JSON.stringify(_erroneous.map(x => `${x[titleInGoogleDrive]}`))
+    console.log("errorneous items in Main: ", errMsg === "" ? "None" : errMsg);
+    return {
+        errors: errMsg !== "",
+        errMsg
+
+    }
 }
 
 const combineExcelJsons = (mainExcelData: ExcelHeaders[], secondaryExcelDataAdjusted: ExcelHeaders[]) => {
@@ -76,6 +105,7 @@ const findCorrespondingExcelHeader = (firstExcel: ExcelHeaders, secondaryExcelDa
         if (_titleInGoogleDrivePrimary === _titleInGoogleDriveSecondary) {
             combinedObject[linkToTruncatedFileLocation] = secondExcel[linkToFileLocation] || "*"
             combinedObject[numPages] = secondExcel[numPages] || "*"
+            combinedObject[thumbnail] = secondExcel[thumbnail] || "*"
             foundItems.push(secondExcel[titleInGoogleDrive])
             return secondExcel;
         }
@@ -116,7 +146,25 @@ const exec = () => {
 
     combineExcels(mainExcelFileName, secondaryExcelFileName, combinedExcelFileName)
 }
-exec()
+
+export const combineGDriveAndReducedPdfExcels = (mainFilePathAbs: string,
+    secondaryFilePathAbs: string,
+    destRoot = "C:\\_catalogWork\\_collation") => {
+    const terminalFolder = path.basename(path.dirname(mainFilePathAbs));
+    const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)
+
+    const combinedExcelPath = `${destRoot}\\_catCombinedExcels\\${terminalFolder}`;
+    console.log(`_combinedExcelPath ${combinedExcelPath}`)
+    if (!fs.existsSync(combinedExcelPath)) {
+        fs.mkdirSync(combinedExcelPath);
+    }
+
+    const combinedExcelFileName = `${combinedExcelPath}\\${terminalFolder}-Catalog-${timeComponent}`;
+
+    return combineExcels(mainFilePathAbs, secondaryFilePathAbs, combinedExcelFileName)
+
+};
+//exec()
 //Combined google drive excel with reduced pdf drive excels
 //yarn run combineExcels
 

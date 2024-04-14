@@ -70,7 +70,16 @@ itemsUsheredRoute.post('/verifyUploadStatus', async (req: any, resp: any) => {
                 });
                 results.push(res);
             }
-            resp.status(200).send({ response: results });
+            const _profilesAsSet = _.uniq(itemsUshered.map(x => x.archiveProfile))
+            console.log(`_profilesAsSet: ${JSON.stringify(_profilesAsSet)}`)
+            const archiveProfiles = `(${_profilesAsSet})`;
+
+            resp.status(200).send({
+                response: {
+                    results,
+                    status: `Verfification of (${results.length}) items for  ${items.uploadCycleIdForVerification} ${archiveProfiles} completed.`
+                }
+            });
         }
         else {
             const uploadsForVerification: SelectedUploadItem[] = items.uploadsForVerification
@@ -80,7 +89,9 @@ itemsUsheredRoute.post('/verifyUploadStatus', async (req: any, resp: any) => {
                 const res = await checkUrlValidityForUploadItems(forVerification);
                 results.push(res);
             }
-            resp.status(200).send({ response: results });
+            resp.status(200).send({
+                response: results,
+            });
         }
     }
     catch (err: any) {
