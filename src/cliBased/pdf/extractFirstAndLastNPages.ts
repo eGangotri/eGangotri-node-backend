@@ -5,8 +5,9 @@ import * as path from 'path';
 import { createFolderIfNotExists, getAllPDFFiles } from '../../imgToPdf/utils/FileUtils';
 const fsPromises = require('fs').promises;
 
-const firstNPages = 10
-const lastNPages = 10
+let firstNPages = 10
+let lastNPages = 10
+
 let FINAL_REPORT: string[] = [];
 let PDF_PROCESSING_COUNTER = 0;
 
@@ -81,25 +82,38 @@ const padNumbersWithZeros = (num: number) => {
 }
 let counter = 0;
 
-const loopFolders = async (_srcFoldersWithPath: string[], destRootFolder: string) => {
-    try {
-        for (const [index, folder] of _srcFoldersWithPath.entries()) {
-            console.log(`Started processing ${folder}`)
-            PDF_PROCESSING_COUNTER = 0;
-            counter = 0
+export const extractFistsAndLastPages = async (_srcFoldersWithPath: string[], destRootFolder: string, nPages = 10) => {
+    if (nPages > 0) {
+        firstNPages = nPages;
+        lastNPages = nPages;
+    }
+    let failures = 0;
+    for (const [index, folder] of _srcFoldersWithPath.entries()) {
+        console.log(`Started processing ${folder}`)
+        PDF_PROCESSING_COUNTER = 0;
+        counter = 0
+        try {
             await loopFolderForExtraction(folder, destRootFolder, `${index + 1}/${_srcFoldersWithPath.length}`);
         }
-        console.log(`FINAL_REPORT(extractPages): ${FINAL_REPORT.map(x => x + "\n")}`)
+        catch (err) {
+            failures++;
+            FINAL_REPORT.push(`Error in processing ${folder} ${err}`)
+            console.log(`Error in processing ${folder} ${err}`)
+        }
     }
-    catch (err) {
-        console.log(err)
+    console.log(`FINAL_REPORT(extractPages): ${FINAL_REPORT.map(x => x + "\n")}`)
+    return {
+        success: failures === 0,
+        msg: `_srcFoldersWithPath ${_srcFoldersWithPath} destRootFolder ${destRootFolder} nPages ${nPages} failures ${failures}`,
+        report: FINAL_REPORT
     }
 }
-const destRootFolder = "C:\\_catalogWork\\_reducedPdfs";
 
-const srcRootFolder = 'H:\\eG-tr1-30';
-const _folders = [20]
-const _srcFoldersWithPath = _folders.map(x => `${srcRootFolder}\\Treasures${x}`)
+// const destRootFolder = "C:\\_catalogWork\\_reducedPdfs";
 
-loopFolders(_srcFoldersWithPath, destRootFolder)
+// const srcRootFolder = 'H:\\eG-tr1-30';
+// const _folders = [20]
+// const _srcFoldersWithPath = _folders.map(x => `${srcRootFolder}\\Treasures${x}`)
+
+//extractFistsAndLastPages(_srcFoldersWithPath, destRootFolder)
 //yarn run extractFirstAndLastNPages
