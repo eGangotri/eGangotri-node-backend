@@ -1,3 +1,5 @@
+import { extractGoogleDriveId } from "../mirror/GoogleDriveUtilsCommonCode";
+
 export const ArchiveExcelHeaderToJSONMAPPING = {
     'Serial No.': 'serialNo',
     Link: 'link',
@@ -60,6 +62,12 @@ export const replaceExcelHeadersWithJsonKeys = (data: Object[], mapping: Object,
             newRow[jsonHeader] = dataRowKeyCorrespondingValue;
             if (jsonHeader === 'pageCount') {
                 newRow[jsonHeader] = newRow[jsonHeader] || 0;
+            }
+            if (jsonHeader === 'gDriveLink') {
+                newRow["identifier"] = extractGoogleDriveId(dataRowKeyCorrespondingValue);
+            }
+            if (jsonHeader === 'truncFileLink') {
+                newRow["identifierTruncFile"] = extractGoogleDriveId(dataRowKeyCorrespondingValue);
             }
         });
         if (source.length > 0) {

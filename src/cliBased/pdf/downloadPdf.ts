@@ -1,15 +1,12 @@
-import { extractGoogleDriveId } from "../googleapi/_utils/GoogleDriveUtil";
 import fs from 'fs';
 import axios from 'axios';
 import { DOWNLOAD_COMPLETED_COUNT, incrementDownloadComplete, incrementDownloadFailed } from "./utils";
+import { extractGoogleDriveId, getGDrivePdfDownloadLink } from '../../mirror/GoogleDriveUtilsCommonCode';
 
 const { DownloaderHelper } = require('node-downloader-helper');
 
 const DEFAULT_DUMP_FOLDER = "D:\\_playground\\_dwnldPlayground";
 
-export const getPdfDownloadLink = (driveId: string) => {
-    return `https://drive.usercontent.google.com/download?id=${driveId}&export=download&authuser=0&confirm=t`
-}
 
 export const downloadPdfFromGoogleDrive = async (driveLinkOrFolderId: string,
     pdfDumpFolder: string,
@@ -17,7 +14,7 @@ export const downloadPdfFromGoogleDrive = async (driveLinkOrFolderId: string,
     dataLength: number = 0) => {
     console.log(`downloadPdfFromGoogleDrive ${driveLinkOrFolderId}`)
     const driveId = extractGoogleDriveId(driveLinkOrFolderId)
-    const downloadUrl = getPdfDownloadLink(driveId)
+    const downloadUrl = getGDrivePdfDownloadLink(driveId)
     const result = await downloadPdfFromUrl(pdfDumpFolder, downloadUrl, fileName, dataLength);
     return result;
 }

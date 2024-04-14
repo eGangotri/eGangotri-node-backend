@@ -3,11 +3,12 @@ import { dataToXslx } from '../../excel/ExcelUtils';
 import { sizeInfo } from '../../../mirror/FrontEndBackendCommonCode';
 import { FOLDER_MIME_TYPE, PDF_MIME_TYPE } from '../_utils/constants';
 import { GoogleApiData } from '../types';
-import { createFileNameWithPathForExport, extractGoogleDriveId, getFolderName, getFolderPathRelativeToRootFolder } from '../_utils/GoogleDriveUtil';
+import { createFileNameWithPathForExport, getFolderName, getFolderPathRelativeToRootFolder } from '../_utils/GoogleDriveUtil';
 import * as _ from 'lodash';
 import { GaxiosResponse } from 'gaxios';
 import { ellipsis } from '../../../mirror/utils';
 import * as FileUtils from '../../../imgToPdf/utils/FileUtils';
+import { extractGoogleDriveId } from '../../../mirror/GoogleDriveUtilsCommonCode';
 
 export async function listFolderContentsAsArrayOfData(folderId: string,
     drive: drive_v3.Drive,
@@ -50,7 +51,7 @@ export async function listFolderContentsAndGenerateCSVAndExcel(_folderIdOrUrl: s
     else {
         console.log("No Data retrieved. No File will be created");
         return {
-            msg: `No Data retirved`,
+            msg: `No Data retrieved.`,
         }
     }
 }
