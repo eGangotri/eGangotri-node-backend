@@ -1,6 +1,7 @@
 import { _credentials } from './_utils/credentials_googleapi';
 import { listFolderContentsAndGenerateCSVAndExcel } from './service/GoogleApiService';
 import { getGoogleDriveInstance } from './service/CreateGoogleDrive';
+import { isValidDriveId } from './Utils';
 
 // Create a new Google Drive instance
 const drive = getGoogleDriveInstance();
@@ -17,12 +18,28 @@ async function procReducedPdfGoogleDrive(driveLinkOrFolderID: string, folderName
 }
 
 export const generateGoogleDriveListingExcel = async (driveLinkOrFolderID: string, folderName: string) => {
-  const _result = await procOrigGoogleDrive(driveLinkOrFolderID, folderName);
-  console.log(`generateGoogleDriveListingExcel ${JSON.stringify(_result)}`)
-  return {
-    ..._result,
-    msg2: `Excel file created in folder ${EXPORT_ROOT_FOLDER}`
-  };
+  //check if driveLinkOrFolderID is a valid google link
+  if (!isValidDriveId(driveLinkOrFolderID)) {
+    return {
+      msg: `Invalid Google Drive Link/folderId ${driveLinkOrFolderID}`,
+      success: false
+    }
+  }
+  try {
+    const _result = await procOrigGoogleDrive(driveLinkOrFolderID, folderName);
+    console.log(`generateGoogleDriveListingExcel ${JSON.stringify(_result)}`)
+    return {
+      ..._result,
+     // msg2: `Excel file created in folder ${EXPORT_ROOT_FOLDER}`
+    };
+  }
+  catch (err) {
+    console.log('Error', err);
+    return {
+      msg: `Error ${err}`,
+      success: false
+    }
+  }
 }
 
 // (() => {
