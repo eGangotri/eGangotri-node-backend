@@ -23,6 +23,7 @@ export const placeOfPubliation = "Place of Publication";
 export const yearOfPublication = "Year of Publication";
 export const isbn = "ISBN";
 export const remarks = "Remarks";
+export const thumbnail = "Thumbnail";
 
 export const CSV_SEPARATOR = ";"
 export const SEPARATOR_SPECIFICATION = `sep=${CSV_SEPARATOR}\n`
@@ -55,7 +56,7 @@ export const emptyExcelHeaderObj = {
     "Size with Units": "",
     "Size in Bytes": "",
     "Folder Name": "",
-    "Thumbnail": "",
+    [thumbnail]: "",
     "Created Time": ""
 }
 

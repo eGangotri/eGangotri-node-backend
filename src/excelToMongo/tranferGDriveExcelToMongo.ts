@@ -34,6 +34,8 @@ const googleListingExcelToMongo = (pathToExcel: string) => {
         }
     });
 }
-googleListingExcelToMongo("C:\\_catalogWork\\_collation\\_catCombinedExcels\\Treasures 60\\" + "Treasures 60-Catalog-24-Aug-2023-01-22-1694" + ".xlsx");
+googleListingExcelToMongo("C:\\_catalogWork\\_collation\\Treasures-1G6A8zbbiLHFlqgNnPosq1q6JbOoI2dI--07-Aug-2023-23-09_2674-Catalog-14-Apr-2024-09-52-2674.xlsx");
+
+   // "C:\\_catalogWork\\_collation\\_catCombinedExcels\\Treasures 60\\" + "Treasures 60-Catalog-24-Aug-2023-01-22-1694" + ".xlsx");
 //process.exit(0);
 // yarn run excelToMongoGDrive 

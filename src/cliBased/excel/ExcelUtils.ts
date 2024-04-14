@@ -17,7 +17,7 @@ const setHeadersForExcel = () => {
   ]
 }
 
-const convertDatatoJson = (googleDrivePdfData:  Array<GoogleApiData>) => {
+const convertDatatoJson = (googleDrivePdfData: Array<GoogleApiData>) => {
   const jsonArray: ExcelHeaders[] = []
   for (const dataRow of googleDrivePdfData) {
     let x = 0
@@ -81,10 +81,14 @@ export const jsonToExcel = (jsonArray: any[], xlsxFileNameWithPath: string) => {
   // Write the workbook to a file
   xlsx.writeFile(workbook, xlsxFileNameWithPath);
   console.log(`created ${xlsxFileNameWithPath}`)
+  return {
+    success: true,
+    msg: `created ${xlsxFileNameWithPath}`
+  }
 }
 
 
-async function editExistingExcelSheet(excelSheetPath:string) {
+async function editExistingExcelSheet(excelSheetPath: string) {
   // Load the existing workbook
   const workbook = new ExcelJS.Workbook();
   await workbook.xlsx.readFile(excelSheetPath);
@@ -94,9 +98,9 @@ async function editExistingExcelSheet(excelSheetPath:string) {
   const rowFirst = sheet.getRow(1);
   rowFirst.actualCellCount
 
-  const rowArray:string[] = []
-  const range = _.range(0, rowFirst.actualCellCount-1);
-  range.forEach((row)=>rowArray.push(" "))
+  const rowArray: string[] = []
+  const range = _.range(0, rowFirst.actualCellCount - 1);
+  range.forEach((row) => rowArray.push(" "))
   // Insert new rows
   // sheet.addRow(['eGangotri Open Access Catalog Fields for Text Cataloging',...rowArray]);
   // sheet.addRow(['',...rowArray]);
@@ -136,16 +140,16 @@ async function editExistingExcelSheet(excelSheetPath:string) {
   }
 
   const parentDirname = path.dirname(excelSheetPath);
-  const newFileName =  path.parse(excelSheetPath).name
+  const newFileName = path.parse(excelSheetPath).name
 
   await workbook.xlsx.writeFile(`${parentDirname}\\1-${newFileName}.xlsx`);
 }
 
 
-export const excelToJson = (excelName: string, sheetName:string = SHEET_NAME) => {
+export const excelToJson = (excelName: string, sheetName: string = SHEET_NAME) => {
   const workbook = XLSX.readFile(excelName);
   const sheet = workbook.Sheets[sheetName] || workbook.Sheets[workbook.SheetNames[0]];
-  const jsonData:any[] = XLSX.utils.sheet_to_json(sheet);
+  const jsonData: any[] = XLSX.utils.sheet_to_json(sheet);
   console.log(`Converted ${excelName} to Json with Data Length ${jsonData.length}(figure may include empty rows)`);
   return jsonData
 }
