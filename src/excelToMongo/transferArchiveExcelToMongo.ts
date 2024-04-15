@@ -1,14 +1,16 @@
 import { readFile, utils } from 'xlsx';
 import { connectToMongo } from '../services/dbService';
 import { ArchiveItem } from '../models/ArchiveItem';
-import { ArchiveExcelHeaderToJSONMAPPING, printMongoTransactions, replaceExcelHeadersWithJsonKeys } from './utils';
+import { ArchiveExcelHeaderToJSONMAPPING, printMongoTransactions, replaceExcelHeadersWithJsonKeysForArchiveItem } from './utils';
+import fs from 'fs/promises';
+import path from 'path';
 
-const excelToMongo = (pathToExcel:string) => {
+const excelToMongo = (pathToExcel:string, source:string) => {
     // Read the Excel file
     const workbook = readFile(pathToExcel);
     const sheetNameList = workbook.SheetNames;
     const data = utils.sheet_to_json(workbook.Sheets[sheetNameList[0]]);
-    const newData = replaceExcelHeadersWithJsonKeys(data, ArchiveExcelHeaderToJSONMAPPING)
+    const newData = replaceExcelHeadersWithJsonKeysForArchiveItem(data, ArchiveExcelHeaderToJSONMAPPING, source)
     console.log(`started inserting newData (${newData?.length}) into mongo`);
 
     connectToMongo(["forUpload"]).then(async () => {
@@ -34,6 +36,20 @@ const excelToMongo = (pathToExcel:string) => {
     });
 }
 
-excelToMongo("C:\\Users\\chetan\\Downloads\\" + "upss_manuscripts(161)-08-Apr-2024" + ".xlsx");
-//process.exit(0);
+async function printXlsxFilePaths(directoryPath:string) {
+    try {
+        const files = await fs.readdir(directoryPath);
+
+        for (const file of files) {
+            if (path.extname(file) === '.xlsx') {
+                const filePath = path.join(directoryPath, file)
+                console.log(path.join(directoryPath, file));
+                excelToMongo(filePath, "Official")
+            }
+        }
+    } catch (err) {
+        console.error('Unable to scan directory: ' + err);
+    }
+}
+printXlsxFilePaths("C:\\Users\\chetan\\Desktop\\archiveExcels");
 // yarn run excelToMongoArchive

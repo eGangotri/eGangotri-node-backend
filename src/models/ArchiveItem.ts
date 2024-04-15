@@ -18,6 +18,7 @@ const schema = new mongoose.Schema(
         type: { type: String, required: true },
         mediaType: { type: String, required: true },
         emailUser: { type: String, required: true },
+        source: { type: String, required: false },
     },
     {
         collection: "ArchiveItem",

@@ -53,7 +53,7 @@ export const GoogleDriveExcelHeaderToJSONMAPPING = {
     "Created Time": 'createdTime',
 }
 
-export const replaceExcelHeadersWithJsonKeys = (data: Object[], mapping: Object, source: string = "") => {
+const replaceExcelHeadersWithJsonKeys = (data: Object[], mapping: Object, source: string = "") => {
     const jsonObj = data.map((row: Object) => {
         const newRow = {};
         Object.keys(row).forEach((key) => {
@@ -75,13 +75,23 @@ export const replaceExcelHeadersWithJsonKeys = (data: Object[], mapping: Object,
         }
         return newRow;
     });
+    return jsonObj
+}
 
+export const replaceExcelHeadersWithJsonKeysForArchiveItem = (data: Object[], mapping: Object, source: string) => {
+    const jsonObj = replaceExcelHeadersWithJsonKeys(data,mapping,source)
     return jsonObj.filter((row: Object) => {
-        return row['serialNo'] !== "";
+        return row['serialNo'] !== "" || row['originalTitle'] !== "";
     });
 }
 
 
+export const replaceExcelHeadersWithJsonKeysForGDriveItem = (data: Object[], mapping: Object, source: string) => {
+    const jsonObj = replaceExcelHeadersWithJsonKeys(data,mapping,source)
+    return jsonObj.filter((row: Object) => {
+        return row['serialNo'] !== "" || row['gDriveLink'] !== "";
+    });
+}
 
 export const printMongoTransactions = (res: any, error = false) => {
     const msg = `Number of documents inserted (${error ? 'with duplication-filtering' : 'without error'}): 
