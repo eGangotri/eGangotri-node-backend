@@ -4,6 +4,7 @@ import { generateGoogleDriveListingExcel } from '../cliBased/googleapi/GoogleDri
 import { ArchiveDataRetrievalMsg } from '../archiveDotOrg/types';
 import { extractFistsAndLastPages } from '../cliBased/pdf/extractFirstAndLastNPages';
 import { combineGDriveAndReducedPdfExcels } from '../cliBased/googleapi/_utils/CombineMainAndReducedExcelData';
+import path from 'path';
 
 export const launchYarnListMakerRoute = express.Router();
 
@@ -13,12 +14,22 @@ launchYarnListMakerRoute.post('/getGoogleDriveListing', async (req: any, resp: a
         const googleDriveLink = req?.body?.googleDriveLink;
         const folderName = req?.body?.folderName || "";
         console.log(`getGoogleDriveListing googleDriveLink ${googleDriveLink} `)
-        if (!googleDriveLink) {
+        if (!googleDriveLink || !folderName) {
             resp.status(300).send({
                 response: {
                     "status": "failed",
                     "success": false,
                     "message": "Pls. provide google drive Link"
+                }
+            });
+            return
+        }
+        if (folderName.includes(path.sep)) {
+            resp.status(300).send({
+                response: {
+                    "status": "failed",
+                    "success": false,
+                    "message": "Folder Name cannot have path separators"
                 }
             });
             return
@@ -114,7 +125,7 @@ launchYarnListMakerRoute.post('/combineGDriveAndReducedPdfExcels', async (req: a
         const mainExcelPath = req?.body?.mainExcelPath;
         const secondaryExcelPath = req?.body?.secondaryExcelPath;
         const destExcelPath = req?.body?.destExcelPath || undefined;
-        
+
         console.log(`combineGDriveAndReducedPdfExcels
          mainExcelPath ${mainExcelPath} 
         secondaryExcelPath ${secondaryExcelPath}

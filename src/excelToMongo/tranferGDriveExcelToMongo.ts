@@ -1,16 +1,16 @@
 import { readFile, utils } from 'xlsx';
 import { connectToMongo } from '../services/dbService';
-import { GoogleDriveExcelHeaderToJSONMAPPING, printMongoTransactions, replaceExcelHeadersWithJsonKeys } from './utils';
+import { GoogleDriveExcelHeaderToJSONMAPPING, printMongoTransactions, replaceExcelHeadersWithJsonKeysForGDriveItem } from './utils';
 import { GDriveItem } from '../models/GDriveItem';
 
-const googleListingExcelToMongo = (pathToExcel: string) => {
+const googleListingExcelToMongo = (pathToExcel: string, source: string) => {
     // Read the Excel file
     const workbook = readFile(pathToExcel);
     const sheetNameList = workbook.SheetNames;
     const data = utils.sheet_to_json(workbook.Sheets[sheetNameList[0]]);
-    const newData = replaceExcelHeadersWithJsonKeys(data, GoogleDriveExcelHeaderToJSONMAPPING, "Treasures-60");
+    const newData = replaceExcelHeadersWithJsonKeysForGDriveItem(data, GoogleDriveExcelHeaderToJSONMAPPING, source);
     console.log(`started inserting newData (${newData?.length}) into mongo 
-    ${JSON.stringify(newData[0] )}`);
+    ${JSON.stringify(newData[0])}`);
 
     connectToMongo(["forUpload"]).then(async () => {
         // Prepare operations for bulkWrite
@@ -34,8 +34,11 @@ const googleListingExcelToMongo = (pathToExcel: string) => {
         }
     });
 }
-googleListingExcelToMongo("C:\\_catalogWork\\_collation\\Treasures-1G6A8zbbiLHFlqgNnPosq1q6JbOoI2dI--07-Aug-2023-23-09_2674-Catalog-14-Apr-2024-09-52-2674.xlsx");
+googleListingExcelToMongo("C:\\_catalogWork\\_collation\\" +
+    "Treasures-1G6A8zbbiLHFlqgNnPosq1q6JbOoI2dI--07-Aug-2023-23-09_2674-Catalog-14-Apr-2024-09-52-2674.xlsx",
+    "Treasures-60"
+);
 
-   // "C:\\_catalogWork\\_collation\\_catCombinedExcels\\Treasures 60\\" + "Treasures 60-Catalog-24-Aug-2023-01-22-1694" + ".xlsx");
+// "C:\\_catalogWork\\_collation\\_catCombinedExcels\\Treasures 60\\" + "Treasures 60-Catalog-24-Aug-2023-01-22-1694" + ".xlsx");
 //process.exit(0);
 // yarn run excelToMongoGDrive 
