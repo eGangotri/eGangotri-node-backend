@@ -2,7 +2,7 @@ import * as express from 'express';
 import { scrapeArchiveOrgProfiles } from '../archiveDotOrg/archiveScraper';
 import { generateGoogleDriveListingExcel } from '../cliBased/googleapi/GoogleDriveApiReadAndExport';
 import { ArchiveDataRetrievalMsg } from '../archiveDotOrg/types';
-import { extractFistsAndLastPages } from '../cliBased/pdf/extractFirstAndLastNPages';
+import { extractFirstAndLastNPages } from '../cliBased/pdf/extractFirstAndLastNPages';
 import { combineGDriveAndReducedPdfExcels } from '../cliBased/googleapi/_utils/CombineMainAndReducedExcelData';
 import path from 'path';
 
@@ -89,7 +89,7 @@ launchYarnListMakerRoute.post('/getFirstAndLastNPages', async (req: any, resp: a
     try {
         const srcFoldersAsCSV = req?.body?.srcFolders;
         const destRootFolder = req?.body?.destRootFolder;
-        const nPages = req?.body?.nPages || 10;
+        const nPages = Number(req?.body?.nPages || 10);
         const _srcFolders: string[] = srcFoldersAsCSV.split(',');
         console.log(`getFirstAndLastNPages _folders ${_srcFolders} 
         destRootFolder ${destRootFolder}
@@ -105,7 +105,7 @@ launchYarnListMakerRoute.post('/getFirstAndLastNPages', async (req: any, resp: a
             });
             return;
         }
-        const _resp = await extractFistsAndLastPages(_srcFolders, destRootFolder, nPages);
+        const _resp = await extractFirstAndLastNPages(_srcFolders, destRootFolder, nPages);
         resp.status(200).send({
             response: {
                 _results: _resp
