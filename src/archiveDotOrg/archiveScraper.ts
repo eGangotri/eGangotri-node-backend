@@ -87,13 +87,13 @@ export const scrapeArchiveOrgProfiles = async (archiveUrlsOrAcctNamesAsCSV: stri
     console.log(`archiveUrlsOrAcctNames ${archiveUrlsOrAcctNames} onlyLinks ${onlyLinks}`);
     const _status: ArchiveDataRetrievalStatus[] = []
     for (let i = 0; i < archiveUrlsOrAcctNames.length; i++) {
-        console.log(`Scraping Link # ${i + 1}. ${archiveUrlsOrAcctNames[i]}`)
         const _archiveAcctName = extractArchiveAcctName(archiveUrlsOrAcctNames[i]);
-        if (!checkValidArchiveUrlAndUpdateStatus(_archiveAcctName, _status)) {
-            continue;
-        }
-
         try {
+            console.log(`Scraping Link # ${i + 1}. ${archiveUrlsOrAcctNames[i]}`)
+            if (!checkValidArchiveUrlAndUpdateStatus(_archiveAcctName, _status)) {
+                continue;
+            }
+    
             const archiveReport: ArchiveScrapReport = await fetchArchiveMetadata(_archiveAcctName, limitedFields);
             console.log(`Equality _linkData ${JSON.stringify(archiveReport.linkData.length)} === ${FETCH_ACRHIVE_METADATA_COUNTER.value}`);
             if (onlyLinks) {
