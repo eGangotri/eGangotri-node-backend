@@ -3,8 +3,8 @@ import { scrapeArchiveOrgProfiles } from '../archiveDotOrg/archiveScraper';
 import { generateGoogleDriveListingExcel } from '../cliBased/googleapi/GoogleDriveApiReadAndExport';
 import { ArchiveDataRetrievalMsg } from '../archiveDotOrg/types';
 import { extractFistsAndLastPages } from '../cliBased/pdf/extractFirstAndLastNPages';
-import { combineGDriveAndReducedPdfExcels } from '../cliBased/googleapi/_utils/CombineMainAndReducedExcelData';
 import path from 'path';
+import { pickLatestExcelsAndCombineGDriveAndReducedPdfExcels } from '../services/yarnListMakerService';
 
 export const launchYarnListMakerRoute = express.Router();
 
@@ -13,7 +13,8 @@ launchYarnListMakerRoute.post('/getGoogleDriveListing', async (req: any, resp: a
     try {
         const googleDriveLink = req?.body?.googleDriveLink;
         const folderName = req?.body?.folderName || "";
-        console.log(`getGoogleDriveListing googleDriveLink ${googleDriveLink} `)
+        const reduced = req?.body?.reduced || false;
+        console.log(`getGoogleDriveListing googleDriveLink ${googleDriveLink}/${folderName}/${reduced}`)
         if (!googleDriveLink || !folderName) {
             resp.status(300).send({
                 response: {
@@ -34,11 +35,46 @@ launchYarnListMakerRoute.post('/getGoogleDriveListing', async (req: any, resp: a
             });
             return
         }
-        const listingResult = await generateGoogleDriveListingExcel(googleDriveLink, folderName);
-        resp.status(200).send({
-            response: {
-                ...listingResult
+
+        const _links = []
+        const _folders = [];
+        if (googleDriveLink.includes(",") || folderName.includes(",")) {
+            const links = googleDriveLink.split(",").map((link: string) => {
+                return link.trim()
+            })
+            _links.push(...links);
+            const folders = folderName.split(",").map((folder: string) => {
+                return folder.trim()
+            })
+            _folders.push(...folders);
+            if (_links.length != _folders.length) {
+                console.log(`eror- links and folder counts diff`)
+                resp.status(300).send({
+                    response: {
+                        "status": "failed",
+                        "success": false,
+                        "message": "Number of Links and Folder Names should match"
+                    }
+                });
+                return
             }
+
+        }
+        else {
+            _links.push(googleDriveLink.trim());
+            _folders.push(folderName.trim());
+        }
+
+        const responses = [];
+        for (let i = 0; i < _links.length; i++) {
+            console.log(`getGoogleDriveListing ${_links[i]} ${_folders[i]}`)
+            const listingResult = await generateGoogleDriveListingExcel(_links[i], _folders[i], reduced);
+            responses.push(listingResult);
+        }
+
+        resp.status(200).send({
+            ...responses,
+            reduced: reduced ? "Reduced" : "Main"
         });
     }
 
@@ -142,7 +178,7 @@ launchYarnListMakerRoute.post('/combineGDriveAndReducedPdfExcels', async (req: a
             });
             return;
         }
-        const _resp = combineGDriveAndReducedPdfExcels(mainExcelPath, secondaryExcelPath, destExcelPath);
+        const _resp = pickLatestExcelsAndCombineGDriveAndReducedPdfExcels(mainExcelPath, secondaryExcelPath, destExcelPath);
         resp.status(200).send({
             response: {
                 _results: _resp

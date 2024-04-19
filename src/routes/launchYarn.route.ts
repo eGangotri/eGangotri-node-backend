@@ -1,7 +1,6 @@
 import * as express from 'express';
 import { downloadPdfFromGoogleDriveToProfile } from '../cliBased/googleapi/GoogleDriveApiReadAndDownload';
 import { scrapeArchiveOrgProfiles } from '../archiveDotOrg/archiveScraper';
-import { generateGoogleDriveListingExcel } from '../cliBased/googleapi/GoogleDriveApiReadAndExport';
 import { getFolderInSrcRootForProfile } from '../cliBased/utils';
 import { moveFileSrcToDest, moveProfilesToFreeze, publishBookTitlesList } from '../services/yarnService';
 import { resetDownloadCounters } from '../cliBased/pdf/utils';

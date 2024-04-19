@@ -111,3 +111,23 @@ export async function checkUrlValidity(url: string): Promise<boolean> {
   }
 }
 
+
+export const getLatestExcelFile = (folderPath: string) => {
+    const files = fs.readdirSync(folderPath);
+    const excelFiles = files.filter(file => path.extname(file).toLowerCase() === '.xlsx' || path.extname(file).toLowerCase() === '.xls');
+
+    let latestFile;
+    let latestTime = 0;
+
+    excelFiles.forEach(file => {
+        const filePath = path.join(folderPath, file);
+        const stat = fs.statSync(filePath);
+
+        if (stat.mtimeMs > latestTime) {
+            latestTime = stat.mtimeMs;
+            latestFile = filePath;
+        }
+    });
+
+    return latestFile;
+}
