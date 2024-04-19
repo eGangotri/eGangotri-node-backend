@@ -5,8 +5,8 @@ import * as path from 'path';
 import { createFolderIfNotExists, getAllPDFFiles } from '../../imgToPdf/utils/FileUtils';
 const fsPromises = require('fs').promises;
 
-let firstNPages = 10
-let lastNPages = 10
+let firstNPages: number = 10
+let lastNPages: number = 10
 
 let FINAL_REPORT: string[] = [];
 let PDF_PROCESSING_COUNTER = 0;
@@ -19,12 +19,13 @@ async function createPartialPdf(inputPath: string, outputPath: string, pdfsToBeP
     const pdfPageCount = pdfDoc.getPages().length
 
     console.log(`Pdf Extraction: Folder # (${index}) Pdf No. ${++counter}/${pdfsToBeProcessedCount} pdfPageCount ${pdfPageCount}`);
-
-    if (pdfPageCount < (firstNPages + lastNPages)) {
-        range = _.range(0, pdfPageCount);
+    console.log(`lastNPages: ${pdfPageCount} < (${firstNPages} + ${lastNPages}) ${firstNPages + lastNPages}
+    typeof firstNPages + lastNPages ${typeof firstNPages} ${typeof lastNPages}`)
+    if (pdfPageCount > (firstNPages + lastNPages)) {
+        range = _.range(0, firstNPages).concat(_.range(pdfPageCount - lastNPages, pdfPageCount));
     }
     else {
-        range = _.range(0, firstNPages).concat(_.range(pdfPageCount - lastNPages, pdfPageCount));
+        range = _.range(0, pdfPageCount);
     }
 
     const newPdf = await PDFDocument.create();
@@ -82,7 +83,7 @@ const padNumbersWithZeros = (num: number) => {
 }
 let counter = 0;
 
-export const extractFistsAndLastPages = async (_srcFoldersWithPath: string[], destRootFolder: string, nPages = 10) => {
+export const extractFirstAndLastNPages = async (_srcFoldersWithPath: string[], destRootFolder: string, nPages: number) => {
     if (nPages > 0) {
         firstNPages = nPages;
         lastNPages = nPages;
