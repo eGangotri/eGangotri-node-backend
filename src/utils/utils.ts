@@ -8,7 +8,7 @@ export const DD_MM_YYYY_FORMAT = 'DD-MMM-YYYY'
 export const DD_MM_YYYY_HH_MMFORMAT = 'DD-MMM-YYYY-HH-mm'
 
 
-export function isValidPath(path: string):boolean {
+export function isValidPath(path: string): boolean {
   try {
     fs.accessSync(path);
     return true;
@@ -113,21 +113,26 @@ export async function checkUrlValidity(url: string): Promise<boolean> {
 
 
 export const getLatestExcelFile = (folderPath: string) => {
-    const files = fs.readdirSync(folderPath);
-    const excelFiles = files.filter(file => path.extname(file).toLowerCase() === '.xlsx' || path.extname(file).toLowerCase() === '.xls');
+  const files = fs.readdirSync(folderPath);
+  const excelFiles = files.filter(file => path.extname(file).toLowerCase() === '.xlsx' || path.extname(file).toLowerCase() === '.xls');
 
-    let latestFile;
-    let latestTime = 0;
+  let latestFilePath;
+  let latestFileName;
+  let latestTime = 0;
 
-    excelFiles.forEach(file => {
-        const filePath = path.join(folderPath, file);
-        const stat = fs.statSync(filePath);
+  excelFiles.forEach(file => {
+    const filePath = path.join(folderPath, file);
+    const stat = fs.statSync(filePath);
 
-        if (stat.mtimeMs > latestTime) {
-            latestTime = stat.mtimeMs;
-            latestFile = filePath;
-        }
-    });
+    if (stat.mtimeMs > latestTime) {
+      latestTime = stat.mtimeMs;
+      latestFilePath = filePath;
+      latestFileName = file;
+    }
+  });
 
-    return latestFile;
+  return {
+    latestFilePath,
+    latestFileName
+  };
 }

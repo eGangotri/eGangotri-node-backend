@@ -5,7 +5,17 @@ import { ArchiveExcelHeaderToJSONMAPPING, printMongoTransactions, replaceExcelHe
 import fs from 'fs/promises';
 import path from 'path';
 
-async function transferArchiveExcelToMongo(newData: {}[]) {
+const transformExcelToJSON = async (pathToExcel: string, source: string) => {
+    // Read the Excel file
+    const workbook = readFile(pathToExcel);
+    const sheetNameList = workbook.SheetNames;
+    const data = utils.sheet_to_json(workbook.Sheets[sheetNameList[0]]);
+    const newData = replaceExcelHeadersWithJsonKeysForArchiveItem(data, ArchiveExcelHeaderToJSONMAPPING, source)
+    console.log(`started inserting newData (${newData?.length}) into mongo`);
+    return newData;
+}
+
+async function excelJsonToMongo(newData: {}[]) {
     try {
         // Prepare operations for bulkWrite
         const operations = newData.map(document => ({
@@ -30,27 +40,19 @@ async function transferArchiveExcelToMongo(newData: {}[]) {
     }
 }
 
-const excelToMongo = async (pathToExcel: string, source: string) => {
-    // Read the Excel file
-    const workbook = readFile(pathToExcel);
-    const sheetNameList = workbook.SheetNames;
-    const data = utils.sheet_to_json(workbook.Sheets[sheetNameList[0]]);
-    const newData = replaceExcelHeadersWithJsonKeysForArchiveItem(data, ArchiveExcelHeaderToJSONMAPPING, source)
-    console.log(`started inserting newData (${newData?.length}) into mongo`);
-    await connectToMongo(["forUpload"]);
-    await transferArchiveExcelToMongo(newData);
-}
 
-async function exec(directoryPath: string) {
+export async function archiveExceltoMongo(directoryPath: string) {
+    await connectToMongo(["forUpload"]);
     try {
         const files = await fs.readdir(directoryPath);
         const rootFolder = path.basename(directoryPath);
-
+        
         for (const file of files) {
             if (path.extname(file) === '.xlsx') {
                 const filePath = path.join(directoryPath, file)
                 console.log(` processing ${rootFolder} : ${path.join(directoryPath, file)}`);
-                excelToMongo(filePath, rootFolder)
+                const newData = await transformExcelToJSON(filePath, rootFolder)
+                await excelJsonToMongo(newData);
             }
         }
     } catch (err) {
@@ -63,7 +65,7 @@ async function exec(directoryPath: string) {
 async function deleteRowsByAccts(accts: string[]) {
     try {
         connectToMongo(["forUpload"]).then(async () => {
-            const result = await ArchiveItem.deleteMany({ acct: { $in: accts} });
+            const result = await ArchiveItem.deleteMany({ acct: { $in: accts } });
             console.log(`${result?.deletedCount} document(s) were deleted.`);
             printMongoTransactions(result);
 
@@ -75,5 +77,5 @@ async function deleteRowsByAccts(accts: string[]) {
 }
 
 //deleteRowsByAccts(['drnaithaniX', 'lucknow_state_museumXXX'] );
-exec("C:\\Users\\chetan\\Desktop\\archiveExcels\\Varanasi");
+//archiveExceltoMongo("C:\\Users\\chetan\\Desktop\\archiveExcels\\Varanasi");
 // yarn run excelToMongoArchive

@@ -2,42 +2,85 @@ import { readFile, utils } from 'xlsx';
 import { connectToMongo } from '../services/dbService';
 import { GoogleDriveExcelHeaderToJSONMAPPING, printMongoTransactions, replaceExcelHeadersWithJsonKeysForGDriveItem } from './utils';
 import { GDriveItem } from '../models/GDriveItem';
+import path from 'path';
+import { getLatestExcelFile } from '../utils/utils';
 
-const googleListingExcelToMongo = (pathToExcel: string, source: string) => {
+const transformExcelToJSON = async (pathToExcel: string, source: string) => {
     // Read the Excel file
     const workbook = readFile(pathToExcel);
     const sheetNameList = workbook.SheetNames;
     const data = utils.sheet_to_json(workbook.Sheets[sheetNameList[0]]);
     const newData = replaceExcelHeadersWithJsonKeysForGDriveItem(data, GoogleDriveExcelHeaderToJSONMAPPING, source);
-    console.log(`started inserting newData (${newData?.length}) into mongo 
-    ${JSON.stringify(newData[0])}`);
+    console.log(`started inserting newData (${newData?.length}) into mongo`);
+    return newData;
+}
 
-    connectToMongo(["forUpload"]).then(async () => {
-        // Prepare operations for bulkWrite
-        const operations = newData.map(document => ({
-            insertOne: {
-                document
+async function excelJsonToMongo(newData: {}[]) {
+    const operations = newData.map(document => ({
+        insertOne: {
+            document
+        }
+    }));
+
+    try {
+        const res = await GDriveItem.bulkWrite(operations, { ordered: false });
+        console.log("after bulkWrite");
+        const results = printMongoTransactions(res);
+        return {
+            ...results,
+            success: true,
+
+        }
+    }
+    catch (err) {
+        if (err.code === 11000) { // Duplicate key error code
+            console.log('Some documents were not inserted due to duplicate keys');
+            const results = printMongoTransactions(err.result, true);
+            return {
+                ...results,
+                success: false,
+                err: `err.code 110001` + err
             }
-        }));
-
-        try {
-            const res = await GDriveItem.bulkWrite(operations, { ordered: false });
-            console.log("after bulkWrite");
-            printMongoTransactions(res);
-        } catch (err) {
-            if (err.code === 11000) { // Duplicate key error code
-                console.log('Some documents were not inserted due to duplicate keys');
-                printMongoTransactions(err.result, true);
-            } else {
-                console.error(`err bulkWrite ArchiveItem ${err}`);
+        } else {
+            console.error(`err bulkWrite GDriveItem ${err}`); return {
+                success: false,
+                err: err
             }
         }
-    });
+    }
 }
-googleListingExcelToMongo("C:\\_catalogWork\\_collation\\" +
-    "Treasures-1G6A8zbbiLHFlqgNnPosq1q6JbOoI2dI--07-Aug-2023-23-09_2674-Catalog-14-Apr-2024-09-52-2674.xlsx",
-    "Treasures-60"
-);
+
+export async function gDriveExceltoMongo(directoryPath: string) {
+    let results = {};
+    try {
+        const { latestFilePath: gDriveExcel, latestFileName } = getLatestExcelFile(directoryPath)
+
+        await connectToMongo(["forUpload"]);
+        if (path.extname(gDriveExcel) === '.xlsx') {
+            const rootFolder = path.basename(directoryPath);
+            console.log(` processing ${rootFolder} for ${gDriveExcel}`);
+            const newData = await transformExcelToJSON(gDriveExcel, rootFolder)
+            results = await excelJsonToMongo(newData);
+            return {
+                ...results,
+                msg: `excel (${latestFileName}) to mongo completed for ${rootFolder}`,
+                directoryPath: `${directoryPath}`
+            }
+        }
+    } catch (err) {
+        console.error('Unable to scan directory: ' + err);
+        return {
+            success: false,
+            err: err,
+            msg: `Error processing scan directory: ${directoryPath}`
+        }
+    }
+}
+
+// gDriveExceltoMongo("C:\\_catalogWork\\_collation\\" +
+//     "Treasures-1G6A8zbbiLHFlqgNnPosq1q6JbOoI2dI--07-Aug-2023-23-09_2674-Catalog-14-Apr-2024-09-52-2674.xlsx",
+//     "Treasures-60"
+// );
 
 // "C:\\_catalogWork\\_collation\\_catCombinedExcels\\Treasures 60\\" + "Treasures 60-Catalog-24-Aug-2023-01-22-1694" + ".xlsx");
 //process.exit(0);

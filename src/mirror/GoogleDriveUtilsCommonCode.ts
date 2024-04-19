@@ -14,7 +14,6 @@ const regex1 = /\/d\/([^/]+)\/view/;
 const regex2 = /\/folders\/([^/?]+)/;
 
 export function extractGoogleDriveId(folderIdOrUrl: string) {
-    console.log("extractGoogleDriveId", folderIdOrUrl)
     folderIdOrUrl = folderIdOrUrl.trim()
     try {
         if (folderIdOrUrl.startsWith("http")) {
