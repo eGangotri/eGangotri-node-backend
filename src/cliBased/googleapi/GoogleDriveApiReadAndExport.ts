@@ -17,7 +17,7 @@ async function procReducedPdfGoogleDrive(driveLinkOrFolderID: string, folderName
   return res;
 }
 
-export const generateGoogleDriveListingExcel = async (driveLinkOrFolderID: string, folderName: string) => {
+export const generateGoogleDriveListingExcel = async (driveLinkOrFolderID: string, folderName: string, reduced = false) => {
   //check if driveLinkOrFolderID is a valid google link
   if (!isValidDriveId(driveLinkOrFolderID)) {
     return {
@@ -26,11 +26,11 @@ export const generateGoogleDriveListingExcel = async (driveLinkOrFolderID: strin
     }
   }
   try {
-    const _result = await procOrigGoogleDrive(driveLinkOrFolderID, folderName);
+    const _result =
+      reduced ? await procReducedPdfGoogleDrive(driveLinkOrFolderID, folderName) : await procOrigGoogleDrive(driveLinkOrFolderID, folderName);
     console.log(`generateGoogleDriveListingExcel ${JSON.stringify(_result)}`)
     return {
       ..._result,
-     // msg2: `Excel file created in folder ${EXPORT_ROOT_FOLDER}`
     };
   }
   catch (err) {

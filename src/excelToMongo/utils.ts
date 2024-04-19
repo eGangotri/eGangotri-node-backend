@@ -100,8 +100,8 @@ export const printMongoTransactions = (res: any, error = false) => {
     modifiedCount: ${res.modifiedCount}
     deletedCount: ${res.deletedCount}
     upsertedCount: ${res.upsertedCount}
-    upsertedIds count: ${Object.keys(res?.upsertedIds)?.length}
-    insertedIds Intended count: ${Object.keys(res?.insertedIds)?.length}
+    upsertedIds count: ${Object.keys(res?.upsertedIds || {})?.length}
+    insertedIds Intended count: ${Object.keys(res?.insertedIds || {})?.length}
     insertedIds Intended count: ${JSON.stringify(res)}
     `
     console.log(msg);
