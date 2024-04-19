@@ -105,4 +105,11 @@ export const printMongoTransactions = (res: any, error = false) => {
     insertedIds Intended count: ${JSON.stringify(res)}
     `
     console.log(msg);
+    return {
+        insertedCount: res.insertedCount,
+        matchedCount: res.matchedCount,
+        modifiedCount: res.modifiedCount,
+        deletedCount: res.deletedCount,
+        upsertedCount: res.upsertedCount,
+    };
 }

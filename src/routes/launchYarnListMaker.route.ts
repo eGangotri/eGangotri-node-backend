@@ -1,10 +1,12 @@
+import path from 'path';
 import * as express from 'express';
 import { scrapeArchiveOrgProfiles } from '../archiveDotOrg/archiveScraper';
 import { generateGoogleDriveListingExcel } from '../cliBased/googleapi/GoogleDriveApiReadAndExport';
 import { ArchiveDataRetrievalMsg } from '../archiveDotOrg/types';
-import { extractFistsAndLastPages } from '../cliBased/pdf/extractFirstAndLastNPages';
-import path from 'path';
 import { pickLatestExcelsAndCombineGDriveAndReducedPdfExcels } from '../services/yarnListMakerService';
+import { extractFirstAndLastNPages } from '../cliBased/pdf/extractFirstAndLastNPages';
+import { gDriveExceltoMongo } from '../excelToMongo/tranferGDriveExcelToMongo';
+import { archiveExceltoMongo } from '../excelToMongo/transferArchiveExcelToMongo';
 
 export const launchYarnListMakerRoute = express.Router();
 
@@ -191,3 +193,71 @@ launchYarnListMakerRoute.post('/combineGDriveAndReducedPdfExcels', async (req: a
         resp.status(400).send(err);
     }
 })
+
+
+launchYarnListMakerRoute.post('/dumpGDriveExcelToMongo', async (req: any, resp: any) => {
+    try {
+        const comboExcelPath = req?.body?.comboExcelPath;
+        const folderName = req?.body?.folderName;
+
+        console.log(`combineGDriveAndReducedPdfExcels
+        comboExcelPath ${comboExcelPath} 
+        folderName ${folderName}
+        `)
+
+        if (!comboExcelPath) {
+            resp.status(300).send({
+                response: {
+                    "status": "failed",
+                    "success": false,
+                    "msg": "Pls. provide Combo Excel Path"
+                }
+            });
+            return;
+        }
+        const _resp = await gDriveExceltoMongo(comboExcelPath);
+        resp.status(200).send({
+            response: {
+                _results: _resp
+            }
+        });
+    }
+
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})
+
+//untested
+launchYarnListMakerRoute.post('/dumpArchiveExcelToMongo', async (req: any, resp: any) => {
+    try {
+        const archiveExcelPath = req?.body?.archiveExcelPath;
+        console.log(`dumpArchiveExcelToMongo
+        comboExcelPath ${archiveExcelPath} 
+        `)
+
+        if (!archiveExcelPath) {
+            resp.status(300).send({
+                response: {
+                    "status": "failed",
+                    "success": false,
+                    "msg": "Pls. provide Archive Excel Path and Folder Name"
+                }
+            });
+            return;
+        }
+        const _resp = archiveExceltoMongo(archiveExcelPath);
+        resp.status(200).send({
+            response: {
+                _results: _resp
+            }
+        });
+    }
+
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})
+
