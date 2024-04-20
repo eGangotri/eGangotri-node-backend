@@ -6,6 +6,13 @@ export const pickLatestExcelsAndCombineGDriveAndReducedPdfExcels = (mainFilePath
     const { latestFilePath: mainExcelPath } = getLatestExcelFile(mainFilePathAbs)
     const { latestFilePath: secondaryExcelPath } = getLatestExcelFile(secondaryFilePathAbs)
 
+    if(!mainExcelPath || !secondaryExcelPath){
+        console.log(`pickLatestExcelsAndCombineGDriveAndReducedPdfExcels mainExcelPath ${mainExcelPath} secondaryExcelPath ${secondaryExcelPath}`)
+        return {
+            success:false,
+            errMsg: `one of mainExcelPath ${mainExcelPath} secondaryExcelPath ${secondaryExcelPath} missing`
+        }
+    }
     console.log(`pickLatestExcelsAndCombineGDriveAndReducedPdfExcels mainExcelPath ${mainExcelPath} secondaryExcelPath ${secondaryExcelPath}`)
     return combineGDriveAndReducedPdfExcels(mainExcelPath, secondaryExcelPath, destExcelPath)
 }

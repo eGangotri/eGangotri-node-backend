@@ -62,7 +62,7 @@ export async function archiveExceltoMongo(directoryPath: string) {
 
 }
 
-async function deleteRowsByAccts(accts: string[]) {
+export async function deleteRowsByAccts(accts: string[]) {
     try {
         connectToMongo(["forUpload"]).then(async () => {
             const result = await ArchiveItem.deleteMany({ acct: { $in: accts } });

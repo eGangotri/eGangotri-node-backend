@@ -113,26 +113,35 @@ export async function checkUrlValidity(url: string): Promise<boolean> {
 
 
 export const getLatestExcelFile = (folderPath: string) => {
-  const files = fs.readdirSync(folderPath);
-  const excelFiles = files.filter(file => path.extname(file).toLowerCase() === '.xlsx' || path.extname(file).toLowerCase() === '.xls');
+  try {
+    const files = fs.readdirSync(folderPath);
+    const excelFiles = files.filter(file => path.extname(file).toLowerCase() === '.xlsx' || path.extname(file).toLowerCase() === '.xls');
 
-  let latestFilePath;
-  let latestFileName;
-  let latestTime = 0;
+    let latestFilePath;
+    let latestFileName;
+    let latestTime = 0;
 
-  excelFiles.forEach(file => {
-    const filePath = path.join(folderPath, file);
-    const stat = fs.statSync(filePath);
+    excelFiles.forEach(file => {
+      const filePath = path.join(folderPath, file);
+      const stat = fs.statSync(filePath);
 
-    if (stat.mtimeMs > latestTime) {
-      latestTime = stat.mtimeMs;
-      latestFilePath = filePath;
-      latestFileName = file;
+      if (stat.mtimeMs > latestTime) {
+        latestTime = stat.mtimeMs;
+        latestFilePath = filePath;
+        latestFileName = file;
+      }
+    });
+
+    return {
+      latestFilePath,
+      latestFileName
+    };
+  }
+  catch (err) {
+    console.log(`Error in getLatestExcelFile ${err}`)
+    return {
+      latestFilePath: undefined,
+      latestFileName: undefined
     }
-  });
-
-  return {
-    latestFilePath,
-    latestFileName
-  };
+  }
 }
