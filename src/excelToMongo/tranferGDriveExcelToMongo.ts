@@ -11,7 +11,7 @@ const transformExcelToJSON = async (pathToExcel: string, source: string) => {
     const sheetNameList = workbook.SheetNames;
     const data = utils.sheet_to_json(workbook.Sheets[sheetNameList[0]]);
     const newData = replaceExcelHeadersWithJsonKeysForGDriveItem(data, GoogleDriveExcelHeaderToJSONMAPPING, source);
-    console.log(`started inserting newData (${newData?.length}) into mongo`);
+    console.log(`transformExcelToJSON (${newData?.length}) items  ${JSON.stringify(newData[0])}`);
     return newData;
 }
 
@@ -76,6 +76,20 @@ export async function gDriveExceltoMongo(directoryPath: string) {
         }
     }
 }
+
+export async function deleteRowsBySource(sources: string[]) {
+    try {
+        await connectToMongo(["forUpload"]);
+        const result = await GDriveItem.deleteMany({ source: { $in: sources } });
+        console.log(`${result?.deletedCount} document(s) were deleted.`);
+        printMongoTransactions(result);
+
+    } catch (err) {
+        printMongoTransactions(err.result, true);
+        console.error('Error occurred while deleting documents: ', err);
+    }
+}
+//deleteRowsBySource(['Treasures68YY', 'Treasures68XXX'] );
 
 // gDriveExceltoMongo("C:\\_catalogWork\\_collation\\" +
 //     "Treasures-1G6A8zbbiLHFlqgNnPosq1q6JbOoI2dI--07-Aug-2023-23-09_2674-Catalog-14-Apr-2024-09-52-2674.xlsx",
