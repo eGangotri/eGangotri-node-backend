@@ -16,15 +16,36 @@ const transformExcelToJSON = async (pathToExcel: string, source: string) => {
 }
 
 async function excelJsonToMongo(newData: {}[]) {
-    const operations = newData.map(document => ({
-        insertOne: {
-            document
-        }
-    }));
+    const operations = newData.map((document, index) => {
+            // const expectedFields = ['serialNo', 'titleGDrive', 'gDriveLink',
+            // 'truncFileLink','sizeWithUnits','sizeInBytes','folderName','createdTime','source','identifier',
+            // 'identifierTruncFile'
 
+            // ]; // Replace with your actual field names
+
+        // Add your validation checks here. For example:
+        // const missingFields = expectedFields.filter(field => !(field in document));
+
+        // if (missingFields.length > 0) {
+        //     console.error(`Document at index ${index} is missing the following fields: ${missingFields.join(', ')}`);
+        //     console.error('Document:', JSON.stringify(document, null, 2));
+        //     return null;
+        // }
+        // if (!document['requiredField']) {
+        //     console.error(`Document at index ${index} is missing requiredField:`, JSON.stringify(document, null, 2));
+        //     return null;
+        // }
+        return {
+            insertOne: {
+                document
+            }
+        }
+    });
+   // console.log(JSON.stringify(operations, null, 2));
     try {
         const res = await GDriveItem.bulkWrite(operations, { ordered: false });
         console.log("after bulkWrite");
+        console.log('Result:', res); // Log result
         const results = printMongoTransactions(res);
         return {
             ...results,
@@ -33,6 +54,7 @@ async function excelJsonToMongo(newData: {}[]) {
         }
     }
     catch (err) {
+        console.log('Error Code:', err?.code); // Log error
         if (err.code === 11000) { // Duplicate key error code
             console.log('Some documents were not inserted due to duplicate keys');
             const results = printMongoTransactions(err.result, true);
@@ -89,7 +111,7 @@ export async function deleteRowsBySource(sources: string[]) {
         console.error('Error occurred while deleting documents: ', err);
     }
 }
-//deleteRowsBySource(['Treasures68YY', 'Treasures68XXX'] );
+//deleteRowsBySource(['Treasures-60X', 'Treasures68XXX'] );
 
 // gDriveExceltoMongo("C:\\_catalogWork\\_collation\\" +
 //     "Treasures-1G6A8zbbiLHFlqgNnPosq1q6JbOoI2dI--07-Aug-2023-23-09_2674-Catalog-14-Apr-2024-09-52-2674.xlsx",
