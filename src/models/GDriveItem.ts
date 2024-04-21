@@ -6,18 +6,18 @@ const schema = new mongoose.Schema(
         titleGDrive: { type: String, required: true },
         gDriveLink: { type: String, required: true },
         truncFileLink: { type: String, required: true },
-        textType: { type: String, required: false },
-        titleinEnglish: { type: String, required: false },
-        pageCount: { type: Number, required: false },
         sizeWithUnits: { type: String, required: true },
         sizeInBytes: { type: String, required: true },
         folderName: { type: String, required: true },
-        thumbnail: { type: String, required: false },
         createdTime: { type: String, required: true },
         source: { type: String, required: true },
         identifier: { type: String, required: true },
         identifierTruncFile: { type: String, required: true },
+        thumbnail: { type: String, required: false },
         titleOriginalScript: { type: String, required: false },
+        textType: { type: String, required: false },
+        titleinEnglish: { type: String, required: false },
+        pageCount: { type: Number, required: false },
         subTitle: { type: String, required: false },
         author: { type: String, required: false },
         editor: { type: String, required: false },
@@ -40,6 +40,6 @@ const schema = new mongoose.Schema(
     }
 );
 // Create a compound unique index on acct and identifier
-schema.index({ gDriveLink: 1 }, { unique: true }); 
+schema.index({ identifier: 1 }, { unique: true });
 
 export const GDriveItem = mongoose.model("GDriveItem", schema);
