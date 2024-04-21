@@ -89,6 +89,7 @@ export const extractFirstAndLastNPages = async (_srcFoldersWithPath: string[], d
         lastNPages = nPages;
     }
     let failures = 0;
+    FINAL_REPORT = []
     for (const [index, folder] of _srcFoldersWithPath.entries()) {
         console.log(`Started processing ${folder}`)
         PDF_PROCESSING_COUNTER = 0;
