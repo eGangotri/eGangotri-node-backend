@@ -106,11 +106,9 @@ export const publishBookTitlesList = async (argFirst: string, options: {
                     success: true,
                     pdfCount: itemCount,
                     pdfDumpFolders,
-                    msg: metadata.map((fileStats: FileStats) => {
-                        return {
-                            fileName: `(${fileStats.rowCounter}). ${fileStats.fileName}`
-                        }
-                    }),
+                    msg: metadata.map((fileStats: FileStats) =>
+                        `(${fileStats.rowCounter}). ${fileStats.fileName}`
+                    ),
                 });
             }
             else {
@@ -125,11 +123,9 @@ export const publishBookTitlesList = async (argFirst: string, options: {
                     totalPageCount,
                     totalSize,
                     pdfDumpFolders,
-                    msg: metadata.map((fileStats: FileStats) => {
-                        return {
-                            fileName: `(${fileStats.rowCounter}). ${fileStats.fileName}`
-                        }
-                    }),
+                    msg: metadata.map((fileStats: FileStats) =>
+                        `(${fileStats.rowCounter}). ${fileStats.fileName}`
+                    ),
                 });
             }
         }
