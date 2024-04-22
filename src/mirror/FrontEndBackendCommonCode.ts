@@ -25,7 +25,7 @@ export function roundOff(num: number) {
   
   export function timeInfo(timeInMilliseconds: number) {
     const timeInSeconds = timeInMilliseconds / 1000;
-    const timeInMins = timeInSeconds / 1000;
+    const timeInMins = timeInSeconds / 60;
   
     if (timeInSeconds < 60) {
       return `${roundOff(timeInSeconds)} seconds`;
