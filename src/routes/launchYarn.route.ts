@@ -153,9 +153,16 @@ launchYarnRoute.post('/yarnGetTitleListings', async (req: any, resp: any) => {
     try {
         const argFirst = req.body.argFirst
         const pdfsOnly = req.body.pdfsOnly
-        const linksOnly = req.body.linksOnly
+        const linksOnly = req.body.linksOnly || false
+        const linksWithStatsOnly = req.body.linksWithStatsOnly || false
         console.log(`yarnGetTitleListings argFirst ${argFirst} pdfsOnly ${pdfsOnly} linksOnly ${linksOnly}`)
-        const res = await publishBookTitlesList(argFirst, pdfsOnly, linksOnly);
+        const res = await publishBookTitlesList(argFirst,
+            {
+                linksWithStatsOnly,
+                pdfsOnly,
+                linksOnly
+            }
+        );
         resp.status(200).send({
             response: res
         });

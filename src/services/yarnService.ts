@@ -78,15 +78,19 @@ const getFoldersFromInput = (argFirst: string) => {
     return pdfDumpFolders
 }
 
-export const publishBookTitlesList = async (argFirst: string, pdfsOnly = true, linksOnly: boolean) => {
+export const publishBookTitlesList = async (argFirst: string, options: {
+    linksWithStatsOnly: boolean,
+    pdfsOnly: boolean,
+    linksOnly: boolean
+}) => {
     const pdfDumpFolders = getFoldersFromInput(argFirst);
     const _response = []
     for (let folder of pdfDumpFolders) {
         if (isValidPath(folder)) {
-            if (!linksOnly) {
+            if (!options.linksOnly && !options.linksWithStatsOnly) {
                 const metadata = await getAllPDFFilesWithMedata(folder);
-                const textFileWrittenTo = createPdfReportAsText(metadata, pdfsOnly, path.basename(folder));
-                const excelWrittenTo = createExcelReport(metadata, pdfsOnly, path.basename(folder))
+                const textFileWrittenTo = createPdfReportAsText(metadata, options.pdfsOnly, path.basename(folder));
+                const excelWrittenTo = createExcelReport(metadata, options.pdfsOnly, path.basename(folder))
                 _response.push({
                     success: true,
                     msg: `Published Folder Contents for ${folder}\n
@@ -94,8 +98,23 @@ export const publishBookTitlesList = async (argFirst: string, pdfsOnly = true, l
                 Excel File: ${excelWrittenTo}`
                 });
             }
-            else {
+            else if (options.linksOnly) {
                 const metadata = await getAllPDFFiles(folder);
+                const itemCount = metadata.length
+
+                _response.push({
+                    success: true,
+                    pdfCount: itemCount,
+                    pdfDumpFolders,
+                    msg: metadata.map((fileStats: FileStats) => {
+                        return {
+                            fileName: `(${fileStats.rowCounter}). ${fileStats.fileName}`
+                        }
+                    }),
+                });
+            }
+            else {
+                const metadata = await getAllPDFFilesWithMedata(folder);
                 const itemCount = metadata.length
                 let totalPageCount = metadata.reduce((total, fileStats) => total + fileStats.pageCount, 0);
                 let totalSize = metadata.reduce((total, fileStats) => total + fileStats.rawSize, 0);
@@ -113,7 +132,6 @@ export const publishBookTitlesList = async (argFirst: string, pdfsOnly = true, l
                     }),
                 });
             }
-
         }
         else {
             _response.push({
