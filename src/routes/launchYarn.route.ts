@@ -4,11 +4,11 @@ import { scrapeArchiveOrgProfiles } from '../archiveDotOrg/archiveScraper';
 import { getFolderInSrcRootForProfile } from '../cliBased/utils';
 import { moveFileSrcToDest, moveProfilesToFreeze, publishBookTitlesList } from '../services/yarnService';
 import { resetDownloadCounters } from '../cliBased/pdf/utils';
-import { ArchiveDataRetrievalMsg, ArchiveDataRetrievalStatus, ArchiveScrapReport } from '../archiveDotOrg/types';
+import { ArchiveDataRetrievalMsg, ArchiveDataRetrievalStatus } from '../archiveDotOrg/types';
 import { downloadPdfFromArchiveToProfile } from '../archiveDotOrg/downloadUtil';
 import { vanitizePdfForProfile } from '../vanityService/VanityPdf';
-import { time } from 'console';
-import { timeInfo } from 'mirror/FrontEndBackendCommonCode';
+import { timeInfo } from '../mirror/FrontEndBackendCommonCode';
+
 export const launchYarnRoute = express.Router();
 
 launchYarnRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
