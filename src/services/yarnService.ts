@@ -121,7 +121,7 @@ export const publishBookTitlesList = async (argFirst: string, options: {
                     success: true,
                     pdfCount: itemCount,
                     totalPageCount,
-                    totalSize,
+                    totalSize:sizeInfo(totalSize),
                     pdfDumpFolders,
                     msg: metadata.map((fileStats: FileStats) =>
                         `(${fileStats.rowCounter}). ${fileStats.fileName}`
