@@ -2,7 +2,7 @@ import { isValidPath } from "../utils/utils";
 import { moveFilesAndFlatten } from "../cliBased/fileMover";
 import { getFolderInDestRootForProfile, getFolderInSrcRootForProfile } from "../cliBased/utils";
 import * as fs from 'fs';
-import { getAllPDFFiles, getAllPDFFilesWithMedata } from "../imgToPdf/utils/FileUtils";
+import { getAllPDFFiles, getAllPDFFilesWithMedata, resetRowCounter } from "../imgToPdf/utils/FileUtils";
 import { FileStats } from "../imgToPdf/utils/types";
 import { sizeInfo } from "../mirror/FrontEndBackendCommonCode";
 import * as path from 'path';
@@ -85,6 +85,7 @@ export const publishBookTitlesList = async (argFirst: string, options: {
 }) => {
     const pdfDumpFolders = getFoldersFromInput(argFirst);
     const _response = []
+    resetRowCounter()
     for (let folder of pdfDumpFolders) {
         if (isValidPath(folder)) {
             if (!options.linksOnly && !options.linksWithStatsOnly) {
