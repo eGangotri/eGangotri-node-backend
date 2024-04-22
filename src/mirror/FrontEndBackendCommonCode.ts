@@ -23,3 +23,18 @@ export function roundOff(num: number) {
     return `${roundOff(sizeInMB)} MB`;
   }
   
+  export function timeInfo(timeInMilliseconds: number) {
+    const timeInSeconds = timeInMilliseconds / 1000;
+    const timeInMins = timeInSeconds / 1000;
+  
+    if (timeInSeconds < 60) {
+      return `${roundOff(timeInSeconds)} seconds`;
+    }
+  
+    if (timeInMins >= 60) {
+      const timeInHours = timeInMins / 60;
+      return `${roundOff(timeInHours)} Hours`;
+    }
+  
+    return `${roundOff(timeInMins)} min.s`;
+  }
