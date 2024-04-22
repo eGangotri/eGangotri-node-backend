@@ -1,4 +1,6 @@
 import * as fs from 'fs';
+import * as fsPromise from 'fs/promises';
+
 import { getPdfPageCountUsingPdfLib } from "./PdfLibUtils";
 import { getFilzeSize } from './PdfLibUtils'; 4
 import * as path from 'path';
@@ -38,7 +40,7 @@ export async function getAllPDFFiles(directoryPath: string, withLogs: boolean = 
 }
 
 //expensive operation
-export async function getAllPDFFilesWithMedata(directoryPath: string, withLogs: boolean = false): Promise<FileStats[]> {
+export async function getAllPDFFilesWithMedata(directoryPath: string, withLogs: boolean = true): Promise<FileStats[]> {
     return await getAllFileStats(directoryPath, PDF_EXT, true, withLogs, true);
 }
 
@@ -51,7 +53,7 @@ export async function getAllPDFFilesWithMedata(directoryPath: string, withLogs: 
  * @param withMetadata 
  * @returns 
  */
-export async function getAllFileStats(directoryPath: string,
+export async function getAllFileStatsSync(directoryPath: string,
     filterPath: string = "",
     ignoreFolders: boolean = false,
     withLogs: boolean = false,
@@ -126,10 +128,86 @@ export async function getAllFileStats(directoryPath: string,
     return _files;
 }
 
+export async function getAllFileStats(directoryPath: string,
+    filterPath: string = "",
+    ignoreFolders: boolean = false,
+    withLogs: boolean = false,
+    withMetadata: boolean = false): Promise<FileStats[]> {
+
+    const queue = [directoryPath];
+    let _files: FileStats[] = [];
+
+    while (queue.length > 0) {
+        const currentDir = queue.shift();
+        const dirContent = await fsPromise.readdir(currentDir, { withFileTypes: true });
+
+        for (const dirent of dirContent) {
+            const fullPath = path.join(currentDir, dirent.name);
+            if (dirent.isDirectory()) {
+                queue.push(fullPath);
+                if (!ignoreFolders) {
+                    const _path = path.parse(fullPath);
+                    _files.push({
+                        rowCounter: ++ROW_COUNTER[1],
+                        absPath: fullPath,
+                        folder: _path.dir,
+                        fileName: _path.base,
+                        ext: "FOLDER"
+                    })
+                }
+            } else if (dirent.isFile()) {
+                const ext = path.extname(fullPath);
+                if (!_.isEmpty(filterPath) && (ext.toLowerCase() !== filterPath)) {
+                    continue;
+                }
+                const _path = path.parse(fullPath);
+                let fileStat: FileStats = {
+                    rowCounter: ++ROW_COUNTER[1],
+                    absPath: fullPath,
+                    folder: _path.dir,
+                    fileName: _path.base,
+                    ext
+                }
+                if (withMetadata) {
+                    try {
+                        const rawSize = getFilzeSize(fullPath);
+                        const pageCount = await getPdfPageCountUsingPdfLib(fullPath)
+                        fileStat = {
+                            ...fileStat,
+                            pageCount: pageCount,
+                            rawSize,
+                            size: Mirror.sizeInfo(rawSize),
+                        }
+                        if (withLogs) {
+                            console.log(`${ROW_COUNTER[0]}/${ROW_COUNTER[1]}). ${JSON.stringify(ellipsis(fileStat.fileName, 40))} ${pageCount} pages ${Mirror.sizeInfo(rawSize)}`);
+                        }
+                    }
+                    catch (err) {
+                        fileStat = {
+                            ...fileStat,
+                            pageCount: 0,
+                            rawSize: 0,
+                            size: Mirror.sizeInfo(0),
+                            ext: "Error reading file"
+                        }
+                        console.log(`*****${ROW_COUNTER[0]}/${ROW_COUNTER[1]}). ${JSON.stringify(ellipsis(fileStat.fileName, 40))} Error reading File`, err);
+                    }
+                }
+                else if (withLogs) {
+                    console.log(`${ROW_COUNTER[0]}/${ROW_COUNTER[1]}). ${JSON.stringify(ellipsis(fileStat.fileName, 40))}`);
+                }
+                _files.push(fileStat)
+            }
+        }
+    }
+
+    return _files;
+}
+
 export async function getAllFileStatsWithMetadata(directoryPath: string,
     filterPath: string = "",
     ignoreFolders: boolean = false,
-    withLogs: boolean = false): Promise<FileStats[]> {
+    withLogs: boolean = true): Promise<FileStats[]> {
     return await getAllFileStats(directoryPath,
         filterPath,
         ignoreFolders,

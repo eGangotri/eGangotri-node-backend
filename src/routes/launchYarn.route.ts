@@ -7,6 +7,8 @@ import { resetDownloadCounters } from '../cliBased/pdf/utils';
 import { ArchiveDataRetrievalMsg, ArchiveDataRetrievalStatus, ArchiveScrapReport } from '../archiveDotOrg/types';
 import { downloadPdfFromArchiveToProfile } from '../archiveDotOrg/downloadUtil';
 import { vanitizePdfForProfile } from '../vanityService/VanityPdf';
+import { time } from 'console';
+import { timeInfo } from 'mirror/FrontEndBackendCommonCode';
 export const launchYarnRoute = express.Router();
 
 launchYarnRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
@@ -156,6 +158,7 @@ launchYarnRoute.post('/yarnGetTitleListings', async (req: any, resp: any) => {
         const linksOnly = req.body.linksOnly || false
         const linksWithStatsOnly = req.body.linksWithStatsOnly || false
         console.log(`yarnGetTitleListings argFirst ${argFirst} pdfsOnly ${pdfsOnly} linksOnly ${linksOnly}`)
+        let timeNow = Date.now();
         const res = await publishBookTitlesList(argFirst,
             {
                 linksWithStatsOnly,
@@ -164,7 +167,10 @@ launchYarnRoute.post('/yarnGetTitleListings', async (req: any, resp: any) => {
             }
         );
         resp.status(200).send({
-            response: res
+            response: {
+                ...res,
+                timeTaken: timeInfo(Date.now() - timeNow)
+            }
         });
     }
     catch (err: any) {
