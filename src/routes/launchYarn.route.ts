@@ -168,8 +168,8 @@ launchYarnRoute.post('/yarnGetTitleListings', async (req: any, resp: any) => {
         );
         resp.status(200).send({
             response: {
-                ...res,
-                timeTaken: timeInfo(Date.now() - timeNow)
+                timeTaken: timeInfo(Date.now() - timeNow),
+                ...res
             }
         });
     }
