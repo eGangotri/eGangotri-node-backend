@@ -9,6 +9,7 @@ import * as path from 'path';
 import moment from "moment";
 import { DD_MM_YYYY_HH_MMFORMAT } from "../utils/constants";
 import * as _ from 'lodash';
+
 import { addSummaryToExcel, createMetadata } from "../excelToMongo/Util";
 import { jsonToExcel } from "../cliBased/excel/ExcelUtils";
 
@@ -95,9 +96,21 @@ export const publishBookTitlesList = async (argFirst: string, pdfsOnly = true, l
             }
             else {
                 const metadata = await getAllPDFFiles(folder);
+                const itemCount = metadata.length
+                let totalPageCount = metadata.reduce((total, fileStats) => total + fileStats.pageCount, 0);
+                let totalSize = metadata.reduce((total, fileStats) => total + fileStats.rawSize, 0);
+
                 _response.push({
                     success: true,
-                    msg: metadata.map((fileStats: FileStats) => fileStats.fileName)
+                    pdfCount: itemCount,
+                    totalPageCount,
+                    totalSize,
+                    pdfDumpFolders,
+                    msg: metadata.map((fileStats: FileStats) => {
+                        return {
+                            fileName: `(${fileStats.rowCounter}). ${fileStats.fileName}`
+                        }
+                    }),
                 });
             }
 
