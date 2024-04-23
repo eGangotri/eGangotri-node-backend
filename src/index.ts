@@ -15,7 +15,8 @@ import { GLOBAL_DB_NAME } from './db/connection';
 import { dailyQAWorkReportRoute } from "./routes/dailyQAWorkReport.route";
 import { archiveItemRoute } from "./routes/archiveItem.route";
 import { launchYarnListMakerRoute } from "./routes/launchYarnListMaker.route";
-import { GDriveItemRoute } from "./routes/gDriveItem.route";
+import { googleDriveItemRoute } from "./routes/googleDriveItem.route";
+import { launchMongoRoute } from "./routes/launchMongo.route";
 
 const egangotri = express();
 const hostname = "localhost";
@@ -51,7 +52,8 @@ egangotri.use("/yarn", launchYarnRoute);
 egangotri.use("/yarnListMaker", launchYarnListMakerRoute);
 
 egangotri.use("/searchArchivesDB", archiveItemRoute);
-egangotri.use("/searchGDriveDB", GDriveItemRoute);
+egangotri.use("/searchGDriveDB", googleDriveItemRoute);
+egangotri.use("/searchMongo", launchMongoRoute);
 
 connectToMongo(args).then(() => {
   egangotri.listen(port,'0.0.0.0', async () => {

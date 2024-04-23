@@ -1,9 +1,9 @@
 import { PDFDocument } from 'pdf-lib'
 import * as fs from 'fs';
 import { formatTime, getAllPdfs } from './Utils';
-import { addReport, INTRO_PAGE_ADJUSTMENT } from '../index';
 import { PDF_SIZE_LIMITATIONS } from './PdfUtil';
 import * as path from 'path';
+
 /**
  *  Only handles files < 2 GB
  */
