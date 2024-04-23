@@ -40,8 +40,8 @@
     "scraper": "ts-node ./src/archiveDotOrg/archiveScraper",
     "addFooter": "ts-node ./src/footerToPdf/index2",
     "moveFilesToProfile": "ts-node ./src/cliBased/fileMover/index",
-    "excelToMongoArchive":"ts-node ./src/excelToMongo/transferArchiveExcelToMongo",
-    "excelToMongoGDrive":"ts-node ./src/excelToMongo/tranferGDriveExcelToMongo"
+    "excelToMongoArchive": "ts-node ./src/excelToMongo/transferArchiveExcelToMongo",
+    "excelToMongoGDrive": "ts-node ./src/excelToMongo/tranferGDriveExcelToMongo"
   },
   "repository": {
     "type": "git",
@@ -73,6 +73,7 @@
     "mongoose": "^7.4.3",
     "node-downloader-helper": "^2.1.9",
     "pdf-lib": "^1.17.1",
+    "pdfjs-dist": "^4.1.392",
     "pdfkit": "^0.13.0",
     "puppeteer": "^21.1.1",
     "sharp": "^0.29.3",
