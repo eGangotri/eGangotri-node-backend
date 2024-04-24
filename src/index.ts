@@ -32,7 +32,7 @@ egangotri.use((req: any, res: any, next: any) => {
   next();
 });
 
-const deployDate = "11-02-24"
+const deployDate = "24-04-24"
 egangotri.get("/", function (req: any, res: any) {
   console.log(`GET / ${deployDate}`);
   res.send({
