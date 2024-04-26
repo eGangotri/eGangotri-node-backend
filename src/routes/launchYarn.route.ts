@@ -8,6 +8,7 @@ import { ArchiveDataRetrievalMsg, ArchiveDataRetrievalStatus } from '../archiveD
 import { downloadPdfFromArchiveToProfile } from '../archiveDotOrg/downloadUtil';
 import { vanitizePdfForProfile } from '../vanityService/VanityPdf';
 import { timeInfo } from '../mirror/FrontEndBackendCommonCode';
+import { compareFolders } from '../folderSync';
 
 export const launchYarnRoute = express.Router();
 
@@ -151,36 +152,6 @@ launchYarnRoute.post('/yarnMoveProfilesToFreeze', async (req: any, resp: any) =>
     }
 })
 
-launchYarnRoute.post('/yarnGetTitleListings', async (req: any, resp: any) => {
-    try {
-        const argFirst = req.body.argFirst
-        const pdfsOnly = req.body.pdfsOnly
-        const linksOnly = req.body.linksOnly || false
-        const linksWithStatsOnly = req.body.linksWithStatsOnly || false
-        console.log(`yarnGetTitleListings argFirst ${argFirst} pdfsOnly ${pdfsOnly} linksOnly ${linksOnly}`)
-        let timeNow = Date.now();
-        const res = await publishBookTitlesList(argFirst,
-            {
-                linksWithStatsOnly,
-                pdfsOnly,
-                linksOnly
-            }
-        );
-        resp.status(200).send({
-            response: {
-                timeTaken: timeInfo(Date.now() - timeNow),
-                ...res
-            }
-        });
-    }
-    catch (err: any) {
-        console.log('Error', err);
-        resp.status(400).send({
-            response: err.message
-        });
-    }
-})
-
 
 launchYarnRoute.post('/addHeaderFooter', async (req: any, resp: any) => {
     try {
@@ -231,5 +202,37 @@ launchYarnRoute.post('/vanitizePdfs', async (req: any, resp: any) => {
     catch (err: any) {
         console.log('Error', err);
         resp.status(400).send(err);
+    }
+})
+
+
+launchYarnRoute.post('/compareDirectories', async (req: any, resp: any) => {
+    try {
+        const srcDir = req.body.srcDir
+        const destDir = req.body.destDir
+        console.log(`/compareDirectories srcDir ${srcDir} destDir ${destDir} `)
+        if (!srcDir || !destDir) {
+            resp.status(300).send({
+                response: {
+                    "status": "failed",
+                    "message": "srcDir and destDir are mandatory"
+                }
+            });
+        }
+
+        let timeNow = Date.now();
+        const res = await compareFolders(srcDir, destDir);
+        resp.status(200).send({
+            response: {
+                timeTaken: timeInfo(Date.now() - timeNow),
+                ...res
+            }
+        });
+    }
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send({
+            response: err.message
+        });
     }
 })

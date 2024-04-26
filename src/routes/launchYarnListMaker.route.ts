@@ -7,6 +7,8 @@ import { pickLatestExcelsAndCombineGDriveAndReducedPdfExcels } from '../services
 import { extractFirstAndLastNPages } from '../cliBased/pdf/extractFirstAndLastNPages';
 import { gDriveExceltoMongo } from '../excelToMongo/tranferGDriveExcelToMongo';
 import { archiveExceltoMongo } from '../excelToMongo/transferArchiveExcelToMongo';
+import { timeInfo } from '../mirror/FrontEndBackendCommonCode';
+import { publishBookTitlesList } from '../services/yarnService';
 
 export const launchYarnListMakerRoute = express.Router();
 
@@ -261,3 +263,33 @@ launchYarnListMakerRoute.post('/dumpArchiveExcelToMongo', async (req: any, resp:
     }
 })
 
+
+launchYarnListMakerRoute.post('/createListingsOfLocalFolder', async (req: any, resp: any) => {
+    try {
+        const argFirst = req.body.argFirst
+        const pdfsOnly = req.body.pdfsOnly
+        const linksOnly = req.body.linksOnly || false
+        const linksWithStatsOnly = req.body.linksWithStatsOnly || false
+        console.log(`/createListingsOfLocalFolder argFirst ${argFirst} pdfsOnly ${pdfsOnly} linksOnly ${linksOnly}`)
+        let timeNow = Date.now();
+        const res = await publishBookTitlesList(argFirst,
+            {
+                linksWithStatsOnly,
+                pdfsOnly,
+                linksOnly
+            }
+        );
+        resp.status(200).send({
+            response: {
+                timeTaken: timeInfo(Date.now() - timeNow),
+                ...res
+            }
+        });
+    }
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send({
+            response: err.message
+        });
+    }
+})
