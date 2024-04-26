@@ -1,5 +1,5 @@
 # Use an official Node.js runtime as a parent image
-FROM node:18-bookworm-slim
+FROM node:18
 
 RUN apt-get clean && apt-get update
 

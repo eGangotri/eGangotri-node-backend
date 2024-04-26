@@ -77,14 +77,14 @@ Ref:
 
 
 ## Docker
-docker build . -t egangotrifoundation/egangotri-node-backend
-docker run -d -p 80:80 egangotrifoundation/egangotri-node-backend:latest
+docker build . -t egangotri/egangotri-node-backend
+docker run -d -p 80:80 egangotri/egangotri-node-backend:latest
 docker login
-docker push egangotrifoundation/egangotri-node-backend:latest
+docker push egangotri/egangotri-node-backend:latest
 
 ## access docker iamge via
 http://localhost:80/
-*** you need to be logged in with the correct acct egangotrifoundation@gmail.com
+*** you need to be logged in with the correct acct egangotritrust@gmail.com
 otherwise you will keep getting access denied error.
 
 #ERRORS
