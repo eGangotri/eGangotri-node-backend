@@ -3,30 +3,53 @@ import { FileStats } from "../imgToPdf/utils/types";
 import * as _ from 'lodash';
 
 
-const sync = async (src: string, dest: string) => {
-    console.log(`sync src ${src}`);
-    const srcJsonArray = await FileUtils.getAllFileStats(src, "", true,true)
+export const compareFolders = async (src: string, dest: string) => {
+    try {
+        console.log(`sync src ${src}`);
+        const srcJsonArray = await FileUtils.getAllFileStats(src, "", true, true)
 
-    FileUtils.incrementRowCounter();
+        FileUtils.incrementRowCounter();
 
-    console.log(`sync dest ${dest}`);
-    const destJsonArray = await FileUtils.getAllFileStats(dest, "", true,true)
+        console.log(`sync dest ${dest}`);
+        const destJsonArray = await FileUtils.getAllFileStats(dest, "", true, true)
 
 
-    const umMatchedItemsLtoR: Array<FileStats | undefined> = []
-    const umMatchedItemsRToL: Array<FileStats | undefined> = []
+        const umMatchedItemsLtoR: Array<FileStats | undefined> = []
+        const umMatchedItemsRToL: Array<FileStats | undefined> = []
 
-    matchOneWay(srcJsonArray, src, destJsonArray, dest, umMatchedItemsLtoR);
-    matchOneWay(destJsonArray, dest, srcJsonArray, src, umMatchedItemsRToL);
-    for (let i = 0; i < umMatchedItemsLtoR.length; i++) {
-        console.log(`L->R:${i + 1} ${JSON.stringify(umMatchedItemsLtoR[i]?.absPath)}`)
+        matchOneWay(srcJsonArray, src, destJsonArray, dest, umMatchedItemsLtoR);
+        matchOneWay(destJsonArray, dest, srcJsonArray, src, umMatchedItemsRToL);
+        for (let i = 0; i < umMatchedItemsLtoR.length; i++) {
+            console.log(`L->R:${i + 1} ${JSON.stringify(umMatchedItemsLtoR[i]?.absPath)}`)
+        }
+        for (let i = 0; i < umMatchedItemsRToL.length; i++) {
+            console.log(`R-L:${i + 1} ${JSON.stringify(umMatchedItemsRToL[i]?.absPath)}`)
+        }
+
+        console.log(`'${umMatchedItemsLtoR.map(x => x?.absPath)?.join(",'")}'`)
+        console.log(`'${umMatchedItemsRToL.map(x => x?.absPath)?.join(",'")}'`)
+        return {
+            msg: `Compared ${src} with ${dest}`,
+            result: ` 
+            unmatched items L->R: ${umMatchedItemsLtoR.length}   
+            unmatched items R->L: ${umMatchedItemsRToL.length}`,
+            totalMisMatch: umMatchedItemsLtoR.length + umMatchedItemsRToL.length,
+            "Source-To-Dest": umMatchedItemsRToL.map((unmatched, index: number) =>
+                `(${index}). ${unmatched.absPath}`
+            ),
+            "Dest-To-Source": umMatchedItemsRToL.map((unmatched, index: number) =>
+                `(${index}). ${unmatched.absPath}`
+            ),
+
+        }
     }
-    for (let i = 0; i < umMatchedItemsRToL.length; i++) {
-        console.log(`R-L:${i + 1} ${JSON.stringify(umMatchedItemsRToL[i]?.absPath)}`)
+    catch (err) {
+        console.log(`Error ${err}`)
+        return {
+            msg: `Error while comparing  ${src} with ${dest}`,
+            err: `: ${err}`
+        }
     }
-
-    console.log(`'${umMatchedItemsLtoR.map(x => x?.absPath)?.join(",'")}'`)
-    console.log(`'${umMatchedItemsRToL.map(x => x?.absPath)?.join(",'")}'`)
 }
 
 const matchOneWay = (firstJsonArray: FileStats[], firstFolderRoot: string, secondJsonArray: FileStats[], secondFolderRoot: string, umMatchedItems: Array<FileStats | undefined>) => {
@@ -61,10 +84,9 @@ const findMatching = (src: FileStats, srcRoot: string, dest: FileStats[], destRo
     return _found
 }
 
-const _root = "Otro-1-Otro-2\\Otro-2"
-//\\Sanskrit Academy Hyd Manuscripts Processed\\Skt Academy Hyd-Sanskrit Manuscript_016
+const _root = "X"
 const _src = `D:\\${_root}`
 const _dest = `E:\\${_root}`;
 
-sync(_src, _dest)
+//compareFolders(_src, _dest)
 //yarn run syncFolders

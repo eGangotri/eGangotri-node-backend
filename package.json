@@ -30,7 +30,7 @@
     "moveLongNames": "ts-node ./src/cliBased/googleapi/_utils/MoveLongFileNamesToRoot",
     "tallyWithLocal": "ts-node ./src/cliBased/googleapi/_utils/TallyLocalFolderWithGoogleDriveExcel",
     "localToExcel": "ts-node ./src/cliBased/googleapi/_utils/LocalFolderToExcel",
-    "syncFolders": "ts-node ./src/folderSync",
+    "syncFolders": "ts-node ./src/folderCompare",
     "compareExcels": "ts-node ./src/cliBased/excel/CompareExcels",
     "findNonLatin": "ts-node ./src/cliBased/excel/FindNonLatinCharactersInName",
     "downloadPdf": "ts-node ./src/cliBased/pdf/downloadPdf.ts",
@@ -41,7 +41,8 @@
     "addFooter": "ts-node ./src/footerToPdf/index2",
     "moveFilesToProfile": "ts-node ./src/cliBased/fileMover/index",
     "excelToMongoArchive": "ts-node ./src/excelToMongo/transferArchiveExcelToMongo",
-    "excelToMongoGDrive": "ts-node ./src/excelToMongo/tranferGDriveExcelToMongo"
+    "excelToMongoGDrive": "ts-node ./src/excelToMongo/tranferGDriveExcelToMongo",
+    "aksharamukha": "ts-node ./src/aksharamukha/convert"
   },
   "repository": {
     "type": "git",
