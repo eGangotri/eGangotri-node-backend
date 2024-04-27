@@ -42,7 +42,8 @@
     "moveFilesToProfile": "ts-node ./src/cliBased/fileMover/index",
     "excelToMongoArchive": "ts-node ./src/excelToMongo/transferArchiveExcelToMongo",
     "excelToMongoGDrive": "ts-node ./src/excelToMongo/tranferGDriveExcelToMongo",
-    "aksharamukha": "ts-node ./src/aksharamukha/convert"
+    "aksharamukha": "ts-node ./src/aksharamukha/convert",
+    "fipExcelToMongo": "ts-node ./src/excelToMongo/fipExcelToMongo"
   },
   "repository": {
     "type": "git",
