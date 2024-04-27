@@ -1,28 +1,40 @@
-import { excelToJson } from "../cliBased/excel/ExcelUtils";
-
-const callAksharamukha = async (body: Record<string, unknown>) => {
-    const aksharaMukha = 'https://www.aksharamukha.com/api/convert';
-    const response = await fetch(`http://aksharamukha-plugin.appspot.com/api/public?source=${body.source}&target=${body.target}&text=${body.text}&nativize=false`)
+export const callAksharamukha = async (body: AksharaMukhaGetProps) => {
+    const response = await fetch(`http://aksharamukha-plugin.appspot.com/api/public?source=${body.source}&target=${body.target}&text=${body.text}&nativize=${body.nativize}`)
     const result = await response.text();
-    console.log(result);
+    //console.log(result);
     return result;
 }
 
+export const aksharamukhaIastToRomanColloquial = async (text: string, nativize = false) => {
+    const body = {
+        "source": "IAST",
+        "target": "RomanColloquial",
+        "text": text,
+        "nativize": nativize,
+    }
+    return callAksharamukha(body);
+}
 
-const jsonBody = {
+export interface AksharaMukhaGetProps {
+    source: string;
+    target: string;
+    text: string;
+    nativize: boolean;
+    postOptions?: (null)[] | null;
+    preOptions?: (null)[] | null;
+  }
+  
+
+const jsonBody:AksharaMukhaGetProps = {
     "source": "IAST",
     "target": "RomanColloquial",
-    "text": "Kriyā-Prayoga \nTantra-Kriyā \nĀgama-Nibandha \nKośa \nĀgama-Kriyā \nKriyā-Prayoga Āgama",
+    "text": "Kriyā-Prayoga $ \nTantra-Kriyā \nĀgama-Nibandha \nKośa \nĀgama-Kriyā \nKriyā-Prayoga Āgama",
     "nativize": true,
     "postOptions": [],
     "preOptions": []
 }
 
-const convertExcel = (excelPath:string) => {
-    const converted = excelToJson(excelPath);
-    console.log(`excelToJson ${converted.length}`)
-    console.log(`excelToJson ${JSON.stringify(converted[5])}`)
-
-}
 callAksharamukha(jsonBody);
-convertExcel("C:\\Users\\chetan\\Downloads\\IFP Handlist Unicode.xlsx")
+
+
+//yarn run aksharamukha
