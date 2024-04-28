@@ -89,14 +89,14 @@ export const addSummaryToExcel = (fileStats: FileStats[], totalFileCount: number
     rowCounter: "Total File Count:",
     absPath: "",
     folder: "",
-    fileName: totalFileCount.toString()
+    fileName: totalFileCount?.toString()
   });
 
   fileStats.push({
     rowCounter: "Total Size of Files Raw:",
     absPath: "",
     folder: "",
-    fileName: totalSizeRaw.toString()
+    fileName: totalSizeRaw?.toString()
   });
 
   fileStats.push({
@@ -110,7 +110,7 @@ export const addSummaryToExcel = (fileStats: FileStats[], totalFileCount: number
     rowCounter: "Total Pages:",
     absPath: "",
     folder: "",
-    fileName: totalPageCount.toString()
+    fileName: totalPageCount?.toString()
   });
 }
 

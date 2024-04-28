@@ -7,7 +7,7 @@ export function roundOff(num: number) {
     return Math.round((num + Number.EPSILON) * 100) / 100;
   }
   
-  export function sizeInfo(sizeInBytes: number) {
+  export function sizeInfo(sizeInBytes: number = 0) {
     const sizeInKB = sizeInBytes / 1024;
     const sizeInMB = sizeInKB / 1024;
   
