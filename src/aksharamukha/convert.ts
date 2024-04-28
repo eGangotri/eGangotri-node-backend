@@ -18,6 +18,18 @@ export const aksharamukhaIastToRomanColloquial = async (text: string, nativize =
     return callAksharamukha(body);
 }
 
+export const aksharamukhaHKToRomanColloquial = async (text: string, nativize = false) => {
+    const body = {
+        "source": "Velthuis",
+        "target": "RomanColloquial",
+        "text": text,
+        "nativize": nativize,
+    }
+    return callAksharamukha(body);
+}
+///􀁂􀀏􀁎􀀃􀁔􀁖􀁎􀁂􀁅􀁂􀁂􀁈􀁂􀁎􀁂􀀍􀀁􀁂􀀏􀁎􀀃􀁔􀁖􀁎􀁂􀁕􀁌􀁂􀁂􀀃􀁔􀁚􀁂􀁑􀁂􀁂􀁈􀁂􀁎􀁂􀀁
+//a.m"sumadaagama
+
 export interface AksharaMukhaGetProps {
     source: string;
     target: string;
@@ -36,7 +48,13 @@ const jsonBody: AksharaMukhaGetProps = {
     "postOptions": [],
     "preOptions": []
 }
-callAksharamukha(jsonBody).then((res) => {
+aksharamukhaHKToRomanColloquial(`a.m"sumadaagama`)
+callAksharamukha({
+    ...jsonBody,
+    "source": "Velthuis",
+    "target": "Devanagari",
+    "text":`a.m"sumadaagama`
+}).then((res) => {
     console.log(res)
 })
 
