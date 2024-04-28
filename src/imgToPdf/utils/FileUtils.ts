@@ -129,6 +129,14 @@ export async function getAllFileStatsSync(directoryPath: string,
     return _files;
 }
 
+export async function getAllFileListingWithoutStats(directoryPath: string): Promise<FileStats[]> {
+    return await getAllFileStatsSync(directoryPath, "", true, false, false);
+}
+
+export async function getAllFileListingWithStats(directoryPath: string): Promise<FileStats[]> {
+    return await getAllFileStatsSync(directoryPath, "", true, false, true);
+}
+
 export async function getAllFileStats(directoryPath: string,
     filterPath: string = "",
     ignoreFolders: boolean = false,

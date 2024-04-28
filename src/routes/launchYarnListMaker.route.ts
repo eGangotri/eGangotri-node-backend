@@ -268,15 +268,19 @@ launchYarnListMakerRoute.post('/createListingsOfLocalFolder', async (req: any, r
     try {
         const argFirst = req.body.argFirst
         const pdfsOnly = req.body.pdfsOnly
-        const linksOnly = req.body.linksOnly || false
-        const linksWithStatsOnly = req.body.linksWithStatsOnly || false
-        console.log(`/createListingsOfLocalFolder argFirst ${argFirst} pdfsOnly ${pdfsOnly} linksOnly ${linksOnly}`)
+        const withLinks = req.body.withLinks || false
+        const withStats = req.body.withStats || false
+        console.log(`/createListingsOfLocalFolder argFirst ${argFirst} 
+        pdfsOnly ${pdfsOnly} 
+        withLinks ${withLinks}
+        withStats ${withStats}`);
+
         let timeNow = Date.now();
         const res = await publishBookTitlesList(argFirst,
             {
-                linksWithStatsOnly,
+                withStats,
                 pdfsOnly,
-                linksOnly
+                withLinks
             }
         );
         resp.status(200).send({
