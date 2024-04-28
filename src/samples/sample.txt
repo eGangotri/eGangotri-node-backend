@@ -1,0 +1,4054 @@
+  below json  is sample when you run following
+https://archive.org/services/search/beta/page_production/?user_query=&page_type=account_details&page_target=@gurukulkangri&page_elements=[%22uploads%22]&hits_per_page=1000&page=1&sort=publicdate:desc&aggregations=false&client_url=https://archive.org/details/@gurukulkangri
+
+{
+    "version": "1f",
+    "session_context": {
+      "username": "indiclibrary1@gmail.com",
+      "authentication_method": "cookie",
+      "is_system": false,
+      "is_guest": false,
+      "is_user": true,
+      "is_archive_user": false,
+      "is_qualified": false,
+      "has_universal_privs": false,
+      "has_allowed_host_priv": false,
+      "has_scan_center_priv": false,
+      "has_any_priv": true,
+      "pps": {
+        "is_page_target_owner": false,
+        "full_text_search_override": false
+      }
+    },
+    "request": {
+      "client_request_parameters": {
+        "client": "page_production_service_endpoint",
+        "user_query": null,
+        "page_type": "account_details",
+        "page_target": "@gurukulkangri",
+        "page_elements": [
+          "uploads"
+        ],
+        "hits_per_page": 1000,
+        "page": 1,
+        "sort": [
+          "publicdate:desc"
+        ],
+        "aggregations": [],
+        "client_url": "https://archive.org/details/@gurukulkangri"
+      },
+      "backend_requests": {
+        "account_extra_info": {
+          "root": "(self)",
+          "children": [
+            "account_uploads__@gurukulkangri"
+          ],
+          "request_type": "account_extra_info",
+          "finalized_parameters": {
+            "page_type": "account_extra_info",
+            "page_target": "@gurukulkangri",
+            "page_elements": [
+              "uploads"
+            ],
+            "service_backend": "eic",
+            "caching": null,
+            "page": 1,
+            "hits_per_page": 50,
+            "fields": [
+              "_tile_"
+            ],
+            "sort": [
+              "week:desc",
+              "identifier"
+            ],
+            "aggregations": [
+              "mediatype",
+              "year",
+              "subject",
+              "collection",
+              "creator",
+              "language",
+              "lending___status"
+            ],
+            "aggregations_size": 10
+          }
+        },
+        "account_uploads__@gurukulkangri": {
+          "root": "account_extra_info",
+          "parent": "account_extra_info",
+          "children": [
+            "collection_title_fetch__676af572db2969df098165709808dd07"
+          ],
+          "request_type": "account_uploads",
+          "finalized_parameters": {
+            "user_query": "(redacted)",
+            "hits_per_page": 1000,
+            "page": 1,
+            "sort": [
+              "publicdate:desc"
+            ],
+            "aggregations": [],
+            "fields": [
+              "_tile_"
+            ],
+            "aggregations_size": 10,
+            "page_type": "search_results",
+            "caching": null,
+            "service_backend": "metadata",
+            "scope": "standard",
+            "feature_flags": {
+              "complex_facets": true,
+              "collection_titles": true,
+              "redact_collections": true,
+              "redact_collections_by_privs": false,
+              "redact_empty_collections": true
+            },
+            "service": "service__metadata__load_balanced"
+          }
+        },
+        "collection_title_fetch__676af572db2969df098165709808dd07": {
+          "root": "account_extra_info",
+          "parent": "account_uploads__@gurukulkangri",
+          "request_type": "collection_title_fetch",
+          "finalized_parameters": {
+            "page_type": "document_fetch",
+            "user_query": "(redacted)",
+            "aggregations": [],
+            "caching": null,
+            "fields": [
+              "identifier",
+              "title"
+            ],
+            "page": 1,
+            "hits_per_page": 250,
+            "sort": [
+              "_doc"
+            ],
+            "service_backend": "metadata",
+            "scope": "standard",
+            "service": "service__metadata__load_balanced"
+          }
+        }
+      }
+    },
+    "caching": {
+      "account_extra_info": {
+        "name": "PPS-1f-RT:aei-T:aei-PT:aed591c7",
+        "acceptable_names": [],
+        "configuration": {
+          "requested": [],
+          "finalized": {
+            "bypass": false,
+            "recompute": false,
+            "no_compute": false,
+            "ttl_s": 300,
+            "max_age_s": 0,
+            "miss_policy": "none"
+          }
+        },
+        "utilization": {
+          "went_to_cache": true,
+          "alternates_allowed": true,
+          "hit_alternate": false,
+          "hit_canonical": true,
+          "hit": true,
+          "miss": false,
+          "recomputed": false,
+          "stored": false,
+          "elapsed_s": 0.00159192085266113
+        },
+        "statsd_bucket": "search.pps.cache.unknown_backend.account_details"
+      },
+      "account_uploads__@gurukulkangri": {
+        "name": "PPS-1f-RT:au~hit-T:sr-Q:950662cc-H:100-S:9c468d37-B:mds-RS:sta~CS::P:0+CS:some+BR:1",
+        "acceptable_names": [
+          "PPS-1f-RT:au~std-T:sr-Q:950662cc-H:100-S:9c468d37-B:mds-RS:sta~CS::P:0+CS:some+BR:1"
+        ],
+        "configuration": {
+          "requested": [],
+          "finalized": {
+            "bypass": false,
+            "recompute": false,
+            "no_compute": false,
+            "ttl_s": 300,
+            "max_age_s": 0,
+            "miss_policy": "none"
+          }
+        },
+        "utilization": {
+          "went_to_cache": true,
+          "alternates_allowed": true,
+          "hit_alternate": false,
+          "hit_canonical": true,
+          "hit": true,
+          "miss": true,
+          "recomputed": false,
+          "stored": false,
+          "acceptable_names_tried": [
+            "PPS-1f-RT:au~std-T:sr-Q:950662cc-H:100-S:9c468d37-B:mds-RS:sta~CS::P:0+CS:some+BR:1"
+          ],
+          "elapsed_s": 0.00513505935668945
+        },
+        "statsd_bucket": "search.pps.cache.unknown_backend.account_details"
+      },
+      "collection_title_fetch__676af572db2969df098165709808dd07": {
+        "name": "PPS-1f-RT:ctf-T:df-Q:4fd7e6c4-F:a8092e92-B:mds-RS:sta~CS::P:0+CS:some+BR:1",
+        "acceptable_names": [],
+        "configuration": {
+          "requested": [],
+          "finalized": {
+            "bypass": false,
+            "recompute": false,
+            "no_compute": false,
+            "ttl_s": 300,
+            "max_age_s": 0,
+            "miss_policy": "none"
+          }
+        },
+        "utilization": {
+          "went_to_cache": true,
+          "alternates_allowed": true,
+          "hit_alternate": false,
+          "hit_canonical": true,
+          "hit": true,
+          "miss": false,
+          "recomputed": false,
+          "stored": false,
+          "elapsed_s": 0.00224804878234863
+        },
+        "statsd_bucket": "search.pps.cache.unknown_backend.account_details"
+      },
+      "summary": {
+        "fetched": [
+          "PPS-1f-RT:aei-T:aei-PT:aed591c7",
+          "PPS-1f-RT:au~hit-T:sr-Q:950662cc-H:100-S:9c468d37-B:mds-RS:sta~CS::P:0+CS:some+BR:1",
+          "PPS-1f-RT:ctf-T:df-Q:4fd7e6c4-F:a8092e92-B:mds-RS:sta~CS::P:0+CS:some+BR:1"
+        ],
+        "computed": [],
+        "stored": [],
+        "missed": [],
+        "bypassed": []
+      }
+    },
+    "elapsed_secs": 0.0638418197631836,
+    "response": {
+      "header": {
+        "succeeded": true,
+        "forensics": {
+          "account_uploads__@gurukulkangri": {
+            "client_characterization": {
+              "characterized_by": "guest",
+              "preferred_client_ip": null,
+              "client_ip": "121.50.33.34:sra",
+              "preferred_client_useragent": null,
+              "client_useragent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36",
+              "preferred_client_id": null,
+              "client_id": "121.50.33.34:sra:cip",
+              "application_id": "pageproduction"
+            },
+            "routing": {
+              "backend": "es-prod-metadatasearch-filtered",
+              "backend_server": "es-prod-client-o-04",
+              "routed_to_load_balanced": true,
+              "index_addressed": "prod-i-006"
+            }
+          },
+          "backend_request_elapsed_secs": {
+            "account_extra_info": 0.00159192085266113,
+            "account_uploads__@gurukulkangri": 0.00513505935668945,
+            "collection_title_fetch__676af572db2969df098165709808dd07": 0.00224804878234863
+          }
+        },
+        "elapsed_secs_for_backend_requests": 0.00897502899169922
+      },
+      "body": {
+        "collection_titles": {
+          "opensource": "Community Texts"
+        },
+        "page_elements": {
+          "uploads": {
+            "hits": {
+              "total": 4457,
+              "returned": 100,
+              "hits": [
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "vbSK_del_20240408",
+                    "title": "del",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'del'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "eGangotri"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "num_favorites": 1,
+                    "item_size": 240667488,
+                    "files_count": 15,
+                    "downloads": 37,
+                    "week": 12,
+                    "month": 37,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:54:42Z",
+                    "publicdate": "2024-04-08T01:54:42Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "tQbs_yagnyavalkya-siksha-with-hindi-bhashya-by-swami-brahma-muni-parivrajak-vidyamart",
+                    "title": "Yagnyavalkya Siksha With Hindi Bhashya By Swami Brahma Muni Parivrajak Vidyamartand 1967 Ajmeir Arya Sahitya Mandal",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Yagnyavalkya Siksha with Hindi Bhashya by Swami Brahma Muni Parivrajak Vidyamartand 1967 Ajmeir - Arya Sahitya Mandal'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Arya Sahitya Mandal"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 88013380,
+                    "files_count": 15,
+                    "downloads": 27,
+                    "week": 8,
+                    "month": 27,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:54:41Z",
+                    "publicdate": "2024-04-08T01:54:41Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "QsuZ_vishnu-devata-by-bhagawat-vedalankar-1964-haridwar-dharmapal-vidyalankar",
+                    "title": "Vishnu Devata By Bhagawat Vedalankar 1964 Haridwar Dharmapal VIdyalankar",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Vishnu Devata by Bhagawat Vedalankar 1964 Haridwar - Dharmapal VIdyalankar'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Dharmapal VIdyalankar"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 166094096,
+                    "files_count": 15,
+                    "downloads": 43,
+                    "week": 19,
+                    "month": 43,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:54:22Z",
+                    "publicdate": "2024-04-08T01:54:22Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "rwoT_ved-vidya-nidarshan-by-bhagawat-datt-vedalankar-2005-new-delhi-pranav-prakashan",
+                    "title": "Ved Vidya Nidarshan By Bhagawat Datt Vedalankar 2005 New Delhi Pranav Prakashan",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Ved Vidya Nidarshan by Bhagawat Datt Vedalankar 2005 New Delhi - Pranav Prakashan'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Pranav Prakashan"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "num_favorites": 2,
+                    "item_size": 244232502,
+                    "files_count": 15,
+                    "downloads": 31,
+                    "week": 8,
+                    "month": 31,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:54:22Z",
+                    "publicdate": "2024-04-08T01:54:22Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "YgPT_yogyata-arthat-rahasyabhed-ka-bhed-by-bhagawatdatt-1922-amrutsar-arya-yuvak-samaj",
+                    "title": "Yogyata Arthat Rahasyabhed Ka Bhed By Bhagawatdatt 1922 Amrutsar Arya Yuvak Samaj",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Yogyata Arthat Rahasyabhed Ka Bhed by Bhagawatdatt 1922 Amrutsar - Arya Yuvak Samaj'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Arya Yuvak Samaj"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "num_favorites": 1,
+                    "item_size": 26366080,
+                    "files_count": 15,
+                    "downloads": 28,
+                    "week": 7,
+                    "month": 28,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:54:21Z",
+                    "publicdate": "2024-04-08T01:54:21Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "wdTp_vedant-darshan-brahma-muni-bhashyopetam-by-swami-brahmamuni-parivrajak-vidyamart",
+                    "title": "Vedant Darshan Brahma Muni Bhashyopetam By Swami Brahmamuni Parivrajak Vidyamartand 1954 New Delhi Sarvadeshik Arya Pratinidhi Sabha",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Vedant Darshan Brahma Muni Bhashyopetam by Swami Brahmamuni Parivrajak Vidyamartand 1954 New Delhi - Sarvadeshik Arya Pratinidhi Sabha'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Sarvadeshik Arya Pratinidhi Sabha"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 268626845,
+                    "files_count": 15,
+                    "downloads": 16,
+                    "week": 5,
+                    "month": 16,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:54:08Z",
+                    "publicdate": "2024-04-08T01:54:08Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "AHDf_vedic-yogamrut-by-swami-brahma-muni-parivrajak-1949-new-delhi-sarvadeshik-pustakalay",
+                    "title": "Vedic Yogamrut By Swami Brahma Muni Parivrajak 1949 New Delhi Sarvadeshik Pustakalay",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Vedic Yogamrut by Swami Brahma Muni Parivrajak 1949 New Delhi - Sarvadeshik Pustakalay'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Sarvadeshik Pustakalay"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 51793727,
+                    "files_count": 15,
+                    "downloads": 26,
+                    "week": 3,
+                    "month": 26,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:54:04Z",
+                    "publicdate": "2024-04-08T01:54:04Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "SVED_vedant-darshan-with-bhasha-bhashya-by-swami-brahma-muni-parivrajak-vidyamartand-",
+                    "title": "Vedant Darshan With Bhasha Bhashya By Swami Brahma Muni Parivrajak Vidyamartand 2010 Delhi Satya Dharma Prakashan",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Vedant Darshan with Bhasha Bhashya by Swami Brahma Muni Parivrajak Vidyamartand 2010 Delhi - Satya Dharma Prakashan'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Satya Dharma Prakashan"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 311092887,
+                    "files_count": 15,
+                    "downloads": 30,
+                    "week": 9,
+                    "month": 30,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:53:55Z",
+                    "publicdate": "2024-04-08T01:53:55Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "eiVC_vedic-swapna-vignyan-by-bhagavat-datt-vedalankar-2006-haridwar-gurukul-kangadi-viswavidyalay",
+                    "title": "Vedic Swapna Vignyan By Bhagavat Datt Vedalankar 2006 Haridwar Gurukul Kangadi Viswavidyalay",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Vedic Swapna Vignyan by Bhagavat Datt Vedalankar 2006 Haridwar - Gurukul Kangadi Viswavidyalay'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Gurukul Kangadi Viswavidyalay"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "num_favorites": 1,
+                    "item_size": 190265093,
+                    "files_count": 15,
+                    "downloads": 30,
+                    "week": 8,
+                    "month": 30,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:53:42Z",
+                    "publicdate": "2024-04-08T01:53:42Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "pEDQ_vedic-adhyatma-vidya-by-bhagavat-datt-vedalankar-2007-haridwar-gurukul-kangadi-viswavidyalay",
+                    "title": "Vedic Adhyatma Vidya By Bhagavat Datt Vedalankar 2007 Haridwar Gurukul Kangadi Viswavidyalay",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Vedic Adhyatma Vidya by Bhagavat Datt Vedalankar 2007 Haridwar - Gurukul Kangadi Viswavidyalay'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Gurukul Kangadi Viswavidyalay"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "num_favorites": 1,
+                    "item_size": 127191814,
+                    "files_count": 15,
+                    "downloads": 26,
+                    "week": 6,
+                    "month": 26,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:53:28Z",
+                    "publicdate": "2024-04-08T01:53:28Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "uJRR_savita-devata-by-bhagavat-datt-vedalankar-1981-new-delhi-scan-2-kangri-shri-saraswati-sadan",
+                    "title": "Savita Devata By Bhagavat Datt Vedalankar 1981 New Delhi Scan 2 Kangri Shri Saraswati Sadan",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Savita Devata by Bhagavat Datt Vedalankar 1981 New Delhi Scan 2 Kangri - Shri Saraswati Sadan'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Shri Saraswati Sadan"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "num_favorites": 2,
+                    "item_size": 240914957,
+                    "files_count": 15,
+                    "downloads": 14,
+                    "week": 1,
+                    "month": 14,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:52:44Z",
+                    "publicdate": "2024-04-08T01:52:44Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "cCao_vedadhyayan-praveshika-by-swami-brahma-muni-parivrajak-vidyamartand-1968-new-del",
+                    "title": "Vedadhyayan Praveshika By Swami Brahma Muni Parivrajak Vidyamartand 1968 New Delhi Sarvadeshika Arya Pratinidhi Sabha",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Vedadhyayan Praveshika by Swami Brahma Muni Parivrajak Vidyamartand 1968 New Delhi - Sarvadeshika Arya Pratinidhi Sabha'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Sarvadeshika Arya Pratinidhi Sabha"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "num_favorites": 1,
+                    "item_size": 260102835,
+                    "files_count": 15,
+                    "downloads": 19,
+                    "week": 5,
+                    "month": 19,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:52:40Z",
+                    "publicdate": "2024-04-08T01:52:40Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "qkBy_vaisheshik-darshan-brahma-muni-bhashyopetam-by-swami-brahma-muni-parivrajak-1962",
+                    "title": "Vaisheshik Darshan Brahma Muni Bhashyopetam By Swami Brahma Muni Parivrajak 1962 Badowda Arya Kumar Maha Sabha",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Vaisheshik Darshan brahma Muni Bhashyopetam by Swami Brahma Muni Parivrajak 1962 Badowda - Arya Kumar Maha Sabha'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Arya Kumar Maha Sabha"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 146169311,
+                    "files_count": 15,
+                    "downloads": 9,
+                    "week": 2,
+                    "month": 9,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:52:40Z",
+                    "publicdate": "2024-04-08T01:52:40Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "ciEh_savita-devata-by-bhagavat-datt-vedalankar-1981-new-delhi-scan-1-kangri-shri-saraswati-sadan",
+                    "title": "Savita Devata By Bhagavat Datt Vedalankar 1981 New Delhi Scan 1 Kangri Shri Saraswati Sadan",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Savita Devata by Bhagavat Datt Vedalankar 1981 New Delhi Scan 1 Kangri - Shri Saraswati Sadan'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Shri Saraswati Sadan"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 203088273,
+                    "files_count": 15,
+                    "downloads": 17,
+                    "week": 3,
+                    "month": 17,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:52:25Z",
+                    "publicdate": "2024-04-08T01:52:25Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "GxXN_saraswati-sammelan-ka-chaturtha-varhika-vruttant-1908-gurukul-mushiram-jignyasu",
+                    "title": "Saraswati Sammelan Ka Chaturtha Varhika Vruttant 1908 Gurukul Mushiram Jignyasu",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Saraswati Sammelan Ka Chaturtha Varhika Vruttant 1908 Gurukul - Mushiram Jignyasu'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Mushiram Jignyasu"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 153141071,
+                    "files_count": 15,
+                    "downloads": 10,
+                    "week": 0,
+                    "month": 10,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:52:14Z",
+                    "publicdate": "2024-04-08T01:52:14Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "ZEII_samaved-adhyatmik-muni-bhashya-by-swami-brahmamuni-parivrajak-vidyamartand-1970-",
+                    "title": "Samaved Adhyatmik Muni Bhashya By Swami Brahmamuni Parivrajak Vidyamartand 1970 New Delhi Sarvadeshik Arya Pratinidhi Sabha",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Samaved Adhyatmik Muni Bhashya by Swami Brahmamuni Parivrajak Vidyamartand 1970 New Delhi - Sarvadeshik Arya Pratinidhi Sabha'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Sarvadeshik Arya Pratinidhi Sabha"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 471471022,
+                    "files_count": 15,
+                    "downloads": 23,
+                    "week": 2,
+                    "month": 23,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:52:13Z",
+                    "publicdate": "2024-04-08T01:52:13Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "xkgu_vaisheshik-darshan-with-brahma-muni-bhashya-by-swami-brahma-muni-parivrajak-1962",
+                    "title": "Vaisheshik Darshan With Brahma Muni Bhashya By Swami Brahma Muni Parivrajak 1962 Badowda Arya Kumar Maha Sabha",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Vaisheshik Darshan with Brahma Muni Bhashya by Swami Brahma Muni Parivrajak 1962 Badowda - Arya Kumar Maha Sabha'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Arya Kumar Maha Sabha"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "num_favorites": 1,
+                    "item_size": 145066381,
+                    "files_count": 15,
+                    "downloads": 5,
+                    "week": 2,
+                    "month": 5,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:52:10Z",
+                    "publicdate": "2024-04-08T01:52:10Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "NKUV_samaved-adhyatmik-muni-bhashya-by-swami-brahmamuni-parivrajak-vidya-martand-1972",
+                    "title": "Samaved Adhyatmik Muni Bhashya By Swami Brahmamuni Parivrajak Vidya Martand 1972 New Delhi Arya Pratinidhi Sabha",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Samaved Adhyatmik Muni Bhashya by Swami Brahmamuni Parivrajak Vidya Martand 1972 New Delhi - Arya Pratinidhi Sabha'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Arya Pratinidhi Sabha"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "num_favorites": 1,
+                    "item_size": 503014824,
+                    "files_count": 15,
+                    "downloads": 16,
+                    "week": 2,
+                    "month": 16,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:52:01Z",
+                    "publicdate": "2024-04-08T01:52:01Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "jqqk_terahva-hindi-sahitya-sammelan-kanpur-ka-karya-vivaran-part-1-1923-cawnpore-hindi-sahitya-samme",
+                    "title": "Terahva Hindi Sahitya Sammelan Kanpur Ka Karya Vivaran Part 1 1923 Cawnpore Hindi Sahitya Sammelan",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Terahva Hindi Sahitya Sammelan Kanpur Ka Karya Vivaran Part 1 1923 Cawnpore - Hindi Sahitya Sammelan'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Hindi Sahitya Sammelan"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 180378115,
+                    "files_count": 15,
+                    "downloads": 7,
+                    "week": 2,
+                    "month": 7,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:51:53Z",
+                    "publicdate": "2024-04-08T01:51:53Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "SnHW_alankar-tatha-gurukul-samachaar-kangadi-snatak-gurukul-mandal",
+                    "title": "Alankar Tatha Gurukul Samachaar Kangadi Snatak Gurukul Mandal",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Alankar Tatha Gurukul Samachaar Kangadi - Snatak Gurukul Mandal'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Snatak Gurukul Mandal"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "num_favorites": 1,
+                    "item_size": 833808377,
+                    "files_count": 15,
+                    "downloads": 8,
+                    "week": 0,
+                    "month": 8,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:51:51Z",
+                    "publicdate": "2024-04-08T01:51:51Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "cVhB_swarajya-aur-charitra-nirman-by-indra-vidya-vachaspati-delhi-vachaspati-pustak-bhandar",
+                    "title": "Swarajya Aur Charitra Nirman By Indra Vidya Vachaspati Delhi Vachaspati Pustak Bhandar",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Swarajya Aur Charitra Nirman by Indra Vidya vachaspati Delhi - Vachaspati Pustak Bhandar'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Vachaspati Pustak Bhandar"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 38476423,
+                    "files_count": 15,
+                    "downloads": 12,
+                    "week": 1,
+                    "month": 12,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:51:40Z",
+                    "publicdate": "2024-04-08T01:51:40Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "ursN_sankhya-darshanam-by-swami-brahma-muni-parivrajak-vidya-martand-1955-delhi-rajpal-and-sons",
+                    "title": "Sankhya Darshanam By Swami Brahma Muni Parivrajak Vidya Martand 1955 Delhi Rajpal And Sons",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Sankhya Darshanam by Swami Brahma Muni Parivrajak Vidya Martand 1955 Delhi - Rajpal And Sons'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Rajpal And Sons"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 162803932,
+                    "files_count": 15,
+                    "downloads": 16,
+                    "week": 4,
+                    "month": 16,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:51:30Z",
+                    "publicdate": "2024-04-08T01:51:30Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "Sgid_sankhya-darshanam-with-brahma-muni-bhashya-by-swami-brahma-muni-parivrajak-delhi",
+                    "title": "Sankhya Darshanam With Brahma Muni Bhashya By Swami Brahma Muni Parivrajak Delhi Arya Pratinidhi Sabha",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Sankhya Darshanam with Brahma Muni Bhashya by Swami Brahma Muni Parivrajak Delhi - Arya Pratinidhi Sabha'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Arya Pratinidhi Sabha"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 177980666,
+                    "files_count": 15,
+                    "downloads": 9,
+                    "week": 4,
+                    "month": 9,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:51:09Z",
+                    "publicdate": "2024-04-08T01:51:09Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "Rqqr_sankshipta-manusmruthi-by-munshiram-1909-kangadi-saddharma-pracharak-yantralay",
+                    "title": "Sankshipta Manusmruthi By Munshiram 1909 Kangadi Saddharma Pracharak Yantralay",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Sankshipta Manusmruthi by Munshiram 1909 Kangadi - Saddharma Pracharak Yantralay'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Saddharma Pracharak Yantralay"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 177539315,
+                    "files_count": 15,
+                    "downloads": 17,
+                    "week": 3,
+                    "month": 17,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:51:09Z",
+                    "publicdate": "2024-04-08T01:51:09Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "XJXI_sant-jeevani-by-girija-kumar-ghosh-1918-kangadi-sahitya-parishad-karyalay",
+                    "title": "Sant Jeevani By Girija Kumar Ghosh 1918 Kangadi Sahitya Parishad Karyalay",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Sant Jeevani by Girija Kumar Ghosh 1918 Kangadi - Sahitya Parishad Karyalay'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Sahitya Parishad Karyalay"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 84720149,
+                    "files_count": 15,
+                    "downloads": 8,
+                    "week": 1,
+                    "month": 8,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:51:05Z",
+                    "publicdate": "2024-04-08T01:51:05Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "KUUT_rudra-devata-by-bhagavat-datt-vedalankar-1985-haridwar-shri-garibdasi-sant-sahitya-shod-samstha",
+                    "title": "Rudra Devata By Bhagavat Datt Vedalankar 1985 Haridwar Shri Garibdasi Sant Sahitya Shod Samsthan",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Rudra Devata by Bhagavat Datt Vedalankar 1985 Haridwar - Shri Garibdasi Sant Sahitya Shod Samsthan'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Shri Garibdasi Sant Sahitya Shod Samsthan"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "num_favorites": 1,
+                    "item_size": 317913000,
+                    "files_count": 15,
+                    "downloads": 47,
+                    "week": 20,
+                    "month": 47,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:50:47Z",
+                    "publicdate": "2024-04-08T01:50:47Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "WyQt_samasudha-by-swami-brahma-muni-parivrajak-vidya-martand-1963-delhi-govindaram-hasanand",
+                    "title": "Samasudha By Swami Brahma Muni Parivrajak Vidya Martand 1963 Delhi Govindaram Hasanand",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Samasudha by Swami Brahma Muni Parivrajak Vidya Martand 1963 Delhi - Govindaram Hasanand'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Govindaram Hasanand"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 74600560,
+                    "files_count": 15,
+                    "downloads": 21,
+                    "week": 2,
+                    "month": 21,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:49:34Z",
+                    "publicdate": "2024-04-08T01:49:34Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "NBLu_rushi-dayanand-ke-patra-aur-vignyapan-part-1-by-bhagawadatt-1918-lahore-bombay-mechine-press",
+                    "title": "Rushi Dayanand Ke Patra Aur Vignyapan Part 1 By Bhagawadatt 1918 Lahore Bombay Mechine Press",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Rushi Dayanand Ke Patra Aur Vignyapan Part 1 by Bhagawadatt 1918 Lahore - Bombay Mechine Press'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Bombay Mechine Press"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 110997136,
+                    "files_count": 15,
+                    "downloads": 6,
+                    "week": 1,
+                    "month": 6,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:49:26Z",
+                    "publicdate": "2024-04-08T01:49:26Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "SkgY_samrat-raghu-by-indra-vidyavachaspati-1950-delhi-vijay-pustak-bhandar",
+                    "title": "Samrat Raghu By Indra Vidyavachaspati 1950 Delhi Vijay Pustak Bhandar",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Samrat Raghu by Indra Vidyavachaspati 1950 Delhi - Vijay Pustak Bhandar'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Vijay Pustak Bhandar"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "num_favorites": 1,
+                    "item_size": 63639226,
+                    "files_count": 15,
+                    "downloads": 14,
+                    "week": 2,
+                    "month": 14,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:49:12Z",
+                    "publicdate": "2024-04-08T01:49:12Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "yELY_dayand-darshan-philosaphy-of-swami-dayananda-by-dr.-ved-prakash-gupta-1975-meeru",
+                    "title": "Dayand Darshan ( Philosaphy Of Swami Dayananda) By Dr. Ved Prakash Gupta 1975 Meerut Satyartha Prakashan Samsthan",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Dayand Darshan (Philosaphy Of Swami Dayananda) by Dr.Ved Prakash Gupta 1975 Meerut - Satyartha Prakashan Samsthan'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Satyartha Prakashan Samsthan"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "num_favorites": 1,
+                    "item_size": 305516777,
+                    "files_count": 15,
+                    "downloads": 9,
+                    "week": 1,
+                    "month": 9,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:49:09Z",
+                    "publicdate": "2024-04-08T01:49:09Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "VAqM_mahabharat-siksha-sudha-by-swami-brahma-muni-1953-ajmeir-arya-sahitya-mandal",
+                    "title": "Mahabharat Siksha Sudha By Swami Brahma Muni 1953 Ajmeir Arya Sahitya Mandal",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Mahabharat Siksha Sudha by Swami Brahma Muni 1953 Ajmeir - Arya Sahitya Mandal'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Arya Sahitya Mandal"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 143474279,
+                    "files_count": 15,
+                    "downloads": 11,
+                    "week": 2,
+                    "month": 11,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:49:08Z",
+                    "publicdate": "2024-04-08T01:49:08Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "gERw_rushi-dayanand-ke-patra-aur-vignyapan-part-4-by-bhagawadatt-1917-punjab-arya-pra",
+                    "title": "Rushi Dayanand Ke Patra Aur Vignyapan Part 4 By Bhagawadatt 1917 Punjab Arya Pradeshik Pratinidhi Sabha",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Rushi Dayanand Ke Patra Aur Vignyapan Part 4 by Bhagawadatt 1917 Punjab - Arya Pradeshik Pratinidhi Sabha'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Arya Pradeshik Pratinidhi Sabha"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 58893607,
+                    "files_count": 15,
+                    "downloads": 8,
+                    "week": 2,
+                    "month": 8,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:48:46Z",
+                    "publicdate": "2024-04-08T01:48:46Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "KvOy_dayand-darshan-philosaphy-of-swami-dayananda-by-dr.-ved-prakash-gupta-1973-meeru",
+                    "title": "Dayand Darshan ( Philosaphy Of Swami Dayananda) By Dr. Ved Prakash Gupta 1973 Meerut Prakashan Pratishtan",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Dayand Darshan (Philosaphy Of Swami Dayananda) by Dr.Ved Prakash Gupta 1973 Meerut - Prakashan Pratishtan'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Prakashan Pratishtan"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 269559930,
+                    "files_count": 15,
+                    "downloads": 18,
+                    "week": 7,
+                    "month": 18,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:48:45Z",
+                    "publicdate": "2024-04-08T01:48:45Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "MHnf_rushi-dayanand-ke-patra-aur-vignapan-part-2-by-bhagawatdatt-1919-lahore-devadatt",
+                    "title": "Rushi Dayanand Ke Patra Aur Vignapan Part 2 By Bhagawatdatt 1919 Lahore Devadatt",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Rushi Dayanand Ke Patra Aur Vignapan Part 2 by Bhagawatdatt 1919 Lahore - Devadatt'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Devadatt"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 99654349,
+                    "files_count": 15,
+                    "downloads": 7,
+                    "week": 1,
+                    "month": 7,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:48:45Z",
+                    "publicdate": "2024-04-08T01:48:45Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "PGav_gurudatt-lekhavali-by-gurudatta-ji-vidyarthi-translated-by-sant-ram-1918-lahore-arya-pustakalay",
+                    "title": "Gurudatt Lekhavali By Gurudatta Ji Vidyarthi Translated By Sant Ram 1918 Lahore Arya Pustakalay",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Gurudatt Lekhavali by Gurudatta Ji Vidyarthi Translated by Sant Ram 1918 Lahore - Arya Pustakalay'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Arya Pustakalay"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 403882894,
+                    "files_count": 15,
+                    "downloads": 21,
+                    "week": 8,
+                    "month": 21,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:48:27Z",
+                    "publicdate": "2024-04-08T01:48:27Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "ScnS_rigved-par-vyakhyan-lectures-on-the-rigveda-by-bhagwadatta-1920-lahore-manaoer-vidya-prakasha-p",
+                    "title": "Rigved Par Vyakhyan ( Lectures On The Rigveda) By Bhagwadatta 1920 Lahore Manaoer Vidya Prakasha Press",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Rigved Par Vyakhyan (Lectures On The Rigveda) by Bhagwadatta 1920 Lahore - Manaoer Vidya Prakasha Press'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Manaoer Vidya Prakasha Press"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "num_favorites": 1,
+                    "item_size": 102798685,
+                    "files_count": 15,
+                    "downloads": 24,
+                    "week": 9,
+                    "month": 24,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:47:59Z",
+                    "publicdate": "2024-04-08T01:47:59Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "mYOi_maharshi-dayanand-ka-jeevan-charitra-by-indra-vidya-vachaspati-1950-delhi-vijay-pustak-bhandar",
+                    "title": "Maharshi Dayanand Ka Jeevan Charitra By Indra Vidya Vachaspati 1950 Delhi Vijay Pustak Bhandar",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Maharshi Dayanand Ka Jeevan Charitra by Indra Vidya Vachaspati 1950 Delhi - Vijay Pustak Bhandar'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Vijay Pustak Bhandar"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 149683531,
+                    "files_count": 15,
+                    "downloads": 8,
+                    "week": 2,
+                    "month": 8,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:47:55Z",
+                    "publicdate": "2024-04-08T01:47:55Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "cRPS_political-testament-of-swami-shradhanand-punjab-shri-virendra",
+                    "title": "Political Testament Of Swami Shradhanand Punjab Shri Virendra",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Political Testament Of Swami Shradhanand Punjab - Shri Virendra'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Shri Virendra"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "num_favorites": 1,
+                    "item_size": 19714040,
+                    "files_count": 15,
+                    "downloads": 11,
+                    "week": 4,
+                    "month": 11,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:47:49Z",
+                    "publicdate": "2024-04-08T01:47:49Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "vmZm_mughal-samrajya-ka-kshya-aur-uska-karan-patrt-3-and-4-by-indra-vidya-vachaspati-",
+                    "title": "Mughal Samrajya Ka Kshya Aur Uska Karan Patrt 3 And 4 By Indra Vidya Vachaspati 1936 Mumbai Hindi Grath Ratnakar Karyalay",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Mughal Samrajya Ka Kshya Aur Uska Karan Patrt 3 and 4 by Indra Vidya Vachaspati 1936 Mumbai - Hindi Grath Ratnakar Karyalay'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Hindi Grath Ratnakar Karyalay"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 196786183,
+                    "files_count": 15,
+                    "downloads": 17,
+                    "week": 3,
+                    "month": 17,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:47:42Z",
+                    "publicdate": "2024-04-08T01:47:42Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "Xffi_nyaya-darshan-with-vatsayana-bhashya-and-hindi-translation-by-swami-brahma-muni-",
+                    "title": "Nyaya Darshan With Vatsayana Bhashya And Hindi Translation By Swami Brahma Muni Parivrajak Vidya Martand 1968 New Delhi Sarvadeshik Arya Pratinidhi Sabha",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Nyaya Darshan with Vatsayana Bhashya and Hindi Translation by Swami Brahma Muni Parivrajak Vidya Martand 1968 New Delhi - Sarvadeshik Arya Pratinidhi Sabha'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Sarvadeshik Arya Pratinidhi Sabha"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 120765264,
+                    "files_count": 15,
+                    "downloads": 19,
+                    "week": 2,
+                    "month": 19,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:47:41Z",
+                    "publicdate": "2024-04-08T01:47:41Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "SFsM_bruhaspati-devata-by-bhagavat-datt-vedalankar-new-delhi-shri-saraswati-sadan",
+                    "title": "Bruhaspati Devata By Bhagavat Datt Vedalankar New Delhi Shri Saraswati Sadan",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Bruhaspati Devata by Bhagavat Datt Vedalankar New Delhi - Shri Saraswati Sadan'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Shri Saraswati Sadan"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "num_favorites": 2,
+                    "item_size": 295109047,
+                    "files_count": 15,
+                    "downloads": 33,
+                    "week": 9,
+                    "month": 33,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:47:21Z",
+                    "publicdate": "2024-04-08T01:47:21Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "ZuNf_mantrom-ke-rushi-by-swami-brahma-muni-parivrajak-vidyamartand-1974-ajmeir-arya-sahitya-mandal",
+                    "title": "Mantrom Ke Rushi By Swami Brahma Muni Parivrajak Vidyamartand 1974 Ajmeir Arya Sahitya Mandal",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Mantrom ke Rushi by Swami Brahma Muni Parivrajak Vidyamartand 1974 Ajmeir - Arya Sahitya Mandal'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Arya Sahitya Mandal"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "num_favorites": 1,
+                    "item_size": 27538293,
+                    "files_count": 15,
+                    "downloads": 18,
+                    "week": 3,
+                    "month": 18,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:47:21Z",
+                    "publicdate": "2024-04-08T01:47:21Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "dqlX_manav-dharma-shastra-tatha-sasana-paddhati-by-munshi-ram-jignyasu-1917-kangadi-p",
+                    "title": "Manav Dharma Shastra Tatha Sasana Paddhati By Munshi Ram Jignyasu 1917 Kangadi Pracharak Pustak Bhandar",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Manav Dharma Shastra Tatha Sasana Paddhati by Munshi Ram Jignyasu 1917 Kangadi - Pracharak Pustak Bhandar'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Pracharak Pustak Bhandar"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "num_favorites": 1,
+                    "item_size": 55631559,
+                    "files_count": 15,
+                    "downloads": 11,
+                    "week": 3,
+                    "month": 11,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:47:17Z",
+                    "publicdate": "2024-04-08T01:47:17Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "tgQv_kathakam-die-samhita-der-katha-cakha-by-leopold-von-schroeder-1900-anon",
+                    "title": "Kathakam ( Die Samhita Der Katha Cakha) By Leopold Von Schroeder 1900 Anon",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Kathakam (Die Samhita Der Katha Cakha) by Leopold Von Schroeder 1900 - Anon'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Anon"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 332699328,
+                    "files_count": 15,
+                    "downloads": 8,
+                    "week": 0,
+                    "month": 8,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:47:14Z",
+                    "publicdate": "2024-04-08T01:47:14Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "GTuW_maharshi-dayanand-praneeta-raj-dharma-by-lakshmi-datta-deekshit-1950-arya-pratinidhi-sabha",
+                    "title": "Maharshi Dayanand Praneeta Raj Dharma By Lakshmi Datta Deekshit 1950 Arya Pratinidhi Sabha",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Maharshi Dayanand Praneeta Raj Dharma by Lakshmi Datta Deekshit 1950 - Arya Pratinidhi Sabha'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Arya Pratinidhi Sabha"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "num_favorites": 1,
+                    "item_size": 86146478,
+                    "files_count": 15,
+                    "downloads": 11,
+                    "week": 4,
+                    "month": 11,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:47:06Z",
+                    "publicdate": "2024-04-08T01:47:06Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "QGbx_atharva-vediya-mantra-vidya-by-swami-brahmamuni-parivrajak-1941-new-delhi-dayananda-samsthan",
+                    "title": "Atharva Vediya Mantra Vidya By Swami Brahmamuni Parivrajak 1941 New Delhi Dayananda Samsthan",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Atharva Vediya Mantra vidya by Swami Brahmamuni Parivrajak 1941 New Delhi - Dayananda Samsthan'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Dayananda Samsthan"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "num_favorites": 2,
+                    "item_size": 228931426,
+                    "files_count": 15,
+                    "downloads": 32,
+                    "week": 8,
+                    "month": 32,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:45:58Z",
+                    "publicdate": "2024-04-08T01:45:58Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "eaeX_bala-samskruti-sudha-by-swami-brahma-muni-parivrajak-vidyamartand-1961-new-delhi",
+                    "title": "Bala Samskruti Sudha By Swami Brahma Muni Parivrajak Vidyamartand 1961 New Delhi Sarvadeshik Arya Pratinidhi Sabha",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Bala Samskruti Sudha by Swami Brahma Muni Parivrajak Vidyamartand 1961 New Delhi - Sarvadeshik Arya Pratinidhi Sabha'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Sarvadeshik Arya Pratinidhi Sabha"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 41112511,
+                    "files_count": 15,
+                    "downloads": 11,
+                    "week": 1,
+                    "month": 11,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:45:47Z",
+                    "publicdate": "2024-04-08T01:45:47Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "WmST_atharvved-muni-bhashya-part-3-by-swami-brahmamuni-parivrajak-vidyamartand-1974-n",
+                    "title": "Atharvved Muni Bhashya Part 3 By Swami Brahmamuni Parivrajak Vidyamartand 1974 New Delhi Sarvadeshik Arya Pratinidhi Sabha",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Atharvved Muni Bhashya Part 3 by Swami Brahmamuni Parivrajak Vidyamartand 1974 new Delhi - Sarvadeshik Arya Pratinidhi Sabha'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Sarvadeshik Arya Pratinidhi Sabha"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 257659875,
+                    "files_count": 15,
+                    "downloads": 13,
+                    "week": 1,
+                    "month": 13,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:45:45Z",
+                    "publicdate": "2024-04-08T01:45:45Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "ciOd_avvyayartha-nibadhanam-by-swami-brahmamuni-parivrajak-vidyamartand-1967-rohatak-",
+                    "title": "Avvyayartha Nibadhanam By Swami Brahmamuni Parivrajak Vidyamartand 1967 Rohatak Haryana Sahitya Samsthan",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Avvyayartha Nibadhanam by Swami Brahmamuni Parivrajak Vidyamartand 1967 Rohatak - Haryana Sahitya Samsthan'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Haryana Sahitya Samsthan"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 43975493,
+                    "files_count": 15,
+                    "downloads": 16,
+                    "week": 1,
+                    "month": 16,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:45:44Z",
+                    "publicdate": "2024-04-08T01:45:44Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "EurQ_amar-hutatma-ed-by-murari-1976-delhi-arya-pratinidhi-sabha",
+                    "title": "Amar Hutatma Ed By Murari 1976 Delhi Arya Pratinidhi Sabha",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Amar Hutatma Ed by Murari 1976 Delhi - Arya Pratinidhi Sabha'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Arya Pratinidhi Sabha"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 172253702,
+                    "files_count": 15,
+                    "downloads": 10,
+                    "week": 2,
+                    "month": 10,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:45:35Z",
+                    "publicdate": "2024-04-08T01:45:35Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "BKhr_arsha-yoga-pradeepika-by-swami-brahma-muni-parivrajak-1949-dehradun-pandit-thakur-datt-sharma-t",
+                    "title": "Arsha Yoga Pradeepika By Swami Brahma Muni Parivrajak 1949 Dehradun Pandit Thakur Datt Sharma Trust",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Arsha Yoga Pradeepika by Swami Brahma Muni Parivrajak 1949 Dehradun - Pandit Thakur Datt Sharma Trust'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Pandit Thakur Datt Sharma Trust"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 225745828,
+                    "files_count": 15,
+                    "downloads": 18,
+                    "week": 2,
+                    "month": 18,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:45:25Z",
+                    "publicdate": "2024-04-08T01:45:25Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "SZPg_atharva-vediya-pruthvi-sukth-matrubhumi-ka-mahatwa-by-shri-swami-vedanand-teerth",
+                    "title": "Atharva Vediya Pruthvi Sukth( Matrubhumi Ka Mahatwa By Shri Swami Vedanand Teertha Ajmeir Arya Sahitya Mandal Limited",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Atharva Vediya Pruthvi Sukth(Matrubhumi Ka Mahatwa by Shri Swami Vedanand Teertha Ajmeir - Arya Sahitya Mandal Limited'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Arya Sahitya Mandal Limited"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "num_favorites": 1,
+                    "item_size": 108322048,
+                    "files_count": 15,
+                    "downloads": 15,
+                    "week": 2,
+                    "month": 15,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:45:19Z",
+                    "publicdate": "2024-04-08T01:45:19Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "STSk_aadima-satyartha-prakash-aur-arya-samaj-ke-sddhant-by-shraddhanand-sanyasi-1918-",
+                    "title": "Aadima Satyartha Prakash Aur Arya Samaj Ke Sddhant By Shraddhanand Sanyasi 1918 Karnal Pandit Vishnu Mitra Sharma",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Aadima Satyartha Prakash Aur Arya Samaj Ke Sddhant by Shraddhanand Sanyasi 1918 Karnal - Pandit Vishnu Mitra Sharma'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Pandit Vishnu Mitra Sharma"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 161633896,
+                    "files_count": 15,
+                    "downloads": 9,
+                    "week": 3,
+                    "month": 9,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:44:53Z",
+                    "publicdate": "2024-04-08T01:44:53Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "Zvqj_arya-parv-paddati-ajmeir-arya-sahitya-mandal-limited",
+                    "title": "Arya Parv Paddati Ajmeir Arya Sahitya Mandal Limited",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Arya Parv Paddati Ajmeir - Arya Sahitya Mandal Limited'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Arya Sahitya Mandal Limited"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 272719001,
+                    "files_count": 15,
+                    "downloads": 14,
+                    "week": 3,
+                    "month": 14,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:44:47Z",
+                    "publicdate": "2024-04-08T01:44:47Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "ivif_atharva-ved-muni-bhashya-by-swami-brahmamuni-parivrajak-vidyamartand-1974-new-de",
+                    "title": "Atharva Ved Muni Bhashya By Swami Brahmamuni Parivrajak Vidyamartand 1974 New Delhi Sarvadeshik Arya Pratinidhi Sabha",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Atharva Ved Muni Bhashya by Swami Brahmamuni Parivrajak Vidyamartand 1974 New Delhi - Sarvadeshik Arya Pratinidhi Sabha'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Sarvadeshik Arya Pratinidhi Sabha"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 254331127,
+                    "files_count": 15,
+                    "downloads": 11,
+                    "week": 2,
+                    "month": 11,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:44:46Z",
+                    "publicdate": "2024-04-08T01:44:46Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "qSJr_abhyas-aur-viragya-by-brahma-muni-parivrajak-vidyamartand-1961-new-delhi-sarvade",
+                    "title": "Abhyas Aur Viragya By Brahma Muni Parivrajak Vidyamartand 1961 New Delhi Sarvadeshik Arya Pratinidhi Sabha",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Abhyas Aur Viragya by Brahma Muni Parivrajak Vidyamartand 1961 New Delhi - Sarvadeshik Arya Pratinidhi Sabha'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Sarvadeshik Arya Pratinidhi Sabha"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "num_favorites": 1,
+                    "item_size": 135578011,
+                    "files_count": 15,
+                    "downloads": 14,
+                    "week": 2,
+                    "month": 14,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:44:04Z",
+                    "publicdate": "2024-04-08T01:44:04Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "GLjT_achar-anachar-aur-chut-chat-by-munshi-ram-jignyasu-1916-kangdi-pracharak-pustak-bhandar",
+                    "title": "Achar Anachar Aur Chut Chat By Munshi Ram Jignyasu 1916 Kangdi Pracharak Pustak Bhandar",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Achar Anachar Aur Chut Chat by Munshi Ram Jignyasu 1916 Kangdi - Pracharak Pustak Bhandar'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Pracharak Pustak Bhandar"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "num_favorites": 1,
+                    "item_size": 37214303,
+                    "files_count": 15,
+                    "downloads": 14,
+                    "week": 4,
+                    "month": 14,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-08T01:44:04Z",
+                    "publicdate": "2024-04-08T01:44:04Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "dSEJ_shabdartha-cinthamani-ka-varga-by-sri-sukhananda-natha-50-missing-pages-1865-anon",
+                    "title": "Shabdartha Cinthamani ( Ka Varga) By Sri Sukhananda Natha ( 50) Missing Pages 1865 Anon",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Shabdartha Cinthamani (Ka Varga) by Sri Sukhananda Natha (50) - missing pages 1865 - Anon'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Anon"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 1674983378,
+                    "files_count": 16,
+                    "downloads": 14,
+                    "week": 1,
+                    "month": 14,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-01T14:51:58Z",
+                    "publicdate": "2024-04-01T14:51:58Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "tPMi_vedartha-yatna-an-attempt-to-interpret-the-vedas-vol-i-issure-13-aprit-1877-4257",
+                    "title": "Vedartha Yatna ( An Attempt To Interpret The Vedas) Vol I Issure 13 Aprit 1877 ( 42575) Mumbai 1877 – Nirnaya Sagar Press",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Vedartha Yatna (An attempt to interpret the Vedas) Vol I Issure 13 Aprit 1877 (42575) Mumbai 1877 – Nirnaya Sagar Press'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "eGangotri"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "num_favorites": 1,
+                    "item_size": 366482359,
+                    "files_count": 16,
+                    "downloads": 22,
+                    "week": 5,
+                    "month": 22,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-01T14:41:19Z",
+                    "publicdate": "2024-04-01T14:41:19Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "gjKI_light-of-truth-an-english-tr.-of-satyarth-prakash-by-shri-durga-prasad-64555-new",
+                    "title": "Light Of Truth ( An English Tr. Of Satyarth Prakash) By Shri Durga Prasad ( 64555) New Delhi 1970 – Jan Gyan Prakashan",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Light of Truth (An English Tr. Of Satyarth Prakash) by Shri Durga Prasad (64555) New Delhi 1970 – Jan Gyan Prakashan'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "eGangotri"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "num_favorites": 1,
+                    "item_size": 756747022,
+                    "files_count": 16,
+                    "downloads": 9,
+                    "week": 2,
+                    "month": 9,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-01T14:41:11Z",
+                    "publicdate": "2024-04-01T14:41:11Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "QNxB_the-east-and-the-west-47772-vol-x-westminster-london-england-1912-the-society-fo",
+                    "title": "The East And The West ( 47772) Vol X Westminster ( London, England) 1912 – The Society For The Propagation Of The Gospel In Foreign Parts",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'The East And The West (47772) Vol X - Westminster (London, England) 1912 – The Society for the Propagation of the Gospel in Foreign Parts'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Westminster (London, England) 1912 – The Society for the Propagation of the Gospel in Foreign Parts"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "num_favorites": 1,
+                    "item_size": 655673295,
+                    "files_count": 16,
+                    "downloads": 5,
+                    "week": 2,
+                    "month": 5,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-01T14:40:23Z",
+                    "publicdate": "2024-04-01T14:40:23Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "mXXH_vaiyakarana-siddhanta-kaumudi-balamanorama-comm-karakanta-part-i-ed.-pt.-g-s-nen",
+                    "title": "Vaiyakarana Siddhanta Kaumudi ( Balamanorama Comm,) ( Karakanta Part I) Ed. Pt. G S Nene ( 158016) Tight Binding Varanasi 2008 – Chaukhambha Prakashan",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Vaiyakarana Siddhanta Kaumudi (Balamanorama comm,) (Karakanta Part I) Ed.Pt. G S Nene (158016) Tight Binding Varanasi 2008 – Chaukhambha Prakashan'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "eGangotri"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "num_favorites": 1,
+                    "item_size": 484943024,
+                    "files_count": 16,
+                    "downloads": 11,
+                    "week": 2,
+                    "month": 11,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-01T14:38:56Z",
+                    "publicdate": "2024-04-01T14:38:56Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "vstG_the-sacred-books-of-the-hindus-tr.-by-various-sanskrit-scholars-ed.-major-b.-d.-",
+                    "title": "The Sacred Books Of The Hindus ( Tr. By Various Sanskrit Scholars) Ed. Major B. D. Basu Vol XVI Book I ( 54251) Bahadurganj 1914 – The Panini Office",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'The Sacred Books Of The Hindus (Tr. by Various Sanskrit Scholars) Ed. Major B. D. Basu Vol XVI -Book I (54251) Bahadurganj 1914 – The Panini Office'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Book I (54251) Bahadurganj 1914 – The Panini Office"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "num_favorites": 1,
+                    "item_size": 502752867,
+                    "files_count": 16,
+                    "downloads": 10,
+                    "week": 1,
+                    "month": 10,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-01T14:37:50Z",
+                    "publicdate": "2024-04-01T14:37:50Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "YplX_the-works-of-the-late-pandit-gurudatta-47092-lahore-1912-the-aryan-printing-publ",
+                    "title": "The Works Of The Late Pandit Gurudatta ( 47092) Lahore 1912 – The Aryan Printing Publishing And General Trading Co Ltd",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'The works of the Late Pandit Gurudatta (47092) Lahore 1912 – The Aryan Printing Publishing and General Trading Co Ltd'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "eGangotri"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 358982700,
+                    "files_count": 16,
+                    "downloads": 16,
+                    "week": 2,
+                    "month": 16,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-01T14:35:35Z",
+                    "publicdate": "2024-04-01T14:35:35Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "eleZ_philosophy-of-dayanand-by-ganga-prasad-upadhyaya-45627-allahabad-1955-ganga-gyan-mandir",
+                    "title": "Philosophy Of Dayanand By Ganga Prasad Upadhyaya ( 45627) Allahabad 1955 – Ganga Gyan Mandir",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Philosophy Of Dayanand by Ganga Prasad Upadhyaya (45627) Allahabad 1955 – Ganga Gyan Mandir'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "eGangotri"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 535761992,
+                    "files_count": 16,
+                    "downloads": 13,
+                    "week": 1,
+                    "month": 13,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-01T14:35:23Z",
+                    "publicdate": "2024-04-01T14:35:23Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "WikB_brahma-sutra-vidyodaya-bhashya-by-sri-udayaveer-shastri-d-4159-gaziabad-u.-p-198",
+                    "title": "Brahma Sutra Vidyodaya Bhashya By Sri Udayaveer Shastri ( D 4159) Gaziabad ( U. P) 1983 – Vijayanand Vaidik Samsthan",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Brahma Sutra-Vidyodaya Bhashya by Sri Udayaveer Shastri (D4159) Gaziabad (U.P) 1983 – Vijayanand Vaidik Samsthan'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Vidyodaya Bhashya by Sri Udayaveer Shastri (D4159) Gaziabad (U.P) 1983 – Vijayanand Vaidik Samsthan"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "num_favorites": 2,
+                    "item_size": 824437596,
+                    "files_count": 16,
+                    "downloads": 17,
+                    "week": 2,
+                    "month": 17,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-01T14:32:50Z",
+                    "publicdate": "2024-04-01T14:32:50Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "gEWi_the-sikhs-by-kushwant-singh-raghu-rai-074912-varanasi-1984-lustre-press-pvt-ltd",
+                    "title": "The Sikhs By Kushwant Singh, Raghu Rai ( 074912) Varanasi 1984 Lustre Press Pvt Ltd",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'The Sikhs by Kushwant Singh, Raghu Rai (074912) Varanasi 1984 -Lustre Press Pvt Ltd'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Lustre Press Pvt Ltd"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "num_favorites": 1,
+                    "item_size": 203828519,
+                    "files_count": 16,
+                    "downloads": 18,
+                    "week": 0,
+                    "month": 18,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-01T14:31:54Z",
+                    "publicdate": "2024-04-01T14:31:54Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "fEfq_lectures-on-the-origin-and-growth-of-religion-by-f.-max-muller-54682-london-1882",
+                    "title": "Lectures On The Origin And Growth Of Religion By F. Max Muller ( 54682) London 1882 – Longmans, Green And Co.",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Lectures on the Origin And Growth Of Religion by F. Max Muller (54682) London 1882 – Longmans, Green And Co'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "eGangotri"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "num_favorites": 1,
+                    "item_size": 386267679,
+                    "files_count": 16,
+                    "downloads": 14,
+                    "week": 0,
+                    "month": 14,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-01T14:28:45Z",
+                    "publicdate": "2024-04-01T14:28:45Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "ZoOZ_the-case-of-satyarth-prakash-light-of-truth-by-s.-chandra-54658-delhi-1947-the-i",
+                    "title": "The Case Of Satyarth Prakash ( Light Of Truth) By S. Chandra ( 54658) Delhi 1947 The International Aryan League",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'The Case Of Satyarth Prakash (Light of Truth) by S. Chandra (54658) Delhi 1947- The International Aryan League'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "The International Aryan League"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 149737664,
+                    "files_count": 16,
+                    "downloads": 13,
+                    "week": 1,
+                    "month": 13,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-01T14:24:59Z",
+                    "publicdate": "2024-04-01T14:24:59Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "XngN_hymns-from-the-rigveda-by-peter-peterson-ed.-s.-r.-bhandarkar-55449-missing-page",
+                    "title": "Hymns From The Rigveda By Peter Peterson Ed. S. R. Bhandarkar ( 55449) Missing Pages Poona 1959 – Bhandarkar Oriental Research Institute",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Hymns from the Rigveda by Peter Peterson Ed. S.R. Bhandarkar (55449) missing pages Poona 1959 – Bhandarkar Oriental Research Institute'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "eGangotri"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "num_favorites": 1,
+                    "item_size": 277379290,
+                    "files_count": 16,
+                    "downloads": 16,
+                    "week": 0,
+                    "month": 16,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-01T14:24:31Z",
+                    "publicdate": "2024-04-01T14:24:31Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "xuyl_the-autobiography-of-dayanand-saraswati-ed.-k.-c.-yadav-96426-new-delhi-1987-manohar-publicatio",
+                    "title": "The Autobiography Of Dayanand Saraswati Ed. K. C. Yadav ( 96426) New Delhi 1987 – Manohar Publications",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'The Autobiography Of Dayanand Saraswati Ed. K. C. Yadav (96426) New Delhi 1987 – Manohar Publications'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "eGangotri"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 121115146,
+                    "files_count": 16,
+                    "downloads": 15,
+                    "week": 1,
+                    "month": 15,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-01T14:24:28Z",
+                    "publicdate": "2024-04-01T14:24:28Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "rcdL_the-atharvavedic-civilization-its-place-in-the-indo-aryan-culture-by-dr.-v.-w.-k",
+                    "title": "The Atharvavedic Civilization ( Its Place In The Indo Aryan Culture) By Dr. V. W. Karambelkar ( 53320) Nagpur 1959 – University Of Nagpur",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'The Atharvavedic Civilization (Its Place in the Indo-Aryan Culture) by Dr. V. W. Karambelkar (53320) Nagpur 1959 – University of Nagpur'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Aryan Culture) by Dr. V. W. Karambelkar (53320) Nagpur 1959 – University of Nagpur"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "num_favorites": 1,
+                    "item_size": 354504000,
+                    "files_count": 16,
+                    "downloads": 17,
+                    "week": 4,
+                    "month": 17,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-01T14:24:26Z",
+                    "publicdate": "2024-04-01T14:24:26Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "BQkU_the-arya-samaj-its-cult-and-creed-by-acharya-vaidyanah-shastri-72259-new-delhi-1",
+                    "title": "The Arya Samaj Its Cult And Creed By Acharya Vaidyanah Shastri ( 72259) New Delhi 1967 Sarvadeshik Arya Pratinidhi Sabha",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'The Arya Samaj Its Cult And Creed by Acharya Vaidyanah Shastri (72259) New Delhi 1967 - Sarvadeshik Arya Pratinidhi Sabha'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Sarvadeshik Arya Pratinidhi Sabha"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 302321455,
+                    "files_count": 16,
+                    "downloads": 11,
+                    "week": 0,
+                    "month": 11,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-01T14:23:02Z",
+                    "publicdate": "2024-04-01T14:23:02Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "MOKx_sama-veda-tr.-devi-chand-59599-hoshiarpur-1963-all-india-dayanand-salvation-mission",
+                    "title": "Sama Veda Tr. Devi Chand ( 59599) Hoshiarpur 1963 – All India Dayanand Salvation Mission",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Sama Veda Tr. Devi Chand (59599) Hoshiarpur 1963 – All India Dayanand Salvation Mission'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "eGangotri"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 394725562,
+                    "files_count": 16,
+                    "downloads": 17,
+                    "week": 6,
+                    "month": 17,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-01T14:22:24Z",
+                    "publicdate": "2024-04-01T14:22:24Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "aeVP_atharvaveda-bhashya-kanda-9-10-by-prof.-vishwanath-vidyalankar-9779-karnal-harya",
+                    "title": "Atharvaveda Bhashya ( Kanda 9 10) By Prof. Vishwanath Vidyalankar ( 9779) Karnal ( Haryana) 1986 – R B C Narayan Singh Pratap Singh Dharmatha Trust",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Atharvaveda Bhashya (Kanda 9-10) by Prof. Vishwanath Vidyalankar (9779) Karnal (Haryana) 1986 – R B C Narayan Singh Pratap Singh Dharmatha Trust'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "10) by Prof. Vishwanath Vidyalankar (9779) Karnal (Haryana) 1986 – R B C Narayan Singh Pratap Singh Dharmatha Trust"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 399505684,
+                    "files_count": 16,
+                    "downloads": 15,
+                    "week": 4,
+                    "month": 15,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-01T14:21:59Z",
+                    "publicdate": "2024-04-01T14:21:59Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "ueFJ_rigveda-samhita-vol-x-book-viii-hymns-41-103-english-tr.-svami-satya-prakash-sar",
+                    "title": "Rigveda Samhita Vol X ( Book VIII Hymns 41 103) English Tr. Svami Satya Prakash Sarasvati, S Vidyalankar ( 137357) New Delhi 1982 – Veda Pratishthana",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Rigveda Samhita Vol-X (Book VIII Hymns 41-103)English Tr. Svami Satya Prakash Sarasvati, S Vidyalankar (137357) New Delhi 1982 – Veda Pratishthana'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "103)English Tr. Svami Satya Prakash Sarasvati, S Vidyalankar (137357) New Delhi 1982 – Veda Pratishthana"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 352308381,
+                    "files_count": 16,
+                    "downloads": 15,
+                    "week": 4,
+                    "month": 15,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-01T14:21:48Z",
+                    "publicdate": "2024-04-01T14:21:48Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "jiBi_sruti-siddhanta-sarasamgraha-compiled-by-maithila-pt.-babu-nandana-sharma-14163-",
+                    "title": "Sruti Siddhanta Sarasamgraha Compiled By Maithila Pt. Babu Nandana Sharma ( 14163) Tight Binding Mumbai 1914 – Kshemaraj Shri Krishna Das",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Sruti Siddhanta Sarasamgraha compiled by Maithila Pt. Babu Nandana Sharma (14163) Tight Binding Mumbai 1914 – Kshemaraj Shri Krishna Das'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "eGangotri"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 286698558,
+                    "files_count": 16,
+                    "downloads": 15,
+                    "week": 5,
+                    "month": 15,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-01T14:21:40Z",
+                    "publicdate": "2024-04-01T14:21:40Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "UAmW_atharva-veda-bhashyam-kanda-7-8-by-prof.-vishwanath-vidyalankar-9771-sonipat-har",
+                    "title": "Atharva Veda Bhashyam ( Kanda 7 8) By Prof. Vishwanath Vidyalankar ( 9771) Sonipat ( Haryana) 1987 – Ram Lal Kapoor Trust",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Atharva-Veda- Bhashyam (Kanda 7-8) by Prof. Vishwanath Vidyalankar (9771) Sonipat (Haryana) 1987 – Ram Lal Kapoor Trust'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "8) by Prof. Vishwanath Vidyalankar (9771) Sonipat (Haryana) 1987 – Ram Lal Kapoor Trust"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 362703966,
+                    "files_count": 16,
+                    "downloads": 12,
+                    "week": 8,
+                    "month": 12,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-01T14:20:24Z",
+                    "publicdate": "2024-04-01T14:20:24Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "pZpD_educational-philosophy-of-swami-dayanand-by-dr.-ragghunatha-safaya-dwarikanath-b",
+                    "title": "Educational Philosophy Of Swami Dayanand By Dr. Ragghunatha Safaya, Dwarikanath Bhan ( 83827) Ambala Cantt. 1977 The Indian Publications",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Educational Philosophy Of Swami Dayanand by Dr. Ragghunatha Safaya, Dwarikanath Bhan (83827) Ambala Cantt. 1977 - The Indian Publications'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "The Indian Publications"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "num_favorites": 1,
+                    "item_size": 168707779,
+                    "files_count": 16,
+                    "downloads": 10,
+                    "week": 3,
+                    "month": 10,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-01T14:19:20Z",
+                    "publicdate": "2024-04-01T14:19:20Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "zYJp_atharva-veda-bhashya-kanda-4-5-by-prof.-vishwanath-vidyalankar-7951-sonipat-hary",
+                    "title": "Atharva Veda Bhashya ( Kanda 4 5) By Prof. Vishwanath Vidyalankar ( 7951) Sonipat ( Haryana) 1991 – Ram Lal Kapoor Trust",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Atharva-Veda- Bhashya (Kanda 4-5) by Prof. Vishwanath Vidyalankar (7951) Sonipat (Haryana) 1991 – Ram Lal Kapoor Trust'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "5) by Prof. Vishwanath Vidyalankar (7951) Sonipat (Haryana) 1991 – Ram Lal Kapoor Trust"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 354756448,
+                    "files_count": 16,
+                    "downloads": 9,
+                    "week": 4,
+                    "month": 9,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-01T14:18:18Z",
+                    "publicdate": "2024-04-01T14:18:18Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "GaNF_vedic-teachings-and-ideals-dayanand-ceenary-series-.-s.-no.-5-54267-by-atma-mutt",
+                    "title": "Vedic Teachings And Ideals ( Dayanand Ceenary Series . S. No. 5) ( 54267) By ‘ Atma’ Muttra – Dayanand First Birth Centenary Committee",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Vedic Teachings And Ideals (Dayanand Ceenary Series . S. No. 5) (54267) by ‘Atma’ Muttra – Dayanand First Birth Centenary Committee'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "eGangotri"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "num_favorites": 2,
+                    "item_size": 310635737,
+                    "files_count": 16,
+                    "downloads": 15,
+                    "week": 6,
+                    "month": 15,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-01T14:17:11Z",
+                    "publicdate": "2024-04-01T14:17:11Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "yWcL_atharva-veda-samhita-vol-iv-khanda-11-15-english-tr.-svami-satya-prakash-sarasva",
+                    "title": "Atharva Veda Samhita Vol IV ( Khanda 11 15) English Tr. Svami Satya Prakash Sarasvati ( 139787) New Delhi – Veda Pratishthana",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Atharva-Veda Samhita Vol IV (Khanda 11 -15) English Tr. Svami Satya Prakash Sarasvati (139787) New Delhi – Veda Pratishthana'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "15) English Tr. Svami Satya Prakash Sarasvati (139787) New Delhi – Veda Pratishthana"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "num_favorites": 1,
+                    "item_size": 348433983,
+                    "files_count": 16,
+                    "downloads": 8,
+                    "week": 4,
+                    "month": 8,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-01T14:16:29Z",
+                    "publicdate": "2024-04-01T14:16:29Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "SBlG_vedic-mythology-by-a.-a.-macdonell-encyclopedia-of-indo-aryan-research-ed.-by-g.",
+                    "title": "Vedic Mythology By A. A. Macdonell ( Encyclopedia Of Indo Aryan Research Ed. By G. Buhler Vol III Part 1 A ) ( 55275) Strassburg 1897 – Verlag Von Karl J. Trubner",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Vedic Mythology by A.A.Macdonell (Encyclopedia Of Indo-Aryan Research Ed. by G.Buhler Vol III Part 1A ) (55275) Strassburg 1897 – Verlag Von Karl J. Trubner'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Aryan Research Ed. by G.Buhler Vol III Part 1A ) (55275) Strassburg 1897 – Verlag Von Karl J. Trubner"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "num_favorites": 1,
+                    "item_size": 295489973,
+                    "files_count": 16,
+                    "downloads": 8,
+                    "week": 2,
+                    "month": 8,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-01T14:15:26Z",
+                    "publicdate": "2024-04-01T14:15:26Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "sjwb_atharva-veda-bhashya-kanda-1-3-by-prof.-vishwanath-vidyalankar-9770-sonipat-hary",
+                    "title": "Atharva Veda Bhashya ( Kanda 1 3) By Prof. Vishwanath Vidyalankar ( 9770) Sonipat ( Haryana) 1992 – Ram Lal Kapoor Trust",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Atharva-Veda- Bhashya (Kanda 1-3) by Prof. Vishwanath Vidyalankar (9770) Sonipat (Haryana) 1992 – Ram Lal Kapoor Trust'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "3) by Prof. Vishwanath Vidyalankar (9770) Sonipat (Haryana) 1992 – Ram Lal Kapoor Trust"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 276565394,
+                    "files_count": 16,
+                    "downloads": 19,
+                    "week": 8,
+                    "month": 19,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-01T14:14:15Z",
+                    "publicdate": "2024-04-01T14:14:15Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "ugnc_rigveda-samhita-english-tr.-svami-satya-prakash-sarasvati-vol-xi-book-ix-hymns-1",
+                    "title": "Rigveda Samhita English Tr. Svami Satya Prakash Sarasvati Vol XI Book IX Hymns 1– 114 ( 137358) New Delhi 1983 – Veda Pratishthana",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Rigveda Samhita English Tr. Svami Satya Prakash Sarasvati Vol-XI Book IX Hymns 1–114 (137358) New Delhi 1983 – Veda Pratishthana'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "XI Book IX Hymns 1–114 (137358) New Delhi 1983 – Veda Pratishthana"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 426231852,
+                    "files_count": 16,
+                    "downloads": 16,
+                    "week": 8,
+                    "month": 16,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-01T14:13:36Z",
+                    "publicdate": "2024-04-01T14:13:36Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "hCbM_rigveda-samhita-english-tr.-svami-satya-prakash-sarasvati-vol-iv-book-ii-hymns-1",
+                    "title": "Rigveda Samhita English Tr. Svami Satya Prakash Sarasvati Vol IV ( Book II Hymns 1– 43 And Book III Hymns 1– 62) ( 135398) New Delhi 1977 – Veda Pratishthana",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Rigveda Samhita English Tr. Svami Satya Prakash Sarasvati Vol- IV (Book II Hymns 1–43 and Book III Hymns 1–62) (135398) New Delhi 1977 – Veda Pratishthana'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "IV (Book II Hymns 1–43 and Book III Hymns 1–62) (135398) New Delhi 1977 – Veda Pratishthana"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 399052476,
+                    "files_count": 16,
+                    "downloads": 3,
+                    "week": 0,
+                    "month": 3,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-01T14:12:29Z",
+                    "publicdate": "2024-04-01T14:12:29Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "JXnH_rigveda-samhita-english-tr.-svami-satya-prakash-sarasvati-vol-i-introduction-and",
+                    "title": "Rigveda Samhita English Tr. Svami Satya Prakash Sarasvati Vol I ( Introduction And Index) ( 139789) New Delhi 1977 – Veda Pratishthana",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Rigveda Samhita English Tr. Svami Satya Prakash Sarasvati Vol I (Introduction and Index) (139789) New Delhi 1977 – Veda Pratishthana'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "eGangotri"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "num_favorites": 1,
+                    "item_size": 411560627,
+                    "files_count": 16,
+                    "downloads": 9,
+                    "week": 0,
+                    "month": 9,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-01T14:12:06Z",
+                    "publicdate": "2024-04-01T14:12:06Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "CTfM_visnu-smrti-with-comm.-vaijayanti-of-sri-nanda-pandit-ed.-julius-jolly-39514-wor",
+                    "title": "Visnu Smrti With Comm. ‘ Vaijayanti’ Of Sri Nanda Pandit Ed. Julius Jolly ( 39514) Work No. 95 Varanasi 1962 – Chowkhamba Sanskrit Series Office",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Visnu Smrti with Comm. ‘Vaijayanti’ of Sri Nanda Pandit Ed. Julius Jolly (39514) Work No. 95 -Varanasi 1962 – Chowkhamba Sanskrit Series Office'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Varanasi 1962 – Chowkhamba Sanskrit Series Office"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 179670401,
+                    "files_count": 16,
+                    "downloads": 12,
+                    "week": 3,
+                    "month": 12,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-01T14:11:56Z",
+                    "publicdate": "2024-04-01T14:11:56Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "wyGY_rigveda-samhita-vol-vii-book-vi-hymns-1-75-english-tr.-svami-satya-prakash-saras",
+                    "title": "Rigveda Samhita Vol VII ( Book VI Hymns 1 75) English Tr. Svami Satya Prakash Sarasvati, S Vidyalankar ( 135400) New Delhi 1997 – Veda Pratishthana",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Rigveda Samhita Vol-VII (Book VI Hymns 1-75)English Tr. Svami Satya Prakash Sarasvati, S Vidyalankar (135400) New Delhi 1997 – Veda Pratishthana'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "75)English Tr. Svami Satya Prakash Sarasvati, S Vidyalankar (135400) New Delhi 1997 – Veda Pratishthana"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 349202034,
+                    "files_count": 16,
+                    "downloads": 5,
+                    "week": 1,
+                    "month": 5,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-01T14:11:53Z",
+                    "publicdate": "2024-04-01T14:11:53Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "zqsJ_atharva-veda-pratishakhya-or-shaunakiya-chaturadhyatika-text-english-translation",
+                    "title": "Atharva Veda Pratishakhya Or Shaunakiya Chaturadhyatika ( Text, English Translation, Notes) By William D. Whitney ( 109894) Delhi 1994 – Parimal Publications",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Atharva-Veda Pratishakhya Or Shaunakiya Chaturadhyatika (Text, English Translation, Notes) by William D. Whitney (109894) Delhi 1994 – Parimal Publications'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Veda Pratishakhya Or Shaunakiya Chaturadhyatika (Text, English Translation, Notes) by William D. Whitney (109894) Delhi 1994 – Parimal Publications"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 392780768,
+                    "files_count": 16,
+                    "downloads": 4,
+                    "week": 3,
+                    "month": 4,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-01T14:11:03Z",
+                    "publicdate": "2024-04-01T14:11:03Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "VWhf_atharva-veda-samhita-vol-iv-khanda-11-15-english-tr.-svami-satya-prakash-sarasva",
+                    "title": "Atharva Veda Samhita Vol IV ( Khanda 11 15) English Tr. Svami Satya Prakash Sarasvati ( 137368) New Delhi – Veda Pratishthana",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Atharva Veda Samhita Vol IV (Khanda 11 -15) English Tr. Svami Satya Prakash Sarasvati (137368) New Delhi – Veda Pratishthana'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "15) English Tr. Svami Satya Prakash Sarasvati (137368) New Delhi – Veda Pratishthana"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 347173930,
+                    "files_count": 16,
+                    "downloads": 3,
+                    "week": 0,
+                    "month": 3,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-01T14:10:53Z",
+                    "publicdate": "2024-04-01T14:10:53Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "KObr_works-of-maharshi-dayanand-and-paropakarini-sabha-y-har-ilas-sarda-19232-ajmer-1942-vedic-yantr",
+                    "title": "Works Of Maharshi Dayanand And Paropakarini Sabha Y Har Ilas Sarda ( 19232) Ajmer 1942 – Vedic Yantralaya",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Works Of Maharshi Dayanand and Paropakarini Sabha y Har ilas Sarda (19232) Ajmer 1942 – Vedic Yantralaya'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "eGangotri"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 125170271,
+                    "files_count": 16,
+                    "downloads": 4,
+                    "week": 1,
+                    "month": 4,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-01T14:10:51Z",
+                    "publicdate": "2024-04-01T14:10:51Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "efSR_vedic-chronology-and-vedanga-jyotisha-by-lokamanya-bal-gangadhar-tilak-54397-poo",
+                    "title": "Vedic Chronology And Vedanga Jyotisha By Lokamanya Bal Gangadhar Tilak ( 54397) Poona 1925 – Messrs Tilak Bros",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Vedic Chronology And Vedanga Jyotisha by Lokamanya Bal Gangadhar Tilak (54397) Poona 1925 – Messrs Tilak Bros'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "eGangotri"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 121208892,
+                    "files_count": 16,
+                    "downloads": 9,
+                    "week": 2,
+                    "month": 9,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-01T14:10:33Z",
+                    "publicdate": "2024-04-01T14:10:33Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "PtvE_yajurvedic-sandhya-upasana-paddhati-24634-fourth-edition-varanasi-1949-chaukhambha-prakashan",
+                    "title": "Yajurvedic Sandhya Upasana Paddhati ( 24634) Fourth Edition Varanasi 1949 – Chaukhambha Prakashan",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Yajurvedic Sandhya Upasana Paddhati (24634) Fourth edition Varanasi 1949 – Chaukhambha Prakashan'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "eGangotri"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 13248687,
+                    "files_count": 16,
+                    "downloads": 16,
+                    "week": 1,
+                    "month": 16,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-01T14:10:31Z",
+                    "publicdate": "2024-04-01T14:10:31Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "hCPh_vratyasanskara-mimansa-composed-by-p-ram-mishra-shastri-42998-kashi-1888-the-lit",
+                    "title": "Vratyasanskara Mimansa Composed By P Ram Mishra Shastri ( 42998) Kashi 1888 – The Literary Socieity Of Benares Pandits",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Vratyasanskara Mimansa composed by P Ram Mishra Shastri (42998) Kashi 1888 – The Literary Socieity of Benares Pandits'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "eGangotri"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 162362191,
+                    "files_count": 16,
+                    "downloads": 7,
+                    "week": 1,
+                    "month": 7,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-01T14:09:58Z",
+                    "publicdate": "2024-04-01T14:09:58Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "LcsE_rigveda-samhita-vol-ix-book-viii-hymns-1-40-english-tr.-svami-satya-prakash-sara",
+                    "title": "Rigveda Samhita Vol IX ( Book VIII Hymns 1 40) English Tr. Svami Satya Prakash Sarasvati, S Vidyalankar ( 135402) New Delhi 1995 – Veda Pratishthana",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Rigveda Samhita Vol-IX (Book VIII Hymns 1-40) English Tr. Svami Satya Prakash Sarasvati, S Vidyalankar (135402) New Delhi 1995 – Veda Pratishthana'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "40) English Tr. Svami Satya Prakash Sarasvati, S Vidyalankar (135402) New Delhi 1995 – Veda Pratishthana"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 341840555,
+                    "files_count": 16,
+                    "downloads": 4,
+                    "week": 0,
+                    "month": 4,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-01T14:09:39Z",
+                    "publicdate": "2024-04-01T14:09:39Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "NUyI_atharva-veda-samhita-vol-iii-khanda-7-10-english-tr.-svami-satya-prakash-sarasva",
+                    "title": "Atharva Veda Samhita Vol III ( Khanda 7 10) English Tr. Svami Satya Prakash Sarasvati ( 137367) New Delhi – Veda Pratishthana",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Atharva Veda Samhita Vol III (Khanda 7 -10) English Tr. Svami Satya Prakash Sarasvati (137367) New Delhi – Veda Pratishthana'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "10) English Tr. Svami Satya Prakash Sarasvati (137367) New Delhi – Veda Pratishthana"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 418277742,
+                    "files_count": 16,
+                    "downloads": 3,
+                    "week": 0,
+                    "month": 3,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-01T14:08:28Z",
+                    "publicdate": "2024-04-01T14:08:28Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "EMuo_philosophy-of-dayananda-dr.-ved-prakash-gupta-87908-ghaziabad-u.-p-1986-indo-vision-pvt.-ltd.",
+                    "title": "Philosophy Of Dayananda Dr. Ved Prakash Gupta ( 87908) Ghaziabad ( U. P) 1986 Indo Vision Pvt. Ltd.",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Philosophy Of Dayananda Dr. Ved Prakash Gupta (87908) Ghaziabad (U.P) 1986 - IndoVision Pvt. Ltd'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "IndoVision Pvt. Ltd"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 300485742,
+                    "files_count": 16,
+                    "downloads": 11,
+                    "week": 0,
+                    "month": 11,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-01T14:07:58Z",
+                    "publicdate": "2024-04-01T14:07:58Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "OBXG_alamkara-kosa-by-dr.-brahma-mitra-awasthi-111034-delhi-1989-indu-prakashan",
+                    "title": "Alamkara Kosa By Dr. Brahma Mitra Awasthi ( 111034) Delhi 1989 Indu Prakashan",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Alamkara-Kosa by Dr. Brahma Mitra Awasthi (111034) Delhi 1989 - Indu Prakashan'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Indu Prakashan"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "num_favorites": 2,
+                    "item_size": 493452099,
+                    "files_count": 16,
+                    "downloads": 27,
+                    "week": 5,
+                    "month": 27,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-01T14:07:26Z",
+                    "publicdate": "2024-04-01T14:07:26Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                },
+                {
+                  "index": "prod-i-006",
+                  "service_backend": "metadata",
+                  "hit_type": "item",
+                  "fields": {
+                    "identifier": "KqHL_anti-theistic-theories-by-robert-flint-the-baird-lecture-for-1877-2063-e-ninth-e",
+                    "title": "Anti Theistic Theories By Robert Flint ( The Baird Lecture For 1877) ( 2063 E) Ninth Edition Edinburgh 1917– William Blackwood And Sons",
+                    "description": "'Gurukul Kangri Haridwar Collection', 'Anti-Theistic Theories by Robert Flint (The Baird Lecture for 1877) (2063E) Ninth edition Edinburgh 1917– William Blackwood and Sons'",
+                    "subject": [
+                      "Gurukul Kangri Haridwar Collection"
+                    ],
+                    "creator": [
+                      "Theistic Theories by Robert Flint (The Baird Lecture for 1877) (2063E) Ninth edition Edinburgh 1917– William Blackwood and Sons"
+                    ],
+                    "collection": [
+                      "opensource"
+                    ],
+                    "mediatype": "texts",
+                    "licenseurl": "https://creativecommons.org/publicdomain/zero/1.0/",
+                    "item_size": 418504819,
+                    "files_count": 16,
+                    "downloads": 6,
+                    "week": 1,
+                    "month": 6,
+                    "indexflag": [
+                      "index",
+                      "nonoindex",
+                      "uncurated"
+                    ],
+                    "addeddate": "2024-04-01T14:06:06Z",
+                    "publicdate": "2024-04-01T14:06:06Z"
+                  },
+                  "highlight": null,
+                  "_score": null
+                }
+              ]
+            },
+            "aggregations": []
+          }
+        },
+        "account_extra_info": {
+          "account_details": {
+            "screenname": "gurukulkangri",
+            "user_item_identifier": "@gurukulkangri",
+            "user_since": "2022-06-07"
+          },
+          "user_item_metadata": {
+            "title": "Gurukula Kangri Haridwar Collection",
+            "description": "\u003Cdiv\u003EGurukul Kangri University Haridwar Collection.\u003C/div\u003E\u003Cdiv\u003E\u003Cbr /\u003E\u003C/div\u003E\u003Cdiv\u003EGurukul Kangri (deemed to be university) ('गुरुकुल कांगड़ी समविश्वविद्यालय') is a government-funded deemed to be university located in Haridwar, Uttarakhand, India. Situated near the banks of the Ganges about 6 km from Haridwar and about 200 km from New Delhi.\u003C/div\u003E\u003Cdiv\u003E\u003Cbr /\u003E\u003Cdiv\u003EDr. Anil Kumar Dhiman\u003C/div\u003E\u003Cdiv\u003EInformation Scientist\u003C/div\u003E\u003Cdiv\u003EGurukul Kangri University\u003C/div\u003E\u003Cdiv\u003EHaridwar\u003C/div\u003E\u003C/div\u003E\u003Cdiv\u003E\u003Cbr /\u003E\u003C/div\u003E\u003Cdiv\u003EA eGangotri-Arya Samaj Chennai Initiative\u003C/div\u003E"
+          },
+          "policy_settings": {
+            "is_archive_user": false,
+            "privileges": [],
+            "preferences": []
+          }
+        }
+      },
+      "hit_schema": {
+        "item": {
+          "identifier": {
+            "multivalue": false,
+            "mapping": "string"
+          },
+          "noindex": {
+            "multivalue": false,
+            "mapping": "boolean",
+            "optional": true
+          },
+          "title": {
+            "multivalue": false,
+            "mapping": "string",
+            "optional": true
+          },
+          "description": {
+            "multivalue": false,
+            "mapping": "string",
+            "dressing": {
+              "truncate": 1000
+            },
+            "optional": true
+          },
+          "subject": {
+            "multivalue": true,
+            "mapping": "string",
+            "dressing": {
+              "truncate": 1000
+            },
+            "optional": true
+          },
+          "creator": {
+            "multivalue": true,
+            "mapping": "string",
+            "optional": true
+          },
+          "collection": {
+            "multivalue": true,
+            "mapping": "string",
+            "comment": "may be a superset of metadata collection field"
+          },
+          "date": {
+            "multivalue": false,
+            "mapping": "date",
+            "optional": true
+          },
+          "year": {
+            "multivalue": false,
+            "mapping": "integer",
+            "comment": "computed from date",
+            "optional": true
+          },
+          "genre": {
+            "multivalue": true,
+            "mapping": "string",
+            "optional": true
+          },
+          "volume": {
+            "multivalue": false,
+            "mapping": "string",
+            "optional": true
+          },
+          "type": {
+            "multivalue": false,
+            "mapping": "string",
+            "optional": true
+          },
+          "language": {
+            "multivalue": true,
+            "mapping": "string",
+            "optional": true
+          },
+          "mediatype": {
+            "multivalue": false,
+            "mapping": "string"
+          },
+          "licenseurl": {
+            "multivalue": false,
+            "mapping": "string__url",
+            "optional": true
+          },
+          "num_favorites": {
+            "multivalue": false,
+            "mapping": "integer",
+            "optional": true,
+            "comment": "computed during document construction"
+          },
+          "num_reviews": {
+            "multivalue": false,
+            "mapping": "integer",
+            "optional": true,
+            "comment": "computed during document construction"
+          },
+          "item_size": {
+            "multivalue": false,
+            "mapping": "integer",
+            "comment": "bytes; computed during document construction"
+          },
+          "files_count": {
+            "multivalue": false,
+            "mapping": "integer",
+            "comment": "computed during document construction"
+          },
+          "item_count": {
+            "multivalue": false,
+            "mapping": "integer",
+            "comment": "computed during document construction",
+            "optional": true
+          },
+          "collection_files_count": {
+            "multivalue": false,
+            "mapping": "integer",
+            "comment": "computed during document construction, for collection items only",
+            "optional": true
+          },
+          "collection_size": {
+            "multivalue": false,
+            "mapping": "integer",
+            "comment": "bytes; computed during document construction, for collection items only",
+            "optional": true
+          },
+          "downloads": {
+            "multivalue": false,
+            "mapping": "integer",
+            "comment": "total views over item lifetime, updated by audit consultation with Views API",
+            "optional": true
+          },
+          "week": {
+            "multivalue": false,
+            "mapping": "integer",
+            "comment": "views over a seven-day period, updated by audit consultation with Views API",
+            "optional": true
+          },
+          "month": {
+            "multivalue": false,
+            "mapping": "integer",
+            "comment": "views over a month, updated by audit consultation with Views API",
+            "optional": true
+          },
+          "indexflag": {
+            "multivalue": true,
+            "mapping": "string",
+            "comment": "item characterization including noindex status"
+          },
+          "lending___available_to_borrow": {
+            "multivalue": false,
+            "mapping": "boolean",
+            "comment": "may be stale",
+            "optional": true
+          },
+          "lending___available_to_browse": {
+            "multivalue": false,
+            "mapping": "boolean",
+            "comment": "may be stale",
+            "optional": true
+          },
+          "lending___available_to_waitlist": {
+            "multivalue": false,
+            "mapping": "boolean",
+            "comment": "may be stale",
+            "optional": true
+          },
+          "lending___status": {
+            "multivalue": false,
+            "mapping": "string",
+            "comment": "may be stale",
+            "optional": true
+          },
+          "avg_rating": {
+            "multivalue": false,
+            "mapping": "integer",
+            "optional": true
+          },
+          "addeddate": {
+            "multivalue": false,
+            "mapping": "date",
+            "optional": true
+          },
+          "issue": {
+            "multivalue": false,
+            "mapping": "string",
+            "comment": "format varies",
+            "optional": true
+          },
+          "source": {
+            "multivalue": false,
+            "mapping": "string",
+            "comment": "format varies",
+            "optional": true
+          },
+          "reviewdate": {
+            "multivalue": false,
+            "mapping": "date",
+            "optional": true
+          },
+          "publicdate": {
+            "multivalue": false,
+            "mapping": "date",
+            "optional": true
+          },
+          "date_favorited": {
+            "multivalue": false,
+            "mapping": "date",
+            "comment": "not metadata; only present in favorites lists, sourced from Lists API",
+            "optional": true
+          },
+          "reviews_data": {
+            "multivalue": true,
+            "dressing": {
+              "truncate": false
+            },
+            "mapping": "string",
+            "comment": "untruncated JSON encoded data used for Account reviews",
+            "optional": true
+          }
+        }
+      }
+    }
+  }

@@ -28,6 +28,7 @@ export const FETCH_ACRHIVE_METADATA_COUNTER = {
         FETCH_ACRHIVE_METADATA_COUNTER.hitsTotal = 0;
     }
 }
+
 const fetchArchiveMetadata = async (username: string, limitedFields = false): Promise<ArchiveScrapReport> => {
     username = username.startsWith('@') ? username.slice(1) : username;
     FETCH_ACRHIVE_METADATA_COUNTER.reset();
