@@ -2,7 +2,7 @@ import { isValidPath } from "../utils/utils";
 import { moveFilesAndFlatten } from "../cliBased/fileMover";
 import { getFolderInDestRootForProfile, getFolderInSrcRootForProfile } from "../cliBased/utils";
 import * as fs from 'fs';
-import { getAllPDFFiles, getAllPDFFilesWithMedata, resetRowCounter } from "../imgToPdf/utils/FileUtils";
+import { getAllFileListingWithoutStats, getAllFileListingWithStats, getAllPDFFiles, getAllPDFFilesWithMedata, resetRowCounter } from "../imgToPdf/utils/FileUtils";
 import { FileStats } from "../imgToPdf/utils/types";
 import { sizeInfo } from "../mirror/FrontEndBackendCommonCode";
 import * as path from 'path';
@@ -79,17 +79,41 @@ const getFoldersFromInput = (argFirst: string) => {
 }
 
 export const publishBookTitlesList = async (argFirst: string, options: {
-    linksWithStatsOnly: boolean,
+    withStats: boolean,
     pdfsOnly: boolean,
-    linksOnly: boolean
+    withLinks: boolean
 }) => {
     const pdfDumpFolders = getFoldersFromInput(argFirst);
     const _response = []
     resetRowCounter()
     for (let folder of pdfDumpFolders) {
         if (isValidPath(folder)) {
-            if (!options.linksOnly && !options.linksWithStatsOnly) {
-                const metadata = await getAllPDFFilesWithMedata(folder);
+            let metadata = []
+            if (options.pdfsOnly) {
+                console.log(`pdfsOnly ${options.pdfsOnly}`)
+                if (options.withStats) {
+                    console.log(`pdfsOnly ${options.pdfsOnly} !options.withStats: ${options.withStats}`)
+                    metadata = await getAllPDFFilesWithMedata(folder);
+                }
+                else {
+                    console.log(`pdfsOnly ${options.pdfsOnly} 
+                    options.withStats: ${options.withStats}`)
+                    metadata = await getAllPDFFiles(folder);
+                }
+            }
+            else {
+                if (options.withStats) {
+                    console.log(`notPDF: withStats ${options.withStats}`)
+                    metadata = await getAllFileListingWithStats(folder);
+                }
+                else {
+                    console.log(`notPDF: !withStats ${options.withStats}`)
+                    metadata = await getAllFileListingWithoutStats(folder);
+                }
+            }
+            //doesnt handle allFiles option yet.
+            if (!options.withLinks) {
+                console.log(`!withLinks ${options.withLinks}`)
                 const textFileWrittenTo = createPdfReportAsText(metadata, options.pdfsOnly, path.basename(folder));
                 const excelWrittenTo = createExcelReport(metadata, options.pdfsOnly, path.basename(folder))
                 _response.push({
@@ -99,10 +123,10 @@ export const publishBookTitlesList = async (argFirst: string, options: {
                 Excel File: ${excelWrittenTo}`
                 });
             }
-            else if (options.linksOnly) {
-                const metadata = await getAllPDFFiles(folder);
-                const itemCount = metadata.length
 
+            else if (!options.withStats) {
+                console.log(`!withStatswithStats ${options.withStats}`)
+                const itemCount = metadata.length
                 _response.push({
                     success: true,
                     pdfCount: itemCount,
@@ -113,16 +137,15 @@ export const publishBookTitlesList = async (argFirst: string, options: {
                 });
             }
             else {
-                const metadata = await getAllPDFFilesWithMedata(folder);
+                console.log(`else ${options.withStats}`)
                 const itemCount = metadata.length
                 let totalPageCount = metadata.reduce((total, fileStats) => total + fileStats.pageCount, 0);
                 let totalSize = metadata.reduce((total, fileStats) => total + fileStats.rawSize, 0);
-
                 _response.push({
                     success: true,
                     pdfCount: itemCount,
                     totalPageCount,
-                    totalSize:sizeInfo(totalSize),
+                    totalSize: sizeInfo(totalSize),
                     pdfDumpFolders,
                     msg: metadata.map((fileStats: FileStats) =>
                         `(${fileStats.rowCounter}). ${fileStats.fileName}`
@@ -184,7 +207,7 @@ function createFileName(pdfsOnly: boolean, folderBase: string, ext: string) {
     const fileName = `${folderBase}_MegaList_${pdfsOnly ? 'pdfs_only' : 'all_files'}-${timeComponent}.${ext}`;
     const filePath = `${_root}\\${folderBase}`;
     if (!fs.existsSync(filePath)) {
-        fs.writeFileSync(filePath, '');
+        fs.mkdirSync(filePath);
     }
     const absPath = `${filePath}\\${fileName}`;
     return absPath;
