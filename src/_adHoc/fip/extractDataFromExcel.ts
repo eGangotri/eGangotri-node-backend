@@ -1,12 +1,12 @@
 import { readFile, utils } from 'xlsx';
-import { connectToMongo } from '../services/dbService';
-import { printMongoTransactions } from './utils';
-import { GDriveItem } from '../models/GDriveItem';
+import { connectToMongo } from '../../services/dbService';
+import { printMongoTransactions } from '../../excelToMongo/utils';
+import { GDriveItem } from '../../models/GDriveItem';
 import path from 'path';
-import { getLatestExcelFile } from '../utils/utils';
-import { aksharamukhaIastToRomanColloquial } from '../aksharamukha/convert';
+import { getLatestExcelFile } from '../../utils/utils';
+import { aksharamukhaIastToRomanColloquial } from '../../aksharamukha/convert';
 import * as _ from 'lodash';
-import { jsonToExcel } from '../cliBased/excel/ExcelUtils';
+import { jsonToExcel } from '../../cliBased/excel/ExcelUtils';
 
 const transformExcelToJSON = async (pathToExcel: string) => {
     console.log(`transformExcelToJSON ${pathToExcel}`);

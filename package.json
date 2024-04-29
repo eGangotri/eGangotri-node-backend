@@ -43,7 +43,10 @@
     "excelToMongoArchive": "ts-node ./src/excelToMongo/transferArchiveExcelToMongo",
     "excelToMongoGDrive": "ts-node ./src/excelToMongo/tranferGDriveExcelToMongo",
     "aksharamukha": "ts-node ./src/aksharamukha/convert",
-    "fipExcelToMongo": "ts-node ./src/excelToMongo/fipExcelToMongo"
+    "fipExcelToMongo": "ts-node ./src/_adHoc/fip/fipExcelToMongo",
+    "combineFIPExcels": "ts-node ./src/_adHoc/fip/combineFIPExcels"
+
+    
   },
   "repository": {
     "type": "git",
