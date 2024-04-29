@@ -61,7 +61,8 @@ async function sanitizeJson(data: FIPJSonTypes[]) {
             newRow.material = row.material.trim()
         }
         newRow.handlist = manuscriptHandListNum;
-        const conversionString = `${row?.title?.replace(/\"/g, "")}  $ ${row?.subject.replace(/\"/g, "")} $ ${row?.script}`
+        const conversionString = `${row?.title?.replace(/\"/g, "")}  $ ${row?.subject?.replace(/\"/g, "")} $ ${row?.script}`
+
         // const colloquialRomanized = "a$b$c";
         const colloquialRomanized = await aksharamukhaIastToRomanColloquial(conversionString);
 
