@@ -1,5 +1,5 @@
 import * as express from 'express';
-import { launchUploader, loginToArchive, makeGradleCall, moveToFreeze, reuploadMissed } from '../services/gradleLauncherService';
+import { launchUploader, launchUploaderViaAbsPath, launchUploaderViaExcel, loginToArchive, makeGradleCall, moveToFreeze, reuploadMissed } from '../services/gradleLauncherService';
 import { ArchiveProfileAndTitle } from '../mirror/types';
 import { isValidPath } from '../utils/utils';
 import { getFolderInDestRootForProfile } from '../cliBased/utils';
@@ -21,6 +21,40 @@ launchGradleRoute.get('/launchUploader', async (req: any, resp: any) => {
         resp.status(400).send(err);
     }
 })
+
+
+launchGradleRoute.get('/launchUploaderViaExcel', async (req: any, resp: any) => {
+    try {
+        const gradleArgs = req.query.gradleArgs
+        console.log(`launchUploader ${gradleArgs}`)
+        const res = await launchUploaderViaExcel(req.query.gradleArgs)
+        resp.status(200).send({
+            response: res
+        });
+
+    }
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})
+
+launchGradleRoute.get('/launchUploaderViaAbsPath', async (req: any, resp: any) => {
+    try {
+        const _profiles = req.query.profiles
+        console.log(`launchUploader ${_profiles}`)
+        const res = await launchUploaderViaAbsPath(req.query.profiles)
+        resp.status(200).send({
+            response: res
+        });
+
+    }
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})
+
 
 launchGradleRoute.post('/reuploadMissed', async (req: any, resp: any) => {
     try {

@@ -4,7 +4,7 @@ export const callAksharamukha = async (body: AksharaMukhaGetProps) => {
     const e_macronRemoval = result.replace(/ē/g, 'e')
     const n_tildaRemoval = e_macronRemoval.replace(/Jṭ/ig, 'gy')
     
-    console.log(`For input: ${body.text} \nResult: ${n_tildaRemoval}`);
+   // console.log(`For input: ${body.text} \nResult: ${n_tildaRemoval}`);
     return n_tildaRemoval;
 }
 
@@ -48,14 +48,14 @@ const jsonBody: AksharaMukhaGetProps = {
     "postOptions": [],
     "preOptions": []
 }
-aksharamukhaHKToRomanColloquial(`a.m"sumadaagama`)
-callAksharamukha({
-    ...jsonBody,
-    "source": "Velthuis",
-    "target": "Devanagari",
-    "text":`a.m"sumadaagama`
-}).then((res) => {
-    console.log(res)
-})
+// aksharamukhaHKToRomanColloquial(`a.m"sumadaagama`)
+// callAksharamukha({
+//     ...jsonBody,
+//     "source": "Velthuis",
+//     "target": "Devanagari",
+//     "text":`a.m"sumadaagama`
+// }).then((res) => {
+//     console.log(res)
+// })
 
 //yarn run aksharamukha
