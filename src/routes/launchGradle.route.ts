@@ -26,7 +26,7 @@ launchGradleRoute.get('/launchUploader', async (req: any, resp: any) => {
 launchGradleRoute.get('/launchUploaderViaExcel', async (req: any, resp: any) => {
     try {
         const gradleArgs = req.query.gradleArgs
-        console.log(`launchUploader ${gradleArgs}`)
+        console.log(`launchUploaderViaExcel ${gradleArgs}`)
         const res = await launchUploaderViaExcel(req.query.gradleArgs)
         resp.status(200).send({
             response: res
@@ -41,9 +41,9 @@ launchGradleRoute.get('/launchUploaderViaExcel', async (req: any, resp: any) => 
 
 launchGradleRoute.get('/launchUploaderViaAbsPath', async (req: any, resp: any) => {
     try {
-        const _profiles = req.query.profiles
-        console.log(`launchUploader ${_profiles}`)
-        const res = await launchUploaderViaAbsPath(req.query.profiles)
+        const gradleArgs = req.query.gradleArgs
+        console.log(`launchUploaderViaAbsPath ${gradleArgs}`)
+        const res = await launchUploaderViaAbsPath(gradleArgs)
         resp.status(200).send({
             response: res
         });
@@ -51,7 +51,12 @@ launchGradleRoute.get('/launchUploaderViaAbsPath', async (req: any, resp: any) =
     }
     catch (err: any) {
         console.log('Error', err);
-        resp.status(400).send(err);
+        resp.status(400).send({
+            response:{
+                success: false,
+                message: err.message
+            }
+        });
     }
 })
 

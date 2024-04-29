@@ -6,7 +6,14 @@ import { ArchiveProfileAndTitle } from 'mirror/types';
 gradle uploadToArchiveSelective --args="your_arg1 your_arg2"
 */
 const generateGradleCommandForCSV = (args: string, gradleCommand: string) => {
-    const _query = args.split(",").map((x: string) => x.trim()).join(" ")
+    return generateGradleCommandForChar(args, gradleCommand, ",")
+}
+
+const generateGradleCommandForHashSeparated = (args: string, gradleCommand: string) => {
+    return generateGradleCommandForChar(args, gradleCommand, "#")
+}
+const generateGradleCommandForChar = (args: string, gradleCommand: string, char:string) => {
+    const _query = args.split(char).map((x: string) => x.trim()).join(" ")
     console.log(`args ${args}`);
     const _cmd = `gradle ${gradleCommand} --args="${_query}"`
     console.log(`_cmd ${_cmd}`);
@@ -27,7 +34,7 @@ export function launchUploaderViaExcel(args: any): Promise<string> {
     return makeGradleCall(generateGradleCommandForCSV(args, "uploadToArchiveExcel"))
 }
 export function launchUploaderViaAbsPath(args: any): Promise<string> {
-    return makeGradleCall(generateGradleCommandForCSV(args, "uploadToArchiveSelective"))
+    return makeGradleCall(generateGradleCommandForHashSeparated(args, "uploadToArchiveSelective"))
 
 }
 export function reuploadMissed(itemsForReupload:ArchiveProfileAndTitle[]): Promise<string> {
