@@ -1,27 +1,7 @@
-import { excelToJson, jsonToExcel } from "../../cliBased/excel/ExcelUtils";
-export interface FipExcelOne {
-    rowCounter: number;
-    absPath: string;
-    folder: string;
-    fileName: string;
-    ext: string;
-}
-export interface FipExcelTwo {
-    identifier: string;
-    material: string;
-    handlist: string;
-    title: string;
-    subject: string;
-    script: string;
-}
-
-
-export interface FipExcelThree {
-    absPath?: string;
-    subject?: string;
-    description?: string;
-    creator?: string;
-}
+import moment from "moment";
+import { excelToJson, excelToJsonV2, jsonToExcel } from "../../cliBased/excel/ExcelUtils";
+import { DD_MM_YYYY_HH_MMFORMAT } from "../../utils/constants";
+import { FipExcelOne, FipExcelThree, FipExcelTwo } from "./utils";
 
 const base = "D:\\FIP\\_IFP\\_IFP"
 /**
@@ -38,28 +18,33 @@ const excelSecond = `${base}\\IFP Handlist Unicode-sanitized.xlsx`
 // RE03177	Palm-leaf	Manuscript hand list – 1 2	Vaittiya nul	Vaidya	Tamil
 
 const mainExcelData: FipExcelOne[] = excelToJson(excelFirst);
-const secondaryExcelData: FipExcelTwo[] = excelToJson(excelSecond);
+const secondaryExcelData: FipExcelTwo[] = excelToJsonV2<FipExcelTwo>(excelSecond);
 console.log(`mainExcelData ${JSON.stringify(mainExcelData[0])}`)
 console.log(`mainExcelData ${JSON.stringify(secondaryExcelData[0])}`)
 
-const findCorrespondingExcelHeader = (firstExcel: FipExcelOne, secondExcel: FipExcelTwo[]): FipExcelThree => {
+const findCorrespondingExcelHeader = (firstExcel: FipExcelOne, secondExcel: FipExcelTwo[]) => {
     let firstExcelFileName = firstExcel.fileName
 
     const matchingItem = secondExcel?.find((secondExcel: FipExcelTwo) => {
         return firstExcelFileName?.match(secondExcel.identifier)
     })
-    if(matchingItem){
-
-    return {
-        absPath: firstExcel.absPath,
-        subject: `${matchingItem.handlist}, ${matchingItem.material}, ${matchingItem.script} ${matchingItem.subject}, FIP-EFEO`,
-        description: `${matchingItem.title} ${firstExcel?.fileName} ${matchingItem.handlist}, ${matchingItem.material}, ${matchingItem.script} ${matchingItem.subject}, FIP-EFEO`,
-        creator: "FIP-EFEO"
-    };
+    if (firstExcelFileName === "RE10666.pdf" || firstExcelFileName === "RE00999.pdf") {
+        console.log(`firstExcelFileName ${firstExcelFileName} 
+        secondExcel ${JSON.stringify(matchingItem)}`)
+    }
+    if (matchingItem) {
+        combinedExcel.push({
+            absPath: firstExcel.absPath,
+            subject: `${matchingItem?.handlist}, ${matchingItem?.material}, ${matchingItem?.script} ${matchingItem?.subject}, FIP-EFEO`,
+            description: `${matchingItem?.title} ${firstExcel?.fileName} ${matchingItem?.handlist}, ${matchingItem?.material}, ${matchingItem?.script} ${matchingItem?.subject}, FIP-EFEO`,
+            creator: "FIP-EFEO"
+        });
+    }
 }
-return {}
-}
-let combinedExcel: FipExcelThree[] = mainExcelData.map(x => findCorrespondingExcelHeader(x, secondaryExcelData));
 
-console.log(`Combining JSON Data: ${JSON.stringify(combinedExcel.splice(0,5))}`)
-jsonToExcel(combinedExcel,`${base}//fip-uploadables.xlsx`)
+let combinedExcel: FipExcelThree[] = []
+mainExcelData.forEach(x => findCorrespondingExcelHeader(x, secondaryExcelData));
+const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)
+
+console.log(`Combining JSON Data: ${JSON.stringify(combinedExcel.splice(0, 1))}`)
+jsonToExcel(combinedExcel, `${base}//fip-uploadables-${timeComponent}.xlsx`)
