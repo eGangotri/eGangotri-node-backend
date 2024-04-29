@@ -10,7 +10,7 @@ const base = "D:\\FIP\\_IFP\\_IFP"
 3	D:\FIP\_IFP Palmleaf Manuscripts PDF All\RE03089.pdf	D:\FIP\_IFP Palmleaf Manuscripts PDF All	RE03089.pdf	.pdf
 
  */
-const excelFirst = `${base}\\_IFP Palmleaf Manuscripts PDF All_MegaList_pdfs_only-29-Apr-2024-08-51.xlsx`;
+const excelFirst = `${base}\\_IFP Palmleaf Manuscripts PDF All_MegaList.xlsx`;
 const excelSecond = `${base}\\IFP Handlist Unicode-sanitized.xlsx`
 
 // RE03175	Palm-leaf	Manuscript hand list – 1 2	Iraniya natakam	Tamil-lit.	Tamil
@@ -35,9 +35,9 @@ const findCorrespondingExcelHeader = (firstExcel: FipExcelOne, secondExcel: FipE
     if (matchingItem) {
         combinedExcel.push({
             absPath: firstExcel.absPath,
-            subject: `${matchingItem?.handlist}, ${matchingItem?.material}, ${matchingItem?.script} ${matchingItem?.subject}, FIP-EFEO`,
-            description: `${matchingItem?.title} ${firstExcel?.fileName} ${matchingItem?.handlist}, ${matchingItem?.material}, ${matchingItem?.script} ${matchingItem?.subject}, FIP-EFEO`,
-            creator: "FIP-EFEO"
+            subject: `${matchingItem?.handlist || ""}, ${matchingItem?.material|| ""}, ${matchingItem?.script|| ""} ${matchingItem?.subject || ""}, FIP-EFEO-Pondicherry`,
+            description: `${matchingItem?.title|| ""} ${firstExcel?.fileName|| ""} ${matchingItem?.handlist|| ""}, ${matchingItem?.material || ""}, ${matchingItem?.script || ""} ${matchingItem?.subject || ""}, FIP-EFEO`,
+            creator: "FIP-EFEO-Pondicherry"
         });
     }
 }
@@ -48,3 +48,5 @@ const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)
 
 console.log(`Combining JSON Data: ${JSON.stringify(combinedExcel.splice(0, 1))}`)
 jsonToExcel(combinedExcel, `${base}//fip-uploadables-${timeComponent}.xlsx`)
+
+//yarn run combineFIPExcels

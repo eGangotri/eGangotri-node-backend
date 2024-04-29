@@ -72,5 +72,5 @@ async function sanitizeJson(data: FIPJSonTypes[]) {
     return sanitizedData
 }
 
-//yarn run fipExcelToMongo 
+//yarn run extractFIPDataFromExcel 
 transformExcelToJSON("D:\\FIP\\_IFP\\_IFP\\IFP Handlist Unicode.xlsx");
