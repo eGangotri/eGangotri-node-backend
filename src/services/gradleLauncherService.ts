@@ -22,6 +22,14 @@ const generateGradleCommand = (spaceSepString: string, gradleCommand: string) =>
 export function launchUploader(args: any): Promise<string> {
     return makeGradleCall(generateGradleCommandForCSV(args, "uploadToArchive"))
 }
+
+export function launchUploaderViaExcel(args: any): Promise<string> {
+    return makeGradleCall(generateGradleCommandForCSV(args, "uploadToArchiveExcel"))
+}
+export function launchUploaderViaAbsPath(args: any): Promise<string> {
+    return makeGradleCall(generateGradleCommandForCSV(args, "uploadToArchiveSelective"))
+
+}
 export function reuploadMissed(itemsForReupload:ArchiveProfileAndTitle[]): Promise<string> {
     console.log(`reuploadMissed ${JSON.stringify(itemsForReupload)}`);
     const dataAsCSV = itemsForReupload.map((x:ArchiveProfileAndTitle) => x.archiveProfile + ", '" + x.title.trim() +"'").join(" ")
