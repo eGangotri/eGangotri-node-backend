@@ -29,13 +29,21 @@ launchGradleRoute.get('/launchUploaderViaExcel', async (req: any, resp: any) => 
         console.log(`launchUploaderViaExcel ${gradleArgs}`)
         const res = await launchUploaderViaExcel(req.query.gradleArgs)
         resp.status(200).send({
-            response: res
+            response: {
+                success:true,
+                res
+            }
         });
 
     }
     catch (err: any) {
         console.log('Error', err);
-        resp.status(400).send(err);
+        resp.status(400).send({
+            response:{
+                success:false,
+                err
+            }
+        });
     }
 })
 
