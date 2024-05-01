@@ -14,8 +14,8 @@ export const validateDateRange = (dateRange: string) => {
                         "msg": `One of Start Date(${startDate})or End Date(${endDate}) not in proper format`
                     }
                 }
-                const _startDate = new Date(startDate).getTime()
-                const _endDate = new Date(endDate).getTime()
+                const _startDate = new Date(startDate + " 00:01").getTime()
+                const _endDate = new Date(endDate + " 23:59").getTime()
                 if (_startDate > _endDate) {
                     return {
                         "status": "failed",
