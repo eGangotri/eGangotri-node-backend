@@ -17,6 +17,7 @@ import { archiveItemRoute } from "./routes/archiveItem.route";
 import { launchYarnListMakerRoute } from "./routes/launchYarnListMaker.route";
 import { googleDriveItemRoute } from "./routes/googleDriveItem.route";
 import { launchMongoRoute } from "./routes/launchMongo.route";
+import { launchArchiveYarnRoute } from "./routes/launchArchiveYarn";
 
 const egangotri = express();
 const hostname = "localhost";
@@ -50,6 +51,7 @@ egangotri.use("/uploadCycleRoute", uploadCycleRoute);
 egangotri.use("/user", userRoute);
 egangotri.use("/yarn", launchYarnRoute);
 egangotri.use("/yarnListMaker", launchYarnListMakerRoute);
+egangotri.use("/yarnArchive", launchArchiveYarnRoute);
 
 egangotri.use("/searchArchivesDB", archiveItemRoute);
 egangotri.use("/searchGDriveDB", googleDriveItemRoute);
