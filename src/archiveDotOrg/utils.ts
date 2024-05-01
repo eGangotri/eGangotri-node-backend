@@ -1,6 +1,6 @@
 import os from 'os';
 import { utils, writeFile } from 'xlsx';
-import { ExcelHeaderType, Hit, LinkData } from './types';
+import { ExcelHeaderType, HitsEntity, LinkData } from './types';
 import { sizeInfo } from '../mirror/FrontEndBackendCommonCode';
 import moment from 'moment';
 import { DD_MM_YYYY_FORMAT } from '../utils/constants';
@@ -121,7 +121,7 @@ export const extractPdfMetaData = async (identifier: string) => {
     }
 }
 
-export const extractLinkedData = async (_hitsHits: Hit[],
+export const extractLinkedData = async (_hitsHits: HitsEntity[],
     email: string,
     _archiveAcctName: string,
     limitedFields = false) => {
@@ -160,7 +160,7 @@ export const extractLinkedData = async (_hitsHits: Hit[],
             item_size_formatted: sizeInfo(hit.fields.item_size),
             email,
             pdfPageCount: pdfPageCount,
-            downloads: hit.fields.downloads
+            downloads: hit?.fields?.downloads?.toString() || "0"
         }
         if (!limitedFields) {
             obj.originalTitle = originalTitle;

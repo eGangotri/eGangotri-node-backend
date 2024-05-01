@@ -1,16 +1,29 @@
-import { ArchiveDataRetrievalMsg, ArchiveDataRetrievalStatus, ArchiveScrapReport, LinkData } from './types';
+import { ArchiveDataRetrievalMsg, ArchiveDataRetrievalStatus, ArchiveScrapReport, Hits, HitsEntity, LinkData } from './types';
 import { extractArchiveAcctName, extractEmail, extractLinkedData as extractLinkedDataAndSpecificFieldsFromAPI, generateExcel } from './utils';
 import * as _ from 'lodash';
 
-const callGenericArchiveApi = async (username: string, pageIndex = 1) => {
+//https://archive.org/services/search/beta/page_production/?user_query=&page_type=account_details&page_target=@drnaithani&page_elements=[%22uploads%22]&hits_per_page=1000&page=1&sort=publicdate:desc&aggregations=false&client_url=https://archive.org/details/@drnaithani
+const callGenericArchiveApi = async (username: string,
+    pageIndex = 1,
+    startDate: number = 0,
+    endDate: number = 0): Promise<Hits> => {
     try {
         const _url =
             `https://archive.org/services/search/beta/page_production/?user_query=&page_type=account_details&page_target=@${username}&page_elements=[%22uploads%22]&hits_per_page=1000&page=${pageIndex}&sort=publicdate:desc&aggregations=false&client_url=https://archive.org/details/@${username}`;
         console.log(`callGenericArchiveApi:${username}(${pageIndex}) ${username}`);
         const response = await fetch(_url);
         const data = await response.json();
-
-        const _hits = data?.response?.body?.page_elements?.uploads?.hits || [];
+        const _hits: Hits = data?.response?.body?.page_elements?.uploads?.hits || {};
+        if (startDate > 0 && endDate > 0) {
+            const _filteredHits = _hits.hits.filter((item: HitsEntity) => {
+                const _date = new Date(item?.fields?.publicdate).getTime();
+                return _date >= startDate && _date <= endDate;
+            });
+            return {
+                ..._hits,
+                hits: _filteredHits || []
+            }
+        }
         console.log(`callGenericArchiveApi _hits.total ${_hits?.total}`)
         return _hits;
     }
@@ -29,28 +42,35 @@ export const FETCH_ACRHIVE_METADATA_COUNTER = {
     }
 }
 
-const fetchArchiveMetadata = async (username: string, limitedFields = false): Promise<ArchiveScrapReport> => {
+const fetchArchiveMetadata = async (username: string,
+     limitedFields = false,
+      dateRange: [number,number] = [0,0]): Promise<ArchiveScrapReport> => {
     username = username.startsWith('@') ? username.slice(1) : username;
     FETCH_ACRHIVE_METADATA_COUNTER.reset();
     try {
-        let _hits = await callGenericArchiveApi(username, 1);
+        let _hits: Hits = await callGenericArchiveApi(username, 1, dateRange[0], dateRange[1]);
         let hitsTotal = _hits?.total;
-        FETCH_ACRHIVE_METADATA_COUNTER.hitsTotal = hitsTotal;
-
-        let _hitsHits = _hits.hits;
-        let email = '';
         const _linkData: LinkData[] = [];
-        if (_hitsHits?.length >= 0) {
-            email = await extractEmail(_hitsHits[0].fields.identifier);
-            const extractedData = await extractLinkedDataAndSpecificFieldsFromAPI(_hitsHits, email, username, limitedFields);
-            _linkData.push(...extractedData);
-        }
-        for (let i = 1; i < Math.ceil(hitsTotal / 1000); i++) {
-            _hits = await callGenericArchiveApi(username, (i + 1));
-            _hitsHits = _hits.hits;
+
+        if (hitsTotal > 0) {
+            FETCH_ACRHIVE_METADATA_COUNTER.hitsTotal = hitsTotal;
+            let _hitsHits = _hits.hits;
+            let email = '';
             if (_hitsHits?.length > 0) {
+                email = await extractEmail(_hitsHits[0].fields.identifier);
                 const extractedData = await extractLinkedDataAndSpecificFieldsFromAPI(_hitsHits, email, username, limitedFields);
                 _linkData.push(...extractedData);
+            }
+            for (let i = 1; i < Math.ceil(hitsTotal / 1000); i++) {
+                _hits = await callGenericArchiveApi(username, (i + 1), dateRange[0], dateRange[1]);
+                _hitsHits = _hits.hits;
+                if (_hitsHits?.length > 0) {
+                    if (email.length === 0) {
+                        email = await extractEmail(_hitsHits[0].fields.identifier);
+                    }
+                    const extractedData = await extractLinkedDataAndSpecificFieldsFromAPI(_hitsHits, email, username, limitedFields);
+                    _linkData.push(...extractedData);
+                }
             }
         }
         console.log(`Equality:
@@ -82,7 +102,9 @@ const checkValidArchiveUrlAndUpdateStatus = async (archiveIdentifier: string, _s
 }
 export const scrapeArchiveOrgProfiles = async (archiveUrlsOrAcctNamesAsCSV: string,
     onlyLinks: boolean = false,
-    limitedFields: boolean = false): Promise<ArchiveDataRetrievalMsg> => {
+    limitedFields: boolean = false,
+    dateRange: [number,number] = [0,0]
+): Promise<ArchiveDataRetrievalMsg> => {
     const archiveUrlsOrAcctNames = archiveUrlsOrAcctNamesAsCSV.includes(",") ? archiveUrlsOrAcctNamesAsCSV.split(",").map((link: string) => link.trim().replace(/['"]/g, "")) : [archiveUrlsOrAcctNamesAsCSV.trim().replace(/['"]/g, "")];
 
     console.log(`archiveUrlsOrAcctNames ${archiveUrlsOrAcctNames} onlyLinks ${onlyLinks}`);
@@ -94,8 +116,8 @@ export const scrapeArchiveOrgProfiles = async (archiveUrlsOrAcctNamesAsCSV: stri
             if (!checkValidArchiveUrlAndUpdateStatus(_archiveAcctName, _status)) {
                 continue;
             }
-    
-            const archiveReport: ArchiveScrapReport = await fetchArchiveMetadata(_archiveAcctName, limitedFields);
+
+            const archiveReport: ArchiveScrapReport = await fetchArchiveMetadata(_archiveAcctName, limitedFields, dateRange);
             console.log(`Equality _linkData ${JSON.stringify(archiveReport.linkData.length)} === ${FETCH_ACRHIVE_METADATA_COUNTER.value}`);
             if (onlyLinks) {
                 _status.push({
@@ -106,13 +128,23 @@ export const scrapeArchiveOrgProfiles = async (archiveUrlsOrAcctNamesAsCSV: stri
                 });
             }
             else {
-                const excelPath = await generateExcel(archiveReport.linkData, limitedFields);
-                _status.push({
-                    excelPath,
-                    success: true,
-                    archiveAcctName: _archiveAcctName,
-                    archiveItemCount: archiveReport.linkData.length,
-                });
+                if (archiveReport?.linkData?.length === 0) {
+                    _status.push({
+                        excelPath: "NONE. No links found in the archive account",
+                        success: false,
+                        archiveAcctName: _archiveAcctName,
+                        archiveItemCount: archiveReport.linkData.length,
+                    });
+                }
+                else {
+                    const excelPath = await generateExcel(archiveReport.linkData, limitedFields);
+                    _status.push({
+                        excelPath,
+                        success: true,
+                        archiveAcctName: _archiveAcctName,
+                        archiveItemCount: archiveReport.linkData.length,
+                    });
+                }
             }
         }
         catch (e) {

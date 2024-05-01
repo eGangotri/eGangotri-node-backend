@@ -58,10 +58,10 @@ export interface ArchiveDataRetrievalStatus {
     error?: string,
 }
 
-export interface Hit {
-    fields: Fields;
-    hit_type: string;
-}
+// export interface Hit {
+//     fields: Fields;
+//     hit_type: string;
+// }
 
 export interface Fields {
     identifier: string;
@@ -93,3 +93,48 @@ export interface ArchiveRes {
 export interface SessionContext {
     username: string;
 }
+
+
+export interface Elements {
+    page_elements: PageElements;
+  }
+  export interface PageElements {
+    uploads: Uploads;
+  }
+  export interface Uploads {
+    hits: Hits;
+    aggregations?: (null)[] | null;
+  }
+  export interface Hits {
+    total: number;
+    returned: number;
+    hits?: (HitsEntity)[] | null;
+  }
+  export interface HitsEntity {
+    index: string;
+    service_backend: string;
+    hit_type: string;
+    fields: HitFields;
+    highlight?: null;
+    _score?: null;
+  }
+  export interface HitFields {
+    identifier: string;
+    title: string;
+    description: string;
+    subject?: (string)[] | null;
+    creator?: (string)[] | null;
+    collection?: (string)[] | null;
+    mediatype: string;
+    licenseurl: string;
+    item_size: number;
+    files_count: number;
+    downloads: number;
+    week: number;
+    month: number;
+    indexflag?: (string)[] | null;
+    addeddate: string;
+    publicdate: string;
+    num_favorites?: number | null;
+  }
+  

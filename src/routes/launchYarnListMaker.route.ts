@@ -89,41 +89,6 @@ launchYarnListMakerRoute.post('/getGoogleDriveListing', async (req: any, resp: a
 })
 
 
-launchYarnListMakerRoute.post('/getArchiveListing', async (req: any, resp: any) => {
-    try {
-        const archiveLinks = req?.body?.archiveLinks;
-        const onlyLinks = (req?.body?.onlyLinks == true) || false;
-        const limitedFields = (req?.body?.limitedFields == true) || false;
-        console.log(`getArchiveListing archiveLinks ${archiveLinks} 
-        onlyLinks ${onlyLinks}
-        req?.body?.limitedFields ${req?.body?.limitedFields}
-        req?.body?.limitedFields ${typeof req?.body?.limitedFields}
-         limitedFields ${limitedFields}`)
-
-        if (!archiveLinks) {
-            resp.status(300).send({
-                response: {
-                    "status": "failed",
-                    "success": false,
-                    "msg": "Pls. provide archive Links. At least one is mandatory"
-                }
-            });
-            return
-        }
-        const _resp: ArchiveDataRetrievalMsg = await scrapeArchiveOrgProfiles(archiveLinks, onlyLinks, limitedFields);
-        resp.status(200).send({
-            response: {
-                _results: _resp
-            }
-        });
-    }
-
-    catch (err: any) {
-        console.log('Error', err);
-        resp.status(400).send(err);
-    }
-})
-
 
 launchYarnListMakerRoute.post('/getFirstAndLastNPages', async (req: any, resp: any) => {
     try {
@@ -218,38 +183,6 @@ launchYarnListMakerRoute.post('/dumpGDriveExcelToMongo', async (req: any, resp: 
             return;
         }
         const _resp = await gDriveExceltoMongo(comboExcelPath);
-        resp.status(200).send({
-            response: {
-                _results: _resp
-            }
-        });
-    }
-
-    catch (err: any) {
-        console.log('Error', err);
-        resp.status(400).send(err);
-    }
-})
-
-//untested
-launchYarnListMakerRoute.post('/dumpArchiveExcelToMongo', async (req: any, resp: any) => {
-    try {
-        const archiveExcelPath = req?.body?.archiveExcelPath;
-        console.log(`dumpArchiveExcelToMongo
-        comboExcelPath ${archiveExcelPath} 
-        `)
-
-        if (!archiveExcelPath) {
-            resp.status(300).send({
-                response: {
-                    "status": "failed",
-                    "success": false,
-                    "msg": "Pls. provide Archive Excel Path and Folder Name"
-                }
-            });
-            return;
-        }
-        const _resp = archiveExceltoMongo(archiveExcelPath);
         resp.status(200).send({
             response: {
                 _results: _resp

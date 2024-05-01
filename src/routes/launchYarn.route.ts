@@ -47,55 +47,6 @@ launchYarnRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => 
 })
 
 
-launchYarnRoute.post('/downloadArchivePdfs', async (req: any, resp: any) => {
-    try {
-        const startTime = Date.now();
-        const archiveLink = req?.body?.archiveLink;
-        const profile = req?.body?.profile;
-
-        if (!archiveLink || !profile) {
-            return resp.status(300).send({
-                response: {
-                    "status": "failed",
-                    "success": false,
-                    "msg": "Pls. provide Archive Link(s) and profile. Both are mandatory"
-                }
-            });
-        }
-        const _archiveScrappedData: ArchiveDataRetrievalMsg = await scrapeArchiveOrgProfiles(archiveLink, true);
-
-        const scrapedLinks: ArchiveDataRetrievalStatus[] = _archiveScrappedData.scrapedMetadata
-        const results = []
-        resetDownloadCounters();
-        for (const entry of scrapedLinks) {
-            if (entry.success == false) {
-                results.push({
-                    "status": "failed",
-                    "error": entry.error,
-                    "success": false,
-                    msg: `Failed for ${entry.archiveAcctName}`,
-
-                });
-                continue;
-            }
-            const res = await downloadPdfFromArchiveToProfile(entry.archiveReport.linkData, profile);
-            results.push(res);
-        }
-
-        const endTime = Date.now();
-        const timeTaken = endTime - startTime;
-        console.log(`Time taken to download downloadArchivePdfs: ${timeTaken} ms`);
-        resp.status(200).send({
-            response: results
-        });
-    }
-
-    catch (err: any) {
-        console.log('Error', err);
-        resp.status(400).send(err);
-    }
-})
-
 launchYarnRoute.post('/qaToDestFileMover', async (req: any, resp: any) => {
     console.log(`qaToDestFileMover ${JSON.stringify(req.body)}`)
     try {
