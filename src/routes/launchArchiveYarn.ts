@@ -18,7 +18,7 @@ launchArchiveYarnRoute.post('/getArchiveListing', async (req: any, resp: any) =>
         let parsedDateRange: [number, number] = [0, 0]
         const _validateDates = validateDateRange(dateRange);
         if (_validateDates.success) {
-            parsedDateRange  = _validateDates.parsedDateRange;
+            parsedDateRange = _validateDates.parsedDateRange;
         }
         else {
             return resp.status(300).send({
@@ -144,14 +144,15 @@ launchArchiveYarnRoute.post('/markAsUploadedEntriesInArchiveExcel', async (req: 
     try {
         const pathOrUploadCycleId = req.body.pathOrUploadCycleId;
         const archiveExcelPath = req.body.archiveExcelPath;
-        const _resp = await getSuccessfullyUploadedItemsForUploadCycleId(pathOrUploadCycleId);
-        const successfullyUploadedCount = _.sumBy(_resp, (o) => o.isValid ? 1 : 0);
-        alterExcelWithUploadedFlag(archiveExcelPath, _resp);
+        const successUploadData = await getSuccessfullyUploadedItemsForUploadCycleId(pathOrUploadCycleId);
+        const successfullyUploadedCount = _.sumBy(successUploadData, (o) => o.isValid ? 1 : 0);
+        const alterationDats = alterExcelWithUploadedFlag(archiveExcelPath, successUploadData);
         resp.status(200).send({
             response: {
-                successUploads: `Successful Uploads${successfullyUploadedCount}`,
-                failedUploads: `UnSuccessful Uploads${successfullyUploadedCount}`,
-                total: `Total Checked : ${_resp.length} in ${pathOrUploadCycleId}`,
+                successUploads: `${successfullyUploadedCount}`,
+                failedUploads: `${successUploadData.length - successfullyUploadedCount}`,
+                total: `Total Checked : ${successUploadData.length} in ${pathOrUploadCycleId}`,
+                ...alterationDats
             }
         });
     }
