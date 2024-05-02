@@ -23,4 +23,5 @@ export interface FipExcelThree {
     subject?: string;
     description?: string;
     creator?: string;
+    title ?:string;
 }

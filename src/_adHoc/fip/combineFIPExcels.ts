@@ -10,8 +10,8 @@ const base = "D:\\FIP\\_IFP\\_IFP"
 3	D:\FIP\_IFP Palmleaf Manuscripts PDF All\RE03089.pdf	D:\FIP\_IFP Palmleaf Manuscripts PDF All	RE03089.pdf	.pdf
 
  */
-const excelFirst = `${base}\\_IFP Palmleaf Manuscripts PDF All_MegaList.xlsx`;
-const excelSecond = `${base}\\IFP Handlist Unicode-sanitized.xlsx`
+const excelFirst = `${base}\\_IFP Palmleaf Manuscripts PDF All_MegaList_pdfs_only-01-May-2024-20-52.xlsx`;
+const excelSecond = `${base}\\IFP Handlist Unicode-sanitized - FIP EFEO Pondicherry.xlsx`
 
 // RE03175	Palm-leaf	Manuscript hand list – 1 2	Iraniya natakam	Tamil-lit.	Tamil
 // RE03176	Palm-leaf	Manuscript hand list – 1 2	Rattinach churukkam	Tamil-lit.	Tamil
@@ -37,7 +37,8 @@ const findCorrespondingExcelHeader = (firstExcel: FipExcelOne, secondExcel: FipE
             absPath: firstExcel.absPath,
             subject: `${matchingItem?.handlist || ""}, ${matchingItem?.material|| ""}, ${matchingItem?.script|| ""} ${matchingItem?.subject || ""}, FIP-EFEO-Pondicherry`,
             description: `${matchingItem?.title|| ""} ${firstExcel?.fileName|| ""} ${matchingItem?.handlist|| ""}, ${matchingItem?.material || ""}, ${matchingItem?.script || ""} ${matchingItem?.subject || ""}, FIP-EFEO`,
-            creator: "FIP-EFEO-Pondicherry"
+            creator: "FIP-EFEO-Pondicherry",
+            title:matchingItem?.title
         });
     }
 }
