@@ -42,4 +42,5 @@ export interface SelectedUploadItem {
     id:Types.ObjectId;
     archiveId:string;
     isValid?: boolean;
+    title?:string
 }
