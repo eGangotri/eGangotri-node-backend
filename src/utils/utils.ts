@@ -89,8 +89,8 @@ export async function checkUrlValidityForUploadItems(_forVerfication: SelectedUp
   const url = createArchiveLink(_forVerfication.archiveId);
   const _validity = await checkUrlValidity(url);
   return {
-    isValid: _validity,
-    ..._forVerfication
+    ..._forVerfication,
+    isValid: _validity
   }
 }
 
