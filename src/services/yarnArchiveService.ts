@@ -124,6 +124,6 @@ export const alterExcelWithUploadedFlag = (archiveExcelPath: string, uploadItems
     return {
         "itemsMarkedAsUploaded": uploadFlagMarkedCounter,
         "itemsMarkedAsNotUploaded": excelAsJson.length - uploadFlagMarkedCounter,
-        "alterExcelMsg": `${archiveExcelPath} renamed to ${newExcelName}
+        "alterExcelMsg": `${archiveExcelPath} renamed to ${newExcelName}`
     }
 }
