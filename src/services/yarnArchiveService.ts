@@ -80,7 +80,7 @@ export const getSuccessfullyUploadedItemsForUploadCycleId = async (pathOrUploadC
     //get all Items_Ushered for uploadCycleIdForVerification
     const itemsUshered = await getListOfItemsUshered({ uploadCycleId: pathOrUploadCycleId });
     const results: SelectedUploadItem[] = [];
-    for (const item of itemsUshered.splice(495, 5)) {
+    for (const item of itemsUshered) {
         const res = await checkUrlValidityForUploadItems({
             id: item._id,
             archiveId: `${item.archiveItemId}`,
@@ -93,7 +93,7 @@ export const getSuccessfullyUploadedItemsForUploadCycleId = async (pathOrUploadC
     console.log(`getEntriesInUploadUshered results ${results.length}/ ${itemsUshered.length}`)
     return results;
 }
-const amendJson = (item: ArchiveUploadExcelProps, uploadItemInMongo: SelectedUploadItem[]):ArchiveUploadExcelProps => {
+const amendJson = (item: ArchiveUploadExcelProps, uploadItemInMongo: SelectedUploadItem[]): ArchiveUploadExcelProps => {
     const absPath = item.absPath;
     const title = path.basename(absPath, path.extname(absPath));
     const _uploadItem = uploadItemInMongo.find(x => x.title === title);
@@ -117,13 +117,24 @@ export const alterExcelWithUploadedFlag = (archiveExcelPath: string, uploadItems
         }
 
     }
-    const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)
-    console.log(`Combining JSON Data: ${JSON.stringify(excelAsJson.splice(0, 4))}`)
-    const newExcelName =  archiveExcelPath.replace(".xlsx", `-${timeComponent}-(${uploadFlagMarkedCounter})(${excelAsJson.length}).xlsx`);
-    // jsonToExcel(excelAsJson, newExcelName);
-    return {
-        "itemsMarkedAsUploaded": uploadFlagMarkedCounter,
-        "itemsMarkedAsNotUploaded": excelAsJson.length - uploadFlagMarkedCounter,
-        "alterExcelMsg": `${archiveExcelPath} renamed to ${newExcelName}`
+    if (amendedExcelAsJSON.length > 0) {
+        const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)
+        console.log(`Combining JSON Data: ${JSON.stringify(excelAsJson?.length > 0 ? excelAsJson[0] : [])}`)
+        const _dir = path.dirname(archiveExcelPath);
+
+        const newExcelName = `${_dir}//fip-uploadables-${timeComponent}-(${uploadFlagMarkedCounter})(${excelAsJson?.length}).xlsx`;
+        jsonToExcel(amendedExcelAsJSON, newExcelName);
+        return {
+            "itemsMarkedAsUploaded": uploadFlagMarkedCounter,
+            "itemsMarkedAsNotUploaded": excelAsJson.length - uploadFlagMarkedCounter,
+            "alterExcelMsg": `${archiveExcelPath} renamed to ${newExcelName}`
+        }
+    }
+    else {
+        return {
+            "itemsMarkedAsUploaded": 0,
+            "itemsMarkedAsNotUploaded": 0,
+            "alterExcelMsg": `No items found in ${archiveExcelPath}`
+        }
     }
 }
