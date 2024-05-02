@@ -44,7 +44,8 @@
     "excelToMongoGDrive": "ts-node ./src/excelToMongo/tranferGDriveExcelToMongo",
     "aksharamukha": "ts-node ./src/aksharamukha/convert",
     "extractFIPDataFromExcel": "ts-node ./src/_adHoc/fip/extractFIPDataFromExcel",
-    "combineFIPExcels": "ts-node ./src/_adHoc/fip/combineFIPExcels"
+    "combineFIPExcels": "ts-node ./src/_adHoc/fip/combineFIPExcels",
+    "fipRename": "ts-node ./src/_adHoc/fip/fipRename"
 
     
   },
