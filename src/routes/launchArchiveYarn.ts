@@ -4,7 +4,8 @@ import { ArchiveDataRetrievalMsg, ArchiveDataRetrievalStatus } from '../archiveD
 import { archiveExceltoMongo } from '../excelToMongo/transferArchiveExcelToMongo';
 import { downloadPdfFromArchiveToProfile } from '../archiveDotOrg/downloadUtil';
 import { resetDownloadCounters } from '../cliBased/pdf/utils';
-import { validateDateRange } from '../services/yarnArchiveService';
+import { alterExcelWithUploadedFlag, getSuccessfullyUploadedItemsForUploadCycleId, validateDateRange } from '../services/yarnArchiveService';
+import _ from 'lodash';
 
 export const launchArchiveYarnRoute = express.Router();
 
@@ -133,6 +134,27 @@ launchArchiveYarnRoute.post('/dumpArchiveExcelToMongo', async (req: any, resp: a
         });
     }
 
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})
+
+launchArchiveYarnRoute.post('/markAsUploadedEntriesInArchiveExcel', async (req: any, resp: any) => {
+    try {
+        const pathOrUploadCycleId = req.body.pathOrUploadCycleId;
+        const archiveExcelPath = req.body.archiveExcelPath;
+        const _resp = await getSuccessfullyUploadedItemsForUploadCycleId(pathOrUploadCycleId);
+        const successfullyUploadedCount = _.sumBy(_resp, (o) => o.isValid ? 1 : 0);
+        alterExcelWithUploadedFlag(archiveExcelPath, _resp);
+        resp.status(200).send({
+            response: {
+                successUploads: `Successful Uploads${successfullyUploadedCount}`,
+                failedUploads: `UnSuccessful Uploads${successfullyUploadedCount}`,
+                total: `Total Checked : ${_resp.length} in ${pathOrUploadCycleId}`,
+            }
+        });
+    }
     catch (err: any) {
         console.log('Error', err);
         resp.status(400).send(err);
