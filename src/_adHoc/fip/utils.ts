@@ -18,9 +18,3 @@ export interface FipExcelTwo {
     script: string;
 }
 
-export interface FipExcelThree {
-    absPath?: string;
-    subject?: string;
-    description?: string;
-    creator?: string;
-}

@@ -1,7 +1,8 @@
 import moment from "moment";
 import { excelToJson, excelToJsonV2, jsonToExcel } from "../../cliBased/excel/ExcelUtils";
 import { DD_MM_YYYY_HH_MMFORMAT } from "../../utils/constants";
-import { FipExcelOne, FipExcelThree, FipExcelTwo } from "./utils";
+import { FipExcelOne, FipExcelTwo } from "./utils";
+import { ArchiveUploadExcelProps } from "archiveDotOrg/archive.types";
 
 const base = "D:\\FIP\\_IFP\\_IFP"
 /**
@@ -42,7 +43,7 @@ const findCorrespondingExcelHeader = (firstExcel: FipExcelOne, secondExcel: FipE
     }
 }
 
-let combinedExcel: FipExcelThree[] = []
+let combinedExcel: ArchiveUploadExcelProps[] = []
 mainExcelData.forEach(x => findCorrespondingExcelHeader(x, secondaryExcelData));
 const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)
 
