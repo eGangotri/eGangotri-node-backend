@@ -27,6 +27,7 @@ export interface UploadCycleTableData {
 
     countIntended?: number;
     archiveProfileAndCountIntended?: ArchiveProfileAndCount[]; 
+    allUploadVerified?: boolean|null;
 }
 
 
