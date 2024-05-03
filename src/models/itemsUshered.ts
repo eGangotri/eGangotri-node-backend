@@ -9,7 +9,8 @@ const schema = new mongoose.Schema(
         uploadCycleId: { type: String, required: true },
         archiveItemId: { type: String, required: true },
         csvName: { type: String, required: true },
-        datetimeUploadStarted: { type: Date, required: true }
+        datetimeUploadStarted: { type: Date, required: true, default:Date.now },
+        uploadFlag: { type: Boolean, required: false, default: null }
     }, {
         collection: 'Items_Ushered',
         timestamps:true
