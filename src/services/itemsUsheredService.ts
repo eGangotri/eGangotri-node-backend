@@ -1,4 +1,4 @@
-import { ArchiveProfileAndCount, SelectedUploadItem, UploadCycleTableData } from "../mirror/types";
+import { ArchiveProfileAndCount, SelectedUploadItem, UploadCycleTableData, UploadCycleTableDataDictionary } from "../mirror/types";
 import { ItemsUshered } from "../models/itemsUshered";
 import { setOptionsForItemListing } from "./dbService";
 import { ItemsListOptionsType } from "./types";
@@ -6,6 +6,8 @@ import { checkUrlValidityForUploadItems } from "../utils/utils";
 import * as _ from 'lodash';
 import { UploadCycle } from "../models/uploadCycle";
 import { ObjectId } from "mongoose";
+import { getListOfItemsQueued } from "./itemsQueuedService";
+import { getListOfUploadCycles } from "./uploadCycleService";
 
 export async function getListOfItemsUshered(queryOptions: ItemsListOptionsType) {
   const { limit, mongoOptionsFilter } = setOptionsForItemListing(queryOptions)
@@ -119,4 +121,45 @@ export const handleEachRow = (uploadCycleId: string,
   }
 
   return uploadCycleData;
+}
+
+
+export const getListOfUploadCyclesAndCorrespondingData = async (queryOptions: ItemsListOptionsType) => {
+  const items = await getListOfItemsUshered(queryOptions);
+  const queuedItems = await getListOfItemsQueued(queryOptions)
+  const uploadCycles = await getListOfUploadCycles(queryOptions)
+  console.log(`queryOptions: ${JSON.stringify(queryOptions)}`)
+
+  const groupedItems = _.groupBy(items, function (item: any) {
+    return item.uploadCycleId;
+  });
+
+  const groupedQueuedItems = _.groupBy(queuedItems, function (item: any) {
+    return item.uploadCycleId;
+  });
+
+  const groupedUploadCycles = _.groupBy(uploadCycles, function (item: any) {
+    return item.uploadCycleId;
+  });
+
+  const uploadCycleIdAndData: UploadCycleTableDataDictionary[] = []
+  for (const key in groupedItems) {
+    const usheredRow = groupedItems[key]
+    const queuedRow = groupedQueuedItems[key];
+    const uploadCycleRow: any = groupedUploadCycles[key];
+
+    const groupedByArchiveProfiles = _.groupBy(usheredRow, function (item: any) {
+      return item.archiveProfile;
+    });
+    const queuedRowGroupedByArchiveProfiles = _.groupBy(queuedRow, function (item: any) {
+      return item.archiveProfile;
+    });
+
+    const _cycle_and_profiles = handleEachRow(key, groupedByArchiveProfiles, queuedRowGroupedByArchiveProfiles, uploadCycleRow)
+
+    uploadCycleIdAndData.push({
+      uploadCycle: _cycle_and_profiles
+    })
+  }
+  return uploadCycleIdAndData
 }

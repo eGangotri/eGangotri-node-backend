@@ -37,12 +37,16 @@ export function launchUploaderViaAbsPath(args: any): Promise<string> {
     return makeGradleCall(generateGradleCommandForHashSeparated(args, "uploadToArchiveSelective"))
 
 }
+
 export function reuploadMissed(itemsForReupload:ArchiveProfileAndTitle[]): Promise<string> {
     console.log(`reuploadMissed ${JSON.stringify(itemsForReupload)}`);
     const dataAsCSV = itemsForReupload.map((x:ArchiveProfileAndTitle) => x.archiveProfile + ", '" + x.title.trim() +"'").join(" ")
     return makeGradleCall(generateGradleCommand(dataAsCSV, "uploadToArchiveSelective"))
 }
 
+export function reuploadByUploadCycleId(args: any): Promise<string> {
+    return makeGradleCall(generateGradleCommandForCSV(args, "uploadByUploadCycleId"))
+}
 
 //localhost/launchGradle/moveToFreeze?profiles="TEST,TMP"
 export function moveToFreeze(args: any): Promise<string> {

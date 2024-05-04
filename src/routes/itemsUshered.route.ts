@@ -1,14 +1,12 @@
 const express = require("express");
 import { ItemsUshered } from '../models/itemsUshered';
 import { Request, Response } from 'express';
-import { getListOfItemsUshered, handleEachRow, itemsUsheredVerficationAndDBFlagUpdate, selectedItemsVerficationAndDBFlagUpdate } from '../services/itemsUsheredService';
+import { getListOfItemsUshered, getListOfUploadCyclesAndCorrespondingData, handleEachRow, itemsUsheredVerficationAndDBFlagUpdate, selectedItemsVerficationAndDBFlagUpdate } from '../services/itemsUsheredService';
 import * as _ from 'lodash';
-import { UploadCycleTableDataDictionary } from '../mirror/types';
 import { validateSuperAdminUserFromRequest } from '../services/userService';
-import { getListOfItemsQueued } from '../services/itemsQueuedService';
-import { getListOfUploadCycles } from '../services/uploadCycleService';
 import { ReuploadType } from '../services/types';
 import { gradleLaunchArchiveUpload } from '../exec/exec';
+import { ArchiveUploadExcelProps } from 'archiveDotOrg/archive.types';
 
 /**
  * INSOMNIA POST Request Sample
@@ -56,7 +54,6 @@ itemsUsheredRoute.post('/add', async (req: any, resp: any) => {
 itemsUsheredRoute.post('/verifyUploadStatus', async (req: any, resp: any) => {
     try {
         const uploadCycleIdForVerification = req.body.uploadCycleIdForVerification;
-        const _uploadsForVerification = req.body.uploadsForVerification;
         if (uploadCycleIdForVerification) {
             //get all Items_Ushered for uploadCycleIdForVerification
             const [results, archiveProfiles] = await itemsUsheredVerficationAndDBFlagUpdate(uploadCycleIdForVerification);
@@ -69,8 +66,8 @@ itemsUsheredRoute.post('/verifyUploadStatus', async (req: any, resp: any) => {
             });
         }
         else {
-            // const uploadsForVerification: SelectedUploadItem[] = _uploadsForVerification
-            const results = await selectedItemsVerficationAndDBFlagUpdate(_uploadsForVerification);
+            const uploadsForVerification = req.body.uploadsForVerification;
+            const results = await selectedItemsVerficationAndDBFlagUpdate(uploadsForVerification);
             resp.status(200).send({
                 response: results,
                 status: `Verfification/DB-Marking of (${results.length}) items for SelectedItems completed.`
@@ -100,45 +97,38 @@ itemsUsheredRoute.get('/list', async (req: Request, resp: Response) => {
 
 itemsUsheredRoute.get('/listForUploadCycle', async (req: Request, resp: Response) => {
     try {
-        const items = await getListOfItemsUshered(req?.query);
-        const queuedItems = await getListOfItemsQueued(req?.query)
-        const uploadCycles = await getListOfUploadCycles(req?.query)
-        console.log(`req?.query: ${JSON.stringify(req?.query)}`)
-
-        const groupedItems = _.groupBy(items, function (item: any) {
-            return item.uploadCycleId;
-        });
-
-        const groupedQueuedItems = _.groupBy(queuedItems, function (item: any) {
-            return item.uploadCycleId;
-        });
-
-        const groupedUploadCycles = _.groupBy(uploadCycles, function (item: any) {
-            return item.uploadCycleId;
-        });
-
-        const uploadCycleIdAndData: UploadCycleTableDataDictionary[] = []
-        for (const key in groupedItems) {
-            const usheredRow = groupedItems[key]
-            const queuedRow = groupedQueuedItems[key];
-            const uploadCycleRow: any = groupedUploadCycles[key];
-
-            const groupedByArchiveProfiles = _.groupBy(usheredRow, function (item: any) {
-                return item.archiveProfile;
-            });
-            const queuedRowGroupedByArchiveProfiles = _.groupBy(queuedRow, function (item: any) {
-                return item.archiveProfile;
-            });
-
-            const _cycle_and_profiles = handleEachRow(key, groupedByArchiveProfiles, queuedRowGroupedByArchiveProfiles, uploadCycleRow)
-
-            uploadCycleIdAndData.push({
-                uploadCycle: _cycle_and_profiles
-            })
-        }
+        const uploadCycleIdAndData = await getListOfUploadCyclesAndCorrespondingData(req?.query)
         resp.status(200).send({
             "response": uploadCycleIdAndData
         });
+    }
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})
+
+itemsUsheredRoute.post('/reUploadMissedInUploadCycle', async (req: any, resp: any) => {
+    try {
+        const uploadCycleId = req.body.uploadCycleId;
+        const itemsUnushered = await getListOfItemsUshered({
+            uploadCycleId: uploadCycleId,
+            uploadFlag: false
+        });
+
+        let combinedExcel: ArchiveUploadExcelProps[] = []
+       
+        // itemsUnushered.forEach((item: ItemsUshered) => {
+        //     combinedExcel.push({
+        //         absPath: item.localPath,
+        //         subject: item.uploadLink,
+        //         description: `${matchingItem?.title || ""} ${firstExcel?.fileName || ""} ${matchingItem?.handlist || ""}, ${matchingItem?.material || ""}, ${matchingItem?.script || ""} ${matchingItem?.subject || ""}, FIP-EFEO`,
+        //         creator: "FIP-EFEO-Pondicherry",
+        //         title: matchingItem?.title
+        //     });
+        // }
+
+        resp.status(200).send({ response: {} });
     }
     catch (err: any) {
         console.log('Error', err);
