@@ -17,7 +17,8 @@ launchArchiveYarnRoute.post('/getArchiveListing', async (req: any, resp: any) =>
         const dateRange = req?.body?.dateRange; //dateRange:"2024/04/01-2024/04/31"
         let parsedDateRange: [number, number] = [0, 0]
         const _validateDates = validateDateRange(dateRange);
-        if (_validateDates.success) {
+        console.log(`validateDateRange ${_validateDates}`)
+        if (dateRange && _validateDates.success) {
             parsedDateRange = _validateDates.parsedDateRange;
         }
         else {

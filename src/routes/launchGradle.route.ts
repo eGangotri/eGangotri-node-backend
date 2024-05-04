@@ -1,5 +1,5 @@
 import * as express from 'express';
-import { launchUploader, launchUploaderViaAbsPath, launchUploaderViaExcel, loginToArchive, makeGradleCall, moveToFreeze, reuploadMissed } from '../services/gradleLauncherService';
+import { launchUploader, launchUploaderViaAbsPath, launchUploaderViaExcel, launchUploaderViaJson, loginToArchive, makeGradleCall, moveToFreeze, reuploadMissed } from '../services/gradleLauncherService';
 import { ArchiveProfileAndTitle } from '../mirror/types';
 import { isValidPath } from '../utils/utils';
 import { getFolderInDestRootForProfile } from '../cliBased/utils';
@@ -52,7 +52,7 @@ launchGradleRoute.get('/launchUploaderViaJson', async (req: any, resp: any) => {
     try {
         const gradleArgs = req.query.gradleArgs
         console.log(`launchUploaderViaJson ${gradleArgs}`)
-        const res = await launchUploaderViaExcel(req.query.gradleArgs)
+        const res = await launchUploaderViaJson(req.query.gradleArgs)
         resp.status(200).send({
             response: {
                 success:true,
