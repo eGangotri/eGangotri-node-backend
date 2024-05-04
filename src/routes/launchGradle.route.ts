@@ -47,6 +47,31 @@ launchGradleRoute.get('/launchUploaderViaExcel', async (req: any, resp: any) => 
     }
 })
 
+
+launchGradleRoute.get('/launchUploaderViaJson', async (req: any, resp: any) => {
+    try {
+        const gradleArgs = req.query.gradleArgs
+        console.log(`launchUploaderViaJson ${gradleArgs}`)
+        const res = await launchUploaderViaExcel(req.query.gradleArgs)
+        resp.status(200).send({
+            response: {
+                success:true,
+                res
+            }
+        });
+
+    }
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send({
+            response:{
+                success:false,
+                err
+            }
+        });
+    }
+})
+
 launchGradleRoute.get('/launchUploaderViaAbsPath', async (req: any, resp: any) => {
     try {
         const gradleArgs = req.query.gradleArgs
