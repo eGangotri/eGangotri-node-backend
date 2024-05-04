@@ -27,6 +27,7 @@ export type ItemsListOptionsType = {
   endDate?: string,
   archiveProfile?: string,
   uploadCycleId?: string,
+  uploadFlag?: boolean,
 };
 
 export type UploadCycleListOptionsType = {

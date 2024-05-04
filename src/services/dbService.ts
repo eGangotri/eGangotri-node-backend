@@ -56,44 +56,47 @@ export function setOptionsForItemListing(queryOptions: ItemsListOptionsType) {
       },
     };
   }
-   //else {
+  //else {
   //   mongoOptionsFilter = { createdAt: { $gte: subDays(new Date(), DEFAULT_DAYS_BEFORE_CURRENT_FOR_SEARCH) } };
   // }
 
   console.log(`queryOptions ${JSON.stringify(queryOptions)}`)
 
-  if(queryOptions?.ids){
-    const ids:string[] = queryOptions?.ids.split(",")
+  if (queryOptions?.ids) {
+    const ids: string[] = queryOptions?.ids.split(",")
     console.log(`ids ${ids}`)
-    mongoOptionsFilter = { ...mongoOptionsFilter, id : { $in: ids } };
+    mongoOptionsFilter = { ...mongoOptionsFilter, id: { $in: ids } };
   }
 
-  if (queryOptions?.archiveProfile){
-    const archiveProfiles:string[] = queryOptions?.archiveProfile.split(",")
+  if (queryOptions?.archiveProfile) {
+    const archiveProfiles: string[] = queryOptions?.archiveProfile.split(",")
     console.log(`archiveProfiles ${archiveProfiles}`)
-    mongoOptionsFilter = { ...mongoOptionsFilter, archiveProfile : { $in: archiveProfiles }};
+    mongoOptionsFilter = { ...mongoOptionsFilter, archiveProfile: { $in: archiveProfiles } };
   }
 
-  if (queryOptions?.uploadCycleId){
-    const uploadCycleIds:string[] = queryOptions?.uploadCycleId.split(",")
+  if (queryOptions?.uploadCycleId) {
+    const uploadCycleIds: string[] = queryOptions?.uploadCycleId.split(",")
     console.log(`uploadCycleIds ${uploadCycleIds}`)
-    mongoOptionsFilter = { ...mongoOptionsFilter, uploadCycleId : { $in: uploadCycleIds }};
+    mongoOptionsFilter = { ...mongoOptionsFilter, uploadCycleId: { $in: uploadCycleIds } };
   }
-  
+
+  if (queryOptions?.uploadFlag) {
+    mongoOptionsFilter = { ...mongoOptionsFilter, $or: [{ uploadFlag: false }, { uploadFlag: null }] };
+  }
   const limit: number = getLimit(queryOptions?.limit);
-  return {limit, mongoOptionsFilter};
+  return { limit, mongoOptionsFilter };
 }
 
 
-export async function connectToMongo(_args:string[] = []) {
-  const mongoDbUrl = mongoDbUrlWithDbName(!_.isEmpty(_args) ? _args[0]: "");
+export async function connectToMongo(_args: string[] = []) {
+  const mongoDbUrl = mongoDbUrlWithDbName(!_.isEmpty(_args) ? _args[0] : "");
   console.log("\nAttempting to connect to DB:", ellipsis(mongoDbUrl));
   if (mongoDbUrl) {
     try {
       await mongoose.connect(mongoDbUrl,
         {
           socketTimeoutMS: 100000,
-          useUnifiedTopology:true,
+          useUnifiedTopology: true,
           // useNewUrlParser: true,
           // useCreateIndex: true,
           // useFindAndModify: false,
