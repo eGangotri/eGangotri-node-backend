@@ -17,7 +17,6 @@ export async function getListOfItemsUshered(queryOptions: ItemsListOptionsType) 
   return items;
 }
 
-
 export const itemsUsheredVerficationAndDBFlagUpdate = async (uploadCycleIdForVerification: string) => {
   //get all Items_Ushered for uploadCycleIdForVerification
   const itemsUshered = await getListOfItemsUshered({ uploadCycleId: uploadCycleIdForVerification });
@@ -26,7 +25,8 @@ export const itemsUsheredVerficationAndDBFlagUpdate = async (uploadCycleIdForVer
     const res = await checkUrlValidityForUploadItems({
       id: item._id,
       archiveId: `${item.archiveItemId}`,
-      isValid: true
+      isValid: true,
+      title: item.title
     });
     results.push(res);
   }
@@ -35,7 +35,13 @@ export const itemsUsheredVerficationAndDBFlagUpdate = async (uploadCycleIdForVer
   const _profilesAsSet = _.uniq(itemsUshered.map(x => x.archiveProfile))
   console.log(`_profilesAsSet: ${JSON.stringify(_profilesAsSet)}`)
   const archiveProfiles = `(${_profilesAsSet})`;
-  return [results, archiveProfiles];
+  const failures = results.filter((x:SelectedUploadItem) => x?.isValid !== true);//accomodates null also   
+  return {
+    successCount: results.length - failures.length,
+    failureCount: failures.length,
+    status: `Verfification/DB-Marking of (${results.length}) items for  ${uploadCycleIdForVerification} ${archiveProfiles} completed.`,
+    failures:failures.map(x => x.title),
+  };
 }
 
 export const selectedItemsVerficationAndDBFlagUpdate = async (uploadsForVerification: SelectedUploadItem[]) => {
@@ -46,7 +52,14 @@ export const selectedItemsVerficationAndDBFlagUpdate = async (uploadsForVerifica
     results.push(res);
   }
   await bulkUpdateUploadedFlag(results);
-  return results;
+  const failures = results.filter((x:SelectedUploadItem) => x?.isValid !== true) || []//accomodates null also   
+
+  return {
+    successCount: results.length - failures.length,
+    failureCount: failures.length,
+    status: `Verfification/DB-Marking of Selected (${results.length}) items completed.`,
+    failures:failures.map(x => x.title)
+  };
 }
 
 export const updadeAllUplodVerfiedFlagInUploadCycle = async (uploadCycleId: string) => {
@@ -128,7 +141,8 @@ export const getListOfUploadCyclesAndCorrespondingData = async (queryOptions: It
   const items = await getListOfItemsUshered(queryOptions);
   const queuedItems = await getListOfItemsQueued(queryOptions)
   const uploadCycles = await getListOfUploadCycles(queryOptions)
-  console.log(`queryOptions: ${JSON.stringify(queryOptions)}`)
+  console.log(`getListOfUploadCyclesAndCorrespondingData: ${JSON.stringify(queryOptions)}`)
+  console.log(`getListOfUploadCyclesAndCorrespondingData(${uploadCycles.length}): ${JSON.stringify(uploadCycles.map(x => x.uploadCycleId))}`)
 
   const groupedItems = _.groupBy(items, function (item: any) {
     return item.uploadCycleId;
@@ -149,7 +163,7 @@ export const getListOfUploadCyclesAndCorrespondingData = async (queryOptions: It
     const uploadCycleRow: any = groupedUploadCycles[key];
 
     const groupedByArchiveProfiles = _.groupBy(usheredRow, function (item: any) {
-      return item.archiveProfile;
+      return item.archiveProfile; 
     });
     const queuedRowGroupedByArchiveProfiles = _.groupBy(queuedRow, function (item: any) {
       return item.archiveProfile;
@@ -161,5 +175,7 @@ export const getListOfUploadCyclesAndCorrespondingData = async (queryOptions: It
       uploadCycle: _cycle_and_profiles
     })
   }
+  console.log(`getListOfUploadCyclesAndCorrespondingData: ${JSON.stringify(uploadCycleIdAndData.length)}`)
+  console.log(`upcanddata: ${JSON.stringify(uploadCycleIdAndData.map(uploadCycles => uploadCycles.uploadCycle.uploadCycleId))}`);
   return uploadCycleIdAndData
 }

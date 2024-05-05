@@ -56,13 +56,9 @@ itemsUsheredRoute.post('/verifyUploadStatus', async (req: any, resp: any) => {
         const uploadCycleIdForVerification = req.body.uploadCycleIdForVerification;
         if (uploadCycleIdForVerification) {
             //get all Items_Ushered for uploadCycleIdForVerification
-            const [results, archiveProfiles] = await itemsUsheredVerficationAndDBFlagUpdate(uploadCycleIdForVerification);
-
+            const _res = await itemsUsheredVerficationAndDBFlagUpdate(uploadCycleIdForVerification);
             resp.status(200).send({
-                response: {
-                    results,
-                    status: `Verfification/DB-Marking of (${results.length}) items for  ${uploadCycleIdForVerification} ${archiveProfiles} completed.`
-                }
+                response: _res
             });
         }
         else {
@@ -70,7 +66,6 @@ itemsUsheredRoute.post('/verifyUploadStatus', async (req: any, resp: any) => {
             const results = await selectedItemsVerficationAndDBFlagUpdate(uploadsForVerification);
             resp.status(200).send({
                 response: results,
-                status: `Verfification/DB-Marking of (${results.length}) items for SelectedItems completed.`
             });
         }
     }
@@ -117,7 +112,7 @@ itemsUsheredRoute.post('/reUploadMissedInUploadCycle', async (req: any, resp: an
         });
 
         let combinedExcel: ArchiveUploadExcelProps[] = []
-       
+
         // itemsUnushered.forEach((item: ItemsUshered) => {
         //     combinedExcel.push({
         //         absPath: item.localPath,
