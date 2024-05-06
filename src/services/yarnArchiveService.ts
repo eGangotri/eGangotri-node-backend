@@ -80,13 +80,15 @@ export const getSuccessfullyUploadedItemsForUploadCycleId = async (pathOrUploadC
     //get all Items_Ushered for uploadCycleIdForVerification
     const itemsUshered = await getListOfItemsUshered({ uploadCycleId: pathOrUploadCycleId });
     const results: SelectedUploadItem[] = [];
+    let counter = 0;
+    const total = itemsUshered.length
     for (const item of itemsUshered) {
         const res = await checkUrlValidityForUploadItems({
             id: item._id,
             archiveId: `${item.archiveItemId}`,
             isValid: true,
             title: item.title
-        });
+        },counter++,total);
         console.log(`getSuccessfullyUploadedItemsForUploadCycleId ${res.isValid} ${res.archiveId}`)
         results.push(res);
     }

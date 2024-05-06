@@ -85,16 +85,18 @@ interface VerfiyUrlType {
   success: boolean;
 }
 
-export async function checkUrlValidityForUploadItems(_forVerfication: SelectedUploadItem): Promise<SelectedUploadItem> {
+export async function checkUrlValidityForUploadItems(_forVerfication: SelectedUploadItem,
+  counter: number,
+  total: number): Promise<SelectedUploadItem> {
   const url = createArchiveLink(_forVerfication.archiveId);
-  const _validity = await checkUrlValidity(url);
+  const _validity = await checkUrlValidity(url, counter,total);
   return {
     ..._forVerfication,
     isValid: _validity
   }
 }
 
-export async function checkUrlValidity(url: string): Promise<boolean> {
+export async function checkUrlValidity(url: string, counter: number,total:number): Promise<boolean> {
   try {
     const response = await fetch(url, { method: 'HEAD' });
     // Check if the response status code indicates success (2xx) or redirection (3xx)
@@ -102,7 +104,7 @@ export async function checkUrlValidity(url: string): Promise<boolean> {
       return true;
     }
     else {
-      console.log(`*******response.status ${url} ${response.status} ${response.statusText}`)
+      console.log(`Item # ${counter/total}(${total-counter}th failure)*******response.status ${url} ${response.status} ${response.statusText}`)
       return false;
     }
   } catch (error) {
