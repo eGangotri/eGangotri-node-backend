@@ -15,7 +15,8 @@ const schema = new mongoose.Schema(
         uploadCycleId: { type: String, required: true },
         uploadCount: { type: Number, required: true },
         datetimeUploadStarted: { type: Date, required: true, default: Date.now },
-        allUploadVerified: { type: Boolean, required: false, default: null }
+        allUploadVerified: { type: Boolean, required: false, default: null },
+        mode: { type: String, required: false, default: "Regular" },
     }, {
     collection: 'Upload_Cycle',
     timestamps: true
