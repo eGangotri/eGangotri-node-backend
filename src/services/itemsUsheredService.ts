@@ -5,9 +5,9 @@ import { ItemsListOptionsType } from "./types";
 import { checkUrlValidityForUploadItems } from "../utils/utils";
 import * as _ from 'lodash';
 import { UploadCycle } from "../models/uploadCycle";
-import { ObjectId } from "mongoose";
 import { getListOfItemsQueued } from "./itemsQueuedService";
 import { getListOfUploadCycles } from "./uploadCycleService";
+import { ellipsis } from "../mirror/utils";
 
 export async function getListOfItemsUshered(queryOptions: ItemsListOptionsType) {
   const { limit, mongoOptionsFilter } = setOptionsForItemListing(queryOptions)
@@ -33,14 +33,13 @@ export const itemsUsheredVerficationAndDBFlagUpdate = async (uploadCycleIdForVer
   await bulkUpdateUploadedFlag(results);
   await updadeAllUplodVerfiedFlagInUploadCycle(uploadCycleIdForVerification);
   const _profilesAsSet = _.uniq(itemsUshered.map(x => x.archiveProfile))
-  console.log(`_profilesAsSet: ${JSON.stringify(_profilesAsSet)}`)
   const archiveProfiles = `(${_profilesAsSet})`;
-  const failures = results.filter((x:SelectedUploadItem) => x?.isValid !== true);//accomodates null also   
+  const failures = results.filter((x: SelectedUploadItem) => x?.isValid !== true);//accomodates null also   
   return {
     successCount: results.length - failures.length,
     failureCount: failures.length,
     status: `Verfification/DB-Marking of (${results.length}) items for  ${uploadCycleIdForVerification} ${archiveProfiles} completed.`,
-    failures:failures.map(x => x.title),
+    failures: failures.map(x => x.title),
   };
 }
 
@@ -52,13 +51,13 @@ export const selectedItemsVerficationAndDBFlagUpdate = async (uploadsForVerifica
     results.push(res);
   }
   await bulkUpdateUploadedFlag(results);
-  const failures = results.filter((x:SelectedUploadItem) => x?.isValid !== true) || []//accomodates null also   
+  const failures = results.filter((x: SelectedUploadItem) => x?.isValid !== true) || []//accomodates null also   
 
   return {
     successCount: results.length - failures.length,
     failureCount: failures.length,
     status: `Verfification/DB-Marking of Selected (${results.length}) items completed.`,
-    failures:failures.map(x => x.title)
+    failures: failures.map(x => x.title)
   };
 }
 
@@ -119,11 +118,10 @@ export const handleEachRow = (uploadCycleId: string,
     dateTimeQueueUploadStarted = row[0]?.datetimeUploadStarted
   }
 
-  console.log(`uploadCycleRow: ${JSON.stringify(uploadCycleRow)}`)
   const uploadCycleData: UploadCycleTableData = {
     uploadCycleId,
     archiveProfileAndCount,
-    datetimeUploadStarted: dateTimeUploadStarted,
+    datetimeUploadStarted: uploadCycleRow[0]?.datetimeUploadStarted,
     totalCount,
     archiveProfileAndCountForQueue,
     totalQueueCount,
@@ -140,11 +138,7 @@ export const handleEachRow = (uploadCycleId: string,
 export const getListOfUploadCyclesAndCorrespondingData = async (queryOptions: ItemsListOptionsType) => {
   const items = await getListOfItemsUshered(queryOptions);
   const queuedItems = await getListOfItemsQueued(queryOptions)
-  const uploadCycles = await getListOfUploadCycles(queryOptions)
-  console.log(`options: ${JSON.stringify(queryOptions)}`)
-  console.log(`uploadCycles: (${uploadCycles.length}):
-   ${JSON.stringify(uploadCycles.map(x => x.uploadCycleId))}`)
-
+  const uploadCycles = await getListOfUploadCycles(queryOptions);
   const groupedItems = _.groupBy(items, function (item: any) {
     return item.uploadCycleId;
   });
@@ -153,20 +147,25 @@ export const getListOfUploadCyclesAndCorrespondingData = async (queryOptions: It
     return item.uploadCycleId;
   });
 
-  const groupedUploadCycles = _.groupBy(uploadCycles, function (item: any) {
-    return item.uploadCycleId;
+  //const groupedUploadCyclesX = _.groupBy(uploadCycles, function (item: any) {
+  //   return item.uploadCycleId;
+  // });
+
+  let groupedUploadCycles = new Map<string, Array<any>>();
+  //to mainitain original sort order
+  uploadCycles.forEach((item: any) => {
+    const key = item.uploadCycleId;
+    groupedUploadCycles.set(key, [item]);
   });
 
-  console.log(`groupedUploadCycles: ${JSON.stringify(groupedUploadCycles.length)}`)
   const uploadCycleIdAndData: UploadCycleTableDataDictionary[] = []
-  for (const key in groupedUploadCycles) {
-    console.log(`key: ${key}`)
-    const usheredRow = groupedItems[key]
+  for (const [key, value] of groupedUploadCycles) {
+    const usheredRow = groupedItems[key];
     const queuedRow = groupedQueuedItems[key];
-    const uploadCycleRow: any = groupedUploadCycles[key];
+    const uploadCycleRow: any = value;
 
     const groupedByArchiveProfiles = _.groupBy(usheredRow, function (item: any) {
-      return item.archiveProfile; 
+      return item.archiveProfile;
     });
     const queuedRowGroupedByArchiveProfiles = _.groupBy(queuedRow, function (item: any) {
       return item.archiveProfile;
@@ -178,7 +177,5 @@ export const getListOfUploadCyclesAndCorrespondingData = async (queryOptions: It
       uploadCycle: _cycle_and_profiles
     })
   }
-  console.log(`getListOfUploadCyclesAndCorrespondingData: ${JSON.stringify(uploadCycleIdAndData.length)}`)
-  console.log(`upcanddata: ${JSON.stringify(uploadCycleIdAndData.map(uploadCycles => uploadCycles.uploadCycle.uploadCycleId))}`);
   return uploadCycleIdAndData
 }

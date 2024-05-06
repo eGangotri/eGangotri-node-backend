@@ -6,7 +6,7 @@ import { UploadCycleListOptionsType } from "./types";
 export async function getListOfUploadCycles(queryOptions: UploadCycleListOptionsType) {
   const { limit, mongoOptionsFilter } = setOptionsForUploadCycleListing(queryOptions)
   const items = await UploadCycle.find(mongoOptionsFilter)
-    .sort({ createdAt: -1 })
+    .sort({ datetimeUploadStarted: -1 })
     .limit(limit);
   return items;
 }
