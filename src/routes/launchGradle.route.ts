@@ -77,6 +77,49 @@ launchGradleRoute.get('/launchUploaderViaJson', async (req: any, resp: any) => {
     }
 })
 
+launchGradleRoute.get('/launchUploaderViaUploadCycleId', async (req: any, resp: any) => {
+    try {
+        const uploadCycleId = req.query.uploadCycleId
+        console.log(`launchUploaderViaJson ${uploadCycleId}`)
+        const _failedForUploacCycleId = await ItemsUshered.find({
+            uploadCycleId: uploadCycleId,
+            uploadFlag: false
+        });
+        if (_failedForUploacCycleId.length > 0) {
+            const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)
+            const folder = (process.env.HOME || process.env.USERPROFILE) + path.sep + 'Downloads' + path.sep;
+            const jsonFileName = folder + `reupload-failed-in-upload-cycle-id-${uploadCycleId}-${timeComponent}.json`;
+            console.log(`jsonFileName ${jsonFileName}`)
+            fs.writeFileSync(jsonFileName, JSON.stringify(_failedForUploacCycleId, null, 2));
+
+            const res = await launchUploaderViaJson(jsonFileName)
+            resp.status(200).send({
+                response: {
+                    success: true,
+                    res
+                }
+            });
+        }
+        else {
+            resp.status(200).send({
+                response: {
+                    success: true,
+                    msg: `No Failed upload found for Upload Cycle Id: ${uploadCycleId}`
+                }
+            });
+
+        }
+    }
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send({
+            response: {
+                success: false,
+                err
+            }
+        });
+    }
+})
 launchGradleRoute.get('/reuploadFailed', async (req: any, resp: any) => {
     try {
         const uploadCycleId = req.query.uploadCycleId
