@@ -19,15 +19,20 @@ export async function getListOfItemsUshered(queryOptions: ItemsListOptionsType) 
 
 export const itemsUsheredVerficationAndDBFlagUpdate = async (uploadCycleIdForVerification: string) => {
   //get all Items_Ushered for uploadCycleIdForVerification
-  const itemsUshered = await getListOfItemsUshered({ uploadCycleId: uploadCycleIdForVerification });
+  const itemsUshered = await getListOfItemsUshered({
+    uploadCycleId: uploadCycleIdForVerification,
+  });
+  const _itemsUsheredFilter = itemsUshered.filter(x=>x?.uploadFlag !== true)
   const results: SelectedUploadItem[] = [];
-  for (const item of itemsUshered) {
+  let counter = 0
+  const total = itemsUshered.length;
+  for (const item of _itemsUsheredFilter) {
     const res = await checkUrlValidityForUploadItems({
       id: item._id,
       archiveId: `${item.archiveItemId}`,
       isValid: true,
       title: item.title
-    });
+    }, counter++, total);
     results.push(res);
   }
   await bulkUpdateUploadedFlag(results);
@@ -45,9 +50,10 @@ export const itemsUsheredVerficationAndDBFlagUpdate = async (uploadCycleIdForVer
 
 export const selectedItemsVerficationAndDBFlagUpdate = async (uploadsForVerification: SelectedUploadItem[]) => {
   const results: SelectedUploadItem[] = [];
-
+  let counter = 0;
+  const total = uploadsForVerification.length;
   for (const forVerification of uploadsForVerification) {
-    const res = await checkUrlValidityForUploadItems(forVerification);
+    const res = await checkUrlValidityForUploadItems(forVerification, counter++, total);
     results.push(res);
   }
   await bulkUpdateUploadedFlag(results);
@@ -139,7 +145,7 @@ export const getListOfUploadCyclesAndCorrespondingData = async (queryOptions: It
   const items = await getListOfItemsUshered(queryOptions);
   const queuedItems = await getListOfItemsQueued(queryOptions)
   const uploadCycles = await getListOfUploadCycles(queryOptions);
-  
+
   const groupedItems = _.groupBy(items, function (item: any) {
     return item.uploadCycleId;
   });
