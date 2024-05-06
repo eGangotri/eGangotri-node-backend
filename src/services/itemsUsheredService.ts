@@ -119,7 +119,7 @@ export const handleEachRow = (uploadCycleId: string,
     dateTimeQueueUploadStarted = row[0]?.datetimeUploadStarted
   }
 
-
+  console.log(`uploadCycleRow: ${JSON.stringify(uploadCycleRow)}`)
   const uploadCycleData: UploadCycleTableData = {
     uploadCycleId,
     archiveProfileAndCount,
@@ -128,9 +128,9 @@ export const handleEachRow = (uploadCycleId: string,
     archiveProfileAndCountForQueue,
     totalQueueCount,
     dateTimeQueueUploadStarted,
-    countIntended: _.isEmpty(uploadCycleRow) ? 0 : uploadCycleRow[0]?.uploadCount,
-    archiveProfileAndCountIntended: _.isEmpty(uploadCycleRow) ? [] : uploadCycleRow[0]?.archiveProfiles,
-    allUploadVerified: _.isEmpty(uploadCycleRow) ? null : uploadCycleRow[0]?.allUploadVerified
+    countIntended: uploadCycleRow[0]?.uploadCount,
+    archiveProfileAndCountIntended: uploadCycleRow[0]?.archiveProfiles,
+    allUploadVerified: uploadCycleRow[0]?.allUploadVerified
   }
 
   return uploadCycleData;
@@ -141,8 +141,9 @@ export const getListOfUploadCyclesAndCorrespondingData = async (queryOptions: It
   const items = await getListOfItemsUshered(queryOptions);
   const queuedItems = await getListOfItemsQueued(queryOptions)
   const uploadCycles = await getListOfUploadCycles(queryOptions)
-  console.log(`getListOfUploadCyclesAndCorrespondingData: ${JSON.stringify(queryOptions)}`)
-  console.log(`getListOfUploadCyclesAndCorrespondingData(${uploadCycles.length}): ${JSON.stringify(uploadCycles.map(x => x.uploadCycleId))}`)
+  console.log(`options: ${JSON.stringify(queryOptions)}`)
+  console.log(`uploadCycles: (${uploadCycles.length}):
+   ${JSON.stringify(uploadCycles.map(x => x.uploadCycleId))}`)
 
   const groupedItems = _.groupBy(items, function (item: any) {
     return item.uploadCycleId;
@@ -156,8 +157,10 @@ export const getListOfUploadCyclesAndCorrespondingData = async (queryOptions: It
     return item.uploadCycleId;
   });
 
+  console.log(`groupedUploadCycles: ${JSON.stringify(groupedUploadCycles.length)}`)
   const uploadCycleIdAndData: UploadCycleTableDataDictionary[] = []
-  for (const key in groupedItems) {
+  for (const key in groupedUploadCycles) {
+    console.log(`key: ${key}`)
     const usheredRow = groupedItems[key]
     const queuedRow = groupedQueuedItems[key];
     const uploadCycleRow: any = groupedUploadCycles[key];
