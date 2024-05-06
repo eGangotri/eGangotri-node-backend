@@ -1,12 +1,7 @@
 const express = require("express");
-import { generateCatWorkReportCSV, generateCatWorkReportCSVApi2 } from "../services/CsvUtil";
-import { deleteRowsByIds } from "../services/dailyWorkReportService";
 import { Request, Response } from "express";
-import { validateSuperAdminUserFromRequest, validateUserFromRequest } from "../services/userService"
-import { getDateTwoHoursBeforeNow, replaceQuotesAndSplit } from "../excelToMongo/Util";
+import { validateSuperAdminUserFromRequest } from "../services/userService"
 import _ from "lodash";
-import { DailyCatWorkReport } from "../models/dailyCatWorkReport";
-import { generateCatCSVAsFile, generateCatCSVAsFileForOperatorAndEntryCountOnly, generateCatCSVAsFileOfAggregates, getListOfDailyCatWorkReport } from "../services/dailyCatWorkReportService";
 import { UploadCycle } from "../models/uploadCycle";
 import { getListOfUploadCycles } from "../services/uploadCycleService";
 
