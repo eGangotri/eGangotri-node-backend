@@ -139,6 +139,7 @@ export const getListOfUploadCyclesAndCorrespondingData = async (queryOptions: It
   const items = await getListOfItemsUshered(queryOptions);
   const queuedItems = await getListOfItemsQueued(queryOptions)
   const uploadCycles = await getListOfUploadCycles(queryOptions);
+  
   const groupedItems = _.groupBy(items, function (item: any) {
     return item.uploadCycleId;
   });
