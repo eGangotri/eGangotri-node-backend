@@ -19,13 +19,15 @@ export async function getListOfItemsUshered(queryOptions: ItemsListOptionsType) 
 
 export const itemsUsheredVerficationAndDBFlagUpdate = async (uploadCycleIdForVerification: string) => {
   //get all Items_Ushered for uploadCycleIdForVerification
-  const itemsUshered = await getListOfItemsUshered({
+  const itemsUsheredByUploadCycle = await getListOfItemsUshered({
     uploadCycleId: uploadCycleIdForVerification,
   });
-  const _itemsUsheredFilter = itemsUshered.filter(x=>x?.uploadFlag !== true)
+
+  const _itemsUsheredFilter = itemsUsheredByUploadCycle.filter(x=>x?.uploadFlag !== true)
   const results: SelectedUploadItem[] = [];
   let counter = 0
-  const total = itemsUshered.length;
+  const total = itemsUsheredByUploadCycle.length;
+  
   for (const item of _itemsUsheredFilter) {
     const res = await checkUrlValidityForUploadItems({
       id: item._id,
@@ -37,7 +39,7 @@ export const itemsUsheredVerficationAndDBFlagUpdate = async (uploadCycleIdForVer
   }
   await bulkUpdateUploadedFlag(results);
   await updadeAllUplodVerfiedFlagInUploadCycle(uploadCycleIdForVerification);
-  const _profilesAsSet = _.uniq(itemsUshered.map(x => x.archiveProfile))
+  const _profilesAsSet = _.uniq(itemsUsheredByUploadCycle.map(x => x.archiveProfile))
   const archiveProfiles = `(${_profilesAsSet})`;
   const failures = results.filter((x: SelectedUploadItem) => x?.isValid !== true);//accomodates null also   
   return {

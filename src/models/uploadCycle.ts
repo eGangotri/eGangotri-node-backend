@@ -9,7 +9,11 @@ const schema = new mongoose.Schema(
                 titles: {
                     type: [String],
                     required: true
-                }
+                },
+                absolutePaths: {
+                    type: [String],
+                    required: true
+                },
             }], required: true
         },
         uploadCycleId: { type: String, required: true },
