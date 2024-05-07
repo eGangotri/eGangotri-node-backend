@@ -1,5 +1,5 @@
 import * as mongoose from "mongoose";
-import { LoginUser, LoginUsersDocument } from "../services/types";
+import { LoginUser, LoginUsersDocument } from "../types/listingTypes";
 
 
 

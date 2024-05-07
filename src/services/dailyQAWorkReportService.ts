@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import moment from 'moment';
-import { DailyQAWorkReportListOptionsType } from "./types";
+import { DailyQAWorkReportListOptionsType } from "../types/listingTypes";
 import { getLimit } from "../routes/utils";
 
 import { Response } from "express";

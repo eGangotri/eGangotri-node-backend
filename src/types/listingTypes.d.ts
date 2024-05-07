@@ -20,6 +20,13 @@ export type UserListOptionsType = {
   endDate?: string;
 };
 
+export enum BOOLEAN_FOUR_STATE {
+  TRUE = "true",
+  FALSE = "false",
+  NULL = "null",
+  NULL_FALSE = "nullOrFalse",
+}
+
 export type ItemsListOptionsType = {
   ids?: string,
   limit?: number,
@@ -27,7 +34,7 @@ export type ItemsListOptionsType = {
   endDate?: string,
   archiveProfile?: string,
   uploadCycleId?: string,
-  uploadFlag?: boolean,
+  uploadFlag?: BOOLEAN_FOUR_STATE,
 };
 
 export type UploadCycleListOptionsType = {

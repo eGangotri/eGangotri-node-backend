@@ -1,5 +1,5 @@
 import { exec } from 'child_process';
-import { ReuploadType } from '../services/types';
+import { ReuploadType } from '../types/listingTypes';
 import * as _ from 'lodash';
 
 //const command = "gradle uploadToArchive";  

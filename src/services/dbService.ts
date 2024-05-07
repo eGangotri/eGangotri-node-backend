@@ -1,13 +1,11 @@
-import { Model, Document } from "mongoose";
 import { DOC_TYPE } from "../common";
-import { mongoDbUrlWithDbName, MONGO_OPTIONS } from "../db/connection";
+import { mongoDbUrlWithDbName } from "../db/connection";
 import mongoose from "mongoose";
 
 import * as _ from "lodash";
 import { getLimit } from "../routes/utils";
-import { DEFAULT_DAYS_BEFORE_CURRENT_FOR_SEARCH } from "../utils/constants";
-import { ItemsListOptionsType } from "./types";
 import { ellipsis } from "../mirror/utils";
+import { BOOLEAN_FOUR_STATE, ItemsListOptionsType } from "../types/listingTypes";
 
 
 export async function addItemsQueuedBulk(itemsArray: any[]) {
@@ -81,8 +79,21 @@ export function setOptionsForItemListing(queryOptions: ItemsListOptionsType) {
   }
 
   if (queryOptions?.uploadFlag) {
-    mongoOptionsFilter = { ...mongoOptionsFilter, $or: [{ uploadFlag: false }, { uploadFlag: null }] };
+    if (queryOptions?.uploadFlag === BOOLEAN_FOUR_STATE.TRUE) {
+      mongoOptionsFilter = { ...mongoOptionsFilter, uploadFlag: true };
+    }
+    else if (queryOptions?.uploadFlag === BOOLEAN_FOUR_STATE.NULL_FALSE) {
+      mongoOptionsFilter = { ...mongoOptionsFilter, $or: [{ uploadFlag: false }, { uploadFlag: null }] };
+    }
+    else if (queryOptions?.uploadFlag === BOOLEAN_FOUR_STATE.FALSE) {
+      mongoOptionsFilter = { ...mongoOptionsFilter, uploadFlag: false };
+    }
+    else if (queryOptions?.uploadFlag === BOOLEAN_FOUR_STATE.NULL) {
+      mongoOptionsFilter = { ...mongoOptionsFilter, uploadFlag: null };
+    }
   }
+
+
   const limit: number = getLimit(queryOptions?.limit);
   return { limit, mongoOptionsFilter };
 }

@@ -1,7 +1,7 @@
 import { ArchiveProfileAndCount, SelectedUploadItem, UploadCycleTableData, UploadCycleTableDataDictionary } from "../mirror/types";
 import { ItemsUshered } from "../models/itemsUshered";
 import { setOptionsForItemListing } from "./dbService";
-import { ItemsListOptionsType } from "./types";
+import { ItemsListOptionsType } from "../types/listingTypes";
 import { checkUrlValidityForUploadItems } from "../utils/utils";
 import * as _ from 'lodash';
 import { UploadCycle } from "../models/uploadCycle";

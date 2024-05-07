@@ -1,7 +1,7 @@
 import { ArchiveItem } from "../models/ArchiveItem";
 import { getLimit } from "../routes/utils";
 import { replaceQuotes, replaceQuotesAndSplit } from "../excelToMongo/Util";
-import { ArchiveItemListOptionsType } from "./types";
+import { ArchiveItemListOptionsType } from "../types/listingTypes";
 
 export async function getListOfArchiveItems(queryOptions: ArchiveItemListOptionsType) {
   const { limit, mongoOptionsFilter } = setOptionsForArchiveListing(queryOptions)

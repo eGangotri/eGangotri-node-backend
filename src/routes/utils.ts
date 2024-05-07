@@ -1,4 +1,4 @@
-import { LoginUsersDocument, UserListOptionsType } from "../services/types";
+import { LoginUsersDocument, UserListOptionsType } from "../types/listingTypes";
 import { MAX_ITEMS_LISTABLE } from "../utils/constants";
 
 

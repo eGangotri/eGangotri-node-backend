@@ -1,6 +1,6 @@
 import { ItemsQueued } from "../models/itemsQueued";
 import { setOptionsForItemListing } from "./dbService";
-import { ItemsListOptionsType } from "./types";
+import { ItemsListOptionsType } from "../types/listingTypes";
 import * as _ from 'lodash';
 
 export async function getListOfItemsQueued(queryOptions: ItemsListOptionsType) {
