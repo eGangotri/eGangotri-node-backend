@@ -1,5 +1,5 @@
 import * as express from 'express';
-import { createExcelV1FileForUpload, createJsonFileForUpload, launchUploader, launchUploaderViaAbsPath, launchUploaderViaExcel, launchUploaderViaJson, loginToArchive, makeGradleCall, moveToFreeze, reuploadMissed } from '../services/gradleLauncherService';
+import { launchUploader, launchUploaderViaAbsPath, launchUploaderViaExcel, launchUploaderViaJson, loginToArchive, makeGradleCall, moveToFreeze, reuploadMissed } from '../services/gradleLauncherService';
 import { ArchiveProfileAndTitle } from '../mirror/types';
 import { isValidPath } from '../utils/utils';
 import { getFolderInDestRootForProfile } from '../cliBased/utils';
@@ -7,6 +7,7 @@ import { ItemsUshered } from '../models/itemsUshered';
 import { UploadCycle } from '../models/uploadCycle';
 import { excelToJson, jsonToExcel } from '../cliBased/excel/ExcelUtils';
 import { ArchiveUploadExcelProps } from '../archiveDotOrg/archive.types';
+import { createExcelV1FileForUpload, createJsonFileForUpload, findMissedUploads } from '../services/GradleLauncherUtil';
 
 export const launchGradleRoute = express.Router();
 
@@ -122,67 +123,70 @@ launchGradleRoute.get('/launchUploaderForMissedViaUploadCycleId', async (req: an
     try {
         const uploadCycleId = req.query.uploadCycleId
         console.log(`launchUploaderViaJson ${uploadCycleId}`)
-        const itemsUsheredByCycleId = await ItemsUshered.find({
-            uploadCycleId: uploadCycleId
-        });
         const uploadCycleByCycleId = await UploadCycle.findOne({
             uploadCycleId: uploadCycleId
         });
+        const allIntended = uploadCycleByCycleId.archiveProfiles.flatMap(x => x.absolutePaths)
 
-        // if (uploadCycleByCycleId.mode.startsWith("Regular")) {
-
-        // }
-        // else 
-        if (uploadCycleByCycleId.mode.startsWith("Excel-")) {
-            const itemsUsheredByCycleId = await ItemsUshered.find({
-                uploadCycleId: uploadCycleId
-            });
-            const _allUshered = itemsUsheredByCycleId.map(x => {
-                return {
-                    title: x.title,
-                    localPath: x.localPath,
-                }
+        if (uploadCycleByCycleId.mode.startsWith("Regular")) {
+            const _missedForUploacCycleId = await findMissedUploads(uploadCycleId, allIntended)
+            const _gradleResponseStreams: string[] = []
+            for (let i = 0; i < uploadCycleByCycleId.archiveProfiles.length; i++) {
+                const archiveProfile = uploadCycleByCycleId.archiveProfiles[i].archiveProfile;
+                const respStream = await launchUploaderViaAbsPath(`${archiveProfile}"#"${_missedForUploacCycleId.join(",")}"`)
+                _gradleResponseStreams.push(respStream)
             }
-            )
-            const allIntended = uploadCycleByCycleId.archiveProfiles.flatMap(x => x.absolutePaths)
-
-            const _missedForUploadCycleId = allIntended.filter(x => !_allUshered.find(y => y.localPath === x))
-            console.log(`_missedForUploacCycleId ${_missedForUploadCycleId.length} ${_missedForUploadCycleId}`);
-
-            //Excel-;${excelFileName}-;${range}
-            let excelFileName = uploadCycleByCycleId.mode.split("-;")
-            let _excelFileName = ""
-            if (excelFileName.length >= 2) {
-                _excelFileName = excelFileName[1]
-            }
-            else {
-                _excelFileName = "D:\\FIP\\_IFP\\_IFP\\fip-uploadables-02-May-2024-15-46-(228)(8475).xlsx"
-            }
-            console.log(`_excelFileName ${_excelFileName}`)
-            let excelAsJson: ArchiveUploadExcelProps[] = excelToJson(_excelFileName);
-            const _missedInJSON = excelAsJson.filter(x => _missedForUploadCycleId.includes(x.absPath))
-            console.log(`_missedInJSON ${_missedInJSON.length} ${JSON.stringify(_missedInJSON)}`)
-
-            const excelFileNameForMissed = createExcelV1FileForUpload(uploadCycleId, _missedInJSON,
-                `${_missedInJSON.length}-of-${allIntended.length}`)
-            const res = await launchUploaderViaExcel(`${uploadCycleByCycleId.archiveProfiles[0].archiveProfile},"${excelFileNameForMissed}"`)
             resp.status(200).send({
                 response: {
                     success: true,
-                    res
+                    msg: `ReUploaded ${_missedForUploacCycleId.length} missed items for Upload Cycle Id: ${uploadCycleId}`,
+                    res: _gradleResponseStreams
                 }
             });
-            return;
         }
-        else {
-            resp.status(400).send({
-                response: {
-                    success: false,
-                    msg: `No Uploader configured yet for Upload Mode ${uploadCycleByCycleId.mode}`
+        else
+            if (uploadCycleByCycleId.mode.startsWith("Excel-")) {
+                const _missedForUploadCycleId = await findMissedUploads(uploadCycleId, allIntended)
+                //Excel-;${excelFileName}-;${range}
+                let excelFileName = uploadCycleByCycleId.mode.split("-;")
+                let _excelFileName = ""
+                if (excelFileName.length >= 2) {
+                    _excelFileName = excelFileName[1]
                 }
-            });
-            return;
-        }
+                else {
+                    resp.status(400).send({
+                        response: {
+                            success: false,
+                            msg: `Invalid Mode ${uploadCycleByCycleId.mode}. Couldnt retireve Excel Name from ${uploadCycleByCycleId.mode}`
+                        }
+                    });
+                    return;
+                }
+                console.log(`_excelFileName ${_excelFileName}`)
+                let excelAsJson: ArchiveUploadExcelProps[] = excelToJson(_excelFileName);
+                const _missedInJSON = excelAsJson.filter(x => _missedForUploadCycleId.includes(x.absPath))
+                console.log(`_missedInJSON ${_missedInJSON.length} ${JSON.stringify(_missedInJSON)}`)
+
+                const excelFileNameForMissed = createExcelV1FileForUpload(uploadCycleId, _missedInJSON,
+                    `${_missedInJSON.length}-of-${allIntended.length}`)
+                const res = await launchUploaderViaExcel(`${uploadCycleByCycleId.archiveProfiles[0].archiveProfile},"${excelFileNameForMissed}"`)
+                resp.status(200).send({
+                    response: {
+                        success: true,
+                        res
+                    }
+                });
+                return;
+            }
+            else {
+                resp.status(400).send({
+                    response: {
+                        success: false,
+                        msg: `No Uploader configured yet for Upload Mode ${uploadCycleByCycleId.mode}`
+                    }
+                });
+                return;
+            }
     }
     catch (err: any) {
         console.log('Error', err);
