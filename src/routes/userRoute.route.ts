@@ -2,7 +2,7 @@ const express = require("express");
 import { User } from "../models/user";
 import e, { Request, Response } from "express";
 import { _userExists, _validateCredentials, getUsers, validateSuperAdminUserFromRequest } from "../services/userService";
-import { LoginUsersDocument } from "../services/types";
+import { LoginUsersDocument } from "../types/listingTypes";
 import { stripPassword } from "./utils";
 import { SUPERADMIN_ROLE } from "../mirror/FrontEndBackendCommonCodeConsts";
 import * as _ from 'lodash';

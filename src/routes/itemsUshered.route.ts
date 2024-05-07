@@ -4,7 +4,7 @@ import { Request, Response } from 'express';
 import { getListOfItemsUshered, getListOfUploadCyclesAndCorrespondingData, handleEachRow, itemsUsheredVerficationAndDBFlagUpdate, selectedItemsVerficationAndDBFlagUpdate } from '../services/itemsUsheredService';
 import * as _ from 'lodash';
 import { validateSuperAdminUserFromRequest } from '../services/userService';
-import { ReuploadType } from '../services/types';
+import { ReuploadType } from '../types/listingTypes';
 import { gradleLaunchArchiveUpload } from '../exec/exec';
 import { ArchiveUploadExcelProps } from 'archiveDotOrg/archive.types';
 
@@ -107,8 +107,7 @@ itemsUsheredRoute.post('/reUploadMissedInUploadCycle', async (req: any, resp: an
     try {
         const uploadCycleId = req.body.uploadCycleId;
         const itemsUnushered = await getListOfItemsUshered({
-            uploadCycleId: uploadCycleId,
-            uploadFlag: false
+            uploadCycleId: uploadCycleId
         });
 
         let combinedExcel: ArchiveUploadExcelProps[] = []
@@ -123,7 +122,7 @@ itemsUsheredRoute.post('/reUploadMissedInUploadCycle', async (req: any, resp: an
         //     });
         // }
 
-        resp.status(200).send({ response: {} });
+        resp.status(200).send({ response: {"Not Implemented yet"} });
     }
     catch (err: any) {
         console.log('Error', err);

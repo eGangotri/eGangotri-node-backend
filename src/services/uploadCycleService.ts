@@ -1,7 +1,7 @@
 import { UploadCycle } from "../models/uploadCycle";
 import { getLimit } from "../routes/utils";
 import { replaceQuotesAndSplit } from "../excelToMongo/Util";
-import { UploadCycleListOptionsType } from "./types";
+import { UploadCycleListOptionsType } from "../types/listingTypes";
 
 export async function getListOfUploadCycles(queryOptions: UploadCycleListOptionsType) {
   const { limit, mongoOptionsFilter } = setOptionsForUploadCycleListing(queryOptions)

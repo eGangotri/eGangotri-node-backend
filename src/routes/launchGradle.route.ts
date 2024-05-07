@@ -81,14 +81,17 @@ launchGradleRoute.get('/launchUploaderViaUploadCycleId', async (req: any, resp: 
     try {
         const uploadCycleId = req.query.uploadCycleId
         console.log(`launchUploaderViaJson ${uploadCycleId}`)
-        const _failedForUploacCycleId = await ItemsUshered.find({
-            uploadCycleId: uploadCycleId,
-            uploadFlag: false
+        const uploadCyclesByCycleId = await ItemsUshered.find({
+            uploadCycleId: uploadCycleId
         });
+        //to account for nulls
+        const _failedForUploacCycleId = uploadCyclesByCycleId.filter(x => x?.uploadFlag !== true)
+
         if (_failedForUploacCycleId.length > 0) {
             const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)
             const folder = (process.env.HOME || process.env.USERPROFILE) + path.sep + 'Downloads' + path.sep;
-            const jsonFileName = folder + `reupload-failed-in-upload-cycle-id-${uploadCycleId}-${timeComponent}.json`;
+            const suffix = `${uploadCycleId}-${_failedForUploacCycleId.length}-of-${uploadCyclesByCycleId.length}-${timeComponent}.json`;
+            const jsonFileName = folder + `reupload-failed-in-upload-cycle-id-${suffix}`;
             console.log(`jsonFileName ${jsonFileName}`)
             fs.writeFileSync(jsonFileName, JSON.stringify(_failedForUploacCycleId, null, 2));
 
@@ -134,13 +137,16 @@ launchGradleRoute.get('/reuploadFailed', async (req: any, resp: any) => {
         }
 
         console.log(`reuploadFailed ${uploadCycleId}`)
-        const _failedForUploacCycleId = await ItemsUshered.find({
-            uploadCycleId: uploadCycleId,
-            uploadFlag: false
+        const uploadCyclesByCycleId = await ItemsUshered.find({
+            uploadCycleId: uploadCycleId
         });
+        //to account for nulls
+        const _failedForUploacCycleId = uploadCyclesByCycleId.filter(x => x?.uploadFlag !== true)
+
         const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)
         const folder = (process.env.HOME || process.env.USERPROFILE) + path.sep + 'Downloads' + path.sep;
-        const jsonFileName = folder + `reupload-failed-${uploadCycleId}-${timeComponent}.json`;
+        const suffix = `${uploadCycleId}-${_failedForUploacCycleId.length}-of-${uploadCyclesByCycleId.length}-${timeComponent}.json`;
+        const jsonFileName = folder + `reupload-failed-${suffix}`;
         console.log(`jsonFileName ${jsonFileName}`)
         fs.writeFileSync(jsonFileName, JSON.stringify(_failedForUploacCycleId, null, 2));
 

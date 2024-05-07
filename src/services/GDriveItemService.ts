@@ -1,6 +1,6 @@
 import { getLimit } from "../routes/utils";
 import { replaceQuotes, replaceQuotesAndSplit } from "../excelToMongo/Util";
-import { GDriveItemListOptionsType } from "./types";
+import { GDriveItemListOptionsType } from "../types/listingTypes";
 import { GDriveItem } from "../models/GDriveItem";
 
 export async function getListOfGDriveItems(queryOptions: GDriveItemListOptionsType) {

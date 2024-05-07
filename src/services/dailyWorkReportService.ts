@@ -3,7 +3,7 @@ import { ObjectId } from 'mongodb';
 
 import moment from 'moment';
 import { DailyWorkReport } from "../models/dailyWorkReport";
-import { DailyWorkReportListOptionsType, ItemsListOptionsType } from "./types";
+import { DailyWorkReportListOptionsType, ItemsListOptionsType } from "../types/listingTypes";
 import { getLimit } from "../routes/utils";
 
 import { Response } from "express";

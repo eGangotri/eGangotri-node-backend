@@ -3,7 +3,7 @@ import { getLimit } from "../routes/utils";
 import { replaceQuotesAndSplit } from "../excelToMongo/Util";
 import { SUPERADMIN_ROLE } from "../mirror/FrontEndBackendCommonCodeConsts";
 import { Request } from "express";
-import { LoginUsersDocument, UserListOptionsType } from "../services/types";
+import { LoginUsersDocument, UserListOptionsType } from "../types/listingTypes";
 import * as _ from 'lodash';
 
 export function setOptionsForUserListing(queryOptions: UserListOptionsType) {
