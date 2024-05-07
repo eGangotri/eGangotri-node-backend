@@ -43,10 +43,10 @@ export const itemsUsheredVerficationAndDBFlagUpdate = async (uploadCycleIdForVer
   const archiveProfiles = `(${_profilesAsSet})`;
   const failures = results.filter((x: SelectedUploadItem) => x?.isValid !== true);//accomodates null also   
   return {
-    successCount: results.length - failures.length,
+    successCount: (failures.length === 0)? "ALL": total - failures.length,
     failureCount: failures.length,
-    status: `Verfification/DB-Marking of (${results.length}) items for  ${uploadCycleIdForVerification} ${archiveProfiles} completed.`,
-    failures: failures.map(x => x.title),
+    status: `Verfification/DB-Marking of ${results.length} previously failed/unverified of (${total}) items for  ${uploadCycleIdForVerification} ${archiveProfiles} completed.`,
+    failures: failures.map(x => x.title) || "None",
   };
 }
 

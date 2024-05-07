@@ -8,6 +8,8 @@ import fs from 'fs';
 import moment from 'moment';
 import { DD_MM_YYYY_HH_MMFORMAT } from '../utils/constants';
 import path from 'path';
+import { UploadCycle } from '../models/uploadCycle';
+import { excelToJson } from '../cliBased/excel/ExcelUtils';
 
 export const launchGradleRoute = express.Router();
 
@@ -123,6 +125,98 @@ launchGradleRoute.get('/launchUploaderViaUploadCycleId', async (req: any, resp: 
         });
     }
 })
+
+launchGradleRoute.get('/launchUploaderForMissedViaUploadCycleId', async (req: any, resp: any) => {
+    try {
+        const uploadCycleId = req.query.uploadCycleId
+        console.log(`launchUploaderViaJson ${uploadCycleId}`)
+        const itemsUsheredByCycleId = await ItemsUshered.find({
+            uploadCycleId: uploadCycleId
+        });
+        const uploadCycleByCycleId = await UploadCycle.findOne({
+            uploadCycleId: uploadCycleId
+        });
+
+        if (uploadCycleByCycleId.mode.startsWith("Regular")) {
+
+        }
+        else if (uploadCycleByCycleId.mode.startsWith("Excel-")) {
+            const itemsUsheredByCycleId = await ItemsUshered.find({
+                uploadCycleId: uploadCycleId
+            });
+            const _allUshered = itemsUsheredByCycleId.map(x => {
+                return {
+                    title: x.title,
+                    localPath: x.localPath,
+                }
+            }
+            )
+            const allIntended = uploadCycleByCycleId.archiveProfiles.flatMap(x => x.absolutePaths)
+
+            const _missedForUploadCycleId = allIntended.filter(x => !_allUshered.find(y => y.localPath === x))
+            console.log(`_missedForUploacCycleId ${_missedForUploadCycleId.length} ${_missedForUploadCycleId}`);
+
+            //Excel-;${excelFileName}-;${range}
+            const excelFileName = uploadCycleByCycleId.mode.split("-;")[1]
+            let excelAsJson = excelToJson(excelFileName);
+
+            const res = await launchUploaderViaExcel(excelFileName)
+            resp.status(200).send({
+                response: {
+                    success: true,
+                    res
+                }
+            });
+            return;
+        }
+        else {
+            resp.status(400).send({
+                response: {
+                    success: false,
+                    msg: `No Uploader configured yet for Upload Mode ${uploadCycleByCycleId.mode}`
+                }
+            });
+            return;
+        }
+        // const x = []
+
+        // if (x.length > 0) {
+        //     const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)
+        //     const folder = (process.env.HOME || process.env.USERPROFILE) + path.sep + 'Downloads' + path.sep;
+        //     const suffix = `${uploadCycleId}-${_failedForUploacCycleId.length}-of-${uploadCyclesByCycleId.length}-${timeComponent}.json`;
+        //     const jsonFileName = folder + `reupload-failed-in-upload-cycle-id-${suffix}`;
+        //     console.log(`jsonFileName ${jsonFileName}`)
+        //     fs.writeFileSync(jsonFileName, JSON.stringify(_failedForUploacCycleId, null, 2));
+
+        //     const res = await launchUploaderViaJson(jsonFileName)
+        //     resp.status(200).send({
+        //         response: {
+        //             success: true,
+        //             res
+        //         }
+        //     });
+        // }
+        // else {
+        //     resp.status(200).send({
+        //         response: {
+        //             success: true,
+        //             msg: `No Failed upload found for Upload Cycle Id: ${uploadCycleId}`
+        //         }
+        //     });
+
+        // }
+    }
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send({
+            response: {
+                success: false,
+                err
+            }
+        });
+    }
+})
+//.
 launchGradleRoute.get('/reuploadFailed', async (req: any, resp: any) => {
     try {
         const uploadCycleId = req.query.uploadCycleId
