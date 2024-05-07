@@ -5,7 +5,8 @@ import mongoose from "mongoose";
 import * as _ from "lodash";
 import { getLimit } from "../routes/utils";
 import { ellipsis } from "../mirror/utils";
-import { BOOLEAN_FOUR_STATE, ItemsListOptionsType } from "../types/listingTypes";
+import { ItemsListOptionsType } from "../types/listingTypes";
+import { BOOLEAN_FOUR_STATE } from "./ServiceUtils";
 
 
 export async function addItemsQueuedBulk(itemsArray: any[]) {

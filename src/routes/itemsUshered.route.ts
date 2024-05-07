@@ -103,33 +103,6 @@ itemsUsheredRoute.get('/listForUploadCycle', async (req: Request, resp: Response
     }
 })
 
-itemsUsheredRoute.post('/reUploadMissedInUploadCycle', async (req: any, resp: any) => {
-    try {
-        const uploadCycleId = req.body.uploadCycleId;
-        const itemsUnushered = await getListOfItemsUshered({
-            uploadCycleId: uploadCycleId
-        });
-
-        let combinedExcel: ArchiveUploadExcelProps[] = []
-
-        // itemsUnushered.forEach((item: ItemsUshered) => {
-        //     combinedExcel.push({
-        //         absPath: item.localPath,
-        //         subject: item.uploadLink,
-        //         description: `${matchingItem?.title || ""} ${firstExcel?.fileName || ""} ${matchingItem?.handlist || ""}, ${matchingItem?.material || ""}, ${matchingItem?.script || ""} ${matchingItem?.subject || ""}, FIP-EFEO`,
-        //         creator: "FIP-EFEO-Pondicherry",
-        //         title: matchingItem?.title
-        //     });
-        // }
-
-        resp.status(200).send({ response: {"Not Implemented yet"} });
-    }
-    catch (err: any) {
-        console.log('Error', err);
-        resp.status(400).send(err);
-    }
-})
-
 itemsUsheredRoute.post('/reUploadMissed', async (req: any, resp: any) => {
     try {
         const items = req.body;
