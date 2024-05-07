@@ -1,6 +1,11 @@
 import { exec, spawn } from 'child_process';
 import { WORKING_DIR } from '../common';
-import { ArchiveProfileAndTitle } from 'mirror/types';
+import { ArchiveProfileAndTitle } from '../mirror/types';
+import moment from 'moment';
+import { DD_MM_YYYY_HH_MMFORMAT } from '../utils/constants';
+import path from 'path';
+import fs from 'fs';
+import { jsonToExcel } from '../cliBased/excel/ExcelUtils';
 
 /*
 gradle uploadToArchiveSelective --args="your_arg1 your_arg2"
@@ -12,7 +17,7 @@ const generateGradleCommandForCSV = (args: string, gradleCommand: string) => {
 const generateGradleCommandForHashSeparated = (args: string, gradleCommand: string) => {
     return generateGradleCommandForChar(args, gradleCommand, "#")
 }
-const generateGradleCommandForChar = (args: string, gradleCommand: string, char:string) => {
+const generateGradleCommandForChar = (args: string, gradleCommand: string, char: string) => {
     const _query = args.split(char).map((x: string) => x.trim()).join(" ")
     console.log(`args ${args}`);
     const _cmd = `gradle ${gradleCommand} --args="${_query}"`
@@ -44,9 +49,9 @@ export function launchUploaderViaAbsPath(args: any): Promise<string> {
     return makeGradleCall(generateGradleCommandForHashSeparated(args, "uploadToArchiveSelective"))
 }
 
-export function reuploadMissed(itemsForReupload:ArchiveProfileAndTitle[]): Promise<string> {
+export function reuploadMissed(itemsForReupload: ArchiveProfileAndTitle[]): Promise<string> {
     console.log(`reuploadMissed ${JSON.stringify(itemsForReupload)}`);
-    const dataAsCSV = itemsForReupload.map((x:ArchiveProfileAndTitle) => x.archiveProfile + ", '" + x.title.trim() +"'").join(" ")
+    const dataAsCSV = itemsForReupload.map((x: ArchiveProfileAndTitle) => x.archiveProfile + ", '" + x.title.trim() + "'").join(" ")
     return makeGradleCall(generateGradleCommand(dataAsCSV, "uploadToArchiveSelective"))
 }
 
@@ -90,3 +95,26 @@ export function makeGradleCall(_cmd: string): Promise<string> {
         })
     });
 }
+
+export const createJsonFileForUpload = (uploadCycleId: string, _failedForUploacCycleId: any[], statusString: string) => {
+    const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)
+    const folder = (process.env.HOME || process.env.USERPROFILE) + path.sep + 'Downloads' + path.sep;
+    const suffix = `${uploadCycleId}-${statusString}-${timeComponent}.json`;
+    const jsonFileName = folder + `reupload-failed-in-upload-cycle-id-${suffix}`;
+    console.log(`jsonFileName ${jsonFileName}`)
+    fs.writeFileSync(jsonFileName, JSON.stringify(_failedForUploacCycleId, null, 2));
+    return jsonFileName
+}
+
+export const createExcelV1FileForUpload = (uploadCycleId: string, jsonArray: any[], statusString: string) => {
+    const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)
+    const folder = (process.env.HOME || process.env.USERPROFILE) + path.sep + 'Downloads' + path.sep;
+    const suffix = `${uploadCycleId}-${statusString}-${timeComponent}.xlsx`;
+    const excelFileName = folder + `reupload-missed-in-upload-cycle-id-${suffix}`;
+    console.log(`excelFileName ${excelFileName}`)
+    jsonToExcel(jsonArray, excelFileName)
+
+    return excelFileName
+}
+
+
