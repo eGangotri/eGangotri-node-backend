@@ -6,7 +6,6 @@ import moment from "moment";
 import { DD_MM_YYYY_HH_MMFORMAT } from "../utils/constants";
 import { ArchiveUploadExcelProps } from "../archiveDotOrg/archive.types";
 import _ from "lodash";
-import * as fs from "fs";
 import path from 'path';
 
 

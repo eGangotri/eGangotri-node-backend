@@ -1,15 +1,12 @@
 import * as express from 'express';
-import { launchUploader, launchUploaderViaAbsPath, launchUploaderViaExcel, launchUploaderViaJson, loginToArchive, makeGradleCall, moveToFreeze, reuploadMissed } from '../services/gradleLauncherService';
+import { createExcelV1FileForUpload, createJsonFileForUpload, launchUploader, launchUploaderViaAbsPath, launchUploaderViaExcel, launchUploaderViaJson, loginToArchive, makeGradleCall, moveToFreeze, reuploadMissed } from '../services/gradleLauncherService';
 import { ArchiveProfileAndTitle } from '../mirror/types';
 import { isValidPath } from '../utils/utils';
 import { getFolderInDestRootForProfile } from '../cliBased/utils';
 import { ItemsUshered } from '../models/itemsUshered';
-import fs from 'fs';
-import moment from 'moment';
-import { DD_MM_YYYY_HH_MMFORMAT } from '../utils/constants';
-import path from 'path';
 import { UploadCycle } from '../models/uploadCycle';
-import { excelToJson } from '../cliBased/excel/ExcelUtils';
+import { excelToJson, jsonToExcel } from '../cliBased/excel/ExcelUtils';
+import { ArchiveUploadExcelProps } from '../archiveDotOrg/archive.types';
 
 export const launchGradleRoute = express.Router();
 
@@ -82,21 +79,16 @@ launchGradleRoute.get('/launchUploaderViaJson', async (req: any, resp: any) => {
 launchGradleRoute.get('/launchUploaderViaUploadCycleId', async (req: any, resp: any) => {
     try {
         const uploadCycleId = req.query.uploadCycleId
-        console.log(`launchUploaderViaJson ${uploadCycleId}`)
+        console.log(`launchUploaderViaUploadCycleId ${uploadCycleId}`)
         const uploadCyclesByCycleId = await ItemsUshered.find({
             uploadCycleId: uploadCycleId
         });
         //to account for nulls
-        const _failedForUploacCycleId = uploadCyclesByCycleId.filter(x => x?.uploadFlag !== true)
-
-        if (_failedForUploacCycleId.length > 0) {
-            const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)
-            const folder = (process.env.HOME || process.env.USERPROFILE) + path.sep + 'Downloads' + path.sep;
-            const suffix = `${uploadCycleId}-${_failedForUploacCycleId.length}-of-${uploadCyclesByCycleId.length}-${timeComponent}.json`;
-            const jsonFileName = folder + `reupload-failed-in-upload-cycle-id-${suffix}`;
-            console.log(`jsonFileName ${jsonFileName}`)
-            fs.writeFileSync(jsonFileName, JSON.stringify(_failedForUploacCycleId, null, 2));
-
+        const _failedForUploadCycleId = uploadCyclesByCycleId.filter(x => x?.uploadFlag !== true)
+        if (_failedForUploadCycleId.length > 0) {
+            const jsonFileName = createJsonFileForUpload(uploadCycleId,
+                _failedForUploadCycleId,
+                `${_failedForUploadCycleId.length}-of-${uploadCyclesByCycleId.length}`)
             const res = await launchUploaderViaJson(jsonFileName)
             resp.status(200).send({
                 response: {
@@ -137,10 +129,11 @@ launchGradleRoute.get('/launchUploaderForMissedViaUploadCycleId', async (req: an
             uploadCycleId: uploadCycleId
         });
 
-        if (uploadCycleByCycleId.mode.startsWith("Regular")) {
+        // if (uploadCycleByCycleId.mode.startsWith("Regular")) {
 
-        }
-        else if (uploadCycleByCycleId.mode.startsWith("Excel-")) {
+        // }
+        // else 
+        if (uploadCycleByCycleId.mode.startsWith("Excel-")) {
             const itemsUsheredByCycleId = await ItemsUshered.find({
                 uploadCycleId: uploadCycleId
             });
@@ -157,10 +150,22 @@ launchGradleRoute.get('/launchUploaderForMissedViaUploadCycleId', async (req: an
             console.log(`_missedForUploacCycleId ${_missedForUploadCycleId.length} ${_missedForUploadCycleId}`);
 
             //Excel-;${excelFileName}-;${range}
-            const excelFileName = uploadCycleByCycleId.mode.split("-;")[1]
-            let excelAsJson = excelToJson(excelFileName);
+            let excelFileName = uploadCycleByCycleId.mode.split("-;")
+            let _excelFileName = ""
+            if (excelFileName.length >= 2) {
+                _excelFileName = excelFileName[1]
+            }
+            else {
+                _excelFileName = "D:\\FIP\\_IFP\\_IFP\\fip-uploadables-02-May-2024-15-46-(228)(8475).xlsx"
+            }
+            console.log(`_excelFileName ${_excelFileName}`)
+            let excelAsJson: ArchiveUploadExcelProps[] = excelToJson(_excelFileName);
+            const _missedInJSON = excelAsJson.filter(x => _missedForUploadCycleId.includes(x.absPath))
+            console.log(`_missedInJSON ${_missedInJSON.length} ${JSON.stringify(_missedInJSON)}`)
 
-            const res = await launchUploaderViaExcel(excelFileName)
+            const excelFileNameForMissed = createExcelV1FileForUpload(uploadCycleId, _missedInJSON,
+                `${_missedInJSON.length}-of-${allIntended.length}`)
+            const res = await launchUploaderViaExcel(`${uploadCycleByCycleId.archiveProfiles[0].archiveProfile},"${excelFileNameForMissed}"`)
             resp.status(200).send({
                 response: {
                     success: true,
@@ -178,33 +183,6 @@ launchGradleRoute.get('/launchUploaderForMissedViaUploadCycleId', async (req: an
             });
             return;
         }
-        // const x = []
-
-        // if (x.length > 0) {
-        //     const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)
-        //     const folder = (process.env.HOME || process.env.USERPROFILE) + path.sep + 'Downloads' + path.sep;
-        //     const suffix = `${uploadCycleId}-${_failedForUploacCycleId.length}-of-${uploadCyclesByCycleId.length}-${timeComponent}.json`;
-        //     const jsonFileName = folder + `reupload-failed-in-upload-cycle-id-${suffix}`;
-        //     console.log(`jsonFileName ${jsonFileName}`)
-        //     fs.writeFileSync(jsonFileName, JSON.stringify(_failedForUploacCycleId, null, 2));
-
-        //     const res = await launchUploaderViaJson(jsonFileName)
-        //     resp.status(200).send({
-        //         response: {
-        //             success: true,
-        //             res
-        //         }
-        //     });
-        // }
-        // else {
-        //     resp.status(200).send({
-        //         response: {
-        //             success: true,
-        //             msg: `No Failed upload found for Upload Cycle Id: ${uploadCycleId}`
-        //         }
-        //     });
-
-        // }
     }
     catch (err: any) {
         console.log('Error', err);
@@ -236,13 +214,9 @@ launchGradleRoute.get('/reuploadFailed', async (req: any, resp: any) => {
         });
         //to account for nulls
         const _failedForUploacCycleId = uploadCyclesByCycleId.filter(x => x?.uploadFlag !== true)
-
-        const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)
-        const folder = (process.env.HOME || process.env.USERPROFILE) + path.sep + 'Downloads' + path.sep;
-        const suffix = `${uploadCycleId}-${_failedForUploacCycleId.length}-of-${uploadCyclesByCycleId.length}-${timeComponent}.json`;
-        const jsonFileName = folder + `reupload-failed-${suffix}`;
-        console.log(`jsonFileName ${jsonFileName}`)
-        fs.writeFileSync(jsonFileName, JSON.stringify(_failedForUploacCycleId, null, 2));
+        const jsonFileName = createJsonFileForUpload(uploadCycleId,
+            _failedForUploacCycleId,
+            `${_failedForUploacCycleId.length}-of-${uploadCyclesByCycleId.length}`)
 
         const res = await launchUploaderViaJson(jsonFileName)
         resp.status(200).send({
