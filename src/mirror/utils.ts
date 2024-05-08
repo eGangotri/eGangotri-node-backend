@@ -1,5 +1,6 @@
 const DEFAULT_COUNT_FOR_ELLIPSIS = 20;
 
+export const PERCENT_SIGN_AS_FILE_SEPARATOR = "%"
 export const ellipsis = (
   input: string|number,
   alphabetCount = DEFAULT_COUNT_FOR_ELLIPSIS
