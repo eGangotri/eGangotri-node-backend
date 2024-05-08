@@ -26,7 +26,7 @@ export interface UploadCycleTableData {
     archiveProfileAndCount: ArchiveProfileAndCount[];
     datetimeUploadStarted: Date;
     totalCount: number;
-
+    mode ?: string;
     archiveProfileAndCountForQueue?: ArchiveProfileAndCount[];
     totalQueueCount?:number;
     dateTimeQueueUploadStarted?:Date;
