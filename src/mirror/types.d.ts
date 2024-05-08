@@ -4,6 +4,12 @@ export interface ArchiveProfileAndCount {
     archiveProfile: string;
     count: number;
 }
+export interface UploadCycleArchiveProfile {
+    archiveProfile?: string;
+    count?: number;
+    titles?: string[];
+    absolutePaths?: string[];
+}
 
 export interface ArchiveProfileAndTitle {
     archiveProfile: string;

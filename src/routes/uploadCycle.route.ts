@@ -4,6 +4,8 @@ import { validateSuperAdminUserFromRequest } from "../services/userService"
 import _ from "lodash";
 import { UploadCycle } from "../models/uploadCycle";
 import { getListOfUploadCycles } from "../services/uploadCycleService";
+import { findMissedUploads } from "../services/GradleLauncherUtil";
+import { UploadCycleArchiveProfile } from "mirror/types";
 
 export const uploadCycleRoute = express.Router();
 
@@ -12,17 +14,17 @@ export const uploadCycleRoute = express.Router();
 POST http://localhost/uploadCycleRoute/add 
 JSON Body 
 {
-	"superadmin_user": "chetan",
-	"superadmin_password": "XXXXX",
-	"uploadCycleId": "2",
-	"uploadCount": 4,
-	"archiveProfiles": [
-		{
-			"archiveProfile": "VT",
-			"count": 4
-		}
-	],
-	"datetimeUploadStarted": "12/12/2002 12:12:21"
+    "superadmin_user": "chetan",
+    "superadmin_password": "XXXXX",
+    "uploadCycleId": "2",
+    "uploadCount": 4,
+    "archiveProfiles": [
+        {
+            "archiveProfile": "VT",
+            "count": 4
+        }
+    ],
+    "datetimeUploadStarted": "12/12/2002 12:12:21"
 }
 */
 
@@ -58,4 +60,24 @@ uploadCycleRoute.get('/list', async (req: Request, resp: Response) => {
         console.log('Error', err);
         resp.status(400).send(err);
     }
+})
+
+uploadCycleRoute.post('/getUploadQueueUploadUsheredMissed', async (req: any, resp: any) => {
+    const uploadCycleId = req.body.uploadCycleId;
+    console.log(`uploadCycleId ${uploadCycleId} ${req.body}`)
+    const _missedForUploadCycleId: UploadCycleArchiveProfile[]
+        = await findMissedUploads(uploadCycleId);
+    const _data = _missedForUploadCycleId.map(x => {
+        return {
+            archiveProfile: x.archiveProfile,
+            missedCount: x.absolutePaths.length,
+            missed: x.absolutePaths
+        }
+    })
+    resp.status(200).send({
+        response: {
+            success: true,
+            missedData: _data
+        }
+    });
 })
