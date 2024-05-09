@@ -9,6 +9,7 @@ import { excelToJson } from '../cliBased/excel/ExcelUtils';
 import { ArchiveUploadExcelProps } from '../archiveDotOrg/archive.types';
 import { createExcelV1FileForUpload, createJsonFileForUpload, findMissedUploads } from '../services/GradleLauncherUtil';
 import { PERCENT_SIGN_AS_FILE_SEPARATOR } from '../mirror/utils';
+import { itemsUsheredVerficationAndDBFlagUpdate } from 'services/itemsUsheredService';
 
 export const launchGradleRoute = express.Router();
 
@@ -223,6 +224,7 @@ launchGradleRoute.get('/launchUploaderForMissedViaUploadCycleId', async (req: an
 launchGradleRoute.get('/reuploadFailed', async (req: any, resp: any) => {
     try {
         const uploadCycleId = req.query.uploadCycleId
+        await itemsUsheredVerficationAndDBFlagUpdate(uploadCycleId);
         if (!uploadCycleId) {
             resp.status(400).send({
                 response: {
