@@ -102,23 +102,3 @@ itemsUsheredRoute.get('/listForUploadCycle', async (req: Request, resp: Response
         resp.status(400).send(err);
     }
 })
-
-itemsUsheredRoute.post('/reUploadMissed', async (req: any, resp: any) => {
-    try {
-        const items = req.body;
-        const itemsForReupload: ReuploadType[] = items.itemsForReupload;
-        const res = gradleLaunchArchiveUpload(itemsForReupload);
-        const first = itemsForReupload[0]
-
-        const itemsByAcrhiveProfiles = _.groupBy(itemsForReupload, 'archiveProfile')
-        console.log(`archiveProfiles:: ${JSON.stringify(itemsByAcrhiveProfiles)}`)
-        // const command = 'gradle loginToArchive --args="SPS VT  PANINI"';
-        // const command = 'gradle uploadToArchive --args="SPS VT  PANINI"';
-
-        resp.status(200).send({ response: res });
-    }
-    catch (err: any) {
-        console.log('Error', err);
-        resp.status(400).send(err);
-    }
-})

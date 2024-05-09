@@ -176,7 +176,10 @@ launchGradleRoute.get('/launchUploaderForMissedViaUploadCycleId', async (req: an
 
                     const excelFileNameForMissed = createExcelV1FileForUpload(uploadCycleId, _missedInJSON,
                         `${_missedInJSON.length}-of-${allIntended.length}`)
-                    const res = await launchUploaderViaExcel(`${uploadCycleByCycleId.archiveProfiles[0].archiveProfile},"${excelFileNameForMissed}"`)
+                    const res = await launchUploaderViaExcel(`'${uploadCycleByCycleId.archiveProfiles[0].archiveProfile}',
+                    '${excelFileNameForMissed}',
+                     '${uploadCycleId}'`);
+
                     resp.status(200).send({
                         response: {
                             success: true,
@@ -230,24 +233,35 @@ launchGradleRoute.get('/reuploadFailed', async (req: any, resp: any) => {
             return;
         }
 
-        console.log(`reuploadFailed ${uploadCycleId}`)
+        console.log(`reuploadFailed check for ${uploadCycleId}`)
         const uploadCyclesByCycleId = await ItemsUshered.find({
             uploadCycleId: uploadCycleId
         });
         //to account for nulls
         const _failedForUploacCycleId = uploadCyclesByCycleId.filter(x => x?.uploadFlag !== true)
-        const jsonFileName = createJsonFileForUpload(uploadCycleId,
-            _failedForUploacCycleId,
-            `${_failedForUploacCycleId.length}-of-${uploadCyclesByCycleId.length}`)
+        if (_failedForUploacCycleId.length > 0) {
+            const jsonFileName = createJsonFileForUpload(uploadCycleId,
+                _failedForUploacCycleId,
+                `${_failedForUploacCycleId.length}-of-${uploadCyclesByCycleId.length}`)
 
-        const res = await launchUploaderViaJson(jsonFileName)
-        resp.status(200).send({
-            response: {
-                success: true,
-                res
-            }
-        });
-
+            const res = await launchUploaderViaJson(jsonFileName)
+            resp.status(200).send({
+                response: {
+                    success: true,
+                    noFailedUploads: false,
+                    res
+                }
+            });
+        }
+        else {
+            resp.status(200).send({
+                response: {
+                    success: true,
+                    noFailedUploads: true,
+                    msg: `No Failed upload found for Upload Cycle Id: ${uploadCycleId}`
+                }
+            });
+        }
     }
     catch (err: any) {
         console.log('Error', err);
@@ -282,7 +296,6 @@ launchGradleRoute.get('/launchUploaderViaAbsPath', async (req: any, resp: any) =
         });
     }
 })
-
 
 launchGradleRoute.post('/reuploadMissed', async (req: any, resp: any) => {
     try {
