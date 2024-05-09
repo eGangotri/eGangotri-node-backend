@@ -74,6 +74,7 @@ export function loginToArchive(args: any): Promise<string> {
 export function makeGradleCall(_cmd: string): Promise<string> {
     return new Promise((resolve, reject) => {
         exec(_cmd, {
+            maxBuffer: 1024 * 10000,
             cwd: `${WORKING_DIR}`
         }, (error, stdout, stderr) => {
             if (error) {
