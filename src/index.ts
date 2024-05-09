@@ -19,6 +19,9 @@ import { googleDriveItemRoute } from "./routes/googleDriveItem.route";
 import { launchMongoRoute } from "./routes/launchMongo.route";
 import { launchArchiveYarnRoute } from "./routes/launchArchiveYarn.route";
 
+//var bodyParser = require('body-parser');
+import * as bodyParser from 'body-parser';
+
 const egangotri = express();
 const hostname = "localhost";
 const port = process.env.PORT || 8000;
@@ -32,7 +35,8 @@ egangotri.use((req: any, res: any, next: any) => {
   res.append("Access-Control-Allow-Headers", "Content-Type");
   next();
 });
-
+egangotri.use(bodyParser.json({limit: '50mb'}));
+egangotri.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 const deployDate = "24-04-24"
 egangotri.get("/", function (req: any, res: any) {
   console.log(`GET / ${deployDate}`);
