@@ -104,7 +104,7 @@ export async function checkUrlValidity(url: string, counter: number,total:number
       return true;
     }
     else {
-      console.log(`Item # ${counter}/${total}(${total-counter}th failure)*******response.status ${url} ${response.status} ${response.statusText}`)
+      console.log(`Item # ${counter}/${total}*******response.status ${url} ${response.status} ${response.statusText}`)
       return false;
     }
   } catch (error) {
