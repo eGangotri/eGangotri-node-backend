@@ -88,10 +88,11 @@ export async function snap2htmlCmdCall(rootFolderPath: string, snap2htmlFileName
     }
 }
 
+const COMMAND_PROMO_MAX_BUFFER_SIZE = 1024 * 1024 * 1024 ; 
 export function makeGradleCall(_cmd: string): Promise<string> {
     return new Promise((resolve, reject) => {
         exec(_cmd, {
-            maxBuffer: 1024 * 10000,
+            maxBuffer: COMMAND_PROMO_MAX_BUFFER_SIZE,
             cwd: `${WORKING_DIR}`
         }, (error, stdout, stderr) => {
             if (error) {

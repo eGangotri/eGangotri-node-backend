@@ -27,17 +27,19 @@ const hostname = "localhost";
 const port = process.env.PORT || 8000;
 const args = process.argv.slice(2);
 console.log("Command-line arguments:", args);
+const BODY_PARSER_LIMIT = '100mb';
 
-egangotri.use(express.json());
+egangotri.use(express.json({limit: BODY_PARSER_LIMIT}));
+egangotri.use(express.urlencoded({limit: BODY_PARSER_LIMIT, extended: true}));
+
 egangotri.use((req: any, res: any, next: any) => {
   res.append("Access-Control-Allow-Origin", ["*"]);
   res.append("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE");
   res.append("Access-Control-Allow-Headers", "Content-Type");
   next();
 });
-egangotri.use(bodyParser.json({limit: '50mb'}));
-egangotri.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
-const deployDate = "24-04-24"
+
+const deployDate = new Date().toISOString();
 egangotri.get("/", function (req: any, res: any) {
   console.log(`GET / ${deployDate}`);
   res.send({
