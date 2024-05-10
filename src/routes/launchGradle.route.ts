@@ -1,5 +1,5 @@
 import * as express from 'express';
-import { launchUploader, launchUploaderViaAbsPath, launchUploaderViaExcel, launchUploaderViaJson, loginToArchive, makeGradleCall, moveToFreeze, reuploadMissed } from '../services/gradleLauncherService';
+import { launchUploader, launchUploaderViaAbsPath, launchUploaderViaExcel, launchUploaderViaJson, loginToArchive, makeGradleCall, moveToFreeze, reuploadMissed, snap2htmlCmdCall } from '../services/gradleLauncherService';
 import { ArchiveProfileAndTitle, UploadCycleArchiveProfile } from '../mirror/types';
 import { isValidPath } from '../utils/utils';
 import { getFolderInDestRootForProfile } from '../cliBased/utils';
@@ -9,7 +9,7 @@ import { excelToJson } from '../cliBased/excel/ExcelUtils';
 import { ArchiveUploadExcelProps } from '../archiveDotOrg/archive.types';
 import { createExcelV1FileForUpload, createJsonFileForUpload, findMissedUploads } from '../services/GradleLauncherUtil';
 import { PERCENT_SIGN_AS_FILE_SEPARATOR } from '../mirror/utils';
-import { itemsUsheredVerficationAndDBFlagUpdate } from 'services/itemsUsheredService';
+import { itemsUsheredVerficationAndDBFlagUpdate } from '../services/itemsUsheredService';
 
 export const launchGradleRoute = express.Router();
 
@@ -367,6 +367,26 @@ launchGradleRoute.get('/loginToArchive', async (req: any, resp: any) => {
         const _profiles = req.query.profiles
         console.log(`loginToArchive ${_profiles}`)
         const res = await loginToArchive(req.query.profiles)
+        resp.status(200).send({
+            response: res
+        });
+    }
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send({
+            response: err.message
+        });
+    }
+})
+
+//Snap2HTMl.exe -path:"root folder path" -outfile:"filename"
+
+launchGradleRoute.get('/snap2html', async (req: any, resp: any) => {
+    try {
+        const rootFolder = req.query.rootFolder
+
+        console.log(`snap2html ${rootFolder}`)
+        const res = await snap2htmlCmdCall(rootFolder)
         resp.status(200).send({
             response: res
         });
