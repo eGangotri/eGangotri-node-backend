@@ -1,6 +1,8 @@
 import { exec, spawn } from 'child_process';
 import { WORKING_DIR } from '../common';
 import { ArchiveProfileAndTitle } from '../mirror/types';
+import path from 'path';
+import { stripQuotes } from '../excelToMongo/Util';
 
 
 /*
@@ -69,6 +71,21 @@ export function bookTitlesLaunchService(args: any): Promise<string> {
 export function loginToArchive(args: any): Promise<string> {
     //gradle loginToArchive --args=JNGM_BEN JNGM_TAMIL JNGM_TEL JNGM BVT
     return makeGradleCall(generateGradleCommandForCSV(args, "loginToArchive"))
+}
+
+export async function snap2htmlCmdCall(rootFolderPath: string, snap2htmlFileName: string = ""): Promise<{}> {
+    if (snap2htmlFileName === "" || !snap2htmlFileName?.endsWith(".html")) {
+        snap2htmlFileName = `${path.basename(rootFolderPath)}.html`
+    }
+
+    console.log(`snap2htmlCmdCall ${snap2htmlFileName}`);
+    const outputPath = path.join(rootFolderPath, snap2htmlFileName);
+    const _cmd = `Snap2HTML.exe -path:"${stripQuotes(rootFolderPath)}" -outfile:"${stripQuotes(outputPath)}"`
+    const _gradleResp = await makeGradleCall(_cmd);
+    return {
+        _gradleResp,
+        msg: `snap2html for ${rootFolderPath} if successful will be in ${rootFolderPath}/${snap2htmlFileName}`,
+    }
 }
 
 export function makeGradleCall(_cmd: string): Promise<string> {

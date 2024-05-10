@@ -48,7 +48,7 @@ export const generateCsvDirAndName = (infix: string) => {
 }
 
 
-function stripQuotes(text: any) {
+export function stripQuotes(text: any) {
   const strippedValue =
     typeof text === "string"
       ? text.toString().replace(/\"/g, "").replace(/\"/g, "").trim()
