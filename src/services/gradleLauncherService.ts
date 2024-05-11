@@ -15,10 +15,17 @@ const generateGradleCommandForCSV = (args: string, gradleCommand: string) => {
 const generateGradleCommandForHashSeparated = (args: string, gradleCommand: string) => {
     return generateGradleCommandForChar(args, gradleCommand, "#")
 }
+
+const gradleCommandFormat = (args: string, gradleCommand: string ) => {
+    const cmd = `gradle ${gradleCommand} --args='${args}'`
+    console.log(`cmd ${cmd}`);
+    return cmd
+}
 const generateGradleCommandForChar = (args: string, gradleCommand: string, char: string) => {
     const _query = args.split(char).map((x: string) => x.trim()).join(" ")
     console.log(`args ${args}`);
-    const _cmd = `gradle ${gradleCommand} --args="${_query}"`
+    const _cmd = gradleCommandFormat(_query, gradleCommand)
+    //`gradle ${gradleCommand} --args="${_query}"`
     console.log(`_cmd ${_cmd}`);
     return _cmd
 }
@@ -33,15 +40,15 @@ export function launchUploader(args: any): Promise<string> {
     return makeGradleCall(generateGradleCommandForCSV(args, "uploadToArchive"))
 }
 
-export function launchUploaderViaExcel(args: any): Promise<string> {
-    return makeGradleCall(generateGradleCommandForCSV(args, "uploadToArchiveExcel"))
+export function launchUploaderViaExcel(profile:string, excelPath:string, uploadCycleId:string): Promise<string> {
+  const gradleArgsAsJSON = `{'profile': '${profile}','excelPath':'${path.basename(excelPath)}','uploadCycleId': '${uploadCycleId}'}`
+  return makeGradleCall(
+        `gradle uploadToArchiveExcel -PjsonArgs="${gradleArgsAsJSON}"`) 
 }
 
 export function launchUploaderViaJson(args: any): Promise<string> {
     return makeGradleCall(generateGradleCommandForCSV(args, "uploadToArchiveJson"))
 }
-
-
 
 export function launchUploaderViaAbsPath(args: any): Promise<string> {
     return makeGradleCall(generateGradleCommandForHashSeparated(args, "uploadToArchiveSelective"))
@@ -90,6 +97,7 @@ export async function snap2htmlCmdCall(rootFolderPath: string, snap2htmlFileName
 
 const COMMAND_PROMO_MAX_BUFFER_SIZE = 1024 * 1024 * 1024 ; 
 export function makeGradleCall(_cmd: string): Promise<string> {
+    console.log(`makeGradleCall ${_cmd}`);
     return new Promise((resolve, reject) => {
         exec(_cmd, {
             maxBuffer: COMMAND_PROMO_MAX_BUFFER_SIZE,
