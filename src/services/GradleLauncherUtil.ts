@@ -18,7 +18,7 @@ export const findMissedUploads = async (uploadCycleId: string): Promise<UploadCy
     });
 
     const usheredPaths = _.groupBy(allUshered, 'archiveProfile');
-
+    console.log(`ushereds ${allUshered.length}`)
     const _allItendedByArchiveProfile = _.groupBy(uploadCycleByCycleId?.archiveProfiles, 'archiveProfile');
 
     const missing: UploadCycleArchiveProfile[] = []
