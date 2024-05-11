@@ -12,7 +12,6 @@ export const findMissedUploads = async (uploadCycleId: string): Promise<UploadCy
     const uploadCycleByCycleId = await UploadCycle.findOne({
         uploadCycleId: uploadCycleId
     });
-    console.log(`uploadCycleByCycleId ${JSON.stringify(uploadCycleByCycleId)}`);
 
     const allUshered = await ItemsUshered.find({
         uploadCycleId: uploadCycleId
@@ -25,10 +24,10 @@ export const findMissedUploads = async (uploadCycleId: string): Promise<UploadCy
     const missing: UploadCycleArchiveProfile[] = []
 
     for (let [key, value] of Object.entries(_allItendedByArchiveProfile)) {
-        const usheredPathsForArchiveProfiles = usheredPaths[key].map(x => x.localPath);
+        const usheredPathsForArchiveProfiles = usheredPaths[key]?.map(x => x.localPath);
         const intendedAbsPaths = value.flatMap(x => x.absolutePaths);
         const diff: string[] = _.differenceWith(intendedAbsPaths, usheredPathsForArchiveProfiles, _.isEqual);
-        console.log(`diff ${key} ${diff.length} ${diff}`)
+        console.log(`diff ${key} ${diff.length}`)
 
         if (diff.length > 0) {
             missing.push({
@@ -37,7 +36,7 @@ export const findMissedUploads = async (uploadCycleId: string): Promise<UploadCy
             })
         }
     }
-    console.log(`missing ${missing.length} ${JSON.stringify(missing)}`)
+    console.log(`ArchiveProfiles Count with missing items: ${missing.length}`)
     return missing;
 }
 
