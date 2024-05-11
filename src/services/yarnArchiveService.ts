@@ -36,6 +36,13 @@ export const validateDateRange = (dateRange: string) => {
                 }
                 parsedDateRange[0] = _startDate;
                 parsedDateRange[1] = _endDate;
+
+
+                return {
+                    "status": "success",
+                    "success": true,
+                    "parsedDateRange": parsedDateRange
+                }
             }
             catch (e) {
                 return {
@@ -52,13 +59,9 @@ export const validateDateRange = (dateRange: string) => {
                 "msg": `Invalid Date Range ${dateRange}`
             }
         }
-
     }
-
     return {
-        "status": "success",
         "success": true,
-        "parsedDateRange": parsedDateRange
     }
 }
 
@@ -87,7 +90,7 @@ export const getSuccessfullyUploadedItemsForUploadCycleId = async (pathOrUploadC
             archiveId: `${item.archiveItemId}`,
             isValid: true,
             title: item.title
-        },counter++,total);
+        }, counter++, total);
         console.log(`getSuccessfullyUploadedItemsForUploadCycleId ${res.isValid} ${res.archiveId}`)
         results.push(res);
     }
