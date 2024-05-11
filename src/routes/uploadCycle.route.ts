@@ -65,19 +65,29 @@ uploadCycleRoute.get('/list', async (req: Request, resp: Response) => {
 uploadCycleRoute.post('/getUploadQueueUploadUsheredMissed', async (req: any, resp: any) => {
     const uploadCycleId = req.body.uploadCycleId;
     console.log(`uploadCycleId ${uploadCycleId} ${req.body}`)
-    const _missedForUploadCycleId: UploadCycleArchiveProfile[]
-        = await findMissedUploads(uploadCycleId);
-    const _data = _missedForUploadCycleId.map(x => {
-        return {
-            archiveProfile: x.archiveProfile,
-            missedCount: x.absolutePaths.length,
-            missed: x.absolutePaths
-        }
-    })
-    resp.status(200).send({
-        response: {
-            success: true,
-            missedData: _data
-        }
-    });
+    if(!uploadCycleId) {    
+        resp.status(400).send({error: 'uploadCycleId is required'});
+        return;
+    }
+    try {
+        const _missedForUploadCycleId: UploadCycleArchiveProfile[]
+            = await findMissedUploads(uploadCycleId);
+        const _data = _missedForUploadCycleId.map(x => {
+            return {
+                archiveProfile: x.archiveProfile,
+                missedCount: x.absolutePaths.length,
+                missed: x.absolutePaths
+            }
+        })
+        resp.status(200).send({
+            response: {
+                success: true,
+                missedData: _data
+            }
+        });
+    }
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
 })

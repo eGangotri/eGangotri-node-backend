@@ -56,16 +56,16 @@ itemsUsheredRoute.post('/verifyUploadStatus', async (req: any, resp: any) => {
         const uploadCycleIdForVerification = req.body.uploadCycleIdForVerification;
         if (uploadCycleIdForVerification) {
             //get all Items_Ushered for uploadCycleIdForVerification
-            const _res = await itemsUsheredVerficationAndDBFlagUpdate(uploadCycleIdForVerification);
+            const result = await itemsUsheredVerficationAndDBFlagUpdate(uploadCycleIdForVerification);
             resp.status(200).send({
-                response: _res
+                response: result
             });
         }
         else {
             const uploadsForVerification = req.body.uploadsForVerification;
-            const results = await selectedItemsVerficationAndDBFlagUpdate(uploadsForVerification);
+            const result = await selectedItemsVerficationAndDBFlagUpdate(uploadsForVerification);
             resp.status(200).send({
-                response: results,
+                response: result,
             });
         }
     }

@@ -23,11 +23,11 @@ export const itemsUsheredVerficationAndDBFlagUpdate = async (uploadCycleIdForVer
     uploadCycleId: uploadCycleIdForVerification,
   });
 
-  const _itemsUsheredFilter = itemsUsheredByUploadCycle.filter(x=>x?.uploadFlag !== true)
+  const _itemsUsheredFilter = itemsUsheredByUploadCycle.filter(x => x?.uploadFlag !== true)
   const results: SelectedUploadItem[] = [];
   let counter = 0
   const total = itemsUsheredByUploadCycle.length;
-  
+
   for (const item of _itemsUsheredFilter) {
     const res = await checkUrlValidityForUploadItems({
       id: item._id,
@@ -42,12 +42,15 @@ export const itemsUsheredVerficationAndDBFlagUpdate = async (uploadCycleIdForVer
   const _profilesAsSet = _.uniq(itemsUsheredByUploadCycle.map(x => x.archiveProfile))
   const archiveProfiles = `(${_profilesAsSet})`;
   const failures = results.filter((x: SelectedUploadItem) => x?.isValid !== true);//accomodates null also   
-  return {
-    successCount: (failures.length === 0)? "ALL": total - failures.length,
+  const result = {
+    successCount: (failures.length === 0) ? "ALL" : total - failures.length,
     failureCount: failures.length,
     status: `Verfification/DB-Marking of ${results.length} previously failed/unverified of (${total}) items for  ${uploadCycleIdForVerification} ${archiveProfiles} completed.`,
     failures: failures.map(x => x.title) || "None",
   };
+  console.log(`_res ${result.status} ${result.successCount} ${result.failureCount}`)
+
+  return result;
 }
 
 export const selectedItemsVerficationAndDBFlagUpdate = async (uploadsForVerification: SelectedUploadItem[]) => {
@@ -61,12 +64,15 @@ export const selectedItemsVerficationAndDBFlagUpdate = async (uploadsForVerifica
   await bulkUpdateUploadedFlag(results);
   const failures = results.filter((x: SelectedUploadItem) => x?.isValid !== true) || []//accomodates null also   
 
-  return {
+  const result =  {
     successCount: results.length - failures.length,
     failureCount: failures.length,
     status: `Verfification/DB-Marking of Selected (${results.length}) items completed.`,
     failures: failures.map(x => x.title)
   };
+  console.log(`_res ${result.status} ${result.successCount} ${result.failureCount}`)
+
+  return result
 }
 
 export const updadeAllUplodVerfiedFlagInUploadCycle = async (uploadCycleId: string) => {
