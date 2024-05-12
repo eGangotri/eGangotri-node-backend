@@ -46,8 +46,8 @@ export function launchUploaderViaExcel(profile: string, excelPath: string, uploa
         `gradle uploadToArchiveExcel -PjsonArgs="${gradleArgsAsJSON}"`)
 }
 
-export function launchUploaderViaExcelV3(profile: string, excelPath: string, uploadCycleId: string): Promise<string> {
-    const gradleArgsAsJSON = `{'profile': '${profile}','excelPath':'${path.basename(excelPath)}','uploadCycleId': '${uploadCycleId}'}`
+export function launchUploaderViaExcelV3(profile: string, excelPath: string, uploadCycleId: string, range:string = ""): Promise<string> {
+    const gradleArgsAsJSON = `{'profile': '${profile}','excelPath':'${path.basename(excelPath)}','uploadCycleId': '${uploadCycleId}' ,'range': '${range}'}`
     return makeGradleCall(generateGradleCommandForCSV(`${profile} ${excelPath}, ${uploadCycleId}`, "uploadToArchiveExcelV3"))
 }
 

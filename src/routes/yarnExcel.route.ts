@@ -2,6 +2,7 @@ import { LOCAL_FOLDERS_PROPERTIES_FILE_FOR_SRC } from '../cliBased/utils';
 import * as express from 'express';
 import { getAllFileListingWithoutStats, getAllPDFFiles } from '../imgToPdf/utils/FileUtils';
 import { createExcelV3FileForUpload } from '../services/GradleLauncherUtil';
+import { getJsonOfAbsPathFromProfile } from 'services/yarnExcelService';
 
 export const yarnExcelRoute = express.Router();
 
@@ -17,26 +18,11 @@ yarnExcelRoute.post('/createExcelOfAbsPathFromProfile', async (req: any, resp: a
                 }
             });
         }
-        const profileFolder = LOCAL_FOLDERS_PROPERTIES_FILE_FOR_SRC.get(profile);
-        console.log(`profileFolder ${profileFolder} pdfOnly ${allNotJustPdfs}`);
-
-        let filesForUpload = []
-        if (allNotJustPdfs) {
-            filesForUpload = await getAllFileListingWithoutStats(profileFolder);
-        } else {
-            filesForUpload = await getAllPDFFiles(profileFolder);
-        }
-        console.log(`filesForUpload ${filesForUpload.length}`);
-
-        const filesAsJson = filesForUpload.map((file) => {
-            return {
-                "absPath": file.absPath,
-            }
-        });
-        const excelFileName = createExcelV3FileForUpload("", filesAsJson, `absPaths-as-excel-${filesAsJson.length}`)
+        const absPathsAsJsons = await getJsonOfAbsPathFromProfile(profile, allNotJustPdfs);
+        const excelFileName = createExcelV3FileForUpload("", absPathsAsJsons, `absPaths-as-excel-${absPathsAsJsons.length}`)
 
         resp.status(200).send({
-            response: `Created Excel file at ${excelFileName} with ${filesAsJson.length} rows`
+            response: `Created Excel file at ${excelFileName} with ${absPathsAsJsons.length} rows`
         });
     }
 
