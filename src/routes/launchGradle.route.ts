@@ -202,7 +202,7 @@ launchGradleRoute.get('/reuploadMissedViaUploadCycleId', async (req: any, resp: 
                 }
             }
             else {
-                resp.status(400).send({
+                resp.status(200).send({
                     response: {
                         success: false,
                         msg: `No Uploader configured yet for Upload Mode ${uploadCycleByCycleId.mode}`
