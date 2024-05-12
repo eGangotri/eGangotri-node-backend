@@ -7,9 +7,12 @@ const callGenericArchiveApi = async (username: string,
     pageIndex = 1,
     startDate: number = 0,
     endDate: number = 0): Promise<Hits> => {
+        const SORT_ORDER = "publicdate:desc"
+        //"publicdate:asc";
+        //"publicdate:desc"
     try {
         const _url =
-            `https://archive.org/services/search/beta/page_production/?user_query=&page_type=account_details&page_target=@${username}&page_elements=[%22uploads%22]&hits_per_page=1000&page=${pageIndex}&sort=publicdate:desc&aggregations=false&client_url=https://archive.org/details/@${username}`;
+            `https://archive.org/services/search/beta/page_production/?user_query=&page_type=account_details&page_target=@${username}&page_elements=[%22uploads%22]&hits_per_page=1000&page=${pageIndex}&sort=${SORT_ORDER}&aggregations=false&client_url=https://archive.org/details/@${username}`;
         console.log(`callGenericArchiveApi:${username}(${pageIndex}) ${username}`);
         const response = await fetch(_url);
         const data = await response.json();

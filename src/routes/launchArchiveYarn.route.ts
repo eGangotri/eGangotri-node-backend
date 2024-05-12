@@ -6,9 +6,10 @@ import { downloadPdfFromArchiveToProfile } from '../archiveDotOrg/downloadUtil';
 import { resetDownloadCounters } from '../cliBased/pdf/utils';
 import { alterExcelWithUploadedFlag, getSuccessfullyUploadedItemsForUploadCycleId, validateDateRange } from '../services/yarnArchiveService';
 import _ from 'lodash';
-import { excelToJson } from '../cliBased/excel/ExcelUtils';
-import { arch } from 'os';
+import { excelToJson, jsonToExcel } from '../cliBased/excel/ExcelUtils';
 import path from 'path';
+import moment from 'moment';
+import { DD_MM_YYYY_HH_MMFORMAT } from '../utils/constants';
 
 export const launchArchiveYarnRoute = express.Router();
 
@@ -185,32 +186,55 @@ launchArchiveYarnRoute.post('/markAsUploadedEntriesInArchiveExcel', async (req: 
 
 launchArchiveYarnRoute.post('/compareUploadsViaExcelWithArchiveOrg', async (req: any, resp: any) => {
     try {
-        const mainExcelPath = req.body.mainExcelPath;
+        const uploadableExcelPath = req.body.mainExcelPath;
         const archiveExcelPath = req.body.archiveExcelPath;
 
-        const leftJsonArray = excelToJson(mainExcelPath)
-        const archiveJsonArray = excelToJson(archiveExcelPath)
+        const uploadableExcelAsJSON = excelToJson(uploadableExcelPath)
 
-        console.log(`leftJsonArray ${leftJsonArray.length}`)
-        console.log(`rightJsonArray ${archiveJsonArray.length}\n`)
-        console.log("first tile" + archiveJsonArray[0][
+        const archiveExcelPaths = archiveExcelPath.split(",");
+        const archiveExcelsAsJson = []
+        for (const _path of archiveExcelPaths) {
+            console.log(`_path ${_path}`)
+            const _archiveJsonArray = excelToJson(_path.trim())
+            console.log(`_archiveJsonArray pushing ${_archiveJsonArray.length} items from ${_path}`)
+            archiveExcelsAsJson.push(..._archiveJsonArray)
+        }
+
+        console.log(`uploadableExcelAsJSON ${uploadableExcelAsJSON.length}`)
+        console.log(`archiveExcelsAsJson ${archiveExcelsAsJson.length}\n`)
+        console.log("first tile" + archiveExcelsAsJson[0][
             "Title-Archive"
         ].substring(0, 8));
-        console.log("first absPath" + leftJsonArray[0]["absPath"]);
+        console.log("first absPath" + uploadableExcelAsJSON[0]["absPath"]);
 
-        const archiveJsonArrayTitles = archiveJsonArray.map(x => x["Title-Archive"]?.substring(0, 8)?.split(/\s/)?.join(""));
+        const archiveJsonArrayTitles = archiveExcelsAsJson.map(x => x["Title-Archive"]?.substring(0, 8)?.split(/\s/)?.join(""));
         console.log(`archiveJsonArrayTitles ${archiveJsonArrayTitles.length}\n`)
         console.log(`archiveJsonArrayTitles ${archiveJsonArrayTitles[0]}`);
 
-        const leftJsonArrayTitles = leftJsonArray.map(x => path.basename(x["absPath"] || "")?.substring(0, 7));
-        console.log(`leftJsonArrayTitles ${leftJsonArrayTitles.length}`)
-        console.log(`leftJsonArrayTitles ${leftJsonArrayTitles[0]}`)
+        const uplodableJsonArrayTitles = uploadableExcelAsJSON.map(x => path.basename(x["absPath"] || "")?.substring(0, 7));
+        console.log(`leftJsonArrayTitles ${uplodableJsonArrayTitles.length}`)
+        console.log(`leftJsonArrayTitles ${uplodableJsonArrayTitles[0]}`)
 
-        const diff = _.difference(leftJsonArrayTitles, archiveJsonArrayTitles);
+        const diff = _.difference(uplodableJsonArrayTitles, archiveJsonArrayTitles);
         console.log(`diff ${diff.length} ${diff[0]}`)
 
+        const diffUplodables = uploadableExcelAsJSON.filter((item) => {
+            return diff.includes(path.basename(item["absPath"] || "")?.substring(0, 7))
+        } );
+       
+        const folder = (process.env.HOME || process.env.USERPROFILE) + path.sep + 'Downloads' + path.sep;
+        const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)
+        console.log( "diffUpl Length" + diffUplodables.length)
+        const excelName = `${folder}${timeComponent}-fip-final-diff-Uplodables(${diffUplodables.length}).xlsx`
+        jsonToExcel(diffUplodables, excelName)
+       
         resp.status(200).send({
-            response: diff
+            response: {
+                diffUplodables: diffUplodables.length,
+                excel: `Excel ${excelName} created for ${diffUplodables.length} items not found in Archive`,
+                msg: `${diff.length} items not found in Archive`,
+                diff,
+            }
         });
     }
     catch (err: any) {
