@@ -8,8 +8,8 @@ import { UploadCycle } from '../models/uploadCycle';
 import { excelToJson } from '../cliBased/excel/ExcelUtils';
 import { ArchiveUploadExcelProps } from '../archiveDotOrg/archive.types';
 import { createExcelV1FileForUpload, createExcelV3FileForUpload, createJsonFileForUpload, findMissedUploads } from '../services/GradleLauncherUtil';
-import { PERCENT_SIGN_AS_FILE_SEPARATOR } from '../mirror/utils';
 import { itemsUsheredVerficationAndDBFlagUpdate } from '../services/itemsUsheredService';
+import { getJsonOfAbsPathFromProfile } from 'services/yarnExcelService';
 
 export const launchGradleRoute = express.Router();
 
@@ -400,3 +400,33 @@ launchGradleRoute.get('/snap2html', async (req: any, resp: any) => {
         });
     }
 })
+
+
+launchGradleRoute.get('/launchUploaderViaExcelV3', async (req: any, resp: any) => {
+    try {
+        const { profile, excelPath, range } = req.query
+
+        console.log(`launchUploaderViaExcelV3 ${profile},${excelPath}, ${range}`)
+        const respStream = await launchUploaderViaExcelV3(profile,
+            excelPath,
+            "", range);
+
+        resp.status(200).send({
+            response: {
+                success: true,
+                msg: `Upload for ${profile} via ${excelPath} with ${range} range performed`,
+                res: respStream
+            }
+        });
+    }
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send({
+            response: {
+                success: false,
+                err
+            }
+        });
+    }
+})
+
