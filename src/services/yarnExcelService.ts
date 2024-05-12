@@ -6,7 +6,7 @@ export const yarnExcelRoute = express.Router();
 
 export const getJsonOfAbsPathFromProfile = async (profile: string, allNotJustPdfs: boolean) => {
     const profileFolder = LOCAL_FOLDERS_PROPERTIES_FILE_FOR_SRC.get(profile);
-    console.log(`profileFolder ${profileFolder} allNotJustPdfs ${allNotJustPdfs}`);
+    console.log(`profileFolder ${profile}:${profileFolder} allNotJustPdfs ${allNotJustPdfs}`);
 
     let filesForUpload = []
     if (allNotJustPdfs) {
