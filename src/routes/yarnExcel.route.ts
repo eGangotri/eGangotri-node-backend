@@ -26,6 +26,8 @@ yarnExcelRoute.post('/createExcelOfAbsPathFromProfile', async (req: any, resp: a
 
     catch (err: any) {
         console.log('Error', err);
-        resp.status(400).send(err);
+        resp.status(400).send({
+            err
+        });
     }
 })
