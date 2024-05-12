@@ -1,5 +1,5 @@
 import * as express from 'express';
-import { launchUploader, launchUploaderViaAbsPath, launchUploaderViaExcel, launchUploaderViaJson, loginToArchive, makeGradleCall, moveToFreeze, reuploadMissed, snap2htmlCmdCall } from '../services/gradleLauncherService';
+import { launchUploader, launchUploaderViaAbsPath, launchUploaderViaExcel, launchUploaderViaExcelV3, launchUploaderViaJson, loginToArchive, makeGradleCall, moveToFreeze, reuploadMissed, snap2htmlCmdCall } from '../services/gradleLauncherService';
 import { ArchiveProfileAndTitle, UploadCycleArchiveProfile } from '../mirror/types';
 import { isValidPath } from '../utils/utils';
 import { getFolderInDestRootForProfile } from '../cliBased/utils';
@@ -7,7 +7,7 @@ import { ItemsUshered } from '../models/itemsUshered';
 import { UploadCycle } from '../models/uploadCycle';
 import { excelToJson } from '../cliBased/excel/ExcelUtils';
 import { ArchiveUploadExcelProps } from '../archiveDotOrg/archive.types';
-import { createExcelV1FileForUpload, createJsonFileForUpload, findMissedUploads } from '../services/GradleLauncherUtil';
+import { createExcelV1FileForUpload, createExcelV3FileForUpload, createJsonFileForUpload, findMissedUploads } from '../services/GradleLauncherUtil';
 import { PERCENT_SIGN_AS_FILE_SEPARATOR } from '../mirror/utils';
 import { itemsUsheredVerficationAndDBFlagUpdate } from '../services/itemsUsheredService';
 
@@ -120,24 +120,29 @@ launchGradleRoute.get('/launchUploaderViaUploadCycleId', async (req: any, resp: 
     }
 })
 
-launchGradleRoute.get('/launchUploaderForReuploadingMissedViaUploadCycleId', async (req: any, resp: any) => {
+launchGradleRoute.get('/reuploadMissedViaUploadCycleId', async (req: any, resp: any) => {
     try {
         const uploadCycleId = req.query.uploadCycleId
-        console.log(`launchUploaderForMissedViaUploadCycleId ${uploadCycleId}`)
+        console.log(`reuploadMissedViaUploadCycleId ${uploadCycleId}`)
         const uploadCycleByCycleId = await UploadCycle.findOne({
             uploadCycleId: uploadCycleId
         });
         const allIntended = uploadCycleByCycleId.archiveProfiles.flatMap(x => x.absolutePaths)
-
+        const _missedForUploadCycleId: UploadCycleArchiveProfile[]
+            = await findMissedUploads(uploadCycleId);
         if (uploadCycleByCycleId.mode.startsWith("Regular")) {
-            const _missedForUploadCycleId: UploadCycleArchiveProfile[]
-                = await findMissedUploads(uploadCycleId);
             const _gradleResponseStreams: string[] = []
             for (let i = 0; i < _missedForUploadCycleId.length; i++) {
                 const archiveProfile = _missedForUploadCycleId[i].archiveProfile;
-                const absolutePaths = _missedForUploadCycleId[i].absolutePaths.join(PERCENT_SIGN_AS_FILE_SEPARATOR);
-                const gradleArgs = `'${archiveProfile}' # '${absolutePaths}'`
-                const respStream = await launchUploaderViaAbsPath(gradleArgs)
+                const missedAbsPaths = _missedForUploadCycleId[i].absolutePaths.map(x => {
+                    return {
+                        absPath: x
+                    }
+                });
+                const excelFileName = createExcelV3FileForUpload(uploadCycleId, missedAbsPaths, `${missedAbsPaths.length}-of-${allIntended.length}`)
+                const respStream = await launchUploaderViaExcelV3(archiveProfile,
+                    excelFileName,
+                    uploadCycleId);
                 _gradleResponseStreams.push(respStream)
             }
             resp.status(200).send({
@@ -150,8 +155,6 @@ launchGradleRoute.get('/launchUploaderForReuploadingMissedViaUploadCycleId', asy
         }
         else
             if (uploadCycleByCycleId.mode.startsWith("Excel-")) {
-                const _missedForUploadCycleId: UploadCycleArchiveProfile[]
-                    = await findMissedUploads(uploadCycleId);
                 //Excel-;${excelFileName}-;${range}
                 let excelFileName = uploadCycleByCycleId.mode.split("-;")
                 let _excelFileName = ""
@@ -177,8 +180,8 @@ launchGradleRoute.get('/launchUploaderForReuploadingMissedViaUploadCycleId', asy
                     const excelFileNameForMissed = createExcelV1FileForUpload(uploadCycleId, _missedInJSON,
                         `${_missedInJSON.length}-of-${allIntended.length}`)
                     const res = await launchUploaderViaExcel(uploadCycleByCycleId.archiveProfiles[0].archiveProfile,
-                    excelFileNameForMissed,
-                     uploadCycleId);
+                        excelFileNameForMissed,
+                        uploadCycleId);
 
                     resp.status(200).send({
                         response: {

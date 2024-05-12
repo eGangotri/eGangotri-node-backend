@@ -36,7 +36,7 @@ export const findMissedUploads = async (uploadCycleId: string): Promise<UploadCy
             })
         }
     }
-    console.log(`ArchiveProfiles Count with missing items: ${missing.length}`)
+    console.log(`ArchiveProfiles found that have issues: ${missing.length}`)
     return missing;
 }
 
@@ -53,11 +53,21 @@ export const createJsonFileForUpload = (uploadCycleId: string, _failedForUploacC
 export const createExcelV1FileForUpload = (uploadCycleId: string, jsonArray: any[], statusString: string) => {
     const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)
     const folder = (process.env.HOME || process.env.USERPROFILE) + path.sep + 'Downloads' + path.sep;
-    const suffix = `${uploadCycleId}-${statusString}-${timeComponent}.xlsx`;
+    const suffix = `uploadable-v1-${uploadCycleId}-${statusString}-${timeComponent}.xlsx`;
     const excelFileName = folder + `reupload-missed-in-upload-cycle-id-${suffix}`;
     console.log(`excelFileName ${excelFileName}`)
     jsonToExcel(jsonArray, excelFileName)
-
     return excelFileName
 }
+
+export const createExcelV3FileForUpload = (uploadCycleId: string, jsonArray: any[], statusString: string) => {
+    const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)
+    const folder = (process.env.HOME || process.env.USERPROFILE) + path.sep + 'Downloads' + path.sep;
+    const suffix = `uplodable-v3-${uploadCycleId}-${statusString}-${timeComponent}.xlsx`;
+    const excelFileName = folder + `reupload-failed-in-upload-cycle-id-${suffix}`;
+    console.log(`excelFileName ${excelFileName}`)
+    jsonToExcel(jsonArray, excelFileName)
+    return excelFileName
+}
+
 

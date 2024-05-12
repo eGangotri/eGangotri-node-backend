@@ -16,7 +16,7 @@ const generateGradleCommandForHashSeparated = (args: string, gradleCommand: stri
     return generateGradleCommandForChar(args, gradleCommand, "#")
 }
 
-const gradleCommandFormat = (args: string, gradleCommand: string ) => {
+const gradleCommandFormat = (args: string, gradleCommand: string) => {
     const cmd = `gradle ${gradleCommand} --args='${args}'`
     console.log(`cmd ${cmd}`);
     return cmd
@@ -40,10 +40,15 @@ export function launchUploader(args: any): Promise<string> {
     return makeGradleCall(generateGradleCommandForCSV(args, "uploadToArchive"))
 }
 
-export function launchUploaderViaExcel(profile:string, excelPath:string, uploadCycleId:string): Promise<string> {
-  const gradleArgsAsJSON = `{'profile': '${profile}','excelPath':'${path.basename(excelPath)}','uploadCycleId': '${uploadCycleId}'}`
-  return makeGradleCall(
-        `gradle uploadToArchiveExcel -PjsonArgs="${gradleArgsAsJSON}"`) 
+export function launchUploaderViaExcel(profile: string, excelPath: string, uploadCycleId: string): Promise<string> {
+    const gradleArgsAsJSON = `{'profile': '${profile}','excelPath':'${path.basename(excelPath)}','uploadCycleId': '${uploadCycleId}'}`
+    return makeGradleCall(
+        `gradle uploadToArchiveExcel -PjsonArgs="${gradleArgsAsJSON}"`)
+}
+
+export function launchUploaderViaExcelV3(profile: string, excelPath: string, uploadCycleId: string): Promise<string> {
+    const gradleArgsAsJSON = `{'profile': '${profile}','excelPath':'${path.basename(excelPath)}','uploadCycleId': '${uploadCycleId}'}`
+    return makeGradleCall(generateGradleCommandForCSV(`${profile} ${excelPath}, ${uploadCycleId}`, "uploadToArchiveExcelV3"))
 }
 
 export function launchUploaderViaJson(args: any): Promise<string> {
@@ -95,7 +100,7 @@ export async function snap2htmlCmdCall(rootFolderPath: string, snap2htmlFileName
     }
 }
 
-const COMMAND_PROMO_MAX_BUFFER_SIZE = 1024 * 1024 * 1024 ; 
+const COMMAND_PROMO_MAX_BUFFER_SIZE = 1024 * 1024 * 1024;
 export function makeGradleCall(_cmd: string): Promise<string> {
     console.log(`makeGradleCall ${_cmd}`);
     return new Promise((resolve, reject) => {
