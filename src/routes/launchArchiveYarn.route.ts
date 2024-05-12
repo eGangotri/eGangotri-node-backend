@@ -1,5 +1,5 @@
 import * as express from 'express';
-import { scrapeArchiveOrgProfiles } from '../archiveDotOrg/archiveScraper';
+import { MAX_ITEMS_RETRIEVABLE_IN_ARCHIVE_ORG, scrapeArchiveOrgProfiles } from '../archiveDotOrg/archiveScraper';
 import { ArchiveDataRetrievalMsg, ArchiveDataRetrievalStatus } from '../archiveDotOrg/types';
 import { archiveExceltoMongo } from '../excelToMongo/transferArchiveExcelToMongo';
 import { downloadPdfFromArchiveToProfile } from '../archiveDotOrg/downloadUtil';
@@ -19,6 +19,7 @@ launchArchiveYarnRoute.post('/getArchiveListing', async (req: any, resp: any) =>
         const onlyLinks = (req?.body?.onlyLinks == true) || false;
         const limitedFields = (req?.body?.limitedFields == true) || false;
         const dateRange = req?.body?.dateRange || ""; //dateRange:"2024/04/01-2024/04/31"
+        const maxItems = req?.body?.totalCount || MAX_ITEMS_RETRIEVABLE_IN_ARCHIVE_ORG;
         let parsedDateRange: [number, number] = [0, 0]
 
         /** 
@@ -62,10 +63,11 @@ launchArchiveYarnRoute.post('/getArchiveListing', async (req: any, resp: any) =>
                 }
             });
         }
-        const _resp: ArchiveDataRetrievalMsg = await scrapeArchiveOrgProfiles(archiveLinks, onlyLinks, limitedFields, parsedDateRange);
+        const _resp: ArchiveDataRetrievalMsg = await scrapeArchiveOrgProfiles(archiveLinks, onlyLinks, limitedFields, parsedDateRange, maxItems);
         resp.status(200).send({
             response: {
-                _results: _resp
+                _results: _resp,
+                caution:"Max API supports is 10K results. For more use scraping API. See https://archive.org/help/aboutsearch.htm  or, you may request up to 1000000000 results at one time if you do NOT specify any page. For best results,  do NOT specify sort (sort may be automatically disabled for very large queries).)"
             }
         });
     }

@@ -8,6 +8,22 @@ import { stripQuotes } from '../excelToMongo/Util';
 /*
 gradle uploadToArchiveSelective --args="your_arg1 your_arg2"
 */
+
+
+
+const gradleCommandFormat = (args: string, gradleCommand: string) => {
+    const cmd = `gradle ${gradleCommand} --args="${args}"`
+    console.log(`gradleCommandFormat:cmd ${cmd}`);
+    return cmd
+}
+
+
+const generateGradleCommand = (spaceSepString: string, gradleCommand: string) => {
+    const _cmd = `gradle ${gradleCommand} --args="${spaceSepString}"`
+    console.log(`_cmd ${_cmd}`);
+    return _cmd
+}
+
 const generateGradleCommandForCSV = (args: string, gradleCommand: string) => {
     return generateGradleCommandForChar(args, gradleCommand, ",")
 }
@@ -16,24 +32,14 @@ const generateGradleCommandForHashSeparated = (args: string, gradleCommand: stri
     return generateGradleCommandForChar(args, gradleCommand, "#")
 }
 
-const gradleCommandFormat = (args: string, gradleCommand: string) => {
-    const cmd = `gradle ${gradleCommand} --args='${args}'`
-    console.log(`gradleCommandFormat:cmd ${cmd}`);
-    return cmd
-}
 const generateGradleCommandForChar = (args: string, gradleCommand: string, char: string) => {
-    const _query = args.split(char).map((x: string) => x.trim()).filter(y=>y.length > 0).map(z=>`"${z}"`).join(" ")
+    const _query = args.split(char).map((x: string) => x.trim()).filter(y=>y.length > 0).map(z=>`'${z}'`).join(" ")
     console.log(`args ${args}`);
     const _cmd = gradleCommandFormat(_query, gradleCommand)
     console.log(`_cmd ${_cmd}`);
     return _cmd
 }
 
-const generateGradleCommand = (spaceSepString: string, gradleCommand: string) => {
-    const _cmd = `gradle ${gradleCommand} --args="${spaceSepString}"`
-    console.log(`_cmd ${_cmd}`);
-    return _cmd
-}
 
 export function launchUploader(args: any): Promise<string> {
     return makeGradleCall(generateGradleCommandForCSV(args, "uploadToArchive"))
@@ -46,7 +52,6 @@ export function launchUploaderViaExcel(profile: string, excelPath: string, uploa
 }
 
 export function launchUploaderViaExcelV3(profile: string, excelPath: string, uploadCycleId: string, range:string = ""): Promise<string> {
-    //const gradleCmd = `gradlew uploadToArchiveExcelV3 -Pargs="${profile}" -Pargs="${excelPath}" -Pargs="${uploadCycleId}" -Pargs="${range}"`;
     const gradleCmd = `gradle uploadToArchiveExcelV3 --args="${profile} '${excelPath}' '${uploadCycleId}' '${range}'"`;
    return makeGradleCall(gradleCmd)
 }
