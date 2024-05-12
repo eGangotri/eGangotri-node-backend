@@ -64,7 +64,7 @@ export const createExcelV3FileForUpload = (uploadCycleId: string, jsonArray: any
     const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)
     const folder = (process.env.HOME || process.env.USERPROFILE) + path.sep + 'Downloads' + path.sep;
     const suffix = `uplodable-v3-${uploadCycleId}-${statusString}-${timeComponent}.xlsx`;
-    const excelFileName = folder + `reupload-failed-in-upload-cycle-id-${suffix}`;
+    const excelFileName =`${folder}-${suffix}`;
     console.log(`excelFileName ${excelFileName}`)
     jsonToExcel(jsonArray, excelFileName)
     return excelFileName

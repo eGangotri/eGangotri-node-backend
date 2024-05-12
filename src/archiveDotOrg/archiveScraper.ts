@@ -7,7 +7,7 @@ const callGenericArchiveApi = async (username: string,
     pageIndex = 1,
     startDate: number = 0,
     endDate: number = 0): Promise<Hits> => {
-        const SORT_ORDER = "publicdate:desc"
+        const SORT_ORDER = "publicdate:asc"
         //"publicdate:asc";
         //"publicdate:desc"
     try {

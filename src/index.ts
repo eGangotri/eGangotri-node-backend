@@ -6,7 +6,7 @@ import {launchGradleRoute} from "./routes/launchGradle.route";
 import {dailyWorkReportRoute} from "./routes/dailyWorkReport.route";
 import {dailyCatWorkReportRoute} from "./routes/dailyCatWorkReport.route";
 import {uploadCycleRoute} from "./routes/uploadCycle.route";
-import { launchYarnRoute } from "./routes/launchYarn.route";
+import { yarnRoute } from "./routes/yarn.route";
 
 import {userRoute} from "./routes/userRoute.route";
 import {connectToMongo} from "./services/dbService";
@@ -14,13 +14,11 @@ import {connectToMongo} from "./services/dbService";
 import { GLOBAL_DB_NAME } from './db/connection';
 import { dailyQAWorkReportRoute } from "./routes/dailyQAWorkReport.route";
 import { archiveItemRoute } from "./routes/archiveItem.route";
-import { launchYarnListMakerRoute } from "./routes/launchYarnListMaker.route";
+import { yarnListMakerRoute } from "./routes/yarnListMaker.route";
 import { googleDriveItemRoute } from "./routes/googleDriveItem.route";
 import { launchMongoRoute } from "./routes/launchMongo.route";
 import { launchArchiveYarnRoute } from "./routes/launchArchiveYarn.route";
-
-//var bodyParser = require('body-parser');
-import * as bodyParser from 'body-parser';
+import { yarnExcelRoute } from "./routes/yarnExcel.route";
 
 const egangotri = express();
 const hostname = "localhost";
@@ -55,8 +53,9 @@ egangotri.use("/dailyCatWorkReport", dailyCatWorkReportRoute);
 egangotri.use("/dailyQAWorkReport", dailyQAWorkReportRoute);
 egangotri.use("/uploadCycleRoute", uploadCycleRoute);
 egangotri.use("/user", userRoute);
-egangotri.use("/yarn", launchYarnRoute);
-egangotri.use("/yarnListMaker", launchYarnListMakerRoute);
+egangotri.use("/yarn", yarnRoute);
+egangotri.use("/yarnExcel", yarnExcelRoute);
+egangotri.use("/yarnListMaker", yarnListMakerRoute);
 egangotri.use("/yarnArchive", launchArchiveYarnRoute);
 
 egangotri.use("/searchArchivesDB", archiveItemRoute);
