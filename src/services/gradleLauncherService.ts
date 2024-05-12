@@ -47,7 +47,7 @@ export function launchUploaderViaExcel(profile: string, excelPath: string, uploa
 
 export function launchUploaderViaExcelV3(profile: string, excelPath: string, uploadCycleId: string, range:string = ""): Promise<string> {
     //const gradleCmd = `gradlew uploadToArchiveExcelV3 -Pargs="${profile}" -Pargs="${excelPath}" -Pargs="${uploadCycleId}" -Pargs="${range}"`;
-    const gradleCmd = `gradlew uploadToArchiveExcelV3 --args="${profile} '${excelPath}' '${uploadCycleId}' '${range}'"`;
+    const gradleCmd = `gradle uploadToArchiveExcelV3 --args="${profile} '${excelPath}' '${uploadCycleId}' '${range}'"`;
    return makeGradleCall(gradleCmd)
 }
 
