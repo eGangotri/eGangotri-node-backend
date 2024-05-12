@@ -9,6 +9,7 @@ import { excelToJson } from '../cliBased/excel/ExcelUtils';
 import { ArchiveUploadExcelProps } from '../archiveDotOrg/archive.types';
 import { createExcelV1FileForUpload, createExcelV3FileForUpload, createJsonFileForUpload, findMissedUploads } from '../services/GradleLauncherUtil';
 import { itemsUsheredVerficationAndDBFlagUpdate } from '../services/itemsUsheredService';
+import * as path from 'path';
 
 export const launchGradleRoute = express.Router();
 
@@ -406,6 +407,7 @@ launchGradleRoute.get('/launchUploaderViaExcelV3', async (req: any, resp: any) =
         const { profile, excelPath, range } = req.query
 
         console.log(`launchUploaderViaExcelV3 ${profile},${excelPath}, ${range}`)
+        const excelFileName = path.basename(excelPath.trim());
         const respStream = await launchUploaderViaExcelV3(profile,
             excelPath,
             "", range);
