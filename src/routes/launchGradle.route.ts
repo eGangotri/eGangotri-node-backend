@@ -9,7 +9,6 @@ import { excelToJson } from '../cliBased/excel/ExcelUtils';
 import { ArchiveUploadExcelProps } from '../archiveDotOrg/archive.types';
 import { createExcelV1FileForUpload, createExcelV3FileForUpload, createJsonFileForUpload, findMissedUploads } from '../services/GradleLauncherUtil';
 import { itemsUsheredVerficationAndDBFlagUpdate } from '../services/itemsUsheredService';
-import { getJsonOfAbsPathFromProfile } from 'services/yarnExcelService';
 
 export const launchGradleRoute = express.Router();
 
