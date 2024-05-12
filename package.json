@@ -63,7 +63,6 @@
   "dependencies": {
     "@csv-js/csv": "0.0.2",
     "axios": "^1.6.8",
-    "body-parser": "^1.20.2",
     "child_process": "^1.0.2",
     "csv-parse": "latest",
     "csv-writer": "^1.6.0",

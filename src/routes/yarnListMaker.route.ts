@@ -10,9 +10,9 @@ import { archiveExceltoMongo } from '../excelToMongo/transferArchiveExcelToMongo
 import { timeInfo } from '../mirror/FrontEndBackendCommonCode';
 import { publishBookTitlesList } from '../services/yarnService';
 
-export const launchYarnListMakerRoute = express.Router();
+export const yarnListMakerRoute = express.Router();
 
-launchYarnListMakerRoute.post('/getGoogleDriveListing', async (req: any, resp: any) => {
+yarnListMakerRoute.post('/getGoogleDriveListing', async (req: any, resp: any) => {
     console.log(`getGoogleDriveListing ${JSON.stringify(req.body)}`)
     try {
         const googleDriveLink = req?.body?.googleDriveLink;
@@ -90,7 +90,7 @@ launchYarnListMakerRoute.post('/getGoogleDriveListing', async (req: any, resp: a
 
 
 
-launchYarnListMakerRoute.post('/getFirstAndLastNPages', async (req: any, resp: any) => {
+yarnListMakerRoute.post('/getFirstAndLastNPages', async (req: any, resp: any) => {
     try {
         const srcFoldersAsCSV = req?.body?.srcFolders;
         const destRootFolder = req?.body?.destRootFolder;
@@ -125,7 +125,7 @@ launchYarnListMakerRoute.post('/getFirstAndLastNPages', async (req: any, resp: a
 })
 
 
-launchYarnListMakerRoute.post('/combineGDriveAndReducedPdfExcels', async (req: any, resp: any) => {
+yarnListMakerRoute.post('/combineGDriveAndReducedPdfExcels', async (req: any, resp: any) => {
     try {
         const mainExcelPath = req?.body?.mainExcelPath;
         const secondaryExcelPath = req?.body?.secondaryExcelPath;
@@ -162,7 +162,7 @@ launchYarnListMakerRoute.post('/combineGDriveAndReducedPdfExcels', async (req: a
 })
 
 
-launchYarnListMakerRoute.post('/dumpGDriveExcelToMongo', async (req: any, resp: any) => {
+yarnListMakerRoute.post('/dumpGDriveExcelToMongo', async (req: any, resp: any) => {
     try {
         const comboExcelPath = req?.body?.comboExcelPath;
         const folderName = req?.body?.folderName;
@@ -197,7 +197,7 @@ launchYarnListMakerRoute.post('/dumpGDriveExcelToMongo', async (req: any, resp: 
 })
 
 
-launchYarnListMakerRoute.post('/createListingsOfLocalFolder', async (req: any, resp: any) => {
+yarnListMakerRoute.post('/createListingsOfLocalFolder', async (req: any, resp: any) => {
     try {
         const argFirst = req.body.argFirst
         const pdfsOnly = req.body.pdfsOnly

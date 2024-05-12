@@ -35,7 +35,12 @@ export const removeExcept = async (folder: any, except: Array<string>) => {
 
 }
 
-
+/**
+ * 
+ * @param directoryPath without meta-data
+ * @param withLogs 
+ * @returns 
+ */
 export async function getAllPDFFiles(directoryPath: string, withLogs: boolean = false): Promise<FileStats[]> {
     return await getAllFileStats(directoryPath, PDF_EXT, true, withLogs);
 }

@@ -10,9 +10,9 @@ import { vanitizePdfForProfile } from '../vanityService/VanityPdf';
 import { timeInfo } from '../mirror/FrontEndBackendCommonCode';
 import { compareFolders } from '../folderSync';
 
-export const launchYarnRoute = express.Router();
+export const yarnRoute = express.Router();
 
-launchYarnRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
+yarnRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
     try {
         const googleDriveLink = req?.body?.googleDriveLink;
         const profile = req?.body?.profile;
@@ -47,7 +47,7 @@ launchYarnRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => 
 })
 
 
-launchYarnRoute.post('/qaToDestFileMover', async (req: any, resp: any) => {
+yarnRoute.post('/qaToDestFileMover', async (req: any, resp: any) => {
     console.log(`qaToDestFileMover ${JSON.stringify(req.body)}`)
     try {
         const qaPath = req?.body?.qaPath;
@@ -78,7 +78,7 @@ launchYarnRoute.post('/qaToDestFileMover', async (req: any, resp: any) => {
     }
 })
 
-launchYarnRoute.post('/yarnMoveProfilesToFreeze', async (req: any, resp: any) => {
+yarnRoute.post('/yarnMoveProfilesToFreeze', async (req: any, resp: any) => {
     console.log(`moveProfilesToFreeze ${JSON.stringify(req.body)}`)
     try {
         const profileAsCSV = req?.body?.profileAsCSV;
@@ -104,7 +104,7 @@ launchYarnRoute.post('/yarnMoveProfilesToFreeze', async (req: any, resp: any) =>
 })
 
 
-launchYarnRoute.post('/addHeaderFooter', async (req: any, resp: any) => {
+yarnRoute.post('/addHeaderFooter', async (req: any, resp: any) => {
     try {
         const profile = req?.body?.profile;
 
@@ -133,7 +133,7 @@ launchYarnRoute.post('/addHeaderFooter', async (req: any, resp: any) => {
     }
 })
 
-launchYarnRoute.post('/vanitizePdfs', async (req: any, resp: any) => {
+yarnRoute.post('/vanitizePdfs', async (req: any, resp: any) => {
     try {
         const profile = req?.body?.profile;
         if (!profile) {
@@ -157,7 +157,7 @@ launchYarnRoute.post('/vanitizePdfs', async (req: any, resp: any) => {
 })
 
 
-launchYarnRoute.post('/compareDirectories', async (req: any, resp: any) => {
+yarnRoute.post('/compareDirectories', async (req: any, resp: any) => {
     try {
         const srcDir = req.body.srcDir
         const destDir = req.body.destDir
