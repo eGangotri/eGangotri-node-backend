@@ -186,7 +186,7 @@ launchArchiveYarnRoute.post('/markAsUploadedEntriesInArchiveExcel', async (req: 
 })
 
 
-launchArchiveYarnRoute.post('/compareUploadsViaExcelWithArchiveOrg', async (req: any, resp: any) => {
+launchArchiveYarnRoute.post('/compareUploadsViaExcelV1WithArchiveOrg', async (req: any, resp: any) => {
     try {
         const uploadableExcelPath = req.body.mainExcelPath;
         const archiveExcelPath = req.body.archiveExcelPath;
@@ -245,3 +245,61 @@ launchArchiveYarnRoute.post('/compareUploadsViaExcelWithArchiveOrg', async (req:
     }
 })
 
+
+
+launchArchiveYarnRoute.post('/compareUploadsViaExcelV3WithArchiveOrg', async (req: any, resp: any) => {
+    try {
+        const profileName = req.body.profileName;
+        const uploadableExcelPath = req.body.mainExcelPath;
+        const archiveExcelPath = req.body.archiveExcelPath;
+
+        const uploadableExcelAsJSON = excelToJson(uploadableExcelPath)
+
+        const archiveExcelPaths = archiveExcelPath.split(",");
+        const archiveExcelsAsJson = []
+        for (const _path of archiveExcelPaths) {
+            console.log(`_path ${_path}`)
+            const _archiveJsonArray = excelToJson(_path.trim())
+            console.log(`_archiveJsonArray pushing ${_archiveJsonArray.length} items from ${_path}`)
+            archiveExcelsAsJson.push(..._archiveJsonArray)
+        }
+
+        console.log(`uploadableExcelAsJSON: ${uploadableExcelAsJSON.length}`)
+        console.log(`archiveExcelsAsJson: ${archiveExcelsAsJson.length}\n`)
+        console.log("first absPath: " + uploadableExcelAsJSON[0]["absPath"]);
+
+        const archiveJsonArrayTitles = archiveExcelsAsJson.map(x => x["Original Title"]);
+        console.log(`archiveJsonArrayTitles: ${archiveJsonArrayTitles.length}\n`)
+        console.log(`archiveJsonArrayTitles first element: ${archiveJsonArrayTitles[0]}`);
+
+        const uplodableJsonArrayTitles = uploadableExcelAsJSON.map(x => path.parse(x["absPath"] || "").name);
+        console.log(`uplodableJsonArrayTitles: ${uplodableJsonArrayTitles.length}`)
+        console.log(`uplodableJsonArrayTitles first element: ${uplodableJsonArrayTitles[0]}`)
+
+        const diff = _.difference(uplodableJsonArrayTitles, archiveJsonArrayTitles);
+        console.log(`diff ${diff.length} ${diff[0]}`)
+
+        const diffUplodables = uploadableExcelAsJSON.filter((item) => {
+            return diff.includes( path.parse(item["absPath"] || "").name)
+        } );
+       
+        const folder = (process.env.HOME || process.env.USERPROFILE) + path.sep + 'Downloads' + path.sep;
+        const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)
+        console.log( "diffUpl Length" + diffUplodables.length)
+        const excelName = `${folder}${profileName}-diff-Uplodables(${diffUplodables.length})-${timeComponent}.xlsx`
+        jsonToExcel(diffUplodables, excelName)
+       
+        resp.status(200).send({
+            response: {
+                diffUplodables: diffUplodables.length,
+                excel: `Excel ${excelName} created for ${diffUplodables.length} items not found in Archive`,
+                msg: `${diff.length} items not found in Archive`,
+                diff,
+            }
+        });
+    }
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})
