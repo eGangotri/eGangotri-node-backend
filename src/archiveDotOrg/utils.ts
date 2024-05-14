@@ -41,7 +41,7 @@ let ARCHIVE_EXCEL_HEADER =
 };
 
 export const generateExcel = async (links: LinkData[],
-    limitedFields = false): Promise<string> => {
+    limitedFields = false, ascOrder = false): Promise<string> => {
     try {
 
         const excelFileName = `${links[0].acct}(${links.length})`;
@@ -55,7 +55,7 @@ export const generateExcel = async (links: LinkData[],
         const workbook = utils.book_new();
         utils.book_append_sheet(workbook, worksheet, "Links");
         const timeNow = moment().format(DD_MM_YYYY_FORMAT);
-        const excelPath = `${ARCHIVE_EXCEL_PATH}\\${excelFileName}${limitedFields ? "-ltd" : ""}-${timeNow}.xlsx`
+        const excelPath = `${ARCHIVE_EXCEL_PATH}\\${excelFileName}${limitedFields ? "-ltd" : ""}-${ascOrder?"ascOrder":"descOrder"}-${timeNow}.xlsx`
         console.log(`Writing to ${excelPath}`);
         await writeFile(workbook, excelPath);
         return excelPath;

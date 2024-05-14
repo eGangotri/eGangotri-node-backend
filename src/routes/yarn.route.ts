@@ -1,11 +1,8 @@
 import * as express from 'express';
 import { downloadPdfFromGoogleDriveToProfile } from '../cliBased/googleapi/GoogleDriveApiReadAndDownload';
-import { scrapeArchiveOrgProfiles } from '../archiveDotOrg/archiveScraper';
 import { getFolderInSrcRootForProfile } from '../cliBased/utils';
-import { moveFileSrcToDest, moveProfilesToFreeze, publishBookTitlesList } from '../services/yarnService';
+import { moveFileSrcToDest, moveProfilesToFreeze } from '../services/yarnService';
 import { resetDownloadCounters } from '../cliBased/pdf/utils';
-import { ArchiveDataRetrievalMsg, ArchiveDataRetrievalStatus } from '../archiveDotOrg/types';
-import { downloadPdfFromArchiveToProfile } from '../archiveDotOrg/downloadUtil';
 import { vanitizePdfForProfile } from '../vanityService/VanityPdf';
 import { timeInfo } from '../mirror/FrontEndBackendCommonCode';
 import { compareFolders } from '../folderSync';

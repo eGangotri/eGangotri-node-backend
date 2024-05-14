@@ -19,9 +19,11 @@ launchArchiveYarnRoute.post('/getArchiveListing', async (req: any, resp: any) =>
         const onlyLinks = (req?.body?.onlyLinks == true) || false;
         const limitedFields = (req?.body?.limitedFields == true) || false;
         const dateRange = req?.body?.dateRange || ""; //dateRange:"2024/04/01-2024/04/31"
+        const ascOrder = req?.body?.ascOrder || false;
         const maxItems = req?.body?.maxItems || MAX_ITEMS_RETRIEVABLE_IN_ARCHIVE_ORG;
         let parsedDateRange: [number, number] = [0, 0]
 
+        console.log(`getArchiveListing params ${JSON.stringify(req.body)}`)
         /** 
          * FOR MORE THAN 10,000 
          *     "errors": [
@@ -49,10 +51,6 @@ launchArchiveYarnRoute.post('/getArchiveListing', async (req: any, resp: any) =>
                 });
             }
         }
-        console.log(`getArchiveListing archiveLinks ${archiveLinks} 
-        onlyLinks ${onlyLinks}
-        req?.body?.limitedFields ${typeof req?.body?.limitedFields}
-        dateRange ${dateRange}`)
 
         if (!archiveLinks) {
             return resp.status(300).send({
@@ -63,7 +61,7 @@ launchArchiveYarnRoute.post('/getArchiveListing', async (req: any, resp: any) =>
                 }
             });
         }
-        const _resp: ArchiveDataRetrievalMsg = await scrapeArchiveOrgProfiles(archiveLinks, onlyLinks, limitedFields, parsedDateRange, maxItems);
+        const _resp: ArchiveDataRetrievalMsg = await scrapeArchiveOrgProfiles(archiveLinks, parsedDateRange, onlyLinks, limitedFields, ascOrder, maxItems);
         resp.status(200).send({
             response: {
                 _results: _resp,
@@ -97,7 +95,7 @@ launchArchiveYarnRoute.post('/downloadArchivePdfs', async (req: any, resp: any) 
                 }
             });
         }
-        const _archiveScrappedData: ArchiveDataRetrievalMsg = await scrapeArchiveOrgProfiles(archiveLink, true, dateRange);
+        const _archiveScrappedData: ArchiveDataRetrievalMsg = await scrapeArchiveOrgProfiles(archiveLink, dateRange, true);
 
         const scrapedLinks: ArchiveDataRetrievalStatus[] = _archiveScrappedData.scrapedMetadata
         const results = []
