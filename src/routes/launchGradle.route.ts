@@ -30,9 +30,9 @@ launchGradleRoute.get('/launchUploader', async (req: any, resp: any) => {
 })
 
 
-launchGradleRoute.get('/launchUploaderViaExcel', async (req: any, resp: any) => {
+launchGradleRoute.get('/launchUploaderViaExcelV1', async (req: any, resp: any) => {
     try {
-        console.log(`launchUploaderViaExcel ${req.query.profile} ${req.query.excelPath} ${req.query.uploadCycleId}`)
+        console.log(`launchUploaderViaExcelV1 ${req.query.profile} ${req.query.excelPath} ${req.query.uploadCycleId}`)
         const res = await launchUploaderViaExcel(req.query.profile, req.query.excelPath, req.query.uploadCycleId)
         resp.status(200).send({
             response: {
@@ -407,7 +407,6 @@ launchGradleRoute.get('/launchUploaderViaExcelV3', async (req: any, resp: any) =
         const { profile, excelPath, range } = req.query
 
         console.log(`launchUploaderViaExcelV3 ${profile},${excelPath}, ${range}`)
-        const excelFileName = path.basename(excelPath.trim());
         const respStream = await launchUploaderViaExcelV3(profile,
             excelPath,
             "", range);
