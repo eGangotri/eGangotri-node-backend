@@ -2,8 +2,8 @@
 import moment from "moment";
 import { excelToJson, jsonToExcel } from "../../cliBased/excel/ExcelUtils";
 import { DD_MM_YYYY_HH_MMFORMAT } from "../../utils/constants";
-import { FipExcelThree } from "./utils";
 import * as fs from "fs";
+import { FipExcelOne } from "./utils";
 
 const base = "D:\\FIP\\_IFP\\_IFP"
 /**
@@ -15,7 +15,7 @@ const base = "D:\\FIP\\_IFP\\_IFP"
 const excelFirst = `${base}\\fip-uploadables-01-May-2024-17-56.xlsx`;
 let counter = 0;
 let failureCount = 0
-const _rename = (item: FipExcelThree) => {
+const _rename = (item: FipExcelOne) => {
     console.log(`item ${JSON.stringify(item)}`)
     console.log(item.absPath)
     console.log(item.title)
@@ -42,7 +42,7 @@ const _rename = (item: FipExcelThree) => {
     }
 }
 
-let combinedExcel: FipExcelThree[] = excelToJson(excelFirst);
+let combinedExcel: FipExcelOne[] = excelToJson(excelFirst);
 
 combinedExcel.forEach(x => _rename(x));
 const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)

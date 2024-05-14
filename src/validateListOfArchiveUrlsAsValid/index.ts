@@ -253,7 +253,7 @@ const urlData = `
        // console.log(`Opening ${line}: `);
 
         if (line?.trim().startsWith('http')) {
-            const result = await checkUrlValidity(line);
+            const result = await checkUrlValidity(line,0,0);
             console.log(`Opening ${line}: ${result}`);
         }
     }

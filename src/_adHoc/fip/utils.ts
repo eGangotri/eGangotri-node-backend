@@ -7,6 +7,7 @@ export interface FipExcelOne {
     folder: string;
     fileName: string;
     ext: string;
+    title?:string
 }
 
 export interface FipExcelTwo {
