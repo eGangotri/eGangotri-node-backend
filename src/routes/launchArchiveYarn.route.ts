@@ -19,7 +19,7 @@ launchArchiveYarnRoute.post('/getArchiveListing', async (req: any, resp: any) =>
         const onlyLinks = (req?.body?.onlyLinks == true) || false;
         const limitedFields = (req?.body?.limitedFields == true) || false;
         const dateRange = req?.body?.dateRange || ""; //dateRange:"2024/04/01-2024/04/31"
-        const maxItems = req?.body?.totalCount || MAX_ITEMS_RETRIEVABLE_IN_ARCHIVE_ORG;
+        const maxItems = req?.body?.maxItems || MAX_ITEMS_RETRIEVABLE_IN_ARCHIVE_ORG;
         let parsedDateRange: [number, number] = [0, 0]
 
         /** 
