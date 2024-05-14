@@ -17,7 +17,7 @@ yarnExcelRoute.post('/createExcelOfAbsPathFromProfile', async (req: any, resp: a
             });
         }
         const absPathsAsJsons = await getJsonOfAbsPathFromProfile(profile, allNotJustPdfs);
-        const excelFileName = createExcelV3FileForUpload("", absPathsAsJsons, `absPaths-as-excel-${absPathsAsJsons.length}`)
+        const excelFileName = createExcelV3FileForUpload("", absPathsAsJsons, `absPaths-as-excel-${profile}-${absPathsAsJsons.length}`)
 
         resp.status(200).send({
             response: `Created Excel file at ${excelFileName} with ${absPathsAsJsons.length} rows`

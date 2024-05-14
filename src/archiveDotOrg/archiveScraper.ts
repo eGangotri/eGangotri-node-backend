@@ -61,9 +61,7 @@ const fetchArchiveMetadata = async (username: string,
     let _maxItems = maxItems > MAX_ITEMS_RETRIEVABLE_IN_ARCHIVE_ORG ? MAX_ITEMS_RETRIEVABLE_IN_ARCHIVE_ORG : maxItems;
     console.log(`fetchArchiveMetadata: ${username} ${dateRange} ${maxItems}`);
     let maxItemsCounter = _maxItems;
-    if (maxItemsCounter > DEFAULT_HITS_PER_PAGE) {
-        maxItemsCounter -= DEFAULT_HITS_PER_PAGE;
-    }
+
     try {
         if (maxItems > MAX_ITEMS_RETRIEVABLE_IN_ARCHIVE_ORG) {
             console.log(`maxItems is Custom iadata: ${username} ${dateRange} ${maxItems}`);
@@ -86,7 +84,10 @@ const fetchArchiveMetadata = async (username: string,
                 if (maxItemsCounter > DEFAULT_HITS_PER_PAGE) {
                     maxItemsCounter -= DEFAULT_HITS_PER_PAGE;
                 }
-                _hits = await callGenericArchiveApi(username, (i + 1), dateRange[0], dateRange[1]);
+
+                console.log(`maxItemsCounter ${maxItemsCounter}`)
+                _hits = await callGenericArchiveApi(username, (i + 1), dateRange[0], dateRange[1], maxItemsCounter);
+              
                 _hitsHits = _hits.hits;
                 if (_hitsHits?.length > 0) {
                     if (email.length === 0) {
@@ -94,6 +95,9 @@ const fetchArchiveMetadata = async (username: string,
                     }
                     const extractedData = await extractLinkedDataAndSpecificFieldsFromAPI(_hitsHits, email, username, limitedFields);
                     _linkData.push(...extractedData);
+                }
+                if (maxItemsCounter < DEFAULT_HITS_PER_PAGE) {
+                    break;
                 }
             }
         }
