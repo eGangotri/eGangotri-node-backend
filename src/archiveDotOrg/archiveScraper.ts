@@ -12,10 +12,14 @@ const callGenericArchiveApi = async (username: string,
     const SORT_ORDER = "publicdate:desc"
     //"publicdate:asc";
     //"publicdate:desc"
+    if (hitsPerPage > DEFAULT_HITS_PER_PAGE) {
+        hitsPerPage = DEFAULT_HITS_PER_PAGE;
+    }
     try {
         const _url =
             `https://archive.org/services/search/beta/page_production/?user_query=&page_type=account_details&page_target=@${username}&page_elements=[%22uploads%22]&hits_per_page=${hitsPerPage}&page=${pageIndex}&sort=${SORT_ORDER}&aggregations=false&client_url=https://archive.org/details/@${username}`;
-        console.log(`callGenericArchiveApi:${username}(${pageIndex}) ${username}`);
+        console.log(`callGenericArchiveApi:${username}(${pageIndex}) ${username}
+        ${_url}`);
         const response = await fetch(_url);
         const data = await response.json();
         const _hits: Hits = data?.response?.body?.page_elements?.uploads?.hits || {};
@@ -49,15 +53,22 @@ export const FETCH_ACRHIVE_METADATA_COUNTER = {
 
 const fetchArchiveMetadata = async (username: string,
     limitedFields = false,
-    dateRange: [number, number] = [0, 0], maxItems: number = MAX_ITEMS_RETRIEVABLE_IN_ARCHIVE_ORG): Promise<ArchiveScrapReport> => {
+    dateRange: [number, number] = [0, 0],
+    maxItems: number = MAX_ITEMS_RETRIEVABLE_IN_ARCHIVE_ORG): Promise<ArchiveScrapReport> => {
+
     username = username.startsWith('@') ? username.slice(1) : username;
     FETCH_ACRHIVE_METADATA_COUNTER.reset();
     let _maxItems = maxItems > MAX_ITEMS_RETRIEVABLE_IN_ARCHIVE_ORG ? MAX_ITEMS_RETRIEVABLE_IN_ARCHIVE_ORG : maxItems;
+    console.log(`fetchArchiveMetadata: ${username} ${dateRange} ${maxItems}`);
+    let maxItemsCounter = _maxItems;
+    if (maxItemsCounter > DEFAULT_HITS_PER_PAGE) {
+        maxItemsCounter -= DEFAULT_HITS_PER_PAGE;
+    }
     try {
-        if(maxItems!==MAX_ITEMS_RETRIEVABLE_IN_ARCHIVE_ORG){
-            console.log(`fetchArchiveMetadata: ${username} ${dateRange} ${maxItems}`);
+        if (maxItems > MAX_ITEMS_RETRIEVABLE_IN_ARCHIVE_ORG) {
+            console.log(`maxItems is Custom iadata: ${username} ${dateRange} ${maxItems}`);
         }
-        let _hits: Hits = await callGenericArchiveApi(username, 1, dateRange[0], dateRange[1],_maxItems);
+        let _hits: Hits = await callGenericArchiveApi(username, 1, dateRange[0], dateRange[1], maxItemsCounter);
         let hitsTotal = _hits?.total;
         const _linkData: LinkData[] = [];
 
@@ -70,8 +81,11 @@ const fetchArchiveMetadata = async (username: string,
                 const extractedData = await extractLinkedDataAndSpecificFieldsFromAPI(_hitsHits, email, username, limitedFields);
                 _linkData.push(...extractedData);
             }
-            let retrieved = _hitsHits.length;
+
             for (let i = 1; i < Math.ceil(hitsTotal / 1000); i++) {
+                if (maxItemsCounter > DEFAULT_HITS_PER_PAGE) {
+                    maxItemsCounter -= DEFAULT_HITS_PER_PAGE;
+                }
                 _hits = await callGenericArchiveApi(username, (i + 1), dateRange[0], dateRange[1]);
                 _hitsHits = _hits.hits;
                 if (_hitsHits?.length > 0) {
