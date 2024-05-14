@@ -81,7 +81,7 @@ const fetchArchiveMetadata = async (username: string,
             }
 
             for (let i = 1; i < Math.ceil(hitsTotal / 1000); i++) {
-                if (maxItemsCounter > DEFAULT_HITS_PER_PAGE) {
+                if (maxItemsCounter >= DEFAULT_HITS_PER_PAGE) {
                     maxItemsCounter -= DEFAULT_HITS_PER_PAGE;
                 }
 
