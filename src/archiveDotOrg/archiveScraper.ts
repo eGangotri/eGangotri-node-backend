@@ -59,16 +59,16 @@ const fetchArchiveMetadata = async (username: string,
 
     username = username.startsWith('@') ? username.slice(1) : username;
     FETCH_ACRHIVE_METADATA_COUNTER.reset();
-    let _maxItems = maxItems > MAX_ITEMS_RETRIEVABLE_IN_ARCHIVE_ORG ? MAX_ITEMS_RETRIEVABLE_IN_ARCHIVE_ORG : maxItems;
     console.log(`fetchArchiveMetadata: ${username} ${dateRange} ${maxItems}`);
-    let maxItemsCounter = _maxItems;
+
+    if (maxItems != MAX_ITEMS_RETRIEVABLE_IN_ARCHIVE_ORG) {
+        console.log(`maxItems is Custom data: ${username} ${dateRange} ${maxItems}`);
+    }
+    let maxItemsCounter = maxItems > MAX_ITEMS_RETRIEVABLE_IN_ARCHIVE_ORG ? MAX_ITEMS_RETRIEVABLE_IN_ARCHIVE_ORG : maxItems;;
 
     try {
-        if (maxItems > MAX_ITEMS_RETRIEVABLE_IN_ARCHIVE_ORG) {
-            console.log(`maxItems is Custom data: ${username} ${dateRange} ${maxItems}`);
-        }
         let _hits: Hits = await callGenericArchiveApi(username, 1, dateRange[0], dateRange[1], ascOrder, maxItemsCounter);
-        maxItemsCounter -= MAX_ITEMS_RETRIEVABLE_IN_ARCHIVE_ORG;
+        maxItemsCounter -= DEFAULT_HITS_PER_PAGE;
         let hitsTotal = _hits?.total;
         const _linkData: LinkData[] = [];
 
