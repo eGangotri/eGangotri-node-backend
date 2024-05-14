@@ -8,10 +8,10 @@ export const DEFAULT_HITS_PER_PAGE = 1000;
 const callGenericArchiveApi = async (username: string,
     pageIndex = 1,
     startDate: number = 0,
-    endDate: number = 0, hitsPerPage: number = DEFAULT_HITS_PER_PAGE): Promise<Hits> => {
-    const SORT_ORDER = "publicdate:desc"
-    //"publicdate:asc";
-    //"publicdate:desc"
+    endDate: number = 0,
+    ascOrder: boolean = false,
+    hitsPerPage: number = DEFAULT_HITS_PER_PAGE): Promise<Hits> => {
+    const SORT_ORDER = ascOrder === true ? "publicdate:asc" : "publicdate:desc";
     if (hitsPerPage > DEFAULT_HITS_PER_PAGE) {
         hitsPerPage = DEFAULT_HITS_PER_PAGE;
     }
@@ -52,8 +52,9 @@ export const FETCH_ACRHIVE_METADATA_COUNTER = {
 }
 
 const fetchArchiveMetadata = async (username: string,
-    limitedFields = false,
     dateRange: [number, number] = [0, 0],
+    limitedFields = false,
+    ascOrder = false,
     maxItems: number = MAX_ITEMS_RETRIEVABLE_IN_ARCHIVE_ORG): Promise<ArchiveScrapReport> => {
 
     username = username.startsWith('@') ? username.slice(1) : username;
@@ -64,9 +65,10 @@ const fetchArchiveMetadata = async (username: string,
 
     try {
         if (maxItems > MAX_ITEMS_RETRIEVABLE_IN_ARCHIVE_ORG) {
-            console.log(`maxItems is Custom iadata: ${username} ${dateRange} ${maxItems}`);
+            console.log(`maxItems is Custom data: ${username} ${dateRange} ${maxItems}`);
         }
-        let _hits: Hits = await callGenericArchiveApi(username, 1, dateRange[0], dateRange[1], maxItemsCounter);
+        let _hits: Hits = await callGenericArchiveApi(username, 1, dateRange[0], dateRange[1], ascOrder, maxItemsCounter);
+        maxItemsCounter -= MAX_ITEMS_RETRIEVABLE_IN_ARCHIVE_ORG;
         let hitsTotal = _hits?.total;
         const _linkData: LinkData[] = [];
 
@@ -81,24 +83,23 @@ const fetchArchiveMetadata = async (username: string,
             }
 
             for (let i = 1; i < Math.ceil(hitsTotal / 1000); i++) {
-                if (maxItemsCounter >= DEFAULT_HITS_PER_PAGE) {
-                    maxItemsCounter -= DEFAULT_HITS_PER_PAGE;
-                }
-
                 console.log(`maxItemsCounter ${maxItemsCounter}`)
-                _hits = await callGenericArchiveApi(username, (i + 1), dateRange[0], dateRange[1], maxItemsCounter);
-              
-                _hitsHits = _hits.hits;
-                if (_hitsHits?.length > 0) {
-                    if (email.length === 0) {
-                        email = await extractEmail(_hitsHits[0].fields.identifier);
+                if (maxItemsCounter > 0) {
+                    _hits = await callGenericArchiveApi(username, (i + 1), dateRange[0], dateRange[1], ascOrder, maxItemsCounter);
+
+                    _hitsHits = _hits.hits;
+                    if (_hitsHits?.length > 0) {
+                        if (email.length === 0) {
+                            email = await extractEmail(_hitsHits[0].fields.identifier);
+                        }
+                        const extractedData = await extractLinkedDataAndSpecificFieldsFromAPI(_hitsHits, email, username, limitedFields);
+                        _linkData.push(...extractedData);
                     }
-                    const extractedData = await extractLinkedDataAndSpecificFieldsFromAPI(_hitsHits, email, username, limitedFields);
-                    _linkData.push(...extractedData);
                 }
-                if (maxItemsCounter < DEFAULT_HITS_PER_PAGE) {
+                else {
                     break;
                 }
+                maxItemsCounter -= DEFAULT_HITS_PER_PAGE;
             }
         }
         console.log(`Equality:
@@ -129,9 +130,10 @@ const checkValidArchiveUrlAndUpdateStatus = async (archiveIdentifier: string, _s
     return isValid.ok
 }
 export const scrapeArchiveOrgProfiles = async (archiveUrlsOrAcctNamesAsCSV: string,
+    dateRange: [number, number] = [0, 0],
     onlyLinks: boolean = false,
     limitedFields: boolean = false,
-    dateRange: [number, number] = [0, 0],
+    ascOrder: boolean = false,
     maxItems: number = MAX_ITEMS_RETRIEVABLE_IN_ARCHIVE_ORG
 ): Promise<ArchiveDataRetrievalMsg> => {
     const archiveUrlsOrAcctNames = archiveUrlsOrAcctNamesAsCSV.includes(",") ? archiveUrlsOrAcctNamesAsCSV.split(",").map((link: string) => link.trim().replace(/['"]/g, "")) : [archiveUrlsOrAcctNamesAsCSV.trim().replace(/['"]/g, "")];
@@ -146,10 +148,11 @@ export const scrapeArchiveOrgProfiles = async (archiveUrlsOrAcctNamesAsCSV: stri
                 continue;
             }
 
-            const archiveReport: ArchiveScrapReport = await fetchArchiveMetadata(_archiveAcctName, limitedFields, dateRange, maxItems);
+            const archiveReport: ArchiveScrapReport = await fetchArchiveMetadata(_archiveAcctName, dateRange, limitedFields, ascOrder, maxItems);
             console.log(`Equality _linkData ${JSON.stringify(archiveReport.linkData.length)} === ${FETCH_ACRHIVE_METADATA_COUNTER.value}`);
             if (onlyLinks) {
                 _status.push({
+                    order: ascOrder === true ? "Asc. Order" : "Desc. Order",
                     archiveAcctName: _archiveAcctName,
                     archiveItemCount: archiveReport.linkData.length,
                     success: true,
@@ -161,15 +164,17 @@ export const scrapeArchiveOrgProfiles = async (archiveUrlsOrAcctNamesAsCSV: stri
                     _status.push({
                         excelPath: "NONE. No links found in the archive account",
                         success: false,
+                        order: ascOrder === true ? "Asc. Order" : "Desc. Order",
                         archiveAcctName: _archiveAcctName,
                         archiveItemCount: archiveReport.linkData.length,
                     });
                 }
                 else {
-                    const excelPath = await generateExcel(archiveReport.linkData, limitedFields);
+                    const excelPath = await generateExcel(archiveReport.linkData, limitedFields, ascOrder);
                     _status.push({
                         excelPath,
                         success: true,
+                        order: ascOrder === true ? "Asc. Order" : "Desc. Order",
                         archiveAcctName: _archiveAcctName,
                         archiveItemCount: archiveReport.linkData.length,
                     });

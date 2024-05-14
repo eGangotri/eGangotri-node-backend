@@ -56,6 +56,7 @@ export interface ArchiveDataRetrievalStatus {
     archiveReport?: ArchiveScrapReport,
     excelPath?: string,
     error?: string,
+    order?: string
 }
 
 // export interface Hit {

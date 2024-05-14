@@ -1,12 +1,9 @@
 import path from 'path';
 import * as express from 'express';
-import { scrapeArchiveOrgProfiles } from '../archiveDotOrg/archiveScraper';
 import { generateGoogleDriveListingExcel } from '../cliBased/googleapi/GoogleDriveApiReadAndExport';
-import { ArchiveDataRetrievalMsg } from '../archiveDotOrg/types';
 import { pickLatestExcelsAndCombineGDriveAndReducedPdfExcels } from '../services/yarnListMakerService';
 import { extractFirstAndLastNPages } from '../cliBased/pdf/extractFirstAndLastNPages';
 import { gDriveExceltoMongo } from '../excelToMongo/tranferGDriveExcelToMongo';
-import { archiveExceltoMongo } from '../excelToMongo/transferArchiveExcelToMongo';
 import { timeInfo } from '../mirror/FrontEndBackendCommonCode';
 import { publishBookTitlesList } from '../services/yarnService';
 
