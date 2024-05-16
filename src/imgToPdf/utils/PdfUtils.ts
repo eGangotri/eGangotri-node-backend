@@ -1,11 +1,9 @@
 import * as fs from 'fs';
 import { getAllPngs } from '../utils/ImgUtils';
 import * as path from 'path';
-import { addReport } from '../index';
 import { PDF_EXT } from './constants';
 import { FOOTER_LINK, FOOTER_TEXT, INTRO_BANNER, INTRO_TEXT, PDF_FONT } from './PdfDecoratorUtils';
 import { chunk, garbageCollect, heapStats, mkDirIfDoesntExists } from './Utils';
-import { ADD_INTRO_PDF, INTRO_PAGE_ADJUSTMENT } from '..';
 const PDFDocument = require('pdfkit');
 
 const DOT_SUM_PDF_NAME = "Z_SUM.pdf"

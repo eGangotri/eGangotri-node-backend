@@ -1,5 +1,9 @@
 import { createPdf, createPdfFromDotSum, createRedundantPdf } from './utils/PdfUtils';
-import { chunk, formatTime, getAllDotSumFiles, getAllPdfsInFolders, getAllPngsInFolders, getDirectories, getDirectoriesWithFullPath, mkDirIfDoesntExists } from './utils/Utils';
+import { chunk, formatTime, 
+    getAllDotSumFiles, getAllPdfsInFolders, 
+    getAllPngsInFolders, getDirectories, 
+    getDirectoriesWithFullPath,
+     mkDirIfDoesntExists } from './utils/Utils';
 import { getAllPngs } from './utils/ImgUtils';
 import * as fs from 'fs';
 import * as path from 'path';
