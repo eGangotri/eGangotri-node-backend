@@ -21,6 +21,8 @@ http://127.0.0.1:80/
 
 docker push egangotri/egangotri-node-backend:latest
 
+
+
 ## Deploy on Render
 Create a New Web Service.
 Share the DockerHub Image URL:
@@ -31,6 +33,14 @@ OLD URL:
 https://egangotri-node-backend.onrender.com
 NEW URL: 
 https://egangotri-node-backend-d4c7.onrender.com
+*** uses github profile. for react-daily-work-report. using diff. database
+
+Below is for react-dashboard frontend and uses the upload_db database
+p*****78@gmail.com
+URL:
+https://egangotri-node-backend-latest.onrender.com/
+
+
 
 Dashboard
 https://dashboard.render.com/web/srv-cjt1pjibgj9c739dc9o0/deploys/dep-cjt1pk2bgj9c739dccig
