@@ -19,6 +19,7 @@ import { googleDriveItemRoute } from "./routes/googleDriveItem.route";
 import { launchMongoRoute } from "./routes/launchMongo.route";
 import { launchArchiveYarnRoute } from "./routes/launchArchiveYarn.route";
 import { yarnExcelRoute } from "./routes/yarnExcel.route";
+import "./logger/override";
 
 const egangotri = express();
 const hostname = "localhost";
