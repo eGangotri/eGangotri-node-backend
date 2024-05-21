@@ -1,3 +1,4 @@
+import * as fs from 'fs';
 /**
  * 
  * @param num All Code in this file should be same in both FE and BE Code.
@@ -38,3 +39,10 @@ export function roundOff(num: number) {
   
     return `${roundOff(timeInMins)} min.s`;
   }
+
+  
+export function getFilzeSize(pdfPath: string) {
+  let stats = fs.statSync(pdfPath)
+  let fileSizeInBytes = stats.size;
+  return fileSizeInBytes;
+}

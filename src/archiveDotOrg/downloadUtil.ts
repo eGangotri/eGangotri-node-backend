@@ -1,5 +1,5 @@
 import { downloadPdfFromUrl } from "../cliBased/pdf/downloadPdf";
-import { DOWNLOAD_COMPLETED_COUNT, DOWNLOAD_FAILED_COUNT, resetDownloadCounters } from "../cliBased/pdf/utils";
+import { DOWNLOAD_COMPLETED_COUNT, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT, resetDownloadCounters } from "../cliBased/pdf/utils";
 import { getFolderInSrcRootForProfile } from "../cliBased/utils";
 import fs from 'fs';
 import * as fsExtra from "fs-extra";
@@ -10,7 +10,7 @@ import { isValidPath } from "../utils/utils";
 export const downloadPdfFromArchiveToProfile = async (pdfLinks: LinkData[], profileOrPath: string) => {
 
   const pdfDumpFolder = isValidPath(profileOrPath) ? profileOrPath : getFolderInSrcRootForProfile(profileOrPath);
-  console.log(`downloadPdfFromGoogleDriveToProfile:pdfDumpFolder ${pdfDumpFolder}`);
+  console.log(`downloadPdfFromArchiveToProfile:pdfDumpFolder ${pdfDumpFolder}`);
   if (!fs.existsSync(pdfDumpFolder)) {
     console.log(`No corresponding folder ${pdfDumpFolder} to profile  ${profileOrPath} exists`)
     return {
@@ -33,11 +33,11 @@ export const downloadPdfFromArchiveToProfile = async (pdfLinks: LinkData[], prof
       folderWithProfileName);
 
     console.log(`Success count: ${DOWNLOAD_COMPLETED_COUNT}`);
-    console.log(`Error count: ${DOWNLOAD_FAILED_COUNT}`);
+    console.log(`Error count: ${DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT}`);
     const _resp = {
-      status: `${DOWNLOAD_COMPLETED_COUNT} out of ${DOWNLOAD_COMPLETED_COUNT + DOWNLOAD_FAILED_COUNT} made it`,
+      status: `${DOWNLOAD_COMPLETED_COUNT} out of ${DOWNLOAD_COMPLETED_COUNT + DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT} made it`,
       success_count: DOWNLOAD_COMPLETED_COUNT,
-      error_count: DOWNLOAD_FAILED_COUNT,
+      error_count: DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT,
       ..._results
     }
     console.log(`_resp : ${JSON.stringify(_resp)}`);
