@@ -7,7 +7,7 @@ import fs from 'fs';
 import path from 'path';
 import * as fsExtra from 'fs-extra';
 import { add, countBy } from 'lodash';
-import { DOWNLOAD_COMPLETED_COUNT, DOWNLOAD_FAILED_COUNT, resetDownloadCounters } from '../../cliBased/pdf/utils';
+import { DOWNLOAD_COMPLETED_COUNT, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT, DOWNLOAD_FAILED_COUNT, resetDownloadCounters } from '../../cliBased/pdf/utils';
 import { getAllPdfsInFolders, getDirectoriesWithFullPath } from '../../imgToPdf/utils/Utils';
 import { addHeaderAndFooterToPDF } from '../../pdfHeaderFooter';
 import { isValidPath } from '../../utils/utils';
@@ -41,8 +41,9 @@ async function getAllPdfsFromGDrive(driveLinkOrFolderID: string, folderName: str
     if (!fs.existsSync(pdfDumpWithPathAppended)) {
       fsExtra.ensureDirSync(pdfDumpWithPathAppended);
     }
+
     return downloadPdfFromGoogleDrive(_data.googleDriveLink,
-      pdfDumpWithPathAppended, _data.fileName, dataLength)
+      pdfDumpWithPathAppended, _data.fileName, dataLength, _data?.fileSizeRaw)
   });
   const results = await Promise.all(promises);
   return {
@@ -100,11 +101,13 @@ export const downloadPdfFromGoogleDriveToProfile = async (driveLinkOrFolderId: s
         pdfDumpFolder);
 
       console.log(`Success count: ${DOWNLOAD_COMPLETED_COUNT}`);
-      console.log(`Error count: ${DOWNLOAD_FAILED_COUNT}`);
+      console.log(`Error count: ${DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT}`);
       const _resp = {
-        status: `${DOWNLOAD_COMPLETED_COUNT} out of ${DOWNLOAD_COMPLETED_COUNT + DOWNLOAD_FAILED_COUNT} made it`,
+        status: `${DOWNLOAD_COMPLETED_COUNT} out of ${DOWNLOAD_COMPLETED_COUNT + DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT + DOWNLOAD_FAILED_COUNT} made it`,
         success_count: DOWNLOAD_COMPLETED_COUNT,
-        error_count: DOWNLOAD_FAILED_COUNT,
+        error_count: DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT,
+        dl_wrong_size_count: `${DOWNLOAD_FAILED_COUNT}
+        ${DOWNLOAD_FAILED_COUNT > 0 ? "Google Drive Quota may have been filled.Typically takes 24 Hours to reset." : ""}`,
         ..._results
       }
       console.log(`_resp : ${JSON.stringify(_resp)}`);

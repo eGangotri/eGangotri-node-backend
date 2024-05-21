@@ -1,7 +1,8 @@
 import fs from 'fs';
 import axios from 'axios';
-import { DOWNLOAD_COMPLETED_COUNT, incrementDownloadComplete, incrementDownloadFailed } from "./utils";
+import { DOWNLOAD_COMPLETED_COUNT, incrementDownloadComplete, incrementDownloadFailed, incrementDownloadInError } from "./utils";
 import { extractGoogleDriveId, getGDrivePdfDownloadLink } from '../../mirror/GoogleDriveUtilsCommonCode';
+import { getFilzeSize, sizeInfo } from '../../mirror/FrontEndBackendCommonCode';
 
 const { DownloaderHelper } = require('node-downloader-helper');
 
@@ -11,11 +12,12 @@ const DEFAULT_DUMP_FOLDER = "D:\\_playground\\_dwnldPlayground";
 export const downloadPdfFromGoogleDrive = async (driveLinkOrFolderId: string,
     pdfDumpFolder: string,
     fileName: string = "",
-    dataLength: number = 0) => {
+    dataLength: number = 0,
+    fileSizeRaw = "0") => {
     console.log(`downloadPdfFromGoogleDrive ${driveLinkOrFolderId}`)
     const driveId = extractGoogleDriveId(driveLinkOrFolderId)
     const downloadUrl = getGDrivePdfDownloadLink(driveId)
-    const result = await downloadPdfFromUrl(pdfDumpFolder, downloadUrl, fileName, dataLength);
+    const result = await downloadPdfFromUrl(pdfDumpFolder, downloadUrl, fileName, dataLength, fileSizeRaw);
     return result;
 }
 
@@ -23,26 +25,31 @@ export const downloadPdfFromUrl = async (
     pdfDumpFolder: string,
     downloadUrl: string,
     fileName: string,
-    dataLength: number) => {
+    dataLength: number,
+    fileSizeRaw = "0") => {
     console.log(`downloadPdfFromUrl ${downloadUrl} to ${pdfDumpFolder}`)
 
     const dl = new DownloaderHelper(downloadUrl, pdfDumpFolder, { fileName: fileName });//
-    let _result = {};
+    let _result: { success?: boolean, status?: string, error?: string } = {};
     try {
         await new Promise((resolve, reject) => {
             dl.on('end', () => {
                 const index = `(${DOWNLOAD_COMPLETED_COUNT + 1}${dataLength > 0 ? "/" + dataLength : ""})`;
                 console.log(`${index}. Downloaded ${fileName}`);
-                incrementDownloadComplete();
-                _result = {
-                    "status": `Downloaded ${fileName} to ${pdfDumpFolder}`,
-                    success: true
-                };
+                _result = checkFileSizeConsistency(pdfDumpFolder, fileName, fileSizeRaw);
+                if (_result?.success) {
+                    incrementDownloadComplete();
+                    _result = {
+                        "status": `Downloaded ${fileName} to ${pdfDumpFolder}`,
+                        success: true
+                    };
+                }
                 resolve(_result);
+
             });
 
             dl.on('error', (err: Error) => {
-                incrementDownloadFailed();
+                incrementDownloadInError();
                 console.log(`Download Failed ${fileName}`, err.message);
                 reject(_result = {
                     success: false,
@@ -54,7 +61,7 @@ export const downloadPdfFromUrl = async (
         });
     } catch (err) {
         console.error(err);
-        incrementDownloadFailed();
+        incrementDownloadInError();
         _result = {
             success: false,
             "error": `Failed download try/catch for ${fileName} to ${pdfDumpFolder} with ${err.message}`
@@ -68,9 +75,10 @@ export const downloadPdfFromUrlSlow = async (
     pdfDumpFolder: string,
     downloadUrl: string,
     fileName: string,
-    dataLength: number) => {
-    //url: string, outputLocationPath: string
-    let _result = {};
+    dataLength: number,
+    fileSizeRaw = "0") => {
+
+    let _result: { success?: boolean, status?: string, error?: string } = {};
     try {
 
         const response = await axios({
@@ -80,22 +88,25 @@ export const downloadPdfFromUrlSlow = async (
         });
 
         const writer = fs.createWriteStream(`${pdfDumpFolder}\\${fileName}`);
-        console.log(`downloadPdfFromUrl- ${fileName}`)
+        console.log(`downloadPdfFromUrlSlow - ${fileName}`)
         response.data.pipe(writer);
 
         await new Promise((resolve, reject) => {
             writer.on('finish', () => {
-                const index = `(${DOWNLOAD_COMPLETED_COUNT + 1}${dataLength > 0 ? "/" + dataLength : ""})`;
-                console.log(`${index}. Downloaded: ${fileName}`);
-                incrementDownloadComplete();
-                _result = {
-                    "status": `Downloaded ${fileName} to ${pdfDumpFolder}`,
-                    success: true
-                };
+                _result = checkFileSizeConsistency(pdfDumpFolder, fileName, fileSizeRaw);
+                if (_result?.success) {
+                    const index = `(${DOWNLOAD_COMPLETED_COUNT + 1}${dataLength > 0 ? "/" + dataLength : ""})`;
+                    console.log(`${index}. Downloaded: ${fileName}`);
+                    incrementDownloadComplete();
+                    _result = {
+                        "status": `Downloaded ${fileName} to ${pdfDumpFolder}`,
+                        success: true
+                    };
+                }
                 resolve(_result);
             });
             writer.on('error', (err: Error) => {
-                incrementDownloadFailed();
+                incrementDownloadInError();
                 console.log(`Download Failed ${fileName}`, err.message);
                 reject(_result = {
                     success: false,
@@ -106,7 +117,7 @@ export const downloadPdfFromUrlSlow = async (
     }
     catch (err) {
         console.error(err);
-        incrementDownloadFailed();
+        incrementDownloadInError();
         _result = {
             success: false,
             "error": `Failed download try/catch for ${fileName} to ${pdfDumpFolder} with ${err.message}`
@@ -116,6 +127,22 @@ export const downloadPdfFromUrlSlow = async (
     return _result;
 };
 
+const checkFileSizeConsistency = (pdfDumpFolder: string, fileName: string, fileSizeRaw: string) => {
+    if (fileSizeRaw !== "0") {
+        const fileSizeOfDwnldFile = getFilzeSize(`${pdfDumpFolder}\\${fileName}`);
+        const fileSizeRawAsInt = parseInt(fileSizeRaw);
+        if (fileSizeOfDwnldFile != fileSizeRawAsInt) {
+            console.log(`Downloaded file size ${fileSizeOfDwnldFile} does not match with expected size ${fileSizeRaw}`);
+            incrementDownloadFailed();
+            return {
+                status: `Downloaded ${fileName} to ${pdfDumpFolder}
+                but FileSize (${sizeInfo(fileSizeOfDwnldFile)} !== ${sizeInfo(fileSizeRawAsInt)}) dont match`,
+                success: false
+            };
+        }
+    }
+    return { success: true }
+}
 // Usage
 // downloadPdf('http://example.com/path/to/pdf', './output.pdf')
 //   .then(() => console.log('Download finished'))
@@ -137,12 +164,7 @@ const getFileDetailsFromGoogleUrl = async (driveLinkOrFolderId: string) => {
     console.log(`HTTP error! Status: ${response.status}`);
 }
 
-// downloadPdfFromGoogleDrive("17OsRNBJC4OSPZ8EAqtxIYu_mWQkpSP96");
-// downloadPdfFromGoogleDrive("1M0Xk75dlVz6GHaXaKEsp3uwr-RBG0-eJ");
-
 //getFileDetailsFromGoogleUrl("1M0Xk75dlVz6GHaXaKEsp3uwr-RBG0-eJ")
 
 //downloadPdfFromGoogleDrive("1zXosWPqnbz8FpDO2p3nt1S58AmqKJl1J", "D:\\_playground\\_ganeshPlayGround");
-// downloadPdfFromGoogleDrive(
-//     "https://drive.google.com/drive/folders/1bBScm1NxfJQD16Ry-oG7XsSbTYFi0AMY?usp=share_link")
 //yarn run downloadPdf

@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import { formatTime, getAllPdfs } from './Utils';
 import { PDF_SIZE_LIMITATIONS } from './PdfUtil';
 import * as path from 'path';
+import { getFilzeSize } from '../../mirror/FrontEndBackendCommonCode';
 
 /**
  *  Only handles files < 2 GB
@@ -30,11 +31,6 @@ export async function getPdfFirstPageDimensionsUsingPdfLib(pdfPath: string) {
 }
 
 
-export function getFilzeSize(pdfPath: string) {
-    let stats = fs.statSync(pdfPath)
-    let fileSizeInBytes = stats.size;
-    return fileSizeInBytes;
-}
 
 export async function mergePDFDocuments(documents: Array<any>, pdfName: string) {
     const mergedPdf = await PDFDocument.create();

@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as fsPromise from 'fs/promises';
 
 import { getPdfPageCountUsingPdfLib } from "./PdfLibUtils";
-import { getFilzeSize } from './PdfLibUtils'; 4
+import { getFilzeSize } from '../../mirror/FrontEndBackendCommonCode';
 import * as path from 'path';
 import * as Mirror from "../../mirror/FrontEndBackendCommonCode"
 import { FileStats } from './types';
