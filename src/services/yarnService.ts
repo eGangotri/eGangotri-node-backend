@@ -118,6 +118,7 @@ export const publishBookTitlesList = async (argFirst: string, options: {
                 const excelWrittenTo = createExcelReport(metadata, options.pdfsOnly, path.basename(folder))
                 _response.push({
                     success: true,
+                    excelName: excelWrittenTo,
                     msg: `Published Folder Contents for ${folder}\n
                 Text file: ${textFileWrittenTo}\n
                 Excel File: ${excelWrittenTo}`
@@ -161,7 +162,7 @@ export const publishBookTitlesList = async (argFirst: string, options: {
         }
     }
     return {
-        response: _response
+        ..._response
     };
 }
 

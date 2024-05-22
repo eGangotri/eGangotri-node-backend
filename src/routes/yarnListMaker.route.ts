@@ -214,10 +214,8 @@ yarnListMakerRoute.post('/createListingsOfLocalFolder', async (req: any, resp: a
             }
         );
         resp.status(200).send({
-            response: {
-                timeTaken: timeInfo(Date.now() - timeNow),
-                ...res
-            }
+            timeTaken: timeInfo(Date.now() - timeNow),
+            ...res
         });
     }
     catch (err: any) {

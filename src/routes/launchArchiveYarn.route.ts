@@ -65,7 +65,7 @@ launchArchiveYarnRoute.post('/getArchiveListing', async (req: any, resp: any) =>
         resp.status(200).send({
             response: {
                 _results: _resp,
-                caution:"Max API supports is 10K results. For more use scraping API. See https://archive.org/help/aboutsearch.htm  or, you may request up to 1000000000 results at one time if you do NOT specify any page. For best results,  do NOT specify sort (sort may be automatically disabled for very large queries).)"
+                caution: "Max API supports is 10K results. For more use scraping API. See https://archive.org/help/aboutsearch.htm  or, you may request up to 1000000000 results at one time if you do NOT specify any page. For best results,  do NOT specify sort (sort may be automatically disabled for very large queries).)"
             }
         });
     }
@@ -220,14 +220,14 @@ launchArchiveYarnRoute.post('/compareUploadsViaExcelV1WithArchiveOrg', async (re
 
         const diffUplodables = uploadableExcelAsJSON.filter((item) => {
             return diff.includes(path.basename(item["absPath"] || "")?.substring(0, 7))
-        } );
-       
+        });
+
         const folder = (process.env.HOME || process.env.USERPROFILE) + path.sep + 'Downloads' + path.sep;
         const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)
-        console.log( "diffUpl Length" + diffUplodables.length)
+        console.log("diffUpl Length" + diffUplodables.length)
         const excelName = `${folder}${timeComponent}-fip-final-diff-Uplodables(${diffUplodables.length}).xlsx`
         jsonToExcel(diffUplodables, excelName)
-       
+
         resp.status(200).send({
             response: {
                 diffUplodables: diffUplodables.length,
@@ -242,8 +242,6 @@ launchArchiveYarnRoute.post('/compareUploadsViaExcelV1WithArchiveOrg', async (re
         resp.status(400).send(err);
     }
 })
-
-
 
 launchArchiveYarnRoute.post('/compareUploadsViaExcelV3WithArchiveOrg', async (req: any, resp: any) => {
     try {
@@ -278,15 +276,15 @@ launchArchiveYarnRoute.post('/compareUploadsViaExcelV3WithArchiveOrg', async (re
         console.log(`diff ${diff.length} ${diff[0]}`)
 
         const diffUplodables = uploadableExcelAsJSON.filter((item) => {
-            return diff.includes( path.parse(item["absPath"] || "").name)
-        } );
-       
+            return diff.includes(path.parse(item["absPath"] || "").name)
+        });
+
         const folder = (process.env.HOME || process.env.USERPROFILE) + path.sep + 'Downloads' + path.sep;
         const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)
-        console.log( "diffUpl Length" + diffUplodables.length)
+        console.log("diffUpl Length" + diffUplodables.length)
         const excelName = `${folder}${profileName}-diff-Uplodables(${diffUplodables.length})-${timeComponent}.xlsx`
         jsonToExcel(diffUplodables, excelName)
-       
+
         resp.status(200).send({
             response: {
                 diffUplodables: diffUplodables.length,
@@ -301,3 +299,4 @@ launchArchiveYarnRoute.post('/compareUploadsViaExcelV3WithArchiveOrg', async (re
         resp.status(400).send(err);
     }
 })
+

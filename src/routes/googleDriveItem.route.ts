@@ -1,6 +1,6 @@
 const express = require("express");
 import e, { Request, Response } from "express";
-import { getListOfGDriveItems } from "../services/GDriveItemService";
+import { getDiffBetweenGDriveAndLocalFiles, getListOfGDriveItems } from "../services/GDriveItemService";
 
 export const googleDriveItemRoute = express.Router();
 
@@ -18,7 +18,7 @@ googleDriveItemRoute.post("/search", async (req: Request, resp: Response) => {
         }
         else {
             console.log(`gDriveItemRoute /search ${JSON.stringify(searchTerm)}`);
-            const gDriveItems = await getListOfGDriveItems({searchTerm});
+            const gDriveItems = await getListOfGDriveItems({ searchTerm });
             console.log(`gDriveItemRoute /search ${JSON.stringify(gDriveItems?.length > 0 ? gDriveItems[0] : [])}`);
             resp.status(200).send({
                 response: gDriveItems
@@ -33,3 +33,19 @@ googleDriveItemRoute.post("/search", async (req: Request, resp: Response) => {
     }
 });
 
+googleDriveItemRoute.post('/compareGDriveAndLocalExcel', async (req: any, resp: any) => {
+    try {
+        const gDriveExcel = req.body.gDriveExcel;
+        const localExcel = req.body.localExcel;
+
+        const _resp = getDiffBetweenGDriveAndLocalFiles(gDriveExcel, localExcel);
+
+        resp.status(200).send({
+            response: _resp
+        });
+    }
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})
