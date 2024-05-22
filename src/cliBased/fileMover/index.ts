@@ -79,6 +79,7 @@ export async function moveFilesAndFlatten(sourceDir: string, targetDir: string, 
     const allSrcPdfsAfter: FileStats[] = await getAllPDFFiles(sourceDir);
     const allDestPdfsAfter: FileStats[] = await getAllPDFFiles(targetDir);
     launchWinExplorer(sourceDir)
+    launchWinExplorer(targetDir)
     return {
         success: (allSrcPdfsAfter?.length === 0 && ((allDestPdfsAfter?.length - allDestPdfs?.length) === _count)),
         msg,
