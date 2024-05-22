@@ -4,6 +4,7 @@ import { FileStats } from "imgToPdf/utils/types";
 
 import * as path from 'path';
 import * as fs from 'fs';
+import { launchWinExplorer } from "./util";
 
 export async function moveFilesAndFlatten(sourceDir: string, targetDir: string, pdfOnly = true) {
     //implement alogrithm
@@ -73,11 +74,11 @@ export async function moveFilesAndFlatten(sourceDir: string, targetDir: string, 
             }
         }
     }
-    const msg = `All files moved from Source dir ${sourceDir}(${_count})  to target dir ${targetDir}`
+    const msg = `All ${_count} files moved from Source dir ${sourceDir}  to target dir ${targetDir}`
     console.log(msg);
     const allSrcPdfsAfter: FileStats[] = await getAllPDFFiles(sourceDir);
     const allDestPdfsAfter: FileStats[] = await getAllPDFFiles(targetDir);
-
+    launchWinExplorer(sourceDir)
     return {
         success: (allSrcPdfsAfter?.length === 0 && ((allDestPdfsAfter?.length - allDestPdfs?.length) === _count)),
         msg,
