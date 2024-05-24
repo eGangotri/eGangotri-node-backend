@@ -1,9 +1,9 @@
 import { exec } from 'child_process';
 
-export const launchWinExplorer = (_path: string) => {
+export const launchWinExplorer = async (_path: string) => {
     exec(`explorer.exe ${_path}`, (err) => {
         if (err) {
-            console.error(`exec error: ${err}`);
+            console.error(`launchWinExplorer:exec error: ${err}`);
             return;
         }
     });
