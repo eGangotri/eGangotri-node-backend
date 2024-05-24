@@ -17,9 +17,9 @@ const setHeadersForExcel = () => {
   ]
 }
 
-const convertDatatoJson = (googleDrivePdfData: Array<GoogleApiData>) => {
+const convertDatatoJson = (googleDriveFileData: Array<GoogleApiData>) => {
   const jsonArray: ExcelHeaders[] = []
-  for (const dataRow of googleDrivePdfData) {
+  for (const dataRow of googleDriveFileData) {
     let x = 0
     jsonArray.push({
       "S.No": dataRow.index,
@@ -56,9 +56,9 @@ const convertDatatoJson = (googleDrivePdfData: Array<GoogleApiData>) => {
   }
   return jsonArray
 }
-export const dataToXslx = async (googleDrivePdfData: Array<GoogleApiData>, xlsxFilePath: string) => {
+export const dataToXslx = async (googleDriveFileData: Array<GoogleApiData>, xlsxFilePath: string) => {
   try {
-    const jsonArray: ExcelHeaders[] = convertDatatoJson(googleDrivePdfData);
+    const jsonArray: ExcelHeaders[] = convertDatatoJson(googleDriveFileData);
     jsonToExcel(jsonArray, xlsxFilePath)
 
     console.log(`Excel File Written to ${xlsxFilePath}!`);

@@ -15,7 +15,11 @@ yarnListMakerRoute.post('/getGoogleDriveListing', async (req: any, resp: any) =>
         const googleDriveLink = req?.body?.googleDriveLink;
         const folderName = req?.body?.folderName || "";
         const reduced = req?.body?.reduced || false;
-        console.log(`getGoogleDriveListing googleDriveLink ${googleDriveLink}/${folderName}/${reduced}`)
+        const ignoreFolder = req?.body?.ignoreFolder || "proc";
+        const allNotJustPdfs = req?.body?.allNotJustPdfs || false;
+
+        console.log(`getGoogleDriveListing googleDriveLink:
+         ${googleDriveLink}/${folderName}/${reduced}/${ignoreFolder}/${allNotJustPdfs}`)
         if (!googleDriveLink || !folderName) {
             resp.status(300).send({
                 response: {
@@ -69,13 +73,13 @@ yarnListMakerRoute.post('/getGoogleDriveListing', async (req: any, resp: any) =>
         const responses = [];
         for (let i = 0; i < _links.length; i++) {
             console.log(`getGoogleDriveListing ${_links[i]} ${_folders[i]}`)
-            const listingResult = await generateGoogleDriveListingExcel(_links[i], _folders[i], reduced);
+            const listingResult = await generateGoogleDriveListingExcel(_links[i], _folders[i], reduced, ignoreFolder, !allNotJustPdfs);
             responses.push(listingResult);
         }
 
         resp.status(200).send({
             ...responses,
-            reduced: reduced ? "Reduced" : "Main"
+            mainFile: reduced ? "Reduced" : "Yes"
         });
     }
 
