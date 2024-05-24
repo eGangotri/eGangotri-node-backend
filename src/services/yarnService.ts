@@ -119,6 +119,8 @@ export const publishBookTitlesList = async (argFirst: string, options: {
                 _response.push({
                     success: true,
                     excelName: excelWrittenTo,
+                    itemsCount: metadata.length,
+                    size: sizeInfo(metadata.reduce((total, fileStats) => total + fileStats.rawSize, 0)),
                     msg: `Published Folder Contents for ${folder}\n
                 Text file: ${textFileWrittenTo}\n
                 Excel File: ${excelWrittenTo}`
