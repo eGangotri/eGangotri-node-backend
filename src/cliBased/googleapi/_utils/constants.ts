@@ -24,6 +24,7 @@ export const yearOfPublication = "Year of Publication";
 export const isbn = "ISBN";
 export const remarks = "Remarks";
 export const thumbnail = "Thumbnail";
+export const folderName = "Folder Name";
 
 export const CSV_SEPARATOR = ";"
 export const SEPARATOR_SPECIFICATION = `sep=${CSV_SEPARATOR}\n`
@@ -55,7 +56,7 @@ export const emptyExcelHeaderObj = {
     "Series ( KSTS/Kavyamala/Chowkhamba etc": "",
     "Size with Units": "",
     "Size in Bytes": "",
-    "Folder Name": "",
+    [folderName]: "",
     [thumbnail]: "",
     "Created Time": ""
 }
