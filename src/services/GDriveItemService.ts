@@ -101,7 +101,7 @@ export const getDiffBetweenGDriveAndLocalFiles = (gDriveExcel: string, localExce
     return diff.includes(item?.absPath)
   });
 
-  console.log(`_forReupload ${_forReupload.length} ${_forReupload[0]}`);
+  console.log(`_forReupload ${_forReupload.length} ${JSON.stringify(_forReupload[0])}`);
 
   const folder = (process.env.HOME || process.env.USERPROFILE) + path.sep + 'Downloads' + path.sep;
   const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)
