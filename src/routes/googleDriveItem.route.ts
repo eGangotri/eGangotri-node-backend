@@ -49,3 +49,26 @@ googleDriveItemRoute.post('/compareGDriveAndLocalExcel', async (req: any, resp: 
         resp.status(400).send(err);
     }
 })
+
+googleDriveItemRoute.post('/uploadToGDriveBasedOnDiffExcel', async (req: any, resp: any) => {
+    try {
+        const diffExcel = req.body.diffExcel;
+        const localExcel = req.body.gDriveRoot;
+
+        const _resp = {
+            diffExcel,
+            localExcel,
+            "msg": "Not implemented"
+        }
+
+        resp.status(200).send({
+            response: _resp
+        });
+    }
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})
+
+

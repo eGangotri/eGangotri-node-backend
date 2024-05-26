@@ -65,7 +65,9 @@ export function setOptionsForGDriveListing(queryOptions: GDriveItemListOptionsTy
 
 export const getDiffBetweenGDriveAndLocalFiles = (gDriveExcel: string, localExcel: string) => {
   const gDriveExcelAsJSON = excelToJson(gDriveExcel)
-  const localExcelAsJSON = excelToJson(localExcel)
+  const localExcelAsJSONWithExtraneousData = excelToJson(localExcel)
+
+  const localExcelAsJSON = localExcelAsJSONWithExtraneousData.filter((item) => item.absPath?.trim().length > 0)
 
   console.log(`gDriveExcelAsJSON: ${gDriveExcelAsJSON.length}`)
   console.log(`localExcelAsJSON: ${localExcelAsJSON.length}\n`)
@@ -103,16 +105,18 @@ export const getDiffBetweenGDriveAndLocalFiles = (gDriveExcel: string, localExce
 
   const folder = (process.env.HOME || process.env.USERPROFILE) + path.sep + 'Downloads' + path.sep;
   const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)
-  console.log("diffUpl Length" + _forReupload.length)
+  console.log("diffUpl Length:" + _forReupload.length)
   const excelName = `${folder}GDrive-Integrity-Check-(${_forReupload.length})-${timeComponent}.xlsx`
   jsonToExcel(_forReupload, excelName)
 
   return {
     diffUplodables: _forReupload.length,
     excelName,
+    gDrivePath: gDriveExcel,
+    localDrivePath: localExcel,
     localGDriveDiff: `Local has: ${localExcelAsJSON.length} items. GDrive has ${gDriveExcelAsJSON.length} items. Missing ${localExcelAsJSON.length - gDriveExcelAsJSON.length}`,
     excel: `G-Drive-Local Integrity Test Excel ${excelName} created for ${_forReupload.length} missing in G-Drive`,
     msg: `${diff.length} items not found in Local`,
-    diff: diff.length > 100 ? "Showing first 100 only" + diff.slice(0,100) : diff,
+    diff: diff.length > 100 ? "Showing first 100 only. " + diff.slice(0, 100) : diff,
   }
 }
