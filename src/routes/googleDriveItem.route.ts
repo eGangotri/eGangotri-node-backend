@@ -1,6 +1,7 @@
 const express = require("express");
 import e, { Request, Response } from "express";
 import { getDiffBetweenGDriveAndLocalFiles, getListOfGDriveItems } from "../services/GDriveItemService";
+import { uploadToGDriveBasedOnDiffExcel } from "../cliBased/googleapi/GoogleDriveUpload";
 
 export const googleDriveItemRoute = express.Router();
 
@@ -53,16 +54,12 @@ googleDriveItemRoute.post('/compareGDriveAndLocalExcel', async (req: any, resp: 
 googleDriveItemRoute.post('/uploadToGDriveBasedOnDiffExcel', async (req: any, resp: any) => {
     try {
         const diffExcel = req.body.diffExcel;
-        const localExcel = req.body.gDriveRoot;
+        const gDriveRootFolder = req.body.gDriveRoot;
 
-        const _resp = {
-            diffExcel,
-            localExcel,
-            "msg": "Not implemented"
-        }
-
+        const _resp = await uploadToGDriveBasedOnDiffExcel(diffExcel, gDriveRootFolder);
+        console.log(`_resp: ${JSON.stringify(_resp)}`);
         resp.status(200).send({
-            response: _resp
+            response: _resp               
         });
     }
     catch (err: any) {
