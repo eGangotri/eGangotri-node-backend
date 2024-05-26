@@ -1,4 +1,4 @@
-import { google } from 'googleapis';
+import { drive_v3, google } from 'googleapis';
 import * as fs from 'fs';
 import * as readline from 'readline';
 import * as path from 'path';
@@ -36,6 +36,38 @@ function uploadFileToGDrive(filePath: string, driveLinkOrFolderID: string) {
     });
 }
 
-uploadFileToGDrive("D:\\NMM-1\\July-2019\\19-07-2019\\M-1981-Vinayak Mahatmya From Ganesh Puran - Kavikulguru Kalidas Sanskrit University Ramtek Collection\\00000196.TIF",
-    "https://drive.google.com/drive/folders/1opz1x_HTJCEVH2H0WgadHyDUnEPPo5nB?usp=drive_link"
-);
+async function findFolderByPath(drive: drive_v3.Drive, driveLinkOrFolderID: string, gDrivePath: string) {
+    const folderId = extractGoogleDriveId(driveLinkOrFolderID)
+
+    const folderNames = gDrivePath.split(path.sep);
+    let currentFolderId = folderId;
+
+    for (const folderName of folderNames) {
+        currentFolderId = await findSubFolderId(drive, currentFolderId, folderName);
+        if (!currentFolderId) {
+            console.log(`Folder not found: ${folderName}`);
+            return;
+        }
+    }
+
+    console.log(`Found folder: ${currentFolderId}`);
+}
+
+async function findSubFolderId(drive: drive_v3.Drive, folderId: string, folderName: string): Promise<string | null> {
+    const res = await drive.files.list({
+        q: `'${folderId}' in parents and mimeType = 'application/vnd.google-apps.folder' and name = '${folderName}' and trashed = false`,
+        fields: 'files(id, name)',
+    });
+
+    const files = res.data.files;
+    if (files.length === 0) {
+        return null;
+    }
+
+    return files[0].id;
+}
+
+const drive = getGoogleDriveInstance();
+
+findFolderByPath(drive, "https://drive.google.com/drive/folders/17BwW6ksj-i53XLDygWRA013q1-e2stDC?usp=drive_link", 
+"01-08-2019\\M-9-Yajnavalkya Shiksha_Anuvak_Vajasaneyi Samhita - Kavikulguru Kalidas Sanskrit University Ramtek Collection")
