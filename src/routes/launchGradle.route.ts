@@ -10,6 +10,7 @@ import { ArchiveUploadExcelProps } from '../archiveDotOrg/archive.types';
 import { createExcelV1FileForUpload, createExcelV3FileForUpload, createJsonFileForUpload, findMissedUploads } from '../services/GradleLauncherUtil';
 import { itemsUsheredVerficationAndDBFlagUpdate } from '../services/itemsUsheredService';
 import * as path from 'path';
+import { getLatestUploadCycle } from 'services/uploadCycleService';
 
 export const launchGradleRoute = express.Router();
 
@@ -18,6 +19,12 @@ launchGradleRoute.get('/launchUploader', async (req: any, resp: any) => {
         const _profiles = req.query.profiles
         console.log(`launchUploader ${_profiles}`)
         const res = await launchUploader(req.query.profiles)
+        //dont wait. let it run in background
+        getLatestUploadCycle().then((uploadCycleId) => {
+            console.log(`uploadCycleId ${uploadCycleId}`)
+            itemsUsheredVerficationAndDBFlagUpdate(uploadCycleId);
+        });
+
         resp.status(200).send({
             response: res
         });

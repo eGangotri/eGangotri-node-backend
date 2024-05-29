@@ -45,12 +45,14 @@ export const downloadPdfFromUrl = async (
                     };
                 }
                 resolve(_result);
-
             });
 
-            dl.on('error', (err: Error) => {
+            dl.on('error', (err) => {
                 incrementDownloadInError();
-                console.log(`Download Failed ${fileName}`, err.message);
+                if (err.code === 'ECONNRESET') {
+                    console.error('Connection reset by peer');
+                }
+                console.log(`Download Failed ${fileName}` + JSON.stringify(err.message));
                 reject(_result = {
                     success: false,
                     "error": `Failed download of ${fileName} to ${pdfDumpFolder} with ${err.message}`
@@ -107,7 +109,7 @@ export const downloadPdfFromUrlSlow = async (
             });
             writer.on('error', (err: Error) => {
                 incrementDownloadInError();
-                console.log(`Download Failed ${fileName}`, err.message);
+                console.log(`Download Failed! ${fileName}`+ JSON.stringify(err.message));
                 reject(_result = {
                     success: false,
                     "error": `Failed download of ${fileName} to ${pdfDumpFolder} with ${err.message}`
