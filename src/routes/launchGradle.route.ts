@@ -2,7 +2,7 @@ import * as express from 'express';
 import { launchUploader, launchUploaderViaAbsPath, launchUploaderViaExcel, launchUploaderViaExcelV3, launchUploaderViaJson, loginToArchive, makeGradleCall, moveToFreeze, reuploadMissed, snap2htmlCmdCall } from '../services/gradleLauncherService';
 import { ArchiveProfileAndTitle, UploadCycleArchiveProfile } from '../mirror/types';
 import { isValidPath } from '../utils/utils';
-import { getFolderInDestRootForProfile } from '../cliBased/utils';
+import { getFolderInDestRootForProfile, getFolderInSrcRootForProfile } from '../cliBased/utils';
 import { ItemsUshered } from '../models/itemsUshered';
 import { UploadCycle } from '../models/uploadCycle';
 import { excelToJson } from '../cliBased/excel/ExcelUtils';
@@ -11,6 +11,7 @@ import { createExcelV1FileForUpload, createExcelV3FileForUpload, createJsonFileF
 import { itemsUsheredVerficationAndDBFlagUpdate } from '../services/itemsUsheredService';
 import * as path from 'path';
 import { getLatestUploadCycle } from '../services/uploadCycleService';
+import { checkIfEmpty } from '../imgToPdf/utils/FileUtils';
 
 export const launchGradleRoute = express.Router();
 
@@ -18,20 +19,43 @@ launchGradleRoute.get('/launchUploader', async (req: any, resp: any) => {
     try {
         const _profiles = req.query.profiles
         console.log(`launchUploader ${_profiles}`)
-        const res = await launchUploader(req.query.profiles)
-        //dont wait. let it run in background
-        getLatestUploadCycle().then((uploadCycleId) => {
-            console.log(`uploadCycleId ${uploadCycleId}`)
-            itemsUsheredVerficationAndDBFlagUpdate(uploadCycleId);
-            setTimeout(() => {
+        const emptyProfiles = []
+
+        for (let profile of _profiles.split(",")) {
+            const srcPath = getFolderInSrcRootForProfile(profile.trim());
+            const isEmpty = await checkIfEmpty(srcPath)
+            if (isEmpty) {
+                emptyProfiles.push(`${profile} (${srcPath})`);
+            }
+            else {
+                console.log(`${profile} (${srcPath}) Folder is not empty`)
+            }
+        }
+
+        if (emptyProfiles.length > 0) {
+            resp.status(400).send({
+                response: {
+                    success: false,
+                    message: `Cannot proceed. Following Profiles are empty: ${emptyProfiles}`
+                }
+            });
+            return;
+        }
+        else {
+            const res = await launchUploader(req.query.profiles)
+            //dont wait. let it run in background
+            getLatestUploadCycle().then((uploadCycleId) => {
+                console.log(`uploadCycleId ${uploadCycleId}`)
                 itemsUsheredVerficationAndDBFlagUpdate(uploadCycleId);
-            }, 300000); // 5 minutes
-        });
+                setTimeout(() => {
+                    itemsUsheredVerficationAndDBFlagUpdate(uploadCycleId);
+                }, 300000); // 5 minutes
+            });
 
-        resp.status(200).send({
-            response: res
-        });
-
+            resp.status(200).send({
+                response: res
+            });
+        }
     }
     catch (err: any) {
         console.log('Error', err);

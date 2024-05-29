@@ -237,5 +237,24 @@ export function createFolderIfNotExists(folderPath: string): void {
     }
 }
 
-
-
+export const checkIfEmpty = async (srcPath: string) => {
+    let empty = true;
+    if (srcPath) {
+        try {
+            const files = await fsPromise.readdir(srcPath);
+            for (let file of files) {
+                if ((await fsPromise.stat(path.join(srcPath, file))).isFile()) {
+                    empty = false;
+                    console.log('The directory has at least one file.');
+                    break;
+                }
+            }
+        } catch (err) {
+            console.error(`Error reading directory: ${err}`);
+        }
+    } else {
+        console.log('srcPath is empty.');
+    }
+    console.log(`emptyFolder ${empty}`);
+    return empty;
+}
