@@ -10,7 +10,7 @@ import { ArchiveUploadExcelProps } from '../archiveDotOrg/archive.types';
 import { createExcelV1FileForUpload, createExcelV3FileForUpload, createJsonFileForUpload, findMissedUploads } from '../services/GradleLauncherUtil';
 import { itemsUsheredVerficationAndDBFlagUpdate } from '../services/itemsUsheredService';
 import * as path from 'path';
-import { getLatestUploadCycle } from 'services/uploadCycleService';
+import { getLatestUploadCycle } from '../services/uploadCycleService';
 
 export const launchGradleRoute = express.Router();
 
