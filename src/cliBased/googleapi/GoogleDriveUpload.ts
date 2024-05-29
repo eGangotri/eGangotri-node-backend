@@ -138,6 +138,6 @@ export const removeFolderRoot = (filePath: string) => {
     return relativePath;
 }
 
-findFolderByPath("https://drive.google.com/drive/folders/1E5cb-iYNuO9ZHBq630GoWOTMGGEOhYH_?usp=drive_link",
-    "g:\\bb\August-2019\\01-08-2019\\M-9-Yajnavalkya Shiksha_Anuvak_Vajasaneyi Samhita - Kavikulguru Kalidas Sanskrit University Ramtek Collection"
-)
+// findFolderByPath("https://drive.google.com/drive/folders/1E5cb-iYNuO9ZHBq630GoWOTMGGEOhYH_?usp=drive_link",
+//     "g:\\bb\August-2019\\01-08-2019\\M-9-Yajnavalkya Shiksha_Anuvak_Vajasaneyi Samhita - Kavikulguru Kalidas Sanskrit University Ramtek Collection"
+// )
