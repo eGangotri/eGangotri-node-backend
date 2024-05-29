@@ -1,7 +1,7 @@
 import { _credentials } from './_utils/credentials_googleapi';
 import { listFolderContentsAsArrayOfData } from './service/GoogleApiService';
 import { getGoogleDriveInstance } from './service/CreateGoogleDrive';
-import { downloadPdfFromGoogleDrive } from '../pdf/downloadPdf';
+import { downloadFileFromGoogleDrive } from '../pdf/downloadPdf';
 import { getFolderInSrcRootForProfile } from '../../cliBased/utils';
 import fs from 'fs';
 import path from 'path';
@@ -42,7 +42,7 @@ async function getAllFilesFromGDrive(driveLinkOrFolderID: string, folderName: st
       fsExtra.ensureDirSync(pdfDumpWithPathAppended);
     }
 
-    return downloadPdfFromGoogleDrive(_data.googleDriveLink,
+    return downloadFileFromGoogleDrive(_data.googleDriveLink,
       pdfDumpWithPathAppended, _data.fileName, dataLength, _data?.fileSizeRaw)
   });
   const results = await Promise.all(promises);
