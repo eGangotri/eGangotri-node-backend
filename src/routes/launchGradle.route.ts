@@ -23,6 +23,9 @@ launchGradleRoute.get('/launchUploader', async (req: any, resp: any) => {
         getLatestUploadCycle().then((uploadCycleId) => {
             console.log(`uploadCycleId ${uploadCycleId}`)
             itemsUsheredVerficationAndDBFlagUpdate(uploadCycleId);
+            setTimeout(() => {
+                itemsUsheredVerficationAndDBFlagUpdate(uploadCycleId);
+            }, 300000); // 5 minutes
         });
 
         resp.status(200).send({
