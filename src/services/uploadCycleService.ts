@@ -11,6 +11,11 @@ export async function getListOfUploadCycles(queryOptions: UploadCycleListOptions
   return items;
 }
 
+export async function getLatestUploadCycle() {
+  const item = await UploadCycle.findOne({}).sort({_id:-1})
+  return item?.uploadCycleId || "";
+}
+
 export function setOptionsForUploadCycleListing(queryOptions: UploadCycleListOptionsType) {
   // Empty `filter` means "match all documents"
   let mongoOptionsFilter = {};
