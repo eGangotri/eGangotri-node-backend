@@ -1,33 +1,35 @@
 import fs from 'fs';
 import axios from 'axios';
-import { DOWNLOAD_COMPLETED_COUNT, incrementDownloadComplete, incrementDownloadFailed, incrementDownloadInError } from "./utils";
+import { DOWNLOAD_COMPLETED_COUNT, checkFileSizeConsistency, incrementDownloadComplete, incrementDownloadInError } from "./utils";
 import { extractGoogleDriveId, getGDrivePdfDownloadLink } from '../../mirror/GoogleDriveUtilsCommonCode';
-import { getFilzeSize, sizeInfo } from '../../mirror/FrontEndBackendCommonCode';
+import { drive_v3 } from 'googleapis';
+import { getGoogleDriveInstance } from '../../cliBased/googleapi/service/CreateGoogleDrive';
+import * as path from 'path';
 
 const { DownloaderHelper } = require('node-downloader-helper');
 
 const DEFAULT_DUMP_FOLDER = "D:\\_playground\\_dwnldPlayground";
+const drive = getGoogleDriveInstance();
 
-
-export const downloadPdfFromGoogleDrive = async (driveLinkOrFolderId: string,
-    pdfDumpFolder: string,
+export const downloadFileFromGoogleDrive = async (driveLinkOrFolderId: string,
+    destPath: string,
     fileName: string = "",
     dataLength: number = 0,
     fileSizeRaw = "0") => {
-    console.log(`downloadPdfFromGoogleDrive ${driveLinkOrFolderId}`)
+    console.log(`downloadFileFromGoogleDrive ${driveLinkOrFolderId}`)
     const driveId = extractGoogleDriveId(driveLinkOrFolderId)
-    const downloadUrl = getGDrivePdfDownloadLink(driveId)
-    const result = await downloadPdfFromUrl(pdfDumpFolder, downloadUrl, fileName, dataLength, fileSizeRaw);
+    // const result = await downloadFileFromUrl(pdfDumpFolder, getGDrivePdfDownloadLink(driveId), fileName, dataLength, fileSizeRaw);
+    const result = await downloadGDriveFileUsingGDriveApi( driveId, destPath, fileName, dataLength, fileSizeRaw);
     return result;
 }
 
-export const downloadPdfFromUrl = async (
+export const downloadFileFromUrl = async (
     pdfDumpFolder: string,
     downloadUrl: string,
     fileName: string,
     dataLength: number,
     fileSizeRaw = "0") => {
-    console.log(`downloadPdfFromUrl ${downloadUrl} to ${pdfDumpFolder}`)
+    console.log(`downloadFileFromUrl ${downloadUrl} to ${pdfDumpFolder}`)
 
     const dl = new DownloaderHelper(downloadUrl, pdfDumpFolder, { fileName: fileName });//
     let _result: { success?: boolean, status?: string, error?: string } = {};
@@ -73,100 +75,123 @@ export const downloadPdfFromUrl = async (
     return _result;
 }
 
-export const downloadPdfFromUrlSlow = async (
-    pdfDumpFolder: string,
-    downloadUrl: string,
-    fileName: string,
+export const downloadGDriveFileUsingGDriveApiWithRaceCon = async (
+    driveLinkOrFileID: string,
+    destPath: string,
+    fileName: string = "",
     dataLength: number,
     fileSizeRaw = "0") => {
-
+    const fileId = extractGoogleDriveId(driveLinkOrFileID)
     let _result: { success?: boolean, status?: string, error?: string } = {};
     try {
+        // Step 1: Get the file metadata to retrieve the original file name
+        if (!fileName) {
+            const fileMetadata = await drive.files.get({ fileId, fields: 'name' });
+            fileName = fileMetadata.data.name;
+        }
 
-        const response = await axios({
-            method: 'GET',
-            url: downloadUrl,
-            responseType: 'stream'
-        });
+        const filePath = path.join(destPath, fileName);
+        const dest = fs.createWriteStream(filePath);
 
-        const writer = fs.createWriteStream(`${pdfDumpFolder}\\${fileName}`);
-        console.log(`downloadPdfFromUrlSlow - ${fileName}`)
-        response.data.pipe(writer);
+        // Step 2: Download the file using the original file name
+        const res = await drive.files.get({ fileId, alt: 'media' }, { responseType: 'stream' });
 
-        await new Promise((resolve, reject) => {
-            writer.on('finish', () => {
-                _result = checkFileSizeConsistency(pdfDumpFolder, fileName, fileSizeRaw);
+        res.data
+            .on('end', () => {
+                console.log('Download complete.');
+                const index = `(${DOWNLOAD_COMPLETED_COUNT + 1}${dataLength > 0 ? "/" + dataLength : ""})`;
+                console.log(`${index}. Downloaded ${fileName}`);
+                _result = checkFileSizeConsistency(destPath, fileName, fileSizeRaw);
                 if (_result?.success) {
-                    const index = `(${DOWNLOAD_COMPLETED_COUNT + 1}${dataLength > 0 ? "/" + dataLength : ""})`;
-                    console.log(`${index}. Downloaded: ${fileName}`);
                     incrementDownloadComplete();
                     _result = {
-                        "status": `Downloaded ${fileName} to ${pdfDumpFolder}`,
+                        "status": `Downloaded ${fileName} to ${destPath}`,
                         success: true
                     };
                 }
-                resolve(_result);
-            });
-            writer.on('error', (err: Error) => {
+            })
+            .on('error', (err: any) => {
+                console.error('Error during download:', err);
                 incrementDownloadInError();
-                console.log(`Download Failed! ${fileName}`+ JSON.stringify(err.message));
-                reject(_result = {
+                if (err.code === 'ECONNRESET') {
+                    console.error('Connection reset by peer');
+                }
+                console.log(`Download Failed ${fileName}` + JSON.stringify(err.message));
+                _result = {
                     success: false,
-                    "error": `Failed download of ${fileName} to ${pdfDumpFolder} with ${err.message}`
-                })
-            });
-        });
-    }
-    catch (err) {
-        console.error(err);
+                    "error": `Failed download of ${fileName} to ${destPath} with ${err.message}`
+                }
+            })
+            .pipe(dest);
+    } catch (error) {
+        console.error('Error:', error.message);
         incrementDownloadInError();
         _result = {
             success: false,
-            "error": `Failed download try/catch for ${fileName} to ${pdfDumpFolder} with ${err.message}`
+            "error": `Failed download try/catch for ${fileName} to ${destPath} with ${error.message}`
         };
-    }
-
+    };
     return _result;
-};
-
-const checkFileSizeConsistency = (pdfDumpFolder: string, fileName: string, fileSizeRaw: string) => {
-    if (fileSizeRaw !== "0") {
-        const fileSizeOfDwnldFile = getFilzeSize(`${pdfDumpFolder}\\${fileName}`);
-        const fileSizeRawAsInt = parseInt(fileSizeRaw);
-        if (fileSizeOfDwnldFile != fileSizeRawAsInt) {
-            console.log(`Downloaded file size ${fileSizeOfDwnldFile} does not match with expected size ${fileSizeRaw}`);
-            incrementDownloadFailed();
-            return {
-                status: `Downloaded ${fileName} to ${pdfDumpFolder}
-                but FileSize (${sizeInfo(fileSizeOfDwnldFile)} !== ${sizeInfo(fileSizeRawAsInt)}) dont match`,
-                success: false
-            };
-        }
-    }
-    return { success: true }
-}
-// Usage
-// downloadPdf('http://example.com/path/to/pdf', './output.pdf')
-//   .then(() => console.log('Download finished'))
-//   .catch(err => console.error('Error during download', err));
-
-
-//{"scanResult":"OK","disposition":"SCAN_CLEAN","fileName":"Anang Rito Dwanda.pdf","sizeBytes":827924,"downloadUrl":"https:\/\/drive.usercontent.google.com\/download?id=17OsRNBJC4OSPZ8EAqtxIYu_mWQkpSP96&export=download&authuser=0&confirm=t&uuid=3e023e6b-413f-43f8-8c0e-4feccac88c33&at=APZUnTWJITyGBCb64CIGROZM-l95:1692979966504"}
-//{"scanResult":"WARNING","disposition":"TOO_LARGE","fileName":"file 7.pdf","sizeBytes":203470209,"downloadUrl":"https:\/\/drive.usercontent.google.com\/download?id=1M0Xk75dlVz6GHaXaKEsp3uwr-RBG0-eJ&export=download&authuser=0&confirm=t&uuid=30a6908a-9c30-444b-8f7b-c16177c13ff3&at=APZUnTWvp6RZVPKbr8DCrOp1lR-m:1692980267429"}
-const getFileDetailsFromGoogleUrl = async (driveLinkOrFolderId: string) => {
-    const driveId = extractGoogleDriveId(driveLinkOrFolderId)
-    const postUrl = `https://drive.usercontent.google.com/uc?id=${driveId}&authuser=0&export=download`
-    const response: Response = await fetch(postUrl, {
-        method: "POST",
-    })
-
-    if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-    }
-    console.log(`HTTP error! Status: ${response.status}`);
 }
 
-//getFileDetailsFromGoogleUrl("1M0Xk75dlVz6GHaXaKEsp3uwr-RBG0-eJ")
+export const downloadGDriveFileUsingGDriveApi = (
+    driveLinkOrFileID: string,
+    destPath: string,
+    fileName: string = "",
+    dataLength: number,
+    fileSizeRaw = "0") => {
+    return new Promise(async (resolve, reject) => {
+        const fileId = extractGoogleDriveId(driveLinkOrFileID)
+        try {
+            // Step 1: Get the file metadata to retrieve the original file name
+            if (!fileName) {
+                const fileMetadata = await drive.files.get({ fileId, fields: 'name' });
+                fileName = fileMetadata.data.name;
+            }
 
-//downloadPdfFromGoogleDrive("1zXosWPqnbz8FpDO2p3nt1S58AmqKJl1J", "D:\\_playground\\_ganeshPlayGround");
+            const filePath = path.join(destPath, fileName);
+            const dest = fs.createWriteStream(filePath);
+
+            // Step 2: Download the file using the original file name
+            const res = await drive.files.get({ fileId, alt: 'media' }, { responseType: 'stream' });
+
+            res.data
+                .on('end', () => {
+                    console.log('Download complete.');
+                    const index = `(${DOWNLOAD_COMPLETED_COUNT + 1}${dataLength > 0 ? "/" + dataLength : ""})`;
+                    console.log(`${index}. Downloaded ${fileName}`);
+                    const _result = checkFileSizeConsistency(destPath, fileName, fileSizeRaw);
+                    if (_result?.success) {
+                        incrementDownloadComplete();
+                        resolve({
+                            "status": `Downloaded ${fileName} to ${destPath}`,
+                            success: true
+                        });
+                    } else {
+                        reject(_result);
+                    }
+                })
+                .on('error', (err: any) => {
+                    console.error('Error during download:', err);
+                    incrementDownloadInError();
+                    if (err.code === 'ECONNRESET') {
+                        console.error('Connection reset by peer');
+                    }
+                    console.log(`Download Failed ${fileName}` + JSON.stringify(err.message));
+                    reject({
+                        success: false,
+                        "error": `Failed download of ${fileName} to ${destPath} with ${err.message}`
+                    });
+                })
+                .pipe(dest);
+        } catch (error) {
+            console.error('Error:', error.message);
+            incrementDownloadInError();
+            reject({
+                success: false,
+                "error": `Failed download try/catch for ${fileName} to ${destPath} with ${error.message}`
+            });
+        };
+    });
+}
 //yarn run downloadPdf

@@ -1,4 +1,4 @@
-import { downloadPdfFromUrl } from "../cliBased/pdf/downloadPdf";
+import { downloadFileFromUrl } from "../cliBased/pdf/downloadPdf";
 import { DOWNLOAD_COMPLETED_COUNT, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT, resetDownloadCounters } from "../cliBased/pdf/utils";
 import { getFolderInSrcRootForProfile } from "../cliBased/utils";
 import fs from 'fs';
@@ -55,7 +55,7 @@ const downloadArchivePdfs = async (linkData: LinkData[], pdfDumpFolder: string) 
   const promises = linkData.map(pdfLink => {
     console.log(`_data: ${JSON.stringify(pdfLink)}}`);
     console.log(`pdfDumpFolder: ${pdfDumpFolder}`);
-    return downloadPdfFromUrl(pdfDumpFolder,
+    return downloadFileFromUrl(pdfDumpFolder,
       pdfLink.pdfDownloadUrl, pdfLink.originalTitle + ".pdf", linkData.length)
   });
 

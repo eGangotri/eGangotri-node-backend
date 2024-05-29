@@ -82,11 +82,11 @@ export async function listFolderContents(folderId: string,
         let files: drive_v3.Schema$File[] = [];
         let pageToken: string | undefined = undefined;
         //
-        const conditionForIgnoreFolder = ignoreFolder?.length > 0 ? ` or (mimeType='${FOLDER_MIME_TYPE}' and not name contains '${ignoreFolder}')` : "";
-        const conditionForPdfOnly = pdfOnly ? ` and (mimeType='${PDF_MIME_TYPE}' ` : ` and (mimeType!='' ` ;
+        const conditionForIgnoreFolder = ignoreFolder?.length > 0 ? ` and (mimeType='${FOLDER_MIME_TYPE}' and not name contains '${ignoreFolder}')` : "";
+        const conditionForPdfOnly = pdfOnly ? ` and (mimeType='${PDF_MIME_TYPE}' or mimeType='${FOLDER_MIME_TYPE}') ` : ` and (mimeType!='' or  mimeType='${FOLDER_MIME_TYPE}')` ;
 
         //
-        const _query = `'${folderId}' in parents and trashed = false ${conditionForPdfOnly} ${conditionForIgnoreFolder} )`
+        const _query = `'${folderId}' in parents and trashed = false ${conditionForPdfOnly} ${conditionForIgnoreFolder} `
         console.log(`_query ${_query}`)
         do {
             const response: GaxiosResponse = await drive.files.list({
