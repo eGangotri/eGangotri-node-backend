@@ -12,6 +12,7 @@ export const uploadToGDriveBasedOnDiffExcel = async (diffExcelPath: string, gDri
     const gDriveExcelAsJSON: FileStats[] = excelToJson(diffExcelPath)
     const drive: drive_v3.Drive = getGoogleDriveInstance();
     const _results = []
+   
     for (let item of gDriveExcelAsJSON) {
         const folderToDumpTo = await findFolderByPath(gDriveRootFolder, item.folder, drive)
         if (!folderToDumpTo) {

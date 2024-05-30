@@ -1,4 +1,7 @@
-To obtain the necessary Google credentials (such as the client_id, client_secret, redirect_uri, and refresh_token), you'll need to set up a Google Cloud Platform project and enable the Google Drive API. Here's a step-by-step guide on how to do that:
+### Google Auth
+To obtain the necessary Google credentials (such as the client_id, client_secret, redirect_uri, and refresh_token), 
+you'll need to set up a Google Cloud Platform project and enable the Google Drive API. 
+Here's a step-by-step guide on how to do that:
 
 Go to the Google Cloud Console and create a new project.
 
@@ -10,7 +13,8 @@ Click on "Create Credentials" and select "OAuth client ID".
 
 Choose the application type as "Web application".
 
-Enter a name for your OAuth 2.0 client, and under "Authorized JavaScript origins", add the redirect URI for your application (e.g., http://localhost:3000).
+Enter a name for your OAuth 2.0 client, and under "Authorized JavaScript origins", add the redirect URI for your application 
+(e.g., http://localhost:3000).
 
 Under "Authorized redirect URIs", add the redirect URI where you plan to handle the OAuth flow (e.g., http://localhost:3000/callback).
 
@@ -18,6 +22,7 @@ Click on "Create", and you'll see the client ID and client secret on the credent
 
 To obtain the refresh_token, you'll need to perform the OAuth flow. Here's an example of how to do it programmatically using the googleapis library:
 
+you can use yarn run refreshToken
 
 /*Code Starts*/
 import { google } from 'googleapis';
@@ -45,7 +50,10 @@ const authUrl = oauth2Client.generateAuthUrl({
 console.log('Authorize this app by visiting the following URL:');
 console.log(authUrl);
 
-// After authorizing the app, you'll receive a code. Use it to get the refresh token
+// After authorizing the app, you'll receive a code. in the form:
+http://localhost:3000/callback?code=4/0AdLIrYfBw3F******************************r8zSHrCvDJfrmr0Q&scope=https://www.googleapis.com/auth/drive.file
+
+//copy it and Use it to get the refresh token
 const code = 'AUTHORIZATION_CODE';
 
 oauth2Client.getToken(code, (err, token) => {

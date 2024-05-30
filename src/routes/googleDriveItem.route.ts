@@ -52,19 +52,30 @@ googleDriveItemRoute.post('/compareGDriveAndLocalExcel', async (req: any, resp: 
 })
 
 googleDriveItemRoute.post('/uploadToGDriveBasedOnDiffExcel', async (req: any, resp: any) => {
-    try {
-        const diffExcel = req.body.diffExcel;
-        const gDriveRootFolder = req.body.gDriveRoot;
-
-        const _resp = await uploadToGDriveBasedOnDiffExcel(diffExcel, gDriveRootFolder);
-        console.log(`_resp: ${JSON.stringify(_resp)}`);
-        resp.status(200).send({
-            response: _resp               
+    const diffExcel = req.body.diffExcel;
+    const gDriveRootFolder = req.body.gDriveRoot;
+    console.log(`diffExcel: ${diffExcel} gDriveRootFolder: ${gDriveRootFolder}`);
+    if (!gDriveRootFolder?.trim()?.startsWith("https://drive.google.com/drive/folders/")) {
+        resp.status(400).send({
+            response: {
+                "status": "failed",
+                "success": false,
+                "message": "Pls. provide valid Google Drive Link "
+            }
         });
     }
-    catch (err: any) {
-        console.log('Error', err);
-        resp.status(400).send(err);
+    else {
+        try {
+            const _resp = await uploadToGDriveBasedOnDiffExcel(diffExcel, gDriveRootFolder);
+            console.log(`_resp: ${JSON.stringify(_resp)}`);
+            resp.status(200).send({
+                response: _resp
+            });
+        }
+        catch (err: any) {
+            console.log('Error', err);
+            resp.status(400).send(err);
+        }
     }
 })
 
