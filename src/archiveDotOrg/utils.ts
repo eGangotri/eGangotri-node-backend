@@ -5,6 +5,8 @@ import { sizeInfo } from '../mirror/FrontEndBackendCommonCode';
 import moment from 'moment';
 import { DD_MM_YYYY_FORMAT } from '../utils/constants';
 import { FETCH_ACRHIVE_METADATA_COUNTER } from './archiveScraper';
+import * as path from 'path';
+
 
 export const ARCHIVE_EXCEL_PATH = `${os.homedir()}\\Downloads`;
 export const ARCHIVE_DOT_ORG_PREFIX = "https://archive.org";
@@ -126,17 +128,19 @@ export const extractLinkedData = async (_hitsHits: HitsEntity[],
     _archiveAcctName: string,
     limitedFields = false) => {
     const _linkData: LinkData[] = [];
+    console.log(`extractLinkedData Extracting metadata for ${_hitsHits.length} items`);
     for (const hit of _hitsHits) {
-        FETCH_ACRHIVE_METADATA_COUNTER.value++;
+        FETCH_ACRHIVE_METADATA_COUNTER.increment();
         const identifier = hit.fields.identifier;
-        let pdfName = ""
-        let pdfPageCount = 0
-        console.log(`${FETCH_ACRHIVE_METADATA_COUNTER.value}/${FETCH_ACRHIVE_METADATA_COUNTER.hitsTotal}).Fetching metadata for ${hit.fields.title} `)
+        let archiveItemName = ""
+        let pageCount = 0
+        console.log(`${FETCH_ACRHIVE_METADATA_COUNTER.value}/${FETCH_ACRHIVE_METADATA_COUNTER.hitsTotal}).
+        Fetching metadata for ${hit.fields.title} `);
         if (!limitedFields) {
             try {
                 const pdfMetaData = await extractPdfMetaData(identifier);
-                pdfName = pdfMetaData?.pdfName || "";
-                pdfPageCount = pdfMetaData?.pdfPageCount || 0;
+                archiveItemName = pdfMetaData?.pdfName || "";
+                pageCount = pdfMetaData?.pdfPageCount || 0;
             }
             catch (err) {
                 console.log(`Error while extracting pdf metadata ${err}`);
@@ -144,7 +148,10 @@ export const extractLinkedData = async (_hitsHits: HitsEntity[],
             }
         }
 
-        const originalTitle = pdfName.replace(".pdf", "");
+        const extension = path.extname(archiveItemName);
+        const originalTitle =  archiveItemName.replace(extension, "");
+
+       
         const obj: LinkData = {
             link: `${ARCHIVE_DOT_ORG_DETAILS_PREFIX}${identifier}`,
             titleArchive: hit.fields.title,
@@ -159,12 +166,12 @@ export const extractLinkedData = async (_hitsHits: HitsEntity[],
             item_size: hit.fields.item_size,
             item_size_formatted: sizeInfo(hit.fields.item_size),
             email,
-            pdfPageCount: pdfPageCount,
+            pdfPageCount: pageCount,
             downloads: hit?.fields?.downloads?.toString() || "0"
         }
         if (!limitedFields) {
             obj.originalTitle = originalTitle;
-            obj.pdfDownloadUrl = `${ARCHIVE_DOT_ORG_DWONLOAD_PREFIX}${identifier}/${pdfName}`;
+            obj.pdfDownloadUrl = `${ARCHIVE_DOT_ORG_DWONLOAD_PREFIX}${identifier}/${archiveItemName}`;
         }
 
         _linkData.push(obj)

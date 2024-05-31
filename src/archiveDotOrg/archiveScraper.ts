@@ -48,6 +48,9 @@ export const FETCH_ACRHIVE_METADATA_COUNTER = {
     reset: () => {
         FETCH_ACRHIVE_METADATA_COUNTER.value = 0;
         FETCH_ACRHIVE_METADATA_COUNTER.hitsTotal = 0;
+    },
+    increment: () => {
+        FETCH_ACRHIVE_METADATA_COUNTER.value++;
     }
 }
 
@@ -82,7 +85,8 @@ const fetchArchiveMetadata = async (username: string,
                 _linkData.push(...extractedData);
             }
 
-            for (let i = 1; i < Math.ceil(hitsTotal / 1000); i++) {
+            //beyond the 1st 1000
+            for (let i = 1; i < Math.ceil(hitsTotal / DEFAULT_HITS_PER_PAGE); i++) {
                 console.log(`maxItemsCounter ${maxItemsCounter}`)
                 if (maxItemsCounter > 0) {
                     _hits = await callGenericArchiveApi(username, (i + 1), dateRange[0], dateRange[1], ascOrder, maxItemsCounter);
