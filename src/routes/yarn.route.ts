@@ -13,6 +13,8 @@ yarnRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
     try {
         const googleDriveLink = req?.body?.googleDriveLink;
         const profile = req?.body?.profile;
+        const ignoreFolder = req?.body?.ignoreFolder || "proc";
+
         console.log(`:downloadFromGoogleDrive:
         googleDriveLink:
          ${googleDriveLink?.split(",").map((link: string) => link + "\n ")} 
@@ -29,7 +31,7 @@ yarnRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
         const links = googleDriveLink.includes(",") ? googleDriveLink.split(",").map((link: string) => link.trim()) : [googleDriveLink.trim()];
         resetDownloadCounters();
         for (const [index, link] of links.entries()) {
-            const res = await downloadPdfFromGoogleDriveToProfile(link, profile);
+            const res = await downloadPdfFromGoogleDriveToProfile(link, profile,ignoreFolder);
             results.push(res);
         }
         resp.status(200).send({

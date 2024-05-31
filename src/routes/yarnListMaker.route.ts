@@ -15,7 +15,8 @@ yarnListMakerRoute.post('/getGoogleDriveListing', async (req: any, resp: any) =>
         const googleDriveLink = req?.body?.googleDriveLink;
         const folderName = req?.body?.folderName || "";
         const reduced = req?.body?.reduced || false;
-        const ignoreFolder = req?.body?.ignoreFolder || "proc";
+        const ignoreFolder = req?.body?.ignoreFolder 
+        //|| "proc";
         const allNotJustPdfs = req?.body?.allNotJustPdfs || false;
 
         console.log(`getGoogleDriveListing googleDriveLink:
