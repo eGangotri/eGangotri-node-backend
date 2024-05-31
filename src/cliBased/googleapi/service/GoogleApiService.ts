@@ -82,7 +82,7 @@ export async function listFolderContents(folderId: string,
         let files: drive_v3.Schema$File[] = [];
         let pageToken: string | undefined = undefined;
         //
-        const conditionForIgnoreFolder = ignoreFolder?.length > 0 ? ` and (mimeType='${FOLDER_MIME_TYPE}' and not name contains '${ignoreFolder}')` : "";
+        const conditionForIgnoreFolder = ignoreFolder?.length > 0 ? ` and not name contains '${ignoreFolder}'` : "";
         const conditionForPdfOnly = pdfOnly ? ` and (mimeType='${PDF_MIME_TYPE}' or mimeType='${FOLDER_MIME_TYPE}') ` : ` and (mimeType!='' or  mimeType='${FOLDER_MIME_TYPE}')` ;
 
         //

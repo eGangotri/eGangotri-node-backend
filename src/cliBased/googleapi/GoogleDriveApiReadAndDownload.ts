@@ -16,7 +16,7 @@ import { extractGoogleDriveId } from '../../mirror/GoogleDriveUtilsCommonCode';
 // Create a new Google Drive instance
 const drive = getGoogleDriveInstance();
 
-async function getAllFilesFromGDrive(driveLinkOrFolderID: string, folderName: string, pdfDumpFolder: string, ignoreFolder="", pdfOnly = true) {
+async function getAllFilesFromGDrive(driveLinkOrFolderID: string, folderName: string, pdfDumpFolder: string, ignoreFolder = "", pdfOnly = true) {
   const folderId = extractGoogleDriveId(driveLinkOrFolderID)
   console.log(`folderId: ${folderId}`)
   const googleDriveData = await listFolderContentsAsArrayOfData(folderId,
@@ -90,7 +90,10 @@ export const addHeaderFooterToPDFsInProfile = async (profile: string) => {
   }
 }
 
-export const downloadPdfFromGoogleDriveToProfile = async (driveLinkOrFolderId: string, profileOrPath: string, ignoreFolder="", pdfOnly = true) => {
+export const downloadPdfFromGoogleDriveToProfile = async (driveLinkOrFolderId: string,
+  profileOrPath: string,
+  ignoreFolder = "",
+  pdfOnly = true) => {
   const pdfDumpFolder = isValidPath(profileOrPath) ? profileOrPath : getFolderInSrcRootForProfile(profileOrPath);
 
   console.log(`downloadPdfFromGoogleDriveToProfile:pdfDumpFolder ${pdfDumpFolder}`)
