@@ -17,6 +17,7 @@ const schema = new mongoose.Schema(
         datetimeUploadStarted: { type: Date, required: true, default: Date.now },
         allUploadVerified: { type: Boolean, required: false, default: null },
         mode: { type: String, required: false, default: "Regular" },
+        moveToFreeze: { type: Boolean, required: true, default: false }
     }, {
     collection: 'Upload_Cycle',
     timestamps: true

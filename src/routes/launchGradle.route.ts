@@ -349,10 +349,11 @@ launchGradleRoute.post('/reuploadMissedByProfileAndAbsPath', async (req: any, re
     }
 })
 
-
+//@deprecated
 launchGradleRoute.get('/moveToFreeze', async (req: any, resp: any) => {
     try {
         const _profiles = req.query.profiles
+        const _uploadCycleId = req.query.uploadCycleId;
         console.log(`moveToFreeze ${_profiles}`)
         const res = await moveToFreeze(req.query.profiles)
         resp.status(200).send({
