@@ -1,12 +1,11 @@
 import fs from 'fs';
-import path from 'path'; import { sizeInfo } from '../mirror/FrontEndBackendCommonCode';
+import path from 'path';
 import { SelectedUploadItem } from '../mirror/types';
 import { createArchiveLink } from '../mirror';
 export const Utils = {};
 
 export const DD_MM_YYYY_FORMAT = 'DD-MMM-YYYY'
 export const DD_MM_YYYY_HH_MMFORMAT = 'DD-MMM-YYYY-HH-mm'
-
 
 export function isValidPath(path: string): boolean {
   try {
@@ -17,8 +16,8 @@ export function isValidPath(path: string): boolean {
   }
 }
 
-function findLongestFileName(directory: string, longestButLessThan: number = 300): string {
-  let longestFileName = '';
+export const findTopNLongestFileNames = (directory: string, n: number = 1, includePathInCalc = false) => {
+  let longestFileNames: string[] = [];
 
   function processDirectory(dir: string) {
     const files = fs.readdirSync(dir);
@@ -30,21 +29,23 @@ function findLongestFileName(directory: string, longestButLessThan: number = 300
       if (stat.isDirectory()) {
         processDirectory(filePath);
       } else {
-        const fileName = path.basename(filePath);
-        const fileWithPathLength = path.resolve(filePath);
-        if (fileName.length > longestFileName.length && (fileName.length < longestButLessThan)) {
-          longestFileName = fileName;
+        const fileName = includePathInCalc ? filePath : path.basename(filePath);
+        longestFileNames.push(fileName);
+        longestFileNames.sort((a, b) => b.length - a.length);
+        if (longestFileNames.length > n) {
+          longestFileNames.pop();
         }
       }
     }
   }
 
   processDirectory(directory);
-
-  return longestFileName;
+  console.log('longestFileNames:', longestFileNames);
+  return longestFileNames;//.map(fileName => [fileName, fileName.length]);
 }
 
-function findHighestFileSize(directory: string): number {
+
+export const findHighestFileSize = (directory: string): number => {
   let highestSize = 0;
 
   function processDirectory(dir: string) {
@@ -89,14 +90,14 @@ export async function checkUrlValidityForUploadItems(_forVerfication: SelectedUp
   counter: number,
   total: number): Promise<SelectedUploadItem> {
   const url = createArchiveLink(_forVerfication.archiveId);
-  const _validity = await checkUrlValidity(url, counter,total);
+  const _validity = await checkUrlValidity(url, counter, total);
   return {
     ..._forVerfication,
     isValid: _validity
   }
 }
 
-export async function checkUrlValidity(url: string, counter: number,total:number): Promise<boolean> {
+export async function checkUrlValidity(url: string, counter: number, total: number): Promise<boolean> {
   try {
     const response = await fetch(url, { method: 'HEAD' });
     // Check if the response status code indicates success (2xx) or redirection (3xx)

@@ -20,6 +20,7 @@ import { launchMongoRoute } from "./routes/launchMongo.route";
 import { launchArchiveYarnRoute } from "./routes/launchArchiveYarn.route";
 import { yarnExcelRoute } from "./routes/yarnExcel.route";
 import "./logger/override";
+import { fileUtilsRoute } from "./routes/fileUtils.route";
 
 const egangotri = express();
 const hostname = "localhost";
@@ -62,6 +63,7 @@ egangotri.use("/yarnArchive", launchArchiveYarnRoute);
 egangotri.use("/searchArchivesDB", archiveItemRoute);
 egangotri.use("/searchGDriveDB", googleDriveItemRoute);
 egangotri.use("/searchMongo", launchMongoRoute);
+egangotri.use("/fileUtil", fileUtilsRoute);
 
 connectToMongo(args).then(() => {
   egangotri.listen(port,'0.0.0.0', async () => {
