@@ -16,6 +16,16 @@ export async function getLatestUploadCycle() {
   return item?.uploadCycleId || "";
 }
 
+export async function getLatestUploadCycleById(uploadCycleId:string) {
+  const item = await UploadCycle.findOne({uploadCycleId:uploadCycleId})
+  return item;
+}
+
+export async function markUploadCycleAsMovedToFreeze(uploadCycleId:string) {
+  await UploadCycle.updateOne({ uploadCycleId: uploadCycleId }, { $set: { moveToFreeze: true } });
+}
+
+
 export function setOptionsForUploadCycleListing(queryOptions: UploadCycleListOptionsType) {
   // Empty `filter` means "match all documents"
   let mongoOptionsFilter = {};

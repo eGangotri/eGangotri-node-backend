@@ -6,6 +6,7 @@ import { resetDownloadCounters } from '../cliBased/pdf/utils';
 import { vanitizePdfForProfile } from '../vanityService/VanityPdf';
 import { timeInfo } from '../mirror/FrontEndBackendCommonCode';
 import { compareFolders } from '../folderSync';
+import { getLatestUploadCycleById, markUploadCycleAsMovedToFreeze } from '../services/uploadCycleService';
 
 export const yarnRoute = express.Router();
 
@@ -81,6 +82,8 @@ yarnRoute.post('/yarnMoveProfilesToFreeze', async (req: any, resp: any) => {
     console.log(`moveProfilesToFreeze ${JSON.stringify(req.body)}`)
     try {
         const profileAsCSV = req?.body?.profileAsCSV;
+        const _uploadCycleId = req.body.uploadCycleId;
+        const uploadCycle = await getLatestUploadCycleById(_uploadCycleId);
         const flatten = req?.body?.flatten === "false" ? false : true;
 
         if (!profileAsCSV) {
@@ -93,6 +96,8 @@ yarnRoute.post('/yarnMoveProfilesToFreeze', async (req: any, resp: any) => {
             });
         }
         const _response = await moveProfilesToFreeze(profileAsCSV, flatten);
+        await markUploadCycleAsMovedToFreeze(_uploadCycleId)
+
         resp.status(200).send(_response);
     }
 
