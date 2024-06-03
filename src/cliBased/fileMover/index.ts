@@ -113,8 +113,9 @@ const checkIfAnyFileInUse = (allSrcPdfs: FileStats[]) => {
 const checkCollision = (allSrcPdfs: FileStats[], allDestPdfs: FileStats[]) => {
     const allSrcFileNames = allSrcPdfs.map((x) => x.fileName);
     const allDestFileNames = allDestPdfs.map((x) => x.fileName);
-    console.log(`allSrcFileNames ${allSrcFileNames}
-     allDestFileNames ${allDestFileNames}`)
+    console.log(`allSrcFileNames ${allSrcPdfs}
+     allDestFileNames ${allDestPdfs}`)
+
     const matchingFiles = allSrcFileNames.filter(file => allDestFileNames.includes(file));
     if (matchingFiles.length > 0) {
         console.error(`Following files are already present in target dir, cancelling move operation: ${matchingFiles}`);
@@ -128,11 +129,3 @@ const checkCollision = (allSrcPdfs: FileStats[], allDestPdfs: FileStats[]) => {
         success: true
     }
 }
-
-// const filePath = "D:\\_playground\\_dhanuShriPlayground\\DONE_RENAMING\\15-Feb-(53)-DHANU";
-// const profile = "KANGRI";
-// const destPath = getFolderInSrcRootForProfile(profile)
-// Usage
-//moveFilesAndFlatten(filePath, destPath);
-//moveFilesWithFolders(filePath,destPath);
-//yarn run moveFilesToProfile
