@@ -40,7 +40,7 @@ export async function listFolderContentsAndGenerateCSVAndExcel(_folderIdOrUrl: s
 
     const googleDriveFileData: Array<GoogleApiData> = await listFolderContentsAsArrayOfData(folderId,
         drive, umbrellaFolder, ignoreFolder, pdfOnly)
-    const fileNameWithPath = createFileNameWithPathForExport(folderId, umbrellaFolder, exportDestFolder) + `_${FileUtils.ROW_COUNTER[1]}`;
+    const fileNameWithPath = createFileNameWithPathForExport(folderId, umbrellaFolder, exportDestFolder, FileUtils.ROW_COUNTER[1]) ;
     FileUtils.incrementRowCounter()
     //writeDataToCSV(googleDriveFileData, `${fileNameWithPath}.csv`)
     // Convert data to XLSX
