@@ -23,7 +23,7 @@ export const getDuplicatesBySize = async (folder: string, folder2: string) => {
 
 const duplicateBySizeCheck = (metadata: FileStats[], metadata2: FileStats[]) => {
     const duplicates = [];
-    console.log(`metadata ${metadata[0].size} metadata2 ${metadata2[0].size}`)
+    console.log(`metadata ${JSON.stringify(metadata[0].size)} metadata2 ${JSON.stringify(metadata2[0].size)}`)
     metadata.forEach((file:FileStats) => {
         const match = metadata2.find((file2:FileStats) => {
             if(file.rawSize === file2.rawSize){
@@ -31,7 +31,7 @@ const duplicateBySizeCheck = (metadata: FileStats[], metadata2: FileStats[]) => 
             }
             return file.rawSize === file2.rawSize;
         });
-        console.log(`match ${JSON.stringify(match)}`)
+        //console.log(`match ${JSON.stringify(match)}`)
         if (match?.fileName.length > 0) {
             duplicates.push({
                 file:file.fileName,
