@@ -65,10 +65,11 @@ egangotri.use("/searchGDriveDB", googleDriveItemRoute);
 egangotri.use("/searchMongo", launchMongoRoute);
 egangotri.use("/fileUtil", fileUtilsRoute);
 
+egangotri.listen(port,'0.0.0.0', async () => {
+  console.log(`Server - deployed ${deployDate} - running at http://${hostname}:${port}/`, new Date());
+});
 connectToMongo(args).then(() => {
-  egangotri.listen(port,'0.0.0.0', async () => {
-    console.log(`Server - deployed ${deployDate} - running at http://${hostname}:${port}/`, new Date());
-  });
+  console.log(`Server - conected to DB, new Date()`);
 })
 
 

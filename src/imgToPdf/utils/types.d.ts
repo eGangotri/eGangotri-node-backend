@@ -11,9 +11,9 @@ export interface FileStats {
 
 export interface FileStatsOptions {
     directoryPath: string,
-    filterPath: string,
-    ignoreFolders: boolean,
-    withLogs: boolean,
-    withMetadata: boolean,
-    withFileSizeMetadata: boolean
+    filterPath?: string,
+    ignoreFolders?: boolean,
+    withLogs?: boolean,
+    withMetadata?: boolean,
+    withFileSizeMetadata?: boolean
 }
