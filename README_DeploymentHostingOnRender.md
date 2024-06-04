@@ -1,5 +1,16 @@
 ## Dockerize
 
+If you want to run the image for Daily-Work-Report then
+in .env
+make 
+MONGO_DB_NAME="egangotridb"
+and instead of dashboard use dwr as the tag.
+eg****trust@Gmail.com is the Docker Hub Acct.
+
+Otherwise use tag "dashboard" 
+and 
+MONGO_DB_NAME="egangotri_upload_db"
+
 ## Create Account in Docker Hub followed by Repository
 
 https://hub.docker.com/r/egangotri/egangotri-node-backend
@@ -13,13 +24,13 @@ docker login -u "egangotri" -p "XXXXX" https://docker.io
 ## Create DockerFile
 Save it as Dockerfile
 
-docker build -t egangotri/egangotri-node-backend:latest .
+docker build -t egangotri/egangotri-node-backend:dashboard .
 Test it by running :
-docker run -p 80:80 egangotri/egangotri-node-backend:latest
+docker run -p 80:80 egangotri/egangotri-node-backend:dashboard
 View at
 http://127.0.0.1:80/
 
-docker push egangotri/egangotri-node-backend:latest
+docker push egangotri/egangotri-node-backend:dashboard
 
 
 
@@ -38,7 +49,7 @@ https://egangotri-node-backend-d4c7.onrender.com
 Below is for react-dashboard frontend and uses the upload_db database
 p*****78@gmail.com
 URL:
-https://egangotri-node-backend-latest.onrender.com/
+https://egangotri-node-backend-dashboard.onrender.com/
 
 
 
