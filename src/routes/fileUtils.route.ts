@@ -10,7 +10,7 @@ fileUtilsRoute.post('/duplicatesByFileSize', async (req: any, resp: any) => {
         const folder2 = req.body.folder2
 
         console.log(`folder: ${folder} folder2: ${folder2}`);
-        const result = getDuplicatesBySize(folder, folder2);
+        const result = await getDuplicatesBySize(folder, folder2);
         resp.status(200).send({
             response: result
         });
