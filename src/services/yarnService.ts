@@ -2,12 +2,14 @@ import { isValidPath } from "../utils/utils";
 import { moveFilesAndFlatten } from "../cliBased/fileMover";
 import { getFolderInDestRootForProfile, getFolderInSrcRootForProfile } from "../cliBased/utils";
 import * as fs from 'fs';
-import { getAllFileListingWithoutStats, getAllFileListingWithStats, getAllPDFFiles, getAllPDFFilesWithMedata, resetRowCounter } from "../imgToPdf/utils/FileUtils";
+import { getAllFileListingWithoutStats, getAllFileListingWithStats, getAllPDFFiles, getAllPDFFilesWithMedata } from "../imgToPdf/utils/FileUtils";
 import { FileStats } from "../imgToPdf/utils/types";
 import { sizeInfo } from "../mirror/FrontEndBackendCommonCode";
 import * as path from 'path';
 import moment from "moment";
 import { DD_MM_YYYY_HH_MMFORMAT } from "../utils/constants";
+import * as FileUtils from '../imgToPdf/utils/FileUtils';
+
 import * as _ from 'lodash';
 
 import { addSummaryToExcel, createMetadata } from "../excelToMongo/Util";
@@ -85,7 +87,7 @@ export const publishBookTitlesList = async (argFirst: string, options: {
 }) => {
     const pdfDumpFolders = getFoldersFromInput(argFirst);
     const _response = []
-    resetRowCounter()
+    FileUtils.resetRowCounter()
     for (let folder of pdfDumpFolders) {
         if (isValidPath(folder)) {
             let metadata = []
@@ -170,7 +172,7 @@ export const publishBookTitlesList = async (argFirst: string, options: {
 
 function createPdfReportAsText(metadata: Array<FileStats>, pdfsOnly: boolean, folderBase: string) {
     const report = generateTextFileContent(metadata, pdfsOnly);
-    const absPath = createFileName(pdfsOnly, folderBase, 'txt');
+    const absPath = createFileName(pdfsOnly,metadata.length, folderBase, 'txt');
     fs.writeFileSync(absPath, report);
     return absPath;
 }
@@ -205,9 +207,9 @@ const createMetadataSummary = (totalFileCount: number, totalPageCount: number, t
     Total Pages: ${totalPageCount}`
 }
 
-function createFileName(pdfsOnly: boolean, folderBase: string, ext: string) {
-    const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)
-    const fileName = `${folderBase}_MegaList_${pdfsOnly ? 'pdfs_only' : 'all_files'}-${timeComponent}.${ext}`;
+function createFileName(pdfsOnly: boolean, fileCount:number, folderBase: string, ext: string) {
+    const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)+ "_HOURS"
+    const fileName = `${folderBase}_MegaList_${pdfsOnly ? 'pdfs_only' : 'all_files'}-${fileCount}Items-${timeComponent}.${ext}`;
     const filePath = `${_root}\\${folderBase}`;
     if (!fs.existsSync(filePath)) {
         fs.mkdirSync(filePath);
@@ -216,7 +218,7 @@ function createFileName(pdfsOnly: boolean, folderBase: string, ext: string) {
     return absPath;
 }
 function createExcelReport(fileStats: Array<FileStats>, pdfsOnly: boolean, folderBase: string) {
-    const absPath = createFileName(pdfsOnly, folderBase, 'xlsx');
+    const absPath = createFileName(pdfsOnly, fileStats.length, folderBase, 'xlsx');
     const { totalFileCount, totalPageCount, totalSizeRaw } = createMetadata(fileStats);
     addSummaryToExcel(fileStats, totalFileCount, totalPageCount, totalSizeRaw);
     jsonToExcel(fileStats, absPath)
