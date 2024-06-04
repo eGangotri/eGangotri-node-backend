@@ -5,7 +5,7 @@ import { getPdfPageCountUsingPdfLib } from "./PdfLibUtils";
 import { getFilzeSize } from '../../mirror/FrontEndBackendCommonCode';
 import * as path from 'path';
 import * as Mirror from "../../mirror/FrontEndBackendCommonCode"
-import { FileStats } from './types';
+import { FileStats, FileStatsOptions } from './types';
 import { ellipsis } from '../../mirror/utils';
 import _ from 'lodash';
 import { PDF_EXT } from './constants';
@@ -59,22 +59,20 @@ export async function getAllPDFFilesWithMedata(directoryPath: string, withLogs: 
  * @param withMetadata 
  * @returns 
  */
-export async function getAllFileStatsSync(directoryPath: string,
-    filterPath: string = "",
-    ignoreFolders: boolean = false,
-    withLogs: boolean = false,
-    withMetadata: boolean = false): Promise<FileStats[]> {
+export async function getAllFileStatsSync(
+    fileStatOptions: FileStatsOptions
+): Promise<FileStats[]> {
     let _files: FileStats[] = [];
 
     // Read all items in the directory
-    const items = fs.readdirSync(directoryPath);
+    const items = fs.readdirSync(fileStatOptions.directoryPath);
 
     for (const item of items) {
-        const itemPath = path.join(directoryPath, item);
+        const itemPath = path.join(fileStatOptions.directoryPath, item);
         const stat = fs.statSync(itemPath);
         if (stat.isDirectory()) {
             // Recursively call the function for subdirectories
-            if (!ignoreFolders) {
+            if (!fileStatOptions.ignoreFolders) {
                 const _path = path.parse(itemPath);
                 _files.push({
                     rowCounter: ++ROW_COUNTER[1],
@@ -84,10 +82,13 @@ export async function getAllFileStatsSync(directoryPath: string,
                     ext: "FOLDER"
                 })
             }
-            _files = _files.concat(await getAllFileStats(itemPath, filterPath, ignoreFolders, withLogs, withMetadata));
+            _files = _files.concat(await getAllFileStats(itemPath, fileStatOptions.filterPath, 
+                fileStatOptions.ignoreFolders, 
+                fileStatOptions.withLogs, 
+                fileStatOptions.withMetadata));
         } else {
             const ext = path.extname(itemPath);
-            if (!_.isEmpty(filterPath) && (ext.toLowerCase() !== filterPath)) {
+            if (!_.isEmpty(fileStatOptions.filterPath) && (ext.toLowerCase() !== fileStatOptions.filterPath)) {
                 continue;
             }
             const _path = path.parse(itemPath);
@@ -98,18 +99,28 @@ export async function getAllFileStatsSync(directoryPath: string,
                 fileName: _path.base,
                 ext
             }
-            if (withMetadata) {
+
+            if (fileStatOptions.withFileSizeMetadata) {
+                const rawSize = getFilzeSize(itemPath);
+                fileStat = {
+                    ...fileStat,
+                    rawSize,
+                    size: Mirror.sizeInfo(rawSize),
+                }
+
+                if (fileStatOptions.withLogs) {
+                    console.log(`${ROW_COUNTER[0]}/${ROW_COUNTER[1]}). ${JSON.stringify(ellipsis(fileStat.fileName, 40))} ${Mirror.sizeInfo(fileStat.rawSize)}`);
+                }
+            }
+            if (fileStatOptions.withMetadata) {
                 try {
-                    const rawSize = getFilzeSize(itemPath);
                     const pageCount = await getPdfPageCountUsingPdfLib(itemPath)
                     fileStat = {
                         ...fileStat,
                         pageCount: pageCount,
-                        rawSize,
-                        size: Mirror.sizeInfo(rawSize),
                     }
-                    if (withLogs) {
-                        console.log(`${ROW_COUNTER[0]}/${ROW_COUNTER[1]}). ${JSON.stringify(ellipsis(fileStat.fileName, 40))} ${pageCount} pages ${Mirror.sizeInfo(rawSize)}`);
+                    if (fileStatOptions.withLogs) {
+                        console.log(`${ROW_COUNTER[0]}/${ROW_COUNTER[1]}). ${JSON.stringify(ellipsis(fileStat.fileName, 40))} ${pageCount} pages ${Mirror.sizeInfo(fileStat.rawSize)}`);
                     }
                 }
                 catch (err) {
@@ -124,7 +135,7 @@ export async function getAllFileStatsSync(directoryPath: string,
                 }
             }
             else {
-                if (withLogs) {
+                if (fileStatOptions.withLogs) {
                     console.log(`${ROW_COUNTER[0]}/${ROW_COUNTER[1]}). ${JSON.stringify(ellipsis(fileStat.fileName, 40))}`);
                 }
             }
@@ -135,11 +146,39 @@ export async function getAllFileStatsSync(directoryPath: string,
 }
 
 export async function getAllFileListingWithoutStats(directoryPath: string): Promise<FileStats[]> {
-    return await getAllFileStatsSync(directoryPath, "", true, false, false);
+    return await getAllFileStatsSync(
+        {
+            directoryPath,
+            filterPath: "",
+            ignoreFolders: true,
+            withLogs: true,
+            withMetadata: false,
+            withFileSizeMetadata: false
+        })
+}
+
+export async function getAllFileListingWithFileSizeStats(directoryPath: string): Promise<FileStats[]> {
+    return await getAllFileStatsSync(
+        {
+            directoryPath,
+            filterPath: "",
+            ignoreFolders: true,
+            withLogs: true,
+            withMetadata: false,
+            withFileSizeMetadata: true
+        })
 }
 
 export async function getAllFileListingWithStats(directoryPath: string): Promise<FileStats[]> {
-    return await getAllFileStatsSync(directoryPath, "", true, false, true);
+    return await getAllFileStatsSync(
+        {
+            directoryPath,
+            filterPath: "",
+            ignoreFolders: true,
+            withLogs: false,
+            withMetadata: true,
+            withFileSizeMetadata: false
+        })
 }
 
 export async function getAllFileStats(directoryPath: string,

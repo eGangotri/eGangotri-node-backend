@@ -8,3 +8,12 @@ export interface FileStats {
     folder: string;
     ext?: string;
 }
+
+export interface FileStatsOptions {
+    directoryPath: string,
+    filterPath: string,
+    ignoreFolders: boolean,
+    withLogs: boolean,
+    withMetadata: boolean,
+    withFileSizeMetadata: boolean
+}
