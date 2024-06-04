@@ -113,8 +113,8 @@ const checkIfAnyFileInUse = (allSrcPdfs: FileStats[]) => {
 const checkCollision = (allSrcPdfs: FileStats[], allDestPdfs: FileStats[]) => {
     const allSrcFileNames = allSrcPdfs.map((x) => x.fileName);
     const allDestFileNames = allDestPdfs.map((x) => x.fileName);
-    console.log(`allSrcFileNames ${allSrcPdfs}
-     allDestFileNames ${allDestPdfs}`)
+    console.log(`allSrcFileNames ${allSrcPdfs.map((x) => x.absPath)}
+     allDestFileNames ${allDestPdfs.map((x) => x.absPath)}`)
 
     const matchingFiles = allSrcFileNames.filter(file => allDestFileNames.includes(file));
     if (matchingFiles.length > 0) {
