@@ -143,7 +143,8 @@ export const handleEachRow = (uploadCycleId: string,
     dateTimeQueueUploadStarted,
     countIntended: uploadCycleRow[0]?.uploadCount,
     archiveProfileAndCountIntended: uploadCycleRow[0]?.archiveProfiles,
-    allUploadVerified: uploadCycleRow[0]?.allUploadVerified
+    allUploadVerified: uploadCycleRow[0]?.allUploadVerified,
+    moveToFreeze: uploadCycleRow[0]?.moveToFreeze
   }
 
   return uploadCycleData;
