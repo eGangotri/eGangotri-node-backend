@@ -2,13 +2,13 @@ import { isValidPath } from "../utils/utils";
 import { moveFilesAndFlatten } from "../cliBased/fileMover";
 import { getFolderInDestRootForProfile, getFolderInSrcRootForProfile } from "../cliBased/utils";
 import * as fs from 'fs';
-import { getAllFileListingWithoutStats, getAllFileListingWithStats, getAllPDFFiles, getAllPDFFilesWithMedata } from "../imgToPdf/utils/FileUtils";
+import { getAllFileListingWithoutStats, getAllFileListingWithStats, getAllPDFFiles, getAllPDFFilesWithMedata } from "../utils/FileUtils";
 import { FileStats } from "../imgToPdf/utils/types";
 import { sizeInfo } from "../mirror/FrontEndBackendCommonCode";
 import * as path from 'path';
 import moment from "moment";
 import { DD_MM_YYYY_HH_MMFORMAT } from "../utils/constants";
-import * as FileUtils from '../imgToPdf/utils/FileUtils';
+import * as FileUtils from '../utils/FileUtils';
 
 import * as _ from 'lodash';
 
@@ -110,7 +110,7 @@ export const publishBookTitlesList = async (argFirst: string, options: {
                 }
                 else {
                     console.log(`notPDF: !withStats ${options.withStats}`)
-                    metadata = await getAllFileListingWithoutStats(folder);
+                    metadata = await FileUtils.getAllFileListingWithFileSizeStats(folder);
                 }
             }
             //doesnt handle allFiles option yet.
