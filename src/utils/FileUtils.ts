@@ -1,14 +1,16 @@
 import * as fs from 'fs';
 import * as fsPromise from 'fs/promises';
 
-import { getPdfPageCountUsingPdfLib } from "./PdfLibUtils";
-import { getFilzeSize } from '../../mirror/FrontEndBackendCommonCode';
+import { getPdfPageCountUsingPdfLib } from "../imgToPdf/utils/PdfLibUtils";
+import { getFilzeSize } from '../mirror/FrontEndBackendCommonCode';
 import * as path from 'path';
-import * as Mirror from "../../mirror/FrontEndBackendCommonCode"
-import { FileStats, FileStatsOptions } from './types';
-import { ellipsis } from '../../mirror/utils';
+import * as Mirror from "../mirror/FrontEndBackendCommonCode"
+import { FileStatsOptions } from '../imgToPdf/utils/types';
+import { ellipsis } from '../mirror/utils';
 import _ from 'lodash';
-import { PDF_EXT } from './constants';
+import { PDF_EXT } from '../imgToPdf/utils/constants';
+
+import { FileStats } from "imgToPdf/utils/types";
 
 export let ROW_COUNTER = [1, 0];
 export const incrementRowCounter = () => { ROW_COUNTER = [++ROW_COUNTER[0], 0] }
@@ -61,6 +63,7 @@ export async function getAllPDFFilesWithMedata(directoryPath: string, withLogs: 
     });
 }
 
+//Deprecated
 /**
  * 
  * @param directoryPath 
@@ -163,7 +166,7 @@ export async function getAllFileStatsSync(
 
 export async function getAllFileListingWithoutStats(directoryPath: string): Promise<FileStats[]> {
     resetRowCounter()
-    return await getAllFileStatsSync(
+    return await getAllFileStats(
         {
             directoryPath,
             filterPath: "",
@@ -189,7 +192,7 @@ export async function getAllFileListingWithFileSizeStats(directoryPath: string):
 
 export async function getAllFileListingWithStats(directoryPath: string): Promise<FileStats[]> {
     resetRowCounter()
-    return await getAllFileStatsSync(
+    return await getAllFileStats(
         {
             directoryPath,
             filterPath: "",
@@ -322,4 +325,45 @@ export const checkIfEmpty = async (srcPath: string) => {
     }
     console.log(`emptyFolder ${empty}`);
     return empty;
+}
+
+export const getDuplicatesBySize = async (folder: string, folder2: string) => {
+    const metadata = await getAllFileListingWithFileSizeStats(folder);
+    const metadata2 = await getAllFileListingWithFileSizeStats(folder2);
+
+    const duplicates = duplicateBySizeCheck(metadata, metadata2)
+
+    const reverseDuplicates = duplicateBySizeCheck(metadata2, metadata)
+    return {
+        msg: `${metadata.length} files in ${folder} and ${metadata2.length} files in ${folder2} with ${duplicates.length} duplicates by size.`,
+        metadata1Length: metadata.length,
+        metadata2Length: metadata2.length,
+        diff1: metadata.length - duplicates.length,
+        diff2: metadata2.length - reverseDuplicates.length,
+        dupLength: duplicates.length,
+        revDupLength: reverseDuplicates.length,
+        duplicates,
+        reverseDuplicates,
+    }
+}
+
+const duplicateBySizeCheck = (metadata: FileStats[], metadata2: FileStats[]) => {
+    const duplicates = [];
+    console.log(`metadata ${JSON.stringify(metadata[0].size)} metadata2 ${JSON.stringify(metadata2[0].size)}`)
+    metadata.forEach((file: FileStats) => {
+        const match = metadata2.find((file2: FileStats) => {
+            if (file.rawSize === file2.rawSize) {
+                console.log(`rawSize ${file.fileName}(${file.rawSize}) ${file2?.fileName}(${file2?.rawSize})`)
+            }
+            return file.rawSize === file2.rawSize;
+        });
+        //console.log(`match ${JSON.stringify(match)}`)
+        if (match?.fileName.length > 0) {
+            duplicates.push({
+                file: file.fileName,
+                file2: match?.fileName
+            });
+        }
+    });
+    return duplicates;
 }

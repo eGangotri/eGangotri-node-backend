@@ -7,7 +7,7 @@ import { createFileNameWithPathForExport, getFolderName, getFolderPathRelativeTo
 import * as _ from 'lodash';
 import { GaxiosResponse } from 'gaxios';
 import { ellipsis } from '../../../mirror/utils';
-import * as FileUtils from '../../../imgToPdf/utils/FileUtils';
+import * as FileUtils from '../../../utils/FileUtils';
 import { extractGoogleDriveId } from '../../../mirror/GoogleDriveUtilsCommonCode';
 
 export async function listFolderContentsAsArrayOfData(folderId: string,
