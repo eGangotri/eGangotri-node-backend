@@ -11,7 +11,7 @@ import { createExcelV1FileForUpload, createExcelV3FileForUpload, createJsonFileF
 import { itemsUsheredVerficationAndDBFlagUpdate } from '../services/itemsUsheredService';
 import * as path from 'path';
 import { getLatestUploadCycle } from '../services/uploadCycleService';
-import { checkIfEmpty } from '../imgToPdf/utils/FileUtils';
+import { checkIfEmpty } from '../utils/FileUtils';
 
 export const launchGradleRoute = express.Router();
 

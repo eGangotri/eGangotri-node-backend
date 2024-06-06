@@ -69,7 +69,7 @@ egangotri.listen(port,'0.0.0.0', async () => {
   console.log(`Server - deployed ${deployDate} - running at http://${hostname}:${port}/`, new Date());
 });
 connectToMongo(args).then(() => {
-  console.log(`Server - conected to DB, new Date()`);
+  console.log(`Server - connected to DB, ${new Date()}`);
 })
 
 

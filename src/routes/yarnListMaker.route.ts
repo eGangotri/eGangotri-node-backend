@@ -6,7 +6,7 @@ import { extractFirstAndLastNPages } from '../cliBased/pdf/extractFirstAndLastNP
 import { gDriveExceltoMongo } from '../excelToMongo/tranferGDriveExcelToMongo';
 import { timeInfo } from '../mirror/FrontEndBackendCommonCode';
 import { publishBookTitlesList } from '../services/yarnService';
-import * as FileUtils from '../imgToPdf/utils/FileUtils';
+import * as FileUtils from '../utils/FileUtils';
 
 export const yarnListMakerRoute = express.Router();
 

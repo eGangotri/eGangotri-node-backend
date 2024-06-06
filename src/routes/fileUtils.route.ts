@@ -1,6 +1,6 @@
 import * as express from 'express';
 import { findTopNLongestFileNames } from '../utils/utils';
-import { getDuplicatesBySize } from '../utils/fileUtil';
+import { getDuplicatesBySize } from '../utils/FileUtils';
 
 export const fileUtilsRoute = express.Router();
 
