@@ -82,7 +82,8 @@ export async function gDriveExceltoMongo(directoryPathOrExcel: string) {
 
         await connectToMongo(["forUpload"]);
         if (path.extname(gDriveExcel) === '.xlsx') {
-            const rootFolder = path.basename(path.basename(gDriveExcel));
+            const dirPath = path.dirname(gDriveExcel);
+            const rootFolder = path.basename(dirPath);
             console.log(` processing ${rootFolder} for ${gDriveExcel}`);
             const newData = await transformExcelToJSON(gDriveExcel, rootFolder)
             results = await excelJsonToMongo(newData);

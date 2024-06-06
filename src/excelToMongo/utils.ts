@@ -61,7 +61,17 @@ const replaceExcelHeadersWithJsonKeys = (data: Object[], mapping: Object, source
             const jsonHeader = mapping[key]
             newRow[jsonHeader] = dataRowKeyCorrespondingValue;
             if (jsonHeader === 'pageCount') {
-                newRow[jsonHeader] = newRow[jsonHeader] || 0;
+                if (typeof newRow[jsonHeader] === 'number') {
+                    newRow[jsonHeader] = newRow[jsonHeader]
+                } else {
+                    const num = Number(newRow[jsonHeader]);
+                    if (isNaN(num)) {
+                        newRow[jsonHeader] = 0;
+                    } else {
+                        newRow[jsonHeader] = num;
+
+                    }
+                }
             }
             if (jsonHeader === 'gDriveLink') {
                 newRow["identifier"] = extractGoogleDriveId(dataRowKeyCorrespondingValue);
@@ -79,7 +89,7 @@ const replaceExcelHeadersWithJsonKeys = (data: Object[], mapping: Object, source
 }
 
 export const replaceExcelHeadersWithJsonKeysForArchiveItem = (data: Object[], mapping: Object, source: string) => {
-    const jsonObj = replaceExcelHeadersWithJsonKeys(data,mapping,source)
+    const jsonObj = replaceExcelHeadersWithJsonKeys(data, mapping, source)
     return jsonObj.filter((row: Object) => {
         return row['serialNo'] !== "" || row['originalTitle'] !== "";
     });
@@ -87,7 +97,7 @@ export const replaceExcelHeadersWithJsonKeysForArchiveItem = (data: Object[], ma
 
 
 export const replaceExcelHeadersWithJsonKeysForGDriveItem = (data: Object[], mapping: Object, source: string) => {
-    const jsonObj = replaceExcelHeadersWithJsonKeys(data,mapping,source)
+    const jsonObj = replaceExcelHeadersWithJsonKeys(data, mapping, source)
     return jsonObj.filter((row: Object) => {
         return row['serialNo'] !== "" || row['gDriveLink'] !== "";
     });
