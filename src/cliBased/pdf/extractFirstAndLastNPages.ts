@@ -57,6 +57,7 @@ export const loopFolderForExtraction = async (rootFolder: string, outputRoot: st
         }
         catch (error) {
             console.error('Error creating PDF:', error);
+            return ""
         }
     }
     const consoleLog: string =
@@ -64,6 +65,7 @@ export const loopFolderForExtraction = async (rootFolder: string, outputRoot: st
 
     FINAL_REPORT.push(consoleLog);
     console.log(consoleLog);
+    return outputPath
 }
 
 const padNumbersWithZeros = (num: number) => {
@@ -90,12 +92,13 @@ export const extractFirstAndLastNPages = async (_srcFoldersWithPath: string[], d
     }
     let failures = 0;
     FINAL_REPORT = []
+    const dumpFolder = []
     for (const [index, folder] of _srcFoldersWithPath.entries()) {
         console.log(`Started processing ${folder}`)
         PDF_PROCESSING_COUNTER = 0;
         counter = 0
         try {
-            await loopFolderForExtraction(folder, destRootFolder, `${index + 1}/${_srcFoldersWithPath.length}`);
+            dumpFolder.push(await loopFolderForExtraction(folder, destRootFolder, `${index + 1}/${_srcFoldersWithPath.length}`));
         }
         catch (err) {
             failures++;
@@ -107,7 +110,8 @@ export const extractFirstAndLastNPages = async (_srcFoldersWithPath: string[], d
     return {
         success: failures === 0,
         msg: `_srcFoldersWithPath ${_srcFoldersWithPath} destRootFolder ${destRootFolder} nPages ${nPages} failures ${failures}`,
-        report: FINAL_REPORT
+        report: FINAL_REPORT,
+        dumpFolder: dumpFolder.join(",")
     }
 }
 
