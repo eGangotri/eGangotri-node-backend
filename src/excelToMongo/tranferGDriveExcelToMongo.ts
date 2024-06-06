@@ -17,11 +17,11 @@ const transformExcelToJSON = async (pathToExcel: string, source: string) => {
 
 async function excelJsonToMongo(newData: {}[]) {
     const operations = newData.map((document, index) => {
-            // const expectedFields = ['serialNo', 'titleGDrive', 'gDriveLink',
-            // 'truncFileLink','sizeWithUnits','sizeInBytes','folderName','createdTime','source','identifier',
-            // 'identifierTruncFile'
+        // const expectedFields = ['serialNo', 'titleGDrive', 'gDriveLink',
+        // 'truncFileLink','sizeWithUnits','sizeInBytes','folderName','createdTime','source','identifier',
+        // 'identifierTruncFile'
 
-            // ]; // Replace with your actual field names
+        // ]; // Replace with your actual field names
 
         // Add your validation checks here. For example:
         // const missingFields = expectedFields.filter(field => !(field in document));
@@ -41,7 +41,7 @@ async function excelJsonToMongo(newData: {}[]) {
             }
         }
     });
-   // console.log(JSON.stringify(operations, null, 2));
+    // console.log(JSON.stringify(operations, null, 2));
     try {
         const res = await GDriveItem.bulkWrite(operations, { ordered: false });
         console.log("after bulkWrite");
@@ -72,21 +72,24 @@ async function excelJsonToMongo(newData: {}[]) {
     }
 }
 
-export async function gDriveExceltoMongo(directoryPath: string) {
+export async function gDriveExceltoMongo(directoryPathOrExcel: string) {
     let results = {};
     try {
-        const { latestFilePath: gDriveExcel, latestFileName } = getLatestExcelFile(directoryPath)
+        let gDriveExcel = directoryPathOrExcel
+        if (!directoryPathOrExcel.endsWith(".xlsx")) {
+            gDriveExcel = getLatestExcelFile(directoryPathOrExcel)?.latestFilePath
+        }
 
         await connectToMongo(["forUpload"]);
         if (path.extname(gDriveExcel) === '.xlsx') {
-            const rootFolder = path.basename(directoryPath);
+            const rootFolder = path.basename(path.basename(gDriveExcel));
             console.log(` processing ${rootFolder} for ${gDriveExcel}`);
             const newData = await transformExcelToJSON(gDriveExcel, rootFolder)
-            results = await excelJsonToMongo(newData);
+            results = {} // await excelJsonToMongo(newData);
             return {
                 ...results,
-                msg: `excel (${latestFileName}) to mongo completed for ${rootFolder}`,
-                directoryPath: `${directoryPath}`
+                msg: `excel (${path.basename(gDriveExcel)}) to mongo completed for ${rootFolder}`,
+                directoryPath: `${directoryPathOrExcel}`
             }
         }
     } catch (err) {
@@ -94,7 +97,7 @@ export async function gDriveExceltoMongo(directoryPath: string) {
         return {
             success: false,
             err: err,
-            msg: `Error processing scan directory: ${directoryPath}`
+            msg: `Error processing scan directory: ${directoryPathOrExcel}`
         }
     }
 }

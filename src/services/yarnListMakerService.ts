@@ -3,13 +3,26 @@ import { getLatestExcelFile } from "../utils/utils"
 
 export const pickLatestExcelsAndCombineGDriveAndReducedPdfExcels = (mainFilePathAbs: string,
     secondaryFilePathAbs: string, destExcelPath: string) => {
-    const { latestFilePath: mainExcelPath } = getLatestExcelFile(mainFilePathAbs)
-    const { latestFilePath: secondaryExcelPath } = getLatestExcelFile(secondaryFilePathAbs)
+    let mainExcelPath = ""
+    let secondaryExcelPath = ""
+    if (!mainFilePathAbs.endsWith(".xlsx")) {
+        mainExcelPath = getLatestExcelFile(mainFilePathAbs)?.latestFilePath
+    }
+    else {
+        mainExcelPath = mainFilePathAbs
+    }
+    if (!secondaryFilePathAbs.endsWith(".xlsx")) {
+        secondaryExcelPath = getLatestExcelFile(secondaryFilePathAbs)?.latestFilePath
+    }
 
-    if(!mainExcelPath || !secondaryExcelPath){
+    else {
+        secondaryExcelPath = secondaryFilePathAbs
+    }
+
+    if (!mainExcelPath || !secondaryExcelPath) {
         console.log(`pickLatestExcelsAndCombineGDriveAndReducedPdfExcels mainExcelPath ${mainExcelPath} secondaryExcelPath ${secondaryExcelPath}`)
         return {
-            success:false,
+            success: false,
             errMsg: `one of mainExcelPath ${mainExcelPath} secondaryExcelPath ${secondaryExcelPath} missing`
         }
     }
