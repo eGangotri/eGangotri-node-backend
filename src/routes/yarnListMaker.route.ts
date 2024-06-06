@@ -117,8 +117,7 @@ yarnListMakerRoute.post('/getFirstAndLastNPages', async (req: any, resp: any) =>
         const _resp = await extractFirstAndLastNPages(_srcFolders, destRootFolder, nPages);
         resp.status(200).send({
             response: {
-                _results: _resp,
-                destRootFolder
+                _results: _resp                
             }
         });
     }
