@@ -39,24 +39,19 @@ Create a New Web Service.
 Share the DockerHub Image URL:
 https://hub.docker.com/r/egangotri/egangotri-node-backend/
 
+copy all .env items under the Section:
+Environment Variables
+Set environment-specific config and secrets (such as API keys), then read those values from your code
 
-OLD URL:
-https://egangotri-node-backend.onrender.com
-NEW URL: 
-https://egangotri-node-backend-d4c7.onrender.com
-*** uses github profile. for react-daily-work-report. using diff. database
+DWR URL: https://egangotri-node-backend-dwr.onrender.com/
+Dashboard URL: https://egangotri-node-backend-dashboard.onrender.com
 
-Below is for react-dashboard frontend and uses the upload_db database
-p*****78@gmail.com
-URL:
-https://egangotri-node-backend-dashboard.onrender.com/
-
-
+###Test:
+Using the render URL above you should see something like below
+{"response":"eGangotri-node-backend 2024-06-04T16:24:36.174Z Deployed (egangotri_upload_db)"}
 
 Dashboard
-https://dashboard.render.com/web/srv-cjt1pjibgj9c739dc9o0/deploys/dep-cjt1pk2bgj9c739dccig
-
-
+https://dashboard.render.com/
 
 ### References
 https://geshan.com.np/blog/2021/01/free-nodejs-hosting/
