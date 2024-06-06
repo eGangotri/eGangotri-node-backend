@@ -16,7 +16,7 @@ yarnListMakerRoute.post('/getGoogleDriveListing', async (req: any, resp: any) =>
         const googleDriveLink = req?.body?.googleDriveLink;
         const folderName = req?.body?.folderName || "";
         const reduced = req?.body?.reduced || false;
-        const ignoreFolder = req?.body?.ignoreFolder 
+        const ignoreFolder = req?.body?.ignoreFolder
         const allNotJustPdfs = req?.body?.allNotJustPdfs || false;
 
         console.log(`getGoogleDriveListing googleDriveLink:
@@ -81,7 +81,8 @@ yarnListMakerRoute.post('/getGoogleDriveListing', async (req: any, resp: any) =>
 
         resp.status(200).send({
             ...responses,
-            mainFile: reduced ? "Reduced" : "Yes"
+            reduced: reduced ? "Yes" : "No",
+            allNotJustPdfs: allNotJustPdfs ? "Yes" : "No",
         });
     }
 
@@ -116,7 +117,8 @@ yarnListMakerRoute.post('/getFirstAndLastNPages', async (req: any, resp: any) =>
         const _resp = await extractFirstAndLastNPages(_srcFolders, destRootFolder, nPages);
         resp.status(200).send({
             response: {
-                _results: _resp
+                _results: _resp,
+                destRootFolder
             }
         });
     }

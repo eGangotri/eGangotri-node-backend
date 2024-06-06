@@ -83,7 +83,8 @@ export const jsonToExcel = (jsonArray: any[], xlsxFileNameWithPath: string) => {
   console.log(`created ${xlsxFileNameWithPath}`)
   return {
     success: true,
-    msg: `created ${xlsxFileNameWithPath}`
+    msg: `created ${xlsxFileNameWithPath}`,
+    xlsxFileNameWithPath
   }
 }
 

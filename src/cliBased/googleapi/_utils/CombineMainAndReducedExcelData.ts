@@ -43,8 +43,7 @@ const combineExcels = (mainExcelFileName: string, secondaryExcelFileName: string
         return {
             ..._errorsCheck,
             ...res,
-            subject
-        }
+            subject        }
     }
 
     catch (err) {
@@ -156,7 +155,7 @@ export const combineGDriveAndReducedPdfExcels = (mainFilePathAbs: string,
     const combinedExcelPath = `${destRoot}\\_catCombinedExcels\\${terminalFolder}`;
     console.log(`_combinedExcelPath ${combinedExcelPath}`)
     if (!fs.existsSync(combinedExcelPath)) {
-        fs.mkdirSync(combinedExcelPath);
+        fs.mkdirSync(combinedExcelPath, { recursive: true });
     }
 
     const combinedExcelFileName = `${combinedExcelPath}\\${terminalFolder}-Catalog-${timeComponent}`;
