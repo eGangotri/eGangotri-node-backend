@@ -71,19 +71,22 @@ yarnListMakerRoute.post('/getGoogleDriveListing', async (req: any, resp: any) =>
             _folders.push(folderName.trim());
         }
 
-        const responses = [];
+        const _resps = [];
         for (let i = 0; i < _links.length; i++) {
             console.log(`getGoogleDriveListing ${_links[i]} ${_folders[i]}`)
             FileUtils.resetRowCounter();
             const listingResult = await generateGoogleDriveListingExcel(_links[i], _folders[i], reduced, ignoreFolder, !allNotJustPdfs);
-            responses.push(listingResult);
+            _resps.push(listingResult);
         }
 
         resp.status(200).send({
-            ...responses,
-            reduced: reduced ? "Yes" : "No",
-            allNotJustPdfs: allNotJustPdfs ? "Yes" : "No",
+            response: {
+                reduced: reduced ? "Yes" : "No",
+                allNotJustPdfs: allNotJustPdfs ? "Yes" : "No",
+                ..._resps,
+            }
         });
+        return;
     }
 
     catch (err: any) {
@@ -117,7 +120,7 @@ yarnListMakerRoute.post('/getFirstAndLastNPages', async (req: any, resp: any) =>
         const _resp = await extractFirstAndLastNPages(_srcFolders, destRootFolder, nPages);
         resp.status(200).send({
             response: {
-                _results: _resp                
+                _results: _resp
             }
         });
     }
