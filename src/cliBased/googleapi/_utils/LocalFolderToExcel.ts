@@ -1,5 +1,5 @@
 import path from "path";
-import * as FileUtils from "../../../imgToPdf/utils/FileUtils";
+import * as FileUtils from "../../../utils/FileUtils";
 import * as fs from 'fs';
 import { DD_MM_YYYY_HH_MMFORMAT } from "../../../utils/utils";
 import moment from "moment";

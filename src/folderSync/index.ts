@@ -1,4 +1,4 @@
-import * as FileUtils from "../imgToPdf/utils/FileUtils";
+import * as FileUtils from "../utils/FileUtils";
 import { FileStats } from "../imgToPdf/utils/types";
 import * as _ from 'lodash';
 
