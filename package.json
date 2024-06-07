@@ -47,7 +47,8 @@
     "combineFIPExcels": "ts-node ./src/_adHoc/fip/combineFIPExcels",
     "fipRename": "ts-node ./src/_adHoc/fip/fipRename",
     "uploadFileToGDrive": "ts-node ./src/cliBased/googleapi/GoogleDriveUpload",
-    "renameNonAsciiFiles":"ts-node ./src/files/renameNonAsciiFiles.ts"
+    "renameNonAsciiFiles": "ts-node ./src/files/renameNonAsciiFiles.ts",
+    "jpgToPdf": "ts-node ./src/imgToPdf/jpgToPdf.ts"
   },
   "repository": {
     "type": "git",
