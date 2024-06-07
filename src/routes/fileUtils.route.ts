@@ -3,7 +3,7 @@ import { findTopNLongestFileNames } from '../utils/utils';
 import { getDuplicatesBySize } from '../utils/FileUtils';
 import { renameAllNonAsciiInFolder } from '../files/renameNonAsciiFiles';
 import { DEFAULT_TARGET_SCRIPT_ROMAN_COLLOQUIAL } from '../aksharamukha/convert';
-import { convertJpgsToPdf } from '../imgToPdf/jpgToPdf';
+import { convertJpgsToPdf, convertJpgsToPdfInAllSubFolders } from '../imgToPdf/jpgToPdf';
 
 export const fileUtilsRoute = express.Router();
 
@@ -79,7 +79,7 @@ fileUtilsRoute.post('/imgFilesToPdf', async (req: any, resp: any) => {
         let res = {};
         switch (imgType) {
             case "JPG":
-                res = await convertJpgsToPdf(folder);
+                res = await convertJpgsToPdfInAllSubFolders(folder);
                 break;
 
             case "PNG":
