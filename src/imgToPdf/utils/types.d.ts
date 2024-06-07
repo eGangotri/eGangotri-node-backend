@@ -11,7 +11,8 @@ export interface FileStats {
 
 export interface FileStatsOptions {
     directoryPath: string,
-    filterPath?: string,
+    filterExt?: string,
+    ignorePaths?: string[],
     ignoreFolders?: boolean,
     withLogs?: boolean,
     withMetadata?: boolean,

@@ -22,7 +22,7 @@ export const renameNonAsciiFile = async (
     const _renamedFile = await callAksharamukha(payload);
     console.log(`_renamedFile ${_renamedFile} fileName ${fileName}`)
     if (_renamedFile !== fileName) {
-        console.log(`${counter})Renaming ${fileNameWithExt} to ${_renamedFile}${ext}`)
+        console.log(`${counter}).Renaming ${fileNameWithExt} to ${_renamedFile}${ext}`)
         // Get the directory of the file
         const dir = path.dirname(fileAbsPath);
 
@@ -51,7 +51,7 @@ export const renameAllNonAsciiInFolder = async (
 ) => {
     let RENAME_COUNTER = 0;
 
-    const files = await getAllFileListingWithoutStats(folder);
+    const files = await getAllFileListingWithoutStats({directoryPath:folder, ignorePaths:[DEFAULT_TARGET_SCRIPT_ROMAN_COLLOQUIAL]});
     const promises = [];
     for (const file of files) {
         promises.push(renameNonAsciiFile(file.absPath, sourceScript, targetScript, RENAME_COUNTER++))

@@ -10,7 +10,7 @@ export const getJsonOfAbsPathFromProfile = async (profile: string, allNotJustPdf
 
     let filesForUpload = []
     if (allNotJustPdfs) {
-        filesForUpload = await getAllFileListingWithoutStats(profileFolder);
+        filesForUpload = await getAllFileListingWithoutStats({directoryPath:profileFolder});
     } else {
         filesForUpload = await getAllPDFFiles(profileFolder);
     }

@@ -7,12 +7,12 @@ import * as _ from 'lodash';
 export const compareFolders = async (src: string, dest: string) => {
     try {
         console.log(`sync src ${src}`);
-        const srcJsonArray = await FileUtils.getAllFileListingWithoutStats(src)
+        const srcJsonArray = await FileUtils.getAllFileListingWithoutStats({directoryPath:src})
 
         FileConstUtils.incrementRowCounter();
 
         console.log(`sync dest ${dest}`);
-        const destJsonArray = await FileUtils.getAllFileListingWithoutStats(dest)
+        const destJsonArray = await FileUtils.getAllFileListingWithoutStats({directoryPath:dest})
 
 
         const umMatchedItemsLtoR: Array<FileStats | undefined> = []
