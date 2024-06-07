@@ -1,5 +1,7 @@
 
 const AKSHARA_MUKHA = "http://aksharamukha-plugin.appspot.com/api/public"
+export const DEFAULT_TARGET_SCRIPT_ROMAN_COLLOQUIAL = "RomanColloquial";
+
 export const callAksharamukhaWithSpecifics = async (body: AksharaMukhaGetProps) => {
     const result = await callAksharamukha(body);
     const e_macronRemoval = result.replace(/ē/g, 'e')
@@ -18,7 +20,7 @@ export const callAksharamukha = async (body: AksharaMukhaGetProps) => {
 export const aksharamukhaIastToRomanColloquial = async (text: string, nativize = false) => {
     const body = {
         "source": "IAST",
-        "target": "RomanColloquial",
+        "target": DEFAULT_TARGET_SCRIPT_ROMAN_COLLOQUIAL,
         "text": text,
         "nativize": nativize,
     }
@@ -28,7 +30,7 @@ export const aksharamukhaIastToRomanColloquial = async (text: string, nativize =
 export const aksharamukhaHKToRomanColloquial = async (text: string, nativize = false) => {
     const body = {
         "source": "Velthuis",
-        "target": "RomanColloquial",
+        "target": DEFAULT_TARGET_SCRIPT_ROMAN_COLLOQUIAL,
         "text": text,
         "nativize": nativize,
     }
@@ -49,7 +51,7 @@ export interface AksharaMukhaGetProps {
 
 const jsonBody: AksharaMukhaGetProps = {
     "source": "IAST",
-    "target": "RomanColloquial",
+    "target": DEFAULT_TARGET_SCRIPT_ROMAN_COLLOQUIAL,
     "text": "Tamilē rayar vaittiya nul    Kriyā-Prayoga $ \nTantra-Kriyā \nĀgama-Nibandha \nKośa \nĀgama-Kriyā \nKriyā-Prayoga Āgama",
     "nativize": true,
     "postOptions": [],

@@ -145,7 +145,7 @@ export const publishBookTitlesList = async (argFirst: string, options: {
                     let totalPageCount = metadata.reduce((total, fileStats) => total + fileStats.pageCount, 0);
                     _res['totalPageCount'] = totalPageCount;
                     _res['msg'] = metadata.map((fileStats: FileStats) =>
-                        `(${fileStats.rowCounter}). ${fileStats.fileName} ${fileStats.pageCount} pages`
+                        `(${fileStats.rowCounter}). ${fileStats.fileName} ${fileStats.pageCount} page(s)`
                     );
                 }
                 else {
