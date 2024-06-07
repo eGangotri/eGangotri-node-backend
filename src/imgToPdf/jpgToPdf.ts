@@ -1,7 +1,7 @@
-import { PDFDocument, rgb } from 'pdf-lib';
+import { PDFDocument } from 'pdf-lib';
 import { readdir, readFile, writeFile } from 'fs-extra';
 import path, { join } from 'path';
-import { generateExcel } from 'archiveDotOrg/utils';
+import { getAllFileStats } from '../utils/FileStatsUtils';
 
 export async function convertJpgsToPdf(inputFolder: string, outputFolder = "") {
     try {
@@ -21,7 +21,7 @@ export async function convertJpgsToPdf(inputFolder: string, outputFolder = "") {
             const jpegImageBytes = await readFile(jpegPath);
             const jpegImage = await pdfDoc.embedJpg(jpegImageBytes);
             const page = pdfDoc.addPage([jpegImage.width, jpegImage.height]);
-            console.log(`Adding file#${++counter} ${jpegFile} to PDF...`)
+            //console.log(`Adding file#${++counter} ${jpegFile} to PDF...`)
             page.drawImage(jpegImage, {
                 x: 0,
                 y: 0,
@@ -33,7 +33,7 @@ export async function convertJpgsToPdf(inputFolder: string, outputFolder = "") {
         const pdfBytes = await pdfDoc.save();
         await writeFile(generatedPdf, pdfBytes);
 
-        console.log(`PDF created at ${generatedPdf}`);
+        console.log(`PDF created at ${generatedPdf} from inputFolder: ${inputFolder} with ${jpegFiles.length} pages.`);
         const pageCount = pdfDoc.getPageCount();
         return {
             success: true,
@@ -54,9 +54,33 @@ export async function convertJpgsToPdf(inputFolder: string, outputFolder = "") {
         };
     }
 }
-// Example usage
-const inputFolder = './path/to/jpeg/folder';
 
-convertJpgsToPdf(inputFolder)
-    .then(() => console.log('Conversion complete'))
-    .catch(error => console.error('Error during conversion:', error));
+export const convertJpgsToPdfInAllSubFolders = async (inputFolder: string, outputFolder = "") => {
+    try {
+        const allFiles = await getAllFileStats({ directoryPath: inputFolder, ignoreFolders: false, withLogs: false, withMetadata: false });
+        const allFolders = allFiles.filter(file => file.ext === "FOLDER") 
+        allFolders.push({
+            absPath: inputFolder,
+            fileName: path.basename(inputFolder),
+            folder: path.dirname(inputFolder),
+            ext: "FOLDER"
+        });
+        const promise = []
+        let counter = 0;
+        allFolders.map(async (folder) => {
+            console.log(`Processing Folder#${++counter} ${folder.absPath}`);
+            promise.push(convertJpgsToPdf(folder.absPath, outputFolder));
+        });
+        const all = await Promise.all(promise);
+        return {
+            totalFolderCount: allFolders.length,
+            foldersProcessed: all.length,
+            eqaulity: allFolders.length === all.length,
+            msg: `${all.length} folders processed in ${inputFolder} with ${allFolders.length} subFolders.`,
+            ...all,
+        }
+    }
+    catch (e) {
+        console.error('Error during conversion:', e);
+    }
+}
