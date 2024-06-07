@@ -73,9 +73,24 @@ fileUtilsRoute.post('/renameNonAsciiFiles', async (req: any, resp: any) => {
 fileUtilsRoute.post('/imgFilesToPdf', async (req: any, resp: any) => {
     try {
         const folder = req.body.folder;
+        const imgFilesToPdf = req.body.imgFilesToPdf;
 
-        console.log(`folder: ${folder} folder: ${folder} `);
-        const res = await convertJpgsToPdf(folder);
+        console.log(`folder: ${folder} imgFilesToPdf: ${imgFilesToPdf} `);
+        let res = {};
+        switch (imgFilesToPdf) {
+            case "JPG":
+                res = await convertJpgsToPdf(folder);
+                break;
+
+            case "PNG":
+                res = { msg: "PNG to PDF conversion is not supported yet." };
+                break;
+
+            case "TIFF":
+                res = { msg: "TIFF to PDF conversion is not supported yet." };
+                break;
+        }
+
         resp.status(200).send({
             response: res
         });
