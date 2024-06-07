@@ -15,5 +15,4 @@ export interface FileStatsOptions {
     ignoreFolders?: boolean,
     withLogs?: boolean,
     withMetadata?: boolean,
-    withFileSizeMetadata?: boolean
 }

@@ -84,12 +84,11 @@ const getFoldersFromInput = (argFirst: string) => {
 export const publishBookTitlesList = async (argFirst: string, options: {
     withStats: boolean,
     pdfsOnly: boolean,
-    withLinks: boolean
+    onlyInfoNoExcel: boolean
 }) => {
-    const pdfDumpFolders = getFoldersFromInput(argFirst);
+    const foldersToProcess = getFoldersFromInput(argFirst);
     const _response = []
-    FileConstUtils.resetRowCounter()
-    for (let folder of pdfDumpFolders) {
+    for (let folder of foldersToProcess) {
         if (isValidPath(folder)) {
             let metadata = []
             if (options.pdfsOnly) {
@@ -114,49 +113,47 @@ export const publishBookTitlesList = async (argFirst: string, options: {
                     metadata = await FileUtils.getAllFileListingWithFileSizeStats(folder);
                 }
             }
-            //doesnt handle allFiles option yet.
-            if (!options.withLinks) {
-                console.log(`!withLinks ${options.withLinks}`)
+            const totalSize = sizeInfo(metadata.reduce((total, fileStats) => total + fileStats.rawSize, 0))
+            const itemsCount = metadata.length
+
+            if (!options.onlyInfoNoExcel) {
+                console.log(`!onlyInfoNoExcel ${options.onlyInfoNoExcel}`)
                 const textFileWrittenTo = createPdfReportAsText(metadata, options.pdfsOnly, path.basename(folder));
                 const excelWrittenTo = createExcelReport(metadata, options.pdfsOnly, path.basename(folder))
+                console.log(`Published Folder Contents for ${folder}\n`)
                 _response.push({
                     success: true,
                     excelName: excelWrittenTo,
-                    itemsCount: metadata.length,
-                    size: sizeInfo(metadata.reduce((total, fileStats) => total + fileStats.rawSize, 0)),
+                    itemsCount: itemsCount,
+                    totalSize,
                     msg: `Published Folder Contents for ${folder}\n
                 Text file: ${textFileWrittenTo}\n
                 Excel File: ${excelWrittenTo}`
                 });
             }
 
-            else if (!options.withStats) {
-                console.log(`!withStatswithStats ${options.withStats}`)
-                const itemCount = metadata.length
-                _response.push({
-                    success: true,
-                    pdfCount: itemCount,
-                    pdfDumpFolders,
-                    msg: metadata.map((fileStats: FileStats) =>
-                        `(${fileStats.rowCounter}). ${fileStats.fileName}`
-                    ),
-                });
-            }
             else {
-                console.log(`else options.withStats:${options.withStats}`)
-                const itemCount = metadata.length
-                let totalPageCount = metadata.reduce((total, fileStats) => total + fileStats.pageCount, 0);
-                let totalSize = metadata.reduce((total, fileStats) => total + fileStats.rawSize, 0);
-                _response.push({
+                console.log(`!withStatswithStats ${options.withStats}`)
+                const _res = {
                     success: true,
-                    pdfCount: itemCount,
-                    totalPageCount,
-                    totalSize: sizeInfo(totalSize),
-                    pdfDumpFolders,
-                    msg: metadata.map((fileStats: FileStats) =>
+                    itemsCount,
+                    folders: foldersToProcess,
+                    totalSize
+                }
+                if (options.withStats) {
+                    console.log(`else options.withStats:${options.withStats}`)
+                    let totalPageCount = metadata.reduce((total, fileStats) => total + fileStats.pageCount, 0);
+                    _res['totalPageCount'] = totalPageCount;
+                    _res['msg'] = metadata.map((fileStats: FileStats) =>
+                        `(${fileStats.rowCounter}). ${fileStats.fileName} ${fileStats.pageCount} pages`
+                    );
+                }
+                else {
+                    _res['msg'] = metadata.map((fileStats: FileStats) =>
                         `(${fileStats.rowCounter}). ${fileStats.fileName}`
-                    ),
-                });
+                    )
+                }
+                _response.push(_res);
             }
         }
         else {

@@ -71,19 +71,6 @@ export async function getAllFileStatsSync(
             }
 
             console.log(`fileStatOptions.withLogs ${fileStatOptions.withLogs}`)
-            console.log(`fileStatOptions.withFileSizeMetadata ${fileStatOptions.withFileSizeMetadata}`)
-            if (fileStatOptions.withFileSizeMetadata) {
-                const rawSize = getFilzeSize(itemPath);
-                fileStat = {
-                    ...fileStat,
-                    rawSize,
-                    size: Mirror.sizeInfo(rawSize),
-                }
-
-                if (fileStatOptions.withLogs) {
-                    console.log(`${ROW_COUNTER[0]}/${ROW_COUNTER[1]}). ${JSON.stringify(ellipsis(fileStat.fileName, 40))} ${Mirror.sizeInfo(fileStat.rawSize)}`);
-                }
-            }
             if (fileStatOptions.withMetadata) {
                 try {
                     let pageCount = 0;
