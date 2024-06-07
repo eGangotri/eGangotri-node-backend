@@ -1,5 +1,5 @@
 import { isFileInUse } from "../../archiveDotOrg/fileUtils";
-import { getAllPDFFiles } from "../../utils/FileUtils";
+import { getAllPDFFiles } from "../../utils/FileStatsUtils";
 import { FileStats } from "imgToPdf/utils/types";
 
 import * as path from 'path';

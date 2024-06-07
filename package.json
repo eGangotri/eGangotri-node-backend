@@ -46,7 +46,8 @@
     "extractFIPDataFromExcel": "ts-node ./src/_adHoc/fip/extractFIPDataFromExcel",
     "combineFIPExcels": "ts-node ./src/_adHoc/fip/combineFIPExcels",
     "fipRename": "ts-node ./src/_adHoc/fip/fipRename",
-    "uploadFileToGDrive": "ts-node ./src/cliBased/googleapi/GoogleDriveUpload"
+    "uploadFileToGDrive": "ts-node ./src/cliBased/googleapi/GoogleDriveUpload",
+    "renameNonAsciiFiles":"ts-node ./src/files/renameNonAsciiFiles.ts"
   },
   "repository": {
     "type": "git",

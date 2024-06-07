@@ -1,4 +1,5 @@
-import * as FileUtils from "../utils/FileUtils";
+import * as FileUtils from "../utils/FileStatsUtils";
+import * as FileConstUtils from "../utils/constants";
 import { FileStats } from "../imgToPdf/utils/types";
 import * as _ from 'lodash';
 
@@ -8,7 +9,7 @@ export const compareFolders = async (src: string, dest: string) => {
         console.log(`sync src ${src}`);
         const srcJsonArray = await FileUtils.getAllFileListingWithoutStats(src)
 
-        FileUtils.incrementRowCounter();
+        FileConstUtils.incrementRowCounter();
 
         console.log(`sync dest ${dest}`);
         const destJsonArray = await FileUtils.getAllFileListingWithoutStats(dest)

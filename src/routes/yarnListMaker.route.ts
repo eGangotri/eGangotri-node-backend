@@ -6,7 +6,7 @@ import { extractFirstAndLastNPages } from '../cliBased/pdf/extractFirstAndLastNP
 import { gDriveExceltoMongo } from '../excelToMongo/tranferGDriveExcelToMongo';
 import { timeInfo } from '../mirror/FrontEndBackendCommonCode';
 import { publishBookTitlesList } from '../services/yarnService';
-import * as FileUtils from '../utils/FileUtils';
+import * as FileConstUtils from '../utils/constants';
 
 export const yarnListMakerRoute = express.Router();
 
@@ -74,7 +74,7 @@ yarnListMakerRoute.post('/getGoogleDriveListing', async (req: any, resp: any) =>
         const _resps = [];
         for (let i = 0; i < _links.length; i++) {
             console.log(`getGoogleDriveListing ${_links[i]} ${_folders[i]}`)
-            FileUtils.resetRowCounter();
+            FileConstUtils.resetRowCounter();
             const listingResult = await generateGoogleDriveListingExcel(_links[i], _folders[i], reduced, ignoreFolder, !allNotJustPdfs);
             _resps.push(listingResult);
         }

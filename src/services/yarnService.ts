@@ -2,13 +2,14 @@ import { isValidPath } from "../utils/utils";
 import { moveFilesAndFlatten } from "../cliBased/fileMover";
 import { getFolderInDestRootForProfile, getFolderInSrcRootForProfile } from "../cliBased/utils";
 import * as fs from 'fs';
-import { getAllFileListingWithoutStats, getAllFileListingWithStats, getAllPDFFiles, getAllPDFFilesWithMedata } from "../utils/FileUtils";
+import { getAllFileListingWithoutStats, getAllFileListingWithStats, getAllPDFFiles, getAllPDFFilesWithMedata } from "../utils/FileStatsUtils";
 import { FileStats } from "../imgToPdf/utils/types";
 import { sizeInfo } from "../mirror/FrontEndBackendCommonCode";
 import * as path from 'path';
 import moment from "moment";
 import { DD_MM_YYYY_HH_MMFORMAT } from "../utils/constants";
-import * as FileUtils from '../utils/FileUtils';
+import * as FileUtils from '../utils/FileStatsUtils';
+import * as FileConstUtils from '../utils/constants';
 
 import * as _ from 'lodash';
 
@@ -87,7 +88,7 @@ export const publishBookTitlesList = async (argFirst: string, options: {
 }) => {
     const pdfDumpFolders = getFoldersFromInput(argFirst);
     const _response = []
-    FileUtils.resetRowCounter()
+    FileConstUtils.resetRowCounter()
     for (let folder of pdfDumpFolders) {
         if (isValidPath(folder)) {
             let metadata = []
@@ -142,7 +143,7 @@ export const publishBookTitlesList = async (argFirst: string, options: {
                 });
             }
             else {
-                console.log(`else ${options.withStats}`)
+                console.log(`else options.withStats:${options.withStats}`)
                 const itemCount = metadata.length
                 let totalPageCount = metadata.reduce((total, fileStats) => total + fileStats.pageCount, 0);
                 let totalSize = metadata.reduce((total, fileStats) => total + fileStats.rawSize, 0);
@@ -172,7 +173,7 @@ export const publishBookTitlesList = async (argFirst: string, options: {
 
 function createPdfReportAsText(metadata: Array<FileStats>, pdfsOnly: boolean, folderBase: string) {
     const report = generateTextFileContent(metadata, pdfsOnly);
-    const absPath = createFileName(pdfsOnly,metadata.length, folderBase, 'txt');
+    const absPath = createFileName(pdfsOnly, metadata.length, folderBase, 'txt');
     fs.writeFileSync(absPath, report);
     return absPath;
 }
@@ -207,8 +208,8 @@ const createMetadataSummary = (totalFileCount: number, totalPageCount: number, t
     Total Pages: ${totalPageCount}`
 }
 
-function createFileName(pdfsOnly: boolean, fileCount:number, folderBase: string, ext: string) {
-    const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)+ "_HOURS"
+function createFileName(pdfsOnly: boolean, fileCount: number, folderBase: string, ext: string) {
+    const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT) + "_HOURS"
     const fileName = `${folderBase}_MegaList_${pdfsOnly ? 'pdfs_only' : 'all_files'}-${fileCount}Items-${timeComponent}.${ext}`;
     const filePath = `${_root}\\${folderBase}`;
     if (!fs.existsSync(filePath)) {

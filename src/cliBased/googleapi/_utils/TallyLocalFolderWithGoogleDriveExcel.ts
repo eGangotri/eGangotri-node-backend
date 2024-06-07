@@ -4,7 +4,7 @@ import * as _ from 'lodash';
 import { ExcelHeaders } from "../types";
 import { excelToJson } from "../../excel/ExcelUtils";
 import { titleInGoogleDrive } from "./constants";
-import { getAllPDFFiles } from '../../../utils/FileUtils';
+import { getAllPDFFiles } from '../../../utils/FileStatsUtils';
 import { FileStats } from '../../../imgToPdf/utils/types';
 
 const _excelToJson = () => {

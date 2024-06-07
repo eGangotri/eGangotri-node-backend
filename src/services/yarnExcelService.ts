@@ -1,6 +1,6 @@
 import { LOCAL_FOLDERS_PROPERTIES_FILE_FOR_SRC } from '../cliBased/utils';
 import * as express from 'express';
-import { getAllFileListingWithoutStats, getAllPDFFiles } from '../utils/FileUtils';
+import { getAllFileListingWithoutStats, getAllPDFFiles } from '../utils/FileStatsUtils';
 
 export const yarnExcelRoute = express.Router();
 
