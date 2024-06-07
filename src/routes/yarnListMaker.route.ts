@@ -74,7 +74,6 @@ yarnListMakerRoute.post('/getGoogleDriveListing', async (req: any, resp: any) =>
         const _resps = [];
         for (let i = 0; i < _links.length; i++) {
             console.log(`getGoogleDriveListing ${_links[i]} ${_folders[i]}`)
-            FileConstUtils.resetRowCounter();
             const listingResult = await generateGoogleDriveListingExcel(_links[i], _folders[i], reduced, ignoreFolder, !allNotJustPdfs);
             _resps.push(listingResult);
         }
@@ -208,11 +207,11 @@ yarnListMakerRoute.post('/createListingsOfLocalFolder', async (req: any, resp: a
     try {
         const argFirst = req.body.argFirst
         const pdfsOnly = req.body.pdfsOnly
-        const withLinks = req.body.withLinks || false
+        const onlyInfoNoExcel = req.body.onlyInfoNoExcel || false
         const withStats = req.body.withStats || false
         console.log(`/createListingsOfLocalFolder argFirst ${argFirst} 
         pdfsOnly ${pdfsOnly} 
-        withLinks ${withLinks}
+        onlyInfoNoExcel ${onlyInfoNoExcel}
         withStats ${withStats}`);
 
         let timeNow = Date.now();
@@ -220,7 +219,7 @@ yarnListMakerRoute.post('/createListingsOfLocalFolder', async (req: any, resp: a
             {
                 withStats,
                 pdfsOnly,
-                withLinks
+                onlyInfoNoExcel: onlyInfoNoExcel
             }
         );
         resp.status(200).send({

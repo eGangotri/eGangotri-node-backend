@@ -16,79 +16,8 @@ import { formatTime } from '../imgToPdf/utils/Utils';
 import { resetRowCounter, ROW_COUNTER } from './constants';
 
 
-/**
- * 
- * @param directoryPath without meta-data
- * @param withLogs 
- * @returns 
- */
-export async function getAllPDFFiles(directoryPath: string, withLogs: boolean = false): Promise<FileStats[]> {
-    return await getAllFileStats({
-        directoryPath,
-        filterPath: PDF_EXT,
-        ignoreFolders: true,
-        withLogs
-    });
-}
-
-//expensive operation
-export async function getAllPDFFilesWithMedata(directoryPath: string, withLogs: boolean = true): Promise<FileStats[]> {
-    const filestatsOptions =
-    {
-        directoryPath: directoryPath,
-        filterPath: PDF_EXT,
-        ignoreFolders: true,
-        withLogs: withLogs,
-        withMetadata: false,
-        withFileSizeMetadata: true
-    }
-    const withoutStats = await getAllFileStats(filestatsOptions)
-    const withStats = await getStatsMetadataIndependently(withoutStats, filestatsOptions);
-    return withStats
-}
-
-
-export async function getAllFileListingWithoutStats(directoryPath: string): Promise<FileStats[]> {
-    resetRowCounter()
-    return await getAllFileStats(
-        {
-            directoryPath,
-            filterPath: "",
-            ignoreFolders: true,
-            withLogs: true,
-            withMetadata: false,
-            withFileSizeMetadata: false
-        })
-}
-
-export async function getAllFileListingWithFileSizeStats(directoryPath: string): Promise<FileStats[]> {
-    resetRowCounter()
-    return await getAllFileStats(
-        {
-            directoryPath,
-            filterPath: "",
-            ignoreFolders: true,
-            withLogs: true,
-            withMetadata: false,
-            withFileSizeMetadata: true
-        })
-}
-
-export async function getAllFileListingWithStats(directoryPath: string): Promise<FileStats[]> {
-    resetRowCounter()
-    return await getAllFileStatsWithMetadata(
-        {
-            directoryPath,
-            filterPath: "",
-            ignoreFolders: true,
-            withLogs: false,
-            withMetadata: true,
-            withFileSizeMetadata: false
-        })
-}
-
 export async function getAllFileStats(filestatsOptions: FileStatsOptions): Promise<FileStats[]> {
-
+    resetRowCounter()
     const queue = [filestatsOptions.directoryPath];
     let _files: FileStats[] = [];
 
@@ -116,48 +45,20 @@ export async function getAllFileStats(filestatsOptions: FileStatsOptions): Promi
                     continue;
                 }
                 const _path = path.parse(fullPath);
+                const rawSize = getFilzeSize(fullPath) || 0;
+
                 let fileStat: FileStats = {
                     rowCounter: ++ROW_COUNTER[1],
                     absPath: fullPath,
                     folder: _path.dir,
                     fileName: _path.base,
-                    ext
+                    ext,
+                    rawSize,
+                    size: Mirror.sizeInfo(rawSize),
                 }
-                if (filestatsOptions.withFileSizeMetadata) {
-                    const rawSize = getFilzeSize(fullPath);
-                    fileStat = {
-                        ...fileStat,
-                        rawSize,
-                        size: Mirror.sizeInfo(rawSize),
-                    }
-                    if (filestatsOptions.withLogs) {
-                        console.log(`${ROW_COUNTER[0]}/${ROW_COUNTER[1]}). ${JSON.stringify(ellipsis(fileStat.fileName, 40))} ${Mirror.sizeInfo(rawSize)}`);
-                    }
-                }
-                if (filestatsOptions.withMetadata) {
-                    try {
-                        const pageCount = await getPdfPageCountUsingPdfLib(fullPath)
-                        fileStat = {
-                            ...fileStat,
-                            pageCount: pageCount,
-                        }
-                        if (filestatsOptions.withLogs) {
-                            console.log(`${ROW_COUNTER[0]}/${ROW_COUNTER[1]}). ${JSON.stringify(ellipsis(fileStat.fileName, 40))} ${pageCount} pages }`);
-                        }
-                    }
-                    catch (err) {
-                        fileStat = {
-                            ...fileStat,
-                            pageCount: 0,
-                            rawSize: 0,
-                            size: Mirror.sizeInfo(0),
-                            ext: "Error reading file"
-                        }
-                        console.log(`*****${ROW_COUNTER[0]}/${ROW_COUNTER[1]}). ${JSON.stringify(ellipsis(fileStat.fileName, 40))} Error reading File`, err);
-                    }
-                }
-                else if (filestatsOptions.withLogs) {
-                    console.log(`${ROW_COUNTER[0]}/${ROW_COUNTER[1]}). ${JSON.stringify(ellipsis(fileStat.fileName, 40))}`);
+
+                if (filestatsOptions.withLogs) {
+                    console.log(`${ROW_COUNTER[0]}/${ROW_COUNTER[1]}). ${JSON.stringify(ellipsis(fileStat.fileName, 40))} ${Mirror.sizeInfo(rawSize)}`);
                 }
                 _files.push(fileStat)
             }
@@ -167,17 +68,69 @@ export async function getAllFileStats(filestatsOptions: FileStatsOptions): Promi
     return _files;
 }
 
-export async function getAllFileStatsWithMetadata(filestatsOptions: FileStatsOptions): Promise<FileStats[]> {
-    const withoutStats = await getAllFileStats(
+/**
+ * 
+ * @param directoryPath without meta-data
+ * @param withLogs 
+ * @returns 
+ */
+export async function getAllPDFFiles(directoryPath: string, withLogs: boolean = false): Promise<FileStats[]> {
+    return await getAllFileStats({
+        directoryPath,
+        filterPath: PDF_EXT,
+        ignoreFolders: true,
+        withLogs
+    });
+}
+
+//expensive operation
+export async function getAllPDFFilesWithMedata(directoryPath: string, withLogs: boolean = true): Promise<FileStats[]> {
+    const filestatsOptions =
+    {
+        directoryPath: directoryPath,
+        filterPath: PDF_EXT,
+        ignoreFolders: true,
+        withLogs: withLogs,
+        withMetadata: false, // initially false
+    }
+    const withoutStats = await getAllFileStats(filestatsOptions)
+    const withStats = await getStatsMetadataIndependently(withoutStats, filestatsOptions);
+    return withStats
+}
+
+
+export async function getAllFileListingWithoutStats(directoryPath: string): Promise<FileStats[]> {
+    return await getAllFileStats(
         {
-            directoryPath: filestatsOptions.directoryPath,
+            directoryPath,
             filterPath: "",
             ignoreFolders: true,
-            withLogs: false,
+            withLogs: true,
             withMetadata: false,
-            withFileSizeMetadata: false
         })
+}
 
+export async function getAllFileListingWithFileSizeStats(directoryPath: string): Promise<FileStats[]> {
+    return await getAllFileStats(
+        {
+            directoryPath,
+            filterPath: "",
+            ignoreFolders: true,
+            withLogs: true,
+            withMetadata: false,
+        })
+}
+
+export async function getAllFileListingWithStats(directoryPath: string): Promise<FileStats[]> {
+    const filestatsOptions = {
+        directoryPath: directoryPath,
+        filterPath: "",
+        ignoreFolders: true,
+        withLogs: false,
+        withMetadata: false, //initially false
+    }
+
+    const withoutStats = await getAllFileStats(filestatsOptions)
     const withStats = await getStatsMetadataIndependently(withoutStats, filestatsOptions);
     return withStats
 }
