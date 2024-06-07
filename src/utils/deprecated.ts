@@ -51,14 +51,14 @@ export async function getAllFileStatsSync(
             }
             _files = _files.concat(await getAllFileStats({
                 directoryPath: itemPath,
-                filterPath: fileStatOptions.filterPath,
+                filterExt: fileStatOptions.filterExt,
                 ignoreFolders: fileStatOptions.ignoreFolders,
                 withLogs: fileStatOptions.withLogs,
                 withMetadata: fileStatOptions.withMetadata
             }));
         } else {
             const ext = path.extname(itemPath);
-            if (!_.isEmpty(fileStatOptions.filterPath) && (ext.toLowerCase() !== fileStatOptions.filterPath)) {
+            if (!_.isEmpty(fileStatOptions.filterExt) && (ext.toLowerCase() !== fileStatOptions.filterExt)) {
                 continue;
             }
             const _path = path.parse(itemPath);

@@ -27,6 +27,10 @@ export async function getAllFileStats(filestatsOptions: FileStatsOptions): Promi
 
         for (const dirent of dirContent) {
             const fullPath = path.join(currentDir, dirent.name);
+
+            if (filestatsOptions?.ignorePaths && filestatsOptions?.ignorePaths?.some((item: string) => fullPath.includes(item))) {
+                continue;
+            }
             if (dirent.isDirectory()) {
                 queue.push(fullPath);
                 if (!filestatsOptions.ignoreFolders) {
@@ -41,7 +45,7 @@ export async function getAllFileStats(filestatsOptions: FileStatsOptions): Promi
                 }
             } else if (dirent.isFile()) {
                 const ext = path.extname(fullPath);
-                if (!_.isEmpty(filestatsOptions.filterPath) && (ext.toLowerCase() !== filestatsOptions.filterPath)) {
+                if (!_.isEmpty(filestatsOptions.filterExt) && (ext.toLowerCase() !== filestatsOptions.filterExt)) {
                     continue;
                 }
                 const _path = path.parse(fullPath);
@@ -77,7 +81,7 @@ export async function getAllFileStats(filestatsOptions: FileStatsOptions): Promi
 export async function getAllPDFFiles(directoryPath: string, withLogs: boolean = false): Promise<FileStats[]> {
     return await getAllFileStats({
         directoryPath,
-        filterPath: PDF_EXT,
+        filterExt: PDF_EXT,
         ignoreFolders: true,
         withLogs
     });
@@ -99,13 +103,14 @@ export async function getAllPDFFilesWithMedata(directoryPath: string, withLogs: 
 }
 
 
-export async function getAllFileListingWithoutStats(directoryPath: string): Promise<FileStats[]> {
+export async function getAllFileListingWithoutStats(filestatsOptions: FileStatsOptions): Promise<FileStats[]> {
     return await getAllFileStats(
         {
-            directoryPath,
-            filterPath: "",
+            directoryPath: filestatsOptions.directoryPath,
+            filterExt: filestatsOptions.filterExt || "",
+            ignorePaths: filestatsOptions.ignorePaths || [],
             ignoreFolders: true,
-            withLogs: true,
+            withLogs: filestatsOptions.withLogs || true,
             withMetadata: false,
         })
 }
@@ -114,7 +119,7 @@ export async function getAllFileListingWithFileSizeStats(directoryPath: string):
     return await getAllFileStats(
         {
             directoryPath,
-            filterPath: "",
+            filterExt: "",
             ignoreFolders: true,
             withLogs: true,
             withMetadata: false,
