@@ -3,6 +3,7 @@ import { findTopNLongestFileNames } from '../utils/utils';
 import { getDuplicatesBySize } from '../utils/FileUtils';
 import { renameAllNonAsciiInFolder } from '../files/renameNonAsciiFiles';
 import { DEFAULT_TARGET_SCRIPT_ROMAN_COLLOQUIAL } from '../aksharamukha/convert';
+import { convertJpgsToPdf } from '../imgToPdf/jpgToPdf';
 
 export const fileUtilsRoute = express.Router();
 
@@ -56,7 +57,7 @@ fileUtilsRoute.post('/renameNonAsciiFiles', async (req: any, resp: any) => {
         const renamedFiles = await renameAllNonAsciiInFolder(folder, script);
         resp.status(200).send({
             response: {
-                src:folder,
+                src: folder,
                 destination: `${folder}/${DEFAULT_TARGET_SCRIPT_ROMAN_COLLOQUIAL}`,
                 msg: `${renamedFiles.length} files renamed from ${folder} and copied to ${folder}/${DEFAULT_TARGET_SCRIPT_ROMAN_COLLOQUIAL}.`,
                 renamedFiles
@@ -72,17 +73,11 @@ fileUtilsRoute.post('/renameNonAsciiFiles', async (req: any, resp: any) => {
 fileUtilsRoute.post('/imgFilesToPdf', async (req: any, resp: any) => {
     try {
         const folder = req.body.folder;
-        const script = req.body.script;
 
-        console.log(`folder: ${folder} folder: ${folder} language: ${script}`);
-        const renamedFiles = await renameAllNonAsciiInFolder(folder, script);
+        console.log(`folder: ${folder} folder: ${folder} `);
+        const res = await convertJpgsToPdf(folder);
         resp.status(200).send({
-            response: {
-                src:folder,
-                destination: `${folder}/${DEFAULT_TARGET_SCRIPT_ROMAN_COLLOQUIAL}`,
-                msg: `${renamedFiles.length} files renamed from ${folder} and copied to ${folder}/${DEFAULT_TARGET_SCRIPT_ROMAN_COLLOQUIAL}.`,
-                renamedFiles
-            }
+            response: res
         });
     }
     catch (err: any) {
