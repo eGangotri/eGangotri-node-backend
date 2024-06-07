@@ -73,11 +73,11 @@ fileUtilsRoute.post('/renameNonAsciiFiles', async (req: any, resp: any) => {
 fileUtilsRoute.post('/imgFilesToPdf', async (req: any, resp: any) => {
     try {
         const folder = req.body.folder;
-        const imgFilesToPdf = req.body.imgFilesToPdf;
+        const imgType = req.body.imgType;
 
-        console.log(`folder: ${folder} imgFilesToPdf: ${imgFilesToPdf} `);
+        console.log(`folder: ${folder} imgType: ${imgType} `);
         let res = {};
-        switch (imgFilesToPdf) {
+        switch (imgType) {
             case "JPG":
                 res = await convertJpgsToPdf(folder);
                 break;
