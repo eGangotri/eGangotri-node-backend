@@ -1,5 +1,6 @@
 import path from "path";
-import * as FileUtils from "../../../utils/FileUtils";
+import * as FileUtils from "../../../utils/FileStatsUtils";
+import * as FileConstsUtils from "../../../utils/constants";
 import * as fs from 'fs';
 import { DD_MM_YYYY_HH_MMFORMAT } from "../../../utils/utils";
 import moment from "moment";
@@ -27,7 +28,7 @@ export const createExcelFilePathName = (mainExcelDataLength: number, folderName:
 
 const folderToExcel = async (folder: string, _excelRoot: string) => {
     console.log(`folderToExcel ${folder}`);
-    FileUtils.incrementRowCounter()
+    FileConstsUtils.incrementRowCounter()
     const jsonArray: FileStats[] = await FileUtils.getAllPDFFilesWithMedata(folder, true)
     const { totalFileCount, totalPageCount, totalSizeRaw } = createMetadata(jsonArray);
     addSummaryToExcel(jsonArray, totalFileCount, totalPageCount, totalSizeRaw);

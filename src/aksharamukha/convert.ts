@@ -1,11 +1,18 @@
-export const callAksharamukha = async (body: AksharaMukhaGetProps) => {
-    const response = await fetch(`http://aksharamukha-plugin.appspot.com/api/public?source=${body.source}&target=${body.target}&text=${body.text}&nativize=${body.nativize}`)
-    const result = await response.text();
+
+const AKSHARA_MUKHA = "http://aksharamukha-plugin.appspot.com/api/public"
+export const callAksharamukhaWithSpecifics = async (body: AksharaMukhaGetProps) => {
+    const result = await callAksharamukha(body);
     const e_macronRemoval = result.replace(/ē/g, 'e')
     const n_tildaRemoval = e_macronRemoval.replace(/Jṭ/ig, 'gy')
-    
-   // console.log(`For input: ${body.text} \nResult: ${n_tildaRemoval}`);
+
+    // console.log(`For input: ${body.text} \nResult: ${n_tildaRemoval}`);
     return n_tildaRemoval;
+}
+export const callAksharamukha = async (body: AksharaMukhaGetProps) => {
+    const response = await fetch(`${AKSHARA_MUKHA}?source=${body.source}&target=${body.target}&text=${body.text}&nativize=${body.nativize}`)
+    const result = await response.text();
+    // console.log(`For input: ${body.text} \nResult: ${n_tildaRemoval}`);
+    return result;
 }
 
 export const aksharamukhaIastToRomanColloquial = async (text: string, nativize = false) => {
@@ -15,7 +22,7 @@ export const aksharamukhaIastToRomanColloquial = async (text: string, nativize =
         "text": text,
         "nativize": nativize,
     }
-    return callAksharamukha(body);
+    return callAksharamukhaWithSpecifics(body);
 }
 
 export const aksharamukhaHKToRomanColloquial = async (text: string, nativize = false) => {
@@ -25,7 +32,7 @@ export const aksharamukhaHKToRomanColloquial = async (text: string, nativize = f
         "text": text,
         "nativize": nativize,
     }
-    return callAksharamukha(body);
+    return callAksharamukhaWithSpecifics(body);
 }
 ///􀁂􀀏􀁎􀀃􀁔􀁖􀁎􀁂􀁅􀁂􀁂􀁈􀁂􀁎􀁂􀀍􀀁􀁂􀀏􀁎􀀃􀁔􀁖􀁎􀁂􀁕􀁌􀁂􀁂􀀃􀁔􀁚􀁂􀁑􀁂􀁂􀁈􀁂􀁎􀁂􀀁
 //a.m"sumadaagama

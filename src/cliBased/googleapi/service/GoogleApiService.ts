@@ -7,7 +7,9 @@ import { createFileNameWithPathForExport, getFolderName, getFolderPathRelativeTo
 import * as _ from 'lodash';
 import { GaxiosResponse } from 'gaxios';
 import { ellipsis } from '../../../mirror/utils';
+import * as FileStatsUtils from '../../../utils/FileStatsUtils';
 import * as FileUtils from '../../../utils/FileUtils';
+import * as FileConstUtils from '../../../utils/constants';
 import { extractGoogleDriveId } from '../../../mirror/GoogleDriveUtilsCommonCode';
 
 export async function listFolderContentsAsArrayOfData(folderId: string,
@@ -40,8 +42,8 @@ export async function listFolderContentsAndGenerateCSVAndExcel(_folderIdOrUrl: s
 
     const googleDriveFileData: Array<GoogleApiData> = await listFolderContentsAsArrayOfData(folderId,
         drive, umbrellaFolder, ignoreFolder, pdfOnly)
-    const fileNameWithPath = createFileNameWithPathForExport(folderId, umbrellaFolder, exportDestFolder, FileUtils.ROW_COUNTER[1]) ;
-    FileUtils.incrementRowCounter()
+    const fileNameWithPath = createFileNameWithPathForExport(folderId, umbrellaFolder, exportDestFolder, FileConstUtils.ROW_COUNTER[1]) ;
+    FileConstUtils.incrementRowCounter()
     //writeDataToCSV(googleDriveFileData, `${fileNameWithPath}.csv`)
     // Convert data to XLSX
     console.log(`googleDriveFileData ${googleDriveFileData.length} `);
@@ -144,7 +146,7 @@ export const addFileMetadataToArray = (file: drive_v3.Schema$File, folderId: str
 
     if (filemimeType !== FOLDER_MIME_TYPE) {
         googleDriveFileData.push({
-            index: ++FileUtils.ROW_COUNTER[1],
+            index: ++FileConstUtils.ROW_COUNTER[1],
             fileName: fileName,
             googleDriveLink: webViewLink,
             sizeInfo: sizeInfo(fileSize),
@@ -154,6 +156,6 @@ export const addFileMetadataToArray = (file: drive_v3.Schema$File, folderId: str
             thumbnailLink: thumbnailLink,
         });
 
-        console.log(`${FileUtils.ROW_COUNTER[0]}/${FileUtils.ROW_COUNTER[1]}). ${ellipsis(fileName, 40)} `);
+        console.log(`${FileConstUtils.ROW_COUNTER[0]}/${FileConstUtils.ROW_COUNTER[1]}). ${ellipsis(fileName, 40)} `);
     }
 }
