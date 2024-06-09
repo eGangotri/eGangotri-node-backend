@@ -1,8 +1,8 @@
 import * as express from 'express';
-import { launchUploader, launchUploaderViaAbsPath, launchUploaderViaExcel, launchUploaderViaExcelV3, launchUploaderViaJson, loginToArchive, makeGradleCall, moveToFreeze, reuploadMissed, snap2htmlCmdCall } from '../services/gradleLauncherService';
+import { launchUploader, launchUploaderViaAbsPath, launchUploaderViaExcel, launchUploaderViaExcelV3, launchUploaderViaExcelV3Multi, launchUploaderViaJson, loginToArchive, makeGradleCall, moveToFreeze, reuploadMissed, snap2htmlCmdCall } from '../services/gradleLauncherService';
 import { ArchiveProfileAndTitle, UploadCycleArchiveProfile } from '../mirror/types';
 import { isValidPath } from '../utils/utils';
-import { getFolderInDestRootForProfile, getFolderInSrcRootForProfile } from '../cliBased/utils';
+import { getFolderInDestRootForProfile, getFolderInSrcRootForProfile } from '../archiveUpload/utils';
 import { ItemsUshered } from '../models/itemsUshered';
 import { UploadCycle } from '../models/uploadCycle';
 import { excelToJson } from '../cliBased/excel/ExcelUtils';
@@ -453,30 +453,40 @@ launchGradleRoute.get('/launchUploaderViaExcelV3', async (req: any, resp: any) =
             return;
         }
 
-        const result = [];
         const profilesAsArray = profiles.includes(",") ? profiles.split(",").map((x: string) => x.trim()) : [profiles.trim()];
         const excelPathsAsArray = excelPaths.includes(",") ? excelPaths.split(",").map((x: string) => x.trim()) : [excelPaths.trim()];
+
+        const result = await launchUploaderViaExcelV3Multi(profilesAsArray,
+            excelPathsAsArray,
+            "", range);
+       resp.status(200).send({ response: result });
+
+        //v2
+        
+        /*
+        const result = [];
         for (let i = 0; i < profilesAsArray.length; i++) {
-            try {
-                const respStream = await launchUploaderViaExcelV3(profilesAsArray[i],
-                    excelPathsAsArray[i],
-                    "", range);
-                result.push({
-                    success: true,
-                    msg: `Upload for ${profiles} via ${excelPaths} with ${range} range performed`,
-                    res: respStream
-                });
-            }
-            catch (err: any) {
-                console.log('Error:', err);
-                result.push({
-                    success: false,
-                    err,
-                    msg: `Error while uploading Excel file for profile ${profile}`
-                });
-            }
-        }
-        resp.status(200).send({ response: result });
+           try {
+               const respStream = await launchUploaderViaExcelV3(profilesAsArray[i],
+                   excelPathsAsArray[i],
+                   "", range);
+               result.push({
+                   success: true,
+                   msg: `Upload for ${profiles} via ${excelPaths} with ${range} range performed`,
+                   res: respStream
+               });
+           }
+           catch (err: any) {
+               console.log('Error:', err);
+               result.push({
+                   success: false,
+                   err,
+                   msg: `Error while uploading Excel file for profile ${profile}`
+               });
+           }
+       }
+       resp.status(200).send({ response: result });
+       */
     }
     catch (err: any) {
         console.log('Error', err);

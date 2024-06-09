@@ -1,6 +1,6 @@
 import * as express from 'express';
 import { downloadPdfFromGoogleDriveToProfile } from '../cliBased/googleapi/GoogleDriveApiReadAndDownload';
-import { getFolderInSrcRootForProfile } from '../cliBased/utils';
+import { getFolderInSrcRootForProfile } from '../archiveUpload/utils';
 import { moveFileSrcToDest, moveProfilesToFreeze } from '../services/yarnService';
 import { resetDownloadCounters } from '../cliBased/pdf/utils';
 import { vanitizePdfForProfile } from '../vanityService/VanityPdf';
