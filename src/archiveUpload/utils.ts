@@ -86,14 +86,19 @@ const getArchiveMetadataProperties = () => {
             properties.set(key.trim(), val.trim());
         }
     });
+    console.log(`archive.metadata.properties ${properties.size}`);
+    return properties;
 }
 
-const ARCHIVE_METADA_PROPERTIES: Map<string, string> = getArchiveMetadataProperties();
-
+let ARCHIVE_METADA_PROPERTIES: Map<string, string> = getArchiveMetadataProperties();
 export const getArchiveMetadataForProfile = (profile: string) => {
-    const subjects = ARCHIVE_METADA_PROPERTIES.get(`${profile}.subjects`);
-    const description = ARCHIVE_METADA_PROPERTIES.get(`${profile}.description`);
-    const creator = ARCHIVE_METADA_PROPERTIES.get(`${profile}.creator`);
+    if (!ARCHIVE_METADA_PROPERTIES) {
+        ARCHIVE_METADA_PROPERTIES = getArchiveMetadataProperties();
+    }
+    const subjects = ARCHIVE_METADA_PROPERTIES.get(`${profile}.subjects` || "");
+    const description = ARCHIVE_METADA_PROPERTIES.get(`${profile}.description` || "");
+    const creator = ARCHIVE_METADA_PROPERTIES.get(`${profile}.creator` || "");
+
     return {
         subjects, description, creator
     }

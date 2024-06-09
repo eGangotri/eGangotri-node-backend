@@ -1,6 +1,9 @@
-import { LOCAL_FOLDERS_PROPERTIES_FILE_FOR_SRC } from '../archiveUpload/utils';
+import { LOCAL_FOLDERS_PROPERTIES_FILE_FOR_SRC, getArchiveMetadataForProfile } from '../archiveUpload/utils';
 import * as express from 'express';
 import { getAllFileListingWithoutStats, getAllPDFFiles } from '../utils/FileStatsUtils';
+import { createExcelV1FileForUpload } from './GradleLauncherUtil';
+import { callAksharamukhaToRomanColloquial } from '../aksharamukha/convert';
+import path from 'path';
 
 export const getJsonOfAbsPathFromProfile = async (profile: string, allNotJustPdfs: boolean) => {
     const profileFolder = LOCAL_FOLDERS_PROPERTIES_FILE_FOR_SRC.get(profile);
@@ -25,7 +28,66 @@ export const getJsonOfAbsPathFromProfile = async (profile: string, allNotJustPdf
     return filesAsJson;
 }
 
+export const generateV1ExcelsForMultipleProfiles = async (profiles: string, script: string, allNotJustPdfs:boolean = false, useFolderNameAsDesc = false) => {
+    const result = []
+    const _profilesAsArray = profiles.includes(",") ? profiles?.split(",").map((x: string) => x.trim()) : [profiles.trim()];
+    for (const profile of _profilesAsArray) {
+        try {
+            const _metadata = getArchiveMetadataForProfile(profile);
+            console.log(`metadata ${JSON.stringify(_metadata)}`);
+            const absPathsAsJsons = await getJsonOfAbsPathFromProfile(profile, allNotJustPdfs);
+            for (const absPathAsJson of absPathsAsJsons) {
+                const fileName = path.basename(absPathAsJson['absPath']);
+                let description = _metadata.description;
+                if (script?.length > 0 && findNonAscii(fileName)) {
+                    console.log(`Non-ASCII: ${fileName}`);
+                    const toRomanCol = await callAksharamukhaToRomanColloquial(script, fileName);
+                    description = `${description} ${toRomanCol}`;
+                    console.log(`Non-ASCII:description: ${description}`);
+                }
 
+                if (useFolderNameAsDesc) {
+                    const folderName = path.dirname(absPathAsJson['absPath']);
+                    description = `${description} ${folderName}`;
+                    console.log(`Non-ASCII:description: ${folderName} ${description}`);
+
+                    if (script?.length > 0 && findNonAscii(folderName)) {
+                        console.log(`Non-ASCII:folderName: ${folderName}`);
+                        const toRomanCol = await callAksharamukhaToRomanColloquial(script, folderName);
+                        description = `${description} ${toRomanCol}`;
+                    }
+                }
+                console.log(`final desc: ${description}`);
+
+                absPathAsJson['subject'] = _metadata.subjects;
+                absPathAsJson['description'] = _metadata.description;
+                absPathAsJson['creator'] = _metadata.creator;
+            }
+            const excelFileName = createExcelV1FileForUpload("", absPathsAsJsons,
+                `absPaths-as-excel-v1-${profile}-${absPathsAsJsons.length}`)
+            result.push({
+                profile: profile,
+                excelFileName: excelFileName,
+                length: absPathsAsJsons.length
+            })
+        }
+        catch (err: any) {
+            console.log('Error:', err);
+            result.push({
+                success: false,
+                msg: `Error while creating Excel file V1 for profile ${profile}`,
+                response: `${err.message}`
+            });
+        }
+    }
+
+    return {
+        msg: `Created ${result.length} Excel file(s) with (${result.map((res) => res.length)}) items in each file.`,
+        profiles: result.map((res) => res.profile),
+        excelFileNames: result.map((res) => res.excelFileName),
+        info: "Excel-Path stored in Local Storage"
+    }
+}
 export const findNonAscii = (str: string) => {
     return str.match(/[^\x00-\x7F]/g);
 }
