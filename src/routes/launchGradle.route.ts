@@ -12,6 +12,7 @@ import { itemsUsheredVerficationAndDBFlagUpdate } from '../services/itemsUshered
 import * as path from 'path';
 import { getLatestUploadCycle } from '../services/uploadCycleService';
 import { checkIfEmpty } from '../utils/FileUtils';
+import { profile } from 'console';
 
 export const launchGradleRoute = express.Router();
 
@@ -439,20 +440,43 @@ launchGradleRoute.get('/snap2html', async (req: any, resp: any) => {
 
 launchGradleRoute.get('/launchUploaderViaExcelV3', async (req: any, resp: any) => {
     try {
-        const { profile, excelPath, range } = req.query
+        const { profiles, excelPaths, range } = req.query
 
-        console.log(`launchUploaderViaExcelV3 ${profile},${excelPath}, ${range}`)
-        const respStream = await launchUploaderViaExcelV3(profile,
-            excelPath,
-            "", range);
+        console.log(`launchUploaderViaExcelV3 ${profiles},${excelPaths}, ${range}`)
+        if (profiles === undefined || excelPaths === undefined) {
+            resp.status(400).send({
+                response: {
+                    success: false,
+                    msg: `Profiles and ExcelPaths are mandatory`
+                }
+            });
+            return;
+        }
 
-        resp.status(200).send({
-            response: {
-                success: true,
-                msg: `Upload for ${profile} via ${excelPath} with ${range} range performed`,
-                res: respStream
+        const result = [];
+        const profilesAsArray = profiles.includes(",") ? profiles.split(",").map((x: string) => x.trim()) : [profiles.trim()];
+        const excelPathsAsArray = excelPaths.includes(",") ? excelPaths.split(",").map((x: string) => x.trim()) : [excelPaths.trim()];
+        for (let i = 0; i < profilesAsArray.length; i++) {
+            try {
+                const respStream = await launchUploaderViaExcelV3(profilesAsArray[i],
+                    excelPathsAsArray[i],
+                    "", range);
+                result.push({
+                    success: true,
+                    msg: `Upload for ${profiles} via ${excelPaths} with ${range} range performed`,
+                    res: respStream
+                });
             }
-        });
+            catch (err: any) {
+                console.log('Error:', err);
+                result.push({
+                    success: false,
+                    err,
+                    msg: `Error while uploading Excel file for profile ${profile}`
+                });
+            }
+        }
+        resp.status(200).send({ response: result });
     }
     catch (err: any) {
         console.log('Error', err);
