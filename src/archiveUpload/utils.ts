@@ -86,11 +86,11 @@ const getArchiveMetadataProperties = () => {
             properties.set(key.trim(), val.trim());
         }
     });
-    console.log(`archive.metadata.properties ${properties.size}`);
+    console.log(`archive.metadata.properties ${properties.size} items`);
     return properties;
 }
 
-let ARCHIVE_METADA_PROPERTIES: Map<string, string> = getArchiveMetadataProperties();
+let ARCHIVE_METADA_PROPERTIES: Map<string, string>;
 export const getArchiveMetadataForProfile = (profile: string) => {
     if (!ARCHIVE_METADA_PROPERTIES) {
         ARCHIVE_METADA_PROPERTIES = getArchiveMetadataProperties();

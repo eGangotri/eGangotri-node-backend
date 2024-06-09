@@ -34,33 +34,29 @@ export const generateV1ExcelsForMultipleProfiles = async (profiles: string, scri
     for (const profile of _profilesAsArray) {
         try {
             const _metadata = getArchiveMetadataForProfile(profile);
-            console.log(`metadata ${JSON.stringify(_metadata)}`);
             const absPathsAsJsons = await getJsonOfAbsPathFromProfile(profile, allNotJustPdfs);
             for (const absPathAsJson of absPathsAsJsons) {
-                const fileName = path.basename(absPathAsJson['absPath']);
+                const absPathModified = absPathAsJson['absPath'].replace(/\\/g, "\\\\");
+                const fileName = path.basename(absPathModified);
                 let description = _metadata.description;
                 if (script?.length > 0 && findNonAscii(fileName)) {
-                    console.log(`Non-ASCII: ${fileName}`);
                     const toRomanCol = await callAksharamukhaToRomanColloquial(script, fileName);
-                    description = `${description} ${toRomanCol}`;
-                    console.log(`Non-ASCII:description: ${description}`);
+                    description = `${description}. ${toRomanCol}`;
                 }
 
                 if (useFolderNameAsDesc) {
-                    const folderName = path.dirname(absPathAsJson['absPath']);
-                    description = `${description} ${folderName}`;
-                    console.log(`Non-ASCII:description: ${folderName} ${description}`);
+                    const folderName = path.dirname(absPathModified);
+                    description = `${description}, ${folderName}`;
 
                     if (script?.length > 0 && findNonAscii(folderName)) {
-                        console.log(`Non-ASCII:folderName: ${folderName}`);
                         const toRomanCol = await callAksharamukhaToRomanColloquial(script, folderName);
-                        description = `${description} ${toRomanCol}`;
+                        description = `${description}, ${toRomanCol}`;
                     }
                 }
                 console.log(`final desc: ${description}`);
 
                 absPathAsJson['subject'] = _metadata.subjects;
-                absPathAsJson['description'] = _metadata.description;
+                absPathAsJson['description'] = description;
                 absPathAsJson['creator'] = _metadata.creator;
             }
             const excelFileName = createExcelV1FileForUpload("", absPathsAsJsons,
@@ -68,7 +64,8 @@ export const generateV1ExcelsForMultipleProfiles = async (profiles: string, scri
             result.push({
                 profile: profile,
                 excelFileName: excelFileName,
-                length: absPathsAsJsons.length
+                length: absPathsAsJsons.length,
+                absPathsAsJsons
             })
         }
         catch (err: any) {
