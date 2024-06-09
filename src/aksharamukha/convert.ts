@@ -10,12 +10,24 @@ export const callAksharamukhaWithSpecifics = async (body: AksharaMukhaGetProps) 
     // console.log(`For input: ${body.text} \nResult: ${n_tildaRemoval}`);
     return n_tildaRemoval;
 }
+
 export const callAksharamukha = async (body: AksharaMukhaGetProps) => {
     const response = await fetch(`${AKSHARA_MUKHA}?source=${body.source}&target=${body.target}&text=${body.text}&nativize=${body.nativize}`)
     const result = await response.text();
     // console.log(`For input: ${body.text} \nResult: ${n_tildaRemoval}`);
     return result;
 }
+
+export const callAksharamukhaToRomanColloquial = async (sourceScript:string, text:string) => {
+    const body = {
+        "source": sourceScript,
+        "target": DEFAULT_TARGET_SCRIPT_ROMAN_COLLOQUIAL,
+        "text": text,
+        "nativize": true,
+    }
+    return callAksharamukha(body);
+}
+
 
 export const aksharamukhaIastToRomanColloquial = async (text: string, nativize = false) => {
     const body = {

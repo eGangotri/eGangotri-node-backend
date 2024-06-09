@@ -1,8 +1,6 @@
-import { LOCAL_FOLDERS_PROPERTIES_FILE_FOR_SRC } from '../cliBased/utils';
+import { LOCAL_FOLDERS_PROPERTIES_FILE_FOR_SRC } from '../archiveUpload/utils';
 import * as express from 'express';
 import { getAllFileListingWithoutStats, getAllPDFFiles } from '../utils/FileStatsUtils';
-
-export const yarnExcelRoute = express.Router();
 
 export const getJsonOfAbsPathFromProfile = async (profile: string, allNotJustPdfs: boolean) => {
     const profileFolder = LOCAL_FOLDERS_PROPERTIES_FILE_FOR_SRC.get(profile);
@@ -27,3 +25,7 @@ export const getJsonOfAbsPathFromProfile = async (profile: string, allNotJustPdf
     return filesAsJson;
 }
 
+
+export const findNonAscii = (str: string) => {
+    return str.match(/[^\x00-\x7F]/g);
+}
