@@ -50,11 +50,11 @@ export const createJsonFileForUpload = (uploadCycleId: string, _failedForUploacC
     return jsonFileName
 }
 
-export const createExcelV1FileForUpload = (uploadCycleId: string, jsonArray: any[], statusString: string) => {
+export const createExcelV1FileForUpload = (uploadCycleId: string, jsonArray: any[], statusString: string, infix = "") => {
     const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)
     const folder = (process.env.HOME || process.env.USERPROFILE) + path.sep + 'Downloads' + path.sep;
     const suffix = `uploadable-v1-${uploadCycleId}-${statusString}-${timeComponent}.xlsx`;
-    const excelFileName = folder + `reupload-missed-in-upload-cycle-id-${suffix}`;
+    const excelFileName = folder + `${infix}${suffix}`;
     console.log(`excelFileName ${excelFileName}`)
     jsonToExcel(jsonArray, excelFileName)
     return excelFileName
