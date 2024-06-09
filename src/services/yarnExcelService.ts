@@ -36,7 +36,7 @@ export const generateV1ExcelsForMultipleProfiles = async (profiles: string, scri
             const _metadata = getArchiveMetadataForProfile(profile);
             const absPathsAsJsons = await getJsonOfAbsPathFromProfile(profile, allNotJustPdfs);
             for (const absPathAsJson of absPathsAsJsons) {
-                const absPathModified = absPathAsJson['absPath'].replace(/\\/g, "\\\\");
+                const absPathModified = absPathAsJson['absPath'].replace(/\\/g, /\\\\/);
                 const fileName = path.basename(absPathModified);
                 let description = _metadata.description;
                 if (script?.length > 0 && findNonAscii(fileName)) {
