@@ -4,6 +4,8 @@ import { getAllFileListingWithoutStats, getAllPDFFiles } from '../utils/FileStat
 import { createExcelV1FileForUpload } from './GradleLauncherUtil';
 import { callAksharamukhaToRomanColloquial } from '../aksharamukha/convert';
 import path from 'path';
+import { ArchiveUploadExcelProps } from 'archiveDotOrg/archive.types';
+import { ExcelV1Columns } from './types';
 
 export const getJsonOfAbsPathFromProfile = async (profile: string, allNotJustPdfs: boolean) => {
     const profileFolder = LOCAL_FOLDERS_PROPERTIES_FILE_FOR_SRC.get(profile);
@@ -27,45 +29,52 @@ export const getJsonOfAbsPathFromProfile = async (profile: string, allNotJustPdf
     });
     return filesAsJson;
 }
+const extractV1Metadata = async (absPathAsJson: { absPath: string }, _metadata: ExcelV1Columns, script: string, useFolderNameAsDesc: boolean) => {
+    const refined: ExcelV1Columns = { ...absPathAsJson };
+    const absPathModified = refined['absPath'];
+    const fileName = path.basename(absPathModified);
+    let description = _metadata.description;
+    if (script?.length > 0 && findNonAscii(fileName)) {
+        const toRomanCol = await callAksharamukhaToRomanColloquial(script, fileName);
+        description = `${description}. '${toRomanCol}'`;
+    }
 
-export const generateV1ExcelsForMultipleProfiles = async (profiles: string, script: string, allNotJustPdfs:boolean = false, useFolderNameAsDesc = false) => {
+    if (useFolderNameAsDesc) {
+        const parentDir = path.dirname(absPathModified);
+        let folderName = path.basename(parentDir);
+        description = `${description}, '${folderName}'`;
+        if (script?.length > 0 && findNonAscii(folderName)) {
+            const toRomanCol = await callAksharamukhaToRomanColloquial(script, folderName);
+            description = `${description}, '${toRomanCol}'`;
+        }
+    }
+
+    refined['subject'] = _metadata.subject;
+    refined['description'] = description;
+    refined['creator'] = _metadata.creator;
+    refined['uploadedFlag'] = false;
+    return refined;
+}
+
+export const generateV1ExcelsForMultipleProfiles = async (profiles: string, script: string, allNotJustPdfs: boolean = false, useFolderNameAsDesc = false) => {
     const result = []
     const _profilesAsArray = profiles.includes(",") ? profiles?.split(",").map((x: string) => x.trim()) : [profiles.trim()];
     for (const profile of _profilesAsArray) {
         try {
             const _metadata = getArchiveMetadataForProfile(profile);
             const absPathsAsJsons = await getJsonOfAbsPathFromProfile(profile, allNotJustPdfs);
+            const _refinedMetadata = [];
             for (const absPathAsJson of absPathsAsJsons) {
-                const absPathModified = absPathAsJson['absPath'].replace(/\\/g, /\\\\/);
-                const fileName = path.basename(absPathModified);
-                let description = _metadata.description;
-                if (script?.length > 0 && findNonAscii(fileName)) {
-                    const toRomanCol = await callAksharamukhaToRomanColloquial(script, fileName);
-                    description = `${description}. ${toRomanCol}`;
-                }
-
-                if (useFolderNameAsDesc) {
-                    const folderName = path.dirname(absPathModified);
-                    description = `${description}, ${folderName}`;
-
-                    if (script?.length > 0 && findNonAscii(folderName)) {
-                        const toRomanCol = await callAksharamukhaToRomanColloquial(script, folderName);
-                        description = `${description}, ${toRomanCol}`;
-                    }
-                }
-                console.log(`final desc: ${description}`);
-
-                absPathAsJson['subject'] = _metadata.subjects;
-                absPathAsJson['description'] = description;
-                absPathAsJson['creator'] = _metadata.creator;
+                const _refined: ExcelV1Columns = await extractV1Metadata(absPathAsJson, _metadata, script, useFolderNameAsDesc);
+                _refinedMetadata.push(_refined);
             }
-            const excelFileName = createExcelV1FileForUpload("", absPathsAsJsons,
-                `absPaths-as-excel-v1-${profile}-${absPathsAsJsons.length}`)
+            const excelFileName = createExcelV1FileForUpload("", _refinedMetadata,
+                `absPaths-as-excel-v1-${profile}-${_refinedMetadata.length}`)
             result.push({
                 profile: profile,
                 excelFileName: excelFileName,
-                length: absPathsAsJsons.length,
-                absPathsAsJsons
+                length: _refinedMetadata.length,
+                _refinedMetadata
             })
         }
         catch (err: any) {
