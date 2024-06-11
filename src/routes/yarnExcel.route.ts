@@ -1,13 +1,14 @@
 import * as express from 'express';
 import { createExcelV3FileForUpload } from '../services/GradleLauncherUtil';
 import { generateV1ExcelsForMultipleProfiles, getJsonOfAbsPathFromProfile } from '../services/yarnExcelService';
+import { toTitleCase } from '../utils/StringUtils';
 
 export const yarnExcelRoute = express.Router();
 
 yarnExcelRoute.post('/createExcelV1OfAbsPathFromProfile', async (req: any, resp: any) => {
     try {
         const profiles = req?.body?.profiles;
-        const script = req?.body?.script;
+        const script = req?.body?.script as string;
         const allNotJustPdfs = req?.body?.allNotJustPdfs;
         const useFolderNameAsDesc = req?.body?.useFolderNameAsDesc;
 
@@ -19,11 +20,13 @@ yarnExcelRoute.post('/createExcelV1OfAbsPathFromProfile', async (req: any, resp:
                 }
             });
         }
-        console.log(`profiles ${profiles} ${profiles?.split(",")} 
+        console.log(`profiles ${profiles} 
+            ${profiles?.split(",")} 
+            script: ${script}
         useFolderNameAsDesc: ${useFolderNameAsDesc}
         allNotJustPdfs ${allNotJustPdfs}`);
         
-        const res = await generateV1ExcelsForMultipleProfiles(profiles, script, allNotJustPdfs, useFolderNameAsDesc);
+        const res = await generateV1ExcelsForMultipleProfiles(profiles, toTitleCase(script), allNotJustPdfs, useFolderNameAsDesc);
         resp.status(200).send({
             response: res
         });

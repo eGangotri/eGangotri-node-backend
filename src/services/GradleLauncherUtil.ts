@@ -7,6 +7,7 @@ import { ItemsUshered } from '../models/itemsUshered';
 import { UploadCycle } from '../models/uploadCycle';
 import _ from 'lodash';
 import { UploadCycleArchiveProfile } from 'mirror/types';
+import { ExcelV1Columns } from './types';
 
 export const findMissedUploads = async (uploadCycleId: string): Promise<UploadCycleArchiveProfile[]> => {
     const uploadCycleByCycleId = await UploadCycle.findOne({
@@ -50,7 +51,7 @@ export const createJsonFileForUpload = (uploadCycleId: string, _failedForUploacC
     return jsonFileName
 }
 
-export const createExcelV1FileForUpload = (uploadCycleId: string, jsonArray: any[], statusString: string, infix = "") => {
+export const createExcelV1FileForUpload = (uploadCycleId: string, jsonArray: ExcelV1Columns[], statusString: string, infix = "") => {
     const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)
     const folder = (process.env.HOME || process.env.USERPROFILE) + path.sep + 'Downloads' + path.sep;
     const suffix = `uploadable-v1-${uploadCycleId}-${statusString}-${timeComponent}.xlsx`;
