@@ -1,4 +1,4 @@
-import { LOCAL_FOLDERS_PROPERTIES_FILE_FOR_SRC, getArchiveMetadataForProfile } from '../archiveUpload/utils';
+import { LOCAL_FOLDERS_PROPERTIES_FILE_FOR_SRC, getArchiveMetadataForProfile, isValidArchiveProfile } from '../archiveUpload/ArchiveProfileUtils';
 import * as express from 'express';
 import { getAllFileListingWithoutStats, getAllPDFFiles } from '../utils/FileStatsUtils';
 import { createExcelV1FileForUpload } from './GradleLauncherUtil';
@@ -29,6 +29,7 @@ export const getJsonOfAbsPathFromProfile = async (profile: string, allNotJustPdf
     });
     return filesAsJson;
 }
+
 const extractV1Metadata = async (absPathAsJson: { absPath: string }, _metadata: ExcelV1Columns, script: string, useFolderNameAsDesc: boolean) => {
     const refined: ExcelV1Columns = { ...absPathAsJson };
     const absPathModified = refined['absPath'];
@@ -58,8 +59,17 @@ const extractV1Metadata = async (absPathAsJson: { absPath: string }, _metadata: 
 
 export const generateV1ExcelsForMultipleProfiles = async (profiles: string, script: string, allNotJustPdfs: boolean = false, useFolderNameAsDesc = false) => {
     const result = []
+    const errors = []
     const _profilesAsArray = profiles.includes(",") ? profiles?.split(",").map((x: string) => x.trim()) : [profiles.trim()];
     for (const profile of _profilesAsArray) {
+        if(!isValidArchiveProfile(profile)){
+            console.log(`Profile ${profile} is not valid. Please check the profile name and try again.`)
+            errors.push({
+                success: false,
+                msg: `Profile ${profile} is not valid. Please check the profile name and try again.`
+            });
+            continue;
+        }
         try {
             const _metadata = getArchiveMetadataForProfile(profile);
             const absPathsAsJsons = await getJsonOfAbsPathFromProfile(profile, allNotJustPdfs);
@@ -79,7 +89,7 @@ export const generateV1ExcelsForMultipleProfiles = async (profiles: string, scri
         }
         catch (err: any) {
             console.log('Error:', err);
-            result.push({
+            errors.push({
                 success: false,
                 msg: `Error while creating Excel file V1 for profile ${profile}`,
                 response: `${err.message}`
@@ -91,7 +101,9 @@ export const generateV1ExcelsForMultipleProfiles = async (profiles: string, scri
         msg: `Created ${result.length} Excel file(s) with (${result.map((res) => res.length)}) items in each file.`,
         profiles: result.map((res) => res.profile),
         excelFileNames: result.map((res) => res.excelFileName),
-        info: "Excel-Path stored in Local Storage"
+        info: "Excel-Path(s) created will be stored in Local Storage",
+        ...result,
+        ...errors
     }
 }
 export const findNonAscii = (str: string) => {

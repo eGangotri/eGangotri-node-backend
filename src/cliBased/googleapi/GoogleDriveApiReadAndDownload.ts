@@ -2,7 +2,7 @@ import { _credentials } from './_utils/credentials_googleapi';
 import { listFolderContentsAsArrayOfData } from './service/GoogleApiService';
 import { getGoogleDriveInstance } from './service/CreateGoogleDrive';
 import { downloadFileFromGoogleDrive } from '../pdf/downloadPdf';
-import { getFolderInSrcRootForProfile } from '../../archiveUpload/utils';
+import { getFolderInSrcRootForProfile } from '../../archiveUpload/ArchiveProfileUtils';
 import fs from 'fs';
 import path from 'path';
 import * as fsExtra from 'fs-extra';

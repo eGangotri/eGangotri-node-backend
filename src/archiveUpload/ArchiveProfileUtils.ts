@@ -104,3 +104,6 @@ export const getArchiveMetadataForProfile = (profile: string) => {
     }
 }
 
+export const isValidArchiveProfile = (profile: string) => {   
+    return LOCAL_FOLDERS_PROPERTIES_FILE_FOR_SRC.has(profile?.trim());
+}
