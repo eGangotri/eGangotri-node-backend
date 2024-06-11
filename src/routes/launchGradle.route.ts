@@ -2,7 +2,7 @@ import * as express from 'express';
 import { launchUploader, launchUploaderViaAbsPath, launchUploaderViaExcel, launchUploaderViaExcelV3, launchUploaderViaExcelV3Multi, launchUploaderViaJson, loginToArchive, makeGradleCall, moveToFreeze, reuploadMissed, snap2htmlCmdCall } from '../services/gradleLauncherService';
 import { ArchiveProfileAndTitle, UploadCycleArchiveProfile } from '../mirror/types';
 import { isValidPath } from '../utils/utils';
-import { getFolderInDestRootForProfile, getFolderInSrcRootForProfile } from '../archiveUpload/utils';
+import { getFolderInDestRootForProfile, getFolderInSrcRootForProfile } from '../archiveUpload/ArchiveProfileUtils';
 import { ItemsUshered } from '../models/itemsUshered';
 import { UploadCycle } from '../models/uploadCycle';
 import { excelToJson } from '../cliBased/excel/ExcelUtils';

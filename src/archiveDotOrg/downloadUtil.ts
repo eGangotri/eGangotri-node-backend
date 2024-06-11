@@ -1,6 +1,6 @@
 import { downloadFileFromUrl } from "../cliBased/pdf/downloadPdf";
 import { DOWNLOAD_COMPLETED_COUNT, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT, resetDownloadCounters } from "../cliBased/pdf/utils";
-import { getFolderInSrcRootForProfile } from "../archiveUpload/utils";
+import { getFolderInSrcRootForProfile } from "../archiveUpload/ArchiveProfileUtils";
 import fs from 'fs';
 import * as fsExtra from "fs-extra";
 import { LinkData } from "./types";

@@ -5,7 +5,7 @@ import { getAllPdfsInFolders, mkDirIfDoesntExists } from "../imgToPdf/utils/Util
 import { prepareDocument } from "../imgToPdf/utils/PdfUtils";
 const path = require('path');
 import { FONT_SIZE, MAX_IMG_WIDTH, formatIntroText, profileVanityTextMap } from "./vanityConstants";
-import { getFolderInSrcRootForProfile } from "../archiveUpload/utils";
+import { getFolderInSrcRootForProfile } from "../archiveUpload/ArchiveProfileUtils";
 
 
 /**

@@ -1,6 +1,6 @@
 import { isValidPath } from "../utils/utils";
 import { moveFilesAndFlatten } from "../cliBased/fileMover";
-import { getFolderInDestRootForProfile, getFolderInSrcRootForProfile } from "../archiveUpload/utils";
+import { getFolderInDestRootForProfile, getFolderInSrcRootForProfile } from "../archiveUpload/ArchiveProfileUtils";
 import * as fs from 'fs';
 import { getAllFileListingWithoutStats, getAllFileListingWithStats, getAllPDFFiles, getAllPDFFilesWithMedata } from "../utils/FileStatsUtils";
 import { FileStats } from "../imgToPdf/utils/types";
