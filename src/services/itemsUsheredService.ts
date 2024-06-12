@@ -46,6 +46,7 @@ export const itemsUsheredVerficationAndDBFlagUpdate = async (uploadCycleIdForVer
     successCount: (failures.length === 0) ? "ALL" : total - failures.length,
     failureCount: failures.length,
     status: `Verfification/DB-Marking of ${results.length} previously failed/unverified of (${total}) items for  ${uploadCycleIdForVerification} ${archiveProfiles} completed.`,
+    note: "Bad Data Upload Failures are not captured yet",
     failures: failures.map(x => x.title) || "None",
   };
   console.log(`_res ${result.status} ${result.successCount} ${result.failureCount}`)
@@ -64,11 +65,12 @@ export const selectedItemsVerficationAndDBFlagUpdate = async (uploadsForVerifica
   await bulkUpdateUploadedFlag(results);
   const failures = results.filter((x: SelectedUploadItem) => x?.isValid !== true) || []//accomodates null also   
 
-  const result =  {
+  const result = {
     successCount: results.length - failures.length,
     failureCount: failures.length,
     status: `Verfification/DB-Marking of Selected (${results.length}) items completed.`,
-    failures: failures.map(x => x.title)
+    note: "Bad Data Upload Failures are not captured yet",
+    failures: failures.map(x => x.title),
   };
   console.log(`_res ${result.status} ${result.successCount} ${result.failureCount}`)
 
