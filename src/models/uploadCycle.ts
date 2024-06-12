@@ -5,6 +5,7 @@ const schema = new mongoose.Schema(
         archiveProfiles: {
             type: [{
                 archiveProfile: String,
+                archiveProfilePath: String,
                 count: Number,
                 absolutePaths: {
                     type: [String],

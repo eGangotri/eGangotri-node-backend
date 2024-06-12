@@ -33,7 +33,8 @@ export const getJsonOfAbsPathFromProfile = async (profile: string, allNotJustPdf
 const extractV1Metadata = async (absPathAsJson: { absPath: string }, _metadata: ExcelV1Columns, script: string, useFolderNameAsDesc: boolean) => {
     const refined: ExcelV1Columns = { ...absPathAsJson };
     const absPathModified = refined['absPath'];
-    const fileName = path.basename(absPathModified);
+    const path = require('path');
+    const fileName = path.parse(absPathModified).name;
     let description = _metadata.description;
     if (script?.length > 0 && findNonAscii(fileName)) {
         const toRomanCol = await callAksharamukhaToRomanColloquial(script, fileName);
