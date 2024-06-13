@@ -36,6 +36,7 @@ const extractV1Metadata = async (absPathAsJson: { absPath: string }, _metadata: 
     const path = require('path');
     const fileName = path.parse(absPathModified).name;
     let description = _metadata.description;
+    let _subject = _metadata.subject;
     if (script?.length > 0 && findNonAscii(fileName)) {
         const toRomanCol = await callAksharamukhaToRomanColloquial(script, fileName);
         description = `${description}. '${toRomanCol}'`;
@@ -45,13 +46,16 @@ const extractV1Metadata = async (absPathAsJson: { absPath: string }, _metadata: 
         const parentDir = path.dirname(absPathModified);
         let folderName = path.basename(parentDir);
         description = `${description}, '${folderName}'`;
+        _subject = `${_subject}, '${folderName}'`;
+
         if (script?.length > 0 && findNonAscii(folderName)) {
             const toRomanCol = await callAksharamukhaToRomanColloquial(script, folderName);
             description = `${description}, '${toRomanCol}'`;
+            _subject = `${_subject}, '${toRomanCol}'`;
         }
     }
 
-    refined['subject'] = _metadata.subject;
+    refined['subject'] = _subject;
     refined['description'] = description;
     refined['creator'] = _metadata.creator;
     refined['uploadedFlag'] = false;
