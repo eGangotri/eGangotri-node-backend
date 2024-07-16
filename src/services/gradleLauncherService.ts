@@ -33,17 +33,17 @@ const generateGradleCommandForHashSeparated = (args: string, gradleCommand: stri
 }
 
 const generateGradleCommandForChar = (args: string, gradleCommand: string, char: string) => {
-    const _query = args.split(char).map((x: string) => x.trim()).filter(y=>y.length > 0).map(z=>`'${z}'`).join(" ")
+    const _query = args.split(char).map((x: string) => x.trim()).filter(y => y.length > 0).map(z => `'${z}'`).join(" ")
     console.log(`args ${args}`);
     const _cmd = gradleCommandFormat(_query, gradleCommand)
     console.log(`_cmd ${_cmd}`);
     return _cmd
 }
 
-export function launchUploader(args: any, optionalParams: { [key: string]: any } = {}): Promise<string> {
-
-//export function launchUploader(args: any, optionalParams:object = { [key: string]: any} = {}): Promise<string> {
-    return makeGradleCall(generateGradleCommandForCSV(args, "uploadToArchive"), optionalParams)
+export function launchUploader(args: any, optionalParams: string = ""): Promise<string> {
+    console.log(`launchUploader ${args} ${optionalParams}`);
+    //export function launchUploader(args: any, optionalParams:object = { [key: string]: any} = {}): Promise<string> {
+    return makeGradleCall(generateGradleCommandForCSV(`${args} , ${optionalParams}`, "uploadToArchive"))
 }
 
 export function launchUploaderViaExcel(profile: string, excelPath: string, uploadCycleId: string): Promise<string> {
@@ -52,14 +52,14 @@ export function launchUploaderViaExcel(profile: string, excelPath: string, uploa
         `gradle uploadToArchiveExcel -PjsonArgs="${gradleArgsAsJSON}"`)
 }
 
-export function launchUploaderViaExcelV3(profile: string, excelPath: string, uploadCycleId: string, range:string = ""): Promise<string> {
+export function launchUploaderViaExcelV3(profile: string, excelPath: string, uploadCycleId: string, range: string = ""): Promise<string> {
     const gradleCmd = `gradle uploadToArchiveExcelV3 --args="${profile} '${excelPath}' '${uploadCycleId}' '${range}'"`;
-   return makeGradleCall(gradleCmd)
+    return makeGradleCall(gradleCmd)
 }
 
-export function launchUploaderViaExcelV3Multi(profiles: string, excelPaths: string, uploadCycleId: string, range:string = ""): Promise<string> {
+export function launchUploaderViaExcelV3Multi(profiles: string, excelPaths: string, uploadCycleId: string, range: string = ""): Promise<string> {
     const gradleCmd = `gradle uploadToArchiveExcelV3Multi --args="${profiles} '${excelPaths}' '${uploadCycleId}' '${range}'"`;
-   return makeGradleCall(gradleCmd)
+    return makeGradleCall(gradleCmd)
 }
 export function launchUploaderViaJson(args: any): Promise<string> {
     return makeGradleCall(generateGradleCommandForCSV(args, "uploadToArchiveJson"))
@@ -111,8 +111,9 @@ export async function snap2htmlCmdCall(rootFolderPath: string, snap2htmlFileName
 }
 
 const COMMAND_PROMO_MAX_BUFFER_SIZE = 1024 * 1024 * 1024;
-export function makeGradleCall(_cmd: string, optionalParams: { [key: string]: any } = {}): Promise<string> {
-    console.log(`makeGradleCall ${_cmd} ${optionalParams}`);
+export function makeGradleCall(_cmd: string): Promise<string> {
+    console.log(`makeGradleCall ${_cmd} `);
+
     return new Promise((resolve, reject) => {
         exec(_cmd, {
             maxBuffer: COMMAND_PROMO_MAX_BUFFER_SIZE,
