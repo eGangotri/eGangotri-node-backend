@@ -39,7 +39,7 @@ export function setOptionsForUserListing(queryOptions: UserListOptionsType) {
     const _role: string[] = replaceQuotesAndSplit(queryOptions?.role);
     mongoOptionsFilter = { ...mongoOptionsFilter, role: { $in: _role } };
   }
-  console.log(`mongoOptionsFilter ${JSON.stringify(mongoOptionsFilter)}`)
+  console.log(`mongoOptionsFilter: ${JSON.stringify(mongoOptionsFilter)}`)
   const limit: number = getLimit(queryOptions?.limit);
   return { limit, mongoOptionsFilter };
 }
