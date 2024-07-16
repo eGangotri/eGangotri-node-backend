@@ -40,9 +40,10 @@ const generateGradleCommandForChar = (args: string, gradleCommand: string, char:
     return _cmd
 }
 
+export function launchUploader(args: any, optionalParams: { [key: string]: any } = {}): Promise<string> {
 
-export function launchUploader(args: any): Promise<string> {
-    return makeGradleCall(generateGradleCommandForCSV(args, "uploadToArchive"))
+//export function launchUploader(args: any, optionalParams:object = { [key: string]: any} = {}): Promise<string> {
+    return makeGradleCall(generateGradleCommandForCSV(args, "uploadToArchive"), optionalParams)
 }
 
 export function launchUploaderViaExcel(profile: string, excelPath: string, uploadCycleId: string): Promise<string> {
@@ -110,8 +111,8 @@ export async function snap2htmlCmdCall(rootFolderPath: string, snap2htmlFileName
 }
 
 const COMMAND_PROMO_MAX_BUFFER_SIZE = 1024 * 1024 * 1024;
-export function makeGradleCall(_cmd: string): Promise<string> {
-    console.log(`makeGradleCall ${_cmd}`);
+export function makeGradleCall(_cmd: string, optionalParams: { [key: string]: any } = {}): Promise<string> {
+    console.log(`makeGradleCall ${_cmd} ${optionalParams}`);
     return new Promise((resolve, reject) => {
         exec(_cmd, {
             maxBuffer: COMMAND_PROMO_MAX_BUFFER_SIZE,

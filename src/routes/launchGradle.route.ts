@@ -9,16 +9,15 @@ import { excelToJson } from '../cliBased/excel/ExcelUtils';
 import { ArchiveUploadExcelProps } from '../archiveDotOrg/archive.types';
 import { createExcelV1FileForUpload, createExcelV3FileForUpload, createJsonFileForUpload, findMissedUploads } from '../services/GradleLauncherUtil';
 import { itemsUsheredVerficationAndDBFlagUpdate } from '../services/itemsUsheredService';
-import * as path from 'path';
 import { getLatestUploadCycle } from '../services/uploadCycleService';
 import { checkIfEmpty } from '../utils/FileUtils';
-import { profile } from 'console';
 
 export const launchGradleRoute = express.Router();
 
 launchGradleRoute.get('/launchUploader', async (req: any, resp: any) => {
     try {
         const _profiles = req.query.profiles
+        const _optionalParams = req.query.optionalParams || ""
         console.log(`launchUploader ${_profiles}`)
         const emptyProfiles = []
 
@@ -43,7 +42,9 @@ launchGradleRoute.get('/launchUploader', async (req: any, resp: any) => {
             return;
         }
         else {
-            const res = await launchUploader(req.query.profiles)
+            const res = await launchUploader(req.query.profiles, {
+                subjectDesc: _optionalParams
+            })
             //dont wait. let it run in background
             getLatestUploadCycle().then((uploadCycleId) => {
                 console.log(`uploadCycleId ${uploadCycleId}`)
