@@ -53,6 +53,7 @@ egangotri.use("/execLauncher", launchGradleRoute);
 egangotri.use("/dailyWorkReport", dailyWorkReportRoute);
 egangotri.use("/dailyCatWorkReport", dailyCatWorkReportRoute);
 egangotri.use("/dailyQAWorkReport", dailyQAWorkReportRoute);
+egangotri.use("/dailyGDriveUploadWorkReport", dailyQAWorkReportRoute);
 egangotri.use("/uploadCycleRoute", uploadCycleRoute);
 egangotri.use("/user", userRoute);
 egangotri.use("/yarn", yarnRoute);
