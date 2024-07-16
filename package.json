@@ -48,7 +48,8 @@
     "fipRename": "ts-node ./src/_adHoc/fip/fipRename",
     "uploadFileToGDrive": "ts-node ./src/cliBased/googleapi/GoogleDriveUpload",
     "renameNonAsciiFiles": "ts-node ./src/files/renameNonAsciiFiles.ts",
-    "jpgToPdf": "ts-node ./src/imgToPdf/jpgToPdf.ts"
+    "jpgToPdf": "ts-node ./src/imgToPdf/jpgToPdf.ts",
+    "convertEAPExcel": "ts-node ./src/eap_bl/index.ts"
   },
   "repository": {
     "type": "git",
