@@ -43,7 +43,13 @@ const generateGradleCommandForChar = (args: string, gradleCommand: string, char:
 export function launchUploader(args: any, optionalParams: string = ""): Promise<string> {
     console.log(`launchUploader ${args} ${optionalParams}`);
     //export function launchUploader(args: any, optionalParams:object = { [key: string]: any} = {}): Promise<string> {
-    return makeGradleCall(generateGradleCommandForCSV(`${args} , ${optionalParams}`, "uploadToArchive"))
+    let _cmd =generateGradleCommandForCSV(`${args}`, "uploadToArchive");
+   // _cmd + = ", ${optionalParams.replace(/,/g, "")""
+   optionalParams = ", '" + optionalParams + "'"
+   _cmd = _cmd.replace(/"$/, optionalParams + "\"")
+   console.log(`_cmd with optionalParams: ${_cmd}`);
+
+    return  makeGradleCall(_cmd)
 }
 
 export function launchUploaderViaExcel(profile: string, excelPath: string, uploadCycleId: string): Promise<string> {
