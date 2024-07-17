@@ -17,8 +17,11 @@ export const launchGradleRoute = express.Router();
 launchGradleRoute.get('/launchUploader', async (req: any, resp: any) => {
     try {
         const _profiles = req.query.profiles
-        const subjectDesc = req.query.subjectDesc || ""
-        console.log(`launchUploader ${_profiles}`)
+        let subjectDesc = req.query?.subjectDesc || ""
+        if(subjectDesc && subjectDesc.trim() !== "") {
+            subjectDesc = `subjectDesc=${subjectDesc}`
+        }
+        console.log(`launchUploader ${_profiles} ${subjectDesc}`)
         const emptyProfiles = []
 
         for (let profile of _profiles.split(",")) {
@@ -42,7 +45,7 @@ launchGradleRoute.get('/launchUploader', async (req: any, resp: any) => {
             return;
         }
         else {
-            const res = await launchUploader(req.query.profiles, `subjectDesc=${subjectDesc}`)
+            const res = await launchUploader(req.query.profiles, subjectDesc)
             //dont wait. let it run in background
             getLatestUploadCycle().then((uploadCycleId) => {
                 console.log(`uploadCycleId ${uploadCycleId}`)

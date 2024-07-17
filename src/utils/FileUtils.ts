@@ -6,6 +6,7 @@ import * as path from 'path';
 import { FileStats } from "imgToPdf/utils/types";
 import { getAllFileListingWithFileSizeStats } from './FileStatsUtils';
 
+import * as Mirror from "../mirror/FrontEndBackendCommonCode"
 
 export function removeFolderWithContents(folder: string) {
     fs.rm(folder, { recursive: true, force: true }, (err) => {
@@ -85,14 +86,15 @@ const duplicateBySizeCheck = (metadata: FileStats[], metadata2: FileStats[]) => 
     console.log(`metadata ${JSON.stringify(metadata[0].size)} metadata2 ${JSON.stringify(metadata2[0].size)}`)
     metadata.forEach((file: FileStats) => {
         const match = metadata2.find((file2: FileStats) => {
-            if (file.rawSize === file2.rawSize) {
+            if (file.rawSize === file2.rawSize && file.fileName !== file2.fileName) {
                 console.log(`rawSize ${file.fileName}(${file.rawSize}) ${file2?.fileName}(${file2?.rawSize})`)
             }
-            return file.rawSize === file2.rawSize;
+            return (file.rawSize === file2.rawSize && file.fileName !== file2.fileName)
         });
         //console.log(`match ${JSON.stringify(match)}`)
         if (match?.fileName.length > 0) {
             duplicates.push({
+                size: Mirror.sizeInfo(file.rawSize),
                 file: file.fileName,
                 file2: match?.fileName
             });

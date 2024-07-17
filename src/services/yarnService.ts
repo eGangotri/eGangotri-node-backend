@@ -223,3 +223,4 @@ function createExcelReport(fileStats: Array<FileStats>, pdfsOnly: boolean, folde
     console.log(`Excel File Written to ${absPath}!`);
     return absPath
 }
+

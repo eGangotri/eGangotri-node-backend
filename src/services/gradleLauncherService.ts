@@ -45,8 +45,10 @@ export function launchUploader(args: any, optionalParams: string = ""): Promise<
     //export function launchUploader(args: any, optionalParams:object = { [key: string]: any} = {}): Promise<string> {
     let _cmd =generateGradleCommandForCSV(`${args}`, "uploadToArchive");
    // _cmd + = ", ${optionalParams.replace(/,/g, "")""
-   optionalParams = ", '" + optionalParams + "'"
-   _cmd = _cmd.replace(/"$/, optionalParams + "\"")
+   if(optionalParams?.trim() != ""){
+    optionalParams = ", '" + optionalParams + "'"
+    _cmd = _cmd.replace(/"$/, optionalParams + "\"")
+   }
    console.log(`_cmd with optionalParams: ${_cmd}`);
 
     return  makeGradleCall(_cmd)
