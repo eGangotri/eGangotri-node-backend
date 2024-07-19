@@ -32,10 +32,15 @@ yarnRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
         const links = googleDriveLink.includes(",") ? googleDriveLink.split(",").map((link: string) => link.trim()) : [googleDriveLink.trim()];
         resetDownloadCounters();
         for (const [index, link] of links.entries()) {
-            const res = await downloadPdfFromGoogleDriveToProfile(link, profile,ignoreFolder);
+            const res = await downloadPdfFromGoogleDriveToProfile(link, profile, ignoreFolder);
             results.push(res);
         }
+        const resultsSummary = results.map((res: any, index: number) => {
+            return `(${index + 1}). Succ: ${res.success_count} Err: ${res.error_count} Wrong Size: ${res.dl_wrong_size_count}`;
+        });
+
         resp.status(200).send({
+            resultsSummary,
             response: results
         });
     }
@@ -48,7 +53,7 @@ yarnRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
 
 
 yarnRoute.post('/qaToDestFileMover', async (req: any, resp: any) => {
-    console.log(`qaToDestFileMover ${JSON.stringify(req.body)}`)
+    console.log(`qaToDestFileMover ${JSON.stringify(req.body)} `)
     try {
         const qaPath = req?.body?.qaPath;
         const dest = req?.body?.dest || "";
@@ -79,7 +84,7 @@ yarnRoute.post('/qaToDestFileMover', async (req: any, resp: any) => {
 })
 
 yarnRoute.post('/yarnMoveProfilesToFreeze', async (req: any, resp: any) => {
-    console.log(`moveProfilesToFreeze ${JSON.stringify(req.body)}`)
+    console.log(`moveProfilesToFreeze ${JSON.stringify(req.body)} `)
     try {
         const profileAsCSV = req?.body?.profileAsCSV;
         const _uploadCycleId = req.body.uploadCycleId;
@@ -125,7 +130,7 @@ yarnRoute.post('/addHeaderFooter', async (req: any, resp: any) => {
 
         resp.status(200).send({
             response: {
-                msg: `Request Recieved. Header/Footer will be added in few minutes`,
+                msg: `Request Recieved.Header / Footer will be added in few minutes`,
                 "success": true,
             }
         });
@@ -165,7 +170,7 @@ yarnRoute.post('/compareDirectories', async (req: any, resp: any) => {
     try {
         const srcDir = req.body.srcDir
         const destDir = req.body.destDir
-        console.log(`/compareDirectories srcDir ${srcDir} destDir ${destDir} `)
+        console.log(`/ compareDirectories srcDir ${srcDir} destDir ${destDir} `)
         if (!srcDir || !destDir) {
             resp.status(300).send({
                 response: {
