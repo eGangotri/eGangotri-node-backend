@@ -146,7 +146,28 @@ async function editExistingExcelSheet(excelSheetPath: string) {
   await workbook.xlsx.writeFile(`${parentDirname}\\1-${newFileName}.xlsx`);
 }
 
+export const excelToJsonFor2RowAsHeader = (filePath: string, sheetName: string): any[] => {
+  const workbook = xlsx.readFile(filePath);
+  const sheet = workbook.Sheets[sheetName];
+  const rows = xlsx.utils.sheet_to_json(sheet, { header: 1 });
 
+  if (rows.length < 2) {
+    throw new Error('The sheet does not have enough rows.');
+  }
+
+  const headers = rows[1] as string[]; // Use the second row as headers
+  const data = rows.slice(2); // Skip the first two rows
+
+  return data.map(row => {
+    const obj: any = {};
+    headers.forEach((header: string, index: number) => {
+      if (header !== undefined && row[index] !== undefined) {
+        obj[header] = row[index];
+      }
+    });
+    return obj;
+  });
+};
 export const excelToJson = (excelName: string, sheetName: string = SHEET_NAME) => {
   const workbook = XLSX.readFile(excelName);
   const sheet = workbook.Sheets[sheetName] || workbook.Sheets[workbook.SheetNames[0]];
@@ -154,7 +175,8 @@ export const excelToJson = (excelName: string, sheetName: string = SHEET_NAME) =
   console.log(`Converted ${excelName} to Json with Data Length ${jsonData.length}(figure may include empty rows)`);
   return jsonData
 }
-export function excelToJsonV2<T>(excelName: string):T[] {
+
+export function excelToJsonV2<T>(excelName: string): T[] {
   const workbook = XLSX.readFile(excelName);
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
   const jsonData: T[] = XLSX.utils.sheet_to_json(sheet);

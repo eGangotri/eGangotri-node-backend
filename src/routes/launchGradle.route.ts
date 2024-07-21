@@ -1,5 +1,5 @@
 import * as express from 'express';
-import { launchUploader, launchUploaderViaAbsPath, launchUploaderViaExcel, launchUploaderViaExcelV3, launchUploaderViaExcelV3Multi, launchUploaderViaJson, loginToArchive, makeGradleCall, moveToFreeze, reuploadMissed, snap2htmlCmdCall } from '../services/gradleLauncherService';
+import { launchUploader, launchUploaderViaAbsPath, launchUploaderViaExcelV1, launchUploaderViaExcelV3, launchUploaderViaExcelV3Multi, launchUploaderViaJson, loginToArchive, makeGradleCall, moveToFreeze, reuploadMissed, snap2htmlCmdCall } from '../services/gradleLauncherService';
 import { ArchiveProfileAndTitle, UploadCycleArchiveProfile } from '../mirror/types';
 import { isValidPath } from '../utils/utils';
 import { getFolderInDestRootForProfile, getFolderInSrcRootForProfile } from '../archiveUpload/ArchiveProfileUtils';
@@ -70,7 +70,7 @@ launchGradleRoute.get('/launchUploader', async (req: any, resp: any) => {
 launchGradleRoute.get('/launchUploaderViaExcelV1', async (req: any, resp: any) => {
     try {
         console.log(`launchUploaderViaExcelV1 ${req.query.profile} ${req.query.excelPath} ${req.query.uploadCycleId}`)
-        const res = await launchUploaderViaExcel(req.query.profile, req.query.excelPath, req.query.uploadCycleId)
+        const res = await launchUploaderViaExcelV1(req.query.profile, req.query.excelPath, req.query.uploadCycleId)
         resp.status(200).send({
             response: {
                 success: true,
@@ -216,7 +216,7 @@ launchGradleRoute.get('/reuploadMissedViaUploadCycleId', async (req: any, resp: 
 
                     const excelFileNameForMissed = createExcelV1FileForUpload(uploadCycleId, _missedInJSON,
                         `${_missedInJSON.length}-of-${allIntended.length}`,"reupload-missed-in-upload-cycle-id-")
-                    const res = await launchUploaderViaExcel(uploadCycleByCycleId.archiveProfiles[0].archiveProfile,
+                    const res = await launchUploaderViaExcelV1(uploadCycleByCycleId.archiveProfiles[0].archiveProfile,
                         excelFileNameForMissed,
                         uploadCycleId);
 

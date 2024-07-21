@@ -54,7 +54,7 @@ export function launchUploader(args: any, optionalParams: string = ""): Promise<
     return  makeGradleCall(_cmd)
 }
 
-export function launchUploaderViaExcel(profile: string, excelPath: string, uploadCycleId: string): Promise<string> {
+export function launchUploaderViaExcelV1(profile: string, excelPath: string, uploadCycleId: string): Promise<string> {
     const gradleArgsAsJSON = `{'profile': '${profile}','excelPath':'${path.basename(excelPath)}','uploadCycleId': '${uploadCycleId}'}`
     return makeGradleCall(
         `gradle uploadToArchiveExcel -PjsonArgs="${gradleArgsAsJSON}"`)
