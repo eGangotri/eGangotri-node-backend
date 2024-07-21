@@ -1,4 +1,4 @@
-import { excelToJsonFor2RowAsHeader } from "../cliBased/excel/ExcelUtils";
+import { excelToJsonFor2RowAsHeader, jsonToExcel } from "../cliBased/excel/ExcelUtils";
 import { EAPBlExcelFormatForSecondRow } from "./types";
 import { getArchiveMetadataForProfile } from "../archiveUpload/ArchiveProfileUtils";
 import * as FileUtils from "../utils/FileStatsUtils";
@@ -60,24 +60,28 @@ export const combineStaticAndDynamicMetadata = (_pdfName, profileName: string) =
 
 (async () => {
     const PROFILE = "SR-BH"
+    const CREATOR = "CSDS-NEW DELHI"
 
     const directoryPath = "D:\\CSDS-Sarai-EAP-1435-Scans\\EAP 1435_Bhavishya_1930 to_1931 PDF Files";
     const fileStats = await FileUtils.getAllFileListingWithoutStats({ directoryPath: directoryPath })
-    const 
-    fileStats.forEach((fileStat:FileStats) => {
+    const excelV1Metadata = []
+    fileStats.forEach((fileStat: FileStats) => {
         console.log(`fileStat ${fileStat.absPath}`)
         const _pdfName = fileStat.fileName.replace(".pdf", "")
         const _res = combineStaticAndDynamicMetadata(_pdfName, PROFILE)
         console.log(`combinedSubjecctMetadata: ${JSON.stringify(_res.combinedSubjectMetadata)}`);
         console.log(`combinedDescMetadata: ${JSON.stringify(_res.combinedDescMetadata)}`);
+        excelV1Metadata.push({
+            absPath: fileStat.absPath,
+            subject: _res.combinedSubjectMetadata,
+            description: _res.combinedDescMetadata,
+            creator: CREATOR
+        })
     })
-   
-
-
+    jsonToExcel(excelV1Metadata, "D:\\excelV1Metadata.xlsx")
 })();
-
-
 /*
+yarn run convertEAPExcel
 Convert a Endangered Archives Programme (EAP) Excel sheet to JSON
 */
 
