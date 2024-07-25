@@ -55,14 +55,13 @@ Scanning and upload by eGangotri Trust.<br>`
 
 const text_chambal = `This PDF you are browsing is in a series of several scanned documents from 
 the Chambal Archives Collection in Etawah, UP<br>
-The Archive was collected over a lifetime through the efforts of Shri Krishna Porwal ji, Hindi Poet and Knowledge Aficianado :<br>
-The Archives contains around 80,000 books including old newspapers and pre-Independence Journals in Hindi and Urdu.<br>
-Sanskrit and English books are there as well.<br>
-Several Books are from the 17th Century. Atleast two manuscripts are also in the Archives - Copy of Rama Charit Manas and another Bengali Manuscript.
-Also included are antique painitings, antique maps, coins<br>
-Chambal Archives also has old cameras, typewriters, TVs, VCR/VCPs Video Cassettes, Lanterns and several other Cultural and Technological Paraphernelia<br>
+The Archive was collected over a lifetime through the efforts of Shri Krishna Porwal ji (b. 27 July 1951) s/o Shri Jamuna Prasad, Hindi Poet. Archivist and Knowledge Aficianado<br>
+The Archives contains around 80,000 books including old newspapers and pre-Independence Journals predominantly in Hindi and Urdu.<br>
+Several Books are from the 17th Century. Atleast two manuscripts are also in the Archives - 1786 Copy of Rama Charit Manas and another Bengali Manuscript.
+Also included are antique painitings, antique maps, coins, and stamps from all over the World.<br>
+Chambal Archives also has old cameras, typewriters, TVs, VCR/VCPs, Video Cassettes, Lanterns and several other Cultural and Technological Paraphernelia<br>
 Collectors and Art/Literature  Lovers can contact him if they wish through his facebook page<br><br>
-Scanning and uploading by eGangotri Digital Preservation Trust.<br>`
+Scanning and uploading by eGangotri Digital Preservation Trust and Sarayu Trust Foundation.<br>`
 
 export const formatIntroText = (_text: string) => _text.replace(/\n/g, '').replace(/<br>/g, '\n\n');
 export const profileVanityTextMap = {
