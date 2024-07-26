@@ -86,6 +86,22 @@ export async function getAllPDFFiles(directoryPath: string, withLogs: boolean = 
         withLogs
     });
 }
+/**
+ * 
+ * @param directoryPath without meta-data
+ * @param withLogs 
+ * @returns 
+ */
+export async function getAllPDFFilesWithIgnorePathsSpecified(directoryPath: string,
+     ignorePaths = []): Promise<FileStats[]> {
+    return await getAllFileStats({
+        directoryPath,
+        filterExt: PDF_EXT,
+        ignoreFolders: true,
+        withLogs:false,
+        ignorePaths:ignorePaths
+    });
+}
 
 //expensive operation
 export async function getAllPDFFilesWithMedata(directoryPath: string, withLogs: boolean = true): Promise<FileStats[]> {

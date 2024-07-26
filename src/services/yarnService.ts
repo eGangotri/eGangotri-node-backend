@@ -41,17 +41,20 @@ export const moveProfilesToFreeze = async (profileAsCSV: string, flatten: boolea
     };
 }
 
-export const moveFileSrcToDest = async (srcPath: string, destFolderOrProfile: string, flatten: boolean = true) => {
+export const moveFileSrcToDest = async (srcPath: string, 
+    destFolderOrProfile: string, 
+    flatten: boolean = true,
+    ignorePaths = []) => {
     const destPath = isValidPath(destFolderOrProfile) ? destFolderOrProfile : getFolderInSrcRootForProfile(destFolderOrProfile)
     try {
         console.log(`moveFileSrcToDest srcPath ${srcPath}/${destFolderOrProfile} destPath ${destPath}  flatten ${flatten}`)
         let _report
         if (flatten) {
-            _report = await moveFilesAndFlatten(srcPath, destPath);
+            _report = await moveFilesAndFlatten(srcPath, destPath, true, ignorePaths);
         }
         else {
             //get this ready
-            _report = await moveFilesAndFlatten(srcPath, destPath);
+            _report = await moveFilesAndFlatten(srcPath, destPath, true, ignorePaths);
         }
         return {
             ..._report

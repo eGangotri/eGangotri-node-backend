@@ -1,5 +1,5 @@
 export const MAX_IMG_WIDTH = 700;
-export const FONT_SIZE = 12
+export const DEFAULT_FONT_SIZE = 12
 
 
 const text_Peerzada = `This PDF you are browsing is in a series of several scanned documents containing 
@@ -71,7 +71,8 @@ export const profileVanityTextMap = {
     },
     "CHAMBAL": {
         text: text_chambal,
-        imgFile: "KrishnaPorwal.jpg"
+        imgFile: "KrishnaPorwal.jpg",
+        fontSize:16
     },
 }
 

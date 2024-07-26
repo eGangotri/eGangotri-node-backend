@@ -4,8 +4,9 @@ import * as fs from 'fs';
 import { getAllPdfsInFolders, mkDirIfDoesntExists } from "../imgToPdf/utils/Utils";
 import { prepareDocument } from "../imgToPdf/utils/PdfUtils";
 const path = require('path');
-import { FONT_SIZE, MAX_IMG_WIDTH, formatIntroText, profileVanityTextMap } from "./vanityConstants";
+import { DEFAULT_FONT_SIZE, MAX_IMG_WIDTH, formatIntroText, profileVanityTextMap } from "./vanityConstants";
 import { getFolderInSrcRootForProfile } from "../archiveUpload/ArchiveProfileUtils";
+import { font } from "pdfkit";
 
 
 /**
@@ -46,7 +47,7 @@ export const moveOrignalToSeparateFolder = async (pdfToVanitize: string, finalDu
     }
 }
 // _orig_dont
-const createIntroPageWithImage = async (imagePath: string, pdfToVanitize: string, text: string) => {
+const createIntroPageWithImage = async (imagePath: string, pdfToVanitize: string, text: string, fontSize: number) => {
     var imageFolderPath = path.dirname(imagePath);
     var _introPath = `${imageFolderPath}\\${_intros_dont}`;
     await mkDirIfDoesntExists(_introPath);
@@ -61,7 +62,7 @@ const createIntroPageWithImage = async (imagePath: string, pdfToVanitize: string
     const [width, height] = await PdfLibUtils.getPdfFirstPageDimensionsUsingPdfLib(pdfToVanitize);
 
     await addImageToFirstPage(doc, imagePath, width, height)
-    addTextToSecondPage(doc, text, width, height)
+    addTextToSecondPage(doc, text, width, height,fontSize)
     doc.save()
 
     // finalize the PDF and end the stream
@@ -91,14 +92,14 @@ export const addImageToFirstPage = async (doc: any, pathToImg: string, imgWidth:
     }
 }
 
-export const addTextToSecondPage = (doc: any, text: string, width: number, height: number) => {
+export const addTextToSecondPage = (doc: any, text: string, width: number, height: number, fontSize:number) => {
     doc.addPage({ size: [width, height] });
 
     let oldBottomMargin = doc.page.margins.bottom;
     doc.page.margins.bottom = 0 //Dumb: Have to remove bottom margin in order to write into it
     const xCoordinate = doc.page.margins.left / 2
-    const yCoordinate = doc.page.margins.top / 2
-    doc.font(PDF_FONT).fontSize(FONT_SIZE)
+    const yCoordinate = doc.page.margins.top / 2;
+    doc.font(PDF_FONT).fontSize(fontSize)
         .fillColor('black')
         .text(text, xCoordinate, yCoordinate)
     doc.page.margins.bottom = oldBottomMargin; // ReProtect bottom margin
@@ -130,7 +131,8 @@ export const vanitizePdfForProfile = async (profile: string) => {
             console.log(`creating vanity for: ${_pdfs[i]}`, await PdfLibUtils.getPdfFirstPageDimensionsUsingPdfLib(_pdfs[i]))
             const vanityIntro = profileVanityTextMap[`${profile}`].text;
             const imgFile = folder + "\\" + profileVanityTextMap[`${profile}`].imgFile;
-            intros.push(await createIntroPageWithImage(imgFile, _pdfs[i], formatIntroText(vanityIntro)));
+            const fontSize = profileVanityTextMap[`${profile}`]?.fontSize || DEFAULT_FONT_SIZE;
+            intros.push(await createIntroPageWithImage(imgFile, _pdfs[i], formatIntroText(vanityIntro)), fontSize);
         }
 
         for (let i = 0; i < _pdfs.length; i++) {

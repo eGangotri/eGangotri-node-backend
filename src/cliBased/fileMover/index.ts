@@ -1,12 +1,12 @@
 import { isFileInUse } from "../../archiveDotOrg/fileUtils";
-import { getAllPDFFiles } from "../../utils/FileStatsUtils";
+import { getAllPDFFiles, getAllPDFFilesWithIgnorePathsSpecified } from "../../utils/FileStatsUtils";
 import { FileStats } from "imgToPdf/utils/types";
 
 import * as path from 'path';
 import * as fs from 'fs';
 import { launchWinExplorer } from "./util";
 
-export async function moveFilesAndFlatten(sourceDir: string, targetDir: string, pdfOnly = true) {
+export async function moveFilesAndFlatten(sourceDir: string, targetDir: string, pdfOnly = true,ignorePaths = []) {
     //implement alogrithm
     //(1) check if any file is open or any file is already present in source Dir
     // if yes then send msg otherwise continut
@@ -20,7 +20,7 @@ export async function moveFilesAndFlatten(sourceDir: string, targetDir: string, 
     let counter = 0;
     let dirs = [sourceDir];
     const filesMoved = [];
-    const allSrcPdfs: FileStats[] = await getAllPDFFiles(sourceDir);
+    const allSrcPdfs: FileStats[] = await getAllPDFFilesWithIgnorePathsSpecified(sourceDir,ignorePaths);
     const fileCollisionsResolvedByRename = [];
     if (allSrcPdfs.length === 0) {
         return {
