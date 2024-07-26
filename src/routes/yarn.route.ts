@@ -58,6 +58,7 @@ yarnRoute.post('/qaToDestFileMover', async (req: any, resp: any) => {
         const qaPath = req?.body?.qaPath;
         const dest = req?.body?.dest || "";
         const flatten = req?.body?.flatten === "false" ? false : true;
+        const ignorePaths = ["dont"];
 
         console.log(`qaToDestFileMover qaPath ${qaPath} for folder(${dest})`)
         if (!qaPath && !dest) {
@@ -69,7 +70,7 @@ yarnRoute.post('/qaToDestFileMover', async (req: any, resp: any) => {
                 }
             });
         }
-        const listingResult = await moveFileSrcToDest(qaPath, dest, flatten);
+        const listingResult = await moveFileSrcToDest(qaPath, dest, flatten, ignorePaths);
         resp.status(200).send({
             response: {
                 ...listingResult
