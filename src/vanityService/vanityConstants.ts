@@ -60,7 +60,7 @@ The Archives contains around 80,000 books including old newspapers and pre-Indep
 Several Books are from the 17th Century. Atleast two manuscripts are also in the Archives - 1786 Copy of Rama Charit Manas and another Bengali Manuscript.
 Also included are antique painitings, antique maps, coins, and stamps from all over the World.<br>
 Chambal Archives also has old cameras, typewriters, TVs, VCR/VCPs, Video Cassettes, Lanterns and several other Cultural and Technological Paraphernelia<br>
-Collectors and Art/Literature  Lovers can contact him if they wish through his facebook page<br><br>
+Collectors and Art/Literature  Lovers can contact him if they wish through his facebook page<br><br><br><br><br><br>
 Scanning and uploading by eGangotri Digital Preservation Trust and Sarayu Trust Foundation.<br>`
 
 export const formatIntroText = (_text: string) => _text.replace(/\n/g, '').replace(/<br>/g, '\n\n');
@@ -72,6 +72,7 @@ export const profileVanityTextMap = {
     "CHAMBAL": {
         text: text_chambal,
         imgFile: "KrishnaPorwal.jpg",
+        //seems the image dimensions forces the font size to behave differently in the generated pdf
         fontSize:16
     },
 }
