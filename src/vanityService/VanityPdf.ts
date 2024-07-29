@@ -23,17 +23,17 @@ const _intros_dont = "_intros_dont"
 const _orig_dont = "_orig_dont"
 const _vanitized = "_vanitized"
 
-export const createVanityPdf = async (imagePath: string, pdfToVanitize: string, text: string, finalDumpGround: string) => {
-    try {
-        const introPdf = await createIntroPageWithImage(imagePath, pdfToVanitize, text);
-        console.log(`merge vanity pdf ${introPdf} pdfName ${pdfToVanitize} `);
-        console.log(`dim:${introPdf}`, await PdfLibUtils.getPdfFirstPageDimensionsUsingPdfLib(introPdf))
-        await mergeVanityPdf(introPdf, pdfToVanitize, finalDumpGround)
-    }
-    catch (err) {
-        console.log(`createVanityPdf:err ${err}`)
-    }
-}
+// export const createVanityPdf = async (imagePath: string, pdfToVanitize: string, text: string, finalDumpGround: string) => {
+//     try {
+//         const introPdf = await createIntroPageWithImage(imagePath, pdfToVanitize, text);
+//         console.log(`merge vanity pdf ${introPdf} pdfName ${pdfToVanitize} `);
+//         console.log(`dim:${introPdf}`, await PdfLibUtils.getPdfFirstPageDimensionsUsingPdfLib(introPdf))
+//         await mergeVanityPdf(introPdf, pdfToVanitize, finalDumpGround)
+//     }
+//     catch (err) {
+//         console.log(`createVanityPdf:err ${err}`)
+//     }
+// }
 
 export const moveOrignalToSeparateFolder = async (pdfToVanitize: string, finalDumpGround: string) => {
     try {
@@ -43,7 +43,7 @@ export const moveOrignalToSeparateFolder = async (pdfToVanitize: string, finalDu
         fs.renameSync(pdfToVanitize, newName);
     }
     catch (err) {
-        console.log(`createVanityPdf:err ${err}`)
+        console.log(`moveOrignalToSeparateFolder:err ${err}`)
     }
 }
 // _orig_dont
@@ -132,7 +132,7 @@ export const vanitizePdfForProfile = async (profile: string) => {
             const vanityIntro = profileVanityTextMap[`${profile}`].text;
             const imgFile = folder + "\\" + profileVanityTextMap[`${profile}`].imgFile;
             const fontSize = profileVanityTextMap[`${profile}`]?.fontSize || DEFAULT_FONT_SIZE;
-            intros.push(await createIntroPageWithImage(imgFile, _pdfs[i], formatIntroText(vanityIntro)), fontSize);
+            intros.push(await createIntroPageWithImage(imgFile, _pdfs[i], formatIntroText(vanityIntro),fontSize));
         }
 
         for (let i = 0; i < _pdfs.length; i++) {
