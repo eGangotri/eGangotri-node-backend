@@ -18,7 +18,9 @@ import { jsonToExcel } from "../cliBased/excel/ExcelUtils";
 
 const _root = "C:\\_catalogWork\\_collation\\local";
 
-export const moveProfilesToFreeze = async (profileAsCSV: string, flatten: boolean = true) => {
+export const moveProfilesToFreeze = async (profileAsCSV: string, 
+    flatten: boolean = true,
+    ignorePaths = []) => {
     const _response = []
     for (let profile of profileAsCSV.split(',')) {
         const srcPath = getFolderInSrcRootForProfile(profile.trim());
@@ -27,7 +29,7 @@ export const moveProfilesToFreeze = async (profileAsCSV: string, flatten: boolea
             fs.mkdirSync(destPath, { recursive: true });
         }
         if (isValidPath(srcPath) && isValidPath(destPath)) {
-            _response.push(await moveFileSrcToDest(srcPath, destPath, flatten));
+            _response.push(await moveFileSrcToDest(srcPath, destPath, flatten, ignorePaths));
         }
         else {
             _response.push({

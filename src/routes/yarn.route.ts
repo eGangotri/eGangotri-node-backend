@@ -89,7 +89,8 @@ yarnRoute.post('/yarnMoveProfilesToFreeze', async (req: any, resp: any) => {
     try {
         const profileAsCSV = req?.body?.profileAsCSV;
         const _uploadCycleId = req.body.uploadCycleId;
-        const uploadCycle = await getLatestUploadCycleById(_uploadCycleId);
+        const ignorePaths = req.body?.ignorePaths || ["dont"];
+
         const flatten = req?.body?.flatten === "false" ? false : true;
 
         if (!profileAsCSV) {
@@ -101,9 +102,10 @@ yarnRoute.post('/yarnMoveProfilesToFreeze', async (req: any, resp: any) => {
                 }
             });
         }
-        const _response = await moveProfilesToFreeze(profileAsCSV, flatten);
-        await markUploadCycleAsMovedToFreeze(_uploadCycleId)
-
+        const _response = await moveProfilesToFreeze(profileAsCSV, flatten, ignorePaths);
+        if(_uploadCycleId) {
+            await markUploadCycleAsMovedToFreeze(_uploadCycleId)
+        }
         resp.status(200).send(_response);
     }
 

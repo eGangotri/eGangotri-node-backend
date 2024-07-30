@@ -6,7 +6,10 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { launchWinExplorer } from "./util";
 
-export async function moveFilesAndFlatten(sourceDir: string, targetDir: string, pdfOnly = true,ignorePaths = []) {
+export async function moveFilesAndFlatten(sourceDir: string, 
+    targetDir: string,
+     pdfOnly = true, 
+     ignorePaths = []) {
     //implement alogrithm
     //(1) check if any file is open or any file is already present in source Dir
     // if yes then send msg otherwise continut
@@ -20,7 +23,7 @@ export async function moveFilesAndFlatten(sourceDir: string, targetDir: string, 
     let counter = 0;
     let dirs = [sourceDir];
     const filesMoved = [];
-    const allSrcPdfs: FileStats[] = await getAllPDFFilesWithIgnorePathsSpecified(sourceDir,ignorePaths);
+    const allSrcPdfs: FileStats[] = await getAllPDFFilesWithIgnorePathsSpecified(sourceDir, ignorePaths);
     const fileCollisionsResolvedByRename = [];
     if (allSrcPdfs.length === 0) {
         return {
@@ -51,7 +54,12 @@ export async function moveFilesAndFlatten(sourceDir: string, targetDir: string, 
 
             if (file.isDirectory()) {
                 dirs.push(sourceFile);
-            } else {
+            }
+            else if (ignorePaths && ignorePaths.some((item: string) => sourceFile.includes(item))) {
+                console.log(`:Ignoring ${sourceFile} due to ${ignorePaths}:`);
+                continue;
+            }
+            else {
                 const targetFile = path.join(targetDir, file.name);
                 if (!pdfOnly || (pdfOnly && file.name.endsWith('.pdf'))) {
                     filesMoved.push(`${++counter}/${_count}). ${file.name}`);
@@ -62,7 +70,7 @@ export async function moveFilesAndFlatten(sourceDir: string, targetDir: string, 
                         console.log(`File already exists in target dir ${targetFile}. renaming to ${targetFile}_1`);
                         const extension = path.extname(targetFile);
 
-                        const newName = `${targetFile.replace(`.${extension}`,`_1.${extension}`)}`
+                        const newName = `${targetFile.replace(`.${extension}`, `_1.${extension}`)}`
                         if (!fs.existsSync(newName)) {
                             fs.renameSync(sourceFile, newName);
                             fileCollisionsResolvedByRename.push(`${file.name}`);
