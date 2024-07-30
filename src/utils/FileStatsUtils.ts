@@ -29,8 +29,11 @@ export async function getAllFileStats(filestatsOptions: FileStatsOptions): Promi
             const fullPath = path.join(currentDir, dirent.name);
 
             if (filestatsOptions?.ignorePaths && filestatsOptions?.ignorePaths?.some((item: string) => fullPath.includes(item))) {
+                console.log(`Ignoring ${fullPath} due to ${filestatsOptions?.ignorePaths}`);
                 continue;
             }
+            console.log(`not Ignoring ${fullPath} due to ${filestatsOptions?.ignorePaths}`);
+
             if (dirent.isDirectory()) {
                 queue.push(fullPath);
                 if (!filestatsOptions.ignoreFolders) {
