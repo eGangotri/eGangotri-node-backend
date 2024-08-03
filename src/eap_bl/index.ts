@@ -4,7 +4,7 @@ import { getArchiveMetadataForProfile } from "../archiveUpload/ArchiveProfileUti
 import * as FileUtils from "../utils/FileStatsUtils";
 import { FileStats } from "imgToPdf/utils/types";
 
-const eapBlExcelPath = "D:\\EAP1435_Metadata_CSDS-X.xlsm";
+const eapBlExcelPath = "D:\\EAP1435_Metadata_CSDS.xlsm";
 const EAP_EXCEL_AS_JSON_ARRAY = []
 
 export const getEapXLAsJson = () => {
@@ -78,7 +78,7 @@ export const combineStaticAndDynamicMetadata = (_pdfName, profileName: string) =
             creator: CREATOR
         })
     })
-    jsonToExcel(excelV1Metadata, "D:\\excelV1Metadata.xlsx")
+    jsonToExcel(excelV1Metadata, "D:\\excelV1Metadata-Aug.xlsx")
 })();
 /*
 yarn run convertEAPExcel
