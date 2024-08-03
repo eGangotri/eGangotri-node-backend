@@ -97,12 +97,13 @@ export const profileVanityTextMap = {
         text: text_chambal,
         imgFile: "KrishnaPorwal.jpg",
         //seems the image dimensions forces the font size to behave differently in the generated pdf
-        fontSize:14
+        fontSize:14,
     },
     "SR": {
         text: text_csds,
         imgFile: "csdsBL.jpeg",
-        fontSize:14
+        fontSize:14,
+        singlePage:true
     },
 }
 
