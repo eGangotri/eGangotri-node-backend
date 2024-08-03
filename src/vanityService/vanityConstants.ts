@@ -1,4 +1,7 @@
+import sharp from 'sharp';
+
 export const MAX_IMG_WIDTH = 700;
+export const MAX_IMG_HEIGHT = 700;
 export const DEFAULT_FONT_SIZE = 12
 
 
@@ -52,7 +55,6 @@ A Compendium of Icons of Jammu & Kashmir & our Inspiration (English)<br>
 Jammu Kashmir ki Sangarsh Gatha (Hindi)<br><br><br>
 Scanning and upload by eGangotri Trust.<br>`
 
-
 const text_chambal = `This PDF you are browsing is in a series of several scanned documents from 
 the Chambal Archives Collection in Etawah, UP<br>
 The Archive was collected over a lifetime through the efforts of Shri Krishna Porwal ji (b. 27 July 1951) s/o Shri Jamuna Prasad, Hindi Poet. Archivist and Knowledge Aficianado<br>
@@ -62,6 +64,28 @@ Also included are antique painitings, antique maps, coins, and stamps from all o
 Chambal Archives also has old cameras, typewriters, TVs, VCR/VCPs, Video Cassettes, Lanterns and several other Cultural and Technological Paraphernelia<br>
 Collectors and Art/Literature  Lovers can contact him if they wish through his facebook page<br><br><br><br><br><br>
 Scanning and uploading by eGangotri Digital Preservation Trust and Sarayu Trust Foundation.<br>`
+
+const text_csds = `This PDF you are browsing now is in a series of several scanned documents by the Centre for the Study of Developing Societies (CSDS), Delhi<br>
+CSDS gratefully acknowledges the enterprise of the following savants/institutions in making the digitzation possible:<br>
+Historian, Writer and Editor Priyamvad of Kanpur for the Hindi periodicals (Bhavishya, Chand, Madhuri)<br>
+Mr. Fuwad Khwaja for the Urdu weekly newspaper Sadaqat, edited by his grandfather and father.<br>
+Historian Shahid Amin for faciliating the donation.<br>
+British Library’s Endangered Archives Programme (EAP-1435) for funding the project that involved rescue, scan, sharing and metadata creation.<br>
+ICAS-MP and India Habitat Centre for facilitating exhibitions.<br>
+Digital Upload by eGangotri Digital Preservation Trust.<br>
+`
+
+const text_csds2 = `The collection was obtained from Kanpur and has been uploaded by the Centre for the Study of Developing Societies (CSDS), Delhi.<br>
+We are grateful to historian, writer and editor, Priyamvad for the Hindi periodicals (Bhavishya, Chand, Madhuri) and to Mr. Fuwad Khwaja for the Urdu weekly newspaper Sadaqat, edited by his grandfather and father. To historian Shahid Amin for enabling the donation.<br>
+Thanks are also due to the British Library’s Endangered Archives Programme (1435) for funding the project that involved rescue, scan, sharing and metadata creation. We also thank ICAS-MP and India Habitat Centre for facilitating exhibitions.<br>
+`
+
+// Function to get image dimensions
+export const getImageDimensions = async (imagePath: string): Promise<{ width: number, height: number }> => {
+    const image = sharp(imagePath);
+    const metadata = await image.metadata();
+    return { width: metadata.width, height: metadata.height };
+};
 
 export const formatIntroText = (_text: string) => _text.replace(/\n/g, '').replace(/<br>/g, '\n\n');
 export const profileVanityTextMap = {
@@ -73,6 +97,11 @@ export const profileVanityTextMap = {
         text: text_chambal,
         imgFile: "KrishnaPorwal.jpg",
         //seems the image dimensions forces the font size to behave differently in the generated pdf
+        fontSize:14
+    },
+    "SR": {
+        text: text_csds,
+        imgFile: "csdsBL.jpeg",
         fontSize:14
     },
 }

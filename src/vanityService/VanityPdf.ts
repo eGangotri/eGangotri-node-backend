@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import { getAllPdfsInFolders, mkDirIfDoesntExists } from "../imgToPdf/utils/Utils";
 import { prepareDocument } from "../imgToPdf/utils/PdfUtils";
 const path = require('path');
-import { DEFAULT_FONT_SIZE, MAX_IMG_WIDTH, formatIntroText, profileVanityTextMap } from "./vanityConstants";
+import { DEFAULT_FONT_SIZE, MAX_IMG_HEIGHT, MAX_IMG_WIDTH, formatIntroText, getImageDimensions, profileVanityTextMap } from "./vanityConstants";
 import { getFolderInSrcRootForProfile } from "../archiveUpload/ArchiveProfileUtils";
 import { font } from "pdfkit";
 
@@ -47,7 +47,10 @@ export const moveOrignalToSeparateFolder = async (pdfToVanitize: string, finalDu
     }
 }
 // _orig_dont
-const createIntroPageWithImage = async (imagePath: string, pdfToVanitize: string, text: string, fontSize: number) => {
+
+
+
+const createIntroPageWithImage = async (imagePath: string, pdfToVanitize: string, text: string, fontSize: number, samePage: boolean = false) => {
     var imageFolderPath = path.dirname(imagePath);
     var _introPath = `${imageFolderPath}\\${_intros_dont}`;
     await mkDirIfDoesntExists(_introPath);
@@ -60,9 +63,15 @@ const createIntroPageWithImage = async (imagePath: string, pdfToVanitize: string
                 pdfToVanitize ${pdfToVanitize} `)
 
     const [width, height] = await PdfLibUtils.getPdfFirstPageDimensionsUsingPdfLib(pdfToVanitize);
+    if (samePage) {
+        await addImageToIntroPageAsWholePage(doc, imagePath, width, height)
+        addTextToIntroPdf(doc, text, width, height, fontSize, false)
+    }
+    else {
+        await addImageToIntroPage(doc, imagePath, width, height)
+        addTextToIntroPdf(doc, text, width, height, fontSize, false)
+    }
 
-    await addImageToFirstPage(doc, imagePath, width, height)
-    addTextToSecondPage(doc, text, width, height,fontSize)
     doc.save()
 
     // finalize the PDF and end the stream
@@ -72,7 +81,7 @@ const createIntroPageWithImage = async (imagePath: string, pdfToVanitize: string
     return `${_introPath}\\${introPDfName}`
 }
 
-export const addImageToFirstPage = async (doc: any, pathToImg: string, imgWidth: number, height: number) => {
+export const addImageToIntroPageAsWholePage = async (doc: any, pathToImg: string, imgWidth: number, height: number) => {
 
     let img = doc.openImage(pathToImg);
     doc.addPage({ size: [imgWidth, height] });
@@ -92,9 +101,32 @@ export const addImageToFirstPage = async (doc: any, pathToImg: string, imgWidth:
     }
 }
 
-export const addTextToSecondPage = (doc: any, text: string, width: number, height: number, fontSize:number) => {
-    doc.addPage({ size: [width, height] });
 
+export const addImageToIntroPage = async (doc: any, pathToImg: string, width: number, height: number) => {
+    const imageDims = await getImageDimensions(pathToImg);
+    console.log(`imageDims width :${imageDims.width},${imageDims.height}`)
+    let img = doc.openImage(pathToImg);
+    doc.addPage({ size: [width, height] });
+    if (imageDims.width > MAX_IMG_WIDTH || imageDims.height > height) {
+        doc.image(img, 0, 0,
+            {
+                width: MAX_IMG_WIDTH,
+                height: height
+            })
+    }
+    else {
+        doc.image(img, 0, doc.page.height - imageDims.height,
+            {
+                width: imageDims.width,
+                height: imageDims.height
+            })
+    }
+}
+
+export const addTextToIntroPdf = (doc: any, text: string, width: number, height: number, fontSize: number, asAsNewPage: boolean = true) => {
+    if (asAsNewPage) {
+        doc.addPage({ size: [width, height] });
+    }
     let oldBottomMargin = doc.page.margins.bottom;
     doc.page.margins.bottom = 0 //Dumb: Have to remove bottom margin in order to write into it
     const xCoordinate = doc.page.margins.left / 2
@@ -132,7 +164,7 @@ export const vanitizePdfForProfile = async (profile: string) => {
             const vanityIntro = profileVanityTextMap[`${profile}`].text;
             const imgFile = folder + "\\" + profileVanityTextMap[`${profile}`].imgFile;
             const fontSize = profileVanityTextMap[`${profile}`]?.fontSize || DEFAULT_FONT_SIZE;
-            intros.push(await createIntroPageWithImage(imgFile, _pdfs[i], formatIntroText(vanityIntro),fontSize));
+            intros.push(await createIntroPageWithImage(imgFile, _pdfs[i], formatIntroText(vanityIntro), fontSize));
         }
 
         for (let i = 0; i < _pdfs.length; i++) {
