@@ -17,8 +17,6 @@ export const getEapXLAsJson = () => {
 export const convertEAPExcel = (eapBlExcelPath: string) => {
     const eapBlExcelAsJson: EAPBlExcelFormatForSecondRow[] = excelToJsonFor2RowAsHeader(eapBlExcelPath, "2. Description");
     EAP_EXCEL_AS_JSON_ARRAY.push(...eapBlExcelAsJson);
-    //console.log(`eapBlExcelAsJson ${JSON.stringify(EAP_EXCEL_AS_JSON_ARRAY[0])}`)
-    //console.log(`eapBlExcel[7] ${JSON.stringify(EAP_EXCEL_AS_JSON_ARRAY[7])}`)
 }
 
 export const findMetadataCorrespondingToTitle = (pdfName: string) => {
@@ -32,16 +30,16 @@ export const fetchDynamicMetadata = (pdfName: string) => {
     console.log(`eapBlExcelAsJson(${pdfName}) ${JSON.stringify(eapBlExcelAsJson)}`)
     const _metadata = `${eapBlExcelAsJson["Title (In English)"]}, ${eapBlExcelAsJson["Title (In Original Language/Script)"]}, ${eapBlExcelAsJson["Content Type"]} `
 
-    const _descMetadata = `
-    Description: ${eapBlExcelAsJson["Description"] || ""}
-    Number and Type of Original Material : ${eapBlExcelAsJson["Number and Type of Original Material"] || ""}
-    Related Subjects: '${eapBlExcelAsJson["Related Subjects\u000d\n"] || ""}'
-    Other Related Subjects: '${eapBlExcelAsJson["Other Related Subjects"] || ""}'
-    Dates of Material (Gregorian Calendar) : ${eapBlExcelAsJson["Dates of Material (Gregorian Calendar)"] || ""}
-    Editor(s) of the Original Material: ${eapBlExcelAsJson["Editor(s) of the Original Material"] || ""}
-    Volume Number:  ${eapBlExcelAsJson["Volume Number"] || ""}
-    Issue Number: ${eapBlExcelAsJson["Issue Number"] || ""}
-`
+    const _descMetadata = 
+    `Description: ${eapBlExcelAsJson["Description"] || "None Specified"}
+    Number and Type of Original Material : ${eapBlExcelAsJson["Number and Type of Original Material"] || "None Specified"}
+    Related Subjects: '${eapBlExcelAsJson["Related Subjects\u000d\n"] || "None Specified"}'
+    Other Related Subjects: '${eapBlExcelAsJson["Other Related Subjects"] || "None Specified"}'
+    Dates of Material (Gregorian Calendar) : ${eapBlExcelAsJson["Dates of Material (Gregorian Calendar)"] || "None Specified"}
+    Editor(s) of the Original Material: ${eapBlExcelAsJson["Editor(s) of the Original Material"] || "None Specified"}
+    Volume Number:  ${eapBlExcelAsJson["Volume Number"] || "None Specified"}
+    Issue Number: ${eapBlExcelAsJson["Issue Number"] || "None Specified"}`
+
     console.log(`_metadata ${_metadata}`)
     return {
         subjectMetadata: _metadata,
@@ -54,7 +52,7 @@ export const combineStaticAndDynamicMetadata = (_pdfName, profileName: string) =
     const dynamicMetadata = fetchDynamicMetadata(_pdfName);
     return {
         combinedSubjectMetadata: `${staticMetadata.description}, ${dynamicMetadata.subjectMetadata}`,
-        combinedDescMetadata: `${staticMetadata.description}, ${dynamicMetadata.subjectMetadata},${dynamicMetadata._descMetadata}`
+        combinedDescMetadata: `Subjects: ${staticMetadata.description},${dynamicMetadata.subjectMetadata}\n${dynamicMetadata._descMetadata}`
     }
 }
 
