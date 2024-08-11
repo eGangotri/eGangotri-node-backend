@@ -1,8 +1,9 @@
 import { excelToJsonFor2RowAsHeader, jsonToExcel } from "../cliBased/excel/ExcelUtils";
 import { EAPBlExcelFormatForSecondRow } from "./types";
-import { getArchiveMetadataForProfile } from "../archiveUpload/ArchiveProfileUtils";
+import { getArchiveMetadataForProfile, getFolderInSrcRootForProfile } from "../archiveUpload/ArchiveProfileUtils";
 import * as FileUtils from "../utils/FileStatsUtils";
 import { FileStats } from "imgToPdf/utils/types";
+import os from "os";
 
 const eapBlExcelPath = "D:\\EAP1435_Metadata_CSDS.xlsm";
 const EAP_EXCEL_AS_JSON_ARRAY = []
@@ -30,8 +31,8 @@ export const fetchDynamicMetadata = (pdfName: string) => {
     console.log(`eapBlExcelAsJson(${pdfName}) ${JSON.stringify(eapBlExcelAsJson)}`)
     const _metadata = `${eapBlExcelAsJson["Title (In English)"]}, ${eapBlExcelAsJson["Title (In Original Language/Script)"]}, ${eapBlExcelAsJson["Content Type"]} `
 
-    const _descMetadata = 
-    `Description: ${eapBlExcelAsJson["Description"] || "None Specified"}
+    const _descMetadata =
+        `Description: ${eapBlExcelAsJson["Description"] || "None Specified"}
     Number and Type of Original Material : ${eapBlExcelAsJson["Number and Type of Original Material"] || "None Specified"}
     Related Subjects: '${eapBlExcelAsJson["Related Subjects\u000d\n"] || "None Specified"}'
     Other Related Subjects: '${eapBlExcelAsJson["Other Related Subjects"] || "None Specified"}'
@@ -56,27 +57,50 @@ export const combineStaticAndDynamicMetadata = (_pdfName, profileName: string) =
     }
 }
 
-(async () => {
-    const PROFILE = "SR-BH"
-    const CREATOR = "CSDS-NEW DELHI"
+export const generateEAPBLMEtadataForProfile = async (profileName: string, excelOutputName = "") => {
+    const creator = getArchiveMetadataForProfile(profileName)?.creator;
+    const directoryPath = getFolderInSrcRootForProfile(profileName);
 
-    const directoryPath = "D:\\CSDS-Sarai-EAP-1435-Scans\\EAP 1435_Bhavishya_1930 to_1931 PDF Files";
+    if(!profileName || !creator || !directoryPath){
+        console.log(`Invalid profileName(${profileName}) or creator(${creator}) or directoryPath(${directoryPath})`)
+        return {
+            "success": false,
+            "msg": `Invalid profileName(${profileName}) or creator(${creator}) or directoryPath(${directoryPath})`
+        };
+    }
+
+
     const fileStats = await FileUtils.getAllFileListingWithoutStats({ directoryPath: directoryPath })
     const excelV1Metadata = []
     fileStats.forEach((fileStat: FileStats) => {
         console.log(`fileStat ${fileStat.absPath}`)
         const _pdfName = fileStat.fileName.replace(".pdf", "")
-        const _res = combineStaticAndDynamicMetadata(_pdfName, PROFILE)
+        const _res = combineStaticAndDynamicMetadata(_pdfName, profileName)
         console.log(`combinedSubjecctMetadata: ${JSON.stringify(_res.combinedSubjectMetadata)}`);
         console.log(`combinedDescMetadata: ${JSON.stringify(_res.combinedDescMetadata)}`);
         excelV1Metadata.push({
             absPath: fileStat.absPath,
             subject: _res.combinedSubjectMetadata,
             description: _res.combinedDescMetadata,
-            creator: CREATOR
+            creator: creator
         })
     })
-    jsonToExcel(excelV1Metadata, "D:\\excelV1Metadata-Aug.xlsx")
+    if(!excelOutputName || excelOutputName.trim().length === 0){ 
+        excelOutputName = "excelV1Metadata-Aug"
+    }
+    const homeDirectory = os.homedir();
+
+    const _excelPath = `${homeDirectory}\\Downloads\\${excelOutputName}.xlsx`
+    jsonToExcel(excelV1Metadata, _excelPath)
+    return {
+        "success": true,
+        "msg": `Metadata generated successfully at ${_excelPath}`,
+        "excelOutputName": _excelPath
+    };
+}
+
+(async () => {
+    // generateEAPBLMEtadataForProfile("SR-BH", "excelV1Metadatav1")
 })();
 /*
 yarn run convertEAPExcel

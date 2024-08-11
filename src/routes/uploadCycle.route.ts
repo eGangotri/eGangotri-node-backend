@@ -14,7 +14,7 @@ export const uploadCycleRoute = express.Router();
 POST http://localhost/uploadCycleRoute/add 
 JSON Body 
 {
-    "superadmin_user": "chetan",
+    "superadmin_user": "",
     "superadmin_password": "XXXXX",
     "uploadCycleId": "2",
     "uploadCount": 4,

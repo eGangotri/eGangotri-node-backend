@@ -69,9 +69,9 @@ const createIntroPageWithImage = async (imagePath: string, pdfToVanitize: string
     return `${_introPath}\\${introPDfName}`
 }
 
-export const addImageToIntroPageAsWholePage = async (doc: any, 
-    pathToImg: string, 
-    pgWidth: number, 
+export const addImageToIntroPageAsWholePage = async (doc: any,
+    pathToImg: string,
+    pgWidth: number,
     pgHeight: number) => {
     const imageDims = await getImageDimensions(pathToImg);
 
@@ -154,7 +154,7 @@ export const vanitizePdfForProfile = async (profile: string) => {
         const folder = getFolderInSrcRootForProfile(profile);
         const _pdfs = await getAllPdfsInFolders([folder]);
         const intros: string[] = []
-
+        console.log(`vanitizePdfForProfile `);
         const vanityIntro = profileVanityTextMap[`${profile}`].text;
         const imgFile = folder + "\\" + profileVanityTextMap[`${profile}`].imgFile;
         const fontSize = profileVanityTextMap[`${profile}`]?.fontSize || DEFAULT_FONT_SIZE;
@@ -179,7 +179,7 @@ export const vanitizePdfForProfile = async (profile: string) => {
     catch (err) {
         console.error(`vanitizePdfForProfile:err ${err}`)
         return {
-            "status": "failed",
+            "status": `Failed for profile: ${profile}. Does profileVanityTextMap has the profile?`,
             "message": err.message
         }
     }

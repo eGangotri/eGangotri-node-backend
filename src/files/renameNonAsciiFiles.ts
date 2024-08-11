@@ -2,6 +2,7 @@ import { callAksharamukha, DEFAULT_TARGET_SCRIPT_ROMAN_COLLOQUIAL } from "../aks
 import fs from 'fs';
 import path from 'path';
 import { getAllFileListingWithoutStats } from "../utils/FileStatsUtils";
+import os from "os";
 
 export const renameNonAsciiFile = async (
     fileAbsPath: string,
@@ -60,6 +61,7 @@ export const renameAllNonAsciiInFolder = async (
     console.log(`results: ${JSON.stringify(results)}`);
     return results.filter((item) => item.new !== "");
 }
+const homeDirectory = os.homedir();
 
-const _fn = "C:\\Users\\chetan\\Downloads\\test";
+const _fn =  `${homeDirectory}\\Downloads\\test`;
 //renameAllNonAsciiInFolder(_fn, "Tamil");

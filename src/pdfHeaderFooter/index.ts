@@ -1,5 +1,6 @@
 const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
-const fs = require('fs');
+import os from "os";
+import fs from "fs";
 
 async function addHeader(headerText: string, srcPdfPath: string, destPath: string = "") {
     await addHeaderAndFooterToPDF("", headerText, srcPdfPath, destPath);
@@ -74,8 +75,9 @@ export async function addHeaderAndFooterToPDF(headerText: string, footerText: st
 const headerText = "This is the header text.";
 const footerText = "This is the footer text.";
 
+const homeDirectory = os.homedir();
 
-const pdfContainingFolder = "C:\\Users\\chetan\\Documents\\_testPDF";
+const pdfContainingFolder = `${homeDirectory}\\Documents\\_testPDF`;
 const _srcPdfPath = `${pdfContainingFolder}\\output-t1-2-reduced-manually.pdf`
 const _destPdfPath = _srcPdfPath.replace(".pdf", "-withFooter2.pdf");
 

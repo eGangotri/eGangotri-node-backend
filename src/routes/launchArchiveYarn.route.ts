@@ -10,6 +10,7 @@ import { excelToJson, jsonToExcel } from '../cliBased/excel/ExcelUtils';
 import path from 'path';
 import moment from 'moment';
 import { DD_MM_YYYY_HH_MMFORMAT } from '../utils/constants';
+import { generateEAPBLMEtadataForProfile } from '../eap_bl';
 
 export const launchArchiveYarnRoute = express.Router();
 
@@ -300,3 +301,30 @@ launchArchiveYarnRoute.post('/compareUploadsViaExcelV3WithArchiveOrg', async (re
     }
 })
 
+
+launchArchiveYarnRoute.post('/generateEapExcelV1', async (req: any, resp: any) => {
+    try {
+        const profileName = req.body.profileName;
+        const excelOutputName = req.body.excelOutputName || "";
+        console.log(`generateEapExcelV1: ${profileName}`)
+        const res = await generateEAPBLMEtadataForProfile(profileName, excelOutputName);
+        if (!res.success) {
+            resp.status(300).send({
+                response: {
+                    ...res
+                }
+            });
+            return;
+        }
+        resp.status(200).send({
+            response: {
+                ...res
+            }
+        });
+
+    }
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})
