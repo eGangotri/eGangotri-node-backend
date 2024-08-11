@@ -4,6 +4,7 @@ import { ArchiveItem } from '../models/ArchiveItem';
 import { ArchiveExcelHeaderToJSONMAPPING, printMongoTransactions, replaceExcelHeadersWithJsonKeysForArchiveItem } from './utils';
 import fs from 'fs/promises';
 import path from 'path';
+import os from "os";
 
 const transformExcelToJSON = async (pathToExcel: string, source: string) => {
     // Read the Excel file
@@ -77,5 +78,6 @@ export async function deleteRowsByAccts(accts: string[]) {
 }
 
 //deleteRowsByAccts(['drnaithaniX', 'lucknow_state_museumXXX'] );
-//archiveExceltoMongo("C:\\Users\\chetan\\Desktop\\archiveExcels\\Varanasi");
+const homeDirectory = os.homedir();
+//archiveExceltoMongo(`${homeDirectory}\\Desktop\\archiveExcels\\Varanasi`);
 // yarn run excelToMongoArchive

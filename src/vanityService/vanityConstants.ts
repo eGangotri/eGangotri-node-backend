@@ -99,7 +99,7 @@ export const profileVanityTextMap = {
         //seems the image dimensions forces the font size to behave differently in the generated pdf
         fontSize:14,
     },
-    "SR": {
+    "SR-BH": {
         text: text_csds,
         imgFile: "csdsBL.jpeg",
         fontSize:14,

@@ -63,12 +63,8 @@ export const getFolderInDestRootForProfile = (profile: string) => {
 export const HEADER_FOOTER_PROPERTIES_FILE: Map<string, string> = getFoldersCorrespondingToProfile(SRC_ROOT);
 
 export const getHeaderAndFooterTextForProfile = (profile: string) => {
-    if (profile && profile.length > 0 && HEADER_FOOTER_PROPERTIES_FILE.has(profile)) {
-        return HEADER_FOOTER_PROPERTIES_FILE.get(profile)
-    }
-    else {
-        ""
-    }
+    const yes = (profile && profile.length > 0 && HEADER_FOOTER_PROPERTIES_FILE.has(profile))
+    return yes ? HEADER_FOOTER_PROPERTIES_FILE.get(profile) : "";
 }
 
 const getArchiveMetadataProperties = () => {
@@ -104,6 +100,6 @@ export const getArchiveMetadataForProfile = (profile: string) => {
     }
 }
 
-export const isValidArchiveProfile = (profile: string) => {   
+export const isValidArchiveProfile = (profile: string) => {
     return LOCAL_FOLDERS_PROPERTIES_FILE_FOR_SRC.has(profile?.trim());
 }
