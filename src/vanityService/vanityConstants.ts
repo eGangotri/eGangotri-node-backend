@@ -88,6 +88,21 @@ export const getImageDimensions = async (imagePath: string): Promise<{ width: nu
 };
 
 export const formatIntroText = (_text: string) => _text.replace(/\n/g, '').replace(/<br>/g, '\n\n');
+
+export const getProfileVanityInfo = (profile: string, folder: string) => {
+    let _tmpProfile = profile;
+    let vanityIntro = profileVanityTextMap[`${_tmpProfile}`]?.text || "";
+    if (vanityIntro.length === 0) {
+        _tmpProfile = profile.split("-")[0]
+        vanityIntro = profileVanityTextMap[`${_tmpProfile}`]?.text || "";
+    }
+
+    const imgFile = folder + "\\" + profileVanityTextMap[`${_tmpProfile}`].imgFile;
+    const fontSize = profileVanityTextMap[`${_tmpProfile}`]?.fontSize || DEFAULT_FONT_SIZE;
+    const singlePage = profileVanityTextMap[`${_tmpProfile}`]?.singlePage || false;
+    return [vanityIntro, imgFile, fontSize, singlePage]
+}
+
 export const profileVanityTextMap = {
     "PZ": {
         text: text_Peerzada,
@@ -97,13 +112,25 @@ export const profileVanityTextMap = {
         text: text_chambal,
         imgFile: "KrishnaPorwal.jpg",
         //seems the image dimensions forces the font size to behave differently in the generated pdf
-        fontSize:14,
+        fontSize: 14,
     },
-    "SR-BH": {
+    "SR": {
         text: text_csds,
-        imgFile: "csdsBL.jpeg",
-        fontSize:14,
-        singlePage:true
+        imgFile: "..\\csdsBL.jpeg",
+        fontSize: 14,
+        singlePage: true
+    },
+    "TMP": {
+        text: text_csds,
+        imgFile: "..\\csdsBL.jpeg",
+        fontSize: 14,
+        singlePage: true
+    },
+    "TMP2": {
+        text: text_csds,
+        imgFile: "..\\csdsBL.jpeg",
+        fontSize: 14,
+        singlePage: true
     },
 }
 

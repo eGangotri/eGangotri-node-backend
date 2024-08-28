@@ -49,7 +49,8 @@
     "uploadFileToGDrive": "ts-node ./src/cliBased/googleapi/GoogleDriveUpload",
     "renameNonAsciiFiles": "ts-node ./src/files/renameNonAsciiFiles.ts",
     "jpgToPdf": "ts-node ./src/imgToPdf/jpgToPdf.ts",
-    "convertEAPExcel": "ts-node ./src/eap_bl/index.ts"
+    "convertEAPExcel": "ts-node ./src/eap_bl/index.ts",
+    "zipFiles": "ts-node ./src/services/zipService.ts"
   },
   "repository": {
     "type": "git",
@@ -66,6 +67,7 @@
   "homepage": "https://github.com/eGangotri/egangotri-node-backend#readme",
   "dependencies": {
     "@csv-js/csv": "0.0.2",
+    "archiver": "^7.0.1",
     "axios": "^1.6.8",
     "child_process": "^1.0.2",
     "csv-parse": "latest",
@@ -82,11 +84,12 @@
     "moment": "^2.29.1",
     "mongoose": "^7.4.3",
     "node-downloader-helper": "^2.1.9",
+    "openai": "^4.56.0",
     "pdf-lib": "^1.17.1",
     "pdfjs-dist": "^4.1.392",
     "pdfkit": "^0.13.0",
     "puppeteer": "^21.1.1",
-    "sharp": "^0.33.4",
+    "sharp": "^0.33.5",
     "uuid": "^8.3.2",
     "winston": "^3.13.0",
     "xlsx": "^0.18.5"

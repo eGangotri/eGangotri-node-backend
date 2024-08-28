@@ -3,7 +3,7 @@ import { downloadPdfFromGoogleDriveToProfile } from '../cliBased/googleapi/Googl
 import { getFolderInSrcRootForProfile } from '../archiveUpload/ArchiveProfileUtils';
 import { moveFileSrcToDest, moveProfilesToFreeze } from '../services/yarnService';
 import { resetDownloadCounters } from '../cliBased/pdf/utils';
-import { vanitizePdfForProfile } from '../vanityService/VanityPdf';
+import {  vanitizePdfForProfiles } from '../vanityService/VanityPdf';
 import { timeInfo } from '../mirror/FrontEndBackendCommonCode';
 import { compareFolders } from '../folderSync';
 import { getLatestUploadCycleById, markUploadCycleAsMovedToFreeze } from '../services/uploadCycleService';
@@ -156,7 +156,11 @@ yarnRoute.post('/vanitizePdfs', async (req: any, resp: any) => {
                 }
             });
         }
-        const res = await vanitizePdfForProfile(profile);
+        const res = await vanitizePdfForProfiles(profile) || {
+            "status": "failed",
+            "message": "vanitizePdfForProfiles returned null"
+        };
+        console.log(`vanitizePdfs ${profile} res ${JSON.stringify(res)}`)
         resp.status(200).send({
             response: res
         });

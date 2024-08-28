@@ -4,6 +4,7 @@ import { getArchiveMetadataForProfile, getFolderInSrcRootForProfile } from "../a
 import * as FileUtils from "../utils/FileStatsUtils";
 import { FileStats } from "imgToPdf/utils/types";
 import os from "os";
+import * as fs from 'fs';
 
 const eapBlExcelPath = "D:\\EAP1435_Metadata_CSDS.xlsm";
 const EAP_EXCEL_AS_JSON_ARRAY = []
@@ -57,11 +58,11 @@ export const combineStaticAndDynamicMetadata = (_pdfName, profileName: string) =
     }
 }
 
-export const generateEAPBLMEtadataForProfile = async (profileName: string, excelOutputName = "") => {
+export const generateEAPBLMetadataForProfile = async (profileName: string, excelOutputName = "") => {
     const creator = getArchiveMetadataForProfile(profileName)?.creator;
-    const directoryPath = getFolderInSrcRootForProfile(profileName);
+    let directoryPath = getFolderInSrcRootForProfile(profileName);
 
-    if(!profileName || !creator || !directoryPath){
+    if (!profileName || !creator || !directoryPath) {
         console.log(`Invalid profileName(${profileName}) or creator(${creator}) or directoryPath(${directoryPath})`)
         return {
             "success": false,
@@ -69,23 +70,38 @@ export const generateEAPBLMEtadataForProfile = async (profileName: string, excel
         };
     }
 
+    //directoryPath
+    // Check if the vanitize subfolder exists
+    const vanitizePath = `${directoryPath}//_vanitized`;
+    try {
+        await fs.promises.access(vanitizePath, fs.constants.F_OK);
+        console.log(`Subfolder 'vanitize' exists in ${directoryPath}`);
+        directoryPath = vanitizePath;
+    } catch (err) {
+        console.log(`Subfolder 'vanitize' does not exist in ${directoryPath}`);
+    }
 
     const fileStats = await FileUtils.getAllFileListingWithoutStats({ directoryPath: directoryPath })
     const excelV1Metadata = []
     fileStats.forEach((fileStat: FileStats) => {
         console.log(`fileStat ${fileStat.absPath}`)
         const _pdfName = fileStat.fileName.replace(".pdf", "")
-        const _res = combineStaticAndDynamicMetadata(_pdfName, profileName)
-        console.log(`combinedSubjecctMetadata: ${JSON.stringify(_res.combinedSubjectMetadata)}`);
-        console.log(`combinedDescMetadata: ${JSON.stringify(_res.combinedDescMetadata)}`);
-        excelV1Metadata.push({
-            absPath: fileStat.absPath,
-            subject: _res.combinedSubjectMetadata,
-            description: _res.combinedDescMetadata,
-            creator: creator
-        })
+        try{
+            const _res = combineStaticAndDynamicMetadata(_pdfName, profileName)
+            console.log(`combinedSubjecctMetadata: ${JSON.stringify(_res.combinedSubjectMetadata)}`);
+            console.log(`combinedDescMetadata: ${JSON.stringify(_res.combinedDescMetadata)}`);
+            excelV1Metadata.push({
+                absPath: fileStat.absPath,
+                subject: _res.combinedSubjectMetadata,
+                description: _res.combinedDescMetadata,
+                creator: creator
+            })
+        }
+        catch (err) {
+            console.log(`Error in processing ${_pdfName} ${err}`)
+        }   
     })
-    if(!excelOutputName || excelOutputName.trim().length === 0){ 
+    if (!excelOutputName || excelOutputName.trim().length === 0) {
         excelOutputName = "excelV1Metadata-Aug"
     }
     const homeDirectory = os.homedir();
