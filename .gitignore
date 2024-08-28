@@ -1,3 +1,4 @@
+zipDump/*.zip
 /src/cliBasedX
 token.json
 *.csv
