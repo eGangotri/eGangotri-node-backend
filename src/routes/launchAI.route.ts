@@ -26,6 +26,11 @@ launchAIRoute.post('/renamePdfsWithAI', async (req: any, resp: any) => {
         const _files = _resp.map(x => x.absPath);
         const _ouptutZipPath = path.join(__dirname, `../zipDump/output-${timeComponent}.zip`);
         await zipFiles(_files, _ouptutZipPath);
+
+        //http://64.227.138.233:8005/pdfprocessor/upload/
+        //form-data
+        //zip_file
+
         resp.status(200).send({
             response: {
                 _results: _resp,
