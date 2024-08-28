@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import { getAllPdfsInFolders, mkDirIfDoesntExists } from "../imgToPdf/utils/Utils";
 import { prepareDocument } from "../imgToPdf/utils/PdfUtils";
 const path = require('path');
-import { DEFAULT_FONT_SIZE, MAX_IMG_HEIGHT, MAX_IMG_WIDTH, formatIntroText, getImageDimensions, profileVanityTextMap } from "./vanityConstants";
+import { DEFAULT_FONT_SIZE, MAX_IMG_HEIGHT, MAX_IMG_WIDTH, formatIntroText, getImageDimensions, getProfileVanityInfo, profileVanityTextMap } from "./vanityConstants";
 import { getFolderInSrcRootForProfile } from "../archiveUpload/ArchiveProfileUtils";
 import { font } from "pdfkit";
 
@@ -39,7 +39,7 @@ export const moveOrignalToSeparateFolder = async (pdfToVanitize: string, finalDu
 const createIntroPageWithImage = async (imagePath: string, pdfToVanitize: string,
     text: string, fontSize: number,
     singlePage: boolean = false) => {
-    var imageFolderPath = path.dirname(imagePath);
+    var imageFolderPath = path.dirname(pdfToVanitize);
     var _introPath = `${imageFolderPath}\\${_intros_dont}`;
     await mkDirIfDoesntExists(_introPath);
 
@@ -149,16 +149,13 @@ const mergeVanityPdf = async (_introPdf: string, origPdf: string, finalDumpGroun
     console.log(`dim::${finalPdfPath}`, await PdfLibUtils.getPdfFirstPageDimensionsUsingPdfLib(finalPdfPath));
 }
 
-export const vanitizePdfForProfile = async (profile: string) => {
+const vanitizePdfForProfile = async (profile: string) => {
     try {
         const folder = getFolderInSrcRootForProfile(profile);
         const _pdfs = await getAllPdfsInFolders([folder]);
         const intros: string[] = []
         console.log(`vanitizePdfForProfile `);
-        const vanityIntro = profileVanityTextMap[`${profile}`].text;
-        const imgFile = folder + "\\" + profileVanityTextMap[`${profile}`].imgFile;
-        const fontSize = profileVanityTextMap[`${profile}`]?.fontSize || DEFAULT_FONT_SIZE;
-        const singlePage = profileVanityTextMap[`${profile}`]?.singlePage || false;
+        const [vanityIntro, imgFile, fontSize, singlePage] = getProfileVanityInfo(profile, folder);
         console.log(`vanitizePdfForProfile ${folder}, ${_pdfs.length} fontSize:${fontSize} imgFile:${imgFile} singlePage: ${singlePage}`);
 
         for (let i = 0; i < _pdfs.length; i++) {
@@ -173,6 +170,7 @@ export const vanitizePdfForProfile = async (profile: string) => {
         }
         return {
             "status": "success",
+            success: true,
             "message": `vanity pdfs generated for profile ${profile} with folder ${folder} with pdf count- ${_pdfs.length} pdfs.`
         }
     }
@@ -180,8 +178,21 @@ export const vanitizePdfForProfile = async (profile: string) => {
         console.error(`vanitizePdfForProfile:err ${err}`)
         return {
             "status": `Failed for profile: ${profile}. Does profileVanityTextMap has the profile?`,
-            "message": err.message
+            success: false,
+            "message": err?.message || "vanitizePdfForProfile: Unknown error"
         }
     }
+}
+
+export const vanitizePdfForProfiles = async (profileAsCSV: string) => {
+    const responseList = []
+    const profiles = profileAsCSV.split(",");
+    for (let i = 0; i < profiles.length; i++) {
+        console.log(`vanitizePdfForProfiles(${i}): ${profiles[i]}`);
+        const _res = await vanitizePdfForProfile(profiles[i]?.trim());
+        responseList.push(_res);
+    }
+    console.log(`vanitizePdfForProfiles:responseList ${responseList}`);
+    return responseList;
 }
 //yarn run vanity 

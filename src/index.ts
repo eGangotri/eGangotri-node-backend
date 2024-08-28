@@ -21,6 +21,7 @@ import { launchArchiveYarnRoute } from "./routes/launchArchiveYarn.route";
 import { yarnExcelRoute } from "./routes/yarnExcel.route";
 import "./logger/override";
 import { fileUtilsRoute } from "./routes/fileUtils.route";
+import { launchAIRoute } from "./routes/launchAI.route";
 
 const egangotri = express();
 const hostname = "localhost";
@@ -60,6 +61,7 @@ egangotri.use("/yarn", yarnRoute);
 egangotri.use("/yarnExcel", yarnExcelRoute);
 egangotri.use("/yarnListMaker", yarnListMakerRoute);
 egangotri.use("/yarnArchive", launchArchiveYarnRoute);
+egangotri.use("/ai", launchAIRoute);
 
 egangotri.use("/searchArchivesDB", archiveItemRoute);
 egangotri.use("/searchGDriveDB", googleDriveItemRoute);
