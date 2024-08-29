@@ -2,8 +2,10 @@ import * as express from 'express';
 import { findTopNLongestFileNames } from '../utils/utils';
 import { getDuplicatesBySize } from '../utils/FileUtils';
 import { renameAllNonAsciiInFolder } from '../files/renameNonAsciiFiles';
-import { DEFAULT_TARGET_SCRIPT_ROMAN_COLLOQUIAL } from '../aksharamukha/convert';
-import { convertJpgsToPdf, convertJpgsToPdfInAllSubFolders } from '../imgToPdf/jpgToPdf';
+import { callAksharamukha, DEFAULT_TARGET_SCRIPT_ROMAN_COLLOQUIAL } from '../aksharamukha/convert';
+import { convertJpgsToPdfInAllSubFolders } from '../imgToPdf/jpgToPdf';
+import { multipleTextScriptConversion } from 'services/fileService';
+
 
 export const fileUtilsRoute = express.Router();
 
@@ -64,6 +66,73 @@ fileUtilsRoute.post('/renameNonAsciiFiles', async (req: any, resp: any) => {
             }
         });
     }
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})
+
+
+fileUtilsRoute.post('/convertMultipleTxtFileEncodings', async (req: any, resp: any) => {
+    try {
+        const folderPath = req.body.folderPath;
+        const scriptFrom = req.body.scriptFrom;
+        const scriptTo = req.body.scriptTo;
+        const multiplTextConversionReport = await multipleTextScriptConversion(folderPath, scriptFrom, scriptTo);
+        resp.status(200).send({
+            response: {
+                multiplTextConversionReport
+            }
+        });
+    }
+
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})
+
+fileUtilsRoute.post('/convertScript', async (req: any, resp: any) => {
+    try {
+        const text = req.body.text;
+        const scriptFrom = req.body.scriptFrom;
+        const scriptTo = req.body.scriptTo;
+
+        console.log(`folderPath: ${text} scriptFrom: ${scriptFrom} scriptTo: ${scriptTo}`);
+        try {
+            const payload = {
+                "source": scriptFrom,
+                "target": scriptTo,
+                "text": text,
+                "nativize": true,
+                "postOptions": [],
+                "preOptions": []
+            }
+            console.log(`payload: ${JSON.stringify(payload)}`);
+            const scriptConvertedContents = await callAksharamukha(payload, true);
+            resp.status(200).send({
+                response: {
+                    src: text,
+                    msg: `${scriptFrom} to ${scriptTo}.`,
+                    scriptConvertedContents,
+                }
+            });
+
+        } catch (error) {
+            console.error(`Error ${scriptFrom} to ${scriptTo}.`, error);
+            resp.status(400).send({
+                response: {
+                    src: text,
+                    msg: `${scriptFrom} to ${scriptTo}.`,
+                    error,
+                }
+            });
+        }
+    }
+
+
+
+
     catch (err: any) {
         console.log('Error', err);
         resp.status(400).send(err);

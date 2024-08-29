@@ -52,6 +52,6 @@ const outputZipPath = 'C:\\Users\\chetan\\Downloads\\output3.zip';
 
 //yarn run zipFiles
 
-zipFiles(pdfPaths, outputZipPath, "C:\\Users\\chetan\\Documents")
-    .then(() => console.log('Zipping completed successfully'))
-    .catch(err => console.error('Error during zipping:', err));
+// zipFiles(pdfPaths, outputZipPath, "C:\\Users\\chetan\\Documents")
+//     .then(() => console.log('Zipping completed successfully'))
+//     .catch(err => console.error('Error during zipping:', err));
