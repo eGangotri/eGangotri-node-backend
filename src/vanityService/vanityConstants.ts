@@ -110,7 +110,7 @@ export const profileVanityTextMap = {
     },
     "CHAMBAL": {
         text: text_chambal,
-        imgFile: "KrishnaPorwal.jpg",
+        imgFile: "KrishnaPorwal.jpeg",
         //seems the image dimensions forces the font size to behave differently in the generated pdf
         fontSize: 14,
     },
