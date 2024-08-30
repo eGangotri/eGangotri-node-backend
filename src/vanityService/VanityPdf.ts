@@ -111,7 +111,7 @@ export const addImageToIntroPage = async (doc: any, pathToImg: string, pgWidth: 
     const xOffset = (pgWidth - _imgWidth) / 2;
     const yOffset = (pgHeight - _imgHeight) / 2;
 
-    doc.image(img, 0, 0, {
+    doc.image(img, xOffset, yOffset, {
         width: _imgWidth,
         height: _imgHeight
     });
