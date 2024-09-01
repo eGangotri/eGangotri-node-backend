@@ -68,7 +68,7 @@
   "dependencies": {
     "@csv-js/csv": "0.0.2",
     "archiver": "^7.0.1",
-    "axios": "^1.7.5",
+    "axios": "^1.7.7",
     "child_process": "^1.0.2",
     "csv-parse": "latest",
     "csv-writer": "^1.6.0",
@@ -76,6 +76,7 @@
     "easy-pdf-merge": "^0.2.6",
     "exceljs": "^4.3.0",
     "express": "^4.19.2",
+    "form-data": "^4.0.0",
     "fs-extra": "^11.1.1",
     "g": "^2.0.1",
     "googleapis": "^121.0.0",
