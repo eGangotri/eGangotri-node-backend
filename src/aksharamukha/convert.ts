@@ -58,7 +58,7 @@ export const callAksharamukha = async (body: AksharaMukhaGetProps, asPost = fals
     else {
         const response = await fetch(`${AKSHARA_MUKHA_URL}?source=${body.source}&target=${body.target}&text=${body.text}&nativize=${body.nativize}`)
         const result = await response.text();
-        // console.log(`For input: ${body.text} \nResult: ${n_tildaRemoval}`);
+        console.log(`For input: ${body?.text}`);
         return result;
     }
 }
@@ -96,8 +96,17 @@ export const aksharamukhaHKToRomanColloquial = async (text: string, nativize = f
 ///􀁂􀀏􀁎􀀃􀁔􀁖􀁎􀁂􀁅􀁂􀁂􀁈􀁂􀁎􀁂􀀍􀀁􀁂􀀏􀁎􀀃􀁔􀁖􀁎􀁂􀁕􀁌􀁂􀁂􀀃􀁔􀁚􀁂􀁑􀁂􀁂􀁈􀁂􀁎􀁂􀀁
 //a.m"sumadaagama
 
+export const aksharaMukhaAutoDetectScriptToRomanColloguial = async (text: string, nativize = false) => {
+    const body = {
+        "target": DEFAULT_TARGET_SCRIPT_ROMAN_COLLOQUIAL,
+        "text": text,
+        "nativize": nativize,
+    }
+    return callAksharamukha(body,true);
+}
+
 export interface AksharaMukhaGetProps {
-    source: string;
+    source?: string;
     target: string;
     text: string;
     nativize: boolean;
