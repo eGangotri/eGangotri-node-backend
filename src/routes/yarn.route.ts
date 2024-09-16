@@ -1,21 +1,13 @@
 import * as express from 'express';
-<<<<<<< HEAD
-import { downloadPdfFromGoogleDriveToProfile } from '../cliBased/googleapi/GoogleDriveApiReadAndDownload';
-=======
 import { downloadFromGoogleDriveToProfile } from '../cliBased/googleapi/GoogleDriveApiReadAndDownload';
->>>>>>> 94ae3b987dd0a3e988dbdea22162cc68a699ace3
 import { getFolderInSrcRootForProfile } from '../archiveUpload/ArchiveProfileUtils';
 import { moveFileSrcToDest, moveProfilesToFreeze } from '../services/yarnService';
 import { resetDownloadCounters } from '../cliBased/pdf/utils';
 import {  vanitizePdfForProfiles } from '../vanityService/VanityPdf';
 import { timeInfo } from '../mirror/FrontEndBackendCommonCode';
 import { compareFolders } from '../folderSync';
-<<<<<<< HEAD
-import { getLatestUploadCycleById, markUploadCycleAsMovedToFreeze } from '../services/uploadCycleService';
-=======
 import {  markUploadCycleAsMovedToFreeze } from '../services/uploadCycleService';
 import { ZIP_TYPE } from '../cliBased/googleapi/_utils/constants';
->>>>>>> 94ae3b987dd0a3e988dbdea22162cc68a699ace3
 
 export const yarnRoute = express.Router();
 
@@ -41,9 +33,6 @@ yarnRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
         const links = googleDriveLink.includes(",") ? googleDriveLink.split(",").map((link: string) => link.trim()) : [googleDriveLink.trim()];
         resetDownloadCounters();
         for (const [index, link] of links.entries()) {
-<<<<<<< HEAD
-            const res = await downloadPdfFromGoogleDriveToProfile(link, profile, ignoreFolder);
-=======
             const res = await downloadFromGoogleDriveToProfile(link, profile, ignoreFolder);
             results.push(res);
         }
@@ -86,7 +75,6 @@ yarnRoute.post('/downloadZipFromGoogleDrive', async (req: any, resp: any) => {
         resetDownloadCounters();
         for (const [index, link] of links.entries()) {
             const res = await downloadFromGoogleDriveToProfile(link, profile, ignoreFolder, ZIP_TYPE);
->>>>>>> 94ae3b987dd0a3e988dbdea22162cc68a699ace3
             results.push(res);
         }
         const resultsSummary = results.map((res: any, index: number) => {
