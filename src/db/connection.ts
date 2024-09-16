@@ -4,6 +4,10 @@ dotenv.config()
 const CONFS = process.env
 
 export let GLOBAL_DB_NAME = CONFS.MONGO_DB_NAME;
+<<<<<<< HEAD
+=======
+export const AI_SERVER = CONFS.AI_SERVER;
+>>>>>>> 94ae3b987dd0a3e988dbdea22162cc68a699ace3
 
 export const mongoDbUrlWithDbName = (dbName: string) => {
     if (dbName === "forUpload") {

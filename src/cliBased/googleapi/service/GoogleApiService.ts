@@ -1,7 +1,11 @@
 import { drive_v3 } from 'googleapis';
 import { dataToXslx } from '../../excel/ExcelUtils';
 import { sizeInfo } from '../../../mirror/FrontEndBackendCommonCode';
+<<<<<<< HEAD
 import { FOLDER_MIME_TYPE, PDF_MIME_TYPE } from '../_utils/constants';
+=======
+import { FOLDER_MIME_TYPE, PDF_MIME_TYPE, PDF_TYPE, ZIP_MIME_TYPE, ZIP_TYPE } from '../_utils/constants';
+>>>>>>> 94ae3b987dd0a3e988dbdea22162cc68a699ace3
 import { GoogleApiData } from '../types';
 import { createFileNameWithPathForExport, getFolderName, getFolderPathRelativeToRootFolder } from '../_utils/GoogleDriveUtil';
 import * as _ from 'lodash';
@@ -16,7 +20,11 @@ export async function listFolderContentsAsArrayOfData(folderId: string,
     drive: drive_v3.Drive,
     umbrellaFolder: string = "",
     ignoreFolder = "",
+<<<<<<< HEAD
     pdfOnly = true) {
+=======
+    type = PDF_TYPE) {
+>>>>>>> 94ae3b987dd0a3e988dbdea22162cc68a699ace3
 
     const rootFolderName = await getFolderName(folderId, drive) || "";
     const _umbrellaFolder = umbrellaFolder?.length > 0 ? umbrellaFolder : rootFolderName;
@@ -27,7 +35,11 @@ export async function listFolderContentsAsArrayOfData(folderId: string,
     const googleDriveFileData: Array<GoogleApiData> = []
     let idFolderNameMap = new Map<string, string>();
 
+<<<<<<< HEAD
     await listFolderContents(folderId, drive, umbrellaFolder, googleDriveFileData, idFolderNameMap, rootFolderName, ignoreFolder, pdfOnly);
+=======
+    await listFolderContents(folderId, drive, umbrellaFolder, googleDriveFileData, idFolderNameMap, rootFolderName, ignoreFolder, type);
+>>>>>>> 94ae3b987dd0a3e988dbdea22162cc68a699ace3
     return googleDriveFileData
 }
 
@@ -36,13 +48,22 @@ export async function listFolderContentsAndGenerateCSVAndExcel(_folderIdOrUrl: s
     exportDestFolder: string,
     umbrellaFolder: string = "",
     ignoreFolder = "",
+<<<<<<< HEAD
     pdfOnly = true) {
+=======
+    type=PDF_TYPE) {
+>>>>>>> 94ae3b987dd0a3e988dbdea22162cc68a699ace3
     const folderId = extractGoogleDriveId(_folderIdOrUrl)
     FileUtils.createFolderIfNotExists(exportDestFolder);
 
     const googleDriveFileData: Array<GoogleApiData> = await listFolderContentsAsArrayOfData(folderId,
+<<<<<<< HEAD
         drive, umbrellaFolder, ignoreFolder, pdfOnly)
     const fileNameWithPath = createFileNameWithPathForExport(folderId, umbrellaFolder, exportDestFolder, FileConstUtils.ROW_COUNTER[1]) ;
+=======
+        drive, umbrellaFolder, ignoreFolder, type)
+    const fileNameWithPath = createFileNameWithPathForExport(folderId, umbrellaFolder, exportDestFolder, FileConstUtils.ROW_COUNTER[1]);
+>>>>>>> 94ae3b987dd0a3e988dbdea22162cc68a699ace3
     FileConstUtils.incrementRowCounter()
     //writeDataToCSV(googleDriveFileData, `${fileNameWithPath}.csv`)
     // Convert data to XLSX
@@ -71,7 +92,14 @@ export async function listFolderContents(folderId: string,
     idFolderNameMap: Map<string, string>,
     rootFolderName: string,
     ignoreFolder = "",
+<<<<<<< HEAD
     pdfOnly = true) {
+=======
+    type = PDF_TYPE) {
+
+    const pdfOnly = type === PDF_TYPE;
+    const zipOnly = type === ZIP_TYPE;
+>>>>>>> 94ae3b987dd0a3e988dbdea22162cc68a699ace3
 
     if (!idFolderNameMap.has(folderId)) {
         const folderPath = await getFolderPathRelativeToRootFolder(folderId, drive)
@@ -83,12 +111,27 @@ export async function listFolderContents(folderId: string,
     try {
         let files: drive_v3.Schema$File[] = [];
         let pageToken: string | undefined = undefined;
+<<<<<<< HEAD
         //
         const conditionForIgnoreFolder = ignoreFolder?.length > 0 ? ` and not name contains '${ignoreFolder}'` : "";
         const conditionForPdfOnly = pdfOnly ? ` and (mimeType='${PDF_MIME_TYPE}' or mimeType='${FOLDER_MIME_TYPE}') ` : ` and (mimeType!='' or  mimeType='${FOLDER_MIME_TYPE}')` ;
 
         //
         const _query = `'${folderId}' in parents and trashed = false ${conditionForPdfOnly} ${conditionForIgnoreFolder} `
+=======
+        //const conditionForPdfOnly = pdfOnly ? ` and (mimeType='${PDF_MIME_TYPE}' or mimeType='${FOLDER_MIME_TYPE}') ` : ` and (mimeType!='' or  mimeType='${FOLDER_MIME_TYPE}')`;
+
+ //(name contains '.zip' or name contains '.rar'
+
+        const conditionForIgnoreFolder = ignoreFolder?.length > 0 ? ` and not name contains '${ignoreFolder}'` : "";
+        const combinedCondition = (pdfOnly || zipOnly) ?
+        ` and ${pdfOnly ? `mimeType='${PDF_MIME_TYPE}'` : `((mimeType='${ZIP_MIME_TYPE}' or name contains '.zip' or name contains '.rar')`}  or mimeType='${FOLDER_MIME_TYPE}')`
+ //+
+   //         ` and (mimeType='${pdfOnly ? PDF_MIME_TYPE : ZIP_MIME_TYPE}' or mimeType='${FOLDER_MIME_TYPE}') ` :
+            :` and (mimeType!='' or  mimeType='${FOLDER_MIME_TYPE}')`;
+
+        const _query = `'${folderId}' in parents and trashed = false ${combinedCondition} ${conditionForIgnoreFolder} `
+>>>>>>> 94ae3b987dd0a3e988dbdea22162cc68a699ace3
         console.log(`_query ${_query}`)
         do {
             const response: GaxiosResponse = await drive.files.list({
@@ -116,7 +159,11 @@ export async function listFolderContents(folderId: string,
                             idFolderNameMap,
                             rootFolderName,
                             ignoreFolder,
+<<<<<<< HEAD
                             pdfOnly); // Recursively call the function for subfolders
+=======
+                            type); // Recursively call the function for subfolders
+>>>>>>> 94ae3b987dd0a3e988dbdea22162cc68a699ace3
                     }
                 }
                 catch (err) {
