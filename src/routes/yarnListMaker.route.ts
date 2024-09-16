@@ -6,7 +6,7 @@ import { extractFirstAndLastNPages } from '../cliBased/pdf/extractFirstAndLastNP
 import { gDriveExceltoMongo } from '../excelToMongo/tranferGDriveExcelToMongo';
 import { timeInfo } from '../mirror/FrontEndBackendCommonCode';
 import { publishBookTitlesList } from '../services/yarnService';
-import * as FileConstUtils from '../utils/constants';
+import { PDF_TYPE, ZIP_TYPE } from '../cliBased/googleapi/_utils/constants';
 
 export const yarnListMakerRoute = express.Router();
 
@@ -73,8 +73,11 @@ yarnListMakerRoute.post('/getGoogleDriveListing', async (req: any, resp: any) =>
 
         const _resps = [];
         for (let i = 0; i < _links.length; i++) {
-            console.log(`getGoogleDriveListing ${_links[i]} ${_folders[i]}`)
-            const listingResult = await generateGoogleDriveListingExcel(_links[i], _folders[i], reduced, ignoreFolder, !allNotJustPdfs);
+            console.log(`getGoogleDriveListing ${_links[i]} ${_folders[i]} (${allNotJustPdfs})`)
+            const listingResult = await generateGoogleDriveListingExcel(_links[i], 
+                _folders[i], reduced,
+                 ignoreFolder,
+                 allNotJustPdfs?"":PDF_TYPE);
             _resps.push(listingResult);
         }
 
@@ -93,8 +96,6 @@ yarnListMakerRoute.post('/getGoogleDriveListing', async (req: any, resp: any) =>
         resp.status(400).send(err);
     }
 })
-
-
 
 yarnListMakerRoute.post('/getFirstAndLastNPages', async (req: any, resp: any) => {
     try {
@@ -129,7 +130,6 @@ yarnListMakerRoute.post('/getFirstAndLastNPages', async (req: any, resp: any) =>
         resp.status(400).send(err);
     }
 })
-
 
 yarnListMakerRoute.post('/combineGDriveAndReducedPdfExcels', async (req: any, resp: any) => {
     try {
@@ -167,7 +167,6 @@ yarnListMakerRoute.post('/combineGDriveAndReducedPdfExcels', async (req: any, re
     }
 })
 
-
 yarnListMakerRoute.post('/dumpGDriveExcelToMongo', async (req: any, resp: any) => {
     try {
         const comboExcelPath = req?.body?.comboExcelPath;
@@ -201,7 +200,6 @@ yarnListMakerRoute.post('/dumpGDriveExcelToMongo', async (req: any, resp: any) =
         resp.status(400).send(err);
     }
 })
-
 
 yarnListMakerRoute.post('/createListingsOfLocalFolder', async (req: any, resp: any) => {
     try {

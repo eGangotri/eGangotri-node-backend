@@ -1,8 +1,8 @@
 import { excelToJson } from "../excel/ExcelUtils";
 import * as fs from 'fs';
 import * as _ from 'lodash';
-import { ExcelHeaders } from "cliBased/googleapi/types";
-import { titleInGoogleDrive } from "cliBased/googleapi/_utils/constants";
+import { ExcelHeaders } from "../../cliBased/googleapi/types";
+import { titleInGoogleDrive } from "../../cliBased/googleapi/_utils/constants";
 
 //https://blog.archive.org/developers/
 

@@ -2,21 +2,22 @@ import { _credentials } from './_utils/credentials_googleapi';
 import { listFolderContentsAndGenerateCSVAndExcel } from './service/GoogleApiService';
 import { getGoogleDriveInstance } from './service/CreateGoogleDrive';
 import { isValidDriveId } from './Utils';
+import { PDF_TYPE } from './_utils/constants';
 
 // Create a new Google Drive instance
 const drive = getGoogleDriveInstance();
 const EXPORT_ROOT_FOLDER = `C:\\_catalogWork\\_collation\\`;
 
-async function procOrigGoogleDrive(driveLinkOrFolderID: string, folderName: string, ignoreFolder = "", pdfOnly = true) {
+async function procOrigGoogleDrive(driveLinkOrFolderID: string, folderName: string, ignoreFolder = "", type=PDF_TYPE) {
   const res = await listFolderContentsAndGenerateCSVAndExcel(driveLinkOrFolderID, drive,
     `${EXPORT_ROOT_FOLDER}_googleDriveExcels`,
-    folderName, ignoreFolder, pdfOnly);
+    folderName, ignoreFolder, type);
   return res;
 }
 
-async function procReducedPdfGoogleDrive(driveLinkOrFolderID: string, folderName: string, ignoreFolder = "", pdfOnly = true) {
+async function procReducedPdfGoogleDrive(driveLinkOrFolderID: string, folderName: string, ignoreFolder = "", type=PDF_TYPE) {
   const res = await listFolderContentsAndGenerateCSVAndExcel(driveLinkOrFolderID, drive,
-    `${EXPORT_ROOT_FOLDER}_catReducedDrivePdfExcels`, folderName, ignoreFolder, pdfOnly);
+    `${EXPORT_ROOT_FOLDER}_catReducedDrivePdfExcels`, folderName, ignoreFolder, type);
   return res;
 }
 
@@ -24,7 +25,7 @@ export const generateGoogleDriveListingExcel = async (driveLinkOrFolderID: strin
   folderName: string,
   reduced = false,
   ignoreFolder = "",
- pdfOnly = true) => {
+  type=PDF_TYPE) => {
   //check if driveLinkOrFolderID is a valid google link
   if (!isValidDriveId(driveLinkOrFolderID)) {
     return {
@@ -35,8 +36,8 @@ export const generateGoogleDriveListingExcel = async (driveLinkOrFolderID: strin
   try {
     const _result =
       reduced ?
-        await procReducedPdfGoogleDrive(driveLinkOrFolderID, folderName, ignoreFolder, pdfOnly) :
-        await procOrigGoogleDrive(driveLinkOrFolderID, folderName, ignoreFolder, pdfOnly);
+        await procReducedPdfGoogleDrive(driveLinkOrFolderID, folderName, ignoreFolder, type) :
+        await procOrigGoogleDrive(driveLinkOrFolderID, folderName, ignoreFolder, type);
     console.log(`generateGoogleDriveListingExcel ${JSON.stringify(_result)}`)
     return {
       ..._result,
