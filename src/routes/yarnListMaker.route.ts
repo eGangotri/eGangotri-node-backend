@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 import path from 'path';
-=======
-.import path from 'path';
->>>>>>> 94ae3b987dd0a3e988dbdea22162cc68a699ace3
 import * as express from 'express';
 import { generateGoogleDriveListingExcel } from '../cliBased/googleapi/GoogleDriveApiReadAndExport';
 import { pickLatestExcelsAndCombineGDriveAndReducedPdfExcels } from '../services/yarnListMakerService';
@@ -10,11 +6,7 @@ import { extractFirstAndLastNPages } from '../cliBased/pdf/extractFirstAndLastNP
 import { gDriveExceltoMongo } from '../excelToMongo/tranferGDriveExcelToMongo';
 import { timeInfo } from '../mirror/FrontEndBackendCommonCode';
 import { publishBookTitlesList } from '../services/yarnService';
-<<<<<<< HEAD
-import * as FileConstUtils from '../utils/constants';
-=======
 import { PDF_TYPE, ZIP_TYPE } from '../cliBased/googleapi/_utils/constants';
->>>>>>> 94ae3b987dd0a3e988dbdea22162cc68a699ace3
 
 export const yarnListMakerRoute = express.Router();
 
@@ -81,16 +73,11 @@ yarnListMakerRoute.post('/getGoogleDriveListing', async (req: any, resp: any) =>
 
         const _resps = [];
         for (let i = 0; i < _links.length; i++) {
-<<<<<<< HEAD
-            console.log(`getGoogleDriveListing ${_links[i]} ${_folders[i]}`)
-            const listingResult = await generateGoogleDriveListingExcel(_links[i], _folders[i], reduced, ignoreFolder, !allNotJustPdfs);
-=======
             console.log(`getGoogleDriveListing ${_links[i]} ${_folders[i]} (${allNotJustPdfs})`)
             const listingResult = await generateGoogleDriveListingExcel(_links[i], 
                 _folders[i], reduced,
                  ignoreFolder,
                  allNotJustPdfs?"":PDF_TYPE);
->>>>>>> 94ae3b987dd0a3e988dbdea22162cc68a699ace3
             _resps.push(listingResult);
         }
 
@@ -110,11 +97,6 @@ yarnListMakerRoute.post('/getGoogleDriveListing', async (req: any, resp: any) =>
     }
 })
 
-<<<<<<< HEAD
-
-
-=======
->>>>>>> 94ae3b987dd0a3e988dbdea22162cc68a699ace3
 yarnListMakerRoute.post('/getFirstAndLastNPages', async (req: any, resp: any) => {
     try {
         const srcFoldersAsCSV = req?.body?.srcFolders;
@@ -149,10 +131,6 @@ yarnListMakerRoute.post('/getFirstAndLastNPages', async (req: any, resp: any) =>
     }
 })
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 94ae3b987dd0a3e988dbdea22162cc68a699ace3
 yarnListMakerRoute.post('/combineGDriveAndReducedPdfExcels', async (req: any, resp: any) => {
     try {
         const mainExcelPath = req?.body?.mainExcelPath;
@@ -189,10 +167,6 @@ yarnListMakerRoute.post('/combineGDriveAndReducedPdfExcels', async (req: any, re
     }
 })
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 94ae3b987dd0a3e988dbdea22162cc68a699ace3
 yarnListMakerRoute.post('/dumpGDriveExcelToMongo', async (req: any, resp: any) => {
     try {
         const comboExcelPath = req?.body?.comboExcelPath;
@@ -227,10 +201,6 @@ yarnListMakerRoute.post('/dumpGDriveExcelToMongo', async (req: any, resp: any) =
     }
 })
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 94ae3b987dd0a3e988dbdea22162cc68a699ace3
 yarnListMakerRoute.post('/createListingsOfLocalFolder', async (req: any, resp: any) => {
     try {
         const argFirst = req.body.argFirst

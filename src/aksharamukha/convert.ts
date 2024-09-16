@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 
-const AKSHARA_MUKHA = "http://aksharamukha-plugin.appspot.com/api/public"
-export const DEFAULT_TARGET_SCRIPT_ROMAN_COLLOQUIAL = "RomanColloquial";
-=======
 import axios from 'axios';
 
 const AKSHARA_MUKHA_URL = 
@@ -13,7 +9,6 @@ const AKSHARA_MUKHA_URL =
 export const DEFAULT_TARGET_SCRIPT_ROMAN_COLLOQUIAL = "RomanColloquial";
 export const AKSHARA_MUKHA_DEVANAGARI = "Devanagari";
 export const AKSHARAMUKHA_IAST = "IAST";
->>>>>>> 94ae3b987dd0a3e988dbdea22162cc68a699ace3
 
 export const callAksharamukhaWithSpecifics = async (body: AksharaMukhaGetProps) => {
     const result = await callAksharamukha(body);
@@ -24,16 +19,6 @@ export const callAksharamukhaWithSpecifics = async (body: AksharaMukhaGetProps) 
     return n_tildaRemoval;
 }
 
-<<<<<<< HEAD
-export const callAksharamukha = async (body: AksharaMukhaGetProps) => {
-    const response = await fetch(`${AKSHARA_MUKHA}?source=${body.source}&target=${body.target}&text=${body.text}&nativize=${body.nativize}`)
-    const result = await response.text();
-    // console.log(`For input: ${body.text} \nResult: ${n_tildaRemoval}`);
-    return result;
-}
-
-export const callAksharamukhaToRomanColloquial = async (sourceScript:string, text:string) => {
-=======
 //Record<string, unknown>
 export const callAksharamukha = async (body: AksharaMukhaGetProps, asPost = false):Promise<string> => {
     if (asPost) {
@@ -80,7 +65,6 @@ export const callAksharamukha = async (body: AksharaMukhaGetProps, asPost = fals
 }
 
 export const callAksharamukhaToRomanColloquial = async (sourceScript: string, text: string) => {
->>>>>>> 94ae3b987dd0a3e988dbdea22162cc68a699ace3
     const body = {
         "source": sourceScript,
         "target": DEFAULT_TARGET_SCRIPT_ROMAN_COLLOQUIAL,
@@ -113,10 +97,6 @@ export const aksharamukhaHKToRomanColloquial = async (text: string, nativize = f
 ///􀁂􀀏􀁎􀀃􀁔􀁖􀁎􀁂􀁅􀁂􀁂􀁈􀁂􀁎􀁂􀀍􀀁􀁂􀀏􀁎􀀃􀁔􀁖􀁎􀁂􀁕􀁌􀁂􀁂􀀃􀁔􀁚􀁂􀁑􀁂􀁂􀁈􀁂􀁎􀁂􀀁
 //a.m"sumadaagama
 
-<<<<<<< HEAD
-export interface AksharaMukhaGetProps {
-    source: string;
-=======
 export const aksharaMukhaAutoDetectScriptToRomanColloguial = async (text: string, nativize = false) => {
     const body = {
         "target": DEFAULT_TARGET_SCRIPT_ROMAN_COLLOQUIAL,
@@ -128,7 +108,6 @@ export const aksharaMukhaAutoDetectScriptToRomanColloguial = async (text: string
 
 export interface AksharaMukhaGetProps {
     source?: string;
->>>>>>> 94ae3b987dd0a3e988dbdea22162cc68a699ace3
     target: string;
     text: string;
     nativize: boolean;

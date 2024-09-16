@@ -2,15 +2,10 @@ import * as express from 'express';
 import { findTopNLongestFileNames } from '../utils/utils';
 import { getDuplicatesBySize } from '../utils/FileUtils';
 import { renameAllNonAsciiInFolder } from '../files/renameNonAsciiFiles';
-<<<<<<< HEAD
-import { DEFAULT_TARGET_SCRIPT_ROMAN_COLLOQUIAL } from '../aksharamukha/convert';
-import { convertJpgsToPdf, convertJpgsToPdfInAllSubFolders } from '../imgToPdf/jpgToPdf';
-=======
 import { callAksharamukha, DEFAULT_TARGET_SCRIPT_ROMAN_COLLOQUIAL } from '../aksharamukha/convert';
 import { convertJpgsToPdfInAllSubFolders } from '../imgToPdf/jpgToPdf';
 import { multipleTextScriptConversion } from '../services/fileService';
 
->>>>>>> 94ae3b987dd0a3e988dbdea22162cc68a699ace3
 
 export const fileUtilsRoute = express.Router();
 
@@ -77,8 +72,6 @@ fileUtilsRoute.post('/renameNonAsciiFiles', async (req: any, resp: any) => {
     }
 })
 
-<<<<<<< HEAD
-=======
 
 fileUtilsRoute.post('/convertMultipleTxtFileEncodings', async (req: any, resp: any) => {
     try {
@@ -146,7 +139,6 @@ fileUtilsRoute.post('/convertScript', async (req: any, resp: any) => {
     }
 })
 
->>>>>>> 94ae3b987dd0a3e988dbdea22162cc68a699ace3
 fileUtilsRoute.post('/imgFilesToPdf', async (req: any, resp: any) => {
     try {
         const folder = req.body.folder;
