@@ -88,10 +88,17 @@ const padNumbersWithZeros = (num: number) => {
 }
 let counter = 0;
 
+<<<<<<< HEAD
 export const extractFirstAndLastNPages = async (_srcFoldersWithPath: string[], destRootFolder: string, nPages: number) => {
     if (nPages > 0) {
         firstNPages = nPages;
         lastNPages = nPages;
+=======
+export const extractFirstAndLastNPages = async (_srcFoldersWithPath: string[], destRootFolder: string, nPages: number, onlyFirst = false) => {
+    if (nPages > 0) {
+        firstNPages = nPages;
+        lastNPages = onlyFirst ? 0 : nPages;
+>>>>>>> 94ae3b987dd0a3e988dbdea22162cc68a699ace3
     }
     let failures = 0;
     FINAL_REPORT = []

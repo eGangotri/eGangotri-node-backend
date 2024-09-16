@@ -12,17 +12,33 @@ import { getAllPdfsInFolders, getDirectoriesWithFullPath } from '../../imgToPdf/
 import { addHeaderAndFooterToPDF } from '../../pdfHeaderFooter';
 import { isValidPath } from '../../utils/utils';
 import { extractGoogleDriveId } from '../../mirror/GoogleDriveUtilsCommonCode';
+<<<<<<< HEAD
+=======
+import { PDF_TYPE } from './_utils/constants';
+>>>>>>> 94ae3b987dd0a3e988dbdea22162cc68a699ace3
 
 // Create a new Google Drive instance
 const drive = getGoogleDriveInstance();
 
+<<<<<<< HEAD
 async function getAllFilesFromGDrive(driveLinkOrFolderID: string, folderName: string, pdfDumpFolder: string, ignoreFolder = "", pdfOnly = true) {
+=======
+async function getAllFilesFromGDrive(driveLinkOrFolderID: string,
+   folderName: string,
+    pdfDumpFolder: string,
+    ignoreFolder = "",
+     type = PDF_TYPE) {
+>>>>>>> 94ae3b987dd0a3e988dbdea22162cc68a699ace3
   const folderId = extractGoogleDriveId(driveLinkOrFolderID)
   console.log(`folderId: ${folderId}`)
   const googleDriveData = await listFolderContentsAsArrayOfData(folderId,
     drive,
     folderName,
+<<<<<<< HEAD
     ignoreFolder, pdfOnly);
+=======
+    ignoreFolder, type);
+>>>>>>> 94ae3b987dd0a3e988dbdea22162cc68a699ace3
 
   const dataLength = googleDriveData.length;
   const maxLimit = 200
@@ -90,6 +106,7 @@ export const addHeaderFooterToPDFsInProfile = async (profile: string) => {
   }
 }
 
+<<<<<<< HEAD
 export const downloadPdfFromGoogleDriveToProfile = async (driveLinkOrFolderId: string,
   profileOrPath: string,
   ignoreFolder = "",
@@ -97,11 +114,24 @@ export const downloadPdfFromGoogleDriveToProfile = async (driveLinkOrFolderId: s
   const pdfDumpFolder = isValidPath(profileOrPath) ? profileOrPath : getFolderInSrcRootForProfile(profileOrPath);
 
   console.log(`downloadPdfFromGoogleDriveToProfile:pdfDumpFolder ${pdfDumpFolder}`)
+=======
+export const downloadFromGoogleDriveToProfile = async (driveLinkOrFolderId: string,
+  profileOrPath: string,
+  ignoreFolder = "",
+  type = PDF_TYPE) => {
+  const pdfDumpFolder = isValidPath(profileOrPath) ? profileOrPath : getFolderInSrcRootForProfile(profileOrPath);
+
+  console.log(`downloadFromGoogleDriveToProfile:pdfDumpFolder ${pdfDumpFolder}`)
+>>>>>>> 94ae3b987dd0a3e988dbdea22162cc68a699ace3
   try {
     if (fs.existsSync(pdfDumpFolder)) {
       resetDownloadCounters()
       const _results = await getAllFilesFromGDrive(driveLinkOrFolderId, "",
+<<<<<<< HEAD
         pdfDumpFolder, ignoreFolder, pdfOnly);
+=======
+        pdfDumpFolder, ignoreFolder, type);
+>>>>>>> 94ae3b987dd0a3e988dbdea22162cc68a699ace3
 
       console.log(`Success count: ${DOWNLOAD_COMPLETED_COUNT}`);
       console.log(`Error count: ${DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT}`);
@@ -136,7 +166,11 @@ export const downloadPdfFromGoogleDriveToProfile = async (driveLinkOrFolderId: s
 //   console.log("Command-line arguments:", args);
 //   const _url = args[0];
 //   const _profile = args[1];
+<<<<<<< HEAD
 //   await downloadPdfFromGoogleDriveToProfile(_url, _profile);
+=======
+//   await downloadFromGoogleDriveToProfile(_url, _profile);
+>>>>>>> 94ae3b987dd0a3e988dbdea22162cc68a699ace3
 // })();
 
 //yarn run downloadFromGoogle "google url" "TMP"
