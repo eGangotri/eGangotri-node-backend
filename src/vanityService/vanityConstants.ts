@@ -106,11 +106,11 @@ export const getProfileVanityInfo = (profile: string, folder: string) => {
 export const profileVanityTextMap = {
     "PZ": {
         text: text_Peerzada,
-        imgFile: "peerzada2.jpg"
+        imgFile: "peerzada_forVanity.jpg"
     },
     "CHAMBAL": {
         text: text_chambal,
-        imgFile: "KrishnaPorwal.jpeg",
+        imgFile: "KrishnaPorwal_forVanity.jpeg",
         //seems the image dimensions forces the font size to behave differently in the generated pdf
         fontSize: 14,
     },
