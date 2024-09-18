@@ -3,11 +3,12 @@ import { downloadFromGoogleDriveToProfile } from '../cliBased/googleapi/GoogleDr
 import { getFolderInSrcRootForProfile } from '../archiveUpload/ArchiveProfileUtils';
 import { moveFileSrcToDest, moveProfilesToFreeze } from '../services/yarnService';
 import { resetDownloadCounters } from '../cliBased/pdf/utils';
-import {  vanitizePdfForProfiles } from '../vanityService/VanityPdf';
+import { vanitizePdfForProfiles } from '../vanityService/VanityPdf';
 import { timeInfo } from '../mirror/FrontEndBackendCommonCode';
 import { compareFolders } from '../folderSync';
-import {  markUploadCycleAsMovedToFreeze } from '../services/uploadCycleService';
+import { markUploadCycleAsMovedToFreeze } from '../services/uploadCycleService';
 import { ZIP_TYPE } from '../cliBased/googleapi/_utils/constants';
+import { unzipAllFilesInDirectory } from '../services/zipService';
 
 export const yarnRoute = express.Router();
 
@@ -93,6 +94,46 @@ yarnRoute.post('/downloadZipFromGoogleDrive', async (req: any, resp: any) => {
     }
 })
 
+yarnRoute.post('/unzipAllFolders', async (req: any, resp: any) => {
+    try {
+        const folder = req?.body?.folder;
+        const ignoreFolder = req?.body?.ignoreFolder || "proc";
+
+        console.log(`:downloadZipFromGoogleDrive:
+        googleDriveLink:
+         ${folder?.split(",").map((link: string) => link + "\n ")} 
+        `)
+        if (!folder) {
+            resp.status(300).send({
+                response: {
+                    "status": "failed",
+                    "message": "googleDriveLink and profile are mandatory"
+                }
+            });
+        }
+        const results = [];
+        const _folder = folder.includes(",") ? folder.split(",").map((link: string) => link.trim()) : [folder.trim()];
+        for (const [index, link] of _folder.entries()) {
+            const res = await unzipAllFilesInDirectory(folder, "", ignoreFolder);
+            results.push({ unzipFolder: res });
+        }
+        const resultsSummary = results.map((res: any, index: number) => {
+            return `(${index + 1}). Succ: ${res.success_count} Err: ${res.error_count} Wrong Size: ${res.dl_wrong_size_count}`;
+        });
+
+        resp.status(200).send({
+            resultsSummary,
+            response: results
+        });
+    }
+
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})
+
+
 
 yarnRoute.post('/qaToDestFileMover', async (req: any, resp: any) => {
     console.log(`qaToDestFileMover ${JSON.stringify(req.body)} `)
@@ -145,7 +186,7 @@ yarnRoute.post('/yarnMoveProfilesToFreeze', async (req: any, resp: any) => {
             });
         }
         const _response = await moveProfilesToFreeze(profileAsCSV, flatten, ignorePaths);
-        if(_uploadCycleId) {
+        if (_uploadCycleId) {
             await markUploadCycleAsMovedToFreeze(_uploadCycleId)
         }
         resp.status(200).send(_response);

@@ -1,8 +1,11 @@
 import * as fs from 'fs';
 import archiver from 'archiver';
+import * as path from 'path';
+import admZip from 'adm-zip';
 
-
-export async function zipFiles(filePaths: string[], outputZipPath: string, rootDirToMaintainOrigFolderOrder = ""): Promise<void> {
+export async function zipFiles(filePaths: string[], 
+    outputZipPath: string, 
+    rootDirToMaintainOrigFolderOrder = ""): Promise<void> {
     return new Promise((resolve, reject) => {
         const output = fs.createWriteStream(outputZipPath);
         const archive = archiver('zip', {
@@ -38,6 +41,51 @@ export async function zipFiles(filePaths: string[], outputZipPath: string, rootD
 
         archive.finalize();
     });
+}
+
+function findZipFiles(dir: string, zipFiles: string[] = []): string[] {
+    const files = fs.readdirSync(dir);
+    for (const file of files) {
+        const filePath = path.join(dir, file);
+        const stat = fs.statSync(filePath);
+        if (stat.isDirectory()) {
+            findZipFiles(filePath, zipFiles);
+        } else if (filePath.endsWith('.zip')) {
+            zipFiles.push(filePath);
+        }
+    }
+    return zipFiles;
+}
+
+export async function unzipFiles(zipPath: string, outputDir: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+        try {
+            const zip = new admZip(zipPath);
+            zip.extractAllTo(outputDir, true);
+            resolve();
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+
+
+export async function unzipAllFilesInDirectory(pathToZipFiles: string, _unzipHere: string = "", ignoreFolder = ""):
+ Promise<string> {
+    const zipFiles = findZipFiles(pathToZipFiles);
+    if(!_unzipHere || _unzipHere === ""){
+        _unzipHere = pathToZipFiles + "\\unzipped";
+    }
+
+    for (const zipFile of zipFiles) {
+        const outputDir = path.join(_unzipHere, path.basename(zipFile, '.zip'));
+        if (!fs.existsSync(outputDir)) {
+            fs.mkdirSync(outputDir, { recursive: true });
+        }
+        await unzipFiles(zipFile, outputDir);
+        console.log(`Unzipped ${zipFile} to ${outputDir}`);
+    }
+    return _unzipHere;
 }
 
 // Example usage:

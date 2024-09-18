@@ -9,7 +9,6 @@ import * as path from 'path';
 import moment from "moment";
 import { DD_MM_YYYY_HH_MMFORMAT } from "../utils/constants";
 import * as FileUtils from '../utils/FileStatsUtils';
-import * as FileConstUtils from '../utils/constants';
 
 import * as _ from 'lodash';
 
