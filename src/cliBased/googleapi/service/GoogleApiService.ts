@@ -36,7 +36,7 @@ export async function listFolderContentsAndGenerateCSVAndExcel(_folderIdOrUrl: s
     exportDestFolder: string,
     umbrellaFolder: string = "",
     ignoreFolder = "",
-    type=PDF_TYPE) {
+    type = PDF_TYPE) {
     const folderId = extractGoogleDriveId(_folderIdOrUrl)
     FileUtils.createFolderIfNotExists(exportDestFolder);
 
@@ -86,16 +86,13 @@ export async function listFolderContents(folderId: string,
     try {
         let files: drive_v3.Schema$File[] = [];
         let pageToken: string | undefined = undefined;
-        //const conditionForPdfOnly = pdfOnly ? ` and (mimeType='${PDF_MIME_TYPE}' or mimeType='${FOLDER_MIME_TYPE}') ` : ` and (mimeType!='' or  mimeType='${FOLDER_MIME_TYPE}')`;
-
- //(name contains '.zip' or name contains '.rar'
 
         const conditionForIgnoreFolder = ignoreFolder?.length > 0 ? ` and not name contains '${ignoreFolder}'` : "";
+        const pdfOnlyFrag = `(mimeType='${PDF_MIME_TYPE}' or mimeType='${FOLDER_MIME_TYPE}')`
+        const zipOnlyFrag = `((mimeType='${ZIP_MIME_TYPE}' or name contains '.zip' or name contains '.rar') or mimeType='${FOLDER_MIME_TYPE}')}`
         const combinedCondition = (pdfOnly || zipOnly) ?
-        ` and ${pdfOnly ? `mimeType='${PDF_MIME_TYPE}'` : `((mimeType='${ZIP_MIME_TYPE}' or name contains '.zip' or name contains '.rar')`}  or mimeType='${FOLDER_MIME_TYPE}')`
- //+
-   //         ` and (mimeType='${pdfOnly ? PDF_MIME_TYPE : ZIP_MIME_TYPE}' or mimeType='${FOLDER_MIME_TYPE}') ` :
-            :` and (mimeType!='' or  mimeType='${FOLDER_MIME_TYPE}')`;
+            ` and ${pdfOnly ? pdfOnlyFrag : zipOnlyFrag}`
+            : ` and (mimeType!='' or  mimeType='${FOLDER_MIME_TYPE}')`;
 
         const _query = `'${folderId}' in parents and trashed = false ${combinedCondition} ${conditionForIgnoreFolder} `
         console.log(`_query ${_query}`)
