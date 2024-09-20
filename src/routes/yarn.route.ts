@@ -104,7 +104,7 @@ yarnRoute.post('/unzipAllFolders', async (req: any, resp: any) => {
          ${folder?.split(",").map((link: string) => link + "\n ")} 
         `)
         if (!folder) {
-            resp.status(300).send({
+            resp.status(400).send({
                 response: {
                     "status": "failed",
                     "message": "googleDriveLink and profile are mandatory"
@@ -113,10 +113,14 @@ yarnRoute.post('/unzipAllFolders', async (req: any, resp: any) => {
         }
         const results = [];
         const _folder = folder.includes(",") ? folder.split(",").map((link: string) => link.trim()) : [folder.trim()];
-        for (const [index, link] of _folder.entries()) {
-            const res = await unzipAllFilesInDirectory(folder, "", ignoreFolder);
+
+        for (const link of _folder) {
+            console.log(1)
+            const res = await unzipAllFilesInDirectory(link, "", ignoreFolder);
+            console.log(2)
             results.push({ unzipFolder: res });
         }
+
         const resultsSummary = results.map((res: any, index: number) => {
             return `(${index + 1}). Succ: ${res.success_count} Err: ${res.error_count} Wrong Size: ${res.dl_wrong_size_count}`;
         });
@@ -129,11 +133,9 @@ yarnRoute.post('/unzipAllFolders', async (req: any, resp: any) => {
 
     catch (err: any) {
         console.log('Error', err);
-        resp.status(400).send(err);
+        resp.status(500).send(err);
     }
 })
-
-
 
 yarnRoute.post('/qaToDestFileMover', async (req: any, resp: any) => {
     console.log(`qaToDestFileMover ${JSON.stringify(req.body)} `)

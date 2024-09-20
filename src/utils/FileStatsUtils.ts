@@ -8,7 +8,7 @@ import * as Mirror from "../mirror/FrontEndBackendCommonCode"
 import { FileStatsOptions } from '../imgToPdf/utils/types';
 import { ellipsis } from '../mirror/utils';
 import _ from 'lodash';
-import { PDF_EXT } from '../imgToPdf/utils/constants';
+import { PDF_EXT, ZIP_EXT } from '../imgToPdf/utils/constants';
 
 import { FileStats } from "imgToPdf/utils/types";
 import { file } from 'pdfkit';
@@ -85,6 +85,15 @@ export async function getAllPDFFiles(directoryPath: string, withLogs: boolean = 
     return await getAllFileStats({
         directoryPath,
         filterExt: PDF_EXT,
+        ignoreFolders: true,
+        withLogs
+    });
+}
+
+export async function getAllZipFiles(directoryPath: string, withLogs: boolean = false): Promise<FileStats[]> {
+    return await getAllFileStats({
+        directoryPath,
+        filterExt: ZIP_EXT,
         ignoreFolders: true,
         withLogs
     });
