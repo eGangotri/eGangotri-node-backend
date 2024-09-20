@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import archiver from 'archiver';
 import * as path from 'path';
 import admZip from 'adm-zip';
+import { getAllZipFiles } from 'utils/FileStatsUtils';
 
 export async function zipFiles(filePaths: string[], 
     outputZipPath: string, 
@@ -72,17 +73,17 @@ export async function unzipFiles(zipPath: string, outputDir: string): Promise<vo
 
 export async function unzipAllFilesInDirectory(pathToZipFiles: string, _unzipHere: string = "", ignoreFolder = ""):
  Promise<string> {
-    const zipFiles = findZipFiles(pathToZipFiles);
+    const zipFiles = await getAllZipFiles(pathToZipFiles);
     if(!_unzipHere || _unzipHere === ""){
         _unzipHere = pathToZipFiles + "\\unzipped";
     }
 
     for (const zipFile of zipFiles) {
-        const outputDir = path.join(_unzipHere, path.basename(zipFile, '.zip'));
+        const outputDir = path.join(_unzipHere, path.basename(zipFile.absPath, '.zip'));
         if (!fs.existsSync(outputDir)) {
             fs.mkdirSync(outputDir, { recursive: true });
         }
-        await unzipFiles(zipFile, outputDir);
+        await unzipFiles(zipFile.absPath, outputDir);
         console.log(`Unzipped ${zipFile} to ${outputDir}`);
     }
     return _unzipHere;
