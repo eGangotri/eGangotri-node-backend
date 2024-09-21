@@ -64,14 +64,16 @@ export const downloadFileFromUrl = async (
             dl.start();
         });
     } catch (err) {
-        console.error(`downloadFileFromUrl err  ${err}`);
+        console.error(`downloadFileFromUrl err  ${JSON.stringify(err)}`);
         incrementDownloadInError();
         _result = {
             success: false,
-            "error": `Failed download try/catch for ${fileName} to ${pdfDumpFolder} with ${err.message}`
+            "error": `Failed download try/catch for ${fileName} to ${pdfDumpFolder} with ${JSON.stringify(_result)}`
         };
-    }
+        console.error(`downloadFileFromUrl result set to ${JSON.stringify(_result)}`);
 
+    }
+    console.log(`downloadFileFromUrl _result ${JSON.stringify(_result)}`);
     return _result;
 }
 
