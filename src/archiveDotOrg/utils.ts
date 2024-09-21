@@ -7,7 +7,7 @@ import { DD_MM_YYYY_FORMAT } from '../utils/constants';
 import { FETCH_ACRHIVE_METADATA_COUNTER } from './archiveScraper';
 import * as path from 'path';
 
-
+export const DOUBLE_HASH_SEPARATOR = "##";
 export const ARCHIVE_EXCEL_PATH = `${os.homedir()}\\Downloads`;
 export const ARCHIVE_DOT_ORG_PREFIX = "https://archive.org";
 export const ARCHIVE_DOT_ORG_DETAILS_PREFIX = "https://archive.org/details/";
@@ -40,7 +40,7 @@ export let ARCHIVE_EXCEL_HEADER =
     "type": "Type",
     "mediaType": "Media Type",
     "emailUser": "Email-User",
-    "allNames": "All Names and Source",
+    "allNames": "All File Names",
     "allFormats": "All Formats"
 };
 
@@ -190,8 +190,8 @@ export const extractLinkedData = async (_hitsHits: HitsEntity[],
             email,
             pdfPageCount: pageCount,
             downloads: hit?.fields?.downloads?.toString() || "0",
-            allNames: allNames?.join(", "),
-            allFormats: allFormats?.join(", ")
+            allNames: allNames?.join(DOUBLE_HASH_SEPARATOR),
+            allFormats: allFormats?.join(DOUBLE_HASH_SEPARATOR)
         }
         if (!limitedFields) {
             obj.originalTitle = originalTitle;

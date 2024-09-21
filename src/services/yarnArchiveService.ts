@@ -163,7 +163,7 @@ function convertToLinkData(json: any): LinkData {
         item_size_formatted: json["Size Formatted"],
         email: json["Email-User"],
         downloads: json["Views"],
-        allNames: json["All Names and Source"],
+        allNames: json["All File Names"],
         allFormats: json["All Formats"]
     };
 }

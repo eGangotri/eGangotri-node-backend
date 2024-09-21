@@ -6,6 +6,7 @@ import * as fsExtra from "fs-extra";
 import { LinkData } from "./types";
 import { isValidPath } from "../utils/utils";
 import { createFolderIfNotExists } from "../utils/FileUtils";
+import { DOUBLE_HASH_SEPARATOR } from "./utils";
 
 
 export const downloadPdfFromArchiveToProfile = async (pdfLinks: LinkData[], profileOrPath: string) => {
@@ -72,7 +73,7 @@ export const adjustLinkedDataForMultipleItems = (linkData: LinkData[], pdfDumpFo
   const linkDataWithMultiItems = [];
 
   linkData.map(pdfLink => {
-    if (!pdfLink?.allNames?.includes(",") && pdfLink?.allFormats?.trim().includes("Text PDF")) {
+    if (!pdfLink?.allNames?.includes(DOUBLE_HASH_SEPARATOR) && pdfLink?.allFormats?.trim().includes("Text PDF")) {
       const _name = pdfLink?.allNames?.trim();
       linkDataWithMultiItems.push({
         pdfDumpFolder,
@@ -81,14 +82,14 @@ export const adjustLinkedDataForMultipleItems = (linkData: LinkData[], pdfDumpFo
       });
     }
     else {
-      const allNames = pdfLink?.allNames?.split(",");
+      const allNames = pdfLink?.allNames?.split(DOUBLE_HASH_SEPARATOR);
       allNames?.forEach(_name => {
         console.log(`pdfLink.pdfDownloadUrl ${pdfLink.pdfDownloadUrl}`);
         const pdfDumpSubFolder = pdfDumpFolder + "\\" + pdfLink.uniqueIdentifier
         createFolderIfNotExists(pdfDumpSubFolder);
         linkDataWithMultiItems.push({
           pdfDumpFolder: pdfDumpSubFolder,
-          pdfDownloadUrl: pdfLink.pdfDownloadUrl,
+          pdfDownloadUrl: `${pdfLink.pdfDownloadUrl}/${_name}`,
           name: _name
         })
       });
@@ -103,10 +104,15 @@ export const downloadArchiveItems = async (_linkData: LinkData[], pdfDumpFolder:
   const _linkDataWithMultiItems = adjustLinkedDataForMultipleItems(_linkData, pdfDumpFolder);
 
   const promises = _linkDataWithMultiItems.map(pdfLink => {
-    console.log(`_data: ${JSON.stringify(pdfLink)}}`);
-    console.log(`pdfDumpFolder: ${pdfDumpFolder}`);
-    return downloadFileFromUrl(pdfLink.pdfDumpFolder,
-      pdfLink.pdfDownloadUrl, pdfLink.name, _linkDataWithMultiItems.length)
+    try {
+      console.log(`downloadArchiveItems:_data: ${JSON.stringify(pdfLink)}}`);
+      console.log(`downloadArchiveItems:pdfDumpFolder: ${pdfDumpFolder}`);
+      return downloadFileFromUrl(pdfLink.pdfDumpFolder, pdfLink.pdfDownloadUrl, pdfLink.name, _linkDataWithMultiItems.length);
+    } catch (error) {
+      console.error(`Error downloading file: ${pdfLink.name}`, error);
+      return null; // Return null or any other value to indicate failure
+    }
+
   });
 
   const results = await Promise.all(promises);

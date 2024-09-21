@@ -64,7 +64,7 @@ export const downloadFileFromUrl = async (
             dl.start();
         });
     } catch (err) {
-        console.error(err);
+        console.error(`downloadFileFromUrl err  ${err}`);
         incrementDownloadInError();
         _result = {
             success: false,
