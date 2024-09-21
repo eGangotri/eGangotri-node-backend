@@ -5,6 +5,7 @@ import fs from 'fs';
 import * as fsExtra from "fs-extra";
 import { LinkData } from "./types";
 import { isValidPath } from "../utils/utils";
+import { createFolderIfNotExists } from "../utils/FileUtils";
 
 
 export const downloadPdfFromArchiveToProfile = async (pdfLinks: LinkData[], profileOrPath: string) => {
@@ -51,6 +52,7 @@ export const downloadPdfFromArchiveToProfile = async (pdfLinks: LinkData[], prof
   }
 }
 
+//this should be redundant after downloadArchiveItems starts working
 const downloadArchivePdfs = async (linkData: LinkData[], pdfDumpFolder: string) => {
   const promises = linkData.map(pdfLink => {
     console.log(`_data: ${JSON.stringify(pdfLink)}}`);
@@ -62,6 +64,54 @@ const downloadArchivePdfs = async (linkData: LinkData[], pdfDumpFolder: string) 
   const results = await Promise.all(promises);
   return {
     totalPdfsToDownload: linkData.length,
+    results
+  }
+}
+
+export const adjustLinkedDataForMultipleItems = (linkData: LinkData[], pdfDumpFolder: string) => {
+  const linkDataWithMultiItems = [];
+
+  linkData.map(pdfLink => {
+    if (!pdfLink?.allNames?.includes(",") && pdfLink?.allFormats?.trim().includes("Text PDF")) {
+      const _name = pdfLink?.allNames?.trim();
+      linkDataWithMultiItems.push({
+        pdfDumpFolder,
+        pdfDownloadUrl: pdfLink.pdfDownloadUrl,
+        name: _name.length > 0 ? _name : pdfLink.originalTitle + ".pdf"
+      });
+    }
+    else {
+      const allNames = pdfLink?.allNames?.split(",");
+      allNames?.forEach(_name => {
+        console.log(`pdfLink.pdfDownloadUrl ${pdfLink.pdfDownloadUrl}`);
+        const pdfDumpSubFolder = pdfDumpFolder + "\\" + pdfLink.uniqueIdentifier
+        createFolderIfNotExists(pdfDumpSubFolder);
+        linkDataWithMultiItems.push({
+          pdfDumpFolder: pdfDumpSubFolder,
+          pdfDownloadUrl: pdfLink.pdfDownloadUrl,
+          name: _name
+        })
+      });
+    }
+  });
+  return linkDataWithMultiItems;
+
+}
+
+export const downloadArchiveItems = async (_linkData: LinkData[], pdfDumpFolder: string) => {
+
+  const _linkDataWithMultiItems = adjustLinkedDataForMultipleItems(_linkData, pdfDumpFolder);
+
+  const promises = _linkDataWithMultiItems.map(pdfLink => {
+    console.log(`_data: ${JSON.stringify(pdfLink)}}`);
+    console.log(`pdfDumpFolder: ${pdfDumpFolder}`);
+    return downloadFileFromUrl(pdfLink.pdfDumpFolder,
+      pdfLink.pdfDownloadUrl, pdfLink.name, _linkDataWithMultiItems.length)
+  });
+
+  const results = await Promise.all(promises);
+  return {
+    totalPdfsToDownload: _linkDataWithMultiItems.length,
     results
   }
 }

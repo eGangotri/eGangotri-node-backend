@@ -2,15 +2,17 @@ import * as express from 'express';
 import { MAX_ITEMS_RETRIEVABLE_IN_ARCHIVE_ORG, scrapeArchiveOrgProfiles } from '../archiveDotOrg/archiveScraper';
 import { ArchiveDataRetrievalMsg, ArchiveDataRetrievalStatus } from '../archiveDotOrg/types';
 import { archiveExceltoMongo } from '../excelToMongo/transferArchiveExcelToMongo';
-import { downloadPdfFromArchiveToProfile } from '../archiveDotOrg/downloadUtil';
-import { resetDownloadCounters } from '../cliBased/pdf/utils';
-import { alterExcelWithUploadedFlag, getSuccessfullyUploadedItemsForUploadCycleId, validateDateRange } from '../services/yarnArchiveService';
+import { downloadArchiveItems, downloadPdfFromArchiveToProfile } from '../archiveDotOrg/downloadUtil';
+import { DOWNLOAD_COMPLETED_COUNT, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT, resetDownloadCounters } from '../cliBased/pdf/utils';
+import { alterExcelWithUploadedFlag, convertArchiveExcelToLinkData, getSuccessfullyUploadedItemsForUploadCycleId, validateDateRange } from '../services/yarnArchiveService';
 import _ from 'lodash';
 import { excelToJson, jsonToExcel } from '../cliBased/excel/ExcelUtils';
 import path from 'path';
 import moment from 'moment';
 import { DD_MM_YYYY_HH_MMFORMAT } from '../utils/constants';
 import { generateEAPBLMetadataForProfile } from '../eap_bl';
+import { formatTime } from '../imgToPdf/utils/Utils';
+import { ArchiveUploadExcelProps } from 'archiveDotOrg/archive.types';
 
 export const launchArchiveYarnRoute = express.Router();
 
@@ -118,9 +120,53 @@ launchArchiveYarnRoute.post('/downloadArchivePdfs', async (req: any, resp: any) 
 
         const endTime = Date.now();
         const timeTaken = endTime - startTime;
-        console.log(`Time taken to download downloadArchivePdfs: ${timeTaken} ms`);
+        console.log(`Time taken to download downloadArchivePdfs: ${formatTime(timeTaken)}`);
         resp.status(200).send({
             response: results
+        });
+    }
+
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})
+
+
+launchArchiveYarnRoute.post('/downloadArchiveItemsViaExcel', async (req: any, resp: any) => {
+    try {
+        const excelPath = req?.body?.excelPath;
+        const profileOrPath = req?.body?.profileOrPath;
+        const startTime = Date.now();
+
+        if (!excelPath || !profileOrPath) {
+            return resp.status(300).send({
+                response: {
+                    "status": "failed",
+                    "success": false,
+                    "msg": "Pls. provide Excel Path and profile/abs-path. Both are mandatory"
+                }
+            });
+        }
+        const _linkData = convertArchiveExcelToLinkData(excelPath);
+        resetDownloadCounters()
+        const _results = await downloadArchiveItems(_linkData, profileOrPath);
+
+        console.log(`Success count: ${DOWNLOAD_COMPLETED_COUNT}`);
+        console.log(`Error count: ${DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT}`);
+        const _resp = {
+            status: `${DOWNLOAD_COMPLETED_COUNT} out of ${DOWNLOAD_COMPLETED_COUNT + DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT} made it`,
+            success_count: DOWNLOAD_COMPLETED_COUNT,
+            error_count: DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT,
+            ..._results
+        }
+        console.log(`_resp : ${JSON.stringify(_resp)}`);
+
+        const endTime = Date.now();
+        const timeTaken = endTime - startTime;
+        console.log(`Time taken to download downloadArchivePdfs: ${formatTime(timeTaken)}`);
+        resp.status(200).send({
+            response: _resp
         });
     }
 
