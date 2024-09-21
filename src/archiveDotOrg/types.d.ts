@@ -17,6 +17,8 @@ export interface ExcelHeaderType {
     type: string;
     mediaType: string;
     emailUser: string;
+    allNames: string;
+    allFormats: string;
 }
 
 export interface ArchiveScrapReport {
@@ -41,6 +43,9 @@ export interface LinkData {
     item_size_formatted: string;
     email: string;
     downloads: string;
+    allNames: string;
+    allFormats: string;
+    
 }
 
 export interface ArchiveDataRetrievalMsg {

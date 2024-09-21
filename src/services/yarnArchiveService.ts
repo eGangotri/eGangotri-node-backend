@@ -7,6 +7,7 @@ import { DD_MM_YYYY_HH_MMFORMAT } from "../utils/constants";
 import { ArchiveUploadExcelProps } from "../archiveDotOrg/archive.types";
 import _ from "lodash";
 import path from 'path';
+import { LinkData } from "../archiveDotOrg/types";
 
 
 export const validateDateRange = (dateRange: string) => {
@@ -141,4 +142,40 @@ export const alterExcelWithUploadedFlag = (archiveExcelPath: string, uploadItems
             "alterExcelMsg": `No items found in ${archiveExcelPath}`
         }
     }
+}
+
+function convertToLinkData(json: any): LinkData {
+    return {
+        link: json["Link"],
+        titleArchive: json["Title-Archive"],
+        originalTitle: json["Original Title"],
+        pdfPageCount: json["Page Count"],
+        uniqueIdentifier: json["Identifier"],
+        allFilesDownloadUrl: json["All Downloads Link Page"],
+        pdfDownloadUrl: json["Pdf Download Link"],
+        description: json["Description"],
+        acct: json["Acct"],
+        publicdate: json["Date"],
+        subject: json["Subject"],
+        hit_type: json["Type"],
+        mediatype: json["Media Type"],
+        item_size: json["Size"],
+        item_size_formatted: json["Size Formatted"],
+        email: json["Email-User"],
+        downloads: json["Views"],
+        allNames: json["All Names and Source"],
+        allFormats: json["All Formats"]
+    };
+}
+
+export const convertArchiveExcelToLinkData = (archiveExcelPath: string): LinkData[] => {
+    const excelAsJson = excelToJson(archiveExcelPath);
+    console.log(`downloadArchiveItemsViaExcel: ${excelAsJson.length} 
+        (${JSON.stringify(excelAsJson[0])}) items found in ${archiveExcelPath}`);
+
+    const _linkData: LinkData[] = excelAsJson.map(_json => convertToLinkData(_json));
+    console.log(`converted to linkData: ${_linkData.length} 
+         (${JSON.stringify(_linkData[0])})
+        items found in ${archiveExcelPath}`);
+    return _linkData;
 }

@@ -20,7 +20,7 @@ export const extractArchiveAcctName = (_urlOrIdentifier: string) => {
     return _urlOrIdentifier
 }
 
-let ARCHIVE_EXCEL_HEADER =
+export let ARCHIVE_EXCEL_HEADER =
 {
     "serialNo": "Serial No.",
     "link": "Link",
@@ -39,7 +39,9 @@ let ARCHIVE_EXCEL_HEADER =
     "identifier": "Identifier",
     "type": "Type",
     "mediaType": "Media Type",
-    "emailUser": "Email-User"
+    "emailUser": "Email-User",
+    "allNames": "All Names and Source",
+    "allFormats": "All Formats"
 };
 
 export const generateExcel = async (links: LinkData[],
@@ -57,7 +59,7 @@ export const generateExcel = async (links: LinkData[],
         const workbook = utils.book_new();
         utils.book_append_sheet(workbook, worksheet, "Links");
         const timeNow = moment().format(DD_MM_YYYY_FORMAT);
-        const excelPath = `${ARCHIVE_EXCEL_PATH}\\${excelFileName}${limitedFields ? "-ltd" : ""}-${ascOrder?"ascOrder":"descOrder"}-${timeNow}.xlsx`
+        const excelPath = `${ARCHIVE_EXCEL_PATH}\\${excelFileName}${limitedFields ? "-ltd" : ""}-${ascOrder ? "ascOrder" : "descOrder"}-${timeNow}.xlsx`
         console.log(`Writing to ${excelPath}`);
         await writeFile(workbook, excelPath);
         return excelPath;
@@ -87,6 +89,8 @@ const linkDataToExcelFormat = (links: LinkData[], archiveExcelHeader: ExcelHeade
             [archiveExcelHeader.size]: link.item_size,
             [archiveExcelHeader.sizeFormatted]: link.item_size_formatted,
             [archiveExcelHeader.emailUser]: link.email,
+            [archiveExcelHeader.allNames]: link.allNames,
+            [archiveExcelHeader.allFormats]: link.allFormats,
         }
         if (limitedFields) {
             return obj
@@ -117,9 +121,23 @@ export const extractPdfMetaData = async (identifier: string) => {
     const zippedFile = metadata.files.filter((file: any) => {
         return file.format.startsWith("Single Page");
     });
+
+    const _filesWithoutCertainformats = metadata.files.filter((file: any) => {
+        return file.source === "original" && file.format !== "Metadata" && file.format !=="Item Tile"
+    });
+
+    const allNames = []
+    const allFormats = []
+    _filesWithoutCertainformats.map(({ name, format }) => {
+        allNames.push(name);
+        allFormats.push(format);
+    })
+
     return {
         pdfName: (pdfRow && pdfRow.length > 0) ? pdfRow[0]?.name : "",
-        pdfPageCount: (zippedFile && zippedFile.length > 0) ? zippedFile[0]?.filecount : 0
+        pdfPageCount: (zippedFile && zippedFile.length > 0) ? zippedFile[0]?.filecount : 0,
+        allNames,
+        allFormats
     }
 }
 
@@ -134,6 +152,8 @@ export const extractLinkedData = async (_hitsHits: HitsEntity[],
         const identifier = hit.fields.identifier;
         let archiveItemName = ""
         let pageCount = 0
+        let allNames = []
+        let allFormats = []
         console.log(`${FETCH_ACRHIVE_METADATA_COUNTER.value}/${FETCH_ACRHIVE_METADATA_COUNTER.hitsTotal}).
         Fetching metadata for ${hit.fields.title} `);
         if (!limitedFields) {
@@ -141,6 +161,8 @@ export const extractLinkedData = async (_hitsHits: HitsEntity[],
                 const pdfMetaData = await extractPdfMetaData(identifier);
                 archiveItemName = pdfMetaData?.pdfName || "";
                 pageCount = pdfMetaData?.pdfPageCount || 0;
+                allNames = pdfMetaData?.allNames || [];
+                allFormats = pdfMetaData?.allFormats || [];
             }
             catch (err) {
                 console.log(`Error while extracting pdf metadata ${err}`);
@@ -149,9 +171,9 @@ export const extractLinkedData = async (_hitsHits: HitsEntity[],
         }
 
         const extension = path.extname(archiveItemName);
-        const originalTitle =  archiveItemName.replace(extension, "");
+        const originalTitle = archiveItemName.replace(extension, "");
 
-       
+
         const obj: LinkData = {
             link: `${ARCHIVE_DOT_ORG_DETAILS_PREFIX}${identifier}`,
             titleArchive: hit.fields.title,
@@ -167,7 +189,9 @@ export const extractLinkedData = async (_hitsHits: HitsEntity[],
             item_size_formatted: sizeInfo(hit.fields.item_size),
             email,
             pdfPageCount: pageCount,
-            downloads: hit?.fields?.downloads?.toString() || "0"
+            downloads: hit?.fields?.downloads?.toString() || "0",
+            allNames: allNames?.join(", "),
+            allFormats: allFormats?.join(", ")
         }
         if (!limitedFields) {
             obj.originalTitle = originalTitle;

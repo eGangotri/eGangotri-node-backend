@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import archiver from 'archiver';
 import * as path from 'path';
 import admZip from 'adm-zip';
-import { getAllZipFiles } from 'utils/FileStatsUtils';
+import { getAllZipFiles } from '../utils/FileStatsUtils';
 
 export async function zipFiles(filePaths: string[], 
     outputZipPath: string, 
