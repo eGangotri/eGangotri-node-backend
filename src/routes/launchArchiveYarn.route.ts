@@ -27,18 +27,6 @@ launchArchiveYarnRoute.post('/getArchiveListing', async (req: any, resp: any) =>
         let parsedDateRange: [number, number] = [0, 0]
 
         console.log(`getArchiveListing params ${JSON.stringify(req.body)}`)
-        /** 
-         * FOR MORE THAN 10,000 
-         *     "errors": [
-              {
-                "message": "Invalid request ([RANGE_OUT_OF_BOUNDS] paging is only supported through 10000 results; scraping is supported through the Scraping API, see https://archive.org/help/aboutsearch.htm  or, you may request up to 1000000000 results at one time if you do NOT specify any page. For best results,  do NOT specify sort (sort may be automatically disabled for very large queries).)",
-                "forensics": null,
-                "context": "client_request"
-              }
-            ],
-        
-         */
-
 
         if (dateRange) {
             const _validateDates = validateDateRange(dateRange);
