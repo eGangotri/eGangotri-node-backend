@@ -22,6 +22,7 @@ import { yarnExcelRoute } from "./routes/yarnExcel.route";
 import "./logger/override";
 import { fileUtilsRoute } from "./routes/fileUtils.route";
 import { launchAIRoute } from "./routes/launchAI.route";
+import { pdfRenameRoute } from "./routes/pdfRename.route";
 
 const egangotri = express();
 const hostname = "localhost";
@@ -67,6 +68,8 @@ egangotri.use("/searchArchivesDB", archiveItemRoute);
 egangotri.use("/searchGDriveDB", googleDriveItemRoute);
 egangotri.use("/searchMongo", launchMongoRoute);
 egangotri.use("/fileUtil", fileUtilsRoute);
+egangotri.use("/pdfRename", pdfRenameRoute);
+
 
 egangotri.listen(port,'0.0.0.0', async () => {
   console.log(`Server - deployed ${deployDate} - running at http://${hostname}:${port}/`, new Date());
