@@ -174,11 +174,8 @@ yarnRoute.post('/yarnMoveProfilesToFreeze', async (req: any, resp: any) => {
     console.log(`moveProfilesToFreeze ${JSON.stringify(req.body)} `)
     try {
         const profileAsCSV = req?.body?.profileAsCSV;
-        const _uploadCycleId = req.body.uploadCycleId;
         const ignorePaths = req.body?.ignorePaths || ["dont"];
-
         const flatten = req?.body?.flatten === "false" ? false : true;
-
         if (!profileAsCSV) {
             resp.status(300).send({
                 response: {
@@ -189,9 +186,6 @@ yarnRoute.post('/yarnMoveProfilesToFreeze', async (req: any, resp: any) => {
             });
         }
         const _response = await moveProfilesToFreeze(profileAsCSV, flatten, ignorePaths);
-        if (_uploadCycleId) {
-            await markUploadCycleAsMovedToFreeze(_uploadCycleId)
-        }
         resp.status(200).send(_response);
     }
 
