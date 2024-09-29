@@ -8,7 +8,7 @@ const schema = new mongoose.Schema(
         destFolderOrProfile: { type: String, required: false },
         success: { type: Boolean, required: false },
         msg: { type: String, required: false },
-        error: { type: String, required: false },
+        errors: { type: [String], required: false },
         srcPdfsBefore: { type: Number, required: false },
         srcPdfsAfter: { type: Number, required: false },
         destFilesBefore: { type: Number, required: false },
