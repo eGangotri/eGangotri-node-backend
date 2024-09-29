@@ -1,5 +1,6 @@
 import * as express from 'express';
 import { RenamePdfFormData } from '../mirror/types';
+import { PdfRenamer } from '../models/pdfRenamer';
 
 export const pdfRenameRoute = express.Router();
 
@@ -18,9 +19,10 @@ pdfRenameRoute.post('/rename', async (req: any, resp: any) => {
         }
 
         console.log(`bodyEntries : ${JSON.stringify(bodyEntries)}`);
-        const res = []
+        const renamer = new PdfRenamer(bodyEntries);
+        await renamer.save();
         resp.status(200).send({
-            response: res
+            response: renamer._id
         });
     }
 
