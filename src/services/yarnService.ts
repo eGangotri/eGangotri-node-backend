@@ -2,7 +2,7 @@ import { isValidPath } from "../utils/utils";
 import { moveAFile, moveFilesAndFlatten } from "../cliBased/fileMover";
 import { getFolderInDestRootForProfile, getFolderInSrcRootForProfile } from "../archiveUpload/ArchiveProfileUtils";
 import * as fs from 'fs';
-import { getAllFileListingWithoutStats, getAllFileListingWithStats, getAllPDFFiles, getAllPDFFilesWithMedata } from "../utils/FileStatsUtils";
+import { getAllFileListingWithStats, getAllPDFFiles, getAllPDFFilesWithMedata } from "../utils/FileStatsUtils";
 import { FileStats } from "../imgToPdf/utils/types";
 import { sizeInfo } from "../mirror/FrontEndBackendCommonCode";
 import * as path from 'path';
