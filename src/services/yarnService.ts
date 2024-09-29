@@ -15,6 +15,8 @@ import * as _ from 'lodash';
 import { addSummaryToExcel, createMetadata } from "../excelToMongo/Util";
 import { jsonToExcel } from "../cliBased/excel/ExcelUtils";
 import { getLatestUploadCycleById } from "./uploadCycleService";
+import { FileMoveTracker } from "../models/FileMoveTracker";
+import { file } from "pdfkit";
 
 const _root = "C:\\_catalogWork\\_collation\\local";
 
@@ -56,7 +58,8 @@ export const moveItemsInListOfProfileToFreeze = async (uploadCycleId: string) =>
             fs.mkdirSync(destPath, { recursive: true });
         }
         if (isValidPath(destPath)) {
-            _response.push(await moveFileInListToDest(archiveProfile.absolutePaths, destPath));
+            const _moveResponse = await moveFileInListToDest(archiveProfile.absolutePaths, destPath);
+            _response.push(_moveResponse);
         }
         else {
             _response.push({
@@ -65,9 +68,7 @@ export const moveItemsInListOfProfileToFreeze = async (uploadCycleId: string) =>
             });
         }
     }
-    return {
-        response: _response
-    };
+    return _response
 }
 
 export const moveFileInListToDest = async (absPathOfFilesToMove: string[],
@@ -83,17 +84,25 @@ export const moveFileInListToDest = async (absPathOfFilesToMove: string[],
                  destFolderOrProfile: ${destFolderOrProfile} 
                  destPath ${destPath}`)
             const moveAFileRes = moveAFile(absPathOfFileToMove, destFolderOrProfile, path.basename(absPathOfFileToMove));
-            _moveResult.push(moveAFileRes.renamedWithoutCollision.length > 0 ?
-                {
-                    "Renamed:": moveAFileRes.renamedWithoutCollision
-                } : {
-                    "Renamed with Collision": moveAFileRes.fileCollisionsResolvedByRename
-                });
+            _moveResult.push({
+                success: true,
+                msg: `Moved file ${absPathOfFileToMove} to ${destPath}`,
+                fileMoved: moveAFileRes.renamedWithoutCollision,
+                fileCollisionsResolvedByRename: moveAFileRes.fileCollisionsResolvedByRename,
+                src: absPathOfFilesToMove,
+                dest: destPath,
+                destFolderOrProfile: destFolderOrProfile
+
+            });
         }
         catch (err) {
             console.log('Error', err);
             return {
+                success: false,
                 error: `Error while moving file ${absPathOfFileToMove} to ${destPath} \n${err}`,
+                src: absPathOfFilesToMove,
+                dest: destPath,
+                destFolderOrProfile: destFolderOrProfile
             };
         }
     }
@@ -120,6 +129,13 @@ export const moveFileSrcToDest = async (srcPath: string,
             //get this ready
             _report = await moveFilesAndFlatten(srcPath, destPath, true, ignorePaths);
         }
+        const tracker = new FileMoveTracker({
+            src: srcPath,
+            dest: destPath,
+            destFolderOrProfile,
+            ..._report
+        });
+        await tracker.save()
         return {
             ..._report
         };
