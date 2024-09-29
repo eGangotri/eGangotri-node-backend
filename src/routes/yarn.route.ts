@@ -1,7 +1,7 @@
 import * as express from 'express';
 import { downloadFromGoogleDriveToProfile } from '../cliBased/googleapi/GoogleDriveApiReadAndDownload';
 import { getFolderInSrcRootForProfile } from '../archiveUpload/ArchiveProfileUtils';
-import { moveFileSrcToDest, moveProfilesToFreeze } from '../services/yarnService';
+import { moveFileSrcToDest, moveItemsInListOfProfileToFreeze, moveProfilesToFreeze } from '../services/yarnService';
 import { resetDownloadCounters } from '../cliBased/pdf/utils';
 import { vanitizePdfForProfiles } from '../vanityService/VanityPdf';
 import { timeInfo } from '../mirror/FrontEndBackendCommonCode';
@@ -188,6 +188,33 @@ yarnRoute.post('/yarnMoveProfilesToFreeze', async (req: any, resp: any) => {
             });
         }
         const _response = await moveProfilesToFreeze(profileAsCSV, flatten, ignorePaths);
+        if (_uploadCycleId) {
+            await markUploadCycleAsMovedToFreeze(_uploadCycleId)
+        }
+        resp.status(200).send(_response);
+    }
+
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})
+
+yarnRoute.post('/yarnMoveFilesInListToFreeze', async (req: any, resp: any) => {
+    console.log(`moveProfilesToFreeze ${JSON.stringify(req.body)} `)
+    try {
+        const _uploadCycleId = req.body.uploadCycleId;
+
+        if (!_uploadCycleId) {
+            resp.status(300).send({
+                response: {
+                    "status": "failed",
+                    "success": false,
+                    "message": "Pls. provide  UploadCycleId"
+                }
+            });
+        }
+        const _response = await moveItemsInListOfProfileToFreeze(_uploadCycleId);
         if (_uploadCycleId) {
             await markUploadCycleAsMovedToFreeze(_uploadCycleId)
         }

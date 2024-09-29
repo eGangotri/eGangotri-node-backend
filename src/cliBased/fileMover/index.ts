@@ -6,10 +6,10 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { launchWinExplorer } from "./util";
 
-export async function moveFilesAndFlatten(sourceDir: string, 
+export async function moveFilesAndFlatten(sourceDir: string,
     targetDir: string,
-     pdfOnly = true, 
-     ignorePaths = []) {
+    pdfOnly = true,
+    ignorePaths = []) {
     //implement alogrithm
     //(1) check if any file is open or any file is already present in source Dir
     // if yes then send msg otherwise continut
@@ -60,25 +60,11 @@ export async function moveFilesAndFlatten(sourceDir: string,
                 continue;
             }
             else {
-                const targetFile = path.join(targetDir, file.name);
-                if (!pdfOnly || (pdfOnly && file.name.endsWith('.pdf'))) {
-                    filesMoved.push(`${++counter}/${_count}). ${file.name}`);
-                    if (!fs.existsSync(targetFile)) {
-                        fs.renameSync(sourceFile, targetFile);
-                    }
-                    else {
-                        console.log(`File already exists in target dir ${targetFile}. renaming to ${targetFile}_1`);
-                        const extension = path.extname(targetFile);
-
-                        const newName = `${targetFile.replace(`.${extension}`, `_1.${extension}`)}`
-                        if (!fs.existsSync(newName)) {
-                            fs.renameSync(sourceFile, newName);
-                            fileCollisionsResolvedByRename.push(`${file.name}`);
-                        }
-
-                    }
+                filesMoved.push(`${++counter}/${_count}). ${file.name}`);
+                const moveAFileRes = moveAFile(sourceFile, targetDir, file.name, pdfOnly);
+                if (moveAFileRes.fileCollisionsResolvedByRename.length > 0) {
+                    fileCollisionsResolvedByRename.push(moveAFileRes.fileCollisionsResolvedByRename);
                 }
-                //console.log(`Moved file: ${targetFile}`);
             }
         }
     }
@@ -98,6 +84,33 @@ export async function moveFilesAndFlatten(sourceDir: string,
         fileCollisionsResolvedByRename,
         filesMoved
     };
+}
+
+
+export const moveAFile = (sourceFileAbsPath: string,
+    targetDir: string,
+    fileName: string,
+    pdfOnly = true) => {
+    const targetFile = path.join(targetDir, fileName);
+    const result = { fileCollisionsResolvedByRename: "", renamedWithoutCollision: "" };
+    if (!pdfOnly || (pdfOnly && fileName.endsWith('.pdf'))) {
+        if (!fs.existsSync(targetFile)) {
+            fs.renameSync(sourceFileAbsPath, targetFile);
+            result.renamedWithoutCollision = `${fileName}`;
+        }
+        else {
+            console.log(`File already exists in target dir ${targetFile}. renaming to ${targetFile}_1`);
+            const extension = path.extname(targetFile);
+
+            const newName = `${targetFile.replace(`.${extension}`, `_1.${extension}`)}`
+            if (!fs.existsSync(newName)) {
+                fs.renameSync(sourceFileAbsPath, newName);
+                result.fileCollisionsResolvedByRename = `${fileName}`;
+            }
+        }
+    }
+    console.log(`Moved file: ${targetFile}`);
+    return result;
 }
 
 const checkIfAnyFileInUse = (allSrcPdfs: FileStats[]) => {

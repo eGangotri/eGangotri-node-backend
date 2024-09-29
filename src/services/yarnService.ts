@@ -1,5 +1,5 @@
 import { isValidPath } from "../utils/utils";
-import { moveFilesAndFlatten } from "../cliBased/fileMover";
+import { moveAFile, moveFilesAndFlatten } from "../cliBased/fileMover";
 import { getFolderInDestRootForProfile, getFolderInSrcRootForProfile } from "../archiveUpload/ArchiveProfileUtils";
 import * as fs from 'fs';
 import { getAllFileListingWithoutStats, getAllFileListingWithStats, getAllPDFFiles, getAllPDFFilesWithMedata } from "../utils/FileStatsUtils";
@@ -14,10 +14,11 @@ import * as _ from 'lodash';
 
 import { addSummaryToExcel, createMetadata } from "../excelToMongo/Util";
 import { jsonToExcel } from "../cliBased/excel/ExcelUtils";
+import { getLatestUploadCycleById } from "./uploadCycleService";
 
 const _root = "C:\\_catalogWork\\_collation\\local";
 
-export const moveProfilesToFreeze = async (profileAsCSV: string, 
+export const moveProfilesToFreeze = async (profileAsCSV: string,
     flatten: boolean = true,
     ignorePaths = []) => {
     const _response = []
@@ -42,8 +43,70 @@ export const moveProfilesToFreeze = async (profileAsCSV: string,
     };
 }
 
-export const moveFileSrcToDest = async (srcPath: string, 
-    destFolderOrProfile: string, 
+
+export const moveItemsInListOfProfileToFreeze = async (uploadCycleId: string) => {
+    const _response = []
+    const _uploads = await getLatestUploadCycleById(uploadCycleId);
+
+    const archiveProfiles = _uploads.archiveProfiles;
+
+    for (let archiveProfile of archiveProfiles) {
+        const destPath = getFolderInDestRootForProfile(archiveProfile.archiveProfile.trim());
+        if (!fs.existsSync(destPath)) {
+            fs.mkdirSync(destPath, { recursive: true });
+        }
+        if (isValidPath(destPath)) {
+            _response.push(await moveFileInListToDest(archiveProfile.absolutePaths, destPath));
+        }
+        else {
+            _response.push({
+                success: false,
+                msg: `Invalid destPath ${destPath} for PROFILE: ${archiveProfile.archiveProfile}`
+            });
+        }
+    }
+    return {
+        response: _response
+    };
+}
+
+export const moveFileInListToDest = async (absPathOfFilesToMove: string[],
+    destFolderOrProfile: string) => {
+    const _moveResult = []
+
+    const destPath = isValidPath(destFolderOrProfile) ? destFolderOrProfile : getFolderInSrcRootForProfile(destFolderOrProfile)
+    for (let absPathOfFileToMove of absPathOfFilesToMove) {
+        try {
+
+            console.log(`moveFileInListToDest
+                 absPathOfFilesToMove ${absPathOfFileToMove}
+                 destFolderOrProfile: ${destFolderOrProfile} 
+                 destPath ${destPath}`)
+            const moveAFileRes = moveAFile(absPathOfFileToMove, destFolderOrProfile, path.basename(absPathOfFileToMove));
+            _moveResult.push(moveAFileRes.renamedWithoutCollision.length > 0 ?
+                {
+                    "Renamed:": moveAFileRes.renamedWithoutCollision
+                } : {
+                    "Renamed with Collision": moveAFileRes.fileCollisionsResolvedByRename
+                });
+        }
+        catch (err) {
+            console.log('Error', err);
+            return {
+                error: `Error while moving file ${absPathOfFileToMove} to ${destPath} \n${err}`,
+            };
+        }
+    }
+
+    return {
+        _moveResult
+    };
+}
+
+
+
+export const moveFileSrcToDest = async (srcPath: string,
+    destFolderOrProfile: string,
     flatten: boolean = true,
     ignorePaths = []) => {
     const destPath = isValidPath(destFolderOrProfile) ? destFolderOrProfile : getFolderInSrcRootForProfile(destFolderOrProfile)
