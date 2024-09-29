@@ -17,6 +17,7 @@ import { jsonToExcel } from "../cliBased/excel/ExcelUtils";
 import { getLatestUploadCycleById } from "./uploadCycleService";
 import { FileMoveTracker } from "../models/FileMoveTracker";
 import { file } from "pdfkit";
+import { error } from "console";
 
 const _root = "C:\\_catalogWork\\_collation\\local";
 
@@ -58,58 +59,70 @@ export const moveItemsInListOfProfileToFreeze = async (uploadCycleId: string) =>
             fs.mkdirSync(destPath, { recursive: true });
         }
         if (isValidPath(destPath)) {
-            const _moveResponse = await moveFileInListToDest(archiveProfile.absolutePaths, destPath);
+            const _moveResponse = await moveFileInListToDest(archiveProfile, destPath);
             _response.push(_moveResponse);
         }
         else {
             _response.push({
                 success: false,
-                msg: `Invalid destPath ${destPath} for PROFILE: ${archiveProfile.archiveProfile}`
+                msg: `Invalid destPath ${destPath} for PROFILE: ${archiveProfile.archiveProfile}`,
+                errors: archiveProfile.absolutePaths,
+                src: archiveProfile.archiveProfilePath,
+                dest: destPath,
+                destFolderOrProfile: archiveProfile.archiveProfile
             });
         }
     }
     return _response
 }
 
-export const moveFileInListToDest = async (absPathOfFilesToMove: string[],
+export const moveFileInListToDest = async (profileData: {
+    absolutePaths: string[];
+    count?: number;
+    archiveProfile?: string;
+    archiveProfilePath?: string;
+},
     destFolderOrProfile: string) => {
-    const _moveResult = []
+    const _fileCollisionsResolvedByRename: string[] = []
+    const _renamedWithoutCollision: string[] = []
+    const errors: string[] = []
 
     const destPath = isValidPath(destFolderOrProfile) ? destFolderOrProfile : getFolderInSrcRootForProfile(destFolderOrProfile)
-    for (let absPathOfFileToMove of absPathOfFilesToMove) {
+    for (let absPathOfFileToMove of profileData.absolutePaths) {
         try {
-
             console.log(`moveFileInListToDest
                  absPathOfFilesToMove ${absPathOfFileToMove}
                  destFolderOrProfile: ${destFolderOrProfile} 
                  destPath ${destPath}`)
             const moveAFileRes = moveAFile(absPathOfFileToMove, destFolderOrProfile, path.basename(absPathOfFileToMove));
-            _moveResult.push({
-                success: true,
-                msg: `Moved file ${absPathOfFileToMove} to ${destPath}`,
-                fileMoved: moveAFileRes.renamedWithoutCollision,
-                fileCollisionsResolvedByRename: moveAFileRes.fileCollisionsResolvedByRename,
-                src: absPathOfFilesToMove,
-                dest: destPath,
-                destFolderOrProfile: destFolderOrProfile
 
-            });
+            if (moveAFileRes.renamedWithoutCollision.length > 0) {
+                _renamedWithoutCollision.push(moveAFileRes.renamedWithoutCollision)
+            }
+            else if (moveAFileRes.fileCollisionsResolvedByRename.length > 0) {
+                _fileCollisionsResolvedByRename.push(moveAFileRes.fileCollisionsResolvedByRename)
+            }
+            else {
+                errors.push(`Couldnt move file ${absPathOfFileToMove} to ${destPath}\n`)
+            }
         }
         catch (err) {
             console.log('Error', err);
-            return {
-                success: false,
-                error: `Error while moving file ${absPathOfFileToMove} to ${destPath} \n${err}`,
-                src: absPathOfFilesToMove,
-                dest: destPath,
-                destFolderOrProfile: destFolderOrProfile
-            };
+            errors.push(`Exception thrown while moving file ${absPathOfFileToMove} to ${destPath} \n${err}`)
         }
     }
-
     return {
-        _moveResult
-    };
+        success: error.length === 0,
+        msg: `${_renamedWithoutCollision.length} files moved from Source dir ${profileData.archiveProfilePath} to target dir ${destPath}.
+        \n${_fileCollisionsResolvedByRename.length} files had collisions resolved by renaming.
+        \n${error.length} files had errors while moving`,
+        errors: errors,
+        fileMoved: _renamedWithoutCollision,
+        fileCollisionsResolvedByRename: _fileCollisionsResolvedByRename,
+        src: profileData.archiveProfilePath,
+        dest: destPath,
+        destFolderOrProfile: profileData.archiveProfile
+    }
 }
 
 

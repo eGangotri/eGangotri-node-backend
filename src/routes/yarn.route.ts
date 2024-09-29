@@ -9,7 +9,7 @@ import { compareFolders } from '../folderSync';
 import { markUploadCycleAsMovedToFreeze } from '../services/uploadCycleService';
 import { ZIP_TYPE } from '../cliBased/googleapi/_utils/constants';
 import { unzipAllFilesInDirectory } from '../services/zipService';
-import { FileMoveTracker } from 'models/FileMoveTracker';
+import { FileMoveTracker } from '../models/FileMoveTracker';
 
 export const yarnRoute = express.Router();
 
@@ -220,13 +220,16 @@ yarnRoute.post('/yarnMoveFilesInListToFreeze', async (req: any, resp: any) => {
             await markUploadCycleAsMovedToFreeze(_uploadCycleId)
         }
         for (const res of _response) {
+            console.log(`Saving FileMoveTracker ${JSON.stringify(res)}`)    
             const tracker = new FileMoveTracker({
                 uploadCycleId: res._uploadCycleId,
                 ...res
             });
             await tracker.save()
         }
-        resp.status(200).send(_response);
+        resp.status(200).send({
+            response: _response
+        });
     }
 
     catch (err: any) {
