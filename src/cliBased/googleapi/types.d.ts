@@ -40,7 +40,26 @@ export interface ExcelHeaders {
     "Created Time": string;
 }
 
-
+export interface ExcelHeadersFileRenamerV2 {
+    "S.No": number | string;
+    "Title in Google Drive": string;
+    "Link to File Location": string;
+    "Title in English": string;
+    "Sub-Title": string;
+    "Author": string;
+    "Commentator/ Translator/Editor": string;
+    "Language(s)": string;
+    "Script": string;
+    "Subject/ Descriptor": string;
+    "Publisher": string;
+    "Edition/Statement": string;
+    "Place of Publication": string;
+    "Year of Publication": string;
+    "Composite Title": string;
+    "Orig Name": string;
+    "Folder Name": string;
+    "Thumbnail": string;
+}
 export interface LocalFileHeaders {
     "Serial No.": string,
     "File Name": string,

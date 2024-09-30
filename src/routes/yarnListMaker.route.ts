@@ -1,7 +1,6 @@
-import path from 'path';
 import * as express from 'express';
 import { generateGoogleDriveListingExcel } from '../cliBased/googleapi/GoogleDriveApiReadAndExport';
-import { pickLatestExcelsAndCombineGDriveAndReducedPdfExcels } from '../services/yarnListMakerService';
+import { genLinksAndFolders, pickLatestExcelsAndCombineGDriveAndReducedPdfExcels, validateGenGDriveLinks } from '../services/yarnListMakerService';
 import { extractFirstAndLastNPages } from '../cliBased/pdf/extractFirstAndLastNPages';
 import { gDriveExceltoMongo } from '../excelToMongo/tranferGDriveExcelToMongo';
 import { timeInfo } from '../mirror/FrontEndBackendCommonCode';
@@ -18,66 +17,38 @@ yarnListMakerRoute.post('/getGoogleDriveListing', async (req: any, resp: any) =>
         const reduced = req?.body?.reduced || false;
         const ignoreFolder = req?.body?.ignoreFolder
         const allNotJustPdfs = req?.body?.allNotJustPdfs || false;
+        const pdfRenamerXlV2 = req?.body?.pdfRenamerXlV2 || false;
 
         console.log(`getGoogleDriveListing googleDriveLink:
-         ${googleDriveLink}/${folderName}/${reduced}/${ignoreFolder}/${allNotJustPdfs}`)
-        if (!googleDriveLink || !folderName) {
+         ${googleDriveLink}/${folderName}/${reduced}/${ignoreFolder}/${allNotJustPdfs}/${pdfRenamerXlV2}`)
+
+        const _validations = validateGenGDriveLinks(googleDriveLink, folderName)
+        if (_validations.success === false) {
+            resp.status(300).send({
+                response: _validations
+            })
+        }
+
+        const { _links, _folders, error } = genLinksAndFolders(googleDriveLink, folderName)
+        if (error) {
             resp.status(300).send({
                 response: {
                     "status": "failed",
                     "success": false,
-                    "message": "Pls. provide google drive Link"
+                    "message": "Number of Links and Folder Names should match"
                 }
             });
             return
-        }
-        if (folderName.includes(path.sep)) {
-            resp.status(300).send({
-                response: {
-                    "status": "failed",
-                    "success": false,
-                    "message": "Folder Name cannot have path separators"
-                }
-            });
-            return
-        }
-
-        const _links = []
-        const _folders = [];
-        if (googleDriveLink.includes(",") || folderName.includes(",")) {
-            const links = googleDriveLink.split(",").map((link: string) => {
-                return link.trim()
-            })
-            _links.push(...links);
-            const folders = folderName.split(",").map((folder: string) => {
-                return folder.trim()
-            })
-            _folders.push(...folders);
-            if (_links.length != _folders.length) {
-                console.log(`eror- links and folder counts diff`)
-                resp.status(300).send({
-                    response: {
-                        "status": "failed",
-                        "success": false,
-                        "message": "Number of Links and Folder Names should match"
-                    }
-                });
-                return
-            }
-
-        }
-        else {
-            _links.push(googleDriveLink.trim());
-            _folders.push(folderName.trim());
         }
 
         const _resps = [];
         for (let i = 0; i < _links.length; i++) {
             console.log(`getGoogleDriveListing ${_links[i]} ${_folders[i]} (${allNotJustPdfs})`)
-            const listingResult = await generateGoogleDriveListingExcel(_links[i], 
+            const listingResult = await generateGoogleDriveListingExcel(_links[i],
                 _folders[i], reduced,
-                 ignoreFolder,
-                 allNotJustPdfs?"":PDF_TYPE);
+                ignoreFolder,
+                pdfRenamerXlV2,
+                allNotJustPdfs ? "" : PDF_TYPE);
             _resps.push(listingResult);
         }
 
