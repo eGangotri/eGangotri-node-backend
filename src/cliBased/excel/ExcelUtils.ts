@@ -1,5 +1,5 @@
 import * as xlsx from 'xlsx';
-import { ExcelHeaders, GoogleApiData } from '../googleapi/types';
+import { ExcelHeaders, ExcelHeadersFileRenamerV2, GoogleApiData } from '../googleapi/types';
 import { SHEET_NAME } from '../googleapi/_utils/constants';
 import * as ExcelJS from 'exceljs';
 import * as path from 'path';
@@ -20,7 +20,6 @@ const setHeadersForExcel = () => {
 const convertDatatoJson = (googleDriveFileData: Array<GoogleApiData>) => {
   const jsonArray: ExcelHeaders[] = []
   for (const dataRow of googleDriveFileData) {
-    let x = 0
     jsonArray.push({
       "S.No": dataRow.index,
       "Title in Google Drive": dataRow.fileName,
@@ -56,6 +55,35 @@ const convertDatatoJson = (googleDriveFileData: Array<GoogleApiData>) => {
   }
   return jsonArray
 }
+
+const convertFileRenamerV2DatatoJson = (googleDriveFileData: Array<GoogleApiData>) => {
+  const jsonArray: ExcelHeadersFileRenamerV2[] = []
+  for (const dataRow of googleDriveFileData) {
+    jsonArray.push({
+      "S.No": dataRow.index,
+      "Title in Google Drive": dataRow.fileName,
+      "Link to File Location": dataRow.googleDriveLink,
+      "Title in English": "",
+      "Sub-Title": "",
+      "Author": "",
+      "Commentator/ Translator/Editor": "",
+      "Language(s)": "",
+      "Script": "",
+      "Subject/ Descriptor": "",
+      "Publisher": "",
+      "Edition/Statement": "",
+      "Place of Publication": "",
+      "Year of Publication": "",
+      "Composite Title": "",
+      "Orig Name": "",
+      "Folder Name": dataRow.parents,
+      "Thumbnail": dataRow.thumbnailLink,
+    })
+  }
+  return jsonArray
+}
+
+
 export const dataToXslx = async (googleDriveFileData: Array<GoogleApiData>, xlsxFilePath: string) => {
   try {
     const jsonArray: ExcelHeaders[] = convertDatatoJson(googleDriveFileData);
@@ -65,7 +93,19 @@ export const dataToXslx = async (googleDriveFileData: Array<GoogleApiData>, xlsx
   } catch (error) {
     console.error('An error occurred:', error);
   }
-};
+}
+
+export const dataToXslxFileRenamerV2 = async (googleDriveFileData: Array<GoogleApiData>, xlsxFilePath: string) => {
+  try {
+    const jsonArray: ExcelHeadersFileRenamerV2[] = convertFileRenamerV2DatatoJson(googleDriveFileData);
+    jsonToExcel(jsonArray, xlsxFilePath)
+
+    console.log(`Excel File Written to ${xlsxFilePath}!`);
+  } catch (error) {
+    console.error('An error occurred:', error);
+  }
+}
+
 
 export const jsonToExcel = (jsonArray: any[], xlsxFileNameWithPath: string) => {
 
