@@ -5,6 +5,7 @@ import { renameAllNonAsciiInFolder } from '../files/renameNonAsciiFiles';
 import { callAksharamukha, DEFAULT_TARGET_SCRIPT_ROMAN_COLLOQUIAL } from '../aksharamukha/convert';
 import { convertJpgsToPdfInAllSubFolders } from '../imgToPdf/jpgToPdf';
 import { multipleTextScriptConversion } from '../services/fileService';
+import { renameFilesViaExcel } from 'services/fileUtilsService';
 
 
 export const fileUtilsRoute = express.Router();
@@ -160,6 +161,25 @@ fileUtilsRoute.post('/imgFilesToPdf', async (req: any, resp: any) => {
                 break;
         }
 
+        resp.status(200).send({
+            response: res
+        });
+    }
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})
+
+
+fileUtilsRoute.post('/renameFilesViaExcel', async (req: any, resp: any) => {
+    try {
+        const excelPath = req.body.excelPath;
+        const folderOrProfile = req.body.folderOrProfile;
+        
+        console.log(`excelPath: ${excelPath} folderOrProfile: ${folderOrProfile}`);
+        const res = await renameFilesViaExcel(excelPath, folderOrProfile);
+       
         resp.status(200).send({
             response: res
         });
