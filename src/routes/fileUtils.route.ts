@@ -5,7 +5,7 @@ import { renameAllNonAsciiInFolder } from '../files/renameNonAsciiFiles';
 import { callAksharamukha, DEFAULT_TARGET_SCRIPT_ROMAN_COLLOQUIAL } from '../aksharamukha/convert';
 import { convertJpgsToPdfInAllSubFolders } from '../imgToPdf/jpgToPdf';
 import { multipleTextScriptConversion } from '../services/fileService';
-import { renameFilesViaExcel } from 'services/fileUtilsService';
+import { renameFilesViaExcel } from '../services/fileUtilsService';
 
 
 export const fileUtilsRoute = express.Router();
