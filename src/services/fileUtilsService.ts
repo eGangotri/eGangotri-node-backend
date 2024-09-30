@@ -12,7 +12,7 @@ export const renameFilesViaExcel = async (excelPath: string, folderOrProfile: st
     try {
         const excelData = excelToJson(excelPath)
         const folder = isValidPath(folderOrProfile) ? folderOrProfile : getFolderInSrcRootForProfile(folderOrProfile)
-        const fileStats = await getAllPDFFiles(folder)
+        const fileStats = await getAllPDFFiles(folder);
         console.log(`excelData: ${JSON.stringify(excelData)} `);
         const results = []
         for (let i = 0; i < excelData.length; i++) {
