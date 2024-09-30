@@ -181,7 +181,12 @@ fileUtilsRoute.post('/renameFilesViaExcel', async (req: any, resp: any) => {
         const res = await renameFilesViaExcel(excelPath, folderOrProfile);
        
         resp.status(200).send({
-            response: res
+            response: {
+                msg: `Files renamed via Excel.` + res.success.length ,
+                errors: `File errors Excel.` + res.errors.length ,
+                total: `Total Files that were in Excel.` + res.totalCount,
+                ...res
+            }
         });
     }
     catch (err: any) {
