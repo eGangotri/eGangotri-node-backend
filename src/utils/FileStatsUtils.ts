@@ -32,7 +32,7 @@ export async function getAllFileStats(filestatsOptions: FileStatsOptions): Promi
                 console.log(`Ignoring ${fullPath} due to ${filestatsOptions?.ignorePaths}`);
                 continue;
             }
-            console.log(`not Ignoring ${fullPath} due to ${filestatsOptions?.ignorePaths}`);
+           // console.log(`not Ignoring ${fullPath} due to ${filestatsOptions?.ignorePaths}`);
 
             if (dirent.isDirectory()) {
                 queue.push(fullPath);
