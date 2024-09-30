@@ -1,7 +1,10 @@
+import { error } from "console";
 import { getFolderInSrcRootForProfile } from "../archiveUpload/ArchiveProfileUtils";
 import { excelToJson } from "../cliBased/excel/ExcelUtils";
 import { getAllPDFFiles } from "../utils/FileStatsUtils";
 import { isValidPath } from "../utils/utils";
+import * as fs from "fs";
+import * as path from 'path';
 
 /**
  * 
@@ -9,30 +12,50 @@ import { isValidPath } from "../utils/utils";
  * @returns 
  */
 export const renameFilesViaExcel = async (excelPath: string, folderOrProfile: string) => {
+    const renameReport = {
+        errors: [],
+        success: [],
+        totalCount: 0
+    }
     try {
         const excelData = excelToJson(excelPath)
         const folder = isValidPath(folderOrProfile) ? folderOrProfile : getFolderInSrcRootForProfile(folderOrProfile)
         const fileStats = await getAllPDFFiles(folder);
-        console.log(`excelData: ${JSON.stringify(excelData)} `);
-        const results = []
+        console.log(`excelData: ${excelData?.length} `);
+        renameReport.totalCount = excelData.length
+
         for (let i = 0; i < excelData.length; i++) {
             const newFileName = excelData["Composite Title"]
             const origName = excelData["Orig Name"]
-            if (newFileName.length > 0) {
-                console.log(`origName: ${JSON.stringify(origName)} newFileName: ${JSON.stringify(newFileName)} `);
+            if (newFileName?.length > 0) {
+                console.log(`\norigName: ${JSON.stringify(origName)} newFileName: ${JSON.stringify(newFileName)} `);
                 const _fileInFolder = fileStats.find((fileStat) => {
                     if (fileStat.fileName === origName) {
                         console.log(`fileStat: ${JSON.stringify(fileStat)} `);
                     }
                 });
                 console.log(`_fileInFolder: ${JSON.stringify(_fileInFolder)} `);
-                results.push(_fileInFolder.absPath)
+                const absPath = _fileInFolder.absPath
+                if (fs.existsSync(absPath)) {
+                    try {
+                        const parentDir = path.dirname(absPath);
+                        const newPath = path.join(parentDir, newFileName);
+                        fs.renameSync(absPath, newPath);
+                        console.log(`File renamed to ${newFileName}`)
+                        renameReport.success.push(`File ${absPath} renamed to ${newFileName}`)
+                    }
+                    catch (e) {
+                        console.log(`Error renaming file ${absPath} to ${newFileName} ${e}`)
+                        renameReport.errors.push(`Error renaming file ${absPath} to ${newFileName} ${e}`)
+                    }
+                }
             }
         }
-        return results;
     }
     catch (err: any) {
         console.log('Error', err);
         return err;
     }
+    return renameReport;
+
 }
