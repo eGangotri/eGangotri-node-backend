@@ -13,18 +13,21 @@ import * as path from 'path';
  */
 export const renameFilesViaExcel = async (excelPath: string, folderOrProfile: string) => {
     const renameReport = {
-        errors: [],
+        errorList: [],
         success: [],
         totalCount: 0
     }
+
     try {
         const excelData = excelToJson(excelPath)
         const folder = isValidPath(folderOrProfile) ? folderOrProfile : getFolderInSrcRootForProfile(folderOrProfile)
         const fileStats = await getAllPDFFiles(folder);
         console.log(`excelData: ${excelData?.length} `);
-        renameReport.totalCount = excelData.length
+        renameReport.totalCount = excelData?.length || 0
 
-        for (let i = 0; i < excelData.length; i++) {
+        for (let i = 0; i < excelData?.length; i++) {
+            console.log(`excelData(${i}): ${excelData[i]?.length} `);
+
             const newFileName = excelData["Composite Title"]
             const origName = excelData["Orig Name"]
             if (newFileName?.length > 0) {
@@ -40,13 +43,13 @@ export const renameFilesViaExcel = async (excelPath: string, folderOrProfile: st
                     try {
                         const parentDir = path.dirname(absPath);
                         const newPath = path.join(parentDir, newFileName);
-                        fs.renameSync(absPath, newPath);
+                      //  fs.renameSync(absPath, newPath);
                         console.log(`File renamed to ${newFileName}`)
                         renameReport.success.push(`File ${absPath} renamed to ${newFileName}`)
                     }
                     catch (e) {
                         console.log(`Error renaming file ${absPath} to ${newFileName} ${e}`)
-                        renameReport.errors.push(`Error renaming file ${absPath} to ${newFileName} ${e}`)
+                        renameReport.errorList.push(`Error renaming file ${absPath} to ${newFileName} ${e}`)
                     }
                 }
             }
@@ -56,6 +59,8 @@ export const renameFilesViaExcel = async (excelPath: string, folderOrProfile: st
         console.log('Error', err);
         return err;
     }
+    console.log(`renameFilesViaExcel ${JSON.stringify(renameReport)} `)
+
     return renameReport;
 
 }

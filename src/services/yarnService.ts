@@ -66,7 +66,7 @@ export const moveItemsInListOfProfileToFreeze = async (uploadCycleId: string) =>
             _response.push({
                 success: false,
                 msg: `Invalid destPath ${destPath} for PROFILE: ${archiveProfile.archiveProfile}`,
-                errors: archiveProfile.absolutePaths,
+                errorList: archiveProfile.absolutePaths,
                 src: archiveProfile.archiveProfilePath,
                 dest: destPath,
                 destFolderOrProfile: archiveProfile.archiveProfile
@@ -85,7 +85,7 @@ export const moveFileInListToDest = async (profileData: {
     destFolderOrProfile: string) => {
     const _fileCollisionsResolvedByRename: string[] = []
     const _renamedWithoutCollision: string[] = []
-    const errors: string[] = []
+    const errorList: string[] = []
 
     const destPath = isValidPath(destFolderOrProfile) ? destFolderOrProfile : getFolderInSrcRootForProfile(destFolderOrProfile)
     for (let absPathOfFileToMove of profileData.absolutePaths) {
@@ -103,12 +103,12 @@ export const moveFileInListToDest = async (profileData: {
                 _fileCollisionsResolvedByRename.push(moveAFileRes.fileCollisionsResolvedByRename)
             }
             else {
-                errors.push(`Couldnt move file ${absPathOfFileToMove} to ${destPath}\n`)
+                errorList.push(`Couldnt move file ${absPathOfFileToMove} to ${destPath}\n`)
             }
         }
         catch (err) {
             console.log('Error', err);
-            errors.push(`Exception thrown while moving file ${absPathOfFileToMove} to ${destPath} \n${err}`)
+            errorList.push(`Exception thrown while moving file ${absPathOfFileToMove} to ${destPath} \n${err}`)
         }
     }
     return {
@@ -116,7 +116,7 @@ export const moveFileInListToDest = async (profileData: {
         msg: `${_renamedWithoutCollision.length} files moved from Source dir ${profileData.archiveProfilePath} to target dir ${destPath}.
         \n${_fileCollisionsResolvedByRename.length} files had collisions resolved by renaming.
         \n${error.length} files had errors while moving`,
-        errors: errors,
+         errorList,
         fileMoved: _renamedWithoutCollision,
         fileCollisionsResolvedByRename: _fileCollisionsResolvedByRename,
         src: profileData.archiveProfilePath,
