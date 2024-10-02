@@ -5,6 +5,7 @@ import * as ExcelJS from 'exceljs';
 import * as path from 'path';
 import * as _ from 'lodash';
 import * as XLSX from "xlsx";
+import { title } from 'process';
 
 const setHeadersForExcel = () => {
   const headerArray = [
@@ -56,9 +57,21 @@ const convertDatatoJson = (googleDriveFileData: Array<GoogleApiData>) => {
   return jsonArray
 }
 
+const compositeTitleFormula = (idx:number) =>{
+  const formula = `=D${idx} & " " & E${idx} & IF(J${idx} <> "", " by " & F${idx},  "") & " " & G${idx} & " " & H${idx} & " " & I${idx} & " " & K${idx} & " " & L${idx} & " " & M${idx} & IF(J${idx} <> "", " - " & J${idx}, "")`
+//=D2 & " " & E2 & IF(J2 <> "", " by " & F2,  "") & " " & G2 & " " & H2 & " " & I2 & " " & K2 & " " & L2 & " " & M2 & IF(J2 <> "", " - " & J2, "")
+  return idx && idx > 1 ? formula :""
+}
+
+const origNameFormula = (idx:number) =>{
+  const formula = `=REGEXREPLACE(B${idx}, "_\\d+(\\.[a-zA-Z]+)$", "$1")`
+  //=REGEXREPLACE(B2, "_\d+(\.[a-zA-Z]+)$", "$1")
+  return idx && idx > 1 ? formula :""
+
+}
 const convertFileRenamerV2DatatoJson = (googleDriveFileData: Array<GoogleApiData>) => {
   const jsonArray: ExcelHeadersFileRenamerV2[] = []
-  let idx = 0;
+  let idx = 1;
   for (const dataRow of googleDriveFileData) {
     jsonArray.push({
       "S.No": dataRow.index,
@@ -74,8 +87,8 @@ const convertFileRenamerV2DatatoJson = (googleDriveFileData: Array<GoogleApiData
       "Edition/Statement": "",
       "Place of Publication": "",
       "Year of Publication": "",
-      "Composite Title": `=SUM(B2,C2,D${idx+1})`,
-      "Orig Name": "",
+      "Composite Title": compositeTitleFormula(idx+1),
+      "Orig Name": origNameFormula(idx+1),
       "Folder Name": dataRow.parents,
       "Thumbnail": dataRow.thumbnailLink,
     })
@@ -99,7 +112,7 @@ export const jsonDataToXslx = async (googleDriveFileData: Array<GoogleApiData>, 
 export const jsonDataToXslxFileRenamerV2 = async (googleDriveFileData: Array<GoogleApiData>, xlsxFilePath: string) => {
   try {
     const jsonArray: ExcelHeadersFileRenamerV2[] = convertFileRenamerV2DatatoJson(googleDriveFileData);
-    jsonToExcelWithFormula(jsonArray, xlsxFilePath)
+    jsonToExcel(jsonArray, xlsxFilePath)
 
     console.log(`Excel File Written to ${xlsxFilePath}!`);
   } catch (error) {
@@ -143,7 +156,7 @@ export const jsonToExcelWithFormula = (jsonArray: any[], xlsxFileNameWithPath: s
     else {
       const oneBasedIndex = index + 1;
       console.log(`oneBasedIndex ${oneBasedIndex}`)
-      worksheet.getCell('O2').value = { formula: 'B2+C2' };
+   //   worksheet.getCell('O2').value = { formula: 'B2+C2' };
       // worksheet.getCell(`O${oneBasedIndex}`).value = {
       //   formula: `D${oneBasedIndex} & " " & E${oneBasedIndex} & IF(J${oneBasedIndex} <> "", " by " & F${oneBasedIndex},  "") & " " & G${oneBasedIndex} & " " & H${oneBasedIndex} & " " & I${oneBasedIndex} & " " & K${oneBasedIndex} & " " & L${oneBasedIndex} & " " & M${oneBasedIndex} & IF(J${oneBasedIndex} <> "", " - " & J${oneBasedIndex}, "")`
       // };
