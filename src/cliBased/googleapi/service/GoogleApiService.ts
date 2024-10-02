@@ -1,5 +1,5 @@
 import { drive_v3 } from 'googleapis';
-import { dataToXslx, dataToXslxFileRenamerV2 } from '../../excel/ExcelUtils';
+import { jsonDataToXslx, jsonDataToXslxFileRenamerV2 } from '../../excel/ExcelUtils';
 import { sizeInfo } from '../../../mirror/FrontEndBackendCommonCode';
 import { FOLDER_MIME_TYPE, PDF_MIME_TYPE, PDF_TYPE, ZIP_MIME_TYPE, ZIP_TYPE } from '../_utils/constants';
 import { GoogleApiData } from '../types';
@@ -50,7 +50,7 @@ export async function listFolderContentsAndGenerateCSVAndExcel(_folderIdOrUrl: s
     console.log(`googleDriveFileData ${googleDriveFileData.length} `);
     if (!_.isEmpty(googleDriveFileData)) {
         const excelName = `${fileNameWithPath}.xlsx`;
-        await dataToXslx(googleDriveFileData, excelName);
+        await jsonDataToXslx(googleDriveFileData, excelName);
         return {
             msg: `Excel file created at ${excelName}`,
             excelName
@@ -82,7 +82,7 @@ export async function listFolderContentsAndGenerateExcelV2ForPdfRenamer(_folderI
     console.log(`googleDriveFileData ${googleDriveFileData.length} `);
     if (!_.isEmpty(googleDriveFileData)) {
         const excelName = `${fileNameWithPath}.xlsx`;
-        await dataToXslxFileRenamerV2(googleDriveFileData, excelName);
+        await jsonDataToXslxFileRenamerV2(googleDriveFileData, excelName);
         return {
             msg: `Excel file created at ${excelName}`,
             excelName

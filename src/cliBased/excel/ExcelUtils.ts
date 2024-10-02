@@ -85,7 +85,7 @@ const convertFileRenamerV2DatatoJson = (googleDriveFileData: Array<GoogleApiData
 }
 
 
-export const dataToXslx = async (googleDriveFileData: Array<GoogleApiData>, xlsxFilePath: string) => {
+export const jsonDataToXslx = async (googleDriveFileData: Array<GoogleApiData>, xlsxFilePath: string) => {
   try {
     const jsonArray: ExcelHeaders[] = convertDatatoJson(googleDriveFileData);
     jsonToExcel(jsonArray, xlsxFilePath)
@@ -96,10 +96,10 @@ export const dataToXslx = async (googleDriveFileData: Array<GoogleApiData>, xlsx
   }
 }
 
-export const dataToXslxFileRenamerV2 = async (googleDriveFileData: Array<GoogleApiData>, xlsxFilePath: string) => {
+export const jsonDataToXslxFileRenamerV2 = async (googleDriveFileData: Array<GoogleApiData>, xlsxFilePath: string) => {
   try {
     const jsonArray: ExcelHeadersFileRenamerV2[] = convertFileRenamerV2DatatoJson(googleDriveFileData);
-    jsonToExcel(jsonArray, xlsxFilePath)
+    jsonToExcelWithFormula(jsonArray, xlsxFilePath)
 
     console.log(`Excel File Written to ${xlsxFilePath}!`);
   } catch (error) {
@@ -129,6 +129,40 @@ export const jsonToExcel = (jsonArray: any[], xlsxFileNameWithPath: string) => {
   }
 }
 
+
+
+export const jsonToExcelWithFormula = (jsonArray: any[], xlsxFileNameWithPath: string) => {
+
+  // Create a new workbook
+  const workbook = xlsx.utils.book_new();
+
+  // Convert JSON to worksheet
+  const worksheet:xlsx.WorkSheet = xlsx.utils.json_to_sheet(jsonArray);
+  jsonArray.forEach((row, index) => {
+    if (index === 0) return;
+    else {
+      const oneBasedIndex = index + 1;
+      console.log(`oneBasedIndex ${oneBasedIndex}`)
+      worksheet.getCell('O2').value = { formula: 'B2+C2' };
+      // worksheet.getCell(`O${oneBasedIndex}`).value = {
+      //   formula: `D${oneBasedIndex} & " " & E${oneBasedIndex} & IF(J${oneBasedIndex} <> "", " by " & F${oneBasedIndex},  "") & " " & G${oneBasedIndex} & " " & H${oneBasedIndex} & " " & I${oneBasedIndex} & " " & K${oneBasedIndex} & " " & L${oneBasedIndex} & " " & M${oneBasedIndex} & IF(J${oneBasedIndex} <> "", " - " & J${oneBasedIndex}, "")`
+      // };
+      // worksheet.getCell(`P${oneBasedIndex}`).value = { formula: `REGEXREPLACE(B${oneBasedIndex}, "_\\d+(\\.[a-zA-Z]+)$", "$1")` };
+    }
+  });
+
+  // Add the worksheet to the workbook
+  xlsx.utils.book_append_sheet(workbook, worksheet, SHEET_NAME);
+
+  // Write the workbook to a file
+  xlsx.writeFile(workbook, xlsxFileNameWithPath);
+  console.log(`created ${xlsxFileNameWithPath}`)
+  return {
+    success: true,
+    msg: `created ${xlsxFileNameWithPath}`,
+    xlsxFileNameWithPath
+  }
+}
 
 async function editExistingExcelSheet(excelSheetPath: string) {
   // Load the existing workbook
