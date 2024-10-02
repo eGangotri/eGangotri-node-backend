@@ -58,6 +58,7 @@ const convertDatatoJson = (googleDriveFileData: Array<GoogleApiData>) => {
 
 const convertFileRenamerV2DatatoJson = (googleDriveFileData: Array<GoogleApiData>) => {
   const jsonArray: ExcelHeadersFileRenamerV2[] = []
+  let idx = 0;
   for (const dataRow of googleDriveFileData) {
     jsonArray.push({
       "S.No": dataRow.index,
@@ -68,17 +69,17 @@ const convertFileRenamerV2DatatoJson = (googleDriveFileData: Array<GoogleApiData
       "Author": "",
       "Commentator/ Translator/Editor": "",
       "Language(s)": "",
-      "Script": "",
       "Subject/ Descriptor": "",
       "Publisher": "",
       "Edition/Statement": "",
       "Place of Publication": "",
       "Year of Publication": "",
-      "Composite Title": "",
+      "Composite Title": `=SUM(B2,C2,D${idx+1})`,
       "Orig Name": "",
       "Folder Name": dataRow.parents,
       "Thumbnail": dataRow.thumbnailLink,
     })
+    idx++;
   }
   return jsonArray
 }

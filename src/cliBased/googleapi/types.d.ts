@@ -49,7 +49,6 @@ export interface ExcelHeadersFileRenamerV2 {
     "Author": string;
     "Commentator/ Translator/Editor": string;
     "Language(s)": string;
-    "Script": string;
     "Subject/ Descriptor": string;
     "Publisher": string;
     "Edition/Statement": string;

@@ -97,7 +97,9 @@ export const extractFirstAndLastNPages = async (_srcFoldersWithPath: string[], d
     FINAL_REPORT = []
     const dumpFolder = []
     for (const [index, folder] of _srcFoldersWithPath.entries()) {
-        console.log(`Started processing ${folder}`)
+        console.log(`extractFirstAndLastNPages:Started processing
+             ${folder} 
+            for-extracting ${firstNPages} pages from start ${onlyFirst?" but not ":" also "} including from end`)
         PDF_PROCESSING_COUNTER = 0;
         counter = 0
         try {
