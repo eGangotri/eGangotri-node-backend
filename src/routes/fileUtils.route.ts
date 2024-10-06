@@ -182,12 +182,12 @@ fileUtilsRoute.post('/renameFilesViaExcel', async (req: any, resp: any) => {
         console.error(`${JSON.stringify(res.errorList)}`)
         resp.status(200).send({
             response: {
-                totalInExcel: `Total Files that were in Excel.` + res?.totalInExcel,
-                totalInFolder: `Total Files that were in Folder(s).` + res?.totalInFolder,
-                msg: `Files renamed via Excel.` + res.success?.length,
-                errorList: `File rename-errors in Excel.` + res.errorList?.length,
-                ignored: `Files that were ignored due to no data.` + (res.totalInFolder - res.totalInExcel),
-                erros: res.errorList
+                totalInFolder: `Total Files that were in Folder(s): ` + res?.totalInFolder,
+                totalInExcel: `Total Files that were in Excel: ` + res?.totalInExcel,
+                msg: `Files renamed via Excel: ` + res.success?.length,
+                ignored: `Files that were ignored due to no data: ` + (res.totalInFolder - res.totalInExcel),
+                errorList: `File rename-errors in Excel: ` + res.errorList?.length,
+                errors: res.errorList
             }
         });
     }
