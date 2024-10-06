@@ -179,13 +179,15 @@ fileUtilsRoute.post('/renameFilesViaExcel', async (req: any, resp: any) => {
 
         console.log(`excelPath: ${excelPath} folderOrProfile: ${folderOrProfile}`);
         const res = await renameFilesViaExcel(excelPath, folderOrProfile);
-
+        console.error(`${JSON.stringify(res.errorList)}`)
         resp.status(200).send({
             response: {
-                total: `Total Files that were in Excel.` + res?.totalCount,
+                totalInExcel: `Total Files that were in Excel.` + res?.totalInExcel,
+                totalInFolder: `Total Files that were in Folder(s).` + res?.totalInFolder,
                 msg: `Files renamed via Excel.` + res.success?.length,
                 errorList: `File rename-errors in Excel.` + res.errorList?.length,
-                ignored: `Files that were ignored due to no data.` + (res.totalCount - (res.success?.length + res.errorList?.length)),
+                ignored: `Files that were ignored due to no data.` + (res.totalInFolder - res.totalInExcel),
+                erros: res.errorList
             }
         });
     }
