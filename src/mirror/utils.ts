@@ -49,3 +49,8 @@ export const makePostCall = async (body: Record<string, unknown>, resource: stri
     }
   }
 };
+
+
+export function isNumber(value: any): boolean {
+  return typeof value === 'number' && Number.isFinite(value);
+}
