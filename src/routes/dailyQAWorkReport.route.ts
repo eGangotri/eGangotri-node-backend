@@ -34,9 +34,10 @@ JSON Body
 dailyQAWorkReportRoute.post("/add", async (req: Request, resp: Response) => {
   try {
     const operatorName = req.body.operatorName
-    if (await validateUserFromRequest(req)) {
+    const _validateUser = await validateUserFromRequest(req)
+    console.log(`validateUserFromRequest ${_validateUser} ${operatorName}`);
+    if (_validateUser) {
       const dailyQAWorkReport = new DailyQAWorkReport(req.body);
-
       //Check if any request was sent in Last 2 hours
       const _query: typeof req.query = {};
       _query['isLastTwoHours'] = 'true';

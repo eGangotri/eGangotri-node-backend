@@ -20,10 +20,12 @@ import { launchMongoRoute } from "./routes/launchMongo.route";
 import { launchArchiveYarnRoute } from "./routes/launchArchiveYarn.route";
 import { yarnExcelRoute } from "./routes/yarnExcel.route";
 import "./logger/override";
+
 import { fileUtilsRoute } from "./routes/fileUtils.route";
 import { launchAIRoute } from "./routes/launchAI.route";
 import { pdfRenameRoute } from "./routes/pdfRename.route";
 import { scanningCenterRoute } from "./routes/scanningCenter.route";
+import { gDriveUploadWorkReportRoute } from "./routes/gDriveUploadWorkReportRoute";
 
 const egangotri = express();
 const hostname = "localhost";
@@ -56,7 +58,7 @@ egangotri.use("/execLauncher", launchGradleRoute);
 egangotri.use("/dailyWorkReport", dailyWorkReportRoute);
 egangotri.use("/dailyCatWorkReport", dailyCatWorkReportRoute);
 egangotri.use("/dailyQAWorkReport", dailyQAWorkReportRoute);
-egangotri.use("/dailyGDriveUploadWorkReport", dailyQAWorkReportRoute);
+egangotri.use("/gDriveUploadWorkReport", gDriveUploadWorkReportRoute);
 egangotri.use("/uploadCycleRoute", uploadCycleRoute);
 egangotri.use("/user", userRoute);
 egangotri.use("/yarn", yarnRoute);
