@@ -23,6 +23,7 @@ import "./logger/override";
 import { fileUtilsRoute } from "./routes/fileUtils.route";
 import { launchAIRoute } from "./routes/launchAI.route";
 import { pdfRenameRoute } from "./routes/pdfRename.route";
+import { scanningCenterRoute } from "./routes/scanningCenter.route";
 
 const egangotri = express();
 const hostname = "localhost";
@@ -69,6 +70,7 @@ egangotri.use("/searchGDriveDB", googleDriveItemRoute);
 egangotri.use("/searchMongo", launchMongoRoute);
 egangotri.use("/fileUtil", fileUtilsRoute);
 egangotri.use("/pdfRename", pdfRenameRoute);
+egangotri.use("/scanningCenter", scanningCenterRoute);
 
 
 egangotri.listen(port,'0.0.0.0', async () => {
