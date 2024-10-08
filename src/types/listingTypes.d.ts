@@ -98,6 +98,16 @@ export type DailyQAWorkReportListOptionsType = {
   limit?: number,
 };
 
+export type GDriveUploadReportListOptionsType = {
+  _ids?: string,
+  startDate?: string,
+  endDate?: string,
+  dateOfReport?: string,
+  operatorName?: string,
+  isLastTwoHours?: string, //true or false as string
+  limit?: number,
+};
+
 export type ReuploadType = {
   ids?: string,
   limit?: number,
