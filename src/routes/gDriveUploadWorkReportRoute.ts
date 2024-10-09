@@ -70,3 +70,37 @@ gDriveUploadWorkReportRoute.post("/add", async (req: Request, resp: Response) =>
   }
 });
 
+
+gDriveUploadWorkReportRoute.get("/list", async (req: Request, resp: Response) => {
+  try {
+    const items = await getListOfGDriveUploadReport(req?.query);
+    console.log(
+      `after getListOfDailyWorkReport retrieved item count: ${items.length}`
+    );
+    resp.status(200).send({
+      response: items,
+    });
+  } catch (err: any) {
+    console.log("Error", err);
+    resp.status(400).send(err);
+  }
+});
+
+
+gDriveUploadWorkReportRoute.get("/listIds", async (req: Request, resp: Response) => {
+  try {
+    const items = await getListOfGDriveUploadReport(req?.query);
+    console.log(
+      `after getListOfDailyWorkReport retrieved item count: ${items.length}`
+    );
+    const itemIds = items?.map((item) => item._id);
+    resp.status(200).send({
+      response: itemIds,
+      responseAsCsv: itemIds?.join(","),
+    });
+  } catch (err: any) {
+    console.log("Error", err);
+    resp.status(400).send(err);
+  }
+});
+
