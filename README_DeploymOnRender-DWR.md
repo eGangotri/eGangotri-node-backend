@@ -4,14 +4,8 @@ If you want to run the image for Daily-Work-Report then
 in .env
 make 
 MONGO_DB_NAME="egangotridb"
-and instead of dashboard use dwr as the tag.
-eg****trust@Gmail.com is the Docker Hub Acct.
 
-Otherwise use tag "dashboard" 
-and 
-MONGO_DB_NAME="egangotri_upload_db"
-
-## Create Account in Docker Hub followed by Repository
+## Create Account in Docker Hub followed by Repository (One Time Only)
 
 https://hub.docker.com/r/egangotri/egangotri-node-backend
 
@@ -21,18 +15,16 @@ Set docker path in PATH
 Login to Docker
 docker login -u "egangotri" -p "XXXXX" https://docker.io
 
-## Create DockerFile
+## Create DockerFile for eGangotri DWR
 Save it as Dockerfile
 
-docker build -t egangotri/egangotri-node-backend:dashboard .
+docker build -t egangotri/egangotri-node-backend:dwr .
 Test it by running :
-docker run -p 80:80 egangotri/egangotri-node-backend:dashboard
+docker run -p 80:80 egangotri/egangotri-node-backend:dwr
 View at
 http://127.0.0.1:80/
 
-docker push egangotri/egangotri-node-backend:dashboard
-
-
+docker push egangotri/egangotri-node-backend:dwr
 
 ## Deploy on Render
 Create a New Web Service.
@@ -44,14 +36,13 @@ Environment Variables
 Set environment-specific config and secrets (such as API keys), then read those values from your code
 
 DWR URL: https://egangotri-node-backend-dwr.onrender.com/
-Dashboard URL: https://egangotri-node-backend-dashboard.onrender.com
 
 ###Test:
 Using the render URL above you should see something like below
-{"response":"eGangotri-node-backend 2024-06-04T16:24:36.174Z Deployed (egangotri_upload_db)"}
+{"response":"eGangotri-node-backend 2024-06-04T16:24:36.174Z Deployed (egangotri_db)"}
 
-Dashboard
-https://dashboard.render.com/
+DWR
+https://dwr.render.com/
 
 ### References
 https://geshan.com.np/blog/2021/01/free-nodejs-hosting/
