@@ -31,18 +31,27 @@ Create a New Web Service.
 Share the DockerHub Image URL:
 https://hub.docker.com/r/egangotri/egangotri-node-backend/
 
+#Deploy Latest Reference
+egangotri-node-backend:dwr
+Under Manual Deploy. 
+
+Choose Deploy Latest Reference
+https://dashboard.render.com/web/srv-cpfisrrtg9os73bf6ph0/deploys/dep-cs38tl56l47c73ec2ojg
+
 copy all .env items under the Section:
 Environment Variables
 Set environment-specific config and secrets (such as API keys), then read those values from your code
 
-DWR URL: https://egangotri-node-backend-dwr.onrender.com/
+
 
 ###Test:
-Using the render URL above you should see something like below
-{"response":"eGangotri-node-backend 2024-06-04T16:24:36.174Z Deployed (egangotri_db)"}
+Using the render URL below 
+DWR URL: https://egangotri-node-backend-dwr.onrender.com/
 
-DWR
-https://dwr.render.com/
+you should see something like below
+{"response":"eGangotri-node-backend 2024-10-09T14:13:06.206Z Deployed (egangotridb)"}
 
 ### References
 https://geshan.com.np/blog/2021/01/free-nodejs-hosting/
+
+
