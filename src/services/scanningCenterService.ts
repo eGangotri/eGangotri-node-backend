@@ -3,7 +3,7 @@ import { getLimit } from "../routes/utils";
 
 export async function getCentersAndLibraries() {
     const centers = await ScanningCenter.find({})
-        .sort({ createdAt: -1 })
+        .sort({ centerName: 1 })
         .limit(getLimit(null));
     return centers;
 }
