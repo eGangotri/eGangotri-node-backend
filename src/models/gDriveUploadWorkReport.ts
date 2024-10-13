@@ -6,7 +6,7 @@ const schema = new mongoose.Schema(
     center: { type: String, required: true },
     lib: { type: String, required: false },
     dateOfReport: { type: Date, required: true },
-    pdfCount: { type: Number, required: false },
+    pdfCount: { type: Number, required: true },
     notes: { type: String, required: false, default: "" },
     gDriveLinks: { type: [String], required: true, default: [] },
   },
