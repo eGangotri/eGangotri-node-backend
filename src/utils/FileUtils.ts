@@ -79,8 +79,8 @@ export const getDuplicatesOrUniquesBySize = async (folder: string, folder2: stri
             diff2: metadata2.length - reverseDisjointSet.length,
             dupLength: disjointSet.length,
             revDupLength: reverseDisjointSet.length,
-            disjointSetASCSV: disjointSet.map((x: any) => x.file).join(","),
-            reverseDisjointSetASCSV: reverseDisjointSet.map((x: any) => x.file).join(","),
+            disjointSetASCSV: disjointSet.map((x: any) => x.absPath).join(","),
+            reverseDisjointSetASCSV: reverseDisjointSet.map((x: any) => x.absPath).join(","),
             disjointSet,
             reverseDisjointSet,
         }
@@ -119,7 +119,8 @@ const disjointSetByFileSize = (metadata: FileStats[], metadata2: FileStats[]) =>
         if (!match) {
             disjointSet.push({
                 size: Mirror.sizeInfo(file.rawSize),
-                file: file.fileName,
+                absPath: file.absPath,
+                fileName: file.fileName,
             });
         }
     });
