@@ -112,10 +112,10 @@ export const moveFileInListToDest = async (profileData: {
         }
     }
     return {
-        success: error.length === 0,
-        msg: `${_renamedWithoutCollision.length} files moved from Source dir ${profileData.archiveProfilePath} to target dir ${destPath}.
+        success: errorList.length === 0,
+        msg: `${_renamedWithoutCollision.length} files moved from Source ${profileData?.archiveProfilePath || ""} to target dir ${destPath}.
         \n${_fileCollisionsResolvedByRename.length} files had collisions resolved by renaming.
-        \n${error.length} files had errors while moving`,
+        \n${errorList.length} file(s) had errors while moving`,
          errorList,
         fileMoved: _renamedWithoutCollision,
         fileCollisionsResolvedByRename: _fileCollisionsResolvedByRename,

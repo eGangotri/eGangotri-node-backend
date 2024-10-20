@@ -61,24 +61,69 @@ export const checkIfEmpty = async (srcPath: string) => {
     return empty;
 }
 
-export const getDuplicatesBySize = async (folder: string, folder2: string) => {
+export const getDuplicatesOrUniquesBySize = async (folder: string, folder2: string, findDisjoint = false) => {
     const metadata = await getAllFileListingWithFileSizeStats(folder);
     const metadata2 = await getAllFileListingWithFileSizeStats(folder2);
 
-    const duplicates = duplicateBySizeCheck(metadata, metadata2)
+    if (findDisjoint) {
+        const disjointSet = disjointSetByFileSize(metadata2, metadata)
+        const reverseDisjointSet = disjointSetByFileSize(metadata2, metadata)
+        return {
+            msg: `${metadata.length} files in ${folder} 
+            and ${metadata2.length} files in ${folder2}
+            with ${disjointSet.length} uniques by size.`,
 
-    const reverseDuplicates = duplicateBySizeCheck(metadata2, metadata)
-    return {
-        msg: `${metadata.length} files in ${folder} and ${metadata2.length} files in ${folder2} with ${duplicates.length} duplicates by size.`,
-        metadata1Length: metadata.length,
-        metadata2Length: metadata2.length,
-        diff1: metadata.length - duplicates.length,
-        diff2: metadata2.length - reverseDuplicates.length,
-        dupLength: duplicates.length,
-        revDupLength: reverseDuplicates.length,
-        duplicates,
-        reverseDuplicates,
+            metadata1Length: metadata.length,
+            metadata2Length: metadata2.length,
+            diff1: metadata.length - disjointSet.length,
+            diff2: metadata2.length - reverseDisjointSet.length,
+            dupLength: disjointSet.length,
+            revDupLength: reverseDisjointSet.length,
+            disjointSet,
+            reverseDisjointSet,
+        }
     }
+    else {
+        const duplicates = duplicateBySizeCheck(metadata, metadata2)
+        const reverseDuplicates = duplicateBySizeCheck(metadata2, metadata)
+        return {
+            msg: `${metadata.length} files in ${folder} and 
+            ${metadata2.length} files in ${folder2} 
+            with ${duplicates.length} duplicates by size.`,
+            metadata1Length: metadata.length,
+            metadata2Length: metadata2.length,
+            diff1: metadata.length - duplicates.length,
+            diff2: metadata2.length - reverseDuplicates.length,
+            dupLength: duplicates.length,
+            revDupLength: reverseDuplicates.length,
+            duplicates,
+            reverseDuplicates,
+        }
+    }
+}
+
+const disjointSetByFileSize = (metadata: FileStats[], metadata2: FileStats[]) => {
+    const disjointSet = [];
+    console.log(`metadata ${JSON.stringify(metadata[0].size)} metadata2 ${JSON.stringify(metadata2[0].size)}`)
+    metadata.forEach((file: FileStats) => {
+        const match = metadata2.find((file2: FileStats) => {
+            if (file.rawSize === file2.rawSize && file.fileName !== file2.fileName) {
+                console.log(`rawSize ${file.fileName}(${file.rawSize}) ${file2?.fileName}(${file2?.rawSize})`);
+            }
+            return (file.rawSize === file2.rawSize && file.fileName !== file2.fileName);
+        });
+
+        // Check if match is undefined or null
+        if (!match) {
+            disjointSet.push({
+                size: Mirror.sizeInfo(file.rawSize),
+                file: file.fileName,
+            });
+        }
+    });
+    console.log(`disjointSet ${JSON.stringify(disjointSet[0])} ${disjointSet.length}`)
+
+    return disjointSet;
 }
 
 const duplicateBySizeCheck = (metadata: FileStats[], metadata2: FileStats[]) => {
