@@ -1,22 +1,24 @@
 import * as express from 'express';
 import { findTopNLongestFileNames } from '../utils/utils';
-import { getDuplicatesBySize } from '../utils/FileUtils';
+import { getDuplicatesOrUniquesBySize } from '../utils/FileUtils';
 import { renameAllNonAsciiInFolder } from '../files/renameNonAsciiFiles';
 import { callAksharamukha, DEFAULT_TARGET_SCRIPT_ROMAN_COLLOQUIAL } from '../aksharamukha/convert';
 import { convertJpgsToPdfInAllSubFolders } from '../imgToPdf/jpgToPdf';
 import { multipleTextScriptConversion } from '../services/fileService';
 import { renameFilesViaExcel } from '../services/fileUtilsService';
+import { moveFileInListToDest } from '../services/yarnService';
 
 
 export const fileUtilsRoute = express.Router();
 
-fileUtilsRoute.post('/duplicatesByFileSize', async (req: any, resp: any) => {
+fileUtilsRoute.post('/findByFileSize', async (req: any, resp: any) => {
     try {
         const folder = req.body.folder1;
-        const folder2 = req.body.folder2
+        const folder2 = req.body.folder2;
+        const findDisjoint = req.body.findDisjoint || false;
 
         console.log(`folder: ${folder} folder2: ${folder2}`);
-        const result = await getDuplicatesBySize(folder, folder2);
+        const result = await getDuplicatesOrUniquesBySize(folder, folder2, findDisjoint);
         resp.status(200).send({
             response: result
         });
@@ -27,6 +29,37 @@ fileUtilsRoute.post('/duplicatesByFileSize', async (req: any, resp: any) => {
     }
 })
 
+
+fileUtilsRoute.post('/moveFilesAsCSVOfAbsPaths', async (req: any, resp: any) => {
+    console.log(`moveFilesAsCSVOfAbsPaths ${JSON.stringify(req.body)} `)
+    try {
+        const absPathsAsCSV = req?.body?.absPathsAsCSV || "";
+        const profileOrFolder = req?.body?.profileOrFolder || "";
+        const absolutePaths = absPathsAsCSV?.split(",").map((item: string) => item.trim());
+
+        console.log(`moveFilesAsCSVOfAbsPaths count: ${absolutePaths?.length} to profileOrFolder(${profileOrFolder})`)
+        if (!absolutePaths && !profileOrFolder) {
+            resp.status(300).send({
+                response: {
+                    "status": "failed",
+                    "success": false,
+                    "message": "Pls. provide Src and Dest Items"
+                }
+            });
+        }
+        const _moveResponse = await moveFileInListToDest({ absolutePaths }, profileOrFolder);
+        resp.status(200).send({
+            response: {
+                ..._moveResponse
+            }
+        });
+    }
+
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})
 
 fileUtilsRoute.post('/topLongFileNames', async (req: any, resp: any) => {
     try {
