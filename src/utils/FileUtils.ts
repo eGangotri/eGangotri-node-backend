@@ -79,6 +79,8 @@ export const getDuplicatesOrUniquesBySize = async (folder: string, folder2: stri
             diff2: metadata2.length - reverseDisjointSet.length,
             dupLength: disjointSet.length,
             revDupLength: reverseDisjointSet.length,
+            disjointSetASCSV: disjointSet.map((x: any) => x.file).join(","),
+            reverseDisjointSetASCSV: reverseDisjointSet.map((x: any) => x.file).join(","),
             disjointSet,
             reverseDisjointSet,
         }
