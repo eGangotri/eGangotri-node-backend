@@ -19,10 +19,10 @@ docker login -u "egangotri" -p "XXXXX" https://docker.io
 Save it as Dockerfile
 
 docker build -t egangotri/egangotri-node-backend:dwr .
-Test it by running :
-docker run -p 80:80 egangotri/egangotri-node-backend:dwr
-View at
-http://127.0.0.1:80/
+    Test it by running :
+    docker run -p 80:80 egangotri/egangotri-node-backend:dwr
+    View at
+    http://127.0.0.1:80/
 
 docker push egangotri/egangotri-node-backend:dwr
 
