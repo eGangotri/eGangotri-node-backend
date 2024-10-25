@@ -86,6 +86,7 @@ export const moveFileInListToDest = async (profileData: {
     const _fileCollisionsResolvedByRename: string[] = []
     const _renamedWithoutCollision: string[] = []
     const errorList: string[] = []
+    const errorAbsPathList: string[] = []
 
     const destPath = isValidPath(destFolderOrProfile) ? destFolderOrProfile : getFolderInSrcRootForProfile(destFolderOrProfile)
     for (let absPathOfFileToMove of profileData.absolutePaths) {
@@ -104,19 +105,23 @@ export const moveFileInListToDest = async (profileData: {
             }
             else {
                 errorList.push(`Couldnt move file ${absPathOfFileToMove} to ${destPath}\n`)
+                errorAbsPathList.push(absPathOfFileToMove)
             }
         }
         catch (err) {
             console.log('Error', err);
+            errorAbsPathList.push(absPathOfFileToMove)
             errorList.push(`Exception thrown while moving file ${absPathOfFileToMove} to ${destPath} \n${err}`)
         }
     }
     return {
         success: errorList.length === 0,
+        total: profileData.absolutePaths.length,
         msg: `${_renamedWithoutCollision.length} files moved from Source ${profileData?.archiveProfilePath || ""} to target dir ${destPath}.
         \n${_fileCollisionsResolvedByRename.length} files had collisions resolved by renaming.
         \n${errorList.length} file(s) had errors while moving`,
          errorList,
+         errorAbsPathList,
         fileMoved: _renamedWithoutCollision,
         fileCollisionsResolvedByRename: _fileCollisionsResolvedByRename,
         src: profileData.archiveProfilePath,
