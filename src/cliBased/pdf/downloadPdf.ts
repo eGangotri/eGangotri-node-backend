@@ -167,7 +167,8 @@ export const downloadGDriveFileUsingGDriveApi = (
                         incrementDownloadComplete();
                         resolve({
                             "status": `Downloaded ${fileName} to ${destPath}`,
-                            success: true
+                            success: true,
+                            destPath
                         });
                     } else {
                         reject(_result);

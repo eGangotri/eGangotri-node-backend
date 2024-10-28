@@ -4,8 +4,9 @@ import * as path from 'path';
 import admZip from 'adm-zip';
 import { getAllZipFiles } from '../utils/FileStatsUtils';
 
-export async function zipFiles(filePaths: string[], 
-    outputZipPath: string, 
+const UNZIP_FOLDER = "\\unzipped";
+export async function zipFiles(filePaths: string[],
+    outputZipPath: string,
     rootDirToMaintainOrigFolderOrder = ""): Promise<void> {
     return new Promise((resolve, reject) => {
         const output = fs.createWriteStream(outputZipPath);
@@ -72,21 +73,38 @@ export async function unzipFiles(zipPath: string, outputDir: string): Promise<vo
 
 
 export async function unzipAllFilesInDirectory(pathToZipFiles: string, _unzipHere: string = "", ignoreFolder = ""):
- Promise<string> {
+    Promise<{
+        success_count: number,
+        error_count: number,
+        unzipFolder: string
+    }> {
+    let error_count = 0;
+    let success_count = 0;
     const zipFiles = await getAllZipFiles(pathToZipFiles);
-    if(!_unzipHere || _unzipHere === ""){
-        _unzipHere = pathToZipFiles + "\\unzipped";
+    if (!_unzipHere || _unzipHere === "") {
+        _unzipHere = pathToZipFiles + UNZIP_FOLDER;
     }
-
+   
     for (const zipFile of zipFiles) {
-        const outputDir = path.join(_unzipHere, path.basename(zipFile.absPath, '.zip'));
-        if (!fs.existsSync(outputDir)) {
-            fs.mkdirSync(outputDir, { recursive: true });
+        try {
+            const outputDir = path.join(_unzipHere, path.basename(zipFile.absPath, '.zip'));
+            if (!fs.existsSync(outputDir)) {
+                fs.mkdirSync(outputDir, { recursive: true });
+            }
+            await unzipFiles(zipFile.absPath, outputDir);
+            console.log(`Unzipped ${zipFile} to ${outputDir}`);
+            success_count++
         }
-        await unzipFiles(zipFile.absPath, outputDir);
-        console.log(`Unzipped ${zipFile} to ${outputDir}`);
+        catch (error) {
+            console.log(`Error while unzipping ${zipFile} : ${error}`);
+            error_count++;
+        }
     }
-    return _unzipHere;
+    return {
+        success_count,
+        error_count,
+        unzipFolder: _unzipHere
+    };
 }
 
 // Example usage:

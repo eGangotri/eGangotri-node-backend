@@ -10,6 +10,7 @@ import { ellipsis } from '../../../mirror/utils';
 import * as FileUtils from '../../../utils/FileUtils';
 import * as FileConstUtils from '../../../utils/constants';
 import { extractGoogleDriveId } from '../../../mirror/GoogleDriveUtilsCommonCode';
+import { constructGoogleApiQuery } from '../Utils';
 
 export async function listFolderContentsAsArrayOfData(folderId: string,
     drive: drive_v3.Drive,
@@ -106,9 +107,6 @@ export async function listFolderContents(folderId: string,
     ignoreFolder = "",
     type = PDF_TYPE) {
 
-    const pdfOnly = type === PDF_TYPE;
-    const zipOnly = type === ZIP_TYPE;
-
     if (!idFolderNameMap.has(folderId)) {
         const folderPath = await getFolderPathRelativeToRootFolder(folderId, drive)
         var index = folderPath.indexOf(rootFolderName);
@@ -120,14 +118,7 @@ export async function listFolderContents(folderId: string,
         let files: drive_v3.Schema$File[] = [];
         let pageToken: string | undefined = undefined;
 
-        const conditionForIgnoreFolder = ignoreFolder?.length > 0 ? ` and not name contains '${ignoreFolder}'` : "";
-        const pdfOnlyFrag = `(mimeType='${PDF_MIME_TYPE}' or mimeType='${FOLDER_MIME_TYPE}')`
-        const zipOnlyFrag = `((mimeType='${ZIP_MIME_TYPE}' or name contains '.zip' or name contains '.rar') or mimeType='${FOLDER_MIME_TYPE}')}`
-        const combinedCondition = (pdfOnly || zipOnly) ?
-            ` and ${pdfOnly ? pdfOnlyFrag : zipOnlyFrag}`
-            : ` and (mimeType!='' or  mimeType='${FOLDER_MIME_TYPE}')`;
-
-        const _query = `'${folderId}' in parents and trashed = false ${combinedCondition} ${conditionForIgnoreFolder} `
+        const _query = constructGoogleApiQuery(folderId, ignoreFolder, type);
         let idx = 0
         console.log(`_query(${++idx}) ${_query}`)
         do {
@@ -171,9 +162,8 @@ export async function listFolderContents(folderId: string,
     } catch (error) {
         console.error('Error retrieving folder contents:', error);
         if (error.response) {
-            console.error('Error details:', error.response?.data);
+            console.error('Error details:', JSON.stringify(error, null, 2));
         }
-        throw error;
     }
 }
 

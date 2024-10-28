@@ -56,6 +56,9 @@ export async function convertJpgsToPdf(inputFolder: string, outputFolder = "") {
 }
 
 export const convertJpgsToPdfInAllSubFolders = async (inputFolder: string, outputFolder = "") => {
+    let success_count = 0;
+    let error_count = 0;
+
     try {
         const allFiles = await getAllFileStats({ directoryPath: inputFolder, ignoreFolders: false, withLogs: false, withMetadata: false });
         const allFolders = allFiles.filter(file => file.ext === "FOLDER") 
@@ -69,10 +72,19 @@ export const convertJpgsToPdfInAllSubFolders = async (inputFolder: string, outpu
         let counter = 0;
         allFolders.map(async (folder) => {
             console.log(`Processing Folder#${++counter} ${folder.absPath}`);
-            promise.push(convertJpgsToPdf(folder.absPath, outputFolder));
+            try{
+                promise.push(convertJpgsToPdf(folder.absPath, outputFolder));
+                success_count++;
+            }
+            catch(e){
+                console.error(`Error while processing folder: ${folder.absPath}`, e);
+                error_count++;
+            }
         });
         const all = await Promise.all(promise);
         return {
+            success_count,
+            error_count,
             totalFolderCount: allFolders.length,
             foldersProcessed: all.length,
             eqaulity: allFolders.length === all.length,

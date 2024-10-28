@@ -1,1 +1,3 @@
 aws_secrets
+node_modules
+.git
