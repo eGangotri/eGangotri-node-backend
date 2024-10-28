@@ -1,3 +1,5 @@
+import { FOLDER_MIME_TYPE, PDF_MIME_TYPE, PDF_TYPE, ZIP_MIME_TYPE, ZIP_TYPE } from "./_utils/constants";
+
 const { google } = require('googleapis');
 
 export function isValidDriveId(folderIdOrUrl: string) {
@@ -10,3 +12,21 @@ export function isValidDriveId(folderIdOrUrl: string) {
     else false;
 }
 
+
+export const constructGoogleApiQuery = (folderId: string, ignoreFolder: string, type: string) => {
+    const pdfOnly = type === PDF_TYPE;
+    const zipOnly = type === ZIP_TYPE;
+
+    const conditionForIgnoreFolder = ignoreFolder?.length > 0 ? ` and not name contains '${ignoreFolder}'` : "";
+    const pdfOnlyFrag = `(mimeType='${PDF_MIME_TYPE}' or mimeType='${FOLDER_MIME_TYPE}')`
+    const zipOnlyFrag = `((mimeType='${ZIP_MIME_TYPE}' or name contains '.zip' or name contains '.rar') or mimeType='${FOLDER_MIME_TYPE}')`
+    const combinedCondition = (pdfOnly || zipOnly) ?
+        ` and ${pdfOnly ? pdfOnlyFrag : zipOnlyFrag}`
+        : ` and (mimeType!='' or  mimeType='${FOLDER_MIME_TYPE}')`;
+
+    const _query = `'${folderId}' in parents and trashed = false ${combinedCondition} ${conditionForIgnoreFolder} `
+    let idx = 0
+    console.log(`_query(${++idx}) ${_query}`)
+    return _query;
+
+}

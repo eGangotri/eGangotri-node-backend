@@ -177,25 +177,37 @@ fileUtilsRoute.post('/imgFilesToPdf', async (req: any, resp: any) => {
     try {
         const folder = req.body.folder;
         const imgType = req.body.imgType;
+        const results = [];
+        const _folder = folder.includes(",") ? folder.split(",").map((link: string) => link.trim()) : [folder.trim()];
+        console.log(`imgFilesToPdf:folder: ${folder} imgType: ${imgType}`);
 
-        console.log(`folder: ${folder} imgType: ${imgType} `);
-        let res = {};
-        switch (imgType) {
-            case "JPG":
-                res = await convertJpgsToPdfInAllSubFolders(folder);
-                break;
+        for (const aFolder of _folder) {
+            let res = {};
+            switch (imgType) {
+                case "JPG":
+                    res = await convertJpgsToPdfInAllSubFolders(aFolder);
+                    break;
 
-            case "PNG":
-                res = { msg: "PNG to PDF conversion is not supported yet." };
-                break;
+                case "PNG":
+                    res = { msg: "PNG to PDF conversion is not supported yet." };
+                    break;
 
-            case "TIFF":
-                res = { msg: "TIFF to PDF conversion is not supported yet." };
-                break;
+                case "TIFF":
+                    res = { msg: "TIFF to PDF conversion is not supported yet." };
+                    break;
+            }
+
+            results.push(res);
         }
 
+        const resultsSummary = results.map((res: { success_count: number, error_count: number }, index: number) => {
+            return `(${index + 1}). Succ: ${res.success_count} Err: ${res.error_count}`;
+        });
+
         resp.status(200).send({
-            response: res
+            total: _folder.length,
+            resultsSummary,
+            response: results
         });
     }
     catch (err: any) {

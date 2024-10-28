@@ -119,11 +119,11 @@ yarnRoute.post('/unzipAllFolders', async (req: any, resp: any) => {
             console.log(1)
             const res = await unzipAllFilesInDirectory(link, "", ignoreFolder);
             console.log(2)
-            results.push({ unzipFolder: res });
+            results.push({ unzipFolder: res.unzipFolder });
         }
 
-        const resultsSummary = results.map((res: any, index: number) => {
-            return `(${index + 1}). Succ: ${res.success_count} Err: ${res.error_count} Wrong Size: ${res.dl_wrong_size_count}`;
+        const resultsSummary = results.map((res: {success_count:number,error_count:number}, index: number) => {
+            return `(${index + 1}). Succ: ${res.success_count} Err: ${res.error_count}`;
         });
 
         resp.status(200).send({
