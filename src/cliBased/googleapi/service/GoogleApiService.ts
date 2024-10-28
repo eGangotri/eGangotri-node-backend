@@ -168,8 +168,12 @@ export async function listFolderContents(folderId: string,
         } else {
             console.log('No files found in the folder.');
         }
-    } catch (err) {
-        console.error('Error retrieving folder contents:', err);
+    } catch (error) {
+        console.error('Error retrieving folder contents:', error);
+        if (error.response) {
+            console.error('Error details:', error.response?.data);
+        }
+        throw error;
     }
 }
 
