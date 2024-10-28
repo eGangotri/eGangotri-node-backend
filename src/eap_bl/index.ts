@@ -119,7 +119,7 @@ export const generateEAPBLMetadataForProfile = async (profileName: string, excel
     // generateEAPBLMEtadataForProfile("SR-BH", "excelV1Metadatav1")
 })();
 /*
-yarn run convertEAPExcel
+pnpm run convertEAPExcel
 Convert a Endangered Archives Programme (EAP) Excel sheet to JSON
 */
 

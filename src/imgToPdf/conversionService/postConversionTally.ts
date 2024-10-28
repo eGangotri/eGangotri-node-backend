@@ -76,4 +76,4 @@ const _local = `E:/NMM-5/${mmYYYY}`
 //After Merge
 tally(_local, TALLY_FOR_PDFS);
 
-//yarn run tally-post-conversion
+//pnpm run tally-post-conversion

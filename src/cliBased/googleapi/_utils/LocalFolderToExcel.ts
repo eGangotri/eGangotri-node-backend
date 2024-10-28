@@ -56,4 +56,4 @@ const folderToExcel = async (folder: string, _excelRoot: string) => {
     }
 })();
 console.log("Dont use this. use the Groovy Version as this wont work for files over 2 GB")
-//yarn run localToExcel
+//pnpm run localToExcel

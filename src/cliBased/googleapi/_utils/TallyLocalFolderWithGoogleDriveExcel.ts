@@ -47,4 +47,4 @@ const tally = async (rootFolder: string) => {
 }
 
 tally("D:\\eG-tr1-30\\Treasures30\\Otro");
-//yarn run tallyWithLocal
+//pnpm run tallyWithLocal

@@ -25,6 +25,12 @@ http://127.0.0.1:80/
 
 docker push egangotri/egangotri-node-backend:dashboard
 
+## access docker iamge via
+http://localhost:80/
+*** you need to be logged in with the correct acct e**trust@gmail.com
+otherwise you will keep getting access denied error.
+
+
 ## Deploy on Render
 Create a New Web Service.
 Share the DockerHub Image URL:

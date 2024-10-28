@@ -90,4 +90,4 @@ const _src = `D:\\${_root}`
 const _dest = `E:\\${_root}`;
 
 //compareFolders(_src, _dest)
-//yarn run syncFolders
+//pnpm run syncFolders

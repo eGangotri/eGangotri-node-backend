@@ -51,4 +51,4 @@ const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)
 console.log(`Combining JSON Data: ${JSON.stringify(combinedExcel.splice(0, 1))}`)
 jsonToExcel(combinedExcel, `${base}//fip-uploadables-${timeComponent}.xlsx`)
 
-//yarn run combineFIPExcels
+//pnpm run combineFIPExcels

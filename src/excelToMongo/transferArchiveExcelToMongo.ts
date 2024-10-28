@@ -80,4 +80,4 @@ export async function deleteRowsByAccts(accts: string[]) {
 //deleteRowsByAccts(['drnaithaniX', 'lucknow_state_museumXXX'] );
 const homeDirectory = os.homedir();
 //archiveExceltoMongo(`${homeDirectory}\\Desktop\\archiveExcels\\Varanasi`);
-// yarn run excelToMongoArchive
+// pnpm run excelToMongoArchive

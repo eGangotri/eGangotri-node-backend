@@ -1,6 +1,6 @@
 # Use an official Node.js runtime as a parent image
-FROM node:18
-
+FROM node:20
+RUN npm install -g pnpm@latest
 RUN apt-get clean && apt-get update
 
 # Set the working directory inside the container
@@ -8,10 +8,10 @@ WORKDIR /app
 
 # Copy package.json and package-lock.json to the working directory
 COPY package*.json ./
-COPY yarn.lock ./
+COPY pnpm-lock.yaml ./
 
-RUN yarn install
-RUN yarn global add typescript
+RUN pnpm install
+RUN pnpm global add typescript
 
 # Install dependencies
 
@@ -20,7 +20,7 @@ COPY . .
 COPY .env .env
 
 # Build your TypeScript code
-RUN yarn run build
+RUN pnpm run build
 # Expose a port (if your app listens on a specific port)
 EXPOSE 80
 

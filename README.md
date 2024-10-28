@@ -5,9 +5,7 @@
 #npm init
 
 # on a new Machine with code from git
-yarn install 
-yarn global add express ts-node typescript cors body-parser
-yarn global  add  @tsconfig/node16 -D
+pnpm install 
 npm install --location=global --force nodemon
 (without --force it was not installing)
 
@@ -40,13 +38,13 @@ Ref:
     mongodb+srv://<username>:<password>@<cluster0>.<xxxxx>.mongodb.net/?authMechanism=DEFAULT
     
     #Run
-    nodemon --exec yarn run start
-    //if on WSL/Linux etc you may need to use sudo yarn run start
+    nodemon --exec pnpm run start
+    //if on WSL/Linux etc you may need to use sudo pnpm run start
     OR
     nodemon 
 
     Start egangotri-react-frontend by running the following command
-    yarn run start 
+    pnpm run start 
     and viewing
     http://localhost:3000/
     
@@ -66,25 +64,22 @@ Ref:
 
 ###Softwware No. 2. 
 ###NMM-Tiff-2-pdf
- * yarn run convert
- * yarn run tally-post-conversion ( with TALLY_FOR_FOLDERS)
+ * pnpm run convert
+ * pnpm run tally-post-conversion ( with TALLY_FOR_FOLDERS)
  * gradle merge(mega)
- * yarn run move-merged-pdfs
- * yarn run tally-post-conversion ( with TALLY_FOR_PDFS )Checks Numbers of Items in Sync Only
+ * pnpm run move-merged-pdfs
+ * pnpm run tally-post-conversion ( with TALLY_FOR_PDFS )Checks Numbers of Items in Sync Only
  * gradle tally(mega) ( checks pageCount corresponds to image count)
  * gradle uploadToArchive
 
 
 
-## Docker
-docker build . -t egangotri/egangotri-node-backend
-docker run -d -p 80:80 egangotri/egangotri-node-backend:latest
-docker login
-docker push egangotri/egangotri-node-backend:latest
+## Docker Instrctions:
+### Find in README for the Specific module:
 
 ## access docker iamge via
 http://localhost:80/
-*** you need to be logged in with the correct acct egangotritrust@gmail.com
+*** you need to be logged in with the correct acct e**trust@gmail.com
 otherwise you will keep getting access denied error.
 
 #ERRORS

@@ -121,4 +121,4 @@ const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)
 mergeExcels(_mainExcelFileName, _secondaryExcelFileName)
 //Caution !!! this is for the Old Excel pre-Google-Drive-Reduced Mechanism to New Mechanism
 
-//yarn run mergeExcels
+//pnpm run mergeExcels

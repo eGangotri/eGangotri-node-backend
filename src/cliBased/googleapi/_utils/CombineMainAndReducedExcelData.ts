@@ -165,5 +165,5 @@ export const combineGDriveAndReducedPdfExcels = (mainFilePathAbs: string,
 };
 //exec()
 //Combined google drive excel with reduced pdf drive excels
-//yarn run combineExcels
+//pnpm run combineExcels
 

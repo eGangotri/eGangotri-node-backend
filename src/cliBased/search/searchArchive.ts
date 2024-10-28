@@ -59,4 +59,4 @@ const leftExcel = `${_excelPath}\\${fs.readdirSync(_excelPath).find(x => x.inclu
 console.log(`leftExcel ${leftExcel}`)
 
 searchArchive(leftExcel);
-//yarn run searchArchive
+//pnpm run searchArchive

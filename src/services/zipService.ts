@@ -99,7 +99,7 @@ const pdfPaths = [
 
 const outputZipPath = 'C:\\Users\\chetan\\Downloads\\output3.zip';
 
-//yarn run zipFiles
+//pnpm run zipFiles
 
 // zipFiles(pdfPaths, outputZipPath, "C:\\Users\\chetan\\Documents")
 //     .then(() => console.log('Zipping completed successfully'))

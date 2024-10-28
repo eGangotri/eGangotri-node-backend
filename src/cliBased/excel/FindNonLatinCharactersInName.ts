@@ -22,4 +22,4 @@ const leftJsonArray = excelToJson(leftExcel)
 console.log(`leftJsonArray ${leftJsonArray.length}`)
 leftJsonArray.filter(x => nonLatin(x as LocalFileHeaders));
 
-//yarn run findNonLatin
+//pnpm run findNonLatin
