@@ -200,8 +200,8 @@ fileUtilsRoute.post('/imgFilesToPdf', async (req: any, resp: any) => {
             results.push(res);
         }
 
-        const resultsSummary = results.map((res: { success_count: number, error_count: number }, index: number) => {
-            return `(${index + 1}). Succ: ${res.success_count} Err: ${res.error_count}`;
+        const resultsSummary = results.map((res: { success_count: number, exception_count: number, error_count: number }, index: number) => {
+            return `(${index + 1}). Succ: ${res.success_count} Err: ${res.error_count} Exception Count: ${res.exception_count} Total: ${res.success_count + res.error_count}`;
         });
 
         resp.status(200).send({
