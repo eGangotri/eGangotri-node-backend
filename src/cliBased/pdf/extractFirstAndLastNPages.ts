@@ -128,4 +128,4 @@ export const extractFirstAndLastNPages = async (_srcFoldersWithPath: string[], d
 // const _srcFoldersWithPath = _folders.map(x => `${srcRootFolder}\\Treasures${x}`)
 
 //extractFistsAndLastPages(_srcFoldersWithPath, destRootFolder)
-//yarn run extractFirstAndLastNPages
+//pnpm run extractFirstAndLastNPages

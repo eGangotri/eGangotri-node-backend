@@ -134,4 +134,4 @@ const jsonBody: AksharaMukhaGetProps = {
 //     console.log(res)
 // })
 
-//yarn run aksharamukha
+//pnpm run aksharamukha

@@ -72,4 +72,4 @@ export const generateGoogleDriveListingExcel = async (driveLinkOrFolderID: strin
 //   const driveLink = "https://drive.google.com/drive/u/0/folders/1yFQaR1FeKN3WEkEGCVhF5PsalQ6-EL2C";
 //   procOrigGoogleDrive(driveLink, "Treasures 66");
 // })();
-//yarn run catalog
+//pnpm run catalog

@@ -40,4 +40,4 @@ const mmYYYY = "Dec-2019_(15)";
 const _local = `E:/NMM-5/${mmYYYY}`
 
 moveMergedPdfs(`${_local}`);
-//yarn run  move-merged-pdfs
+//pnpm run  move-merged-pdfs

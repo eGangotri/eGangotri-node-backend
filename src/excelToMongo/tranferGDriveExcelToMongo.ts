@@ -124,4 +124,4 @@ export async function deleteRowsBySource(sources: string[]) {
 
 // "C:\\_catalogWork\\_collation\\_catCombinedExcels\\Treasures 60\\" + "Treasures 60-Catalog-24-Aug-2023-01-22-1694" + ".xlsx");
 //process.exit(0);
-// yarn run excelToMongoGDrive 
+// pnpm run excelToMongoGDrive 

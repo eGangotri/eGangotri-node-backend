@@ -144,4 +144,4 @@ export const downloadFromGoogleDriveToProfile = async (driveLinkOrFolderId: stri
 //   await downloadFromGoogleDriveToProfile(_url, _profile);
 // })();
 
-//yarn run downloadFromGoogle "google url" "TMP"
+//pnpm run downloadFromGoogle "google url" "TMP"

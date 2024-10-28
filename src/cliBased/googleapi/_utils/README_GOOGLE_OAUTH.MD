@@ -22,7 +22,7 @@ Click on "Create", and you'll see the client ID and client secret on the credent
 
 To obtain the refresh_token, you'll need to perform the OAuth flow. Here's an example of how to do it programmatically using the googleapis library:
 
-you can use yarn run refreshToken
+you can use pnpm run refreshToken
 
 /*Code Starts*/
 import { google } from 'googleapis';

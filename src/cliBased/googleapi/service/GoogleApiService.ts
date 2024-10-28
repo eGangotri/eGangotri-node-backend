@@ -128,7 +128,8 @@ export async function listFolderContents(folderId: string,
             : ` and (mimeType!='' or  mimeType='${FOLDER_MIME_TYPE}')`;
 
         const _query = `'${folderId}' in parents and trashed = false ${combinedCondition} ${conditionForIgnoreFolder} `
-        console.log(`_query ${_query}`)
+        let idx = 0
+        console.log(`_query(${++idx}) ${_query}`)
         do {
             const response: GaxiosResponse = await drive.files.list({
                 q: _query,
@@ -138,8 +139,10 @@ export async function listFolderContents(folderId: string,
                 includeItemsFromAllDrives: true,
                 supportsAllDrives: true
             });
+            console.log(`resp: ${idx} ${JSON.stringify(response?.data?.files || "no files")}`)
             files = files.concat(response.data.files || []);
             pageToken = response.data.nextPageToken;
+            console.log(`after pageTiken: ${idx}`)
         } while (pageToken);
 
 

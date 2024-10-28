@@ -195,4 +195,4 @@ export const vanitizePdfForProfiles = async (profileAsCSV: string) => {
     console.log(`vanitizePdfForProfiles:responseList ${responseList}`);
     return responseList;
 }
-//yarn run vanity 
+//pnpm run vanity 

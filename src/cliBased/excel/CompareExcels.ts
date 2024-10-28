@@ -121,4 +121,4 @@ console.log(`leftJsonArray ${leftJsonArray.length}`)
 console.log(`rightJsonArray ${rightJsonArray.length}\n`)
 
 compareLocalToReduced(leftJsonArray, rightJsonArray);
-//yarn run compareExcels
+//pnpm run compareExcels

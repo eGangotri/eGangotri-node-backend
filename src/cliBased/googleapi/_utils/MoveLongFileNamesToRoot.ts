@@ -55,4 +55,4 @@ MOVED(${MOVED_FILE_LIST.length}):${MOVED_FILE_LIST.join("\n")}
 `)
 })
 
-//yarn run moveLongNames
+//pnpm run moveLongNames
