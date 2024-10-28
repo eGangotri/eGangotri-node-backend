@@ -12,6 +12,7 @@ export async function convertJpgsToPdf(inputFolder: string, outputFolder = "") {
         let counter = 0;
         if (jpegFiles.length === 0) {
             return {
+                inputFolder,
                 error: 'No JPEG files found in the input folder',
                 success: false
             };
@@ -61,7 +62,7 @@ export const convertJpgsToPdfInAllSubFolders = async (inputFolder: string, outpu
 
     try {
         const allFiles = await getAllFileStats({ directoryPath: inputFolder, ignoreFolders: false, withLogs: false, withMetadata: false });
-        const allFolders = allFiles.filter(file => file.ext === "FOLDER") 
+        const allFolders = allFiles.filter(file => file.ext === "FOLDER")
         allFolders.push({
             absPath: inputFolder,
             fileName: path.basename(inputFolder),
@@ -72,19 +73,20 @@ export const convertJpgsToPdfInAllSubFolders = async (inputFolder: string, outpu
         let counter = 0;
         allFolders.map(async (folder) => {
             console.log(`Processing Folder#${++counter} ${folder.absPath}`);
-            try{
-                promise.push(convertJpgsToPdf(folder.absPath, outputFolder));
-                success_count++;
+            try {
+                const _convertResult = convertJpgsToPdf(folder.absPath, outputFolder);
+                promise.push(_convertResult);
             }
-            catch(e){
+            catch (e) {
                 console.error(`Error while processing folder: ${folder.absPath}`, e);
                 error_count++;
             }
         });
         const all = await Promise.all(promise);
         return {
-            success_count,
-            error_count,
+            success_count: all.filter((res: any) => res.success).length,    
+            error_count: all.filter((res: any) => !res.success).length,
+            exception_count: error_count,
             totalFolderCount: allFolders.length,
             foldersProcessed: all.length,
             eqaulity: allFolders.length === all.length,
