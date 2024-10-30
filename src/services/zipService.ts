@@ -71,7 +71,7 @@ function unzipFiles(filePath: string, outputDir: string): Promise<void> {
 
             zipfile.readEntry();
             let entryFileName = "";
-            try {
+            
                 zipfile.on("entry", (entry) => {
                     // Construct the full output path
                     const outputPath = path.join(outputDir, entry.fileName);
@@ -106,11 +106,7 @@ function unzipFiles(filePath: string, outputDir: string): Promise<void> {
                     }
                 
             });
-        }
-        catch (err) {
-            console.error("Unexpected error processing entry:", err);
-            zipfile.readEntry(); // Continue to next entry
-        }
+       
 
         zipfile.on("end", () => {
             console.log(`yauzl-extracted ${entryFileName} to ${outputDir}`);
