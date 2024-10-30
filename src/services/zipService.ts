@@ -3,8 +3,10 @@ import archiver from 'archiver';
 import * as path from 'path';
 import admZip from 'adm-zip';
 import { getAllZipFiles } from '../utils/FileStatsUtils';
+import * as yauzl from 'yauzl';
 
 const UNZIP_FOLDER = "\\unzipped";
+
 export async function zipFiles(filePaths: string[],
     outputZipPath: string,
     rootDirToMaintainOrigFolderOrder = ""): Promise<void> {
@@ -59,13 +61,64 @@ function findZipFiles(dir: string, zipFiles: string[] = []): string[] {
     return zipFiles;
 }
 
-export async function unzipFiles(zipPath: string, outputDir: string): Promise<void> {
+function unzipFiles(filePath: string, outputDir: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+        yauzl.open(filePath, { lazyEntries: true }, (err, zipfile) => {
+            if (err) {
+                return reject(err);
+            }
+
+            zipfile.readEntry();
+
+            zipfile.on("entry", (entry) => {
+                // Construct the full output path
+                const outputPath = path.join(outputDir, entry.fileName);
+               // console.log(`outputPath ${outputPath}`);
+                // Create directory for entry if needed
+                if (/\/$/.test(entry.fileName)) {
+                    // Directory entry
+                    fs.mkdirSync(outputPath, { recursive: true });
+                    zipfile.readEntry(); // Continue to the next entry
+                } else {
+                    // File entry
+                    zipfile.openReadStream(entry, (err, readStream) => {
+                        if (err) {
+                            return reject(err);
+                        }
+
+                        // Ensure the output directory exists
+                        fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+
+                        const writeStream = fs.createWriteStream(outputPath);
+                        readStream.pipe(writeStream);
+
+                        writeStream.on("finish", () => {
+                        console.log(`yauzl-extracted ${entry.fileName} to ${outputPath}`);
+                            zipfile.readEntry(); // Continue to the next entry
+                        });
+
+                        writeStream.on("error", (err) => {
+                            reject(err);
+                        });
+                    });
+                }
+            });
+
+            zipfile.on("end", () => {
+                resolve(); // Resolve the promise when done
+            });
+        });
+    });
+}
+
+export async function unzipFilesDeprecated(zipPath: string, outputDir: string): Promise<void> {
     return new Promise((resolve, reject) => {
         try {
             const zip = new admZip(zipPath);
             zip.extractAllTo(outputDir, true);
             resolve();
         } catch (error) {
+            console.log(`unzipFiles: ${error}`);
             reject(error);
         }
     });
@@ -76,10 +129,12 @@ export async function unzipAllFilesInDirectory(pathToZipFiles: string, _unzipHer
     Promise<{
         success_count: number,
         error_count: number,
-        unzipFolder: string
+        unzipFolder: string,
+        error_msg: string[]
     }> {
     let error_count = 0;
     let success_count = 0;
+    const error_msg: string[] = [];
     const zipFiles = await getAllZipFiles(pathToZipFiles);
     if (!_unzipHere || _unzipHere === "") {
         _unzipHere = pathToZipFiles + UNZIP_FOLDER;
@@ -92,17 +147,21 @@ export async function unzipAllFilesInDirectory(pathToZipFiles: string, _unzipHer
                 fs.mkdirSync(outputDir, { recursive: true });
             }
             await unzipFiles(zipFile.absPath, outputDir);
-            console.log(`Unzipped ${zipFile} to ${outputDir}`);
+            console.log(`Unzipped ${zipFile.absPath} to 
+            ${outputDir}`);
             success_count++
         }
         catch (error) {
-            console.log(`Error while unzipping ${zipFile} : ${error}`);
+            const _err = `Error while unzipping ${zipFile.absPath} : ${JSON.stringify(error)}`;
+            console.log(_err);
             error_count++;
+            error_msg.push(_err)
         }
     }
     return {
         success_count,
         error_count,
+        error_msg,
         unzipFolder: _unzipHere
     };
 }
