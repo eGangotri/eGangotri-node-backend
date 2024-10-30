@@ -100,7 +100,7 @@ yarnRoute.post('/unzipAllFolders', async (req: any, resp: any) => {
         const folder = req?.body?.folder;
         const ignoreFolder = req?.body?.ignoreFolder || "proc";
 
-        console.log(`:downloadZipFromGoogleDrive:
+        console.log(`:unzipAllFolders:
         googleDriveLink:
          ${folder?.split(",").map((link: string) => link + "\n ")} 
         `)
@@ -116,10 +116,8 @@ yarnRoute.post('/unzipAllFolders', async (req: any, resp: any) => {
         const _folder = folder.includes(",") ? folder.split(",").map((link: string) => link.trim()) : [folder.trim()];
 
         for (const link of _folder) {
-            console.log(1)
             const res = await unzipAllFilesInDirectory(link, "", ignoreFolder);
-            console.log(2)
-            results.push({ unzipFolder: res.unzipFolder });
+            results.push(res);
         }
 
         const resultsSummary = results.map((res: {success_count:number,error_count:number}, index: number) => {
