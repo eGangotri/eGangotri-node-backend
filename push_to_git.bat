@@ -6,7 +6,7 @@ set commit_msg="Optimizations at %timestamp% %arg1WithoutQuotes%"
 git status
 git add src/*
 git add *.json
-git add pnpm-lock.yaml
+git add *.bat
 git add *.yaml
 git commit -m %commit_msg%
 git push origin master
