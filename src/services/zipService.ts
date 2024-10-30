@@ -65,50 +65,59 @@ function unzipFiles(filePath: string, outputDir: string): Promise<void> {
     return new Promise((resolve, reject) => {
         yauzl.open(filePath, { lazyEntries: true }, (err, zipfile) => {
             if (err) {
+                console.error(`recieved error in yauzl: ${JSON.stringify(err)}`);
                 return reject(err);
             }
 
             zipfile.readEntry();
+            let entryFileName = "";
+            try {
+                zipfile.on("entry", (entry) => {
+                    // Construct the full output path
+                    const outputPath = path.join(outputDir, entry.fileName);
+                    entryFileName = entry.fileName;
+                    // Create directory for entry if needed
+                    if (/\/$/.test(entry.fileName)) {
+                        // Directory entry
+                        fs.mkdirSync(outputPath, { recursive: true });
+                        zipfile.readEntry(); // Continue to the next entry
+                    } else {
+                        // File entry
+                        zipfile.openReadStream(entry, (err, readStream) => {
+                            if (err) {
+                                return reject(err);
+                            }
 
-            zipfile.on("entry", (entry) => {
-                // Construct the full output path
-                const outputPath = path.join(outputDir, entry.fileName);
-               // console.log(`outputPath ${outputPath}`);
-                // Create directory for entry if needed
-                if (/\/$/.test(entry.fileName)) {
-                    // Directory entry
-                    fs.mkdirSync(outputPath, { recursive: true });
-                    zipfile.readEntry(); // Continue to the next entry
-                } else {
-                    // File entry
-                    zipfile.openReadStream(entry, (err, readStream) => {
-                        if (err) {
-                            return reject(err);
-                        }
+                            // Ensure the output directory exists
+                            fs.mkdirSync(path.dirname(outputPath), { recursive: true });
 
-                        // Ensure the output directory exists
-                        fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+                            const writeStream = fs.createWriteStream(outputPath);
+                            readStream.pipe(writeStream);
 
-                        const writeStream = fs.createWriteStream(outputPath);
-                        readStream.pipe(writeStream);
+                            writeStream.on("finish", () => {
+                                zipfile.readEntry(); // Continue to the next entry
+                            });
 
-                        writeStream.on("finish", () => {
-                        console.log(`yauzl-extracted ${entry.fileName} to ${outputPath}`);
-                            zipfile.readEntry(); // Continue to the next entry
+                            writeStream.on("error", (err) => {
+                                console.error(`yauzl-error ${entryFileName} to ${outputDir}`);
+                                reject(err);
+                            });
                         });
-
-                        writeStream.on("error", (err) => {
-                            reject(err);
-                        });
-                    });
-                }
+                    }
+                
             });
+        }
+        catch (err) {
+            console.error("Unexpected error processing entry:", err);
+            zipfile.readEntry(); // Continue to next entry
+        }
 
-            zipfile.on("end", () => {
-                resolve(); // Resolve the promise when done
-            });
+        zipfile.on("end", () => {
+            console.log(`yauzl-extracted ${entryFileName} to ${outputDir}`);
+            resolve(); // Resolve the promise when done
         });
     });
+});
 }
 
 export async function unzipFilesDeprecated(zipPath: string, outputDir: string): Promise<void> {
@@ -139,7 +148,7 @@ export async function unzipAllFilesInDirectory(pathToZipFiles: string, _unzipHer
     if (!_unzipHere || _unzipHere === "") {
         _unzipHere = pathToZipFiles + UNZIP_FOLDER;
     }
-   
+
     for (const zipFile of zipFiles) {
         try {
             const outputDir = path.join(_unzipHere, path.basename(zipFile.absPath, '.zip'));
