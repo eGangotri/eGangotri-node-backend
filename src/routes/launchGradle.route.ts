@@ -18,7 +18,7 @@ launchGradleRoute.get('/launchUploader', async (req: any, resp: any) => {
     try {
         const _profiles = req.query.profiles
         let subjectDesc = req.query?.subjectDesc || ""
-        if(subjectDesc && subjectDesc.trim() !== "") {
+        if (subjectDesc && subjectDesc.trim() !== "") {
             subjectDesc = `subjectDesc=${subjectDesc}`
         }
         console.log(`launchUploader ${_profiles} ${subjectDesc}`)
@@ -215,7 +215,7 @@ launchGradleRoute.get('/reuploadMissedViaUploadCycleId', async (req: any, resp: 
                     console.log(`_missedInJSON ${_missedInJSON.length}`)
 
                     const excelFileNameForMissed = createExcelV1FileForUpload(uploadCycleId, _missedInJSON,
-                        `${_missedInJSON.length}-of-${allIntended.length}`,"reupload-missed-in-upload-cycle-id-")
+                        `${_missedInJSON.length}-of-${allIntended.length}`, "reupload-missed-in-upload-cycle-id-")
                     const res = await launchUploaderViaExcelV1(uploadCycleByCycleId.archiveProfiles[0].archiveProfile,
                         excelFileNameForMissed,
                         uploadCycleId);
@@ -461,10 +461,10 @@ launchGradleRoute.get('/launchUploaderViaExcelV3', async (req: any, resp: any) =
         const result = await launchUploaderViaExcelV3Multi(profilesAsArray,
             excelPathsAsArray,
             "", range);
-       resp.status(200).send({ response: result });
+        resp.status(200).send({ response: result });
 
         //v2
-        
+
         /*
         const result = [];
         for (let i = 0; i < profilesAsArray.length; i++) {
@@ -501,3 +501,34 @@ launchGradleRoute.get('/launchUploaderViaExcelV3', async (req: any, resp: any) =
     }
 })
 
+launchGradleRoute.post('/imgFilesToPdfGradleVersion', async (req: any, resp: any) => {
+    try {
+        const folder = req.body.folder;
+        const imgType = req.body.imgType;
+        const results = [];
+        const _folder = folder.includes(",") ? folder.split(",").map((link: string) => link.trim()) : [folder.trim()];
+        console.log(`imgFilesToPdf:folder: ${_folder} imgType: ${imgType}`);
+
+        for (const aFolder of _folder) {
+            console.log(`imgToPdf for ${aFolder}`)
+            const _cmd = `gradle imgToPdf --args="${aFolder}"` //, ${imgType}
+            console.log(`_cmd ${_cmd}`)
+            const res = await makeGradleCall(_cmd)
+            results.push(res);
+        }
+
+        // const resultsSummary = results.map((res: { success_count: number, exception_count: number, error_count: number }, index: number) => {
+        //     return `(${index + 1}). Succ: ${res.success_count} Err: ${res.error_count} Exception Count: ${res.exception_count} Total: ${res.success_count + res.error_count}`;
+        // });
+
+        resp.status(200).send({
+            total: _folder.length,
+          //  resultsSummary,
+            response: results
+        });
+    }
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})

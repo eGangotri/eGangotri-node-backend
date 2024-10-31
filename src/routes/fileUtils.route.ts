@@ -172,7 +172,9 @@ fileUtilsRoute.post('/convertScript', async (req: any, resp: any) => {
         resp.status(400).send(err);
     }
 })
-
+/**
+ * doesnt work for 2TB+. better to use mergePdf gradle Version
+ */
 fileUtilsRoute.post('/imgFilesToPdf', async (req: any, resp: any) => {
     try {
         const folder = req.body.folder;

@@ -50,7 +50,7 @@ export async function convertJpgsToPdf(inputFolder: string, outputFolder = "") {
     catch (error) {
         console.error('Error during conversion:', error);
         return {
-            error,
+            error:`Error during conversion: ${error}`,
             success: false
         };
     }
@@ -98,7 +98,7 @@ export const convertJpgsToPdfInAllSubFolders = async (inputFolder: string, outpu
     catch (e) {
         console.error('Error during conversion:', e);
         return {
-            error: e,
+            error:`Error during conversion: ${e}`,
             success: false,
             error_count,
             success_count,
