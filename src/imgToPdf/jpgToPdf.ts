@@ -76,6 +76,7 @@ export const convertJpgsToPdfInAllSubFolders = async (inputFolder: string, outpu
             try {
                 const _convertResult = convertJpgsToPdf(folder.absPath, outputFolder);
                 promise.push(_convertResult);
+                success_count++
             }
             catch (e) {
                 console.error(`Error while processing folder: ${folder.absPath}`, e);
@@ -96,5 +97,12 @@ export const convertJpgsToPdfInAllSubFolders = async (inputFolder: string, outpu
     }
     catch (e) {
         console.error('Error during conversion:', e);
+        return {
+            error: e,
+            success: false,
+            error_count,
+            success_count,
+            exception_count: error_count,
+        };
     }
 }
