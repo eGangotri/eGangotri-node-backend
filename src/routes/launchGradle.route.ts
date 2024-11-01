@@ -511,7 +511,7 @@ launchGradleRoute.post('/imgFilesToPdfGradleVersion', async (req: any, resp: any
 
         for (const aFolder of _folder) {
             console.log(`imgToPdf for ${aFolder}`)
-            const _cmd = `gradle imgToPdf --args="${aFolder}"` //, ${imgType}
+            const _cmd = `gradle imgToPdf --args="'${aFolder}', '${imgType}'"` //, ${imgType}
             console.log(`_cmd ${_cmd}`)
             const res = await makeGradleCall(_cmd)
             results.push(res);
