@@ -181,7 +181,7 @@ fileUtilsRoute.post('/imgFilesToPdf', async (req: any, resp: any) => {
         const imgType = req.body.imgType;
         const results = [];
         const _folder = folder.includes(",") ? folder.split(",").map((link: string) => link.trim()) : [folder.trim()];
-        console.log(`imgFilesToPdf:folder: ${folder} imgType: ${imgType}`);
+        console.log(`deprecated:imgFilesToPdf:folder: ${folder} imgType: ${imgType}`);
 
         for (const aFolder of _folder) {
             let res = {};
