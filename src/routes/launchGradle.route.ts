@@ -511,15 +511,16 @@ launchGradleRoute.post('/imgFilesToPdfGradleVersion', async (req: any, resp: any
 
         for (const aFolder of _folder) {
             console.log(`imgToPdf for ${aFolder}`)
-            const _cmd = `gradle imgToPdf --args="'${aFolder}', '${imgType}'"` //, ${imgType}
-            console.log(`_cmd ${_cmd}`)
+            const escapedFolder = aFolder.replace(/\\/g, '\\\\');
+            const _cmd = `gradle imgToPdf --args="\\"${escapedFolder}\\" \\"${imgType}\\""`;
+            console.log(`_cmd ${_cmd}`);
             const res = await makeGradleCall(_cmd)
             results.push(res);
         }
 
         resp.status(200).send({
             total: _folder.length,
-          //  resultsSummary,
+            //  resultsSummary,
             response: results
         });
     }
