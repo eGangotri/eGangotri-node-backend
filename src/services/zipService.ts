@@ -71,49 +71,49 @@ function unzipFiles(filePath: string, outputDir: string): Promise<void> {
 
             zipfile.readEntry();
             let entryFileName = "";
-            
-                zipfile.on("entry", (entry) => {
-                    // Construct the full output path
-                    const outputPath = path.join(outputDir, entry.fileName);
-                    entryFileName = entry.fileName;
-                    // Create directory for entry if needed
-                    if (/\/$/.test(entry.fileName)) {
-                        // Directory entry
-                        fs.mkdirSync(outputPath, { recursive: true });
-                        zipfile.readEntry(); // Continue to the next entry
-                    } else {
-                        // File entry
-                        zipfile.openReadStream(entry, (err, readStream) => {
-                            if (err) {
-                                return reject(err);
-                            }
 
-                            // Ensure the output directory exists
-                            fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+            zipfile.on("entry", (entry) => {
+                // Construct the full output path
+                const outputPath = path.join(outputDir, entry.fileName);
+                entryFileName = entry.fileName;
+                // Create directory for entry if needed
+                if (/\/$/.test(entry.fileName)) {
+                    // Directory entry
+                    fs.mkdirSync(outputPath, { recursive: true });
+                    zipfile.readEntry(); // Continue to the next entry
+                } else {
+                    // File entry
+                    zipfile.openReadStream(entry, (err, readStream) => {
+                        if (err) {
+                            return reject(err);
+                        }
 
-                            const writeStream = fs.createWriteStream(outputPath);
-                            readStream.pipe(writeStream);
+                        // Ensure the output directory exists
+                        fs.mkdirSync(path.dirname(outputPath), { recursive: true });
 
-                            writeStream.on("finish", () => {
-                                zipfile.readEntry(); // Continue to the next entry
-                            });
+                        const writeStream = fs.createWriteStream(outputPath);
+                        readStream.pipe(writeStream);
 
-                            writeStream.on("error", (err) => {
-                                console.error(`yauzl-error ${entryFileName} to ${outputDir}`);
-                                reject(err);
-                            });
+                        writeStream.on("finish", () => {
+                            zipfile.readEntry(); // Continue to the next entry
                         });
-                    }
-                
-            });
-       
 
-        zipfile.on("end", () => {
-            console.log(`yauzl-extracted ${entryFileName} to ${outputDir}`);
-            resolve(); // Resolve the promise when done
+                        writeStream.on("error", (err) => {
+                            console.error(`yauzl-error ${entryFileName} to ${outputDir}`);
+                            reject(err);
+                        });
+                    });
+                }
+
+            });
+
+
+            zipfile.on("end", () => {
+                console.log(`yauzl-extracted ${entryFileName} to ${outputDir}`);
+                resolve(); // Resolve the promise when done
+            });
         });
     });
-});
 }
 
 export async function unzipFilesDeprecated(zipPath: string, outputDir: string): Promise<void> {
@@ -140,28 +140,36 @@ export async function unzipAllFilesInDirectory(pathToZipFiles: string, _unzipHer
     let error_count = 0;
     let success_count = 0;
     const error_msg: string[] = [];
-    const zipFiles = await getAllZipFiles(pathToZipFiles);
-    if (!_unzipHere || _unzipHere === "") {
-        _unzipHere = pathToZipFiles + UNZIP_FOLDER;
-    }
+    try {
+        const zipFiles = await getAllZipFiles(pathToZipFiles);
+        if (!_unzipHere || _unzipHere === "") {
+            _unzipHere = pathToZipFiles + UNZIP_FOLDER;
+        }
 
-    for (const zipFile of zipFiles) {
-        try {
-            const outputDir = path.join(_unzipHere, path.basename(zipFile.absPath, '.zip'));
-            if (!fs.existsSync(outputDir)) {
-                fs.mkdirSync(outputDir, { recursive: true });
-            }
-            await unzipFiles(zipFile.absPath, outputDir);
-            console.log(`Unzipped ${zipFile.absPath} to 
+        for (const zipFile of zipFiles) {
+            try {
+                const outputDir = path.join(_unzipHere, path.basename(zipFile.absPath, '.zip'));
+                if (!fs.existsSync(outputDir)) {
+                    fs.mkdirSync(outputDir, { recursive: true });
+                }
+                console.log(`unzipping ${zipFile.absPath} to ${outputDir}`)
+                await unzipFiles(zipFile.absPath, outputDir);
+                console.log(`Unzipped ${zipFile.absPath} to 
             ${outputDir}`);
-            success_count++
+                success_count++
+            }
+            catch (error) {
+                const _err = `Error while unzipping ${zipFile.absPath} : ${JSON.stringify(error)}`;
+                console.log(_err);
+                error_count++;
+                error_msg.push(_err)
+            }
         }
-        catch (error) {
-            const _err = `Error while unzipping ${zipFile.absPath} : ${JSON.stringify(error)}`;
-            console.log(_err);
-            error_count++;
-            error_msg.push(_err)
-        }
+    }
+    catch (error) {
+        console.log(`Error while getting zip files: ${JSON.stringify(error)}`);
+        error_count++;
+        error_msg.push(`Error while getting zip files: ${JSON.stringify(error)}`);
     }
     return {
         success_count,

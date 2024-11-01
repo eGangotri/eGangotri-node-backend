@@ -507,7 +507,7 @@ launchGradleRoute.post('/imgFilesToPdfGradleVersion', async (req: any, resp: any
         const imgType = req.body.imgType;
         const results = [];
         const _folder = folder.includes(",") ? folder.split(",").map((link: string) => link.trim()) : [folder.trim()];
-        console.log(`imgFilesToPdf:folder: ${_folder} imgType: ${imgType}`);
+        console.log(`gradle/imgFilesToPdf:folder: ${_folder} imgType: ${imgType}`);
 
         for (const aFolder of _folder) {
             console.log(`imgToPdf for ${aFolder}`)
@@ -516,10 +516,6 @@ launchGradleRoute.post('/imgFilesToPdfGradleVersion', async (req: any, resp: any
             const res = await makeGradleCall(_cmd)
             results.push(res);
         }
-
-        // const resultsSummary = results.map((res: { success_count: number, exception_count: number, error_count: number }, index: number) => {
-        //     return `(${index + 1}). Succ: ${res.success_count} Err: ${res.error_count} Exception Count: ${res.exception_count} Total: ${res.success_count + res.error_count}`;
-        // });
 
         resp.status(200).send({
             total: _folder.length,

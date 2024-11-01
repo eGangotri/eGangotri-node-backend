@@ -101,7 +101,7 @@ yarnRoute.post('/unzipAllFolders', async (req: any, resp: any) => {
         const ignoreFolder = req?.body?.ignoreFolder || "proc";
 
         console.log(`:unzipAllFolders:
-        googleDriveLink:
+        folders to unzip:
          ${folder?.split(",").map((link: string) => link + "\n ")} 
         `)
         if (!folder) {
