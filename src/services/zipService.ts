@@ -145,7 +145,7 @@ export async function unzipAllFilesInDirectory(pathToZipFiles: string, _unzipHer
         if (!_unzipHere || _unzipHere === "") {
             _unzipHere = pathToZipFiles + UNZIP_FOLDER;
         }
-
+        
         for (const zipFile of zipFiles) {
             try {
                 const outputDir = path.join(_unzipHere, path.basename(zipFile.absPath, '.zip'));
