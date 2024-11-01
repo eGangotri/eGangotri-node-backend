@@ -108,13 +108,14 @@ yarnRoute.post('/unzipAllFolders', async (req: any, resp: any) => {
             resp.status(400).send({
                 response: {
                     "status": "failed",
-                    "message": "googleDriveLink and profile are mandatory"
+                    "message": "folder to unzip mandatory" 
                 }
             });
         }
         const results = [];
         const _folder = folder.includes(",") ? folder.split(",").map((link: string) => link.trim()) : [folder.trim()];
 
+        const startTime = Date.now();
         for (const link of _folder) {
             const res = await unzipAllFilesInDirectory(link, "", ignoreFolder);
             results.push(res);
@@ -123,8 +124,13 @@ yarnRoute.post('/unzipAllFolders', async (req: any, resp: any) => {
         const resultsSummary = results.map((res: {success_count:number,error_count:number}, index: number) => {
             return `(${index + 1}). Succ: ${res.success_count} Err: ${res.error_count}`;
         });
+        
+        const endTime = Date.now();
+        const timeTaken = endTime - startTime;
+        console.log(`Time taken to download downloadArchivePdfs: ${timeInfo(timeTaken)}`);
 
         resp.status(200).send({
+            timeTaken: timeInfo(timeTaken),
             resultsSummary,
             response: results
         });
