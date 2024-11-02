@@ -11,6 +11,7 @@ import { createExcelV1FileForUpload, createExcelV3FileForUpload, createJsonFileF
 import { itemsUsheredVerficationAndDBFlagUpdate } from '../services/itemsUsheredService';
 import { getLatestUploadCycle } from '../services/uploadCycleService';
 import { checkIfEmpty } from '../utils/FileUtils';
+import { timeInfo } from '../mirror/FrontEndBackendCommonCode';
 
 export const launchGradleRoute = express.Router();
 
@@ -502,6 +503,7 @@ launchGradleRoute.get('/launchUploaderViaExcelV3', async (req: any, resp: any) =
 })
 
 launchGradleRoute.post('/imgFilesToPdfGradleVersion', async (req: any, resp: any) => {
+    const startTime = Date.now();
     try {
         const folder = req.body.folder;
         const imgType = req.body.imgType;
@@ -517,8 +519,12 @@ launchGradleRoute.post('/imgFilesToPdfGradleVersion', async (req: any, resp: any
             const res = await makeGradleCall(_cmd)
             results.push(res);
         }
+        const endTime = Date.now();
+        const timeTaken = endTime - startTime;
+        console.log(`Time taken to download downloadArchivePdfs: ${timeInfo(timeTaken)}`);
 
         resp.status(200).send({
+            timeTaken: timeInfo(timeTaken),
             total: _folder.length,
             //  resultsSummary,
             response: results
