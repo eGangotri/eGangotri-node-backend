@@ -96,6 +96,7 @@ yarnRoute.post('/downloadZipFromGoogleDrive', async (req: any, resp: any) => {
 })
 
 yarnRoute.post('/unzipAllFolders', async (req: any, resp: any) => {
+    const startTime = Date.now();
     try {
         const folder = req?.body?.folder;
         const ignoreFolder = req?.body?.ignoreFolder || "proc";
@@ -115,7 +116,6 @@ yarnRoute.post('/unzipAllFolders', async (req: any, resp: any) => {
         const results = [];
         const _folder = folder.includes(",") ? folder.split(",").map((link: string) => link.trim()) : [folder.trim()];
 
-        const startTime = Date.now();
         for (const link of _folder) {
             const res = await unzipAllFilesInDirectory(link, "", ignoreFolder);
             results.push(res);

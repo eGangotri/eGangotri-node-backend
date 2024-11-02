@@ -11,6 +11,8 @@ export const yarnListMakerRoute = express.Router();
 
 yarnListMakerRoute.post('/getGoogleDriveListing', async (req: any, resp: any) => {
     console.log(`getGoogleDriveListing ${JSON.stringify(req.body)}`)
+    const startTime = Date.now();
+
     try {
         const googleDriveLink = req?.body?.googleDriveLink;
         const folderName = req?.body?.folderName || "";
@@ -51,8 +53,12 @@ yarnListMakerRoute.post('/getGoogleDriveListing', async (req: any, resp: any) =>
                 allNotJustPdfs ? "" : PDF_TYPE);
             _resps.push(listingResult);
         }
+        const endTime = Date.now();
+        const timeTaken = endTime - startTime;
+        console.log(`Time taken to download downloadArchivePdfs: ${timeInfo(timeTaken)}`);
 
         resp.status(200).send({
+            timeTaken: timeInfo(timeTaken),
             response: {
                 reduced: reduced ? "Yes" : "No",
                 allNotJustPdfs: allNotJustPdfs ? "Yes" : "No",
