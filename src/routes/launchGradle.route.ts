@@ -535,3 +535,33 @@ launchGradleRoute.post('/imgFilesToPdfGradleVersion', async (req: any, resp: any
         resp.status(400).send(err);
     }
 })
+
+launchGradleRoute.post('/mergePdfsGradleVersion', async (req: any, resp: any) => {
+    const startTime = Date.now();
+    try {
+        const folder = req.body.folder;
+        const mergeType = req.body.mergeType;
+        const results = [];
+        console.log(`gradle/mergePdfsGradleVersion:folder: ${folder} mergeType: ${mergeType}`);
+
+        console.log(`mergePdf for ${folder}`)
+        const escapedFolder = folder.replace(/\\/g, '\\\\');
+        const _cmd = `gradle mergePdf --args="\\"${escapedFolder}\\" \\"${mergeType}\\""`;
+        console.log(`_cmd ${_cmd}`);
+        const res = await makeGradleCall(_cmd)
+        results.push(res);
+
+        const endTime = Date.now();
+        const timeTaken = endTime - startTime;
+        console.log(`Time taken to convert Img Files (${mergeType}) to PDFs: ${timeInfo(timeTaken)}`);
+
+        resp.status(200).send({
+            timeTaken: timeInfo(timeTaken),
+            response: results
+        });
+    }
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})

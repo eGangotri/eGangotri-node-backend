@@ -174,7 +174,7 @@ fileUtilsRoute.post('/convertScript', async (req: any, resp: any) => {
     }
 })
 /**
- * doesnt work for 2TB+. better to use mergePdf gradle Version
+ * doesnt work for 2TB+. better to use imgFilesToPdfGradleVersion Gradle Version
  */
 fileUtilsRoute.post('/imgFilesToPdfDeprecated', async (req: any, resp: any) => {
     try {

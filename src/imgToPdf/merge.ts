@@ -6,7 +6,6 @@ import * as path from 'path';
 import { getAllPdfs, getAllPdfsInFolders, getDirectoriesWithFullPath } from "./utils/Utils";
 import { addReport, printReport } from "./index";
 import { PDF_EXT, PDF_SUB_FOLDER, PNG_SUB_FOLDER } from "./utils/constants";
-import { mergeUsingEasyPdf } from "./utils/EasyPdfMergeUtil";
 import { checkPageCountEqualsImgCountInFolder } from "./utils/PdfUtil";
 
 (async () => {
