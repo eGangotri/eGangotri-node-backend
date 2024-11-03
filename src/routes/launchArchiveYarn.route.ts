@@ -108,8 +108,9 @@ launchArchiveYarnRoute.post('/downloadArchivePdfs', async (req: any, resp: any) 
 
         const endTime = Date.now();
         const timeTaken = endTime - startTime;
-        console.log(`Time taken to download downloadArchivePdfs: ${formatTime(timeTaken)}`);
+        console.log(`Time taken to download pdfs: ${formatTime(timeTaken)}`);
         resp.status(200).send({
+            timeTaken:formatTime(timeTaken),
             response: results
         });
     }
@@ -152,8 +153,9 @@ launchArchiveYarnRoute.post('/downloadArchiveItemsViaExcel', async (req: any, re
 
         const endTime = Date.now();
         const timeTaken = endTime - startTime;
-        console.log(`Time taken to download downloadArchivePdfs: ${formatTime(timeTaken)}`);
+        console.log(`Time taken to download archiveItems from Excel: ${formatTime(timeTaken)}`);
         resp.status(200).send({
+            timeTaken:formatTime(timeTaken),
             response: _resp
         });
     }

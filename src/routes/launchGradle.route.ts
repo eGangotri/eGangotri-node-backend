@@ -521,7 +521,7 @@ launchGradleRoute.post('/imgFilesToPdfGradleVersion', async (req: any, resp: any
         }
         const endTime = Date.now();
         const timeTaken = endTime - startTime;
-        console.log(`Time taken to download downloadArchivePdfs: ${timeInfo(timeTaken)}`);
+        console.log(`Time taken to convert Img Files (${imgType}) to PDFs: ${timeInfo(timeTaken)}`);
 
         resp.status(200).send({
             timeTaken: timeInfo(timeTaken),

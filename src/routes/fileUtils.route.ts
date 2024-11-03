@@ -7,6 +7,7 @@ import { convertJpgsToPdfInAllSubFolders } from '../imgToPdf/jpgToPdf';
 import { multipleTextScriptConversion } from '../services/fileService';
 import { renameFilesViaExcel } from '../services/fileUtilsService';
 import { moveFileInListToDest } from '../services/yarnService';
+import { deprecate } from 'util';
 
 
 export const fileUtilsRoute = express.Router();
@@ -175,7 +176,7 @@ fileUtilsRoute.post('/convertScript', async (req: any, resp: any) => {
 /**
  * doesnt work for 2TB+. better to use mergePdf gradle Version
  */
-fileUtilsRoute.post('/imgFilesToPdf', async (req: any, resp: any) => {
+fileUtilsRoute.post('/imgFilesToPdfDeprecated', async (req: any, resp: any) => {
     try {
         const folder = req.body.folder;
         const imgType = req.body.imgType;
