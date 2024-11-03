@@ -14,6 +14,7 @@ import { FileMoveTracker } from '../models/FileMoveTracker';
 export const yarnRoute = express.Router();
 
 yarnRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
+    const startTime = Date.now();
     try {
         const googleDriveLink = req?.body?.googleDriveLink;
         const profile = req?.body?.profile;
@@ -41,8 +42,12 @@ yarnRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
         const resultsSummary = results.map((res: any, index: number) => {
             return `(${index + 1}). Succ: ${res.success_count} Err: ${res.error_count} Wrong Size: ${res.dl_wrong_size_count}`;
         });
+        const endTime = Date.now();
+        const timeTaken = endTime - startTime;
+        console.log(`Time taken to download for /downloadFromGoogleDrive: ${timeInfo(timeTaken)}`);
 
         resp.status(200).send({
+            timeTaken: timeInfo(timeTaken),
             resultsSummary,
             response: results
         });
@@ -55,6 +60,7 @@ yarnRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
 })
 
 yarnRoute.post('/downloadZipFromGoogleDrive', async (req: any, resp: any) => {
+    const startTime = Date.now();
     try {
         const googleDriveLink = req?.body?.googleDriveLink;
         const profile = req?.body?.profile;
@@ -82,8 +88,12 @@ yarnRoute.post('/downloadZipFromGoogleDrive', async (req: any, resp: any) => {
         const resultsSummary = results.map((res: any, index: number) => {
             return `(${index + 1}). Succ: ${res.success_count} Err: ${res.error_count} Wrong Size: ${res.dl_wrong_size_count}`;
         });
+        const endTime = Date.now();
+        const timeTaken = endTime - startTime;
+        console.log(`Time taken to download Zip Files from G-Drive: ${timeInfo(timeTaken)}`);
 
         resp.status(200).send({
+            timeTaken: timeInfo(timeTaken),
             resultsSummary,
             response: results
         });
@@ -127,7 +137,7 @@ yarnRoute.post('/unzipAllFolders', async (req: any, resp: any) => {
         
         const endTime = Date.now();
         const timeTaken = endTime - startTime;
-        console.log(`Time taken to download downloadArchivePdfs: ${timeInfo(timeTaken)}`);
+        console.log(`Time taken to Unzip All Folders : ${timeInfo(timeTaken)}`);
 
         resp.status(200).send({
             timeTaken: timeInfo(timeTaken),

@@ -55,7 +55,7 @@ yarnListMakerRoute.post('/getGoogleDriveListing', async (req: any, resp: any) =>
         }
         const endTime = Date.now();
         const timeTaken = endTime - startTime;
-        console.log(`Time taken to download downloadArchivePdfs: ${timeInfo(timeTaken)}`);
+        console.log(`Time taken to download google drive Listings: ${timeInfo(timeTaken)}`);
 
         resp.status(200).send({
             timeTaken: timeInfo(timeTaken),
