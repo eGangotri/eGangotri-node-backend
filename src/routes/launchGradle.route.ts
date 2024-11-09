@@ -565,3 +565,37 @@ launchGradleRoute.post('/mergePdfsGradleVersion', async (req: any, resp: any) =>
         resp.status(400).send(err);
     }
 })
+
+launchGradleRoute.post('/verifyImgToPdfSuccessGradle', async (req: any, resp: any) => {
+    const startTime = Date.now();
+    try {
+        const folder = req.body.folder;
+        const imgType = req.body.imgType || "jpg";
+        const results = [];
+        const _folder = folder.includes(",") ? folder.split(",").map((link: string) => link.trim()) : [folder.trim()];
+        console.log(`gradle/verifyImgToPdfSuccessGradle:folder: ${_folder} imgType: ${imgType}`);
+
+        for (const aFolder of _folder) {
+            console.log(`imgToPdf for ${aFolder}`)
+            const escapedFolder = aFolder.replace(/\\/g, '\\\\');
+            const _cmd = `gradle verifyImgToPdfSuccess --args="\\"${escapedFolder}\\" \\"${imgType}\\""`;
+            console.log(`_cmd ${_cmd}`);
+            const res = await makeGradleCall(_cmd)
+            results.push(res);
+        }
+        const endTime = Date.now();
+        const timeTaken = endTime - startTime;
+        console.log(`Time taken to convert Img Files (${imgType}) to PDFs: ${timeInfo(timeTaken)}`);
+
+        resp.status(200).send({
+            timeTaken: timeInfo(timeTaken),
+            total: _folder.length,
+            //  resultsSummary,
+            response: results
+        });
+    }
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})
