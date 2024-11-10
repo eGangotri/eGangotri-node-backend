@@ -4,6 +4,7 @@ import * as path from 'path';
 import admZip from 'adm-zip';
 import { getAllZipFiles } from '../utils/FileStatsUtils';
 import * as yauzl from 'yauzl';
+import { getNonFolderFileCount } from '../archiveDotOrg/utils';
 
 const UNZIP_FOLDER = "\\unzipped";
 
@@ -145,21 +146,27 @@ export async function unzipAllFilesInDirectory(pathToZipFiles: string, _unzipHer
         if (!_unzipHere || _unzipHere === "") {
             _unzipHere = pathToZipFiles + UNZIP_FOLDER;
         }
-        
+        let idx = 0;
         for (const zipFile of zipFiles) {
             try {
                 const outputDir = path.join(_unzipHere, path.basename(zipFile.absPath, '.zip'));
+                if (fs.existsSync(outputDir)) {
+                    console.log(`Folder already exists ${outputDir} for ${zipFile.absPath} to `);
+                    error_count++;
+                    error_msg.push(`Folder already exists ${zipFile.absPath}`);
+                    continue;
+                }
                 if (!fs.existsSync(outputDir)) {
                     fs.mkdirSync(outputDir, { recursive: true });
                 }
-                console.log(`unzipping ${zipFile.absPath} to ${outputDir}`)
+                console.log(`${++idx}). unzipping ${zipFile.absPath} to ${outputDir} `)
                 await unzipFiles(zipFile.absPath, outputDir);
                 console.log(`Unzipped ${zipFile.absPath} to 
-            ${outputDir}`);
+            ${outputDir} `);
                 success_count++
             }
             catch (error) {
-                const _err = `Error while unzipping ${zipFile.absPath} : ${JSON.stringify(error)}`;
+                const _err = `Error while unzipping ${zipFile.absPath} : ${JSON.stringify(error)} `;
                 console.log(_err);
                 error_count++;
                 error_msg.push(_err)
@@ -167,9 +174,9 @@ export async function unzipAllFilesInDirectory(pathToZipFiles: string, _unzipHer
         }
     }
     catch (error) {
-        console.log(`Error while getting zip files: ${JSON.stringify(error)}`);
+        console.log(`Error while getting zip files: ${JSON.stringify(error)} `);
         error_count++;
-        error_msg.push(`Error while getting zip files: ${JSON.stringify(error)}`);
+        error_msg.push(`Error while getting zip files: ${JSON.stringify(error)} `);
     }
     return {
         success_count,
@@ -179,18 +186,69 @@ export async function unzipAllFilesInDirectory(pathToZipFiles: string, _unzipHer
     };
 }
 
-// Example usage:
-const pdfPaths = [
-    'C:\\Users\\chetan\\Documents\\_testPDF\\output-t1-2-reduced-manually.pdf',
-    "C:\\Users\\chetan\\Documents\\Aug 29 Meeting.pdf",
-    'C:\\Users\\chetan\\Documents\\_testPDF\\output-t1-2-reduced-manually-withFooter.pdf',
-    'C:\\Users\\chetan\\Documents\\_testPDF\\output-t1-2-reduced-manually-withFooter2.pdf'
-];
+export async function verifyUnzipSuccessInDirectory(pathToZipFiles: string,
+    _unzipHere: string = "",
+    ignoreFolder = ""):
+    Promise<{
+        success_count: number,
+        error_count: number,
+        unzipFolder: string,
+        error_msg: string[]
+    }> {
+    let error_count = 0;
+    let success_count = 0;
+    const error_msg: string[] = [];
+    try {
+        const zipFiles = await getAllZipFiles(pathToZipFiles);
+        if (!_unzipHere || _unzipHere === "") {
+            _unzipHere = pathToZipFiles + UNZIP_FOLDER;
+        }
 
-const outputZipPath = 'C:\\Users\\chetan\\Downloads\\output3.zip';
+        for (const zipFile of zipFiles) {
+            if (zipFile.absPath.includes(ignoreFolder) ||
+                zipFile.absPath.includes(UNZIP_FOLDER)) {
+                console.log(`Ignoring ${zipFile.absPath} `);
+                continue
+            }
+            try {
+                const outputDir = path.join(_unzipHere, path.basename(zipFile.absPath, '.zip'));
+                console.log(`checking ${zipFile.absPath} for ${outputDir}`)
+                if (!fs.existsSync(outputDir)) {
+                    console.log(`no corresponding ${outputDir} to ${zipFile.absPath} `)
+                    error_msg.push(`No output directory found for ${zipFile.absPath} to ${outputDir} `);
+                    error_count++;
+                }
+                else {
+                    const fileCount = await getNonFolderFileCount(outputDir);
+                    if (fileCount > 0) {
+                        console.log(`${zipFile.absPath} exists for ${outputDir}`);
+                        success_count++;
+                    }
+                    else {
+                        console.log(`${zipFile.absPath} to ${outputDir} empty`)
+                        error_msg.push(`output directory ${outputDir} empty for ${zipFile.absPath}`);
+                        error_count++;
+                    }
+                }
 
-//pnpm run zipFiles
-
-// zipFiles(pdfPaths, outputZipPath, "C:\\Users\\chetan\\Documents")
-//     .then(() => console.log('Zipping completed successfully'))
-//     .catch(err => console.error('Error during zipping:', err));
+            }
+            catch (error) {
+                const _err = `Error while reading ${zipFile.absPath} : ${JSON.stringify(error)} `;
+                console.log(_err);
+                error_count++;
+                error_msg.push(_err)
+            }
+        }
+    }
+    catch (error) {
+        console.log(`Error while getting zip files: ${JSON.stringify(error)} `);
+        error_count++;
+        error_msg.push(`Error while getting zip files: ${JSON.stringify(error)} `);
+    }
+    return {
+        success_count,
+        error_count,
+        error_msg,
+        unzipFolder: _unzipHere
+    };
+}
