@@ -8,7 +8,7 @@ import { timeInfo } from '../mirror/FrontEndBackendCommonCode';
 import { compareFolders } from '../folderSync';
 import { markUploadCycleAsMovedToFreeze } from '../services/uploadCycleService';
 import { ZIP_TYPE } from '../cliBased/googleapi/_utils/constants';
-import { unzipAllFilesInDirectory } from '../services/zipService';
+import { unzipAllFilesInDirectory, verifyUnzipSuccessInDirectory } from '../services/zipService';
 import { FileMoveTracker } from '../models/FileMoveTracker';
 
 export const yarnRoute = express.Router();
@@ -151,6 +151,56 @@ yarnRoute.post('/unzipAllFolders', async (req: any, resp: any) => {
         resp.status(500).send(err);
     }
 })
+
+
+
+yarnRoute.post('/verifyUnzipAllFolders', async (req: any, resp: any) => {
+    const startTime = Date.now();
+    try {
+        const folder = req?.body?.folder;
+        const ignoreFolder = req?.body?.ignoreFolder || "proc";
+
+        console.log(`:verifyUnzipAllFolders:
+        folders to unzip:
+         ${folder?.split(",").map((link: string) => link + "\n ")} 
+        `)
+        if (!folder) {
+            resp.status(400).send({
+                response: {
+                    "status": "failed",
+                    "message": "folder to unzip for verfication mandatory" 
+                }
+            });
+        }
+        const results = [];
+        const _folder = folder.includes(",") ? folder.split(",").map((link: string) => link.trim()) : [folder.trim()];
+
+        for (const link of _folder) {
+            const res = await verifyUnzipSuccessInDirectory(link, "", ignoreFolder);
+            results.push(res);
+        }
+
+        const resultsSummary = results.map((res: {success_count:number,error_count:number}, index: number) => {
+            return `(${index + 1}). Succ: ${res.success_count} Err: ${res.error_count}`;
+        });
+        
+        const endTime = Date.now();
+        const timeTaken = endTime - startTime;
+        console.log(`Time taken to Unzip All Folders : ${timeInfo(timeTaken)}`);
+
+        resp.status(200).send({
+            timeTaken: timeInfo(timeTaken),
+            resultsSummary,
+            response: results
+        });
+    }
+
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(500).send(err);
+    }
+})
+
 
 yarnRoute.post('/qaToDestFileMover', async (req: any, resp: any) => {
     console.log(`qaToDestFileMover ${JSON.stringify(req.body)} `)
