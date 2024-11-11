@@ -8,6 +8,14 @@ import { getAllFileListingWithFileSizeStats } from './FileStatsUtils';
 
 import * as Mirror from "../mirror/FrontEndBackendCommonCode"
 
+interface FileInfo {
+    size: string;
+    absPath: string;
+    file: string;
+    file2 ?: string;
+}
+
+
 export function removeFolderWithContents(folder: string) {
     fs.rm(folder, { recursive: true, force: true }, (err) => {
         if (err) {
@@ -79,8 +87,8 @@ export const getDuplicatesOrUniquesBySize = async (folder: string, folder2: stri
             diff2: metadata2.length - reverseDisjointSet.length,
             dupLength: disjointSet.length,
             revDupLength: reverseDisjointSet.length,
-            disjointSetASCSV: disjointSet.map((x: any) => x.absPath).join(","),
-            reverseDisjointSetASCSV: reverseDisjointSet.map((x: any) => x.absPath).join(","),
+            disjointSetASCSV: disjointSet.map((x: FileInfo) => x.absPath).join(","),
+            reverseDisjointSetASCSV: reverseDisjointSet.map((x: FileInfo) => x.absPath).join(","),
             disjointSet,
             reverseDisjointSet,
         }
@@ -100,12 +108,14 @@ export const getDuplicatesOrUniquesBySize = async (folder: string, folder2: stri
             revDupLength: reverseDuplicates.length,
             duplicates,
             reverseDuplicates,
+            duplicatesASCSV: duplicates.map((x: FileInfo) => x.absPath).join(","),
+            reverseDuplicatesASCSV: reverseDuplicates.map((x: FileInfo) => x.absPath).join(","),
         }
     }
 }
 
 const disjointSetByFileSize = (metadata: FileStats[], metadata2: FileStats[]) => {
-    const disjointSet = [];
+    const disjointSet:FileInfo[] = [];
     console.log(`metadata ${JSON.stringify(metadata[0].size)} metadata2 ${JSON.stringify(metadata2[0].size)}`)
     metadata.forEach((file: FileStats) => {
         const match = metadata2.find((file2: FileStats) => {
@@ -120,7 +130,7 @@ const disjointSetByFileSize = (metadata: FileStats[], metadata2: FileStats[]) =>
             disjointSet.push({
                 size: Mirror.sizeInfo(file.rawSize),
                 absPath: file.absPath,
-                fileName: file.fileName,
+                file: file.fileName,
             });
         }
     });
@@ -130,7 +140,7 @@ const disjointSetByFileSize = (metadata: FileStats[], metadata2: FileStats[]) =>
 }
 
 const duplicateBySizeCheck = (metadata: FileStats[], metadata2: FileStats[]) => {
-    const duplicates = [];
+    const duplicates:FileInfo[] = [];
     console.log(`metadata ${JSON.stringify(metadata[0].size)} metadata2 ${JSON.stringify(metadata2[0].size)}`)
     metadata.forEach((file: FileStats) => {
         const match = metadata2.find((file2: FileStats) => {
@@ -144,7 +154,8 @@ const duplicateBySizeCheck = (metadata: FileStats[], metadata2: FileStats[]) => 
             duplicates.push({
                 size: Mirror.sizeInfo(file.rawSize),
                 file: file.fileName,
-                file2: match?.fileName
+                file2: match?.fileName,
+                absPath: file.absPath,
             });
         }
     });
