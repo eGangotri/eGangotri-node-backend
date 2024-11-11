@@ -87,10 +87,10 @@ export const getDuplicatesOrUniquesBySize = async (folder: string, folder2: stri
             diff2: metadata2.length - reverseDisjointSet.length,
             dupLength: disjointSet.length,
             revDupLength: reverseDisjointSet.length,
-            disjointSetASCSV: disjointSet.map((x: FileInfo) => x.absPath).join(","),
-            reverseDisjointSetASCSV: reverseDisjointSet.map((x: FileInfo) => x.absPath).join(","),
             disjointSet,
             reverseDisjointSet,
+            [`"disjointSetASCSV"(${disjointSet?.length})`] : disjointSet.map((x: FileInfo) => x.absPath).join(","),
+            [`"reverseDisjointSetASCSV"(${reverseDisjointSet?.length})`] : reverseDisjointSet.map((x: FileInfo) => x.absPath).join(","),
         }
     }
     else {
@@ -108,8 +108,8 @@ export const getDuplicatesOrUniquesBySize = async (folder: string, folder2: stri
             revDupLength: reverseDuplicates.length,
             duplicates,
             reverseDuplicates,
-            duplicatesASCSV: duplicates.map((x: FileInfo) => x.absPath).join(","),
-            reverseDuplicatesASCSV: reverseDuplicates.map((x: FileInfo) => x.absPath).join(","),
+            [`"duplicatesASCSV"(${duplicates?.length})`]: duplicates.map((x: FileInfo) => x.absPath).join(","),
+            [`"reverseDuplicatesASCSV"(${reverseDuplicates?.length})`]: reverseDuplicates.map((x: FileInfo) => x.absPath).join(","),
         }
     }
 }
