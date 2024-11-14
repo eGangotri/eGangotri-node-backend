@@ -5,12 +5,13 @@ import { GDriveItem } from "../models/GDriveItem";
 import { excelToJson, jsonToExcel } from "../cliBased/excel/ExcelUtils";
 import { folderName, titleInGoogleDrive } from "../cliBased/googleapi/_utils/constants";
 import { DD_MM_YYYY_HH_MMFORMAT } from "../utils/constants";
-
+import fs from 'fs';
+import * as fsExtra from 'fs-extra';
 import moment from "moment";
 import path from "path";
 import _, { String } from "lodash";
-import { downloadFileFromGoogleDrive } from "cliBased/pdf/downloadPdf";
-import { GDriveExcelData, GDriveExcelHeaders } from "cliBased/googleapi/types";
+import { downloadFileFromGoogleDrive } from "../cliBased/pdf/downloadPdf";
+import { GDriveExcelData } from "../cliBased/googleapi/types";
 
 export async function getListOfGDriveItems(queryOptions: GDriveItemListOptionsType) {
   const { limit, mongoOptionsFilter } = setOptionsForGDriveListing(queryOptions)
@@ -170,20 +171,20 @@ export const convertGDriveExcelToLinkData =
   }
 
 
-// export const downloadGDriveData = async (googleDriveData:any[],
-//   pdfDumpFolder:string
-// ) => {
-//   const promises = googleDriveData.map(_data => {
-//     console.log(`_data: ${JSON.stringify(_data)}}`);
-//     const pdfDumpWithPathAppended = pdfDumpFolder + path.sep + _data.parents;
-//     console.log(`pdfDumpWithPathAppended: ${pdfDumpWithPathAppended}`);
-//     if (!fs.existsSync(pdfDumpWithPathAppended)) {
-//       fsExtra.ensureDirSync(pdfDumpWithPathAppended);
-//     }
+export const downloadGDriveData = async (googleDriveData:GDriveExcelData[],
+  pdfDumpFolder:string
+) => {
+  const promises = googleDriveData.map(_data => {
+    console.log(`_data: ${JSON.stringify(_data)}}`);
+    const pdfDumpWithPathAppended = pdfDumpFolder + path.sep + _data.folderName;
+    console.log(`pdfDumpWithPathAppended: ${pdfDumpWithPathAppended}`);
+    if (!fs.existsSync(pdfDumpWithPathAppended)) {
+      fsExtra.ensureDirSync(pdfDumpWithPathAppended);
+    }
 
-//     return downloadFileFromGoogleDrive(_data.googleDriveLink,
-//       pdfDumpWithPathAppended, _data.fileName, dataLength, _data?.fileSizeRaw)
-//   });
-//   const results = await Promise.all(promises);
-//   return results
-// }
+    return downloadFileFromGoogleDrive(_data.linkToFileLocation,
+      pdfDumpWithPathAppended, _data.titleInGoogleDrive, googleDriveData.length, _data?.sizeInBytes)
+  });
+  const results = await Promise.all(promises);
+  return results
+}

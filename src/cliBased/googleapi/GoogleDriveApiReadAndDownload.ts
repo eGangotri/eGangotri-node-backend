@@ -6,7 +6,6 @@ import { getFolderInSrcRootForProfile } from '../../archiveUpload/ArchiveProfile
 import fs from 'fs';
 import path from 'path';
 import * as fsExtra from 'fs-extra';
-import { add, countBy } from 'lodash';
 import { DOWNLOAD_COMPLETED_COUNT, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT, DOWNLOAD_FAILED_COUNT, resetDownloadCounters } from '../../cliBased/pdf/utils';
 import { getAllPdfsInFolders, getDirectoriesWithFullPath } from '../../imgToPdf/utils/Utils';
 import { addHeaderAndFooterToPDF } from '../../pdfHeaderFooter';
@@ -14,6 +13,7 @@ import { isValidPath } from '../../utils/utils';
 import { extractGoogleDriveId } from '../../mirror/GoogleDriveUtilsCommonCode';
 import { PDF_TYPE } from './_utils/constants';
 
+export const MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE = 200;
 // Create a new Google Drive instance
 const drive = getGoogleDriveInstance();
 
@@ -30,7 +30,7 @@ async function getAllFilesFromGDrive(driveLinkOrFolderID: string,
     ignoreFolder, type);
 
   const dataLength = googleDriveData.length;
-  const maxLimit = 200
+  const maxLimit = MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE;
   if (dataLength > maxLimit) {
     console.log(`restriction to ${maxLimit} items only for now. Cannot continue`);
     return {
