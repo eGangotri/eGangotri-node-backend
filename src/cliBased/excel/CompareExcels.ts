@@ -1,4 +1,4 @@
-import { ExcelHeaders, LocalFileHeaders } from "../googleapi/types";
+import { GDriveExcelHeaders, LocalFileHeaders } from "../googleapi/types";
 import { LOCAL_FILE_NAME_HEADER, titleInGoogleDrive } from "../googleapi/_utils/constants";
 import { excelToJson } from "./ExcelUtils";
 import * as fs from 'fs';
@@ -20,7 +20,7 @@ const findCommonDriveToLocal = (tileToCheck: string, localExcelAsJsonArray: Loca
     insertMatchData(_found, tileToCheck)
 }
 
-const findCommonLocalToDrive = (tileToCheck: string, googleDriveExcelAsJsonArray: ExcelHeaders[]) => {
+const findCommonLocalToDrive = (tileToCheck: string, googleDriveExcelAsJsonArray: GDriveExcelHeaders[]) => {
     const _found = googleDriveExcelAsJsonArray.filter(item => item[titleInGoogleDrive]?.trim() === tileToCheck?.trim())
     insertMatchData(_found, tileToCheck)
 }
@@ -78,7 +78,7 @@ const matchLocalToDrive = (localExcelAsJsonArray: any[], googleDriveExcelAsJsonA
     localExcelAsJsonArray.map(x => findCommonLocalToDrive(x[LOCAL_FILE_NAME_HEADER], googleDriveExcelAsJsonArray));
 }
 
-const compareDriveToLocal = (googleDriveExcelAsJsonArray: ExcelHeaders[], localExcelAsJsonArray: any[]) => {
+const compareDriveToLocal = (googleDriveExcelAsJsonArray: GDriveExcelHeaders[], localExcelAsJsonArray: any[]) => {
     matchDriveToLocal(googleDriveExcelAsJsonArray, localExcelAsJsonArray)
     report();
     reset();

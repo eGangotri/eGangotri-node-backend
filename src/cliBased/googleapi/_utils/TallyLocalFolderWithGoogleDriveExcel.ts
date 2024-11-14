@@ -1,7 +1,7 @@
 import path from 'path';
 import * as fs from 'fs';
 import * as _ from 'lodash';
-import { ExcelHeaders } from "../types";
+import { GDriveExcelHeaders } from "../types";
 import { excelToJson } from "../../excel/ExcelUtils";
 import { titleInGoogleDrive } from "./constants";
 import { getAllPDFFiles } from '../../../utils/FileStatsUtils';
@@ -12,16 +12,16 @@ const _excelToJson = () => {
     const treasureFolder = "Treasures 60"
     const mainExcelPath = `${_root}\\_googleDriveExcels\\${treasureFolder}`
     const mainExcelFileName = `${mainExcelPath}\\${fs.readdirSync(mainExcelPath)[0]}`;
-    const mainExcelData: ExcelHeaders[] = excelToJson(mainExcelFileName);
+    const mainExcelData: GDriveExcelHeaders[] = excelToJson(mainExcelFileName);
     return mainExcelData
 
 }
 
-const findCorrespondingExcelHeader = (local: FileStats, excelJson: ExcelHeaders[]) => {
+const findCorrespondingExcelHeader = (local: FileStats, excelJson: GDriveExcelHeaders[]) => {
     const combinedObject: FileStats = local;
     let localTitle = local.fileName;
 
-    excelJson?.find((_excel: ExcelHeaders) => {
+    excelJson?.find((_excel: GDriveExcelHeaders) => {
         if (localTitle === _excel[titleInGoogleDrive]) {
             FOUND_PDFS.push(local.fileName)
             return true

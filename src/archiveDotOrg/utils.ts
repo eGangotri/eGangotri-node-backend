@@ -1,6 +1,6 @@
 import os from 'os';
 import { utils, writeFile } from 'xlsx';
-import { ExcelHeaderType, HitsEntity, LinkData } from './types';
+import { ArchiveExcelHeaderType, HitsEntity, ArchiveLinkData } from './types';
 import { sizeInfo } from '../mirror/FrontEndBackendCommonCode';
 import moment from 'moment';
 import { DD_MM_YYYY_FORMAT } from '../utils/constants';
@@ -45,7 +45,7 @@ export let ARCHIVE_EXCEL_HEADER =
     "allFormats": "All Formats"
 };
 
-export const generateExcel = async (links: LinkData[],
+export const generateExcel = async (links: ArchiveLinkData[],
     limitedFields = false, ascOrder = false): Promise<string> => {
     try {
 
@@ -71,7 +71,7 @@ export const generateExcel = async (links: LinkData[],
     }
 }
 
-const linkDataToExcelFormat = (links: LinkData[], archiveExcelHeader: ExcelHeaderType,
+const linkDataToExcelFormat = (links: ArchiveLinkData[], archiveExcelHeader: ArchiveExcelHeaderType,
     limitedFields = false) => {
     return links.map((link, index) => {
         const obj = {
@@ -146,7 +146,7 @@ export const extractLinkedData = async (_hitsHits: HitsEntity[],
     email: string,
     _archiveAcctName: string,
     limitedFields = false) => {
-    const _linkData: LinkData[] = [];
+    const _linkData: ArchiveLinkData[] = [];
     console.log(`extractLinkedData Extracting metadata for ${_hitsHits.length} items`);
     for (const hit of _hitsHits) {
         FETCH_ACRHIVE_METADATA_COUNTER.increment();
@@ -175,7 +175,7 @@ export const extractLinkedData = async (_hitsHits: HitsEntity[],
         const originalTitle = archiveItemName.replace(extension, "");
 
 
-        const obj: LinkData = {
+        const obj: ArchiveLinkData = {
             link: `${ARCHIVE_DOT_ORG_DETAILS_PREFIX}${identifier}`,
             titleArchive: hit.fields.title,
             description: hit.fields.description,

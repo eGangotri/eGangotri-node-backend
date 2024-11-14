@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as _ from 'lodash';
 import { DD_MM_YYYY_HH_MMFORMAT } from "../../../utils/utils";
 import moment from "moment";
-import { ExcelHeaders } from '../types';
+import { GDriveExcelHeaders } from '../types';
 import { excelToJson, getGoogleDriveId, jsonToExcel } from '../../excel/ExcelUtils';
 import {
   author, edition, editor,
@@ -14,16 +14,16 @@ import {
   yearOfPublication
 } from './constants';
 
-const mergeExcelJsons = (mainExcelData: ExcelHeaders[], secondaryExcelDataAdjusted: ExcelHeaders[]) => {
+const mergeExcelJsons = (mainExcelData: GDriveExcelHeaders[], secondaryExcelDataAdjusted: GDriveExcelHeaders[]) => {
   const combinedExcelJsons = mainExcelData.map(x => findCorrespondingExcelHeader(x, secondaryExcelDataAdjusted));
   console.log(`Merging JSON Data: `)
   return combinedExcelJsons
 }
 
-const findCorrespondingExcelHeader = (firstExcelRow: ExcelHeaders, secondaryExcelDataAdjusted: ExcelHeaders[]) => {
-  const combinedObject: ExcelHeaders = firstExcelRow;
+const findCorrespondingExcelHeader = (firstExcelRow: GDriveExcelHeaders, secondaryExcelDataAdjusted: GDriveExcelHeaders[]) => {
+  const combinedObject: GDriveExcelHeaders = firstExcelRow;
   let folderidInGoogleDrivePrimary = getGoogleDriveId(firstExcelRow[linkToFileLocation])
-  secondaryExcelDataAdjusted?.find((secondExcelRow: ExcelHeaders) => {
+  secondaryExcelDataAdjusted?.find((secondExcelRow: GDriveExcelHeaders) => {
     let folderidInGoogleDriveSecondary = getGoogleDriveId(secondExcelRow[linkToFileLocation])
     if (!_.isEmpty(folderidInGoogleDrivePrimary) && (folderidInGoogleDrivePrimary === folderidInGoogleDriveSecondary)) {
       MATCH_COUNTER++
@@ -50,8 +50,8 @@ const findCorrespondingExcelHeader = (firstExcelRow: ExcelHeaders, secondaryExce
 }
 
 const mergeExcels = (mainExcelFileName: string, secondaryExcelFileName: string) => {
-  const mainExcelData: ExcelHeaders[] = excelToJson(mainExcelFileName);
-  const secondaryExcelData: ExcelHeaders[] = excelToJson(secondaryExcelFileName, "Published Books");
+  const mainExcelData: GDriveExcelHeaders[] = excelToJson(mainExcelFileName);
+  const secondaryExcelData: GDriveExcelHeaders[] = excelToJson(secondaryExcelFileName, "Published Books");
 
   SECONDARY_EXCEL_GOOGLE_FOLDER_IDS_LIST = secondaryExcelData.map(y => getGoogleDriveId(y[linkToFileLocation]))?.filter(x => !_.isEmpty(x) && x?.length > 0);
 
@@ -71,7 +71,7 @@ const mergeExcels = (mainExcelFileName: string, secondaryExcelFileName: string) 
   jsonToExcel(_mergedExcelJsons, fileNameWithLength);
 }
 
-const findErroneous = (_mergedExcelJsons: ExcelHeaders[]) => {
+const findErroneous = (_mergedExcelJsons: GDriveExcelHeaders[]) => {
   console.log(`Mismatch found. identifying .....\nMatched Items ${MATCH_COUNTER}/${SECONDARY_EXCEL_GOOGLE_FOLDER_IDS_LIST.length}`);
 
   const mergedExcelJsonFolderIds = _mergedExcelJsons.map(x => getGoogleDriveId(x[linkToFileLocation])).filter(y => !_.isEmpty(y));

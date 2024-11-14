@@ -7,7 +7,7 @@ import { DD_MM_YYYY_HH_MMFORMAT } from "../utils/constants";
 import { ArchiveUploadExcelProps } from "../archiveDotOrg/archive.types";
 import _ from "lodash";
 import path from 'path';
-import { LinkData } from "../archiveDotOrg/types";
+import { ArchiveLinkData } from "../archiveDotOrg/types";
 
 
 export const validateDateRange = (dateRange: string) => {
@@ -144,7 +144,7 @@ export const alterExcelWithUploadedFlag = (archiveExcelPath: string, uploadItems
     }
 }
 
-function convertToLinkData(json: any): LinkData {
+function convertToLinkData(json: any): ArchiveLinkData {
     return {
         link: json["Link"],
         titleArchive: json["Title-Archive"],
@@ -168,12 +168,12 @@ function convertToLinkData(json: any): LinkData {
     };
 }
 
-export const convertArchiveExcelToLinkData = (archiveExcelPath: string): LinkData[] => {
+export const convertArchiveExcelToLinkData = (archiveExcelPath: string): ArchiveLinkData[] => {
     const excelAsJson = excelToJson(archiveExcelPath);
     console.log(`downloadArchiveItemsViaExcel: ${excelAsJson.length} 
         (${JSON.stringify(excelAsJson[0])}) items found in ${archiveExcelPath}`);
 
-    const _linkData: LinkData[] = excelAsJson.map(_json => convertToLinkData(_json));
+    const _linkData: ArchiveLinkData[] = excelAsJson.map(_json => convertToLinkData(_json));
     console.log(`converted to linkData: ${_linkData.length} 
          (${JSON.stringify(_linkData[0])})
         items found in ${archiveExcelPath}`);

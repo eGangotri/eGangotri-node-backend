@@ -1,5 +1,5 @@
 import * as xlsx from 'xlsx';
-import { ExcelHeaders, ExcelHeadersFileRenamerV2, GoogleApiData } from '../googleapi/types';
+import { GDriveExcelHeaders, GDriveExcelHeadersFileRenamerV2, GoogleApiData } from '../googleapi/types';
 import { SHEET_NAME } from '../googleapi/_utils/constants';
 import * as ExcelJS from 'exceljs';
 import * as path from 'path';
@@ -19,7 +19,7 @@ const setHeadersForExcel = () => {
 }
 
 const convertDatatoJson = (googleDriveFileData: Array<GoogleApiData>) => {
-  const jsonArray: ExcelHeaders[] = []
+  const jsonArray: GDriveExcelHeaders[] = []
   for (const dataRow of googleDriveFileData) {
     jsonArray.push({
       "S.No": dataRow.index,
@@ -70,7 +70,7 @@ const origNameFormula = (idx:number) =>{
 
 }
 const convertFileRenamerV2DatatoJson = (googleDriveFileData: Array<GoogleApiData>) => {
-  const jsonArray: ExcelHeadersFileRenamerV2[] = []
+  const jsonArray: GDriveExcelHeadersFileRenamerV2[] = []
   let idx = 1;
   for (const dataRow of googleDriveFileData) {
     jsonArray.push({
@@ -100,7 +100,7 @@ const convertFileRenamerV2DatatoJson = (googleDriveFileData: Array<GoogleApiData
 
 export const jsonDataToXslx = async (googleDriveFileData: Array<GoogleApiData>, xlsxFilePath: string) => {
   try {
-    const jsonArray: ExcelHeaders[] = convertDatatoJson(googleDriveFileData);
+    const jsonArray: GDriveExcelHeaders[] = convertDatatoJson(googleDriveFileData);
     jsonToExcel(jsonArray, xlsxFilePath)
 
     console.log(`Excel File Written to ${xlsxFilePath}!`);
@@ -111,7 +111,7 @@ export const jsonDataToXslx = async (googleDriveFileData: Array<GoogleApiData>, 
 
 export const jsonDataToXslxFileRenamerV2 = async (googleDriveFileData: Array<GoogleApiData>, xlsxFilePath: string) => {
   try {
-    const jsonArray: ExcelHeadersFileRenamerV2[] = convertFileRenamerV2DatatoJson(googleDriveFileData);
+    const jsonArray: GDriveExcelHeadersFileRenamerV2[] = convertFileRenamerV2DatatoJson(googleDriveFileData);
     jsonToExcel(jsonArray, xlsxFilePath)
 
     console.log(`Excel File Written to ${xlsxFilePath}!`);

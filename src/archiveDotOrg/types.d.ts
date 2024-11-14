@@ -1,4 +1,4 @@
-export interface ExcelHeaderType {
+export interface ArchiveExcelHeaderType {
     serialNo: string;
     link: string;
     allDwnldsLink: string;
@@ -22,10 +22,10 @@ export interface ExcelHeaderType {
 }
 
 export interface ArchiveScrapReport {
-    linkData: LinkData[];
+    linkData: ArchiveLinkData[];
     stats: string;
 }
-export interface LinkData {
+export interface ArchiveLinkData {
     link: string;
     titleArchive: string;
     originalTitle?: string;

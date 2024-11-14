@@ -3,13 +3,13 @@ import { DOWNLOAD_COMPLETED_COUNT, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT, resetDownlo
 import { getFolderInSrcRootForProfile } from "../archiveUpload/ArchiveProfileUtils";
 import fs from 'fs';
 import * as fsExtra from "fs-extra";
-import { LinkData } from "./types";
+import { ArchiveLinkData } from "./types";
 import { isValidPath } from "../utils/utils";
 import { createFolderIfNotExists } from "../utils/FileUtils";
 import { DOUBLE_HASH_SEPARATOR } from "./utils";
 
 
-export const downloadPdfFromArchiveToProfile = async (pdfLinks: LinkData[], profileOrPath: string) => {
+export const downloadPdfFromArchiveToProfile = async (pdfLinks: ArchiveLinkData[], profileOrPath: string) => {
 
   const pdfDumpFolder = isValidPath(profileOrPath) ? profileOrPath : getFolderInSrcRootForProfile(profileOrPath);
   console.log(`downloadPdfFromArchiveToProfile:pdfDumpFolder ${pdfDumpFolder}`);
@@ -54,7 +54,7 @@ export const downloadPdfFromArchiveToProfile = async (pdfLinks: LinkData[], prof
 }
 
 //this should be redundant after downloadArchiveItems starts working
-const downloadArchivePdfs = async (linkData: LinkData[], pdfDumpFolder: string) => {
+const downloadArchivePdfs = async (linkData: ArchiveLinkData[], pdfDumpFolder: string) => {
   const promises = linkData.map(pdfLink => {
     console.log(`_data: ${JSON.stringify(pdfLink)}}`);
     console.log(`pdfDumpFolder: ${pdfDumpFolder}`);
@@ -69,7 +69,7 @@ const downloadArchivePdfs = async (linkData: LinkData[], pdfDumpFolder: string) 
   }
 }
 
-export const adjustLinkedDataForMultipleItems = (linkData: LinkData[], pdfDumpFolder: string) => {
+export const adjustLinkedDataForMultipleItems = (linkData: ArchiveLinkData[], pdfDumpFolder: string) => {
   const linkDataWithMultiItems = [];
 
   linkData.map(pdfLink => {
@@ -100,7 +100,7 @@ export const adjustLinkedDataForMultipleItems = (linkData: LinkData[], pdfDumpFo
 
 }
 
-export const downloadArchiveItems = async (_linkData: LinkData[], pdfDumpFolder: string) => {
+export const downloadArchiveItems = async (_linkData: ArchiveLinkData[], pdfDumpFolder: string) => {
 
   const _linkDataWithMultiItems = adjustLinkedDataForMultipleItems(_linkData, pdfDumpFolder);
 
