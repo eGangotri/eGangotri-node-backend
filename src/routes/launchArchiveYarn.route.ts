@@ -12,8 +12,7 @@ import moment from 'moment';
 import { DD_MM_YYYY_HH_MMFORMAT } from '../utils/constants';
 import { generateEAPBLMetadataForProfile } from '../eap_bl';
 import { formatTime } from '../imgToPdf/utils/Utils';
-import { ArchiveUploadExcelProps } from 'archiveDotOrg/archive.types';
-import { convertGDriveExcelToLinkData } from 'services/GDriveItemService';
+import { convertGDriveExcelToLinkData, downloadGDriveData } from '../services/GDriveItemService';
 
 export const launchArchiveYarnRoute = express.Router();
 
@@ -111,7 +110,7 @@ launchArchiveYarnRoute.post('/downloadArchivePdfs', async (req: any, resp: any) 
         const timeTaken = endTime - startTime;
         console.log(`Time taken to download pdfs: ${formatTime(timeTaken)}`);
         resp.status(200).send({
-            timeTaken:formatTime(timeTaken),
+            timeTaken: formatTime(timeTaken),
             response: results
         });
     }
@@ -156,7 +155,7 @@ launchArchiveYarnRoute.post('/downloadArchiveItemsViaExcel', async (req: any, re
         const timeTaken = endTime - startTime;
         console.log(`Time taken to download archiveItems from Excel: ${formatTime(timeTaken)}`);
         resp.status(200).send({
-            timeTaken:formatTime(timeTaken),
+            timeTaken: formatTime(timeTaken),
             response: _resp
         });
     }
@@ -182,9 +181,9 @@ launchArchiveYarnRoute.post('/downloadGDriveItemsViaExcel', async (req: any, res
                 }
             });
         }
-        const _linkData = convertGDriveExcelToLinkData(excelPath);
+        const excelLinksData = convertGDriveExcelToLinkData(excelPath);
         resetDownloadCounters()
-       // const _results = await downloadArchiveItems(_linkData, profileOrPath);
+        const _results = await downloadGDriveData(excelLinksData, profileOrPath);
 
         console.log(`Success count: ${DOWNLOAD_COMPLETED_COUNT}`);
         console.log(`Error count: ${DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT}`);
@@ -192,7 +191,7 @@ launchArchiveYarnRoute.post('/downloadGDriveItemsViaExcel', async (req: any, res
             status: `${DOWNLOAD_COMPLETED_COUNT} out of ${DOWNLOAD_COMPLETED_COUNT + DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT} made it`,
             success_count: DOWNLOAD_COMPLETED_COUNT,
             error_count: DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT,
-          //  ..._results
+            ..._results
         }
         console.log(`_resp : ${JSON.stringify(_resp)}`);
 
@@ -200,7 +199,7 @@ launchArchiveYarnRoute.post('/downloadGDriveItemsViaExcel', async (req: any, res
         const timeTaken = endTime - startTime;
         console.log(`Time taken to download archiveItems from Excel: ${formatTime(timeTaken)}`);
         resp.status(200).send({
-            timeTaken:formatTime(timeTaken),
+            timeTaken: formatTime(timeTaken),
             response: _resp
         });
     }
