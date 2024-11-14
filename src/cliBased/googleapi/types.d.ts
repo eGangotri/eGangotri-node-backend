@@ -67,3 +67,34 @@ export interface LocalFileHeaders {
     "Units": string,
     "Total File Size in KB": number,
 }
+
+export interface GDriveExcelData {
+    sNo: number | string;
+    titleInGoogleDrive: string;
+    linkToFileLocation: string;
+    linkToTruncatedFileLocation: string;
+    bookManuscript: string;
+    titleInEnglish: string;
+    titleInOriginalScriptDevanagariEtc: string;
+    subTitle: string;
+    author: string;
+    commentatorTranslatorEditor: string;
+    languages: string;
+    script: string;
+    subjectDescriptor: string;
+    publisher: string;
+    editionStatement: string;
+    placeOfPublication: string;
+    yearOfPublication: string;
+    noOfPages: string | number;
+    isbn: string;
+    remarks: string;
+    commentairies: string;
+    commentator: string;
+    seriesKstsKavyamalaChowkhambaEtc: string;
+    sizeWithUnits: string;
+    sizeInBytes: string;
+    folderName: string;
+    thumbnail: string;
+    createdTime: string;
+}
