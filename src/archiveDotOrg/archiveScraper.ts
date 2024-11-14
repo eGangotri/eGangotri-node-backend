@@ -1,4 +1,4 @@
-import { ArchiveDataRetrievalMsg, ArchiveDataRetrievalStatus, ArchiveScrapReport, Hits, HitsEntity, LinkData } from './types';
+import { ArchiveDataRetrievalMsg, ArchiveDataRetrievalStatus, ArchiveScrapReport, Hits, HitsEntity, ArchiveLinkData } from './types';
 import { extractArchiveAcctName, extractEmail, extractLinkedData as extractLinkedDataAndSpecificFieldsFromAPI, generateExcel } from './utils';
 import * as _ from 'lodash';
 
@@ -73,7 +73,7 @@ const fetchArchiveMetadata = async (username: string,
         let _hits: Hits = await callGenericArchiveApi(username, 1, dateRange[0], dateRange[1], ascOrder, maxItemsCounter);
         maxItemsCounter -= DEFAULT_HITS_PER_PAGE;
         let hitsTotal = _hits?.total;
-        const _linkData: LinkData[] = [];
+        const _linkData: ArchiveLinkData[] = [];
 
         if (hitsTotal > 0) {
             FETCH_ACRHIVE_METADATA_COUNTER.hitsTotal = hitsTotal;

@@ -13,6 +13,7 @@ import { DD_MM_YYYY_HH_MMFORMAT } from '../utils/constants';
 import { generateEAPBLMetadataForProfile } from '../eap_bl';
 import { formatTime } from '../imgToPdf/utils/Utils';
 import { ArchiveUploadExcelProps } from 'archiveDotOrg/archive.types';
+import { convertGDriveExcelToLinkData } from 'services/GDriveItemService';
 
 export const launchArchiveYarnRoute = express.Router();
 
@@ -138,6 +139,50 @@ launchArchiveYarnRoute.post('/downloadArchiveItemsViaExcel', async (req: any, re
             });
         }
         const _linkData = convertArchiveExcelToLinkData(excelPath);
+        resetDownloadCounters()
+        const _results = await downloadArchiveItems(_linkData, profileOrPath);
+
+        console.log(`Success count: ${DOWNLOAD_COMPLETED_COUNT}`);
+        console.log(`Error count: ${DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT}`);
+        const _resp = {
+            status: `${DOWNLOAD_COMPLETED_COUNT} out of ${DOWNLOAD_COMPLETED_COUNT + DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT} made it`,
+            success_count: DOWNLOAD_COMPLETED_COUNT,
+            error_count: DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT,
+            ..._results
+        }
+        console.log(`_resp : ${JSON.stringify(_resp)}`);
+
+        const endTime = Date.now();
+        const timeTaken = endTime - startTime;
+        console.log(`Time taken to download archiveItems from Excel: ${formatTime(timeTaken)}`);
+        resp.status(200).send({
+            timeTaken:formatTime(timeTaken),
+            response: _resp
+        });
+    }
+
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})
+
+launchArchiveYarnRoute.post('/downloadGDriveItemsViaExcel', async (req: any, resp: any) => {
+    try {
+        const excelPath = req?.body?.excelPath;
+        const profileOrPath = req?.body?.profileOrPath;
+        const startTime = Date.now();
+
+        if (!excelPath || !profileOrPath) {
+            return resp.status(300).send({
+                response: {
+                    "status": "failed",
+                    "success": false,
+                    "msg": "Pls. provide Excel Path and profile/abs-path. Both are mandatory"
+                }
+            });
+        }
+        const _linkData = convertGDriveExcelToLinkData(excelPath);
         resetDownloadCounters()
         const _results = await downloadArchiveItems(_linkData, profileOrPath);
 

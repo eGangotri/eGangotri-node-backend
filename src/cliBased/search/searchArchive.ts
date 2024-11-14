@@ -1,7 +1,7 @@
 import { excelToJson } from "../excel/ExcelUtils";
 import * as fs from 'fs';
 import * as _ from 'lodash';
-import { ExcelHeaders } from "../../cliBased/googleapi/types";
+import { GDriveExcelHeaders } from "../../cliBased/googleapi/types";
 import { titleInGoogleDrive } from "../../cliBased/googleapi/_utils/constants";
 
 //https://blog.archive.org/developers/
@@ -15,7 +15,7 @@ const _archiveUrl = (_query: string) => {
 }
 
 const searchArchive = async (leftExcel: string) => {
-    const excelAsJson: ExcelHeaders[] = excelToJson(leftExcel)
+    const excelAsJson: GDriveExcelHeaders[] = excelToJson(leftExcel)
 
     for (const entry of excelAsJson) {
         const _title = entry[titleInGoogleDrive];

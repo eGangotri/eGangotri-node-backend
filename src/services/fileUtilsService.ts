@@ -5,7 +5,7 @@ import { isValidPath } from "../utils/utils";
 import * as fs from "fs";
 import * as path from 'path';
 import { FileStats } from "../imgToPdf/utils/types";
-import { ExcelHeadersFileRenamerV2 } from "../cliBased/googleapi/types";
+import { GDriveExcelHeadersFileRenamerV2 } from "../cliBased/googleapi/types";
 import { isNumber } from "../mirror/utils";
 
 interface RenameReportType {
@@ -29,7 +29,7 @@ export const renameFilesViaExcel = async (excelPath: string, folderOrProfile: st
     }
 
     try {
-        const excelData: ExcelHeadersFileRenamerV2[] = excelToJson(excelPath).filter((x: ExcelHeadersFileRenamerV2) => {
+        const excelData: GDriveExcelHeadersFileRenamerV2[] = excelToJson(excelPath).filter((x: GDriveExcelHeadersFileRenamerV2) => {
             return isNumber(x["S.No"])
         })
         //
@@ -70,7 +70,7 @@ export const renameFileViaFormula = (origName: string, newFileName: string, loca
     _renameFileInFolder(_fileInFolder, newFileName, renameReport)
 }
 
-export const renameFileViaReadingColumns = (excelData: ExcelHeadersFileRenamerV2,
+export const renameFileViaReadingColumns = (excelData: GDriveExcelHeadersFileRenamerV2,
     localFileStats: FileStats[],
     renameReport: RenameReportType) => {
 

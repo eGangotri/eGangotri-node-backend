@@ -1,5 +1,5 @@
 import { excelToJson, jsonToExcel } from "../../excel/ExcelUtils";
-import { ExcelHeaders } from "../types";
+import { GDriveExcelHeaders } from "../types";
 import { emptyExcelHeaderObj, linkToFileLocation, linkToTruncatedFileLocation, numPages, thumbnail, titleInGoogleDrive } from "./constants";
 import * as fs from 'fs';
 import * as _ from 'lodash';
@@ -10,10 +10,10 @@ import path from "path";
 const ignoreDiff = true;
 const foundItems: string[] = [];
 const combineExcels = (mainExcelFileName: string, secondaryExcelFileName: string, combinedExcelFileName: string) => {
-    const mainExcelData: ExcelHeaders[] = excelToJson(mainExcelFileName);
-    const secondaryExcelData: ExcelHeaders[] = excelToJson(secondaryExcelFileName);
+    const mainExcelData: GDriveExcelHeaders[] = excelToJson(mainExcelFileName);
+    const secondaryExcelData: GDriveExcelHeaders[] = excelToJson(secondaryExcelFileName);
 
-    const secondaryExcelDataAdjusted: ExcelHeaders[] = fillPageCount(secondaryExcelData);
+    const secondaryExcelDataAdjusted: GDriveExcelHeaders[] = fillPageCount(secondaryExcelData);
     const dataMisMatchDiff = mainExcelData.length - secondaryExcelData.length
     const dataMismatch = dataMisMatchDiff !== 0
     if (dataMismatch) {
@@ -58,7 +58,7 @@ const combineExcels = (mainExcelFileName: string, secondaryExcelFileName: string
 
 }
 
-const checkErroneous = (_excelData: ExcelHeaders[]) => {
+const checkErroneous = (_excelData: GDriveExcelHeaders[]) => {
     const _erroneous = _excelData.filter(x => !foundItems.includes(x[titleInGoogleDrive]));
     const errMsg = _.isEmpty(_erroneous) ? "" : JSON.stringify(_erroneous.map(x => `${x[titleInGoogleDrive]}`))
     console.log("errorneous items in Main: ", errMsg === "" ? "None" : errMsg);
@@ -69,7 +69,7 @@ const checkErroneous = (_excelData: ExcelHeaders[]) => {
     }
 }
 
-const combineExcelJsons = (mainExcelData: ExcelHeaders[], secondaryExcelDataAdjusted: ExcelHeaders[]) => {
+const combineExcelJsons = (mainExcelData: GDriveExcelHeaders[], secondaryExcelDataAdjusted: GDriveExcelHeaders[]) => {
 
     const combinedExcelJsons = mainExcelData.map(x => findCorrespondingExcelHeader(x, secondaryExcelDataAdjusted));
 
@@ -81,11 +81,11 @@ const combineExcelJsons = (mainExcelData: ExcelHeaders[], secondaryExcelDataAdju
     ]
 }
 
-const findCorrespondingExcelHeader = (firstExcel: ExcelHeaders, secondaryExcelDataAdjusted: ExcelHeaders[]) => {
-    const combinedObject: ExcelHeaders = firstExcel;
+const findCorrespondingExcelHeader = (firstExcel: GDriveExcelHeaders, secondaryExcelDataAdjusted: GDriveExcelHeaders[]) => {
+    const combinedObject: GDriveExcelHeaders = firstExcel;
     let _titleInGoogleDrivePrimary = firstExcel[titleInGoogleDrive]
 
-    secondaryExcelDataAdjusted?.find((secondExcel: ExcelHeaders) => {
+    secondaryExcelDataAdjusted?.find((secondExcel: GDriveExcelHeaders) => {
         let _titleInGoogleDriveSecondary = secondExcel[titleInGoogleDrive]
         /*if (_titleInGoogleDriveSecondary.length > MAX_FILE_NAME_LENGTH) {
             _titleInGoogleDriveSecondary = _titleInGoogleDriveSecondary.slice(0, MAX_FILE_NAME_LENGTH)
@@ -113,8 +113,8 @@ const findCorrespondingExcelHeader = (firstExcel: ExcelHeaders, secondaryExcelDa
     return combinedObject;
 }
 
-const fillPageCount = (excelJson: ExcelHeaders[]) => {
-    return excelJson.map((row: ExcelHeaders) => {
+const fillPageCount = (excelJson: GDriveExcelHeaders[]) => {
+    return excelJson.map((row: GDriveExcelHeaders) => {
         const titleWithPageCount = row[titleInGoogleDrive]
         row[titleInGoogleDrive] = titleWithPageCount.slice(0, titleWithPageCount.length - 9) + ".pdf";
         row[numPages] = parseInt(titleWithPageCount.slice(-8, -4))

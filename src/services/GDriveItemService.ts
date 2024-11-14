@@ -8,7 +8,9 @@ import { DD_MM_YYYY_HH_MMFORMAT } from "../utils/constants";
 
 import moment from "moment";
 import path from "path";
-import _ from "lodash";
+import _, { String } from "lodash";
+import { downloadFileFromGoogleDrive } from "cliBased/pdf/downloadPdf";
+import { GDriveExcelHeaders } from "cliBased/googleapi/types";
 
 export async function getListOfGDriveItems(queryOptions: GDriveItemListOptionsType) {
   const { limit, mongoOptionsFilter } = setOptionsForGDriveListing(queryOptions)
@@ -120,3 +122,35 @@ export const getDiffBetweenGDriveAndLocalFiles = (gDriveExcel: string, localExce
     diff: diff.length > 100 ? "Showing first 100 only. " + diff.slice(0, 100) : diff,
   }
 }
+
+export const convertGDriveExcelToLinkData = 
+(gDriveExcelPath: string): GDriveExcelHeaders[] => {
+  const excelAsJson = excelToJson(gDriveExcelPath);
+  console.log(`downloadArchiveItemsViaExcel: ${excelAsJson.length} 
+      (${JSON.stringify(excelAsJson[0])}) items found in ${gDriveExcelPath}`);
+
+  const _linkData: LinkData[] = excelAsJson.map(_json => convertToLinkData(_json));
+  console.log(`converted to linkData: ${_linkData.length} 
+       (${JSON.stringify(_linkData[0])})
+      items found in ${gDriveExcelPath}`);
+  return _linkData;
+}
+
+
+// export const downloadGDriveData = async (googleDriveData:any[], 
+//   pdfDumpFolder:string
+// ) => {
+//   const promises = googleDriveData.map(_data => {
+//     console.log(`_data: ${JSON.stringify(_data)}}`);
+//     const pdfDumpWithPathAppended = pdfDumpFolder + path.sep + _data.parents;
+//     console.log(`pdfDumpWithPathAppended: ${pdfDumpWithPathAppended}`);
+//     if (!fs.existsSync(pdfDumpWithPathAppended)) {
+//       fsExtra.ensureDirSync(pdfDumpWithPathAppended);
+//     }
+
+//     return downloadFileFromGoogleDrive(_data.googleDriveLink,
+//       pdfDumpWithPathAppended, _data.fileName, dataLength, _data?.fileSizeRaw)
+//   });
+//   const results = await Promise.all(promises);
+//   return results
+// }

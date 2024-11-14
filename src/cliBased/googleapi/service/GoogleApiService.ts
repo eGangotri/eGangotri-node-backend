@@ -31,8 +31,6 @@ export async function listFolderContentsAsArrayOfData(folderId: string,
     return googleDriveFileData
 }
 
-
-
 export async function listFolderContentsAndGenerateCSVAndExcel(_folderIdOrUrl: string,
     drive: drive_v3.Drive,
     exportDestFolder: string,

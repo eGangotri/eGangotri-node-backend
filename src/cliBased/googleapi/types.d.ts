@@ -9,7 +9,7 @@ export interface GoogleApiData {
     thumbnailLink: string,
 }
 
-export interface ExcelHeaders {
+export interface GDriveExcelHeaders {
     "S.No": number | string;
     "Title in Google Drive": string;
     "Link to File Location": string;
@@ -40,7 +40,7 @@ export interface ExcelHeaders {
     "Created Time": string;
 }
 
-export interface ExcelHeadersFileRenamerV2 {
+export interface GDriveExcelHeadersFileRenamerV2 {
     "S.No": number | string;
     "Title in Google Drive": string;
     "Link to File Location": string;
