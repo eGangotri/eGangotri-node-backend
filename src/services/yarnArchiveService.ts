@@ -144,7 +144,7 @@ export const alterExcelWithUploadedFlag = (archiveExcelPath: string, uploadItems
     }
 }
 
-function convertToLinkData(json: any): ArchiveLinkData {
+function convertToArchiveLinkData(json: any): ArchiveLinkData {
     return {
         link: json["Link"],
         titleArchive: json["Title-Archive"],
@@ -173,7 +173,7 @@ export const convertArchiveExcelToLinkData = (archiveExcelPath: string): Archive
     console.log(`downloadArchiveItemsViaExcel: ${excelAsJson.length} 
         (${JSON.stringify(excelAsJson[0])}) items found in ${archiveExcelPath}`);
 
-    const _linkData: ArchiveLinkData[] = excelAsJson.map(_json => convertToLinkData(_json));
+    const _linkData: ArchiveLinkData[] = excelAsJson.map(_json => convertToArchiveLinkData(_json));
     console.log(`converted to linkData: ${_linkData.length} 
          (${JSON.stringify(_linkData[0])})
         items found in ${archiveExcelPath}`);

@@ -184,7 +184,7 @@ launchArchiveYarnRoute.post('/downloadGDriveItemsViaExcel', async (req: any, res
         }
         const _linkData = convertGDriveExcelToLinkData(excelPath);
         resetDownloadCounters()
-        const _results = await downloadArchiveItems(_linkData, profileOrPath);
+       // const _results = await downloadArchiveItems(_linkData, profileOrPath);
 
         console.log(`Success count: ${DOWNLOAD_COMPLETED_COUNT}`);
         console.log(`Error count: ${DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT}`);
@@ -192,7 +192,7 @@ launchArchiveYarnRoute.post('/downloadGDriveItemsViaExcel', async (req: any, res
             status: `${DOWNLOAD_COMPLETED_COUNT} out of ${DOWNLOAD_COMPLETED_COUNT + DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT} made it`,
             success_count: DOWNLOAD_COMPLETED_COUNT,
             error_count: DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT,
-            ..._results
+          //  ..._results
         }
         console.log(`_resp : ${JSON.stringify(_resp)}`);
 

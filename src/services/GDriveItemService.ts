@@ -10,7 +10,7 @@ import moment from "moment";
 import path from "path";
 import _, { String } from "lodash";
 import { downloadFileFromGoogleDrive } from "cliBased/pdf/downloadPdf";
-import { GDriveExcelHeaders } from "cliBased/googleapi/types";
+import { GDriveExcelData, GDriveExcelHeaders } from "cliBased/googleapi/types";
 
 export async function getListOfGDriveItems(queryOptions: GDriveItemListOptionsType) {
   const { limit, mongoOptionsFilter } = setOptionsForGDriveListing(queryOptions)
@@ -123,21 +123,54 @@ export const getDiffBetweenGDriveAndLocalFiles = (gDriveExcel: string, localExce
   }
 }
 
-export const convertGDriveExcelToLinkData = 
-(gDriveExcelPath: string): GDriveExcelHeaders[] => {
-  const excelAsJson = excelToJson(gDriveExcelPath);
-  console.log(`downloadArchiveItemsViaExcel: ${excelAsJson.length} 
-      (${JSON.stringify(excelAsJson[0])}) items found in ${gDriveExcelPath}`);
-
-  const _linkData: LinkData[] = excelAsJson.map(_json => convertToLinkData(_json));
-  console.log(`converted to linkData: ${_linkData.length} 
-       (${JSON.stringify(_linkData[0])})
-      items found in ${gDriveExcelPath}`);
-  return _linkData;
+function convertToGDriveExcelLinkData(json: any): GDriveExcelData {
+  return {
+    sNo: json["S.No"],
+    titleInGoogleDrive: json["Title in Google Drive"],
+    linkToFileLocation: json["Link to File Location"],
+    linkToTruncatedFileLocation: json["Link to Truncated File Location"],
+    bookManuscript: json["Book / Manuscript"],
+    titleInEnglish: json["Title in English"],
+    titleInOriginalScriptDevanagariEtc: json["Title in Original Script ( Devanagari etc )"],
+    subTitle: json["Sub-Title"],
+    author: json["Author"],
+    commentatorTranslatorEditor: json["Commentator/ Translator/Editor"],
+    languages: json["Language(s)"],
+    script: json["Script"],
+    subjectDescriptor: json["Subject/ Descriptor"],
+    publisher: json["Publisher"],
+    editionStatement: json["Edition/Statement"],
+    placeOfPublication: json["Place of Publication"],
+    yearOfPublication: json["Year of Publication"],
+    noOfPages: json["No. of Pages"],
+    isbn: json["ISBN"],
+    remarks: json["Remarks"],
+    commentairies: json["Commentairies"],
+    commentator: json["Commentator"],
+    seriesKstsKavyamalaChowkhambaEtc: json["Series ( KSTS/Kavyamala/Chowkhamba etc"],
+    sizeWithUnits: json["Size with Units"],
+    sizeInBytes: json["Size in Bytes"],
+    folderName: json["Folder Name"],
+    thumbnail: json["Thumbnail"],
+    createdTime: json["Created Time"]
+  }
 }
 
+export const convertGDriveExcelToLinkData =
+  (gDriveExcelPath: string): GDriveExcelData[] => {
+    const _excelAsJson = excelToJson(gDriveExcelPath);
+    console.log(`downloadArchiveItemsViaExcel: ${_excelAsJson.length} 
+      (${JSON.stringify(_excelAsJson[0])}) items found in ${gDriveExcelPath}`);
 
-// export const downloadGDriveData = async (googleDriveData:any[], 
+    const _gDriveLinkData: GDriveExcelData[] = _excelAsJson.map(_json => convertToGDriveExcelLinkData(_json));
+    console.log(`converted to linkData: ${_gDriveLinkData.length} 
+       (${JSON.stringify(_gDriveLinkData[0])})
+      items found in ${gDriveExcelPath}`);
+    return _gDriveLinkData;
+  }
+
+
+// export const downloadGDriveData = async (googleDriveData:any[],
 //   pdfDumpFolder:string
 // ) => {
 //   const promises = googleDriveData.map(_data => {
