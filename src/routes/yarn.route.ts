@@ -1,109 +1,14 @@
 import * as express from 'express';
-import { downloadFromGoogleDriveToProfile } from '../cliBased/googleapi/GoogleDriveApiReadAndDownload';
 import { getFolderInSrcRootForProfile } from '../archiveUpload/ArchiveProfileUtils';
 import { moveFileSrcToDest, moveItemsInListOfProfileToFreeze, moveProfilesToFreeze } from '../services/yarnService';
-import { resetDownloadCounters } from '../cliBased/pdf/utils';
 import { vanitizePdfForProfiles } from '../vanityService/VanityPdf';
 import { timeInfo } from '../mirror/FrontEndBackendCommonCode';
 import { compareFolders } from '../folderSync';
 import { markUploadCycleAsMovedToFreeze } from '../services/uploadCycleService';
-import { ZIP_TYPE } from '../cliBased/googleapi/_utils/constants';
 import { unzipAllFilesInDirectory, verifyUnzipSuccessInDirectory } from '../services/zipService';
 import { FileMoveTracker } from '../models/FileMoveTracker';
 
 export const yarnRoute = express.Router();
-
-yarnRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
-    const startTime = Date.now();
-    try {
-        const googleDriveLink = req?.body?.googleDriveLink;
-        const profile = req?.body?.profile;
-        const ignoreFolder = req?.body?.ignoreFolder || "proc";
-
-        console.log(`:downloadFromGoogleDrive:
-        googleDriveLink:
-         ${googleDriveLink?.split(",").map((link: string) => link + "\n ")} 
-        profile ${profile}`)
-        if (!googleDriveLink || !profile) {
-            resp.status(300).send({
-                response: {
-                    "status": "failed",
-                    "message": "googleDriveLink and profile are mandatory"
-                }
-            });
-        }
-        const results = [];
-        const links = googleDriveLink.includes(",") ? googleDriveLink.split(",").map((link: string) => link.trim()) : [googleDriveLink.trim()];
-        resetDownloadCounters();
-        for (const [index, link] of links.entries()) {
-            const res = await downloadFromGoogleDriveToProfile(link, profile, ignoreFolder);
-            results.push(res);
-        }
-        const resultsSummary = results.map((res: any, index: number) => {
-            return `(${index + 1}). Succ: ${res.success_count} Err: ${res.error_count} Wrong Size: ${res.dl_wrong_size_count}`;
-        });
-        const endTime = Date.now();
-        const timeTaken = endTime - startTime;
-        console.log(`Time taken to download for /downloadFromGoogleDrive: ${timeInfo(timeTaken)}`);
-
-        resp.status(200).send({
-            timeTaken: timeInfo(timeTaken),
-            resultsSummary,
-            response: results
-        });
-    }
-
-    catch (err: any) {
-        console.log('Error', err);
-        resp.status(400).send(err);
-    }
-})
-
-yarnRoute.post('/downloadZipFromGoogleDrive', async (req: any, resp: any) => {
-    const startTime = Date.now();
-    try {
-        const googleDriveLink = req?.body?.googleDriveLink;
-        const profile = req?.body?.profile;
-        const ignoreFolder = req?.body?.ignoreFolder || "proc";
-
-        console.log(`:downloadZipFromGoogleDrive:
-        googleDriveLink:
-         ${googleDriveLink?.split(",").map((link: string) => link + "\n ")} 
-        profile ${profile}`)
-        if (!googleDriveLink || !profile) {
-            resp.status(300).send({
-                response: {
-                    "status": "failed",
-                    "message": "googleDriveLink and profile are mandatory"
-                }
-            });
-        }
-        const results = [];
-        const links = googleDriveLink.includes(",") ? googleDriveLink.split(",").map((link: string) => link.trim()) : [googleDriveLink.trim()];
-        resetDownloadCounters();
-        for (const [index, link] of links.entries()) {
-            const res = await downloadFromGoogleDriveToProfile(link, profile, ignoreFolder, ZIP_TYPE);
-            results.push(res);
-        }
-        const resultsSummary = results.map((res: any, index: number) => {
-            return `(${index + 1}). Succ: ${res.success_count} Err: ${res.error_count} Wrong Size: ${res.dl_wrong_size_count}`;
-        });
-        const endTime = Date.now();
-        const timeTaken = endTime - startTime;
-        console.log(`Time taken to download Zip Files from G-Drive: ${timeInfo(timeTaken)}`);
-
-        resp.status(200).send({
-            timeTaken: timeInfo(timeTaken),
-            resultsSummary,
-            response: results
-        });
-    }
-
-    catch (err: any) {
-        console.log('Error', err);
-        resp.status(400).send(err);
-    }
-})
 
 yarnRoute.post('/unzipAllFolders', async (req: any, resp: any) => {
     const startTime = Date.now();
@@ -151,7 +56,6 @@ yarnRoute.post('/unzipAllFolders', async (req: any, resp: any) => {
         resp.status(500).send(err);
     }
 })
-
 
 
 yarnRoute.post('/verifyUnzipAllFolders', async (req: any, resp: any) => {
