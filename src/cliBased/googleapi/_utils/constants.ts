@@ -6,6 +6,7 @@ export const ZIP_MIME_TYPE = 'application/zip';
 
 export const PDF_TYPE = 'pdf';
 export const ZIP_TYPE = 'zip';
+export const ALL_TYPE = 'all';
 
 
 export const numPages = "No. of Pages"

@@ -16,7 +16,7 @@ export async function listFolderContentsAsArrayOfData(folderId: string,
     drive: drive_v3.Drive,
     umbrellaFolder: string = "",
     ignoreFolder = "",
-    type = PDF_TYPE) {
+    fileType = PDF_TYPE) {
 
     const rootFolderName = await getFolderName(folderId, drive) || "";
     const _umbrellaFolder = umbrellaFolder?.length > 0 ? umbrellaFolder : rootFolderName;
@@ -27,7 +27,7 @@ export async function listFolderContentsAsArrayOfData(folderId: string,
     const googleDriveFileData: Array<GoogleApiData> = []
     let idFolderNameMap = new Map<string, string>();
 
-    await listFolderContents(folderId, drive, umbrellaFolder, googleDriveFileData, idFolderNameMap, rootFolderName, ignoreFolder, type);
+    await listFolderContents(folderId, drive, umbrellaFolder, googleDriveFileData, idFolderNameMap, rootFolderName, ignoreFolder, fileType);
     return googleDriveFileData
 }
 
@@ -103,7 +103,7 @@ export async function listFolderContents(folderId: string,
     idFolderNameMap: Map<string, string>,
     rootFolderName: string,
     ignoreFolder = "",
-    type = PDF_TYPE) {
+    fileType = PDF_TYPE) {
 
     if (!idFolderNameMap.has(folderId)) {
         const folderPath = await getFolderPathRelativeToRootFolder(folderId, drive)
@@ -116,7 +116,7 @@ export async function listFolderContents(folderId: string,
         let files: drive_v3.Schema$File[] = [];
         let pageToken: string | undefined = undefined;
 
-        const _query = constructGoogleApiQuery(folderId, ignoreFolder, type);
+        const _query = constructGoogleApiQuery(folderId, ignoreFolder, fileType);
         let idx = 0
         console.log(`_query(${++idx}) ${_query}`)
         do {
@@ -147,7 +147,7 @@ export async function listFolderContents(folderId: string,
                             idFolderNameMap,
                             rootFolderName,
                             ignoreFolder,
-                            type); // Recursively call the function for subfolders
+                            fileType); // Recursively call the function for subfolders
                     }
                 }
                 catch (err) {

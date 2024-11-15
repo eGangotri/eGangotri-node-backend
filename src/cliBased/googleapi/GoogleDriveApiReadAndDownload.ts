@@ -18,16 +18,16 @@ export const MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE = 200;
 const drive = getGoogleDriveInstance();
 
 async function getAllFilesFromGDrive(driveLinkOrFolderID: string,
-   folderName: string,
-    pdfDumpFolder: string,
-    ignoreFolder = "",
-     type = PDF_TYPE) {
+  folderName: string,
+  fileDumpFolder: string,
+  ignoreFolder = "",
+  fileType = PDF_TYPE) {
   const folderId = extractGoogleDriveId(driveLinkOrFolderID)
   console.log(`folderId: ${folderId}`)
   const googleDriveData = await listFolderContentsAsArrayOfData(folderId,
     drive,
     folderName,
-    ignoreFolder, type);
+    ignoreFolder, fileType);
 
   const dataLength = googleDriveData.length;
   const maxLimit = MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE;
@@ -41,7 +41,7 @@ async function getAllFilesFromGDrive(driveLinkOrFolderID: string,
   }
   const promises = googleDriveData.map(_data => {
     console.log(`_data: ${JSON.stringify(_data)}}`);
-    const pdfDumpWithPathAppended = pdfDumpFolder + path.sep + _data.parents;
+    const pdfDumpWithPathAppended = fileDumpFolder + path.sep + _data.parents;
     console.log(`pdfDumpWithPathAppended: ${pdfDumpWithPathAppended}`);
     if (!fs.existsSync(pdfDumpWithPathAppended)) {
       fsExtra.ensureDirSync(pdfDumpWithPathAppended);
@@ -98,15 +98,15 @@ export const addHeaderFooterToPDFsInProfile = async (profile: string) => {
 export const downloadFromGoogleDriveToProfile = async (driveLinkOrFolderId: string,
   profileOrPath: string,
   ignoreFolder = "",
-  type = PDF_TYPE) => {
-  const pdfDumpFolder = isValidPath(profileOrPath) ? profileOrPath : getFolderInSrcRootForProfile(profileOrPath);
+  fileType = PDF_TYPE) => {
+  const fileDumpFolder = isValidPath(profileOrPath) ? profileOrPath : getFolderInSrcRootForProfile(profileOrPath);
 
-  console.log(`downloadFromGoogleDriveToProfile:pdfDumpFolder ${pdfDumpFolder}`)
+  console.log(`downloadFromGoogleDriveToProfile:fileDumpFolder ${fileDumpFolder}`)
   try {
-    if (fs.existsSync(pdfDumpFolder)) {
+    if (fs.existsSync(fileDumpFolder)) {
       resetDownloadCounters()
       const _results = await getAllFilesFromGDrive(driveLinkOrFolderId, "",
-        pdfDumpFolder, ignoreFolder, type);
+        fileDumpFolder, ignoreFolder, fileType);
 
       console.log(`Success count: ${DOWNLOAD_COMPLETED_COUNT}`);
       console.log(`Error count: ${DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT}`);
@@ -121,7 +121,7 @@ export const downloadFromGoogleDriveToProfile = async (driveLinkOrFolderId: stri
       console.log(`_resp : ${JSON.stringify(_resp)}`);
       return _resp;
     }
-    console.log(`No corresponding folder ${pdfDumpFolder} to profile  ${profileOrPath} exists`)
+    console.log(`No corresponding folder ${fileDumpFolder} to profile  ${profileOrPath} exists`)
     return {
       "success": false,
       msg: `No corresponding folder to profile (${profileOrPath}) exists`

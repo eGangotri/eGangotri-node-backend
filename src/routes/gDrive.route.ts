@@ -3,25 +3,29 @@ import { downloadFromGoogleDriveToProfile } from '../cliBased/googleapi/GoogleDr
 import { DOWNLOAD_COMPLETED_COUNT, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT, resetDownloadCounters } from '../cliBased/pdf/utils';
 import { timeInfo } from '../mirror/FrontEndBackendCommonCode';
 import { PDF_TYPE, ZIP_TYPE } from '../cliBased/googleapi/_utils/constants';
-import { genLinksAndFolders, validateGenGDriveLinks } from 'services/yarnListMakerService';
-import { generateGoogleDriveListingExcel } from 'cliBased/googleapi/GoogleDriveApiReadAndExport';
-import { convertArchiveExcelToLinkData } from 'services/yarnArchiveService';
-import { downloadArchiveItems } from 'archiveDotOrg/downloadUtil';
-import { formatTime } from 'imgToPdf/utils/Utils';
+import { genLinksAndFolders, validateGenGDriveLinks } from '../services/yarnListMakerService';
+import { generateGoogleDriveListingExcel, getGDriveContentsAsJson } from '../cliBased/googleapi/GoogleDriveApiReadAndExport';
+import { formatTime } from '../imgToPdf/utils/Utils';
+import { convertGDriveExcelToLinkData, downloadGDriveData } from '../services/GDriveItemService';
+import { GoogleApiData } from 'cliBased/googleapi/types';
+import { getAllFileStats } from '../utils/FileStatsUtils';
+import { PDF_EXT, ZIP_EXT } from 'imgToPdf/utils/constants';
 
 export const gDriveRoute = express.Router();
 
+//
 gDriveRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
     const startTime = Date.now();
     try {
         const googleDriveLink = req?.body?.googleDriveLink;
         const profile = req?.body?.profile;
         const ignoreFolder = req?.body?.ignoreFolder || "proc";
+        const fileType = req?.body?.fileType || PDF_TYPE;
 
         console.log(`:downloadFromGoogleDrive:
         googleDriveLink:
          ${googleDriveLink?.split(",").map((link: string) => link + "\n ")} 
-        profile ${profile}`)
+        profile ${profile} fileType ${fileType} ignoreFolder ${ignoreFolder}`)
         if (!googleDriveLink || !profile) {
             resp.status(300).send({
                 response: {
@@ -34,7 +38,7 @@ gDriveRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
         const links = googleDriveLink.includes(",") ? googleDriveLink.split(",").map((link: string) => link.trim()) : [googleDriveLink.trim()];
         resetDownloadCounters();
         for (const [index, link] of links.entries()) {
-            const res = await downloadFromGoogleDriveToProfile(link, profile, ignoreFolder);
+            const res = await downloadFromGoogleDriveToProfile(link, profile, ignoreFolder, fileType);
             results.push(res);
         }
         const resultsSummary = results.map((res: any, index: number) => {
@@ -57,53 +61,10 @@ gDriveRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
     }
 })
 
-gDriveRoute.post('/downloadZipFromGoogleDrive', async (req: any, resp: any) => {
-    const startTime = Date.now();
-    try {
-        const googleDriveLink = req?.body?.googleDriveLink;
-        const profile = req?.body?.profile;
-        const ignoreFolder = req?.body?.ignoreFolder || "proc";
 
-        console.log(`:downloadZipFromGoogleDrive:
-        googleDriveLink:
-         ${googleDriveLink?.split(",").map((link: string) => link + "\n ")} 
-        profile ${profile}`)
-        if (!googleDriveLink || !profile) {
-            resp.status(300).send({
-                response: {
-                    "status": "failed",
-                    "message": "googleDriveLink and profile are mandatory"
-                }
-            });
-        }
-        const results = [];
-        const links = googleDriveLink.includes(",") ? googleDriveLink.split(",").map((link: string) => link.trim()) : [googleDriveLink.trim()];
-        resetDownloadCounters();
-        for (const [index, link] of links.entries()) {
-            const res = await downloadFromGoogleDriveToProfile(link, profile, ignoreFolder, ZIP_TYPE);
-            results.push(res);
-        }
-        const resultsSummary = results.map((res: any, index: number) => {
-            return `(${index + 1}). Succ: ${res.success_count} Err: ${res.error_count} Wrong Size: ${res.dl_wrong_size_count}`;
-        });
-        const endTime = Date.now();
-        const timeTaken = endTime - startTime;
-        console.log(`Time taken to download Zip Files from G-Drive: ${timeInfo(timeTaken)}`);
 
-        resp.status(200).send({
-            timeTaken: timeInfo(timeTaken),
-            resultsSummary,
-            response: results
-        });
-    }
 
-    catch (err: any) {
-        console.log('Error', err);
-        resp.status(400).send(err);
-    }
-})
-
-gDriveRoute.post('/verifyLocalDownloadSameAsGDrive', async (req: any, resp: any) => {
+gDriveRoute.post('/getGoogleDriveListingAsExcel', async (req: any, resp: any) => {
     console.log(`getGoogleDriveListingAsExcel ${JSON.stringify(req.body)}`)
     const startTime = Date.now();
 
@@ -168,7 +129,8 @@ gDriveRoute.post('/verifyLocalDownloadSameAsGDrive', async (req: any, resp: any)
     }
 })
 
-gDriveRoute.post('/downloadArchiveItemsViaExcel', async (req: any, resp: any) => {
+
+gDriveRoute.post('/downloadGDriveItemsViaExcel', async (req: any, resp: any) => {
     try {
         const excelPath = req?.body?.excelPath;
         const profileOrPath = req?.body?.profileOrPath;
@@ -183,9 +145,9 @@ gDriveRoute.post('/downloadArchiveItemsViaExcel', async (req: any, resp: any) =>
                 }
             });
         }
-        const _linkData = convertArchiveExcelToLinkData(excelPath);
+        const excelLinksData = convertGDriveExcelToLinkData(excelPath);
         resetDownloadCounters()
-        const _results = await downloadArchiveItems(_linkData, profileOrPath);
+        const _results = await downloadGDriveData(excelLinksData, profileOrPath);
 
         console.log(`Success count: ${DOWNLOAD_COMPLETED_COUNT}`);
         console.log(`Error count: ${DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT}`);
@@ -211,3 +173,70 @@ gDriveRoute.post('/downloadArchiveItemsViaExcel', async (req: any, resp: any) =>
         resp.status(400).send(err);
     }
 })
+
+gDriveRoute.post('/verifyLocalDownloadSameAsGDrive', async (req: any, resp: any) => {
+    console.log(`verifyLocalDownloadSameAsGDrive ${JSON.stringify(req.body)}`)
+    const startTime = Date.now();
+
+    try {
+        const googleDriveLink = req?.body?.googleDriveLink;
+        const folderName = req?.body?.folderName || "";
+        const ignoreFolder = req?.body?.ignoreFolder
+        const fileType = req?.body?.fileType || PDF_TYPE;
+
+        console.log(`verifyLocalDownloadSameAsGDrive googleDriveLink:
+         ${googleDriveLink}/${folderName}/${ignoreFolder}/${fileType}`)
+
+        const _validations = validateGenGDriveLinks(googleDriveLink, folderName)
+        if (_validations.success === false) {
+            resp.status(300).send({
+                response: _validations
+            })
+        }
+
+        const { _links, _folders, error } = genLinksAndFolders(googleDriveLink, folderName)
+        if (error) {
+            resp.status(300).send({
+                response: {
+                    "status": "failed",
+                    "success": false,
+                    "message": "Number of Links and Folder Names should match"
+                }
+            });
+            return
+        }
+
+        const _resps = [];
+        const _resps2 = [];
+        for (let i = 0; i < _links.length; i++) {
+            console.log(`getGoogleDriveListingAsExcel ${_links[i]} ${_folders[i]} (${fileType})`)
+            const googleDriveFileData: Array<GoogleApiData> = 
+            await getGDriveContentsAsJson(_links[i],"", ignoreFolder, fileType);
+           _resps.push(googleDriveFileData);
+           getAllFileStats({
+            directoryPath: _folders[i], 
+            filterExt: fileType === PDF_TYPE ? [PDF_EXT] : (fileType === ZIP_TYPE ? [ZIP_EXT] : []),
+            ignoreFolders: ignoreFolder,
+            withLogs: false,
+            withMetadata: true,
+           });
+        }
+        const endTime = Date.now();
+        const timeTaken = endTime - startTime;
+        console.log(`Time taken to download google drive Listings: ${timeInfo(timeTaken)}`);
+
+        resp.status(200).send({
+            timeTaken: timeInfo(timeTaken),
+            response: {
+                ..._resps,
+            }
+        });
+        return;
+    }
+
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})
+
