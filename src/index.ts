@@ -66,6 +66,7 @@ egangotri.use("/yarnExcel", yarnExcelRoute);
 egangotri.use("/yarnListMaker", yarnListMakerRoute);
 egangotri.use("/yarnArchive", launchArchiveYarnRoute);
 egangotri.use("/ai", launchAIRoute);
+egangotri.use("/gDrive", gDriveRoute);
 
 egangotri.use("/searchArchivesDB", archiveItemRoute);
 egangotri.use("/searchGDriveDB", googleDriveItemRoute);
