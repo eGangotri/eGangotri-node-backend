@@ -1,4 +1,4 @@
-import { FOLDER_MIME_TYPE, PDF_MIME_TYPE, PDF_TYPE, ZIP_MIME_TYPE, ZIP_TYPE } from "./_utils/constants";
+import { ALL_TYPE, FOLDER_MIME_TYPE, PDF_MIME_TYPE, PDF_TYPE, ZIP_MIME_TYPE, ZIP_TYPE } from "./_utils/constants";
 
 const { google } = require('googleapis');
 
@@ -13,9 +13,10 @@ export function isValidDriveId(folderIdOrUrl: string) {
 }
 
 
-export const constructGoogleApiQuery = (folderId: string, ignoreFolder: string, type: string) => {
-    const pdfOnly = type === PDF_TYPE;
-    const zipOnly = type === ZIP_TYPE;
+export const constructGoogleApiQuery = (folderId: string, ignoreFolder: string, fileType: string) => {
+    const pdfOnly = fileType === PDF_TYPE;
+    const zipOnly = fileType === ZIP_TYPE;
+    const all = fileType.toLowerCase() === ALL_TYPE || ( fileType !== PDF_TYPE && fileType !== ZIP_TYPE);
 
     const conditionForIgnoreFolder = ignoreFolder?.length > 0 ? ` and not name contains '${ignoreFolder}'` : "";
     const pdfOnlyFrag = `(mimeType='${PDF_MIME_TYPE}' or mimeType='${FOLDER_MIME_TYPE}')`

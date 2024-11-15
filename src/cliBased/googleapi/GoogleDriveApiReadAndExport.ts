@@ -1,12 +1,21 @@
 import { _credentials } from './_utils/credentials_googleapi';
-import { listFolderContentsAndGenerateCSVAndExcel, listFolderContentsAndGenerateExcelV2ForPdfRenamer } from './service/GoogleApiService';
+import { listFolderContentsAndGenerateCSVAndExcel, listFolderContentsAndGenerateExcelV2ForPdfRenamer, listFolderContentsAsArrayOfData } from './service/GoogleApiService';
 import { getGoogleDriveInstance } from './service/CreateGoogleDrive';
 import { isValidDriveId } from './Utils';
 import { PDF_TYPE } from './_utils/constants';
 
 // Create a new Google Drive instance
 const drive = getGoogleDriveInstance();
-const EXPORT_ROOT_FOLDER = `C:\\_catalogWork\\_collation\\`;
+export const EXPORT_ROOT_FOLDER = `C:\\_catalogWork\\_collation\\`;
+
+export async function getGDriveContentsAsJson(folderId: string,
+  umbrellaFolder: string = "",
+  ignoreFolder = "",
+  fileType = PDF_TYPE) {
+  const _data = await listFolderContentsAsArrayOfData(folderId, drive, umbrellaFolder, 
+    ignoreFolder, fileType);
+  return _data;
+}
 
 async function procOrigGoogleDrive(driveLinkOrFolderID: string, folderName: string, ignoreFolder = "", pdfRenamerXlV2 = false, type = PDF_TYPE) {
   if (pdfRenamerXlV2) {

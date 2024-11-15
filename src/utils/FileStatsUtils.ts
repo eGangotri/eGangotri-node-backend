@@ -32,7 +32,7 @@ export async function getAllFileStats(filestatsOptions: FileStatsOptions): Promi
                 console.log(`Ignoring ${fullPath} due to ${filestatsOptions?.ignorePaths}`);
                 continue;
             }
-           // console.log(`not Ignoring ${fullPath} due to ${filestatsOptions?.ignorePaths}`);
+            // console.log(`not Ignoring ${fullPath} due to ${filestatsOptions?.ignorePaths}`);
 
             if (dirent.isDirectory()) {
                 queue.push(fullPath);
@@ -48,7 +48,8 @@ export async function getAllFileStats(filestatsOptions: FileStatsOptions): Promi
                 }
             } else if (dirent.isFile()) {
                 const ext = path.extname(fullPath);
-                if (!_.isEmpty(filestatsOptions.filterExt) && (ext.toLowerCase() !== filestatsOptions.filterExt)) {
+                if (!_.isEmpty(filestatsOptions.filterExt) &&
+                    (filestatsOptions?.filterExt?.every((item: string) => ext.toLowerCase() !== item))) {
                     continue;
                 }
                 const _path = path.parse(fullPath);
@@ -84,7 +85,7 @@ export async function getAllFileStats(filestatsOptions: FileStatsOptions): Promi
 export async function getAllPDFFiles(directoryPath: string, withLogs: boolean = false): Promise<FileStats[]> {
     return await getAllFileStats({
         directoryPath,
-        filterExt: PDF_EXT,
+        filterExt: [PDF_EXT],
         ignoreFolders: true,
         withLogs
     });
@@ -93,7 +94,7 @@ export async function getAllPDFFiles(directoryPath: string, withLogs: boolean = 
 export async function getAllZipFiles(directoryPath: string, withLogs: boolean = false): Promise<FileStats[]> {
     return await getAllFileStats({
         directoryPath,
-        filterExt: ZIP_EXT,
+        filterExt: [ZIP_EXT],
         ignoreFolders: true,
         withLogs
     });
@@ -105,13 +106,13 @@ export async function getAllZipFiles(directoryPath: string, withLogs: boolean = 
  * @returns 
  */
 export async function getAllPDFFilesWithIgnorePathsSpecified(directoryPath: string,
-     ignorePaths = []): Promise<FileStats[]> {
+    ignorePaths = []): Promise<FileStats[]> {
     return await getAllFileStats({
         directoryPath,
-        filterExt: PDF_EXT,
+        filterExt: [PDF_EXT],
         ignoreFolders: true,
-        withLogs:false,
-        ignorePaths:ignorePaths
+        withLogs: false,
+        ignorePaths: ignorePaths
     });
 }
 
@@ -120,7 +121,7 @@ export async function getAllPDFFilesWithMedata(directoryPath: string, withLogs: 
     const filestatsOptions =
     {
         directoryPath: directoryPath,
-        filterPath: PDF_EXT,
+        filterExt: [PDF_EXT],
         ignoreFolders: true,
         withLogs: withLogs,
         withMetadata: false, // initially false
@@ -135,7 +136,7 @@ export async function getAllFileListingWithoutStats(filestatsOptions: FileStatsO
     return await getAllFileStats(
         {
             directoryPath: filestatsOptions.directoryPath,
-            filterExt: filestatsOptions.filterExt || "",
+            filterExt: filestatsOptions.filterExt || [],
             ignorePaths: filestatsOptions.ignorePaths || [],
             ignoreFolders: true,
             withLogs: filestatsOptions.withLogs || true,
@@ -147,7 +148,7 @@ export async function getAllFileListingWithFileSizeStats(directoryPath: string):
     return await getAllFileStats(
         {
             directoryPath,
-            filterExt: "",
+            filterExt: [],
             ignoreFolders: true,
             withLogs: true,
             withMetadata: false,
@@ -157,7 +158,7 @@ export async function getAllFileListingWithFileSizeStats(directoryPath: string):
 export async function getAllFileListingWithStats(directoryPath: string): Promise<FileStats[]> {
     const filestatsOptions = {
         directoryPath: directoryPath,
-        filterPath: "",
+        filterExt: [],
         ignoreFolders: true,
         withLogs: false,
         withMetadata: false, //initially false

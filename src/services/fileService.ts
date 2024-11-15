@@ -7,7 +7,7 @@ export const multipleTextScriptConversion = async (folderPath: string, scriptFro
     console.log(`folderPath: ${folderPath} scriptFrom: ${scriptFrom} scriptTo: ${scriptTo}`);
     const allDotTxts = await getAllFileListingWithoutStats({
         directoryPath: folderPath,
-        filterExt: '.txt',
+        filterExt: ['.txt'],
         ignoreFolders: true,
         withLogs: false,
     });
