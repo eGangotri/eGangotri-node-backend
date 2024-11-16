@@ -11,6 +11,8 @@ import { GoogleApiData } from 'cliBased/googleapi/types';
 import { getAllFileStats } from '../utils/FileStatsUtils';
 import { PDF_EXT, ZIP_EXT } from '../imgToPdf/utils/constants';
 import { file } from 'pdfkit';
+import { isValidPath } from '../utils/utils';
+import { getFolderInSrcRootForProfile } from 'archiveUpload/ArchiveProfileUtils';
 
 export const gDriveRoute = express.Router();
 
@@ -181,21 +183,23 @@ gDriveRoute.post('/verifyLocalDownloadSameAsGDrive', async (req: any, resp: any)
 
     try {
         const googleDriveLink = req?.body?.googleDriveLink;
-        const folderName = req?.body?.folderName || "";
+        const folderOrProfile = req?.body?.folderOrProfile || "";
         const ignoreFolder = req?.body?.ignoreFolder
         const fileType = req?.body?.fileType || PDF_TYPE;
 
-        console.log(`verifyLocalDownloadSameAsGDrive googleDriveLink:
-         ${googleDriveLink}/${folderName}/${ignoreFolder}/${fileType}`)
+        const folder = isValidPath(folderOrProfile) ? folderOrProfile : getFolderInSrcRootForProfile(folderOrProfile)
 
-        const _validations = validateGenGDriveLinks(googleDriveLink, folderName)
+        console.log(`verifyLocalDownloadSameAsGDrive googleDriveLink:
+         ${googleDriveLink}/${folder}/${ignoreFolder}/${fileType}`)
+
+        const _validations = validateGenGDriveLinks(googleDriveLink, folder)
         if (_validations.success === false) {
             resp.status(300).send({
                 response: _validations
             })
         }
 
-        const { _links, _folders, error } = genLinksAndFolders(googleDriveLink, folderName)
+        const { _links, _folders, error } = genLinksAndFolders(googleDriveLink, folder)
         if (error) {
             resp.status(300).send({
                 response: {
