@@ -2,17 +2,14 @@ import * as express from 'express';
 import { downloadFromGoogleDriveToProfile } from '../cliBased/googleapi/GoogleDriveApiReadAndDownload';
 import { DOWNLOAD_COMPLETED_COUNT, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT, resetDownloadCounters } from '../cliBased/pdf/utils';
 import { timeInfo } from '../mirror/FrontEndBackendCommonCode';
-import { PDF_TYPE, ZIP_TYPE } from '../cliBased/googleapi/_utils/constants';
+import { PDF_TYPE } from '../cliBased/googleapi/_utils/constants';
 import { genLinksAndFolders, validateGenGDriveLinks } from '../services/yarnListMakerService';
 import { generateGoogleDriveListingExcel, getGDriveContentsAsJson } from '../cliBased/googleapi/GoogleDriveApiReadAndExport';
 import { formatTime } from '../imgToPdf/utils/Utils';
 import { convertGDriveExcelToLinkData, downloadGDriveData } from '../services/GDriveItemService';
-import { GoogleApiData } from 'cliBased/googleapi/types';
-import { getAllFileStats } from '../utils/FileStatsUtils';
-import { PDF_EXT, ZIP_EXT, ZIP_TYPE_EXT } from '../imgToPdf/utils/constants';
 import { isValidPath } from '../utils/utils';
 import { getFolderInSrcRootForProfile } from '../archiveUpload/ArchiveProfileUtils';
-import { verifyGDriveLocalIntegrity } from 'services/GDriveService';
+import { verifyGDriveLocalIntegrity } from '../services/GDriveService';
 
 export const gDriveRoute = express.Router();
 
