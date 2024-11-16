@@ -1,6 +1,6 @@
 const express = require("express");
 import e, { Request, Response } from "express";
-import { getDiffBetweenGDriveAndLocalFiles, getListOfGDriveItems } from "../services/GDriveItemService";
+import { getDiffBetweenGDriveAndLocalFiles, getListOfGDriveItems, getSourceStatistics } from "../services/GDriveItemService";
 import { uploadToGDriveBasedOnDiffExcel } from "../cliBased/googleapi/GoogleDriveUpload";
 
 export const googleDriveItemRoute = express.Router();
@@ -77,4 +77,55 @@ googleDriveItemRoute.post('/uploadToGDriveBasedOnDiffExcel', async (req: any, re
     }
 })
 
+googleDriveItemRoute.get('/getPerSource', async (req: any, resp: any) => {
+    const { page = 1, limit = 10, sortField = "createdTime", sortOrder = "asc", source } = req.body;
+    try {
+        const _resp = await getListOfGDriveItems({ source });
+        console.log(`_resp: ${JSON.stringify(_resp[0])}`);
+        if (!_resp || _resp.length === 0) {
+            resp.status(200).send({
+                response: {
+                    success: false,
+                    msg: `No data corresponding to ${source} found`
+
+                }
+            });
+        }
+        else {
+            resp.status(200).send({
+                response: resp
+            });
+        }
+    }
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})
+
+googleDriveItemRoute.get('/gdriveDBAggregatedBySource', async (req: any, resp: any) => {
+    try {
+        const _resp = await getSourceStatistics();
+
+        console.log(`_resp: ${JSON.stringify(_resp[0])}`);
+        if (!_resp || _resp.length === 0) {
+            resp.status(200).send({
+                response: {
+                    success: false,
+                    msg: `No Data found in GDriveItem collection`
+
+                }
+            });
+        }
+        else {
+            resp.status(200).send({
+                response: resp
+            });
+        }
+    }
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})
 
