@@ -51,11 +51,14 @@ export function setOptionsForGDriveListing(queryOptions: GDriveItemListOptionsTy
       }
     }
   }
-  else {
-    console.log(`cannot proceed no searchTerm`);
-    throw new Error(`Please provide a searchTerm`);
+  if (queryOptions?.source) {
+    const source: string[] = replaceQuotesAndSplit(queryOptions?.source)
+    console.log(`source ${source}`)
+    mongoOptionsFilter = { ...mongoOptionsFilter, source: { $in: source } };
   }
 
+/*
+{"":"Treasure 56","page":1,"limit":10,"sortField":"createdTime","sortOrder":"asc"}*/
   if (queryOptions?.archiveProfiles) {
     const archiveProfiles: string[] = replaceQuotesAndSplit(queryOptions?.archiveProfiles)
     console.log(`archiveProfiles ${archiveProfiles}`)

@@ -77,12 +77,14 @@ googleDriveItemRoute.post('/uploadToGDriveBasedOnDiffExcel', async (req: any, re
     }
 })
 
-googleDriveItemRoute.get('/getPerSource', async (req: any, resp: any) => {
+googleDriveItemRoute.post('/getPerSource', async (req: any, resp: any) => {
+    console.log(`getPerSource:`);
+    
     const { page = 1, limit = 10, sortField = "createdTime", sortOrder = "asc", source } = req.body;
     try {
-        const _resp = await getListOfGDriveItems({ source });
-        console.log(`_resp: ${JSON.stringify(_resp[0])}`);
-        if (!_resp || _resp.length === 0) {
+        const _gDriveItemsList = await getListOfGDriveItems({ source });
+        console.log(`_resp: ${JSON.stringify(_gDriveItemsList[0])}`);
+        if (!_gDriveItemsList || _gDriveItemsList.length === 0) {
             resp.status(200).send({
                 response: {
                     success: false,
@@ -93,7 +95,7 @@ googleDriveItemRoute.get('/getPerSource', async (req: any, resp: any) => {
         }
         else {
             resp.status(200).send({
-                response: resp
+                response: _gDriveItemsList
             });
         }
     }
@@ -104,11 +106,12 @@ googleDriveItemRoute.get('/getPerSource', async (req: any, resp: any) => {
 })
 
 googleDriveItemRoute.get('/gdriveDBAggregatedBySource', async (req: any, resp: any) => {
-    try {
-        const _resp = await getSourceStatistics();
+    console.log(`gdriveDBAggregatedBySource:`);
 
-        console.log(`_resp: ${JSON.stringify(_resp[0])}`);
-        if (!_resp || _resp.length === 0) {
+    try {
+        const aggregatedData = await getSourceStatistics();
+        console.log(`_resp: ${JSON.stringify(aggregatedData[0])}`);
+        if (!aggregatedData || aggregatedData.length === 0) {
             resp.status(200).send({
                 response: {
                     success: false,
@@ -119,7 +122,7 @@ googleDriveItemRoute.get('/gdriveDBAggregatedBySource', async (req: any, resp: a
         }
         else {
             resp.status(200).send({
-                response: resp
+                response: aggregatedData
             });
         }
     }
