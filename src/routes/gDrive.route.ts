@@ -10,6 +10,7 @@ import { convertGDriveExcelToLinkData, downloadGDriveData } from '../services/GD
 import { GoogleApiData } from 'cliBased/googleapi/types';
 import { getAllFileStats } from '../utils/FileStatsUtils';
 import { PDF_EXT, ZIP_EXT } from '../imgToPdf/utils/constants';
+import { file } from 'pdfkit';
 
 export const gDriveRoute = express.Router();
 
@@ -213,13 +214,14 @@ gDriveRoute.post('/verifyLocalDownloadSameAsGDrive', async (req: any, resp: any)
             const googleDriveFileData: Array<GoogleApiData> = 
             await getGDriveContentsAsJson(_links[i],"", ignoreFolder, fileType);
            _resps.push(googleDriveFileData);
-           getAllFileStats({
+           const fileStats = await getAllFileStats({
             directoryPath: _folders[i], 
             filterExt: fileType === PDF_TYPE ? [PDF_EXT] : (fileType === ZIP_TYPE ? [ZIP_EXT] : []),
             ignoreFolders: ignoreFolder,
             withLogs: false,
             withMetadata: true,
            });
+           _resps2.push(fileStats)
         }
         const endTime = Date.now();
         const timeTaken = endTime - startTime;
@@ -228,7 +230,8 @@ gDriveRoute.post('/verifyLocalDownloadSameAsGDrive', async (req: any, resp: any)
         resp.status(200).send({
             timeTaken: timeInfo(timeTaken),
             response: {
-                ..._resps,
+                googleDriveFileData: _resps,
+                fileStats: _resps2
             }
         });
         return;
