@@ -56,6 +56,7 @@ export type GDriveItemListOptionsType = {
   searchTerm?: string,
   limit?: number,
   archiveProfiles?: string,
+  source?: string,
   wordBoundary?: string,
   startDate?: string,
   endDate?: string,

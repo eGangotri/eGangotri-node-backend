@@ -188,3 +188,34 @@ export const downloadGDriveData = async (googleDriveData:GDriveExcelData[],
   const results = await Promise.all(promises);
   return results
 }
+
+      /**
+         * pageCount 290
+sizeInBytes
+"82562822"
+createdTime
+"2024-03-02T20:41:32.105Z"
+source
+"Treasures67"
+         */
+export async function getSourceStatistics() {
+  const result = await GDriveItem.aggregate([
+      {
+          $group: {
+              _id: "$source",
+              count: { $sum: 1 },
+              firstItemCreatedTime: { $min: "$createdTime" }
+          }
+      },
+      {
+          $project: {
+              _id: 0,
+              source: "$_id",
+              count: 1,
+              firstItemCreatedTime: 1
+          }
+      }
+  ]);
+
+  return result;
+}
