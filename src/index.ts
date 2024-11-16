@@ -66,7 +66,7 @@ egangotri.use("/ai", launchAIRoute);
 egangotri.use("/gDrive", gDriveRoute);
 
 egangotri.use("/searchArchivesDB", archiveItemRoute);
-egangotri.use("/searchGDriveDB", googleDriveItemRoute);
+egangotri.use("/googleDriveDB", googleDriveItemRoute);
 egangotri.use("/searchMongo", launchMongoRoute);
 egangotri.use("/fileUtil", fileUtilsRoute);
 egangotri.use("/pdfRename", pdfRenameRoute);
