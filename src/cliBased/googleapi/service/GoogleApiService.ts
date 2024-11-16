@@ -21,8 +21,10 @@ export async function listFolderContentsAsArrayOfData(folderId: string,
     const rootFolderName = await getFolderName(folderId, drive) || "";
     const _umbrellaFolder = umbrellaFolder?.length > 0 ? umbrellaFolder : rootFolderName;
 
-    console.log(`drive api folder extracTion process initiated: \
-    from (${_umbrellaFolder}) ${folderId} \n`)
+    console.log(`drive api folder metadata extraction process initiated: \
+    Umbrella Folder (${_umbrellaFolder}) 
+    Folder Id ${folderId} 
+    rootFolderName ${rootFolderName}.\n`)
 
     const googleDriveFileData: Array<GoogleApiData> = []
     let idFolderNameMap = new Map<string, string>();
@@ -131,7 +133,7 @@ export async function listFolderContents(folderId: string,
             console.log(`resp: ${idx} ${JSON.stringify(response?.data?.files || "no files")}`)
             files = files.concat(response.data.files || []);
             pageToken = response.data.nextPageToken;
-            console.log(`after pageTiken: ${idx}`)
+            console.log(`after nextPageToken: ${idx}`)
         } while (pageToken);
 
 

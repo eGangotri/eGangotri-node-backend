@@ -3,16 +3,20 @@ import { listFolderContentsAndGenerateCSVAndExcel, listFolderContentsAndGenerate
 import { getGoogleDriveInstance } from './service/CreateGoogleDrive';
 import { isValidDriveId } from './Utils';
 import { PDF_TYPE } from './_utils/constants';
+import { extractGoogleDriveId } from '../../mirror/GoogleDriveUtilsCommonCode';
 
 // Create a new Google Drive instance
 const drive = getGoogleDriveInstance();
 export const EXPORT_ROOT_FOLDER = `C:\\_catalogWork\\_collation\\`;
 
-export async function getGDriveContentsAsJson(folderId: string,
+export async function getGDriveContentsAsJson(driveLinkOrFolderID: string,
   umbrellaFolder: string = "",
   ignoreFolder = "",
   fileType = PDF_TYPE) {
-  const _data = await listFolderContentsAsArrayOfData(folderId, drive, umbrellaFolder, 
+    
+  const folderId = extractGoogleDriveId(driveLinkOrFolderID)
+  console.log(`folderId: ${folderId}`)
+  const _data = await listFolderContentsAsArrayOfData(folderId, drive, umbrellaFolder,
     ignoreFolder, fileType);
   return _data;
 }

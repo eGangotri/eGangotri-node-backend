@@ -189,7 +189,10 @@ gDriveRoute.post('/verifyLocalDownloadSameAsGDrive', async (req: any, resp: any)
         const folder = isValidPath(folderOrProfile) ? folderOrProfile : getFolderInSrcRootForProfile(folderOrProfile)
 
         console.log(`verifyLocalDownloadSameAsGDrive googleDriveLink:
-         ${googleDriveLink}/${folder}/${ignoreFolder}/${fileType}`)
+         ${googleDriveLink} /
+         ${folder} /
+         ${ignoreFolder} /
+         ${fileType}`)
 
         const _validations = validateGenGDriveLinks(googleDriveLink, folder)
         if (_validations.success === false) {
@@ -213,10 +216,11 @@ gDriveRoute.post('/verifyLocalDownloadSameAsGDrive', async (req: any, resp: any)
         const _resps = [];
         const _resps2 = [];
         for (let i = 0; i < _links.length; i++) {
-            console.log(`getGoogleDriveListingAsExcel ${_links[i]} ${_folders[i]} (${fileType})`)
+            console.log(`getGDriveContentsAsJson ${_links[i]} ${_folders[i]} (${fileType})`)
             const googleDriveFileData: Array<GoogleApiData> = 
             await getGDriveContentsAsJson(_links[i],"", ignoreFolder, fileType);
            _resps.push(googleDriveFileData);
+
            const fileStats = await getAllFileStats({
             directoryPath: _folders[i], 
             filterExt: fileType === PDF_TYPE ? [PDF_EXT] : (fileType === ZIP_TYPE ? [ZIP_EXT] : []),
@@ -228,7 +232,7 @@ gDriveRoute.post('/verifyLocalDownloadSameAsGDrive', async (req: any, resp: any)
         }
         const endTime = Date.now();
         const timeTaken = endTime - startTime;
-        console.log(`Time taken to download google drive Listings: ${timeInfo(timeTaken)}`);
+        console.log(`Time taken to retrieve google drive Listings and local file listings: ${timeInfo(timeTaken)}`);
 
         resp.status(200).send({
             timeTaken: timeInfo(timeTaken),
