@@ -15,26 +15,27 @@ export const verifyGDriveLocalIntegrity = async (_links: string[],
     const startTime = Date.now();
     const gDriveFileStats = [];
     const localStats = [];
-
+    const comparisonResult = [];
     for (let i = 0; i < _links.length; i++) {
         console.log(`getGDriveContentsAsJson ${_links[i]} ${_folders[i]} (${fileType})`)
-        const googleDriveFileData: GoogleApiData[] =
+        const _gDriveStats: GoogleApiData[] =
             await getGDriveContentsAsJson(_links[i], "", ignoreFolder, fileType);
-        gDriveFileStats.push(googleDriveFileData);
+        gDriveFileStats.push(_gDriveStats);
 
-        const _stats: FileStats[] = await getAllFileStats({
+        const _localStats: FileStats[] = await getAllFileStats({
             directoryPath: _folders[i],
             filterExt: fileType === PDF_TYPE ? [PDF_EXT] : (fileType === ZIP_TYPE ? ZIP_TYPE_EXT : []),
             ignorePaths: [ignoreFolder],
             withLogs: true,
             withMetadata: true,
         });
-        localStats.push(_stats)
+        localStats.push(_localStats)
+        comparisonResult.push(compareGDriveLocalJson(_gDriveStats, _localStats));
+
     }
     const endTime = Date.now();
     const timeTaken = endTime - startTime;
     console.log(`Time taken to retrieve google drive Listings and local file listings: ${timeInfo(timeTaken)}`);
-    const comparisonResult = compareGDriveLocalJson(gDriveFileStats, localStats);
     console.log(`comparisonResult: ${JSON.stringify(comparisonResult)}`);
     return {
         timeTaken: timeInfo(timeTaken),
@@ -47,13 +48,15 @@ export const verifyGDriveLocalIntegrity = async (_links: string[],
 }
 
 export const compareGDriveLocalJson =
-     (googleDriveFileData: GoogleApiData[],
+    (googleDriveFileData: GoogleApiData[],
         localFileStats: FileStats[]) => {
+        let failedMsgs = [];
         let failedFiles = [];
+        const successMsgs = []
         const gDriveFileTotal = googleDriveFileData?.length
         const localFileTotal = localFileStats?.length;
         if (gDriveFileTotal !== localFileTotal) {
-            failedFiles.push(`Length of googleDriveFileData(${gDriveFileTotal}) and localFileStats(${localFileTotal}) are not equal`
+            failedMsgs.push(`Length of googleDriveFileData(${gDriveFileTotal}) and localFileStats(${localFileTotal}) are not equal`
             )
         }
 
@@ -64,20 +67,30 @@ export const compareGDriveLocalJson =
             console.log(`localItem: ${JSON.stringify(localItem)}`);
 
             if (parseInt(gDriveItem?.fileSizeRaw) !== localItem.rawSize) {
-                failedFiles.push(`File size mismatch: ${gDriveItem.fileName} ${localItem?.fileName}`
+                failedMsgs.push(`File size mismatch: ${gDriveItem?.fileName} (${parseInt(gDriveItem?.fileSizeRaw)}) ${localItem?.absPath}(${localItem.rawSize})`
                 )
+                failedFiles.push(gDriveItem?.fileName)
+            }
+            else {
+                successMsgs.push(`File size match: ${gDriveItem?.fileName} (${parseInt(gDriveItem?.fileSizeRaw)}) ${localItem?.absPath}(${localItem.rawSize})`)
             }
             if (localItem?.absPath?.endsWith(`${gDriveItem.parents}/${gDriveItem.fileName}`)) {
-                failedFiles.push(`File name mismatch: ${gDriveItem?.fileName} ${localItem.absPath}`
+                failedMsgs.push(`File name mismatch: ${gDriveItem?.fileName} ${localItem.absPath}`
                 )
+                failedFiles.push(gDriveItem?.fileName)
+            }
+            else {
+                successMsgs.push(`File name match: ${gDriveItem?.fileName} ${localItem.absPath}`)
             }
         }
 
         return {
             gDriveFileTotal,
             localFileTotal,
-            success: failedFiles.length === 0,
-            failedCount: failedFiles.length,
-            failedFiles,
+            success: failedMsgs.length === 0,
+            failedCount: failedMsgs.length,
+            failedMsgs: failedMsgs,
+            successMsgs,
+            failedFiles: failedFiles
         }
     }
