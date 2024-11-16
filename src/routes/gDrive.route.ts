@@ -9,7 +9,7 @@ import { formatTime } from '../imgToPdf/utils/Utils';
 import { convertGDriveExcelToLinkData, downloadGDriveData } from '../services/GDriveItemService';
 import { GoogleApiData } from 'cliBased/googleapi/types';
 import { getAllFileStats } from '../utils/FileStatsUtils';
-import { PDF_EXT, ZIP_EXT } from 'imgToPdf/utils/constants';
+import { PDF_EXT, ZIP_EXT } from '../imgToPdf/utils/constants';
 
 export const gDriveRoute = express.Router();
 
