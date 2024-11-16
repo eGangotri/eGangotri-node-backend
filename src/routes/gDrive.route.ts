@@ -9,7 +9,7 @@ import { formatTime } from '../imgToPdf/utils/Utils';
 import { convertGDriveExcelToLinkData, downloadGDriveData } from '../services/GDriveItemService';
 import { GoogleApiData } from 'cliBased/googleapi/types';
 import { getAllFileStats } from '../utils/FileStatsUtils';
-import { PDF_EXT, ZIP_EXT } from '../imgToPdf/utils/constants';
+import { PDF_EXT, ZIP_EXT, ZIP_TYPE_EXT } from '../imgToPdf/utils/constants';
 import { isValidPath } from '../utils/utils';
 import { getFolderInSrcRootForProfile } from '../archiveUpload/ArchiveProfileUtils';
 
@@ -194,11 +194,11 @@ gDriveRoute.post('/verifyLocalDownloadSameAsGDrive', async (req: any, resp: any)
          ${ignoreFolder} /
          ${fileType}`)
 
-        const _validations = validateGenGDriveLinks(googleDriveLink, folder)
-        if (_validations.success === false) {
+        if (!googleDriveLink || !folder) {
             resp.status(300).send({
-                response: _validations
+                response: "Pls. provide google drive Link or Folder"
             })
+            return;
         }
 
         const { _links, _folders, error } = genLinksAndFolders(googleDriveLink, folder)
@@ -210,7 +210,7 @@ gDriveRoute.post('/verifyLocalDownloadSameAsGDrive', async (req: any, resp: any)
                     "message": "Number of Links and Folder Names should match"
                 }
             });
-            return
+            return;
         }
 
         const _resps = [];
@@ -223,9 +223,9 @@ gDriveRoute.post('/verifyLocalDownloadSameAsGDrive', async (req: any, resp: any)
 
            const fileStats = await getAllFileStats({
             directoryPath: _folders[i], 
-            filterExt: fileType === PDF_TYPE ? [PDF_EXT] : (fileType === ZIP_TYPE ? [ZIP_EXT] : []),
+            filterExt: fileType === PDF_TYPE ? [PDF_EXT] : (fileType === ZIP_TYPE ? ZIP_TYPE_EXT : []),
             ignoreFolders: ignoreFolder,
-            withLogs: false,
+            withLogs: true,
             withMetadata: true,
            });
            _resps2.push(fileStats)

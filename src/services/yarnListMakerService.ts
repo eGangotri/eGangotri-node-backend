@@ -32,7 +32,8 @@ export const pickLatestExcelsAndCombineGDriveAndReducedPdfExcels = (mainFilePath
 }
 
 
-export const genLinksAndFolders = (googleDriveLink: string, folderName: string) => {
+export const genLinksAndFolders = 
+(googleDriveLink: string, folderName: string) => {
     const _links = []
     const _folders = [];
     if (googleDriveLink.includes(",") || folderName.includes(",")) {
@@ -58,14 +59,14 @@ export const genLinksAndFolders = (googleDriveLink: string, folderName: string) 
     }
 }
 
-export const validateGenGDriveLinks = (googleDriveLink: string, folderName: string) => {
+export const validateGenGDriveLinks = 
+(googleDriveLink: string, folderName: string) => {
     if (!googleDriveLink || !folderName) {
         return {
             "status": "failed",
             "success": false,
             "message": "Pls. provide google drive Link"
         }
-
     }
 
     if (folderName.includes(path.sep)) {

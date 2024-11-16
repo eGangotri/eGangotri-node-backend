@@ -13,7 +13,7 @@ export async function getGDriveContentsAsJson(driveLinkOrFolderID: string,
   umbrellaFolder: string = "",
   ignoreFolder = "",
   fileType = PDF_TYPE) {
-    
+
   const folderId = extractGoogleDriveId(driveLinkOrFolderID)
   console.log(`folderId: ${folderId}`)
   const _data = await listFolderContentsAsArrayOfData(folderId, drive, umbrellaFolder,
