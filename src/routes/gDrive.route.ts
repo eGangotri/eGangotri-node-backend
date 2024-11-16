@@ -12,6 +12,7 @@ import { getAllFileStats } from '../utils/FileStatsUtils';
 import { PDF_EXT, ZIP_EXT, ZIP_TYPE_EXT } from '../imgToPdf/utils/constants';
 import { isValidPath } from '../utils/utils';
 import { getFolderInSrcRootForProfile } from '../archiveUpload/ArchiveProfileUtils';
+import { verifyGDriveLocalIntegrity } from 'services/GDriveService';
 
 export const gDriveRoute = express.Router();
 
@@ -178,12 +179,11 @@ gDriveRoute.post('/downloadGDriveItemsViaExcel', async (req: any, resp: any) => 
 
 gDriveRoute.post('/verifyLocalDownloadSameAsGDrive', async (req: any, resp: any) => {
     console.log(`verifyLocalDownloadSameAsGDrive ${JSON.stringify(req.body)}`)
-    const startTime = Date.now();
 
     try {
         const googleDriveLink = req?.body?.googleDriveLink;
         const folderOrProfile = req?.body?.folderOrProfile || "";
-        const ignoreFolder = req?.body?.ignoreFolder
+        const ignoreFolder = req?.body?.ignoreFolder || "proc";
         const fileType = req?.body?.fileType || PDF_TYPE;
 
         const folder = isValidPath(folderOrProfile) ? folderOrProfile : getFolderInSrcRootForProfile(folderOrProfile)
@@ -212,35 +212,8 @@ gDriveRoute.post('/verifyLocalDownloadSameAsGDrive', async (req: any, resp: any)
             });
             return;
         }
-
-        const _resps = [];
-        const _resps2 = [];
-        for (let i = 0; i < _links.length; i++) {
-            console.log(`getGDriveContentsAsJson ${_links[i]} ${_folders[i]} (${fileType})`)
-            const googleDriveFileData: Array<GoogleApiData> = 
-            await getGDriveContentsAsJson(_links[i],"", ignoreFolder, fileType);
-           _resps.push(googleDriveFileData);
-
-           const fileStats = await getAllFileStats({
-            directoryPath: _folders[i], 
-            filterExt: fileType === PDF_TYPE ? [PDF_EXT] : (fileType === ZIP_TYPE ? ZIP_TYPE_EXT : []),
-            ignoreFolders: ignoreFolder,
-            withLogs: true,
-            withMetadata: true,
-           });
-           _resps2.push(fileStats)
-        }
-        const endTime = Date.now();
-        const timeTaken = endTime - startTime;
-        console.log(`Time taken to retrieve google drive Listings and local file listings: ${timeInfo(timeTaken)}`);
-
-        resp.status(200).send({
-            timeTaken: timeInfo(timeTaken),
-            response: {
-                googleDriveFileData: _resps,
-                fileStats: _resps2
-            }
-        });
+        const integrityCheck = await verifyGDriveLocalIntegrity(_links, _folders, ignoreFolder, fileType);
+        resp.status(200).send(integrityCheck);
         return;
     }
 
