@@ -10,9 +10,8 @@ import { convertGDriveExcelToLinkData, downloadGDriveData } from '../services/GD
 import { GoogleApiData } from 'cliBased/googleapi/types';
 import { getAllFileStats } from '../utils/FileStatsUtils';
 import { PDF_EXT, ZIP_EXT } from '../imgToPdf/utils/constants';
-import { file } from 'pdfkit';
 import { isValidPath } from '../utils/utils';
-import { getFolderInSrcRootForProfile } from 'archiveUpload/ArchiveProfileUtils';
+import { getFolderInSrcRootForProfile } from '../archiveUpload/ArchiveProfileUtils';
 
 export const gDriveRoute = express.Router();
 
