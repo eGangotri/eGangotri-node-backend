@@ -57,7 +57,7 @@ export function setOptionsForArchiveListing(queryOptions: ArchiveItemListOptions
   const limit: number = getLimit(queryOptions?.limit);
   return { limit, mongoOptionsFilter };
 }
-
+// "source" "acct"
 export async function getArchiveItemStatistics() {
     const result = await ArchiveItem.aggregate([
         {
@@ -86,3 +86,26 @@ export async function getArchiveItemStatistics() {
     return result;
 }
 
+export async function getArchiveSourceStatistics() {
+    const result = await ArchiveItem.aggregate([
+        {
+            $group: {
+                _id: "$source",
+                totalSize: { $sum: { $toLong: "$size" } },
+                totalPageCount: { $sum: { $toInt: "$pageCount" } },
+                accts: { $addToSet: "$acct" }
+            }
+        },
+        {
+            $project: {
+                _id: 0,
+                source: "$_id",
+                totalSize: 1,
+                totalPageCount: 1,
+                accts: 1
+            }
+        }
+    ]);
+
+    return result;
+}
