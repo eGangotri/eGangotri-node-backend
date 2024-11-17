@@ -1,6 +1,7 @@
 const express = require("express");
 import e, { Request, Response } from "express";
-import { getListOfArchiveItems } from "../services/archiveItemService";
+import { getArchiveItemStatistics, getListOfArchiveItems } from "../services/archiveItemService";
+import { ArchiveItemListOptionsType } from "types/listingTypes";
 
 export const archiveItemRoute = express.Router();
 
@@ -33,3 +34,76 @@ archiveItemRoute.post("/search", async (req: Request, resp: Response) => {
     }
 });
 
+
+archiveItemRoute.post('/getArchiveItemPerProfile/:profile', async (req: any, resp: any) => {
+    getArchiveItem(req, resp);
+})
+archiveItemRoute.post('/getArchiveItemPerProfile/', async (req: any, resp: any) => {
+    getArchiveItem(req, resp);
+})
+
+const getArchiveItem = async (req: any, resp: any) => {
+    console.log(`getArchiveItem:`, req.params.profile);
+    const { page = 1, limit = 10, sortField = "createdTime", sortOrder = "asc" } = req.body;
+    const archiveProfiles = req.params.profile || "";
+    let _options: ArchiveItemListOptionsType = {
+        // page, 
+        limit,
+        //   sortField, 
+        //   sortOrder
+    }
+    if (archiveProfiles) {
+        _options = {
+            ..._options,
+            archiveProfiles: archiveProfiles
+        }
+    }
+    try {
+        const archiveItems = await getListOfArchiveItems(_options);
+        console.log(`_resp: ${JSON.stringify(archiveItems[0])}`);
+        if (!archiveItems || archiveItems.length === 0) {
+            resp.status(200).send({
+                response: {
+                    success: false,
+                    msg: `No data corresponding to ${archiveProfiles} found`
+
+                }
+            });
+        }
+        else {
+            resp.status(200).send({
+                response: archiveItems
+            });
+        }
+    }
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+}
+
+archiveItemRoute.get('/archiveDBStatsByProfile', async (req: any, resp: any) => {
+    console.log(`archiveDBStatsByProfile:`);
+    try {
+        const aggregatedData = await getArchiveItemStatistics();
+        console.log(`aggregatedData: ${JSON.stringify(aggregatedData[0])}`);
+        if (!aggregatedData || aggregatedData.length === 0) {
+            resp.status(200).send({
+                response: {
+                    success: false,
+                    msg: `No Data found in Archive DB collection`
+
+                }
+            });
+        }
+        else {
+            resp.status(200).send({
+                response: aggregatedData
+            });
+        }
+    }
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})

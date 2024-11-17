@@ -1,6 +1,26 @@
 import * as mongoose from "mongoose";
 
-const schema = new mongoose.Schema(
+interface IArchiveItem extends Document {
+    link: string;
+    allDownloadsLinkPage: string;
+    pdfDownloadLink: string;
+    pageCount: string;
+    originalTitle: string;
+    titleArchive: string;
+    size: string;
+    sizeFormatted: string;
+    subject: string;
+    description: string;
+    date: string;
+    acct: string;
+    identifier: string;
+    type: string;
+    mediaType: string;
+    emailUser: string;
+    source?: string;
+  }
+  
+const ArchiveItemSchema = new mongoose.Schema(
     {
         link: { type: String, required: true },
         allDownloadsLinkPage: { type: String, required: true },
@@ -26,5 +46,5 @@ const schema = new mongoose.Schema(
     }
 );
 // Create a compound unique index on acct and identifier
-schema.index({ acct: 1, identifier: 1 }, { unique: true });
-export const ArchiveItem = mongoose.model("ArchiveItem", schema);
+ArchiveItemSchema.index({ acct: 1, identifier: 1 }, { unique: true });
+export const ArchiveItem = mongoose.model<IArchiveItem>("ArchiveItem", ArchiveItemSchema);
