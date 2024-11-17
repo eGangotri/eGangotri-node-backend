@@ -41,10 +41,6 @@ export function setOptionsForArchiveListing(queryOptions: ArchiveItemListOptions
       }
     }
   }
-  else {
-    console.log(`cannot proceed no searchTerm`);
-    throw new Error(`Please provide a searchTerm`);
-  }
 
   if (queryOptions?.archiveProfiles) {
     const archiveProfiles: string[] = replaceQuotesAndSplit(queryOptions?.archiveProfiles)
@@ -54,5 +50,33 @@ export function setOptionsForArchiveListing(queryOptions: ArchiveItemListOptions
 
   const limit: number = getLimit(queryOptions?.limit);
   return { limit, mongoOptionsFilter };
+}
+
+export async function getArchiveItemStatistics() {
+    const result = await ArchiveItem.aggregate([
+        {
+            $group: {
+                _id: "$acct",
+                totalSize: { $sum: { $toLong: "$size" } },
+                totalPageCount: { $sum: { $toInt: "$pageCount" } },
+                emailUsers: { $addToSet: "$emailUser" },
+                sources: { $addToSet: "$source" },
+                firstLowestDate: { $min: "$date" }
+            }
+        },
+        {
+            $project: {
+                _id: 0,
+                acct: "$_id",
+                totalSize: 1,
+                totalPageCount: 1,
+                emailUsers: 1,
+                sources: 1,
+                firstLowestDate: 1
+            }
+        }
+    ]);
+
+    return result;
 }
 
