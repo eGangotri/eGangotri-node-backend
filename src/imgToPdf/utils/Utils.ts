@@ -125,7 +125,7 @@ var getStats = function (text: string = '') {
 function formatMem(heapSize: number) {
      const heapSizeInMBs = (heapSize / 1024 / 1024);
      const heapSizeInGBs = (heapSize / 1024 / 1024 / 1024);
-     return heapSizeInGBs > 1 ? `${heapSizeInGBs.toFixed(2)} GB(s)` : `${heapSizeInMBs.toFixed(2)} M(s)`
+     return heapSizeInGBs > 1 ? `${heapSizeInGBs.toFixed(2)} GB(s)` : `${heapSizeInMBs.toFixed(2)} Mb(s)`
 }
 
 export function garbageCollect() {

@@ -2,6 +2,7 @@ const express = require("express");
 import e, { Request, Response } from "express";
 import { getDiffBetweenGDriveAndLocalFiles, getListOfGDriveItems, getSourceStatistics } from "../services/GDriveItemService";
 import { uploadToGDriveBasedOnDiffExcel } from "../cliBased/googleapi/GoogleDriveUpload";
+import { GDriveItemListOptionsType } from "types/listingTypes";
 
 export const googleDriveItemRoute = express.Router();
 
@@ -77,12 +78,31 @@ googleDriveItemRoute.post('/uploadToGDriveBasedOnDiffExcel', async (req: any, re
     }
 })
 
-googleDriveItemRoute.post('/getPerSource', async (req: any, resp: any) => {
-    console.log(`getPerSource:`);
-    
-    const { page = 1, limit = 10, sortField = "createdTime", sortOrder = "asc", source } = req.body;
+googleDriveItemRoute.post('/getPerSource/:value', async (req: any, resp: any) => {
+    getPerSource(req, resp);
+})
+googleDriveItemRoute.post('/getPerSource/', async (req: any, resp: any) => {
+    getPerSource(req, resp);
+})
+
+const getPerSource = async (req: any, resp: any) => {
+    console.log(`getPerSource:`, req.params.value);
+    const { page = 1, limit = 10, sortField = "createdTime", sortOrder = "asc" } = req.body;
+    const source = req.params.value || "";
+    let _options: GDriveItemListOptionsType = {
+        // page, 
+        limit,
+        //   sortField, 
+        //   sortOrder
+    }
+    if (source) {
+        _options = {
+            ..._options,
+            source: source
+        }
+    }
     try {
-        const _gDriveItemsList = await getListOfGDriveItems({ source });
+        const _gDriveItemsList = await getListOfGDriveItems(_options);
         console.log(`_resp: ${JSON.stringify(_gDriveItemsList[0])}`);
         if (!_gDriveItemsList || _gDriveItemsList.length === 0) {
             resp.status(200).send({
@@ -103,8 +123,7 @@ googleDriveItemRoute.post('/getPerSource', async (req: any, resp: any) => {
         console.log('Error', err);
         resp.status(400).send(err);
     }
-})
-
+}
 googleDriveItemRoute.get('/gdriveDBAggregatedBySource', async (req: any, resp: any) => {
     console.log(`gdriveDBAggregatedBySource:`);
 
