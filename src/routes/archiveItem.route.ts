@@ -1,6 +1,6 @@
 const express = require("express");
 import e, { Request, Response } from "express";
-import { getArchiveItemStatistics, getListOfArchiveItems } from "../services/archiveItemService";
+import { getArchiveItemStatistics, getArchiveSourceStatistics, getListOfArchiveItems } from "../services/archiveItemService";
 import { ArchiveItemListOptionsType } from "types/listingTypes";
 
 export const archiveItemRoute = express.Router();
@@ -86,6 +86,32 @@ archiveItemRoute.get('/archiveDBStatsByProfile', async (req: any, resp: any) => 
     console.log(`archiveDBStatsByProfile:`);
     try {
         const aggregatedData = await getArchiveItemStatistics();
+        console.log(`aggregatedData: ${JSON.stringify(aggregatedData[0])}`);
+        if (!aggregatedData || aggregatedData.length === 0) {
+            resp.status(200).send({
+                response: {
+                    success: false,
+                    msg: `No Data found in Archive DB collection`
+
+                }
+            });
+        }
+        else {
+            resp.status(200).send({
+                response: aggregatedData
+            });
+        }
+    }
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})
+
+archiveItemRoute.get('/archiveDBStatsBySources', async (req: any, resp: any) => {
+    console.log(`archiveDBStatsBySources:`);
+    try {
+        const aggregatedData = await getArchiveSourceStatistics();
         console.log(`aggregatedData: ${JSON.stringify(aggregatedData[0])}`);
         if (!aggregatedData || aggregatedData.length === 0) {
             resp.status(200).send({
