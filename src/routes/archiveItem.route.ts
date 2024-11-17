@@ -43,9 +43,9 @@ archiveItemRoute.post('/getArchiveItemPerProfile/', async (req: any, resp: any) 
 })
 
 const getArchiveItem = async (req: any, resp: any) => {
-    console.log(`getArchiveItem:`, req.params.profile);
-    const { page = 1, limit = 10, sortField = "createdTime", sortOrder = "asc" } = req.body;
     const archiveProfiles = req.params.profile || "";
+    console.log(`getArchiveItem:`,archiveProfiles);
+    const { page = 1, limit = 10, sortField = "createdTime", sortOrder = "asc" } = req.body;
     let _options: ArchiveItemListOptionsType = {
         // page, 
         limit,
@@ -55,7 +55,7 @@ const getArchiveItem = async (req: any, resp: any) => {
     if (archiveProfiles) {
         _options = {
             ..._options,
-            archiveProfiles: archiveProfiles
+            acct:archiveProfiles
         }
     }
     try {

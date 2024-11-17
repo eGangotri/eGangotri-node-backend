@@ -48,6 +48,12 @@ export function setOptionsForArchiveListing(queryOptions: ArchiveItemListOptions
     mongoOptionsFilter = { ...mongoOptionsFilter, archiveProfile: { $in: archiveProfiles } };
   }
 
+  if (queryOptions?.acct) {
+    const acct: string[] = replaceQuotesAndSplit(queryOptions?.acct)
+    console.log(`acct ${acct}`)
+    mongoOptionsFilter = { ...mongoOptionsFilter, acct: { $in: acct } };
+  }
+
   const limit: number = getLimit(queryOptions?.limit);
   return { limit, mongoOptionsFilter };
 }

@@ -47,6 +47,7 @@ export type ArchiveItemListOptionsType = {
   searchTerm?: string,
   limit?: number,
   archiveProfiles?: string,
+  acct?: string,
   wordBoundary?: string,
   startDate?: string,
   endDate?: string,
