@@ -27,9 +27,11 @@ yarnListMakerRoute.post('/getFirstAndLastNPages', async (req: any, resp: any) =>
             });
             return;
         }
+        let timeNow = Date.now();
         const _resp = await extractFirstAndLastNPages(_srcFolders, destRootFolder, nPages);
         resp.status(200).send({
             response: {
+                timeTaken: timeInfo(Date.now() - timeNow),
                 _results: _resp
             }
         });
