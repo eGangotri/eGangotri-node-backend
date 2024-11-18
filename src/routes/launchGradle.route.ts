@@ -599,3 +599,30 @@ launchGradleRoute.post('/verifyImgToPdfSuccessGradle', async (req: any, resp: an
         resp.status(400).send(err);
     }
 })
+
+launchGradleRoute.post('/getFirstAndLastNPagesGradle', async (req: any, resp: any) => {
+    const startTime = Date.now();
+    try {
+        const srcFoldersAsCSV = req?.body?.srcFolders;
+        const destRootFolder = req?.body?.destRootFolder;
+        const nPages = Number(req?.body?.nPages || 10);
+
+        console.log(`getFirstAndLastNPagesGradle for ${srcFoldersAsCSV}`)
+        const escapedFolder = srcFoldersAsCSV.replace(/\\/g, '\\\\');
+        const _cmd = `gradle getFirstNPagesFromPdfMultiple --args="\\"${escapedFolder}\\" \\"${destRootFolder}\\" \\"${nPages}\\" \\"${nPages}\\""`;
+        console.log(`_cmd ${_cmd}`);
+        const results = await makeGradleCall(_cmd)
+        const endTime = Date.now();
+        const timeTaken = endTime - startTime;
+        console.log(`Time taken to getFirstAndLastNPagesGradle: ${timeInfo(timeTaken)}`);
+
+        resp.status(200).send({
+            timeTaken: timeInfo(timeTaken),
+            response: results
+        });
+    }
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})
