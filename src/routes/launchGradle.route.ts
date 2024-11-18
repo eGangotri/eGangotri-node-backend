@@ -608,8 +608,9 @@ launchGradleRoute.post('/getFirstAndLastNPagesGradle', async (req: any, resp: an
         const nPages = Number(req?.body?.nPages || 10);
 
         console.log(`getFirstAndLastNPagesGradle for ${srcFoldersAsCSV}`)
-        const escapedFolder = srcFoldersAsCSV.replace(/\\/g, '\\\\');
-        const _cmd = `gradle getFirstNPagesFromPdfMultiple --args="\\"${escapedFolder}\\" \\"${destRootFolder}\\" \\"${nPages}\\" \\"${nPages}\\""`;
+        const escapedSrcFolder = srcFoldersAsCSV.replace(/\\/g, '\\\\');
+        const escapedDestFolder = destRootFolder.replace(/\\/g, '\\\\');
+        const _cmd = `gradle getFirstNPagesFromPdfMultiple --args="\\"${escapedSrcFolder}\\" \\"${escapedDestFolder}\\" \\"${nPages}\\" \\"${nPages}\\""`;
         console.log(`_cmd ${_cmd}`);
         const results = await makeGradleCall(_cmd)
         const endTime = Date.now();
