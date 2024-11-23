@@ -123,6 +123,43 @@ const fetchArchiveMetadata = async (username: string,
 }
 
 const checkValidArchiveUrlAndUpdateStatus = async (archiveIdentifier: string, _status: {}[]) => {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => {
+        controller.abort();
+    }, 5000); // Set timeout to 5 seconds
+
+    const _link = `https://archive.org/services/users/@${archiveIdentifier}/lists`;
+    try {
+        const isValid = await fetch(_link, {
+            signal: controller.signal
+        });
+        clearTimeout(timeout);
+
+        if (!isValid.ok) {
+            _status.push({
+                success: false,
+                archiveAcctName: archiveIdentifier,
+                error: "Invalid archive account name",
+            });
+        }
+        return isValid.ok;
+    } catch (error) {
+        if (error.name === 'AbortError') {
+            _status.push({
+                success: false,
+                archiveAcctName: archiveIdentifier,
+                error: `Connection timeout while invoking ${_link}`,
+            });
+        } else {
+            _status.push({
+                success: false,
+                archiveAcctName: archiveIdentifier,
+                error: error.message,
+            });
+        }
+    }
+};
+const checkValidArchiveUrlAndUpdateStatusx = async (archiveIdentifier: string, _status: {}[]) => {
     const isValid = await fetch(`https://archive.org/services/users/@${archiveIdentifier}/lists`);
     if (!isValid.ok) {
         _status.push({
@@ -133,6 +170,7 @@ const checkValidArchiveUrlAndUpdateStatus = async (archiveIdentifier: string, _s
     }
     return isValid.ok
 }
+
 export const scrapeArchiveOrgProfiles = async (archiveUrlsOrAcctNamesAsCSV: string,
     dateRange: [number, number] = [0, 0],
     onlyLinks: boolean = false,

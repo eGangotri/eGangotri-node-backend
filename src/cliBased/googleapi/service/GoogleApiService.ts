@@ -39,14 +39,14 @@ export async function listFolderContentsAndGenerateCSVAndExcel(_folderIdOrUrl: s
     umbrellaFolder: string = "",
     ignoreFolder = "",
     type = PDF_TYPE) {
-    const folderId = extractGoogleDriveId(_folderIdOrUrl)
+    const gDriveFolderId = extractGoogleDriveId(_folderIdOrUrl)
     FileUtils.createFolderIfNotExists(exportDestFolder);
 
-    const googleDriveFileData: Array<GoogleApiData> = await listFolderContentsAsArrayOfData(folderId,
+    const googleDriveFileData: Array<GoogleApiData> = await listFolderContentsAsArrayOfData(gDriveFolderId,
         drive, umbrellaFolder, ignoreFolder, type)
-    const fileNameWithPath = createFileNameWithPathForExport(folderId, umbrellaFolder, exportDestFolder, FileConstUtils.ROW_COUNTER[1]);
-    FileConstUtils.incrementRowCounter()
-    //writeDataToCSV(googleDriveFileData, `${fileNameWithPath}.csv`)
+    const fileNameWithPath = createFileNameWithPathForExport(gDriveFolderId, umbrellaFolder, exportDestFolder, FileConstUtils.ROW_COUNTER[1]);
+    FileConstUtils.incrementRowCounter();
+    
     // Convert data to XLSX
     console.log(`googleDriveFileData ${googleDriveFileData.length} `);
     if (!_.isEmpty(googleDriveFileData)) {
