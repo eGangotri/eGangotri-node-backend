@@ -65,7 +65,7 @@ gDriveRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
 
 
 gDriveRoute.post('/getGoogleDriveListingAsExcel', async (req: any, resp: any) => {
-    console.log(`getGoogleDriveListingAsExcel ${JSON.stringify(req.body)}`)
+    console.log(`getGoogleDriveListingAsExcel:req.body ${JSON.stringify(req.body)}`)
     const startTime = Date.now();
 
     try {
@@ -76,7 +76,8 @@ gDriveRoute.post('/getGoogleDriveListingAsExcel', async (req: any, resp: any) =>
         const allNotJustPdfs = req?.body?.allNotJustPdfs || false;
         const pdfRenamerXlV2 = req?.body?.pdfRenamerXlV2 || false;
 
-        console.log(`getGoogleDriveListingAsExcel googleDriveLink:
+        console.log(`getGoogleDriveListingAsExcel 
+            googleDriveLink:
          ${googleDriveLink}/${folderName}/${reduced}/${ignoreFolder}/${allNotJustPdfs}/${pdfRenamerXlV2}`)
 
         const _validations = validateGenGDriveLinks(googleDriveLink, folderName)
@@ -100,7 +101,7 @@ gDriveRoute.post('/getGoogleDriveListingAsExcel', async (req: any, resp: any) =>
 
         const _resps = [];
         for (let i = 0; i < _links.length; i++) {
-            console.log(`getGoogleDriveListingAsExcel ${_links[i]} ${_folders[i]} (${allNotJustPdfs})`)
+            console.log(`getGoogleDriveListingAsExcel:loop ${_links[i]} ${_folders[i]} (${allNotJustPdfs})`)
             const listingResult = await generateGoogleDriveListingExcel(_links[i],
                 _folders[i], reduced,
                 ignoreFolder,

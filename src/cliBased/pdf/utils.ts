@@ -85,7 +85,7 @@ export const downloadPdfFromUrlSlow = async (
                 _result = checkFileSizeConsistency(pdfDumpFolder, fileName, fileSizeRaw);
                 if (_result?.success) {
                     const index = `(${DOWNLOAD_COMPLETED_COUNT + 1}${dataLength > 0 ? "/" + dataLength : ""})`;
-                    console.log(`${index}. Downloaded: ${fileName}`);
+                    console.log(`${index}. Downloaded(slow): ${fileName}`);
                     incrementDownloadComplete();
                     _result = {
                         "status": `Downloaded ${fileName} to ${pdfDumpFolder}`,
