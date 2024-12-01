@@ -89,11 +89,7 @@ export const renameFileViaReadingColumns = (excelData: GDriveExcelHeadersFileRen
         "Year of Publication": string;
      */
 
-    const newFileName =
-        `${excelData["Title in English"]?.trim() || ""} ${excelData["Sub-Title"]?.trim() || ""} ${excelData["Author"]?.trim() || ""}\
-     ${excelData["Commentator/ Translator/Editor"]?.trim() || ""} ${excelData["Language(s)"]?.trim() || ""} ${excelData["Subject/ Descriptor"]?.trim() || ""}\
-     ${excelData["Edition/Statement"]?.trim() || ""} ${excelData["Place of Publication"]?.trim() || ""}\
-      ${excelData["Year of Publication"]?.trim() || ""} - ${excelData["Publisher"]?.trim() || ""}.pdf`;
+    const newFileName = createNewFileName(excelData);
 
     const _titleInGoogleDrive = excelData["Title in Google Drive"]
     const origName = getOrigName(_titleInGoogleDrive)
@@ -106,6 +102,19 @@ export const renameFileViaReadingColumns = (excelData: GDriveExcelHeadersFileRen
         return fileStat.fileName === origName
     });
     _renameFileInFolder(_fileInFolder, newFileName, renameReport)
+}
+
+const createNewFileName = (excelData: GDriveExcelHeadersFileRenamerV2): string => {
+    const newFileName =
+        `${removeExtraneousChars(excelData["Title in English"])} ${removeExtraneousChars(excelData["Sub-Title"])} ${removeExtraneousChars(excelData["Author"])}\
+    ${removeExtraneousChars(excelData["Commentator/ Translator/Editor"])} ${removeExtraneousChars(excelData["Language(s)"])} ${removeExtraneousChars(excelData["Subject/ Descriptor"])}\
+    ${removeExtraneousChars(excelData["Edition/Statement"])} ${removeExtraneousChars(excelData["Place of Publication"])}\
+     ${removeExtraneousChars(excelData["Year of Publication"])} - ${removeExtraneousChars(excelData["Publisher"])}.pdf`;
+    return newFileName;
+}
+//remove colon etc
+const removeExtraneousChars = (str: any) => {
+    return str?.toString()?.trim()?.replace(/[:]/g, '') || "";
 }
 
 export const _renameFileInFolder = (_fileInFolder: FileStats, newFileName: string, renameReport: RenameReportType) => {
