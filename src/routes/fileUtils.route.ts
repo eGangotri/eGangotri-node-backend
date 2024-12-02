@@ -237,8 +237,8 @@ fileUtilsRoute.post('/renameFilesViaExcel', async (req: any, resp: any) => {
                 msg: `Files renamed via Excel: ` + res.success?.length,
                 ignored: `Files that were ignored due to no data: ${ignoredCount}`,
                 errorList: `File rename-errors in Excel: ` + res.errorList?.length,
-                errors: res.errorList,
-                warning: warning ? "check Col. N&O. for un-interpreted formulas in Excel" : ""
+                warning: warning ? "check Col. N&O. for un-interpreted formulas in Excel" : "",
+                errors: res.errorList
             }
         });
     }
