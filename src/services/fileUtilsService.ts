@@ -43,7 +43,6 @@ export const renameFilesViaExcel = async (excelPath: string, folderOrProfile: st
             let _newFileName = sanitizeFileName(excelRow["Composite Title"]);
             const origName = excelRow["Orig Name"]?.trim()
             if ((_newFileName?.length > 0 && origName?.length > 0) && (!_newFileName.startsWith("=") && !origName.startsWith("="))) {
-                console.log(`_newFileNameX: ${_newFileName} `);
                 renameFileViaFormula(origName, _newFileName, localFileStats, renameReport)
             }
             else {
@@ -141,6 +140,9 @@ export const _renameFileInFolder = (_fileInFolder: FileStats, newFileName: strin
         try {
             const parentDir = path.dirname(absPath);
             const newPath = path.join(parentDir, newFileName);
+            if(!newPath.endsWith(".pdf")){
+                throw new Error(`${newPath} doesnt end with .pdf`);
+            }
             fs.renameSync(absPath, newPath);
             console.log(`File renamed to ${newFileName}`)
             renameReport.success.push(`File ${absPath} renamed to ${newFileName}`)
