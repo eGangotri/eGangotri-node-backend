@@ -40,10 +40,11 @@ export const renameFilesViaExcel = async (excelPath: string, folderOrProfile: st
         renameReport.totalInFolder = localFileStats?.length || 0
 
         for (let excelRow of excelData) {
-            let newFileName = excelRow["Composite Title"]?.trim()
+            let _newFileName = sanitizeFileName(excelRow["Composite Title"]);
             const origName = excelRow["Orig Name"]?.trim()
-            if ((newFileName?.length > 0 && origName?.length > 0) && (!newFileName.startsWith("=") && !origName.startsWith("="))) {
-                renameFileViaFormula(origName, newFileName, localFileStats, renameReport)
+            if ((_newFileName?.length > 0 && origName?.length > 0) && (!_newFileName.startsWith("=") && !origName.startsWith("="))) {
+                console.log(`_newFileNameX: ${_newFileName} `);
+                renameFileViaFormula(origName, _newFileName, localFileStats, renameReport)
             }
             else {
                 renameFileViaReadingColumns(excelRow, localFileStats, renameReport)
@@ -57,17 +58,20 @@ export const renameFilesViaExcel = async (excelPath: string, folderOrProfile: st
     return renameReport;
 }
 
-export const renameFileViaFormula = (origName: string, newFileName: string, localFileStats: FileStats[], renameReport: RenameReportType) => {
-    newFileName = newFileName.split(/\s+/).join(' ') + '.pdf'
+export const renameFileViaFormula = (origName: string,
+    newName: string,
+    localFileStats: FileStats[],
+    renameReport: RenameReportType) => {
 
-    console.log(`renameFileViaFormula:origName: ${JSON.stringify(origName)} newFileName: ${JSON.stringify(newFileName)} `);
+    console.log(`renameFileViaFormula:origName: ${origName}
+     newFileName: ${newName} `);
     const _fileInFolder = localFileStats.find((fileStat) => {
         if (fileStat.fileName === origName) {
             console.log(`fileStat: ${JSON.stringify(fileStat)} `);
         }
         return fileStat.fileName === origName
     });
-    _renameFileInFolder(_fileInFolder, newFileName, renameReport)
+    _renameFileInFolder(_fileInFolder, newName, renameReport)
 }
 
 export const renameFileViaReadingColumns = (excelData: GDriveExcelHeadersFileRenamerV2,
@@ -109,12 +113,21 @@ const createNewFileName = (excelData: GDriveExcelHeadersFileRenamerV2): string =
         `${removeExtraneousChars(excelData["Title in English"])} ${removeExtraneousChars(excelData["Sub-Title"])} ${removeExtraneousChars(excelData["Author"])}\
     ${removeExtraneousChars(excelData["Commentator/ Translator/Editor"])} ${removeExtraneousChars(excelData["Language(s)"])} ${removeExtraneousChars(excelData["Subject/ Descriptor"])}\
     ${removeExtraneousChars(excelData["Edition/Statement"])} ${removeExtraneousChars(excelData["Place of Publication"])}\
-     ${removeExtraneousChars(excelData["Year of Publication"])} - ${removeExtraneousChars(excelData["Publisher"])}.pdf`;
-    return newFileName;
+     ${removeExtraneousChars(excelData["Year of Publication"])} - ${removeExtraneousChars(excelData["Publisher"])}`;
+    return sanitizeFileName(newFileName);
 }
-//remove colon etc
-const removeExtraneousChars = (str: any) => {
-    return str?.toString()?.trim()?.replace(/[:]/g, '') || "";
+
+const sanitizeFileName = (_fileName: any) => {
+    const _removeExtraneousChars = removeExtraneousChars(_fileName);
+    const removeTrailingDash = _removeExtraneousChars?.endsWith("-") ? _removeExtraneousChars?.slice(0, -1)?.trim() : _removeExtraneousChars.trim();
+    const removeExtraSpaces = removeTrailingDash.split(/\s+/).join(' ');
+    return `${removeExtraSpaces}.pdf`;
+}
+
+//remove colon etc not allowed in a File
+const removeExtraneousChars = (fileNameFrag: any) => {
+    const sanitized = fileNameFrag?.toString()?.trim()?.replace(/[\\/:*?"<>|]/g, "") || "";
+    return sanitized?.trim();
 }
 
 export const _renameFileInFolder = (_fileInFolder: FileStats, newFileName: string, renameReport: RenameReportType) => {
@@ -123,7 +136,6 @@ export const _renameFileInFolder = (_fileInFolder: FileStats, newFileName: strin
         return
     }
     console.log(`_fileInFolder: ${JSON.stringify(_fileInFolder?.absPath)} `);
-    newFileName = newFileName.replace(/\s+/g, ' ');
     const absPath = _fileInFolder?.absPath
     if (fs.existsSync(absPath)) {
         try {
