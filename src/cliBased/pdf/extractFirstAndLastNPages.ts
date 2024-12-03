@@ -58,7 +58,7 @@ export const loopFolderForExtraction = async (rootFolder: string, outputRoot: st
         }
         catch (error) {
             console.error('Error creating PDF:', error);
-            return ""
+            throw new Error(`Error creating PDF: ${error}`)
         }
     }
     const consoleLog: string =
@@ -92,30 +92,34 @@ export const extractFirstAndLastNPages = async (_srcFoldersWithPath: string[], d
         firstNPages = nPages;
         lastNPages = onlyFirst ? 0 : nPages;
     }
-    let failures = 0;
+    let errors = [];
     FINAL_REPORT = []
     const dumpFolder = []
     for (const [index, folder] of _srcFoldersWithPath.entries()) {
         console.log(`extractFirstAndLastNPages:Started processing
-             ${folder} 
-            for-extracting ${firstNPages} pages from start ${onlyFirst?" but not ":" also "} including from end`)
+             ${folder} to
+             ${destRootFolder}
+            for-extracting ${firstNPages} pages from start ${onlyFirst ? " but not " : " also "} including from end`)
         PDF_PROCESSING_COUNTER = 0;
         counter = 0
         try {
             dumpFolder.push(await loopFolderForExtraction(folder, destRootFolder, `${index + 1}/${_srcFoldersWithPath.length}`));
         }
         catch (err) {
-            failures++;
-            FINAL_REPORT.push(`Error in processing ${folder} ${err}`)
+            errors.push(`Error in processing ${folder} ${err}`)
+            FINAL_REPORT.push(`**Folder # (${index + 1}/${_srcFoldersWithPath.length}).${folder}`)
             console.log(`Error in processing ${folder} ${err}`)
         }
     }
     console.log(`FINAL_REPORT(extractPages): ${FINAL_REPORT.map(x => x + "\n")}`)
     return {
-        success: failures === 0,
-        msg: `_srcFoldersWithPath ${_srcFoldersWithPath} destRootFolder ${destRootFolder} nPages ${nPages} failures ${failures}`,
+        success: `${errors.length === 0 ? "Success" : `${errors.length} of ${_srcFoldersWithPath.length} failed`}`,
+        "Sources": ` ${_srcFoldersWithPath}`,
+        "Dest":destRootFolder,
+        nPages,
         report: FINAL_REPORT,
-        dumpFolder: dumpFolder.join(",")
+        dumpFolder: dumpFolder.join(","),
+        failures: errors
     }
 }
 
