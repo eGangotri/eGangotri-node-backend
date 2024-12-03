@@ -10,6 +10,7 @@ import { convertGDriveExcelToLinkData, downloadGDriveData } from '../services/GD
 import { isValidPath } from '../utils/utils';
 import { getFolderInSrcRootForProfile } from '../archiveUpload/ArchiveProfileUtils';
 import { verifyGDriveLocalIntegrity } from '../services/GDriveService';
+import * as FileConstUtils from '../utils/constants';
 
 export const gDriveRoute = express.Router();
 
@@ -102,6 +103,7 @@ gDriveRoute.post('/getGoogleDriveListingAsExcel', async (req: any, resp: any) =>
         const _resps = [];
         for (let i = 0; i < _links.length; i++) {
             console.log(`getGoogleDriveListingAsExcel:loop ${_links[i]} ${_folders[i]} (${allNotJustPdfs})`)
+            FileConstUtils.resetRowCounter();
             const listingResult = await generateGoogleDriveListingExcel(_links[i],
                 _folders[i], reduced,
                 ignoreFolder,

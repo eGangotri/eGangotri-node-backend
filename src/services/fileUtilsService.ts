@@ -143,6 +143,9 @@ export const _renameFileInFolder = (_fileInFolder: FileStats, newFileName: strin
             if(!newPath.endsWith(".pdf")){
                 throw new Error(`${newPath} doesnt end with .pdf`);
             }
+            if(newPath.length < 8){
+                throw new Error(`${newPath} length is too short`);
+            }
             fs.renameSync(absPath, newPath);
             console.log(`File renamed to ${newFileName}`)
             renameReport.success.push(`File ${absPath} renamed to ${newFileName}`)
