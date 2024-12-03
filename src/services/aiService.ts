@@ -91,7 +91,7 @@ export const zipFilesInFolder = async (folderPath: string) => {
             fs.mkdirSync(outputDir, { recursive: true });
         }
 
-        await extractFirstAndLastNPages([folderPath], outputDir, FIRST_N_PAGE_COUNT, true);
+        await extractFirstAndLastNPages([folderPath], outputDir, FIRST_N_PAGE_COUNT, 0);
         const _resp = await getAllPDFFilesWithIgnorePathsSpecified(folderPath);
         const _files = _resp.map(x => x.absPath);
         const _ouptutZipPath = path.join(outputDir, `firstNPages.zip`);

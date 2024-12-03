@@ -125,7 +125,7 @@ export const extractFirstAndLastNPages = async (_srcFoldersWithPath: string[],
         success: `${errors.length === 0 ? `Success(All ${_srcFoldersWithPath.length})` : `${errors.length} of ${_srcFoldersWithPath.length} failed`}`,
         "Sources": ` ${_srcFoldersWithPath}`,
         "Dest": destRootFolder,
-        nPages,
+        pageRange: `${(firstNPages===lastNPages)?firstNPages:`${firstNPages}-${lastNPages}`}`,
         report: FINAL_REPORT,
         dumpFolder: dumpFolder.join(","),
         failures: errors
