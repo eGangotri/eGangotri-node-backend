@@ -8,13 +8,17 @@ import { createFolderIfNotExists } from '../../utils/FileUtils';
 
 const fsPromises = require('fs').promises;
 
-let firstNPages: number = 10
-let lastNPages: number = 10
-
 let FINAL_REPORT: string[] = [];
 let PDF_PROCESSING_COUNTER = 0;
+export const DEFAULT_PDF_PAGE_EXTRACTION_COUNT = 10;
 
-async function createPartialPdf(inputPath: string, outputPath: string, pdfsToBeProcessedCount: number, index: string): Promise<number> {
+async function createPartialPdf(inputPath: string, 
+    outputPath: string, 
+    pdfsToBeProcessedCount: number,
+     index: string,
+     firstNPages: number = DEFAULT_PDF_PAGE_EXTRACTION_COUNT,
+     lastNPages: number = DEFAULT_PDF_PAGE_EXTRACTION_COUNT
+    ): Promise<number> {
     const existingPdfBytes = await fsPromises.readFile(inputPath)
 
     const pdfDoc = await PDFDocument.load(existingPdfBytes);
@@ -41,7 +45,11 @@ async function createPartialPdf(inputPath: string, outputPath: string, pdfsToBeP
     return pdfPageCount
 }
 
-export const loopFolderForExtraction = async (rootFolder: string, outputRoot: string, loopIndex: string) => {
+export const loopFolderForExtraction = async (rootFolder: string,
+     outputRoot: string, 
+     loopIndex: string,
+     firstNPages: number,
+     lastNPages: number) => {
     const allPdfs = await getAllPDFFiles(rootFolder)
     const pdfsToBeProcessedCount = allPdfs.length;
     const outputPath = `${outputRoot}\\${path.parse(rootFolder).name} (${pdfsToBeProcessedCount})`;
@@ -53,7 +61,7 @@ export const loopFolderForExtraction = async (rootFolder: string, outputRoot: st
         let _subFolder = `${outputPath}\\${subDir}`
         createFolderIfNotExists(_subFolder)
         try {
-            await createPartialPdf(pdf.absPath, _subFolder, pdfsToBeProcessedCount, loopIndex);
+            await createPartialPdf(pdf.absPath, _subFolder, pdfsToBeProcessedCount, loopIndex,firstNPages, lastNPages);
             PDF_PROCESSING_COUNTER++;
         }
         catch (error) {
@@ -87,11 +95,11 @@ const padNumbersWithZeros = (num: number) => {
 }
 let counter = 0;
 
-export const extractFirstAndLastNPages = async (_srcFoldersWithPath: string[], destRootFolder: string, nPages: number, onlyFirst = false) => {
-    if (nPages > 0) {
-        firstNPages = nPages;
-        lastNPages = onlyFirst ? 0 : nPages;
-    }
+export const extractFirstAndLastNPages = async (_srcFoldersWithPath: string[],
+    destRootFolder: string,
+    firstNPages: number,
+    lastNPages: number) => {
+    
     let errors = [];
     FINAL_REPORT = []
     const dumpFolder = []
@@ -99,11 +107,12 @@ export const extractFirstAndLastNPages = async (_srcFoldersWithPath: string[], d
         console.log(`extractFirstAndLastNPages:Started processing
              ${folder} to
              ${destRootFolder}
-            for-extracting ${firstNPages} pages from start ${onlyFirst ? " but not " : " also "} including from end`)
+            for-extracting ${firstNPages} pages f ${firstNPages }-${lastNPages}`)
         PDF_PROCESSING_COUNTER = 0;
         counter = 0
         try {
-            dumpFolder.push(await loopFolderForExtraction(folder, destRootFolder, `${index + 1}/${_srcFoldersWithPath.length}`));
+            const outputFolder = await loopFolderForExtraction(folder, destRootFolder, index.toString(), firstNPages, lastNPages);
+            dumpFolder.push(outputFolder);
         }
         catch (err) {
             errors.push(`Error in processing ${folder} ${err}`)
@@ -115,7 +124,7 @@ export const extractFirstAndLastNPages = async (_srcFoldersWithPath: string[], d
     return {
         success: `${errors.length === 0 ? `Success(All ${_srcFoldersWithPath.length})` : `${errors.length} of ${_srcFoldersWithPath.length} failed`}`,
         "Sources": ` ${_srcFoldersWithPath}`,
-        "Dest":destRootFolder,
+        "Dest": destRootFolder,
         nPages,
         report: FINAL_REPORT,
         dumpFolder: dumpFolder.join(","),

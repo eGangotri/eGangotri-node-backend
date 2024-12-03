@@ -1,18 +1,34 @@
 import * as express from 'express';
 import { pickLatestExcelsAndCombineGDriveAndReducedPdfExcels } from '../services/yarnListMakerService';
-import { extractFirstAndLastNPages } from '../cliBased/pdf/extractFirstAndLastNPages';
+import { DEFAULT_PDF_PAGE_EXTRACTION_COUNT, extractFirstAndLastNPages } from '../cliBased/pdf/extractFirstAndLastNPages';
 import { gDriveExceltoMongo } from '../excelToMongo/tranferGDriveExcelToMongo';
 import { timeInfo } from '../mirror/FrontEndBackendCommonCode';
 import { publishBookTitlesList } from '../services/yarnService';
 
 export const yarnListMakerRoute = express.Router();
-
 yarnListMakerRoute.post('/getFirstAndLastNPages', async (req: any, resp: any) => {
     try {
         const srcFoldersAsCSV = req?.body?.srcFolders;
         const destRootFolder = req?.body?.destRootFolder;
-        const nPages = Number(req?.body?.nPages || 10);
-        const _srcFolders: string[] = srcFoldersAsCSV.split(',').map((x:string)=>x.trim());
+        const nPages = req?.body?.nPages || DEFAULT_PDF_PAGE_EXTRACTION_COUNT;
+        let firstNPages = DEFAULT_PDF_PAGE_EXTRACTION_COUNT;
+        let lastNPages = DEFAULT_PDF_PAGE_EXTRACTION_COUNT;
+
+        if (!isNaN(nPages)) {
+            firstNPages = nPages <= 0 ? DEFAULT_PDF_PAGE_EXTRACTION_COUNT : nPages;
+            lastNPages = nPages <= 0 ? DEFAULT_PDF_PAGE_EXTRACTION_COUNT : nPages;
+        } else {
+            if (nPages?.trim().includes('-')) {
+                const [start, end] = nPages.split('-').map((x: string) => parseInt(x?.trim()));
+                firstNPages = start;
+                lastNPages = end;
+            } else {
+                firstNPages = parseInt(nPages?.trim());
+                lastNPages = parseInt(nPages?.trim());
+            }
+        }
+
+        const _srcFolders: string[] = srcFoldersAsCSV.split(',').map((x: string) => x.trim());
         console.log(`getFirstAndLastNPages _folders ${_srcFolders} 
         destRootFolder ${destRootFolder}
         req?.body?.nPages ${nPages}`)
@@ -28,7 +44,7 @@ yarnListMakerRoute.post('/getFirstAndLastNPages', async (req: any, resp: any) =>
             return;
         }
         let timeNow = Date.now();
-        const _resp = await extractFirstAndLastNPages(_srcFolders, destRootFolder, nPages);
+        const _resp = await extractFirstAndLastNPages(_srcFolders, destRootFolder,firstNPages, lastNPages);
         resp.status(200).send({
             response: {
                 timeTaken: timeInfo(Date.now() - timeNow),
