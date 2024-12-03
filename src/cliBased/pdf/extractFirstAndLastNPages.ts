@@ -113,7 +113,7 @@ export const extractFirstAndLastNPages = async (_srcFoldersWithPath: string[], d
     }
     console.log(`FINAL_REPORT(extractPages): ${FINAL_REPORT.map(x => x + "\n")}`)
     return {
-        success: `${errors.length === 0 ? "Success" : `${errors.length} of ${_srcFoldersWithPath.length} failed`}`,
+        success: `${errors.length === 0 ? `Success(All ${_srcFoldersWithPath.length})` : `${errors.length} of ${_srcFoldersWithPath.length} failed`}`,
         "Sources": ` ${_srcFoldersWithPath}`,
         "Dest":destRootFolder,
         nPages,
