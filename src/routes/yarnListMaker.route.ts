@@ -12,7 +12,7 @@ yarnListMakerRoute.post('/getFirstAndLastNPages', async (req: any, resp: any) =>
         const srcFoldersAsCSV = req?.body?.srcFolders;
         const destRootFolder = req?.body?.destRootFolder;
         const nPages = Number(req?.body?.nPages || 10);
-        const _srcFolders: string[] = srcFoldersAsCSV.split(',');
+        const _srcFolders: string[] = srcFoldersAsCSV.split(',').map((x:string)=>x.trim());
         console.log(`getFirstAndLastNPages _folders ${_srcFolders} 
         destRootFolder ${destRootFolder}
         req?.body?.nPages ${nPages}`)
