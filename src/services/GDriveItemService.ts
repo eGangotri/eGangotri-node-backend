@@ -10,7 +10,7 @@ import * as fsExtra from 'fs-extra';
 import moment from "moment";
 import path from "path";
 import _, { String } from "lodash";
-import { downloadFileFromGoogleDrive } from "../cliBased/pdf/downloadPdf";
+import { downloadFileFromGoogleDrive } from "../cliBased/pdf/downloadFile";
 import { GDriveExcelData } from "../cliBased/googleapi/types";
 
 export async function getListOfGDriveItems(queryOptions: GDriveItemListOptionsType) {

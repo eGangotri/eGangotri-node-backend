@@ -1,7 +1,7 @@
 import { _credentials } from './_utils/credentials_googleapi';
 import { listFolderContentsAsArrayOfData } from './service/GoogleApiService';
 import { getGoogleDriveInstance } from './service/CreateGoogleDrive';
-import { downloadFileFromGoogleDrive } from '../pdf/downloadPdf';
+import { downloadFileFromGoogleDrive } from '../pdf/downloadFile';
 import { getFolderInSrcRootForProfile } from '../../archiveUpload/ArchiveProfileUtils';
 import fs from 'fs';
 import path from 'path';
@@ -28,7 +28,7 @@ async function getAllFilesFromGDrive(driveLinkOrFolderID: string,
     drive,
     folderName,
     ignoreFolder, fileType);
-
+    console.log(`googleDriveData(${googleDriveData.length}): ${JSON.stringify(googleDriveData)}`);
   const dataLength = googleDriveData.length;
   const maxLimit = MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE;
   if (dataLength > maxLimit) {
@@ -40,15 +40,15 @@ async function getAllFilesFromGDrive(driveLinkOrFolderID: string,
     }
   }
   const promises = googleDriveData.map(_data => {
-    console.log(`_data: ${JSON.stringify(_data)}}`);
-    const pdfDumpWithPathAppended = fileDumpFolder + path.sep + _data.parents;
-    console.log(`pdfDumpWithPathAppended: ${pdfDumpWithPathAppended}`);
-    if (!fs.existsSync(pdfDumpWithPathAppended)) {
-      fsExtra.ensureDirSync(pdfDumpWithPathAppended);
+    console.log(`googleDriveData.map(_data: ${JSON.stringify(_data)}}`);
+    const fileDumpWithPathAppended = fileDumpFolder + path.sep + _data.parents;
+    console.log(`fileDumpWithPathAppended: ${fileDumpWithPathAppended}`);
+    if (!fs.existsSync(fileDumpWithPathAppended)) {
+      fsExtra.ensureDirSync(fileDumpWithPathAppended);
     }
 
     return downloadFileFromGoogleDrive(_data.googleDriveLink,
-      pdfDumpWithPathAppended, _data.fileName, dataLength, _data?.fileSizeRaw)
+      fileDumpWithPathAppended, _data.fileName, dataLength, _data?.fileSizeRaw)
   });
   const results = await Promise.all(promises);
   return {
@@ -87,7 +87,7 @@ export const addHeaderFooterToPDFsInProfile = async (profile: string) => {
     }
   }
   catch (err) {
-    console.log(`Error ${err}`)
+    console.log(`Error ${JSON.stringify(err)}`)
     return {
       "mdg": "failed" + err,
       status: false
@@ -128,20 +128,9 @@ export const downloadFromGoogleDriveToProfile = async (driveLinkOrFolderId: stri
     }
   }
   catch (err) {
-    console.log(`Error ${err}`)
+    console.log(`downloadFromGoogleDriveToProfile:Error ${JSON.stringify(err)}`)
     return {
       "status": "failed" + err
     }
   }
 }
-
-//all entries must have await in front
-// (async () => {
-//   const args = process.argv.slice(2);
-//   console.log("Command-line arguments:", args);
-//   const _url = args[0];
-//   const _profile = args[1];
-//   await downloadFromGoogleDriveToProfile(_url, _profile);
-// })();
-
-//pnpm run downloadFromGoogle "google url" "TMP"
