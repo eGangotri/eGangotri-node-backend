@@ -1,11 +1,10 @@
 import { drive_v3 } from 'googleapis';
 import { jsonDataToXslx, jsonDataToXslxFileRenamerV2 } from '../../excel/ExcelUtils';
 import { sizeInfo } from '../../../mirror/FrontEndBackendCommonCode';
-import { FOLDER_MIME_TYPE, PDF_MIME_TYPE, PDF_TYPE, ZIP_MIME_TYPE, ZIP_TYPE } from '../_utils/constants';
+import { FOLDER_MIME_TYPE, PDF_TYPE} from '../_utils/constants';
 import { GoogleApiData } from '../types';
 import { createFileNameWithPathForExport, getFolderName, getFolderPathRelativeToRootFolder } from '../_utils/GoogleDriveUtil';
 import * as _ from 'lodash';
-import { GaxiosResponse } from 'gaxios';
 import { ellipsis } from '../../../mirror/utils';
 import * as FileUtils from '../../../utils/FileUtils';
 import * as FileConstUtils from '../../../utils/constants';
@@ -122,7 +121,8 @@ export async function listFolderContents(folderId: string,
         let idx = 0
         console.log(`_query(${++idx}) ${_query}`)
         do {
-            const response: GaxiosResponse = await drive.files.list({
+            //: GaxiosResponse<drive_v3.Schema$FileList> 
+            const response= await drive.files.list({
                 q: _query,
                 fields: 'nextPageToken, files(id, name, mimeType,size,parents,webViewLink,thumbnailLink,createdTime)',
                 pageSize: 1000, // Increase the page size to retrieve more files if necessary

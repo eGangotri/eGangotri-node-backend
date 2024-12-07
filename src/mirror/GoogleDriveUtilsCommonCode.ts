@@ -8,7 +8,9 @@ export const getGDrivePdfDownloadLink = (driveId: string) => {
 }
 
 //Sample:  https://drive.google.com/file/d/11ovaMqoQxVe06gzjPmLkFlbk2-ghHSrr/view?usp=drivesdk
-const regex1 = /\/d\/([^/]+)\/view/;
+//Sample 2: //https://docs.google.com/spreadsheets/d/1rj3-umAmHplgstGj8QL3hhe6y4fuzwb4/edit?usp=drivesdk&ouid=102521773827228978854&rtpof=true&sd=true
+
+const regex1 = /\/d\/([^/]+)\/(view|edit)/;
 
 //Sample: https://drive.google.com/drive/folders/1eJnYKRgZIyPO2s-BgsJ4ozhCEuH3i_lQ?usp=drive_link
 const regex2 = /\/folders\/([^/?]+)/;
