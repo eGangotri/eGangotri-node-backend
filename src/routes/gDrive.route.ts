@@ -28,7 +28,7 @@ gDriveRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
          ${googleDriveLink?.split(",").map((link: string) => link + "\n ")} 
         profile ${profile} fileType ${fileType} ignoreFolder ${ignoreFolder}`)
         if (!googleDriveLink || !profile) {
-            resp.status(300).send({
+            resp.status(400).send({
                 response: {
                     "status": "failed",
                     "message": "googleDriveLink and profile are mandatory"
@@ -62,13 +62,9 @@ gDriveRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
     }
 })
 
-
-
-
 gDriveRoute.post('/getGoogleDriveListingAsExcel', async (req: any, resp: any) => {
     console.log(`getGoogleDriveListingAsExcel:req.body ${JSON.stringify(req.body)}`)
     const startTime = Date.now();
-
     try {
         const googleDriveLink = req?.body?.googleDriveLink;
         const folderName = req?.body?.folderName || "";
@@ -83,24 +79,27 @@ gDriveRoute.post('/getGoogleDriveListingAsExcel', async (req: any, resp: any) =>
 
         const _validations = validateGenGDriveLinks(googleDriveLink, folderName)
         if (_validations.success === false) {
-            resp.status(300).send({
+            console.log(`getGoogleDriveListingAsExcel:validation failed ${JSON.stringify(_validations)}`)
+             resp.status(400).send({
                 response: _validations
-            })
+            });
         }
 
+       else {
         const { _links, _folders, error } = genLinksAndFolders(googleDriveLink, folderName)
         if (error) {
-            resp.status(300).send({
+            console.log(`getGoogleDriveListingAsExcel:genLinksAndFolders failed ${JSON.stringify(error)}`)
+            resp.status(400).send({
                 response: {
                     "status": "failed",
                     "success": false,
                     "message": "Number of Links and Folder Names should match"
                 }
             });
-            return
         }
 
-        const _resps = [];
+        else {
+            const _resps = [];
         for (let i = 0; i < _links.length; i++) {
             console.log(`getGoogleDriveListingAsExcel:loop ${_links[i]} ${_folders[i]} (${allNotJustPdfs})`)
             FileConstUtils.resetRowCounter();
@@ -123,7 +122,8 @@ gDriveRoute.post('/getGoogleDriveListingAsExcel', async (req: any, resp: any) =>
                 ..._resps,
             }
         });
-        return;
+        }
+       }
     }
 
     catch (err: any) {
@@ -140,7 +140,7 @@ gDriveRoute.post('/downloadGDriveItemsViaExcel', async (req: any, resp: any) => 
         const startTime = Date.now();
 
         if (!excelPath || !profileOrPath) {
-            return resp.status(300).send({
+            return resp.status(400).send({
                 response: {
                     "status": "failed",
                     "success": false,
@@ -195,7 +195,7 @@ gDriveRoute.post('/verifyLocalDownloadSameAsGDrive', async (req: any, resp: any)
          ${fileType}`)
 
         if (!googleDriveLink || !folder) {
-            resp.status(300).send({
+            resp.status(400).send({
                 response: "Pls. provide google drive Link or Folder"
             })
             return;
@@ -203,7 +203,7 @@ gDriveRoute.post('/verifyLocalDownloadSameAsGDrive', async (req: any, resp: any)
 
         const { _links, _folders, error } = genLinksAndFolders(googleDriveLink, folder)
         if (error) {
-            resp.status(300).send({
+            resp.status(400).send({
                 response: {
                     "status": "failed",
                     "success": false,
