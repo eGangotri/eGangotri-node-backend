@@ -133,7 +133,10 @@ export const addTextToIntroPdf = (doc: any, text: string, width: number,
     doc.page.margins.bottom = oldBottomMargin; // ReProtect bottom margin
 }
 
-const mergeVanityPdf = async (_introPdf: string, origPdf: string, finalDumpGround: string) => {
+const mergeVanityPdf = async (_introPdf: string, origPdf: string,
+    finalDumpGround: string,
+    suffix: string = "",
+    pdfSuffix:string = "") => {
     var origFileName = path.basename(origPdf);
     var destDir = path.dirname(_introPdf);
 
@@ -143,19 +146,27 @@ const mergeVanityPdf = async (_introPdf: string, origPdf: string, finalDumpGroun
         console.log(`_pdf: ${_pdf}`)
         return fs.readFileSync(_pdf)
     });
-    const finalPdfPath = `${finalDumpGround}\\${origFileName}`
+    let _fileNameWithSuffix = origFileName;
+    if(suffix.length>0){
+        _fileNameWithSuffix = `${_fileNameWithSuffix} ${suffix?.trim()}`
+    }
+
+    if(pdfSuffix.length>0){
+        _fileNameWithSuffix = `${_fileNameWithSuffix} ${pdfSuffix?.trim()}`
+    }
+    const finalPdfPath = `${finalDumpGround}\\${_fileNameWithSuffix}`
     await PdfLibUtils.mergePDFDocuments(pdfsForMerge, finalPdfPath)
     console.log(`${_introPdf}`, await PdfLibUtils.getPdfFirstPageDimensionsUsingPdfLib(_introPdf));
     console.log(`dim::${finalPdfPath}`, await PdfLibUtils.getPdfFirstPageDimensionsUsingPdfLib(finalPdfPath));
 }
 
-const vanitizePdfForProfile = async (profile: string) => {
+const vanitizePdfForProfile = async (profile: string, suffix: string = "") => {
     try {
         const folder = getFolderInSrcRootForProfile(profile);
         const _pdfs = await getAllPdfsInFolders([folder]);
         const intros: string[] = []
         console.log(`vanitizePdfForProfile `);
-        const [vanityIntro, imgFile, fontSize, singlePage] = getProfileVanityInfo(profile, folder);
+        const [vanityIntro, imgFile, fontSize, singlePage, pdfSuffix] = getProfileVanityInfo(profile, folder);
         console.log(`vanitizePdfForProfile ${folder}, ${_pdfs.length} fontSize:${fontSize} imgFile:${imgFile} singlePage: ${singlePage}`);
 
         for (let i = 0; i < _pdfs.length; i++) {
@@ -165,7 +176,7 @@ const vanitizePdfForProfile = async (profile: string) => {
 
         for (let i = 0; i < _pdfs.length; i++) {
             console.log(`creating vanity for: ${_pdfs[i]}`, await PdfLibUtils.getPdfFirstPageDimensionsUsingPdfLib(_pdfs[i]))
-            await mergeVanityPdf(intros[i], _pdfs[i], `${folder}\\${_vanitized}`)
+            await mergeVanityPdf(intros[i], _pdfs[i], `${folder}\\${_vanitized}`, suffix, pdfSuffix)
             moveOrignalToSeparateFolder(_pdfs[i], `${folder}\\${_orig_dont}`)
         }
         return {
@@ -184,12 +195,12 @@ const vanitizePdfForProfile = async (profile: string) => {
     }
 }
 
-export const vanitizePdfForProfiles = async (profileAsCSV: string) => {
+export const vanitizePdfForProfiles = async (profileAsCSV: string, suffix: string = "") => {
     const responseList = []
     const profiles = profileAsCSV.split(",");
     for (let i = 0; i < profiles.length; i++) {
         console.log(`vanitizePdfForProfiles(${i}): ${profiles[i]}`);
-        const _res = await vanitizePdfForProfile(profiles[i]?.trim());
+        const _res = await vanitizePdfForProfile(profiles[i]?.trim(), suffix);
         responseList.push(_res);
     }
     console.log(`vanitizePdfForProfiles:responseList ${responseList}`);
