@@ -29,7 +29,7 @@ export const checkFileSizeConsistency = (pdfDumpFolder: string, fileName: string
         const fileSizeOfDwnldFile = getFilzeSize(`${pdfDumpFolder}\\${fileName}`);
         const fileSizeRawAsInt = parseInt(fileSizeRaw);
         if (fileSizeOfDwnldFile != fileSizeRawAsInt) {
-            console.log(`Downloaded file size ${fileSizeOfDwnldFile} does not match with expected size ${fileSizeRaw}`);
+            console.log(`Downloaded file size for (${fileName}) ${fileSizeOfDwnldFile} does not match with expected size ${fileSizeRaw}`);
             incrementDownloadFailed();
             return {
                 status: `Downloaded ${fileName} to ${pdfDumpFolder}

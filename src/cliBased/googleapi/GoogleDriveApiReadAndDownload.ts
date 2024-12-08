@@ -100,7 +100,6 @@ export const downloadFromGoogleDriveToProfile = async (driveLinkOrFolderId: stri
   ignoreFolder = "",
   fileType = PDF_TYPE) => {
   const fileDumpFolder = isValidPath(profileOrPath) ? profileOrPath : getFolderInSrcRootForProfile(profileOrPath);
-
   console.log(`downloadFromGoogleDriveToProfile:fileDumpFolder ${fileDumpFolder}`)
   try {
     if (fs.existsSync(fileDumpFolder)) {
@@ -121,16 +120,16 @@ export const downloadFromGoogleDriveToProfile = async (driveLinkOrFolderId: stri
       console.log(`_resp : ${JSON.stringify(_resp)}`);
       return _resp;
     }
-    console.log(`No corresponding folder ${fileDumpFolder} to profile  ${profileOrPath} exists`)
+    console.log(`No corresponding folder ${fileDumpFolder} to profile ${profileOrPath} exists`)
     return {
       "success": false,
       msg: `No corresponding folder to profile (${profileOrPath}) exists`
     }
   }
   catch (err) {
-    console.log(`downloadFromGoogleDriveToProfile:Error ${JSON.stringify(err)}`)
+    console.log(`downloadFromGoogleDriveToProfile:Error (${fileDumpFolder}) ${JSON.stringify(err)}`)
     return {
-      "status": "failed" + err
+      "status": `downloadFromGoogleDriveToProfile:Error (${fileDumpFolder}) ${JSON.stringify(err)}`
     }
   }
 }
