@@ -146,7 +146,7 @@ const mergeVanityPdf = async (_introPdf: string, origPdf: string,
         console.log(`_pdf: ${_pdf}`)
         return fs.readFileSync(_pdf)
     });
-    let _fileNameWithSuffix = origFileName;
+    let _fileNameWithSuffix = origFileName.replace(".pdf", "");
     if(suffix.length>0){
         _fileNameWithSuffix = `${_fileNameWithSuffix} ${suffix?.trim()}`
     }
@@ -154,7 +154,7 @@ const mergeVanityPdf = async (_introPdf: string, origPdf: string,
     if(pdfSuffix.length>0){
         _fileNameWithSuffix = `${_fileNameWithSuffix} ${pdfSuffix?.trim()}`
     }
-    const finalPdfPath = `${finalDumpGround}\\${_fileNameWithSuffix}`
+    const finalPdfPath = `${finalDumpGround}\\${_fileNameWithSuffix}.pdf`
     await PdfLibUtils.mergePDFDocuments(pdfsForMerge, finalPdfPath)
     console.log(`${_introPdf}`, await PdfLibUtils.getPdfFirstPageDimensionsUsingPdfLib(_introPdf));
     console.log(`dim::${finalPdfPath}`, await PdfLibUtils.getPdfFirstPageDimensionsUsingPdfLib(finalPdfPath));
