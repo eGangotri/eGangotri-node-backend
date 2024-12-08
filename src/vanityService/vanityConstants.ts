@@ -100,13 +100,15 @@ export const getProfileVanityInfo = (profile: string, folder: string) => {
     const imgFile = folder + "\\" + profileVanityTextMap[`${_tmpProfile}`].imgFile;
     const fontSize = profileVanityTextMap[`${_tmpProfile}`]?.fontSize || DEFAULT_FONT_SIZE;
     const singlePage = profileVanityTextMap[`${_tmpProfile}`]?.singlePage || false;
-    return [vanityIntro, imgFile, fontSize, singlePage]
+    const pdfSuffix = profileVanityTextMap[`${_tmpProfile}`]?.pdfSuffix || "";
+    return [vanityIntro, imgFile, fontSize, singlePage,pdfSuffix]
 }
 
 export const profileVanityTextMap = {
     "PZ": {
         text: text_Peerzada,
-        imgFile: "peerzada_forVanity.jpg"
+        imgFile: "peerzada_forVanity.jpg",
+        pdfSuffix: " - Mohd Ashraf Peerzada Collection",
     },
     "CHAMBAL": {
         text: text_chambal,

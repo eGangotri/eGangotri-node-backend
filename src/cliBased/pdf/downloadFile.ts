@@ -3,6 +3,8 @@ import { DOWNLOAD_COMPLETED_COUNT, checkFileSizeConsistency, incrementDownloadCo
 import { extractGoogleDriveId } from '../../mirror/GoogleDriveUtilsCommonCode';
 import { getGoogleDriveInstance } from '../googleapi/service/CreateGoogleDrive';
 import * as path from 'path';
+import { GaxiosPromise } from 'googleapis/build/src/apis/abusiveexperiencereport';
+import internal from 'stream';
 
 const { DownloaderHelper } = require('node-downloader-helper');
 const drive = getGoogleDriveInstance();
@@ -10,7 +12,6 @@ const drive = getGoogleDriveInstance();
 export const downloadFileFromGoogleDrive = async (driveLinkOrFolderId: string,
     destPath: string,
     fileName: string = "",
-    dataLength: number = 0,
     fileSizeRaw = "0") => {
     console.log(`downloadFileFromGoogleDrive ${driveLinkOrFolderId}`)
     const result = await downloadGDriveFileUsingGDriveApi(driveLinkOrFolderId, destPath, fileName, fileSizeRaw);

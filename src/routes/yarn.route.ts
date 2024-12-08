@@ -233,6 +233,7 @@ yarnRoute.post('/addHeaderFooter', async (req: any, resp: any) => {
 yarnRoute.post('/vanitizePdfs', async (req: any, resp: any) => {
     try {
         const profile = req?.body?.profile;
+        const suffix = req?.body?.suffix;
         if (!profile) {
             resp.status(300).send({
                 response: {
@@ -241,7 +242,7 @@ yarnRoute.post('/vanitizePdfs', async (req: any, resp: any) => {
                 }
             });
         }
-        const res = await vanitizePdfForProfiles(profile) || {
+        const res = await vanitizePdfForProfiles(profile, suffix) || {
             "status": "failed",
             "message": "vanitizePdfForProfiles returned null"
         };

@@ -48,7 +48,7 @@ async function getAllFilesFromGDrive(driveLinkOrFolderID: string,
     }
 
     return downloadFileFromGoogleDrive(_data.googleDriveLink,
-      fileDumpWithPathAppended, _data.fileName, dataLength, _data?.fileSizeRaw)
+      fileDumpWithPathAppended, _data.fileName, _data?.fileSizeRaw)
   });
   const results = await Promise.all(promises);
   return {
@@ -129,7 +129,12 @@ export const downloadFromGoogleDriveToProfile = async (driveLinkOrFolderId: stri
   catch (err) {
     console.log(`downloadFromGoogleDriveToProfile:Error (${fileDumpFolder}) ${JSON.stringify(err)}`)
     return {
-      "status": `downloadFromGoogleDriveToProfile:Error (${fileDumpFolder}) ${JSON.stringify(err)}`
+      status: `${DOWNLOAD_COMPLETED_COUNT} out of ${DOWNLOAD_COMPLETED_COUNT + DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT + DOWNLOAD_FAILED_COUNT} made it`,
+      success_count: DOWNLOAD_COMPLETED_COUNT,
+      error_count: DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT,
+      dl_wrong_size_count: `${DOWNLOAD_FAILED_COUNT}
+      ${DOWNLOAD_FAILED_COUNT > 0 ? "Google Drive Quota may have been filled.Typically takes 24 Hours to reset." : ""}`,
+      "error": `downloadFromGoogleDriveToProfile:Error (${fileDumpFolder}) ${JSON.stringify(err)}`
     }
   }
 }
