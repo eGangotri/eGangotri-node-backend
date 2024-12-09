@@ -11,6 +11,12 @@ export async function getListOfArchiveItems(queryOptions: ArchiveItemListOptions
   return items;
 }
 
+export async function getCountArchiveItems(queryOptions: ArchiveItemListOptionsType) {
+  const items = await getListOfArchiveItems(queryOptions);
+  return items?.length || 0;
+}
+
+
 export function setOptionsForArchiveListing(queryOptions: ArchiveItemListOptionsType) {
   // Empty `filter` means "match all documents"
   let mongoOptionsFilter = {};
@@ -59,53 +65,53 @@ export function setOptionsForArchiveListing(queryOptions: ArchiveItemListOptions
 }
 // "source" "acct"
 export async function getArchiveItemStatistics() {
-    const result = await ArchiveItem.aggregate([
-        {
-            $group: {
-                _id: "$acct",
-                totalSize: { $sum: { $toLong: "$size" } },
-                totalPageCount: { $sum: { $toInt: "$pageCount" } },
-                emailUsers: { $addToSet: "$emailUser" },
-                sources: { $addToSet: "$source" },
-                firstLowestDate: { $min: "$date" }
-            }
-        },
-        {
-            $project: {
-                _id: 0,
-                acct: "$_id",
-                totalSize: 1,
-                totalPageCount: 1,
-                emailUsers: 1,
-                sources: 1,
-                firstLowestDate: 1
-            }
-        }
-    ]);
+  const result = await ArchiveItem.aggregate([
+    {
+      $group: {
+        _id: "$acct",
+        totalSize: { $sum: { $toLong: "$size" } },
+        totalPageCount: { $sum: { $toInt: "$pageCount" } },
+        emailUsers: { $addToSet: "$emailUser" },
+        sources: { $addToSet: "$source" },
+        firstLowestDate: { $min: "$date" }
+      }
+    },
+    {
+      $project: {
+        _id: 0,
+        acct: "$_id",
+        totalSize: 1,
+        totalPageCount: 1,
+        emailUsers: 1,
+        sources: 1,
+        firstLowestDate: 1
+      }
+    }
+  ]);
 
-    return result;
+  return result;
 }
 
 export async function getArchiveSourceStatistics() {
-    const result = await ArchiveItem.aggregate([
-        {
-            $group: {
-                _id: "$source",
-                totalSize: { $sum: { $toLong: "$size" } },
-                totalPageCount: { $sum: { $toInt: "$pageCount" } },
-                accts: { $addToSet: "$acct" }
-            }
-        },
-        {
-            $project: {
-                _id: 0,
-                source: "$_id",
-                totalSize: 1,
-                totalPageCount: 1,
-                accts: 1
-            }
-        }
-    ]);
+  const result = await ArchiveItem.aggregate([
+    {
+      $group: {
+        _id: "$source",
+        totalSize: { $sum: { $toLong: "$size" } },
+        totalPageCount: { $sum: { $toInt: "$pageCount" } },
+        accts: { $addToSet: "$acct" }
+      }
+    },
+    {
+      $project: {
+        _id: 0,
+        source: "$_id",
+        totalSize: 1,
+        totalPageCount: 1,
+        accts: 1
+      }
+    }
+  ]);
 
-    return result;
+  return result;
 }

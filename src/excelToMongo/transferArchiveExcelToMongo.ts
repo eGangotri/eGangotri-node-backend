@@ -5,6 +5,7 @@ import { ArchiveExcelHeaderToJSONMAPPING, printMongoTransactions, replaceExcelHe
 import fs from 'fs/promises';
 import path from 'path';
 import os from "os";
+import { getCountArchiveItems } from 'services/archiveItemService';
 
 const transformExcelToJSON = async (pathToExcel: string, source: string) => {
     // Read the Excel file
@@ -41,26 +42,65 @@ async function excelJsonToMongo(newData: {}[]) {
     }
 }
 
-
-export async function archiveExceltoMongo(directoryPath: string) {
+/**
+ * 
+ * @param directoryPathOrExcel Single Excel or Directory containing multiple Excels
+ * @returns 
+ */
+export async function archiveExceltoMongo(directoryPathOrExcel: string, source: string = "") {
     await connectToMongo(["forUpload"]);
     try {
-        const files = await fs.readdir(directoryPath);
-        const rootFolder = path.basename(directoryPath);
-        
-        for (const file of files) {
-            if (path.extname(file) === '.xlsx') {
-                const filePath = path.join(directoryPath, file)
-                console.log(` processing ${rootFolder} : ${path.join(directoryPath, file)}`);
-                const newData = await transformExcelToJSON(filePath, rootFolder)
-                await excelJsonToMongo(newData);
+        if (directoryPathOrExcel.endsWith(".xlsx")) {
+            const newData = await transformExcelToJSON(directoryPathOrExcel, source);
+            await excelJsonToMongo(newData);
+            const { count, acct } = await archiveExcelToMongoCheckReport(newData);
+            return {
+                success: count > 0,
+                msg: `Excel Path ${directoryPathOrExcel} read to insert ${count} items in acct ${acct}`,
+            }
+        }
+        else {
+            const files = await fs.readdir(directoryPathOrExcel);
+            const rootFolderAsSource = path.basename(directoryPathOrExcel);
+            const resultMap = []
+            let excelCount = 0;
+            for (const file of files) {
+                if (path.extname(file) === '.xlsx') {
+                    excelCount++;
+                    const filePath = path.join(directoryPathOrExcel, file)
+                    console.log(` processing ${rootFolderAsSource} : ${path.join(directoryPathOrExcel, file)}`);
+                    const newData = await transformExcelToJSON(filePath, rootFolderAsSource)
+                    await excelJsonToMongo(newData);
+                    resultMap.push(await archiveExcelToMongoCheckReport(newData));
+                }
+            }
+            return {
+                success: excelCount === resultMap.length,
+                msg: `Excel Path ${directoryPathOrExcel} read for ${excelCount} excels 
+                and inserted ${resultMap.length} archiveDB Entries.
+                `,
+                resultMap: `${resultMap.forEach((x: any) => {
+                    return JSON.stringify(x)
+                })} `
             }
         }
     } catch (err) {
         console.error('Unable to scan directory: ' + err);
+        return {
+            error: 'Unable to scan directory: ' + JSON.stringify(err),
+            success: false
+        }
     }
-    console.log(` excel to mongo for  ${directoryPath}`);
 
+}
+
+async function archiveExcelToMongoCheckReport(newData: {}[]) {
+    const acct = (newData && newData?.length > 0) ? newData[0]?.["acct"] : "";
+    const count = await getCountArchiveItems({ acct });
+    return {
+        count,
+        acct
+    }
 }
 
 export async function deleteRowsByAccts(accts: string[]) {

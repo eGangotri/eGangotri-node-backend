@@ -70,6 +70,7 @@ const fetchArchiveMetadata = async (username: string,
     let maxItemsCounter = maxItems > MAX_ITEMS_RETRIEVABLE_IN_ARCHIVE_ORG ? MAX_ITEMS_RETRIEVABLE_IN_ARCHIVE_ORG : maxItems;;
 
     try {
+        const _OldmaxItemsCounter = maxItemsCounter
         let _hits: Hits = await callGenericArchiveApi(username, 1, dateRange[0], dateRange[1], ascOrder, maxItemsCounter);
         maxItemsCounter -= DEFAULT_HITS_PER_PAGE;
         let hitsTotal = _hits?.total;
@@ -79,6 +80,17 @@ const fetchArchiveMetadata = async (username: string,
             FETCH_ACRHIVE_METADATA_COUNTER.hitsTotal = hitsTotal;
             let _hitsHits = _hits.hits;
             let email = '';
+            console.log(`fetchArchiveMetadata-try: ${maxItems} 
+                hitsTotal: ${hitsTotal} 
+                maxItemsCounter: ${maxItemsCounter}
+                _hitsHits?.length: ${_hitsHits?.length}
+                 _OldmaxItemsCounter: ${_OldmaxItemsCounter}`);
+
+                 //after I printed this. the count of 100 only for default desc order was fixed
+            console.log(`_hitsHits:
+                ${JSON.stringify(_hitsHits)}
+            `);
+
             if (_hitsHits?.length > 0) {
                 email = await extractEmail(_hitsHits[0].fields.identifier);
                 const extractedData = await extractLinkedDataAndSpecificFieldsFromAPI(_hitsHits, email, username, limitedFields);

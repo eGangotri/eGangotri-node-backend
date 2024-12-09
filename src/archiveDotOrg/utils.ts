@@ -175,35 +175,85 @@ export const extractLinkedData = async (_hitsHits: HitsEntity[],
         const originalTitle = archiveItemName.replace(extension, "");
 
 
-        const obj: ArchiveLinkData = {
-            link: `${ARCHIVE_DOT_ORG_DETAILS_PREFIX}${identifier}`,
-            titleArchive: hit.fields.title,
-            description: hit.fields.description,
-            uniqueIdentifier: identifier,
-            allFilesDownloadUrl: `${ARCHIVE_DOT_ORG_DWONLOAD_PREFIX}${identifier}`,
-            publicdate: moment(hit.fields.publicdate).format(DD_MM_YYYY_FORMAT),
-            subject: hit.fields?.subject?.join(","),
-            acct: _archiveAcctName,
-            hit_type: hit.hit_type,
-            mediatype: hit.fields.mediatype,
-            item_size: hit.fields.item_size,
-            item_size_formatted: sizeInfo(hit.fields.item_size),
+        // const obj: ArchiveLinkData = {
+        //     link: `${ARCHIVE_DOT_ORG_DETAILS_PREFIX}${identifier}`,
+        //     titleArchive: hit.fields.title,
+        //     description: hit.fields.description,
+        //     uniqueIdentifier: identifier,
+        //     allFilesDownloadUrl: `${ARCHIVE_DOT_ORG_DWONLOAD_PREFIX}${identifier}`,
+        //     publicdate: moment(hit.fields.publicdate).format(DD_MM_YYYY_FORMAT),
+        //     subject: hit.fields?.subject?.join(","),
+        //     acct: _archiveAcctName,
+        //     hit_type: hit.hit_type,
+        //     mediatype: hit.fields.mediatype,
+        //     item_size: hit.fields.item_size,
+        //     item_size_formatted: sizeInfo(hit.fields.item_size),
+        //     email,
+        //     pdfPageCount: pageCount,
+        //     downloads: hit?.fields?.downloads?.toString() || "0",
+        //     allNames: allNames?.join(DOUBLE_HASH_SEPARATOR),
+        //     allFormats: allFormats?.join(DOUBLE_HASH_SEPARATOR)
+        // }
+        // if (!limitedFields) {
+        //     obj.originalTitle = originalTitle;
+        //     obj.pdfDownloadUrl = `${ARCHIVE_DOT_ORG_DWONLOAD_PREFIX}${identifier}/${archiveItemName}`;
+        // }
+        const archiveLinkData = createArchiveLinkData(
+            hit,
+            identifier,
+            _archiveAcctName,
             email,
-            pdfPageCount: pageCount,
-            downloads: hit?.fields?.downloads?.toString() || "0",
-            allNames: allNames?.join(DOUBLE_HASH_SEPARATOR),
-            allFormats: allFormats?.join(DOUBLE_HASH_SEPARATOR)
-        }
-        if (!limitedFields) {
-            obj.originalTitle = originalTitle;
-            obj.pdfDownloadUrl = `${ARCHIVE_DOT_ORG_DWONLOAD_PREFIX}${identifier}/${archiveItemName}`;
-        }
-
-        _linkData.push(obj)
+            pageCount,
+            allNames,
+            allFormats,
+            limitedFields,
+            originalTitle,
+            archiveItemName
+        );
+        _linkData.push(archiveLinkData)
     }
     return _linkData
 }
 
+function createArchiveLinkData(
+    hit: any,
+    identifier: string,
+    _archiveAcctName: string,
+    email: string,
+    pageCount: number,
+    allNames: string[],
+    allFormats: string[],
+    limitedFields: boolean,
+    originalTitle?: string,
+    archiveItemName?: string
+): ArchiveLinkData {
+    const obj: ArchiveLinkData = {
+        link: `${ARCHIVE_DOT_ORG_DETAILS_PREFIX}${identifier}`,
+        titleArchive: hit.fields.title,
+        description: hit.fields.description,
+        uniqueIdentifier: identifier,
+        allFilesDownloadUrl: `${ARCHIVE_DOT_ORG_DWONLOAD_PREFIX}${identifier}`,
+        publicdate: moment(hit.fields.publicdate).format(DD_MM_YYYY_FORMAT),
+        subject: hit.fields?.subject?.join(","),
+        acct: _archiveAcctName,
+        hit_type: hit.hit_type,
+        mediatype: hit.fields.mediatype,
+        item_size: hit.fields.item_size,
+        item_size_formatted: sizeInfo(hit.fields.item_size),
+        email,
+        pdfPageCount: pageCount,
+        downloads: hit?.fields?.downloads?.toString() || "0",
+        allNames: allNames?.join(DOUBLE_HASH_SEPARATOR),
+        allFormats: allFormats?.join(DOUBLE_HASH_SEPARATOR)
+    };
+
+    if (!limitedFields) {
+        obj.originalTitle = originalTitle;
+        obj.pdfDownloadUrl = `${ARCHIVE_DOT_ORG_DWONLOAD_PREFIX}${identifier}/${archiveItemName}`;
+    }
+
+    return obj;
+}
 export async function getNonFolderFileCount(directory: string): Promise<number> {
     try {
         const files = await fs.readdir(directory, { withFileTypes: true });

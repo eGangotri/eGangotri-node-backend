@@ -126,8 +126,10 @@ launchArchiveYarnRoute.post('/downloadArchivePdfs', async (req: any, resp: any) 
 launchArchiveYarnRoute.post('/dumpArchiveExcelToMongo', async (req: any, resp: any) => {
     try {
         const archiveExcelPath = req?.body?.archiveExcelPath;
+        const source = req?.body?.source;
+
         console.log(`dumpArchiveExcelToMongo
-        comboExcelPath ${archiveExcelPath} 
+        comboExcelPath ${archiveExcelPath} ${source}
         `)
 
         if (!archiveExcelPath) {
@@ -140,7 +142,7 @@ launchArchiveYarnRoute.post('/dumpArchiveExcelToMongo', async (req: any, resp: a
             });
             return;
         }
-        const _resp = archiveExceltoMongo(archiveExcelPath);
+        const _resp = archiveExceltoMongo(archiveExcelPath, source);
         resp.status(200).send({
             response: {
                 _results: _resp
