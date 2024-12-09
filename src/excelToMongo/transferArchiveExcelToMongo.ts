@@ -5,7 +5,7 @@ import { ArchiveExcelHeaderToJSONMAPPING, printMongoTransactions, replaceExcelHe
 import fs from 'fs/promises';
 import path from 'path';
 import os from "os";
-import { getCountArchiveItems } from 'services/archiveItemService';
+import { getCountArchiveItems } from '../services/archiveItemService';
 
 const transformExcelToJSON = async (pathToExcel: string, source: string) => {
     // Read the Excel file
