@@ -146,6 +146,9 @@ export const _renameFileInFolder = (_fileInFolder: FileStats, newFileName: strin
             if(newPath.length < 8){
                 throw new Error(`${newPath} length is too short`);
             }
+            if(fs.existsSync(newPath)){
+                throw new Error(`${newPath} already exists`);
+            }
             fs.renameSync(absPath, newPath);
             console.log(`File renamed to ${newFileName}`)
             renameReport.success.push(`File ${absPath} renamed to ${newFileName}`)
