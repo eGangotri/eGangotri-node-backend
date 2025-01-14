@@ -10,7 +10,7 @@ const fsPromises = require('fs').promises;
 
 let FINAL_REPORT: string[] = [];
 let PDF_PROCESSING_COUNTER = 0;
-export const DEFAULT_PDF_PAGE_EXTRACTION_COUNT = 10;
+export const DEFAULT_PDF_PAGE_EXTRACTION_COUNT:number = 10;
 
 async function createPartialPdf(inputPath: string, 
     outputPath: string, 
@@ -27,15 +27,19 @@ async function createPartialPdf(inputPath: string,
 
     console.log(`Pdf Extraction: Folder # (${parseInt(index)+1}) Pdf No. ${++counter}/${pdfsToBeProcessedCount}
          pdfPageCount ${pdfPageCount}
-         extracting: ${firstNPages} and ${lastNPages} pages`);
-    if (pdfPageCount > (firstNPages + lastNPages)) {
+         extracting: ${firstNPages} and ${lastNPages} pages
+         ${pdfPageCount > ((Number(firstNPages) + Number(lastNPages)))}
+         ${(Number(firstNPages) + Number(lastNPages))}
+         `);
+    if (pdfPageCount > (Number(firstNPages) + Number(lastNPages))) {
         range = _.range(0, firstNPages).concat(_.range(pdfPageCount - lastNPages, pdfPageCount));
+        console.log(`Range (first and last pages): ${range}`);
     }
     else {
         range = _.range(0, pdfPageCount);
+        console.log(`Range (full): ${range}`);
     }
 
-    console.log(`range: ${range} ${range.length}`)
     const newPdf = await PDFDocument.create();
     const copiedPages = await newPdf.copyPages(pdfDoc, range);
     copiedPages.forEach((page) => newPdf.addPage(page));
