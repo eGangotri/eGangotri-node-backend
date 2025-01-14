@@ -31,11 +31,9 @@ async function createPartialPdf(inputPath: string,
          `);
     if (pdfPageCount > (Number(firstNPages) + Number(lastNPages))) {
         range = _.range(0, firstNPages).concat(_.range(pdfPageCount - lastNPages, pdfPageCount));
-        console.log(`Range (first and last pages): ${range}`);
     }
     else {
         range = _.range(0, pdfPageCount);
-        console.log(`Range (full): ${range}`);
     }
 
     const newPdf = await PDFDocument.create();
