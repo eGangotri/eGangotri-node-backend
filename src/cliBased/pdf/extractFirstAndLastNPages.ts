@@ -28,8 +28,6 @@ async function createPartialPdf(inputPath: string,
     console.log(`Pdf Extraction: Folder # (${parseInt(index)+1}) Pdf No. ${++counter}/${pdfsToBeProcessedCount}
          pdfPageCount ${pdfPageCount}
          extracting: ${firstNPages} and ${lastNPages} pages
-         ${pdfPageCount > ((Number(firstNPages) + Number(lastNPages)))}
-         ${(Number(firstNPages) + Number(lastNPages))}
          `);
     if (pdfPageCount > (Number(firstNPages) + Number(lastNPages))) {
         range = _.range(0, firstNPages).concat(_.range(pdfPageCount - lastNPages, pdfPageCount));
