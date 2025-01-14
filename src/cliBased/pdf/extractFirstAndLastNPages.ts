@@ -35,6 +35,7 @@ async function createPartialPdf(inputPath: string,
         range = _.range(0, pdfPageCount);
     }
 
+    console.log(`range: ${range} ${range.length}`)
     const newPdf = await PDFDocument.create();
     const copiedPages = await newPdf.copyPages(pdfDoc, range);
     copiedPages.forEach((page) => newPdf.addPage(page));
@@ -57,28 +58,37 @@ export const loopFolderForExtraction = async (rootFolder: string,
     const outputPath = `${outputRoot}\\${path.parse(rootFolder).name} (${pdfsToBeProcessedCount})`;
     console.log(`rootFolder ${rootFolder} ${outputRoot} ${loopIndex}`);
     createFolderIfNotExists(outputPath)
+    let errorCount = 0;
     for (const [index, pdf] of allPdfs.entries()) {
         const _path = path.parse(pdf.absPath);
         const subDir = _path.dir.replace(rootFolder, '')
         let _subFolder = `${outputPath}\\${subDir}`
-        createFolderIfNotExists(_subFolder)
+        createFolderIfNotExists(_subFolder);
         try {
             await createPartialPdf(pdf.absPath, _subFolder, pdfsToBeProcessedCount, loopIndex,firstNPages, lastNPages);
             PDF_PROCESSING_COUNTER++;
         }
         catch (error) {
             console.error('Error creating PDF:', error);
+            errorCount++;
             //throw new Error(`Error creating PDF: ${error}`)
             continue;
         }
     }
+
     const consoleLog: string =
         `\nFolder # (${loopIndex}).${path.parse(rootFolder).name} 
-        PDF Count ${pdfsToBeProcessedCount} == PDF_PROCESSING_COUNTER ${PDF_PROCESSING_COUNTER} Match ${pdfsToBeProcessedCount === PDF_PROCESSING_COUNTER}`
+        PDF Count ${pdfsToBeProcessedCount} == PDF_PROCESSING_COUNTER ${PDF_PROCESSING_COUNTER} 
+        Match ${pdfsToBeProcessedCount === PDF_PROCESSING_COUNTER}`
 
     FINAL_REPORT.push(consoleLog);
     console.log(consoleLog);
-    return outputPath
+    return {
+        outputPath,
+        pdfsToBeProcessedCount,
+        match: pdfsToBeProcessedCount === PDF_PROCESSING_COUNTER,
+        errorCount
+    }
 }
 
 const padNumbersWithZeros = (num: number) => {
@@ -106,6 +116,7 @@ export const extractFirstAndLastNPages = async (_srcFoldersWithPath: string[],
     let errors = [];
     FINAL_REPORT = []
     const dumpFolder = []
+    const _report = []
     for (const [index, folder] of _srcFoldersWithPath.entries()) {
         console.log(`extractFirstAndLastNPages:Started processing
              ${folder} to
@@ -114,8 +125,9 @@ export const extractFirstAndLastNPages = async (_srcFoldersWithPath: string[],
         PDF_PROCESSING_COUNTER = 0;
         counter = 0
         try {
-            const outputFolder = await loopFolderForExtraction(folder, destRootFolder, index.toString(), firstNPages, lastNPages);
-            dumpFolder.push(outputFolder);
+            const _result = await loopFolderForExtraction(folder, destRootFolder, index.toString(), firstNPages, lastNPages);
+            dumpFolder.push(_result.outputPath);
+            _report.push(_result)
         }
         catch (err) {
             errors.push(`Error in processing ${folder} ${err}`)
@@ -131,7 +143,8 @@ export const extractFirstAndLastNPages = async (_srcFoldersWithPath: string[],
         pageRange: `${(firstNPages===lastNPages)?firstNPages:`${firstNPages}-${lastNPages}`}`,
         report: FINAL_REPORT,
         dumpFolder: dumpFolder.join(","),
-        failures: errors
+        failures: errors,
+        _report
     }
 }
 
