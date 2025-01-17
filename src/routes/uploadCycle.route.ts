@@ -3,7 +3,7 @@ import { Request, Response } from "express";
 import { validateSuperAdminUserFromRequest } from "../services/userService"
 import _ from "lodash";
 import { UploadCycle } from "../models/uploadCycle";
-import { getListOfUploadCycles } from "../services/uploadCycleService";
+import { getListOfUploadCycles, getUploadCycleById } from "../services/uploadCycleService";
 import { findMissedUploads } from "../services/GradleLauncherUtil";
 import { UploadCycleArchiveProfile } from "mirror/types";
 
@@ -65,8 +65,8 @@ uploadCycleRoute.get('/list', async (req: Request, resp: Response) => {
 uploadCycleRoute.post('/getUploadQueueUploadUsheredMissed', async (req: any, resp: any) => {
     const uploadCycleId = req.body.uploadCycleId;
     console.log(`uploadCycleId ${uploadCycleId} ${req.body}`)
-    if(!uploadCycleId) {    
-        resp.status(400).send({error: 'uploadCycleId is required'});
+    if (!uploadCycleId) {
+        resp.status(400).send({ error: 'uploadCycleId is required' });
         return;
     }
     try {
@@ -91,3 +91,40 @@ uploadCycleRoute.post('/getUploadQueueUploadUsheredMissed', async (req: any, res
         resp.status(400).send(err);
     }
 })
+
+uploadCycleRoute.post("/deleteUploadCycleById", async (req: Request, resp: Response) => {
+    console.log(`deleteUploadCycleById: ${JSON.stringify(req.body)}`)
+
+    try {
+        const uploadCycleId = req.body.uploadCycleId;
+        if (!uploadCycleId) {
+            resp.status(400).send({ error: 'uploadCycleId is required' });
+            return;
+        }
+        const uploadCycle = await getUploadCycleById(uploadCycleId);
+        if (uploadCycle) {
+            uploadCycle.deleted = true;
+            await uploadCycle.save();
+             resp.status(200).send({
+                response: {
+                    success: true,
+                    message: `uploadCycleId ${uploadCycleId} deleted`
+                }
+            });
+            return;
+        }
+        else {
+            resp.status(200).send({
+                response: {
+                    success: false,
+                    message: `uploadCycleId ${uploadCycleId} not found`
+                }
+            });
+        }
+    }
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+});
+

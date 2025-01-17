@@ -56,7 +56,7 @@ egangotri.get("/", function (req: any, res: any) {
 egangotri.use("/itemsQueued", itemsQueuedRoute);
 egangotri.use("/itemsUshered", itemsUsheredRoute);
 egangotri.use("/execLauncher", launchGradleRoute);
-egangotri.use("/uploadCycleRoute", uploadCycleRoute);
+egangotri.use("/uploadCycle", uploadCycleRoute);
 egangotri.use("/user", userRoute);
 egangotri.use("/yarn", yarnRoute);
 egangotri.use("/yarnExcel", yarnExcelRoute);

@@ -12,16 +12,21 @@ export async function getListOfUploadCycles(queryOptions: UploadCycleListOptions
 }
 
 export async function getLatestUploadCycle() {
-  const item = await UploadCycle.findOne({}).sort({_id:-1})
+  const item = await UploadCycle.findOne({}).sort({ _id: -1 })
   return item?.uploadCycleId || "";
 }
 
-export async function getLatestUploadCycleById(uploadCycleId:string) {
-  const item = await UploadCycle.findOne({uploadCycleId:uploadCycleId})
+export async function getLatestUploadCycleById(uploadCycleId: string) {
+  const item = await UploadCycle.findOne({ uploadCycleId: uploadCycleId })
   return item;
 }
 
-export async function markUploadCycleAsMovedToFreeze(uploadCycleId:string) {
+export async function getUploadCycleById(uploadCycleId: string) {
+  const item = await UploadCycle.findOne({ uploadCycleId: uploadCycleId })
+  return item;
+}
+
+export async function markUploadCycleAsMovedToFreeze(uploadCycleId: string) {
   await UploadCycle.updateOne({ uploadCycleId: uploadCycleId }, { $set: { moveToFreeze: true } });
 }
 
@@ -31,6 +36,7 @@ export function setOptionsForUploadCycleListing(queryOptions: UploadCycleListOpt
   let mongoOptionsFilter = {};
   if (queryOptions?.startDate && queryOptions?.endDate) {
     mongoOptionsFilter = {
+      ...mongoOptionsFilter,
       createdAt: {
         $gte: new Date(queryOptions?.startDate),
         $lte: new Date(queryOptions?.endDate),
@@ -55,6 +61,10 @@ export function setOptionsForUploadCycleListing(queryOptions: UploadCycleListOpt
     console.log(`uploadCycleIds ${uploadCycleIds}`)
     mongoOptionsFilter = { ...mongoOptionsFilter, uploadCycleId: { $in: uploadCycleIds } };
   }
+  mongoOptionsFilter = {
+    ...mongoOptionsFilter,
+    deleted: { $ne: true }
+  };
 
   const limit: number = getLimit(queryOptions?.limit);
   return { limit, mongoOptionsFilter };
