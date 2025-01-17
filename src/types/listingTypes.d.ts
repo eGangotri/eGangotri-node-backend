@@ -40,6 +40,7 @@ export type UploadCycleListOptionsType = {
   uploadCycleId?: string,
   startDate?: string,
   endDate?: string,
+  deleted?: boolean,
 };
 
 
