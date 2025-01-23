@@ -7,10 +7,35 @@ import { convertJpgsToPdfInAllSubFolders } from '../imgToPdf/jpgToPdf';
 import { multipleTextScriptConversion } from '../services/fileService';
 import { renameFilesViaExcel } from '../services/fileUtilsService';
 import { moveFileInListToDest } from '../services/yarnService';
-import { deprecate } from 'util';
+import { FileMoveTracker } from '../models/FileMoveTracker';
 
 
 export const fileUtilsRoute = express.Router();
+fileUtilsRoute.get('/file-move-list', async (req, res) => {
+    console.log(`GET /file-move-list`);
+    try {
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      const skip = (page - 1) * limit;
+  
+      const totalCount = await FileMoveTracker.countDocuments();
+      const fileMoveTrackers = await FileMoveTracker.find()
+        .skip(skip)
+        .limit(limit)
+        .sort({ createdAt: -1 });
+  
+      res.json({
+        data: fileMoveTrackers,
+        currentPage: page,
+        totalPages: Math.ceil(totalCount / limit),
+        totalCount,
+      });
+    } catch (error) {
+      console.error('Error fetching file move trackers:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
 
 fileUtilsRoute.post('/findByFileSize', async (req: any, resp: any) => {
     try {
