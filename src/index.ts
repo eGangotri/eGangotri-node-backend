@@ -27,6 +27,7 @@ import { pdfRenameRoute } from "./routes/pdfRename.route";
 import { scanningCenterRoute } from "./routes/scanningCenter.route";
 import { gDriveUploadWorkReportRoute } from "./routes/gDriveUploadWorkReportRoute";
 import { gDriveRoute } from "./routes/gDrive.route";
+import { gDriveDownloadRoute } from "./routes/gDrive.download.route";
 
 const egangotri = express();
 const hostname = "localhost";
@@ -71,13 +72,13 @@ egangotri.use("/searchMongo", launchMongoRoute);
 egangotri.use("/fileUtil", fileUtilsRoute);
 egangotri.use("/pdfRename", pdfRenameRoute);
 egangotri.use("/scanningCenter", scanningCenterRoute);
-
+egangotri.use("/gDriveUploadWorkReportRoute", gDriveUploadWorkReportRoute);
 
 //Daily Work Report Routes
 egangotri.use("/dailyWorkReport", dailyWorkReportRoute);
 egangotri.use("/dailyCatWorkReport", dailyCatWorkReportRoute);
 egangotri.use("/dailyQAWorkReport", dailyQAWorkReportRoute);
-egangotri.use("/gDriveUploadWorkReport", gDriveUploadWorkReportRoute);
+egangotri.use("/gDriveDownloadRoute", gDriveDownloadRoute);
 
 egangotri.listen(port,'0.0.0.0', async () => {
   console.log(`Server - deployed ${deployDate} - running at http://${hostname}:${port}/`, new Date());

@@ -186,7 +186,7 @@ export const downloadGDriveData = async (googleDriveData:GDriveExcelData[],
     }
 
     return downloadFileFromGoogleDrive(_data.linkToFileLocation,
-      pdfDumpWithPathAppended, _data.titleInGoogleDrive, _data?.sizeInBytes)
+      pdfDumpWithPathAppended, _data.titleInGoogleDrive, _data?.sizeInBytes, "")
   });
   const results = await Promise.all(promises);
   return results
