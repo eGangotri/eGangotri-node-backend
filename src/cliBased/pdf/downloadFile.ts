@@ -3,8 +3,7 @@ import { DOWNLOAD_COMPLETED_COUNT, checkFileSizeConsistency, incrementDownloadCo
 import { extractGoogleDriveId } from '../../mirror/GoogleDriveUtilsCommonCode';
 import { getGoogleDriveInstance } from '../googleapi/service/CreateGoogleDrive';
 import * as path from 'path';
-import { GaxiosPromise } from 'googleapis/build/src/apis/abusiveexperiencereport';
-import internal from 'stream';
+import { GLOBAL_SERVER_NAME } from '../../db/connection';
 
 const { DownloaderHelper } = require('node-downloader-helper');
 const drive = getGoogleDriveInstance();
@@ -12,9 +11,10 @@ const drive = getGoogleDriveInstance();
 export const downloadFileFromGoogleDrive = async (driveLinkOrFolderId: string,
     destPath: string,
     fileName: string = "",
-    fileSizeRaw = "0") => {
+    fileSizeRaw = "0", gDriveDownloadTaskId: string = "") => {
     console.log(`downloadFileFromGoogleDrive ${driveLinkOrFolderId}`)
-    const result = await downloadGDriveFileUsingGDriveApi(driveLinkOrFolderId, destPath, fileName, fileSizeRaw);
+    const result = await downloadGDriveFileUsingGDriveApi(driveLinkOrFolderId, destPath,
+        fileName, fileSizeRaw, gDriveDownloadTaskId);
     return result;
 }
 
@@ -76,7 +76,7 @@ export const downloadGDriveFileUsingGDriveApi = (
     driveLinkOrFileID: string,
     destPath: string,
     fileName: string = "",
-    fileSizeRaw = "0") => {
+    fileSizeRaw = "0", gDriveDownloadTaskId: string = "") => {
     return new Promise(async (resolve, reject) => {
         const fileId = extractGoogleDriveId(driveLinkOrFileID);
         console.log(`downloadGDriveFileUsingGDriveApi ${driveLinkOrFileID} ${fileId} to ${destPath}`);
@@ -94,7 +94,19 @@ export const downloadGDriveFileUsingGDriveApi = (
             const fileMetadata = await drive.files.get({ fileId, fields: 'name,mimeType' });
             const mimeType = fileMetadata.data.mimeType;
             fileName = fileName || fileMetadata.data.name;
-
+            await fetch(`${GLOBAL_SERVER_NAME}/gDriveDownloadRoute/updateGDriveDownload/:${gDriveDownloadTaskId}`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        msg: `started d/l of ${fileName}`,
+                        status: "queued",
+                        fileName: fileName
+                    })
+                }
+            )
             console.log(`Downloading file "${fileName}" with MIME type: ${mimeType}`);
 
             const filePath = path.join(destPath, fileName);
@@ -131,6 +143,19 @@ export const downloadGDriveFileUsingGDriveApi = (
 
                 if (_result?.success) {
                     incrementDownloadComplete();
+                    fetch(`${GLOBAL_SERVER_NAME}/gDriveDownloadRoute/updateEmbeddedFileByFileName/:${gDriveDownloadTaskId}`,
+                        {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                msg: `completed d/l of ${fileName}`,
+                                status: "completed",
+                                fileName: fileName
+                            })
+                        }
+                    );
                     resolve({
                         status: `Downloaded ${fileName} to ${destPath}`,
                         success: true,
@@ -144,6 +169,19 @@ export const downloadGDriveFileUsingGDriveApi = (
             dest.on('error', (err) => {
                 console.error('Error writing file:', err);
                 incrementDownloadInError();
+                fetch(`${GLOBAL_SERVER_NAME}/gDriveDownloadRoute/updateEmbeddedFileByFileName/:${gDriveDownloadTaskId}`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            msg: `failed d/l of ${fileName}`,
+                            status: "failed",
+                            fileName: fileName
+                        })
+                    }
+                );
                 reject({
                     success: false,
                     error: `Error writing file for ${fileName}: ${err.message}`,
@@ -153,6 +191,19 @@ export const downloadGDriveFileUsingGDriveApi = (
             const errorContext = `Error during ${error.response?.config?.url ? 'download' : 'metadata fetch'}`;
             console.error(`${errorContext}:`, error.message);
             incrementDownloadInError();
+            fetch(`${GLOBAL_SERVER_NAME}/gDriveDownloadRoute/updateEmbeddedFileByFileName/:${gDriveDownloadTaskId}`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        msg: `error d/l of ${fileName}`,
+                        status: "failed",
+                        fileName: fileName
+                    })
+                }
+            );
             reject({
                 success: false,
                 error: `${errorContext}: ${error.message}`,

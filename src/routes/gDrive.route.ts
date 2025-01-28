@@ -38,7 +38,7 @@ gDriveRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
         const results = [];
         const links = googleDriveLink.includes(",") ? googleDriveLink.split(",").map((link: string) => link.trim()) : [googleDriveLink.trim()];
         resetDownloadCounters();
-        for (const [index, link] of links.entries()) {
+        for (const [index, link] of links.entries()) {         
             const res = await downloadFromGoogleDriveToProfile(link, profile, ignoreFolder, fileType);
             results.push(res);
         }
@@ -80,50 +80,50 @@ gDriveRoute.post('/getGoogleDriveListingAsExcel', async (req: any, resp: any) =>
         const _validations = validateGenGDriveLinks(googleDriveLink, folderName)
         if (_validations.success === false) {
             console.log(`getGoogleDriveListingAsExcel:validation failed ${JSON.stringify(_validations)}`)
-             resp.status(400).send({
+            resp.status(400).send({
                 response: _validations
             });
         }
 
-       else {
-        const { _links, _folders, error } = genLinksAndFolders(googleDriveLink, folderName)
-        if (error) {
-            console.log(`getGoogleDriveListingAsExcel:genLinksAndFolders failed ${JSON.stringify(error)}`)
-            resp.status(400).send({
-                response: {
-                    "status": "failed",
-                    "success": false,
-                    "message": "Number of Links and Folder Names should match"
-                }
-            });
-        }
-
         else {
-            const _resps = [];
-        for (let i = 0; i < _links.length; i++) {
-            console.log(`getGoogleDriveListingAsExcel:loop ${_links[i]} ${_folders[i]} (${allNotJustPdfs})`)
-            FileConstUtils.resetRowCounter();
-            const listingResult = await generateGoogleDriveListingExcel(_links[i],
-                _folders[i], reduced,
-                ignoreFolder,
-                pdfRenamerXlV2,
-                allNotJustPdfs ? "" : PDF_TYPE);
-            _resps.push(listingResult);
-        }
-        const endTime = Date.now();
-        const timeTaken = endTime - startTime;
-        console.log(`Time taken to download google drive Listings: ${timeInfo(timeTaken)}`);
-
-        resp.status(200).send({
-            timeTaken: timeInfo(timeTaken),
-            response: {
-                reduced: reduced ? "Yes" : "No",
-                allNotJustPdfs: allNotJustPdfs ? "Yes" : "No",
-                ..._resps,
+            const { _links, _folders, error } = genLinksAndFolders(googleDriveLink, folderName)
+            if (error) {
+                console.log(`getGoogleDriveListingAsExcel:genLinksAndFolders failed ${JSON.stringify(error)}`)
+                resp.status(400).send({
+                    response: {
+                        "status": "failed",
+                        "success": false,
+                        "message": "Number of Links and Folder Names should match"
+                    }
+                });
             }
-        });
+
+            else {
+                const _resps = [];
+                for (let i = 0; i < _links.length; i++) {
+                    console.log(`getGoogleDriveListingAsExcel:loop ${_links[i]} ${_folders[i]} (${allNotJustPdfs})`)
+                    FileConstUtils.resetRowCounter();
+                    const listingResult = await generateGoogleDriveListingExcel(_links[i],
+                        _folders[i], reduced,
+                        ignoreFolder,
+                        pdfRenamerXlV2,
+                        allNotJustPdfs ? "" : PDF_TYPE);
+                    _resps.push(listingResult);
+                }
+                const endTime = Date.now();
+                const timeTaken = endTime - startTime;
+                console.log(`Time taken to download google drive Listings: ${timeInfo(timeTaken)}`);
+
+                resp.status(200).send({
+                    timeTaken: timeInfo(timeTaken),
+                    response: {
+                        reduced: reduced ? "Yes" : "No",
+                        allNotJustPdfs: allNotJustPdfs ? "Yes" : "No",
+                        ..._resps,
+                    }
+                });
+            }
         }
-       }
     }
 
     catch (err: any) {
