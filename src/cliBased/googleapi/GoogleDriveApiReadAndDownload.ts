@@ -88,9 +88,6 @@ async function getAllFilesFromGDrive(driveLinkOrFolderID: string,
     console.log(`updateGDriveDownload/completed/error: ${JSON.stringify(error)}`);
   });
 
-  const responseData = await x.json();
-  console.log(`updateGDriveDownload/completed/response with msg(${resultsAsString}): ${JSON.stringify(responseData)}`);
-
   return {
     totalPdfsToDownload: googleDriveData.length,
     results
@@ -156,6 +153,7 @@ export const downloadFromGoogleDriveToProfile = async (driveLinkOrFolderId: stri
             profileNameOrAbsPath: profileOrPath,
             downloadType: fileType,
             fileDumpFolder,
+            msg: "Initiated Downloading",
             files: []
           })
         }
