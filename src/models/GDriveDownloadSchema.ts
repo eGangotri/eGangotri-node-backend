@@ -1,6 +1,6 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
-interface ICompositeDocument {
+export interface ICompositeDocument {
     fileName: string;
     filePath: string;
     status: 'queued' | 'in-progress' | 'completed' | 'failed';
@@ -10,17 +10,18 @@ interface ICompositeDocument {
 const CompositeDocumentSchema: Schema = new Schema(
     {
         fileName: { type: String, required: true },
-        filePath: { type: String, required: true },
+        filePath: { type: String, required: false },
         status: { type: String, enum: ['queued', 'in-progress', 'completed', 'failed'], required: true },
         msg: { type: String, required: false },
     },
     { _id: false }
 );
 
-interface IGDriveDownload extends Document {
+export interface IGDriveDownload extends Document {
     status: 'queued' | 'in-progress' | 'completed' | 'failed';
     createdAt: Date;
     updatedAt: Date;
+    msg: string;
     googleDriveLink: string;
     profileNameOrAbsPath: string;
     fileDumpFolder: string;
@@ -47,4 +48,3 @@ const GDriveDownloadSchema: Schema = new Schema(
 const GDriveDownload = mongoose.model<IGDriveDownload>('GDriveDownload', GDriveDownloadSchema);
 
 export default GDriveDownload;
-export { IGDriveDownload };

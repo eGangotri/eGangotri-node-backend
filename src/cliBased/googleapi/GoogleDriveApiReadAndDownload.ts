@@ -35,23 +35,26 @@ async function getAllFilesFromGDrive(driveLinkOrFolderID: string,
   const maxLimit = MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE;
   if (dataLength > maxLimit) {
     console.log(`restriction to ${maxLimit} items only for now. Cannot continue`);
-    await fetch(`${GLOBAL_SERVER_NAME}/gDriveDownloadRoute/updateGDriveDownload/:${gDriveDownloadTaskId}`,
+    fetch(`${GLOBAL_SERVER_NAME}/gDriveDownloadRoute/updateGDriveDownload/${gDriveDownloadTaskId}`,
       {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          msg: `restriction to ${maxLimit} items only for now. Cannot continue`
+          msg: `restriction to ${maxLimit} items only for now. Link has ${googleDriveData.length} items Cannot continue`,
+          status: "failed",
         })
       }
     )
+
     return {
       totalPdfsToDownload: googleDriveData.length,
       success: false,
-      msg: `restriction to ${maxLimit} items only for now. Cannot continue`
+      msg: `restriction to ${maxLimit} items only for now. Link has ${googleDriveData.length} items Cannot continue`
     }
   }
+
   const promises = googleDriveData.map(_data => {
     console.log(`googleDriveData.map(_data: ${JSON.stringify(_data)}}`);
     const fileDumpWithPathAppended = fileDumpFolder + path.sep + _data.parents;
@@ -64,6 +67,25 @@ async function getAllFilesFromGDrive(driveLinkOrFolderID: string,
       fileDumpWithPathAppended, _data.fileName, _data?.fileSizeRaw, gDriveDownloadTaskId)
   });
   const results = await Promise.all(promises);
+
+  fetch(`${GLOBAL_SERVER_NAME}/gDriveDownloadRoute/updateGDriveDownload`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        id: gDriveDownloadTaskId,
+        status: "completed",
+        msg: JSON.stringify(results)
+      })
+    }
+  ).then((response) => {  
+    console.log(`updateGDriveDownload/completed/response with msg(${JSON.stringify(results)}): ${JSON.stringify(response)}`);
+  }).catch((error) => { 
+    console.log(`updateGDriveDownload/completed/error: ${JSON.stringify(error)}`);
+  });
+
   return {
     totalPdfsToDownload: googleDriveData.length,
     results
@@ -134,15 +156,16 @@ export const downloadFromGoogleDriveToProfile = async (driveLinkOrFolderId: stri
         }
       )
       console.log(`after insertInDB:fileDumpFolder ${fileDumpFolder}`);
+      let gDriveDownloadTaskId = "0";
 
       if (!insertInDB.ok) {
         console.log(`Failed to create GDriveDownload`);
-        throw new Error('Failed to create GDriveDownload');
       }
-
-      const responseData = await insertInDB.json();
-      const gDriveDownloadTaskId = responseData.id; // Assuming the response contains the id
-      console.log(`gDriveDownloadTaskId: ${gDriveDownloadTaskId}`);
+      else {
+        const responseData = await insertInDB.json();
+        gDriveDownloadTaskId = responseData._id;
+        console.log(`gDriveDownloadTaskId: ${JSON.stringify(gDriveDownloadTaskId)}`);
+      }
       const _results = await getAllFilesFromGDrive(driveLinkOrFolderId, "",
         fileDumpFolder, ignoreFolder, fileType, gDriveDownloadTaskId);
 
