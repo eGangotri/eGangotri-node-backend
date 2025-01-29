@@ -67,24 +67,29 @@ async function getAllFilesFromGDrive(driveLinkOrFolderID: string,
       fileDumpWithPathAppended, _data.fileName, _data?.fileSizeRaw, gDriveDownloadTaskId)
   });
   const results = await Promise.all(promises);
-
-  fetch(`${GLOBAL_SERVER_NAME}/gDriveDownloadRoute/updateGDriveDownload`,
+  const resultsAsString = results.map((result: any) => JSON.stringify(result)).join(",");
+  fetch(`${GLOBAL_SERVER_NAME}/gDriveDownloadRoute/updateGDriveDownload/${gDriveDownloadTaskId}`,
     {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
+
       body: JSON.stringify({
         id: gDriveDownloadTaskId,
         status: "completed",
-        msg: JSON.stringify(results)
+        msg: resultsAsString
       })
     }
-  ).then((response) => {  
-    console.log(`updateGDriveDownload/completed/response with msg(${JSON.stringify(results)}): ${JSON.stringify(response)}`);
+   )
+   .then((response) => {  
+    console.log(`updateGDriveDownload/completed/response with msg(${resultsAsString}): ${JSON.stringify(response)}`);
   }).catch((error) => { 
     console.log(`updateGDriveDownload/completed/error: ${JSON.stringify(error)}`);
   });
+
+  const responseData = await x.json();
+  console.log(`updateGDriveDownload/completed/response with msg(${resultsAsString}): ${JSON.stringify(responseData)}`);
 
   return {
     totalPdfsToDownload: googleDriveData.length,

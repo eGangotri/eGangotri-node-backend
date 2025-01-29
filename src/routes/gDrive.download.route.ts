@@ -40,7 +40,7 @@ gDriveDownloadRoute.post("/updateGDriveDownload/:id", async (req: Request, res: 
                 gDriveDownload.status = status;
             }
             if (msg !== undefined) {
-                gDriveDownload.msg = gDriveDownload.msg + "," + msg;
+                gDriveDownload.msg = msg + "," + gDriveDownload.msg;
             }
             const updatedGDriveDownload = await gDriveDownload.save();
             console.log(`updateGDriveDownload:updatedGDriveDownload/${id}: ${JSON.stringify(updatedGDriveDownload)}`);
@@ -106,17 +106,19 @@ gDriveDownloadRoute.get("/getGDriveDownloads", async (req: Request, res: Respons
         const gdriveDownloads: IGDriveDownload[] = await GDriveDownload.find()
             .sort({ createdAt: -1 })
             .skip(skip)
-            .limit(limit)
+            .limit(limit);
 
         const total = await GDriveDownload.countDocuments()
-
-        res.json({
+        const results = {
             data: gdriveDownloads,
             currentPage: page,
             totalPages: Math.ceil(total / limit),
             totalItems: total,
-        })
+        }
+        console.log(`/getGDriveDownloads: ${JSON.stringify(results)}`);
+        res.json(results)
     } catch (error) {
+        console.log(`/getGDriveDownloads error: ${JSON.stringify(error.message)}`);
         res.status(500).json({ message: "Error fetching GDrive downloads", error })
     }
 });
