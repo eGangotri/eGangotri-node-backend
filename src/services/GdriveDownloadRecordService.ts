@@ -39,6 +39,7 @@ export const updateEntryForGDriveUploadHistory = async (gDriveDownloadTaskId: st
   if (quickStatus && quickStatus?.status?.length > 0) {
     params['quickStatus'] = quickStatus;
   }
+  console.log(`quickStatus${JSON.stringify(quickStatus)}`);
   fetch(`${GDRIVE_DOWNLOAD_HISTORY_PATH}/updateGDriveDownload/${gDriveDownloadTaskId}`,
     {
       method: 'POST',
@@ -48,7 +49,7 @@ export const updateEntryForGDriveUploadHistory = async (gDriveDownloadTaskId: st
       body: JSON.stringify(params)
     }
   ).then((response) => {
-    console.log(`updateEntryForGDriveUploadHistory/${msg}/${status}/${params} with ${JSON.stringify(response)}`);
+    console.log(`updateEntryForGDriveUploadHistory/${msg}/${status}/${JSON.stringify(quickStatus)} with ${JSON.stringify(response)}`);
   }).catch((error) => {
     console.log(`updateEntryForGDriveUploadHistory:error/${msg}/${status}: ${JSON.stringify(error)}`);
   });
