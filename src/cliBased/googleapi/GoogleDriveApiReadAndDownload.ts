@@ -7,12 +7,12 @@ import fs from 'fs';
 import path from 'path';
 import * as fsExtra from 'fs-extra';
 import { DOWNLOAD_COMPLETED_COUNT, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT, DOWNLOAD_FAILED_COUNT, resetDownloadCounters } from '../../cliBased/pdf/utils';
+import { insertEntryForGDriveUploadHistory, updateEntryForGDriveUploadHistory } from '../../services/GdriveDownloadRecordService';
 import { getAllPdfsInFolders, getDirectoriesWithFullPath } from '../../imgToPdf/utils/Utils';
 import { addHeaderAndFooterToPDF } from '../../pdfHeaderFooter';
 import { isValidPath } from '../../utils/utils';
 import { extractGoogleDriveId } from '../../mirror/GoogleDriveUtilsCommonCode';
 import { PDF_TYPE } from './_utils/constants';
-import { GLOBAL_SERVER_NAME } from '../../db/connection';
 
 export const MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE = 200;
 // Create a new Google Drive instance
@@ -35,23 +35,13 @@ async function getAllFilesFromGDrive(driveLinkOrFolderID: string,
   const maxLimit = MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE;
   if (dataLength > maxLimit) {
     console.log(`restriction to ${maxLimit} items only for now. Cannot continue`);
-    fetch(`${GLOBAL_SERVER_NAME}/gDriveDownloadRoute/updateGDriveDownload/${gDriveDownloadTaskId}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          msg: `restriction to ${maxLimit} items only for now. Link has ${googleDriveData.length} items Cannot continue`,
-          status: "failed",
-        })
-      }
-    )
+    const msg = `restriction to ${maxLimit} items only for now. Link has ${googleDriveData.length} items Cannot continue`
 
+    updateEntryForGDriveUploadHistory(gDriveDownloadTaskId, "failed", msg);
     return {
       totalPdfsToDownload: googleDriveData.length,
       success: false,
-      msg: `restriction to ${maxLimit} items only for now. Link has ${googleDriveData.length} items Cannot continue`
+      msg
     }
   }
 
@@ -68,25 +58,7 @@ async function getAllFilesFromGDrive(driveLinkOrFolderID: string,
   });
   const results = await Promise.all(promises);
   const resultsAsString = results.map((result: any) => JSON.stringify(result)).join(",");
-  fetch(`${GLOBAL_SERVER_NAME}/gDriveDownloadRoute/updateGDriveDownload/${gDriveDownloadTaskId}`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-
-      body: JSON.stringify({
-        id: gDriveDownloadTaskId,
-        status: "completed",
-        msg: resultsAsString
-      })
-    }
-   )
-   .then((response) => {  
-    console.log(`updateGDriveDownload/completed/response with msg(${resultsAsString}): ${JSON.stringify(response)}`);
-  }).catch((error) => { 
-    console.log(`updateGDriveDownload/completed/error: ${JSON.stringify(error)}`);
-  });
+  updateEntryForGDriveUploadHistory(gDriveDownloadTaskId, "completed", resultsAsString);
 
   return {
     totalPdfsToDownload: googleDriveData.length,
@@ -141,26 +113,8 @@ export const downloadFromGoogleDriveToProfile = async (driveLinkOrFolderId: stri
   try {
     if (fs.existsSync(fileDumpFolder)) {
       resetDownloadCounters();
-      console.log(`inserting info in DB ${GLOBAL_SERVER_NAME}/gDriveDownloadRoute/createGDriveDownload`)
-      const insertInDB = await fetch(`${GLOBAL_SERVER_NAME}/gDriveDownloadRoute/createGDriveDownload`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            googleDriveLink: driveLinkOrFolderId,
-            profileNameOrAbsPath: profileOrPath,
-            downloadType: fileType,
-            fileDumpFolder,
-            msg: "Initiated Downloading",
-            files: []
-          })
-        }
-      )
-      console.log(`after insertInDB:fileDumpFolder ${fileDumpFolder}`);
       let gDriveDownloadTaskId = "0";
-
+      const insertInDB = await insertEntryForGDriveUploadHistory(driveLinkOrFolderId, profileOrPath, fileType, fileDumpFolder, "Initiated Downloading");
       if (!insertInDB.ok) {
         console.log(`Failed to create GDriveDownload`);
       }
@@ -183,6 +137,7 @@ export const downloadFromGoogleDriveToProfile = async (driveLinkOrFolderId: stri
         ..._results
       }
       console.log(`_resp : ${JSON.stringify(_resp)}`);
+      updateEntryForGDriveUploadHistory(gDriveDownloadTaskId,JSON.stringify(_resp), "completed", );
       return _resp;
     }
     console.log(`No corresponding folder ${fileDumpFolder} to profile ${profileOrPath} exists`)
