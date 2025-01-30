@@ -13,6 +13,7 @@ import { addHeaderAndFooterToPDF } from '../../pdfHeaderFooter';
 import { isValidPath } from '../../utils/utils';
 import { extractGoogleDriveId } from '../../mirror/GoogleDriveUtilsCommonCode';
 import { PDF_TYPE } from './_utils/constants';
+import { GDriveDownloadHistoryStatus } from '../../utils/constants';
 
 export const MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE = 200;
 // Create a new Google Drive instance
@@ -37,7 +38,7 @@ async function getAllFilesFromGDrive(driveLinkOrFolderID: string,
     console.log(`restriction to ${maxLimit} items only for now. Cannot continue`);
     const msg = `restriction to ${maxLimit} items only for now. Link has ${googleDriveData.length} items Cannot continue`
 
-    updateEntryForGDriveUploadHistory(gDriveDownloadTaskId, "failed", msg);
+    updateEntryForGDriveUploadHistory(gDriveDownloadTaskId, GDriveDownloadHistoryStatus.Failed, msg, { totalPdfsToDownload: googleDriveData.length});
     return {
       totalPdfsToDownload: googleDriveData.length,
       success: false,
@@ -110,25 +111,18 @@ export const downloadFromGoogleDriveToProfile = async (driveLinkOrFolderId: stri
   fileType = PDF_TYPE) => {
   const fileDumpFolder = isValidPath(profileOrPath) ? profileOrPath : getFolderInSrcRootForProfile(profileOrPath);
   console.log(`downloadFromGoogleDriveToProfile:fileDumpFolder ${fileDumpFolder}`)
+  let gDriveDownloadTaskId = "0"
   try {
     if (fs.existsSync(fileDumpFolder)) {
       resetDownloadCounters();
-      let gDriveDownloadTaskId = "0";
-      const insertInDB = await insertEntryForGDriveUploadHistory(driveLinkOrFolderId, profileOrPath, fileType, fileDumpFolder, "Initiated Downloading");
-      if (!insertInDB.ok) {
-        console.log(`Failed to create GDriveDownload`);
-      }
-      else {
-        const responseData = await insertInDB.json();
-        gDriveDownloadTaskId = responseData._id;
-        console.log(`gDriveDownloadTaskId: ${JSON.stringify(gDriveDownloadTaskId)}`);
-      }
+      gDriveDownloadTaskId = await insertEntryForGDriveUploadHistory(driveLinkOrFolderId, profileOrPath, fileType, fileDumpFolder, "Initiated Downloading");
       const _results = await getAllFilesFromGDrive(driveLinkOrFolderId, "",
         fileDumpFolder, ignoreFolder, fileType, gDriveDownloadTaskId);
 
       console.log(`Success count: ${DOWNLOAD_COMPLETED_COUNT}`);
       console.log(`Error count: ${DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT}`);
       const _resp = {
+        totalPdfsToDownload: _results.totalPdfsToDownload,
         status: `${DOWNLOAD_COMPLETED_COUNT} out of ${DOWNLOAD_COMPLETED_COUNT + DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT + DOWNLOAD_FAILED_COUNT} made it`,
         success_count: DOWNLOAD_COMPLETED_COUNT,
         error_count: DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT,
@@ -137,7 +131,7 @@ export const downloadFromGoogleDriveToProfile = async (driveLinkOrFolderId: stri
         ..._results
       }
       console.log(`_resp : ${JSON.stringify(_resp)}`);
-      updateEntryForGDriveUploadHistory(gDriveDownloadTaskId,JSON.stringify(_resp), "completed", );
+      updateEntryForGDriveUploadHistory(gDriveDownloadTaskId, JSON.stringify(_resp), GDriveDownloadHistoryStatus.Completed,_resp);
       return _resp;
     }
     console.log(`No corresponding folder ${fileDumpFolder} to profile ${profileOrPath} exists`)
@@ -148,7 +142,7 @@ export const downloadFromGoogleDriveToProfile = async (driveLinkOrFolderId: stri
   }
   catch (err) {
     console.log(`downloadFromGoogleDriveToProfile:Error (${fileDumpFolder}) ${JSON.stringify(err)}`)
-    return {
+    const _resp =  {
       status: `${DOWNLOAD_COMPLETED_COUNT} out of ${DOWNLOAD_COMPLETED_COUNT + DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT + DOWNLOAD_FAILED_COUNT} made it`,
       success_count: DOWNLOAD_COMPLETED_COUNT,
       error_count: DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT,
@@ -156,5 +150,7 @@ export const downloadFromGoogleDriveToProfile = async (driveLinkOrFolderId: stri
       ${DOWNLOAD_FAILED_COUNT > 0 ? "Google Drive Quota may have been filled.Typically takes 24 Hours to reset." : ""}`,
       "error": `downloadFromGoogleDriveToProfile:Error (${fileDumpFolder}) ${JSON.stringify(err)}`
     }
+    updateEntryForGDriveUploadHistory(gDriveDownloadTaskId,err, GDriveDownloadHistoryStatus.Failed, _resp);
+    return _resp
   }
 }
