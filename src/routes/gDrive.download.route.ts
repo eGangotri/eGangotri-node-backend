@@ -1,6 +1,6 @@
 const express = require("express");
 import { Request, Response } from 'express';
-import GDriveDownload, { IGDriveDownload } from '../models/GDriveDownloadSchema';
+import GDriveDownload, { IGDriveDownload } from '../models/GDriveDownloadHistorySchema';
 
 export const gDriveDownloadRoute = express.Router();
 
