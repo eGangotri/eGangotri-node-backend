@@ -26,7 +26,7 @@ gDriveDownloadRoute.post("/createGDriveDownload", async (req: Request, res: Resp
 // Update the main schema of an existing GDriveDownload entry
 gDriveDownloadRoute.post("/updateGDriveDownload/:id", async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { status, msg } = req.body;
+    const { status, msg , quickStatus} = req.body;
     try {
         console.log(`updateGDriveDownload:params: ${id} ${status} ${msg}`);
         const gDriveDownload = await GDriveDownload.findById(id);
@@ -41,6 +41,9 @@ gDriveDownloadRoute.post("/updateGDriveDownload/:id", async (req: Request, res: 
             }
             if (msg !== undefined) {
                 gDriveDownload.msg = msg + "," + gDriveDownload.msg;
+            }
+            if(quickStatus !== undefined) {
+                gDriveDownload.quickStatus = quickStatus;
             }
             const updatedGDriveDownload = await gDriveDownload.save();
             console.log(`updateGDriveDownload:updatedGDriveDownload/${id}: ${JSON.stringify(updatedGDriveDownload)}`);
