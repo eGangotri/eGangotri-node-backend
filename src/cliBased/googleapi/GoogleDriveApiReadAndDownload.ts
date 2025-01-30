@@ -45,6 +45,8 @@ async function getAllFilesFromGDrive(driveLinkOrFolderID: string,
       msg
     }
   }
+  
+  updateEntryForGDriveUploadHistory(gDriveDownloadTaskId, GDriveDownloadHistoryStatus.InProgress,`Started download with ${googleDriveData.length} items`);
 
   const promises = googleDriveData.map(_data => {
     console.log(`googleDriveData.map(_data: ${JSON.stringify(_data)}}`);

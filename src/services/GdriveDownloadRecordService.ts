@@ -16,7 +16,7 @@ export const insertEntryForGDriveUploadHistory = async (driveLinkOrFolderId: str
         profileNameOrAbsPath: profileOrPath,
         downloadType: fileType,
         fileDumpFolder,
-        msg: msg,
+        msg,
         files: []
       })
     }
