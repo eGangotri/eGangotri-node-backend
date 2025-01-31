@@ -87,6 +87,7 @@ export const moveFileInListToDest = async (profileData: {
     const _renamedWithoutCollision: string[] = []
     const errorList: string[] = []
     const errorAbsPathList: string[] = []
+    const filesAbsPathMoved = [];
 
     const destPath = isValidPath(destFolderOrProfile) ? destFolderOrProfile : getFolderInSrcRootForProfile(destFolderOrProfile)
     for (let absPathOfFileToMove of profileData.absolutePaths) {
@@ -99,6 +100,7 @@ export const moveFileInListToDest = async (profileData: {
 
             if (moveAFileRes.renamedWithoutCollision.length > 0) {
                 _renamedWithoutCollision.push(moveAFileRes.renamedWithoutCollision)
+                filesAbsPathMoved.push(absPathOfFileToMove)
             }
             else if (moveAFileRes.fileCollisionsResolvedByRename.length > 0) {
                 _fileCollisionsResolvedByRename.push(moveAFileRes.fileCollisionsResolvedByRename)
@@ -123,6 +125,7 @@ export const moveFileInListToDest = async (profileData: {
          errorList,
          errorAbsPathList,
         fileMoved: _renamedWithoutCollision,
+        filesAbsPathMoved: filesAbsPathMoved,
         fileCollisionsResolvedByRename: _fileCollisionsResolvedByRename,
         src: profileData.archiveProfilePath,
         dest: destPath,

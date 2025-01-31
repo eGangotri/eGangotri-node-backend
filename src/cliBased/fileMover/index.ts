@@ -26,6 +26,7 @@ export async function moveFilesAndFlatten(sourceDir: string,
     const allSrcPdfs: FileStats[] = await getAllPDFFilesWithIgnorePathsSpecified(sourceDir, ignorePaths);
     const fileCollisionsResolvedByRename = [];
     const filesMoved = [];
+    const filesAbsPathMoved = [];
     const errorList = []
     if (allSrcPdfs.length === 0) {
         return {
@@ -63,6 +64,7 @@ export async function moveFilesAndFlatten(sourceDir: string,
             }
             else {
                 filesMoved.push(`${++counter}/${_count}). ${file.name}`);
+                filesAbsPathMoved.push(sourceFile);
                 const moveAFileRes = moveAFile(sourceFile, targetDir, file.name, pdfOnly);
 
                 if (moveAFileRes.renamedWithoutCollision.length > 0) {
@@ -93,6 +95,7 @@ export async function moveFilesAndFlatten(sourceDir: string,
         destFilesAfter: allDestPdfsAfter?.length,
         fileCollisionsResolvedByRename,
         filesMoved,
+        filesAbsPathMoved,
         errors: errorList
     };
 }
