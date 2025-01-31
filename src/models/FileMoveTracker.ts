@@ -15,6 +15,7 @@ const schema = new mongoose.Schema(
         destFilesAfter: { type: Number, required: false },
         fileCollisionsResolvedByRename: { type: [String], required: false },
         filesMoved: { type: [String], required: false },
+        filesAbsPathMoved: { type: [String], required: false },
     }, {
     collection: 'File_Move_Tracker',
     timestamps: true
