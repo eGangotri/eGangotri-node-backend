@@ -1,9 +1,11 @@
 import * as express from 'express';
 import { pickLatestExcelsAndCombineGDriveAndReducedPdfExcels } from '../services/yarnListMakerService';
-import { DEFAULT_PDF_PAGE_EXTRACTION_COUNT, extractFirstAndLastNPages } from '../cliBased/pdf/extractFirstAndLastNPages';
 import { gDriveExceltoMongo } from '../excelToMongo/tranferGDriveExcelToMongo';
 import { timeInfo } from '../mirror/FrontEndBackendCommonCode';
 import { publishBookTitlesList } from '../services/yarnService';
+import { makePythonCall } from '../services/pythonLauncherService';
+import { countPDFsInFolder } from '../utils/FileUtils';
+import { DEFAULT_PDF_PAGE_EXTRACTION_COUNT } from 'cliBased/pdf/extractFirstAndLastNPages';
 
 export const yarnListMakerRoute = express.Router();
 yarnListMakerRoute.post('/getFirstAndLastNPages', async (req: any, resp: any) => {
@@ -43,14 +45,27 @@ yarnListMakerRoute.post('/getFirstAndLastNPages', async (req: any, resp: any) =>
             });
             return;
         }
-        let timeNow = Date.now();
-        const _resp = await extractFirstAndLastNPages(_srcFolders, destRootFolder,firstNPages, lastNPages);
-        resp.status(200).send({
-            response: {
-                timeTaken: timeInfo(Date.now() - timeNow),
-                _results: _resp
-            }
-        });
+
+        const _resp = await makePythonCall(_srcFolders[0], firstNPages, firstNPages);
+        if(_resp.success){ 
+            const pdfsReduced = await countPDFsInFolder(`${_srcFolders[0]}//reduced`);
+            resp.status(200).send({
+                response: {
+                    timeTaken: timeInfo(_resp.timeTaken),
+                    _results: _resp,
+                    pdfsReduced
+                }
+            });
+            
+        }
+        else{
+            resp.status(500).send({
+                response: {
+                    timeTaken: timeInfo(_resp.timeTaken),
+                    _results: _resp
+                }
+            });
+        }
     }
 
     catch (err: any) {
