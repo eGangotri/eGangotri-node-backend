@@ -260,11 +260,38 @@ launchGradleRoute.get('/reuploadMissedViaUploadCycleId', async (req: any, resp: 
     }
 })
 
+const reuploadFailedLogic = async (uploadCycleId: string) => {
+    const _itemsUsheredData = await itemsUsheredVerficationAndDBFlagUpdate(uploadCycleId);
 
+    console.log(`reuploadFailedLogic check for ${uploadCycleId}`)
+    const uploadCyclesByCycleId = await ItemsUshered.find({
+        uploadCycleId: uploadCycleId
+    });
+    //to account for nulls
+    const _failedForUploacCycleId = uploadCyclesByCycleId.filter(x => x?.uploadFlag !== true)
+    if (_failedForUploacCycleId.length > 0) {
+        const jsonFileName = createJsonFileForUpload(uploadCycleId,
+            _failedForUploacCycleId,
+            `${_failedForUploacCycleId.length}-of-${uploadCyclesByCycleId.length}`)
+
+        const res = await launchUploaderViaJson(jsonFileName)
+        return {
+            noFailedUploads: false,
+            res,
+            failureCount: _itemsUsheredData.failureCount
+        }
+    }
+    else {
+        console.log(`No Failed upload found for Upload Cycle Id: ${uploadCycleId}`);
+        return {
+            noFailedUploads: true,
+            failureCount: 0
+        }
+    }
+}
 launchGradleRoute.get('/reuploadFailed', async (req: any, resp: any) => {
     try {
         const uploadCycleId = req.query.uploadCycleId
-        await itemsUsheredVerficationAndDBFlagUpdate(uploadCycleId);
         if (!uploadCycleId) {
             resp.status(400).send({
                 response: {
@@ -275,36 +302,34 @@ launchGradleRoute.get('/reuploadFailed', async (req: any, resp: any) => {
             return;
         }
 
-        console.log(`reuploadFailed check for ${uploadCycleId}`)
-        const uploadCyclesByCycleId = await ItemsUshered.find({
-            uploadCycleId: uploadCycleId
-        });
-        //to account for nulls
-        const _failedForUploacCycleId = uploadCyclesByCycleId.filter(x => x?.uploadFlag !== true)
-        if (_failedForUploacCycleId.length > 0) {
-            const jsonFileName = createJsonFileForUpload(uploadCycleId,
-                _failedForUploacCycleId,
-                `${_failedForUploacCycleId.length}-of-${uploadCyclesByCycleId.length}`)
-
-            const res = await launchUploaderViaJson(jsonFileName)
-            resp.status(200).send({
-                response: {
-                    success: true,
-                    noFailedUploads: false,
-                    res
-                }
-            });
-        }
         else {
-            resp.status(200).send({
-                response: {
-                    success: true,
-                    noFailedUploads: true,
-                    msg: `No Failed upload found for Upload Cycle Id: ${uploadCycleId}`
-                }
-            });
+            const _reuploadFailedLogic = await reuploadFailedLogic(uploadCycleId);
+            if (_reuploadFailedLogic.noFailedUploads === true) {
+                resp.status(200).send({
+                    response: {
+                        success: true,
+                        noFailedUploads: true,
+                        msg: `No Failed upload found for Upload Cycle Id: ${uploadCycleId}`
+                    }
+                });
+            }
+            else {
+                const _failCount = _reuploadFailedLogic.failureCount || 1;
+                const timeOutPeriod = ((_failCount / 20) * 1000 * 60) + (1000 * 60 * 5); // 5 minutes for each failed item
+                console.log(`timeOutPeriod ${timeOutPeriod}`)
+
+                resp.status(200).send({
+                    response: {
+                        success: true,
+                        ..._reuploadFailedLogic
+                    }
+                });
+                setTimeout(() => reuploadFailedLogic(uploadCycleId), timeOutPeriod);
+
+            }
         }
     }
+
     catch (err: any) {
         console.log('Error', err);
         resp.status(400).send({

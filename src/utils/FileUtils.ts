@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import * as fsPromise from 'fs/promises';
+import { promisify } from 'util';
 
 import * as path from 'path';
 
@@ -47,27 +47,44 @@ export function createFolderIfNotExists(folderPath: string): void {
     }
 }
 
-export const checkIfEmpty = async (srcPath: string) => {
-    let empty = true;
-    if (srcPath) {
-        try {
-            const files = await fsPromise.readdir(srcPath);
-            for (let file of files) {
-                if ((await fsPromise.stat(path.join(srcPath, file))).isFile()) {
-                    empty = false;
-                    console.log('The directory has at least one file.');
-                    break;
+
+const _fsPromise = {
+    readdir: promisify(fs.readdir),
+    stat: promisify(fs.stat)
+};
+
+export const checkIfEmpty = async (srcPath: string): Promise<boolean> => {
+    if (!srcPath) {
+        console.log('srcPath is empty.');
+        return true;
+    }
+
+    try {
+        const files = await _fsPromise.readdir(srcPath);
+        for (const file of files) {
+            const filePath = path.join(srcPath, file);
+            const stats = await _fsPromise.stat(filePath);
+
+            if (stats.isFile()) {
+                console.log('The directory has at least one file.');
+                return false;
+            }
+
+            if (stats.isDirectory()) {
+                const isEmpty = await checkIfEmpty(filePath);
+                if (!isEmpty) {
+                    return false;
                 }
             }
-        } catch (err) {
-            console.error(`Error reading directory: ${err}`);
         }
-    } else {
-        console.log('srcPath is empty.');
+    } catch (err) {
+        console.error(`Error reading directory: ${err}`);
+        return true;
     }
-    console.log(`emptyFolder ${empty}`);
-    return empty;
-}
+
+    console.log('The directory is empty.');
+    return true;
+};
 
 export const getDuplicatesOrUniquesBySize = async (folder: string, folder2: string, findDisjoint = false) => {
     const metadata = await getAllFileListingWithFileSizeStats(folder);
