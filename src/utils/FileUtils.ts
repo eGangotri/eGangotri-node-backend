@@ -25,6 +25,14 @@ export function removeFolderWithContents(folder: string) {
     })
 }
 
+export const isValidDirectory = async (dirPath: string): Promise<boolean> => {
+    try {
+        const stats = await fs.promises.stat(dirPath);
+        return stats.isDirectory();
+    } catch (error) {
+        return false;
+    }
+};
 
 
 export const countPDFsInFolder = async (folderPath: string, ignoreFolder: string = "@#@#$@#$"): Promise<number> => {

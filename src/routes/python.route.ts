@@ -1,6 +1,6 @@
 import * as express from 'express';
 import { makePythonCall } from '../services/pythonLauncherService';
-import { countPDFsInFolder } from '../utils/FileUtils';
+import { countPDFsInFolder, isValidDirectory } from '../utils/FileUtils';
 import { DEFAULT_PDF_PAGE_EXTRACTION_COUNT } from '../cliBased/pdf/extractFirstAndLastNPages';
 import fs from 'fs';
 
@@ -45,7 +45,13 @@ pythonRoute.post('/getFirstAndLastNPages', async (req: any, resp: any) => {
         }
 
         const pdfsToReduceCount = await countPDFsInFolder(_srcFolders[0], "reduced");
-        if (!fs.existsSync(destRootFolder)) {
+        if (isValidDirectory(destRootFolder)) {
+            if (!fs.existsSync(`${destRootFolder}`)) {
+                fs.mkdirSync(`${destRootFolder}`, { recursive: true });
+                console.log(`Folder created: ${destRootFolder}`);
+            }
+        }
+        else {
             destRootFolder = `${_srcFolders[0]}\\reduced`;
         }
         const _resp = await makePythonCall(_srcFolders[0], destRootFolder, firstNPages, firstNPages);
