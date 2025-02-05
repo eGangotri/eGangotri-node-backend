@@ -154,6 +154,6 @@ const srcRootFolder = "F:\\_playground2\\_common\\testDiscardAfterUse";
 // const _folders = [20]
 // const _srcFoldersWithPath = _folders.map(x => `${srcRootFolder}\\Treasures${x}`)
 
-extractFirstAndLastNPagesDeprecated([srcRootFolder], 
-    `${srcRootFolder}\\1`,25,25)
+//extractFirstAndLastNPagesDeprecated([srcRootFolder], 
+  //  `${srcRootFolder}\\1`,25,25)
 //pnpm run extractFirstAndLastNPages

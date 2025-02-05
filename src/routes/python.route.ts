@@ -1,11 +1,9 @@
 import * as express from 'express';
-import { pickLatestExcelsAndCombineGDriveAndReducedPdfExcels } from '../services/yarnListMakerService';
-import { gDriveExceltoMongo } from '../excelToMongo/tranferGDriveExcelToMongo';
-import { timeInfo } from '../mirror/FrontEndBackendCommonCode';
-import { publishBookTitlesList } from '../services/yarnService';
 import { makePythonCall } from '../services/pythonLauncherService';
 import { countPDFsInFolder } from '../utils/FileUtils';
-import { DEFAULT_PDF_PAGE_EXTRACTION_COUNT } from 'cliBased/pdf/extractFirstAndLastNPages';
+import { DEFAULT_PDF_PAGE_EXTRACTION_COUNT } from '../cliBased/pdf/extractFirstAndLastNPages';
+import { getAllFileStats } from '../utils/FileStatsUtils';
+import { PDF_EXT } from '../imgToPdf/utils/constants';
 
 export const pythonRoute = express.Router();
 
@@ -47,22 +45,24 @@ pythonRoute.post('/getFirstAndLastNPages', async (req: any, resp: any) => {
             return;
         }
 
+        const pdfCount = await countPDFsInFolder(_srcFolders[0], "reduced");
         const _resp = await makePythonCall(_srcFolders[0], firstNPages, firstNPages);
+            
         if(_resp.success){ 
             const pdfsReduced = await countPDFsInFolder(`${_srcFolders[0]}//reduced`);
             resp.status(200).send({
                 response: {
-                    timeTaken: timeInfo(_resp.timeTaken),
+                    forReduction: pdfCount,
+                    pdfsReduced,
+                    isReductionCountMatch: pdfCount === pdfsReduced,
                     _results: _resp,
-                    pdfsReduced
                 }
             });
-            
         }
         else{
             resp.status(500).send({
                 response: {
-                    timeTaken: timeInfo(_resp.timeTaken),
+                    forReduction: pdfCount,
                     _results: _resp
                 }
             });

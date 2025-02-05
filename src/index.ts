@@ -28,7 +28,7 @@ import { scanningCenterRoute } from "./routes/scanningCenter.route";
 import { gDriveUploadWorkReportRoute } from "./routes/gDriveUploadWorkReportRoute";
 import { gDriveRoute } from "./routes/gDrive.route";
 import { gDriveDownloadRoute } from "./routes/gDrive.download.route";
-import { pythonRoute } from "routes/python.route";
+import { pythonRoute } from "./routes/python.route";
 
 const egangotri = express();
 const hostname = "localhost";
