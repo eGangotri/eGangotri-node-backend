@@ -1,8 +1,7 @@
 import { exec } from 'child_process';
+import { timeInfo } from '../mirror/FrontEndBackendCommonCode';
 
 const PYTHON_HOME = "C://ws//egangotri-python";
-
-
 export const makePythonCall = async (_srcFolder: string,
      firstNPages: number, 
      lastNPages: number): Promise<any> => {
@@ -10,7 +9,7 @@ export const makePythonCall = async (_srcFolder: string,
     const pythonScriptPath = `${PYTHON_HOME}//extractPdf//firstAndLastNPages.py`;
     const command = `python ${pythonScriptPath} ${_srcFolder} --firstN ${firstNPages} --lastN ${lastNPages}`;
     const timeNow = Date.now();
-
+    console.log(`makePythonCall command: ${command} started at ${new Date(timeNow)}`);
     return new Promise((resolve, reject) => {
         // Execute the Python script
         exec(command, (error, stdout, stderr) => {
@@ -28,7 +27,7 @@ export const makePythonCall = async (_srcFolder: string,
                 status: "success",
                 success: true,
                 output: stdout,
-                timeTaken: Date.now() - timeNow
+                timeTaken: timeInfo(Date.now() - timeNow);
             });
         });
     });
