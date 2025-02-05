@@ -8,7 +8,6 @@ import _ from 'lodash';
 import { AI_SERVER } from '../db/connection';
 import { USER_HOME } from '../archiveUpload/constants';
 import { aksharaMukhaAutoDetectScriptToRomanColloguial } from '../aksharamukha/convert';
-import { extractFirstAndLastNPages } from '../cliBased/pdf/extractFirstAndLastNPages';
 import path from 'path';
 
 const DD_MM_YYYY_HH_MMFORMAT = 'DD-MM-YYYY-HH-mm'; // Define your date format
@@ -91,7 +90,7 @@ export const zipFilesInFolder = async (folderPath: string) => {
             fs.mkdirSync(outputDir, { recursive: true });
         }
 
-        await extractFirstAndLastNPages([folderPath], outputDir, FIRST_N_PAGE_COUNT, 0);
+        //await extractFirstAndLastNPages([folderPath], outputDir, FIRST_N_PAGE_COUNT, 0);
         const _resp = await getAllPDFFilesWithIgnorePathsSpecified(folderPath);
         const _files = _resp.map(x => x.absPath);
         const _ouptutZipPath = path.join(outputDir, `firstNPages.zip`);

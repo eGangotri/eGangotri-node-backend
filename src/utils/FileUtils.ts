@@ -25,6 +25,27 @@ export function removeFolderWithContents(folder: string) {
     })
 }
 
+export const countPDFsInFolder = async (folderPath: string): Promise<number> => {
+    let pdfCount = 0;
+
+    const readDirRecursive = async (dir: string) => {
+        const entries = await fs.promises.readdir(dir, { withFileTypes: true });
+
+        for (const entry of entries) {
+            const fullPath = path.join(dir, entry.name);
+
+            if (entry.isDirectory()) {
+                await readDirRecursive(fullPath);
+            } else if (entry.isFile() && path.extname(entry.name).toLowerCase() === '.pdf') {
+                pdfCount++;
+            }
+        }
+    };
+
+    await readDirRecursive(folderPath);
+    return pdfCount;
+};
+
 export const removeExcept = async (folder: any, except: Array<string>) => {
     const contentList = await fs.promises.readdir(folder)
     const files = contentList.map((x) => folder + "\\" + x).filter((y) => {

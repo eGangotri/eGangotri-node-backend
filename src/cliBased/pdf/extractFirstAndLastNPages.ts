@@ -107,8 +107,8 @@ const padNumbersWithZeros = (num: number) => {
     return num
 }
 let counter = 0;
-
-export const extractFirstAndLastNPages = async (_srcFoldersWithPath: string[],
+//@deprecated
+export const extractFirstAndLastNPagesDeprecated = async (_srcFoldersWithPath: string[],
     destRootFolder: string,
     firstNPages: number,
     lastNPages: number) => {
@@ -150,10 +150,10 @@ export const extractFirstAndLastNPages = async (_srcFoldersWithPath: string[],
 
 // const destRootFolder = "C:\\_catalogWork\\_reducedPdfs";
 
-const srcRootFolder = 'C:\\Users\\chetan\\Downloads\\test';
+const srcRootFolder = "F:\\_playground2\\_common\\testDiscardAfterUse";
 // const _folders = [20]
 // const _srcFoldersWithPath = _folders.map(x => `${srcRootFolder}\\Treasures${x}`)
 
-extractFirstAndLastNPages([srcRootFolder], 
-    'C:\\Users\\chetan\\Downloads\\test2',25,25)
+extractFirstAndLastNPagesDeprecated([srcRootFolder], 
+    `${srcRootFolder}\\1`,25,25)
 //pnpm run extractFirstAndLastNPages
