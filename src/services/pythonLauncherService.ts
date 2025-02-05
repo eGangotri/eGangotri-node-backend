@@ -3,11 +3,12 @@ import { timeInfo } from '../mirror/FrontEndBackendCommonCode';
 
 const PYTHON_HOME = "C://ws//egangotri-python";
 export const makePythonCall = async (_srcFolder: string,
+    destFolder: string = "",
     firstNPages: number,
     lastNPages: number): Promise<any> => {
     // Construct the command to run the Python script
     const pythonScriptPath = `${PYTHON_HOME}//extractPdf//firstAndLastNPages.py`;
-    const command = `python ${pythonScriptPath} ${_srcFolder} --firstN ${firstNPages} --lastN ${lastNPages}`;
+    const command = `python ${pythonScriptPath} "${_srcFolder}" --output_folder "${destFolder}" --firstN ${firstNPages} --lastN ${lastNPages}`;
     const timeNow = Date.now();
     console.log(`makePythonCall command: ${command} started at ${new Date(timeNow)}`);
     return new Promise((resolve, reject) => {

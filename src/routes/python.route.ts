@@ -2,15 +2,14 @@ import * as express from 'express';
 import { makePythonCall } from '../services/pythonLauncherService';
 import { countPDFsInFolder } from '../utils/FileUtils';
 import { DEFAULT_PDF_PAGE_EXTRACTION_COUNT } from '../cliBased/pdf/extractFirstAndLastNPages';
-import { getAllFileStats } from '../utils/FileStatsUtils';
-import { PDF_EXT } from '../imgToPdf/utils/constants';
+import fs from 'fs';
 
 export const pythonRoute = express.Router();
 
 pythonRoute.post('/getFirstAndLastNPages', async (req: any, resp: any) => {
     try {
         const srcFoldersAsCSV = req?.body?.srcFolders;
-        const destRootFolder = req?.body?.destRootFolder;
+        let destRootFolder = req?.body?.destRootFolder;
         const nPages = req?.body?.nPages || DEFAULT_PDF_PAGE_EXTRACTION_COUNT;
         let firstNPages = DEFAULT_PDF_PAGE_EXTRACTION_COUNT;
         let lastNPages = DEFAULT_PDF_PAGE_EXTRACTION_COUNT;
@@ -28,7 +27,7 @@ pythonRoute.post('/getFirstAndLastNPages', async (req: any, resp: any) => {
                 lastNPages = parseInt(nPages?.trim());
             }
         }
-
+        console.log(`getFirstAndLastNPages _folders ${srcFoldersAsCSV} firstNPages${firstNPages} lastNPages${lastNPages}`)
         const _srcFolders: string[] = srcFoldersAsCSV.split(',').map((x: string) => x.trim());
         console.log(`getFirstAndLastNPages _folders ${_srcFolders} 
         destRootFolder ${destRootFolder}
@@ -45,24 +44,29 @@ pythonRoute.post('/getFirstAndLastNPages', async (req: any, resp: any) => {
             return;
         }
 
-        const pdfCount = await countPDFsInFolder(_srcFolders[0], "reduced");
-        const _resp = await makePythonCall(_srcFolders[0], firstNPages, firstNPages);
-            
-        if(_resp.success){ 
-            const pdfsReduced = await countPDFsInFolder(`${_srcFolders[0]}//reduced`);
-            resp.status(200).send({
+        const pdfsToReduceCount = await countPDFsInFolder(_srcFolders[0], "reduced");
+        if (!fs.existsSync(destRootFolder)) {
+            destRootFolder = `${_srcFolders[0]}\\reduced`;
+        }
+        const _resp = await makePythonCall(_srcFolders[0], destRootFolder, firstNPages, firstNPages);
+        if (_resp.success) {
+            const pdfsReducedCount = await countPDFsInFolder(`${destRootFolder}`);
+            const result = {
                 response: {
-                    forReduction: pdfCount,
-                    pdfsReduced,
-                    isReductionCountMatch: pdfCount === pdfsReduced,
+                    msg: `${pdfsToReduceCount} pdfs processed to ${pdfsReducedCount} with first ${firstNPages} and last ${lastNPages} pages`,
+                    _srcFolders: _srcFolders[0],
+                    destRootFolder: destRootFolder,
+                    isReductionCountMatch: pdfsToReduceCount === pdfsReducedCount,
                     _results: _resp,
                 }
-            });
+            }
+            console.log('result', result);
+            resp.status(200).send(result);
         }
-        else{
+        else {
             resp.status(500).send({
                 response: {
-                    forReduction: pdfCount,
+                    forReduction: pdfsToReduceCount,
                     _results: _resp
                 }
             });
