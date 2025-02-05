@@ -25,7 +25,9 @@ export function removeFolderWithContents(folder: string) {
     })
 }
 
-export const countPDFsInFolder = async (folderPath: string): Promise<number> => {
+
+
+export const countPDFsInFolder = async (folderPath: string, ignoreFolder: string = "@#@#$@#$"): Promise<number> => {
     let pdfCount = 0;
 
     const readDirRecursive = async (dir: string) => {
@@ -35,6 +37,10 @@ export const countPDFsInFolder = async (folderPath: string): Promise<number> => 
             const fullPath = path.join(dir, entry.name);
 
             if (entry.isDirectory()) {
+                if (entry.name === ignoreFolder) {
+                    console.log(`Ignoring folder: ${fullPath}`);
+                    continue;
+                }
                 await readDirRecursive(fullPath);
             } else if (entry.isFile() && path.extname(entry.name).toLowerCase() === '.pdf') {
                 pdfCount++;

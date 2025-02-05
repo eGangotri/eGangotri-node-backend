@@ -21,10 +21,7 @@
     "vanity": "ts-node ./src/vanityService/VanityPdf.ts",
     "catalog": "ts-node ./src/cliBased/googleapi/GoogleDriveApiReadAndExport.ts",
     "refresh": "ts-node ./src/cliBased/googleapi/_utils/getRefreshToken.ts",
-    "extractFirstAndLastNPagesOld": "ts-node ./src/cliBased/pdf/extractFirstAndLastNPages.ts",
     "extractFirstAndLastNPages": "cross-env NODE_OPTIONS=--max-old-space-size=8192 ts-node ./src/cliBased/pdf/extractFirstAndLastNPages.ts",
-
-    "pdfWithPdfDist": "ts-node ./src/cliBased/pdf/pdfWithPdfDist.ts",
     "combineExcels": "ts-node ./src/cliBased/googleapi/_utils/CombineMainAndReducedExcelData",
     "excelutil": "ts-node ./src/cliBased/googleapi/_utils/ExcelUtils",
     "findLongestFileName": "ts-node ./src/utils/utils",
