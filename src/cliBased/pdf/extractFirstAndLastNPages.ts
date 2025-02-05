@@ -150,9 +150,10 @@ export const extractFirstAndLastNPages = async (_srcFoldersWithPath: string[],
 
 // const destRootFolder = "C:\\_catalogWork\\_reducedPdfs";
 
-// const srcRootFolder = 'H:\\eG-tr1-30';
+const srcRootFolder = 'C:\\Users\\chetan\\Downloads\\test';
 // const _folders = [20]
 // const _srcFoldersWithPath = _folders.map(x => `${srcRootFolder}\\Treasures${x}`)
 
-//extractFistsAndLastPages(_srcFoldersWithPath, destRootFolder)
+extractFirstAndLastNPages([srcRootFolder], 
+    'C:\\Users\\chetan\\Downloads\\test2',25,25)
 //pnpm run extractFirstAndLastNPages
