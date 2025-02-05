@@ -36,7 +36,7 @@ pythonRoute.post('/getFirstAndLastNPages', async (req: any, resp: any) => {
         destRootFolder ${destRootFolder}
         req?.body?.nPages ${nPages}`)
 
-        if (!srcFoldersAsCSV || !srcFoldersAsCSV) {
+        if (!srcFoldersAsCSV) {
             resp.status(300).send({
                 response: {
                     "status": "failed",
