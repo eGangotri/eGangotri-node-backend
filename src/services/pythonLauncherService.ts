@@ -1,5 +1,6 @@
 import { exec } from 'child_process';
 import { timeInfo } from '../mirror/FrontEndBackendCommonCode';
+import { ellipsis } from '../mirror/utils';
 
 const PYTHON_HOME = "C://ws//egangotri-python";
 export const makePythonCall = async (_srcFolder: string,
@@ -19,7 +20,7 @@ export const makePythonCall = async (_srcFolder: string,
                 return reject({
                     success: false,
                     timeTaken: timeInfo(Date.now() - timeNow),
-                    msg: `Error executing Python script: ${error.message}`
+                    output: `Error executing Python script: ${error.message}`
                 });
             }
 
@@ -27,7 +28,7 @@ export const makePythonCall = async (_srcFolder: string,
             resolve({
                 success: true,
                 timeTaken: timeInfo(Date.now() - timeNow),
-                output: stdout
+                output: ellipsis(stdout,100)
             });
         });
     });
