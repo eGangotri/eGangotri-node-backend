@@ -1,6 +1,6 @@
 const { DownloaderHelper } = require('node-downloader-helper');
 import fs from 'fs';
-import { DOWNLOAD_COMPLETED_COUNT, checkFileSizeConsistency, incrementDownloadComplete, incrementDownloadInError } from "./utils";
+import { DOWNLOAD_COMPLETED_COUNT, checkFileSizeConsistency, incrementDownloadComplete, incrementDownloadCompleted2, incrementDownloadFailed2, incrementDownloadInError, incrementDownloadInError2 } from "./utils";
 import { extractGoogleDriveId } from '../../mirror/GoogleDriveUtilsCommonCode';
 import { getGoogleDriveInstance } from '../googleapi/service/CreateGoogleDrive';
 import * as path from 'path';
@@ -12,10 +12,12 @@ const drive = getGoogleDriveInstance();
 export const downloadFileFromGoogleDrive = async (driveLinkOrFolderId: string,
     destPath: string,
     fileName: string = "",
-    fileSizeRaw = "0", gDriveDownloadTaskId: string = "") => {
+    fileSizeRaw = "0",
+    gDriveDownloadTaskId: string = "",
+    downloadCounterController = "") => {
     console.log(`downloadFileFromGoogleDrive ${driveLinkOrFolderId}`)
     const result = await downloadGDriveFileUsingGDriveApi(driveLinkOrFolderId, destPath,
-        fileName, fileSizeRaw, gDriveDownloadTaskId);
+        fileName, fileSizeRaw, gDriveDownloadTaskId,downloadCounterController);
     return result;
 }
 
@@ -77,7 +79,9 @@ export const downloadGDriveFileUsingGDriveApi = (
     driveLinkOrFileID: string,
     destPath: string,
     fileName: string = "",
-    fileSizeRaw = "0", gDriveDownloadTaskId: string = "") => {
+    fileSizeRaw = "0", 
+    gDriveDownloadTaskId: string = "",
+    downloadCounterController = "") => {
     return new Promise(async (resolve, reject) => {
         const fileId = extractGoogleDriveId(driveLinkOrFileID);
         console.log(`downloadGDriveFileUsingGDriveApi ${driveLinkOrFileID} ${fileId} to ${destPath}`);
@@ -131,7 +135,7 @@ export const downloadGDriveFileUsingGDriveApi = (
                     : { success: true };
 
                 if (_result?.success) {
-                    incrementDownloadComplete();
+                    incrementDownloadCompleted2(downloadCounterController);
                     updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, GDriveDownloadHistoryStatus.Completed, `completed d/l of ${fileName}`, destPath);
                     resolve({
                         status: `Downloaded ${fileName} to ${destPath}`,
@@ -140,14 +144,15 @@ export const downloadGDriveFileUsingGDriveApi = (
                     });
                 } else {
                     reject(_result);
+                    incrementDownloadFailed2(downloadCounterController);
                     updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, GDriveDownloadHistoryStatus.Failed, `failed d/l of ${fileName}`, destPath);
                 }
             });
 
             dest.on('error', (err) => {
                 console.error('Error writing file:', err);
-                incrementDownloadInError();
-                updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, GDriveDownloadHistoryStatus.Failed, `failed d/l of ${fileName}`, destPath);
+                incrementDownloadInError2(downloadCounterController);
+                updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, GDriveDownloadHistoryStatus.Failed, `error d/l of ${fileName}`, destPath);
                 reject({
                     success: false,
                     error: `Error writing file for ${fileName}: ${err.message}`,
@@ -156,7 +161,7 @@ export const downloadGDriveFileUsingGDriveApi = (
         } catch (error) {
             const errorContext = `Error during ${error.response?.config?.url ? 'download' : 'metadata fetch'}`;
             console.error(`${errorContext}:`, error.message);
-            incrementDownloadInError();
+            incrementDownloadInError2(downloadCounterController);
             updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, GDriveDownloadHistoryStatus.Failed, `${errorContext}: ${error.message}`, destPath);
             reject({
                 success: false,

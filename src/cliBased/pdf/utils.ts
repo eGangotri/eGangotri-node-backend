@@ -17,10 +17,49 @@ export const incrementDownloadInError = () => {
 export const incrementDownloadFailed = () => {
     DOWNLOAD_FAILED_COUNT++
 }
+//deprecated
 export const resetDownloadCounters = () => {
     DOWNLOAD_COMPLETED_COUNT = 0;
     DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT = 0;
     DOWNLOAD_FAILED_COUNT = 0;
+}
+
+let downloadCounters = {};
+
+export const DOWNLOAD_COMPLETED_COUNT2 = (requestId: string) => {
+    return downloadCounters[requestId].completed;
+}
+
+export const DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT2 = (requestId: string) => {
+    return downloadCounters[requestId].inError;
+}
+
+export const DOWNLOAD_FAILED_COUNT2 = (requestId: string) => {
+    return downloadCounters[requestId].failed;
+}
+
+export function resetDownloadCounters2(requestId: string) {
+    downloadCounters[requestId] = {
+        completed: 0,
+        inError: 0,
+        failed: 0
+    };
+}
+
+export function incrementDownloadCompleted2(requestId: string) {
+    downloadCounters[requestId].completed++;
+}
+
+export function incrementDownloadInError2(requestId: string) {
+    downloadCounters[requestId].inError++;
+}
+
+export function incrementDownloadFailed2(requestId: string) {
+    downloadCounters[requestId].failed++;
+}
+
+export function getDownloadCounters2(requestId: string) {
+    return downloadCounters[requestId];
 }
 
 

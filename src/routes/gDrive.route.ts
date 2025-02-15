@@ -1,6 +1,6 @@
 import * as express from 'express';
 import { downloadFromGoogleDriveToProfile } from '../cliBased/googleapi/GoogleDriveApiReadAndDownload';
-import { DOWNLOAD_COMPLETED_COUNT, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT, resetDownloadCounters } from '../cliBased/pdf/utils';
+import { DOWNLOAD_COMPLETED_COUNT, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT, resetDownloadCounters, resetDownloadCounters2 } from '../cliBased/pdf/utils';
 import { timeInfo } from '../mirror/FrontEndBackendCommonCode';
 import { PDF_TYPE } from '../cliBased/googleapi/_utils/constants';
 import { genLinksAndFolders, validateGenGDriveLinks } from '../services/yarnListMakerService';
@@ -37,9 +37,10 @@ gDriveRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
         }
         const results = [];
         const links = googleDriveLink.includes(",") ? googleDriveLink.split(",").map((link: string) => link.trim()) : [googleDriveLink.trim()];
-        resetDownloadCounters();
+        const downloadCounterController = Math.random().toString(36).substring(7);
+        resetDownloadCounters2(downloadCounterController);
         for (const [index, link] of links.entries()) {         
-            const res = await downloadFromGoogleDriveToProfile(link, profile, ignoreFolder, fileType);
+            const res = await downloadFromGoogleDriveToProfile(link, profile, ignoreFolder, fileType,downloadCounterController);
             results.push(res);
         }
         const resultsSummary = results.map((res: any, index: number) => {
