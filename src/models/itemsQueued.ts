@@ -1,6 +1,17 @@
 import * as mongoose from 'mongoose';
+const DOC_NAME = 'Items_Queued';
 
-const schema = new mongoose.Schema(
+export interface IItemsQueued extends mongoose.Document {
+    archiveProfile: string;
+    uploadLink: string;
+    localPath: string;
+    title: string;
+    uploadCycleId: string;
+    csvName: string;
+    datetimeUploadStarted: Date;
+}
+
+const schema = new mongoose.Schema<IItemsQueued>(
     {
         archiveProfile: { type: String, required: true },
         uploadLink: { type: String, required: true },
@@ -9,12 +20,13 @@ const schema = new mongoose.Schema(
         uploadCycleId: { type: String, required: true },
         csvName: { type: String, required: true },
         datetimeUploadStarted: { type: Date, required: true, default: Date.now }
-    }, {
-        collection: 'Items_Queued',
-        timestamps:true
+    },
+    {
+        collection: DOC_NAME,
+        timestamps: true
     }
 );
 
-export const ItemsQueued = mongoose.model('Items_Queued', schema);
+export const ItemsQueued = mongoose.model<IItemsQueued>(DOC_NAME, schema);
 
 

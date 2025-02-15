@@ -1,5 +1,5 @@
 import { ArchiveProfileAndCount, SelectedUploadItem, UploadCycleTableData, UploadCycleTableDataDictionary } from "../mirror/types";
-import { ItemsUshered } from "../models/itemsUshered";
+import { IItemsUshered, ItemsUshered } from "../models/itemsUshered";
 import { setOptionsForItemListing } from "./dbService";
 import { ItemsListOptionsType } from "../types/listingTypes";
 import { checkUrlValidityForUploadItems } from "../utils/utils";
@@ -8,6 +8,7 @@ import { UploadCycle } from "../models/uploadCycle";
 import { getListOfItemsQueued } from "./itemsQueuedService";
 import { getListOfUploadCycles } from "./uploadCycleService";
 import { ellipsis } from "../mirror/utils";
+import { IItemsQueued } from "models/itemsQueued";
 
 export async function getListOfItemsUshered(queryOptions: ItemsListOptionsType) {
   const { limit, mongoOptionsFilter } = setOptionsForItemListing(queryOptions)
@@ -102,27 +103,31 @@ export const bulkUpdateUploadedFlag = async (usheredUploads: SelectedUploadItem[
 }
 
 export const handleEachRow = (uploadCycleId: string,
-  usheredRow: _.Dictionary<UploadCycleTableData[]>,
-  queuedRow: _.Dictionary<UploadCycleTableData[]>,
+  usheredRow: _.Dictionary<IItemsUshered[]>,
+  queuedRow: _.Dictionary<IItemsQueued[]>,
   uploadCycleRow: [any, ...any[]]) => {
 
   const archiveProfileAndCount: ArchiveProfileAndCount[] = []
   let totalCount = 0
-  let dateTimeUploadStarted = new Date();
+  let dateTimeUploadStarted = null;
   for (const key in usheredRow) {
-    const row = usheredRow[key]
+    const row:IItemsUshered[] = usheredRow[key]
     // console.log(`handleEachRow: ${key}: ${row}`);
+    const uploadFlagSuccessCount = row.filter(x => x.uploadFlag === true).length;
     archiveProfileAndCount.push({
       archiveProfile: key,
-      count: row.length
+      count: row.length,
+      uploadSuccessCount: uploadFlagSuccessCount
     })
     totalCount += row.length
-    dateTimeUploadStarted = row[0]?.datetimeUploadStarted
+    if(!dateTimeUploadStarted) {
+      dateTimeUploadStarted = row[0]?.datetimeUploadStarted
+    }
   }
 
   const archiveProfileAndCountForQueue: ArchiveProfileAndCount[] = []
   let totalQueueCount = 0
-  let dateTimeQueueUploadStarted = new Date();
+  let dateTimeQueueUploadStarted = null;
   for (const key in queuedRow) {
     const row = queuedRow[key]
     // console.log(`handleEachRow: ${key}: ${row}`);
@@ -131,7 +136,9 @@ export const handleEachRow = (uploadCycleId: string,
       count: row.length
     })
     totalQueueCount += row.length
-    dateTimeQueueUploadStarted = row[0]?.datetimeUploadStarted
+    if(!dateTimeQueueUploadStarted){
+      dateTimeQueueUploadStarted = row[0]?.datetimeUploadStarted
+    }
   }
 
   const uploadCycleData: UploadCycleTableData = {
@@ -154,21 +161,17 @@ export const handleEachRow = (uploadCycleId: string,
 
 
 export const getListOfUploadCyclesAndCorrespondingData = async (queryOptions: ItemsListOptionsType) => {
-  const items = await getListOfItemsUshered(queryOptions);
+  const usheredItems = await getListOfItemsUshered(queryOptions);
   const queuedItems = await getListOfItemsQueued(queryOptions)
   const uploadCycles = await getListOfUploadCycles(queryOptions);
 
-  const groupedItems = _.groupBy(items, function (item: any) {
+  const groupedUsheredItems = _.groupBy(usheredItems, function (item: any) {
     return item.uploadCycleId;
   });
 
   const groupedQueuedItems = _.groupBy(queuedItems, function (item: any) {
     return item.uploadCycleId;
   });
-
-  //const groupedUploadCyclesX = _.groupBy(uploadCycles, function (item: any) {
-  //   return item.uploadCycleId;
-  // });
 
   let groupedUploadCycles = new Map<string, Array<any>>();
   //to mainitain original sort order
@@ -179,14 +182,14 @@ export const getListOfUploadCyclesAndCorrespondingData = async (queryOptions: It
 
   const uploadCycleIdAndData: UploadCycleTableDataDictionary[] = []
   for (const [key, value] of groupedUploadCycles) {
-    const usheredRow = groupedItems[key];
-    const queuedRow = groupedQueuedItems[key];
+    const usheredRow: IItemsUshered[] = groupedUsheredItems[key];
+    const queuedRow:IItemsQueued[] = groupedQueuedItems[key];
     const uploadCycleRow: any = value;
 
-    const groupedByArchiveProfiles = _.groupBy(usheredRow, function (item: any) {
+    const groupedByArchiveProfiles:_.Dictionary<IItemsUshered[]> = _.groupBy(usheredRow, function (item: any) {
       return item.archiveProfile;
     });
-    const queuedRowGroupedByArchiveProfiles = _.groupBy(queuedRow, function (item: any) {
+    const queuedRowGroupedByArchiveProfiles:_.Dictionary<IItemsQueued[]> = _.groupBy(queuedRow, function (item: any) {
       return item.archiveProfile;
     });
 
