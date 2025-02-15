@@ -3,6 +3,7 @@ import { Types } from "mongoose";
 export interface ArchiveProfileAndCount {
     archiveProfile: string;
     count: number;
+    uploadSuccessCount ?:number;
 }
 export interface UploadCycleArchiveProfile {
     archiveProfile?: string;

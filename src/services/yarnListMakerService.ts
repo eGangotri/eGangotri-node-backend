@@ -32,51 +32,51 @@ export const pickLatestExcelsAndCombineGDriveAndReducedPdfExcels = (mainFilePath
 }
 
 
-export const genLinksAndFolders = 
-(googleDriveLink: string, folderName: string) => {
-    const _links = []
-    const _folders = [];
-    if (googleDriveLink.includes(",") || folderName.includes(",")) {
-        const links = googleDriveLink.split(",").map((link: string) => {
-            return link.trim()
-        })
-        _links.push(...links);
-        const folders = folderName.split(",").map((folder: string) => {
-            return folder.trim()
-        })
-        _folders.push(...folders);
-    }
+export const genLinksAndFolders =
+    (googleDriveLink: string, folderName: string) => {
+        const _links = []
+        const _folders = [];
+        if (googleDriveLink.includes(",")) {
+            const links = googleDriveLink.split(",").map((link: string) => {
+                return link.trim()
+            })
+            _links.push(...links);
 
-    else {
-        _links.push(googleDriveLink.trim());
-        _folders.push(folderName.trim());
-    }
+            for (let i = 0; i < links.length; i++) {
+                _folders.push(`${folderName}-${i + 1}`);
+            }
+        }
 
-    return {
-        error: _links.length != _folders.length,
-        _links,
-        _folders
-    }
-}
+        else {
+            _links.push(googleDriveLink.trim());
+            _folders.push(folderName.trim());
+        }
 
-export const validateGenGDriveLinks = 
-(googleDriveLink: string, folderName: string) => {
-    if (!googleDriveLink || !folderName) {
         return {
-            "status": "failed",
-            "success": false,
-            "message": "Pls. provide google drive Link"
+            error: _links.length != _folders.length,
+            _links,
+            _folders
         }
     }
 
-    if (folderName.includes(path.sep)) {
+export const validateGenGDriveLinks =
+    (googleDriveLink: string, folderName: string) => {
+        if (!googleDriveLink || !folderName) {
+            return {
+                "status": "failed",
+                "success": false,
+                "message": "Pls. provide google drive Link"
+            }
+        }
+
+        if (folderName.includes(path.sep)) {
+            return {
+                "status": "failed",
+                "success": false,
+                "message": "Folder Name cannot have path separators"
+            }
+        }
         return {
-            "status": "failed",
-            "success": false,
-            "message": "Folder Name cannot have path separators"
+            "success": true,
         }
     }
-    return {
-        "success": true,
-    }
-}
