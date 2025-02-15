@@ -110,7 +110,7 @@ gDriveDownloadRoute.get("/getGDriveDownloads", async (req: Request, res: Respons
         const gdriveDownloads: IGDriveDownload[] = await GDriveDownload.find()
             .sort({ createdAt: -1 })
             .skip(skip)
-            .limit(limit);
+            .limit(100);
 
         const total = await GDriveDownload.countDocuments()
         const results = {
@@ -119,7 +119,6 @@ gDriveDownloadRoute.get("/getGDriveDownloads", async (req: Request, res: Respons
             totalPages: Math.ceil(total / limit),
             totalItems: total,
         }
-        console.log(`/getGDriveDownloads: ${JSON.stringify(results)}`);
         res.json(results)
     } catch (error) {
         console.log(`/getGDriveDownloads error: ${JSON.stringify(error.message)}`);
