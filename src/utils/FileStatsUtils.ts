@@ -13,11 +13,12 @@ import { PDF_EXT, ZIP_EXT } from '../imgToPdf/utils/constants';
 import { FileStats } from "imgToPdf/utils/types";
 import { file } from 'pdfkit';
 import { formatTime } from '../imgToPdf/utils/Utils';
-import { resetRowCounter, ROW_COUNTER } from './constants';
+import * as FileConstUtils from '../utils/constants';
 
 
 export async function getAllFileStats(filestatsOptions: FileStatsOptions): Promise<FileStats[]> {
-    resetRowCounter()
+    const rowCounterController = Math.random().toString(36).substring(7);
+    FileConstUtils.resetRowCounter(rowCounterController);
     const queue = [filestatsOptions.directoryPath];
     let _files: FileStats[] = [];
 
@@ -39,7 +40,7 @@ export async function getAllFileStats(filestatsOptions: FileStatsOptions): Promi
                 if (!filestatsOptions.ignoreFolders) {
                     const _path = path.parse(fullPath);
                     _files.push({
-                        rowCounter: ++ROW_COUNTER[1],
+                        rowCounter:FileConstUtils.incrementColumnCounter(rowCounterController),
                         absPath: fullPath,
                         folder: _path.dir,
                         fileName: _path.base,
@@ -56,7 +57,7 @@ export async function getAllFileStats(filestatsOptions: FileStatsOptions): Promi
                 const rawSize = getFilzeSize(fullPath) || 0;
 
                 let fileStat: FileStats = {
-                    rowCounter: ++ROW_COUNTER[1],
+                    rowCounter:FileConstUtils.incrementColumnCounter(rowCounterController),
                     absPath: fullPath,
                     folder: _path.dir,
                     fileName: _path.base,
@@ -66,7 +67,7 @@ export async function getAllFileStats(filestatsOptions: FileStatsOptions): Promi
                 }
 
                 if (filestatsOptions.withLogs) {
-                    console.log(`${ROW_COUNTER[0]}/${ROW_COUNTER[1]}). ${JSON.stringify(ellipsis(fileStat.fileName, 40))} ${Mirror.sizeInfo(rawSize)}`);
+                    console.log(`${FileConstUtils.getRowCounter(rowCounterController)[0]}/${FileConstUtils.getRowCounter(rowCounterController)[1]}). ${JSON.stringify(ellipsis(fileStat.fileName, 40))} ${Mirror.sizeInfo(rawSize)}`);
                 }
                 _files.push(fileStat)
             }
@@ -117,7 +118,8 @@ export async function getAllPDFFilesWithIgnorePathsSpecified(directoryPath: stri
 }
 
 //expensive operation
-export async function getAllPDFFilesWithMedata(directoryPath: string, withLogs: boolean = true): Promise<FileStats[]> {
+export async function getAllPDFFilesWithMedata(directoryPath: string, 
+    withLogs: boolean = true, rowCounterController = ""): Promise<FileStats[]> {
     const filestatsOptions =
     {
         directoryPath: directoryPath,
@@ -127,7 +129,7 @@ export async function getAllPDFFilesWithMedata(directoryPath: string, withLogs: 
         withMetadata: false, // initially false
     }
     const withoutStats = await getAllFileStats(filestatsOptions)
-    const withStats = await getStatsMetadataIndependently(withoutStats, filestatsOptions);
+    const withStats = await getStatsMetadataIndependently(withoutStats, filestatsOptions, rowCounterController);
     return withStats
 }
 
@@ -170,7 +172,9 @@ export async function getAllFileListingWithStats(directoryPath: string): Promise
 }
 
 // hack to make things faster
-export async function getStatsMetadataIndependently(withoutStats: FileStats[], filestatsOptions: FileStatsOptions): Promise<FileStats[]> {
+export async function getStatsMetadataIndependently(withoutStats: FileStats[], 
+    filestatsOptions: FileStatsOptions,
+    rowCounterController=""): Promise<FileStats[]> {
     let START_TIME = Number(Date.now())
     const promises = withoutStats.map((fileStat: FileStats) => {
         let updatedFileStat = { ...fileStat };
@@ -179,7 +183,7 @@ export async function getStatsMetadataIndependently(withoutStats: FileStats[], f
             pageCountPromise.then(pageCount => {
                 updatedFileStat.pageCount = pageCount;
                 if (filestatsOptions.withLogs) {
-                    console.log(`${fileStat.rowCounter}/${ROW_COUNTER[1]}). ${JSON.stringify(ellipsis(fileStat.fileName, 40))} ${pageCount} pages ${Mirror.sizeInfo(fileStat.rawSize)}`);
+                    console.log(`${fileStat.rowCounter}/${FileConstUtils.getRowCounter(rowCounterController)[1]}). ${JSON.stringify(ellipsis(fileStat.fileName, 40))} ${pageCount} pages ${Mirror.sizeInfo(fileStat.rawSize)}`);
                 }
             });
             return pageCountPromise.then(() => updatedFileStat);

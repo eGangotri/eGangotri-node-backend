@@ -103,13 +103,13 @@ gDriveRoute.post('/getGoogleDriveListingAsExcel', async (req: any, resp: any) =>
                 const _resps = [];
                 for (let i = 0; i < _links.length; i++) {
                     console.log(`getGoogleDriveListingAsExcel:loop ${_links[i]} ${_folders[i]} (${allNotJustPdfs})`)
-                    const resetRowCounter = Math.random().toString(36).substring(7);
-                    FileConstUtils.resetRowCounter();
+                    const rowCounterController = Math.random().toString(36).substring(7);
+                    FileConstUtils.resetRowCounter(rowCounterController);
                     const listingResult = await generateGoogleDriveListingExcel(_links[i],
                         _folders[i], reduced,
                         ignoreFolder,
                         pdfRenamerXlV2,
-                        allNotJustPdfs ? "" : PDF_TYPE);
+                        allNotJustPdfs ? "" : PDF_TYPE,rowCounterController);
                     _resps.push(listingResult);
                 }
                 const endTime = Date.now();
@@ -163,6 +163,7 @@ gDriveRoute.post('/downloadGDriveItemsViaExcel', async (req: any, resp: any) => 
             error_count: DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT2(downloadCounterController),
             ..._results
         }
+
         console.log(`_resp : ${JSON.stringify(_resp)}`);
 
         const endTime = Date.now();
