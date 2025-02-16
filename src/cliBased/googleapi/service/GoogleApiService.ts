@@ -1,7 +1,7 @@
 import { drive_v3 } from 'googleapis';
 import { jsonDataToXslx, jsonDataToXslxFileRenamerV2 } from '../../excel/ExcelUtils';
 import { sizeInfo } from '../../../mirror/FrontEndBackendCommonCode';
-import { FOLDER_MIME_TYPE, PDF_TYPE} from '../_utils/constants';
+import { FOLDER_MIME_TYPE, PDF_TYPE } from '../_utils/constants';
 import { GoogleApiData } from '../types';
 import { createFileNameWithPathForExport, getFolderName, getFolderPathRelativeToRootFolder } from '../_utils/GoogleDriveUtil';
 import * as _ from 'lodash';
@@ -15,7 +15,8 @@ export async function listFolderContentsAsArrayOfData(folderId: string,
     drive: drive_v3.Drive,
     umbrellaFolder: string = "",
     ignoreFolder = "",
-    fileType = PDF_TYPE) {
+    fileType = PDF_TYPE,
+    rowCounterController = "") {
 
     const rootFolderName = await getFolderName(folderId, drive) || "";
     const _umbrellaFolder = umbrellaFolder?.length > 0 ? umbrellaFolder : rootFolderName;
@@ -28,7 +29,9 @@ export async function listFolderContentsAsArrayOfData(folderId: string,
     const googleDriveFileData: Array<GoogleApiData> = []
     let idFolderNameMap = new Map<string, string>();
 
-    await listFolderContents(folderId, drive, umbrellaFolder, googleDriveFileData, idFolderNameMap, rootFolderName, ignoreFolder, fileType);
+    await listFolderContents(folderId, drive, umbrellaFolder, 
+        googleDriveFileData, idFolderNameMap, rootFolderName,
+         ignoreFolder, fileType,rowCounterController);
     return googleDriveFileData
 }
 
@@ -37,15 +40,16 @@ export async function listFolderContentsAndGenerateCSVAndExcel(_folderIdOrUrl: s
     exportDestFolder: string,
     umbrellaFolder: string = "",
     ignoreFolder = "",
-    type = PDF_TYPE) {
+    type = PDF_TYPE, rowCounterController = "") {
     const gDriveFolderId = extractGoogleDriveId(_folderIdOrUrl)
     FileUtils.createFolderIfNotExists(exportDestFolder);
 
     const googleDriveFileData: Array<GoogleApiData> = await listFolderContentsAsArrayOfData(gDriveFolderId,
         drive, umbrellaFolder, ignoreFolder, type)
-    const fileNameWithPath = createFileNameWithPathForExport(gDriveFolderId, umbrellaFolder, exportDestFolder, FileConstUtils.ROW_COUNTER[1]);
-    FileConstUtils.incrementRowCounter();
-    
+    const fileNameWithPath = createFileNameWithPathForExport(gDriveFolderId,
+         umbrellaFolder, exportDestFolder, FileConstUtils.getRowCounter(rowCounterController)[1]);
+    FileConstUtils.incrementRowCounter(rowCounterController);
+
     // Convert data to XLSX
     console.log(`googleDriveFileData ${googleDriveFileData.length} `);
     if (!_.isEmpty(googleDriveFileData)) {
@@ -70,14 +74,16 @@ export async function listFolderContentsAndGenerateExcelV2ForPdfRenamer(_folderI
     exportDestFolder: string,
     umbrellaFolder: string = "",
     ignoreFolder = "",
-    type = PDF_TYPE) {
+    type = PDF_TYPE,
+    rowCounterController = "") {
     const folderId = extractGoogleDriveId(_folderIdOrUrl)
     FileUtils.createFolderIfNotExists(exportDestFolder);
 
     const googleDriveFileData: Array<GoogleApiData> = await listFolderContentsAsArrayOfData(folderId,
         drive, umbrellaFolder, ignoreFolder, type)
-    const fileNameWithPath = createFileNameWithPathForExport(folderId, umbrellaFolder, exportDestFolder, FileConstUtils.ROW_COUNTER[1]);
-    FileConstUtils.incrementRowCounter()
+    const fileNameWithPath = createFileNameWithPathForExport(folderId, umbrellaFolder, exportDestFolder,
+        FileConstUtils.getRowCounter(rowCounterController)[1]);
+    FileConstUtils.incrementRowCounter(rowCounterController);
     // Convert data to XLSX
     console.log(`googleDriveFileData ${googleDriveFileData.length} `);
     if (!_.isEmpty(googleDriveFileData)) {
@@ -104,7 +110,8 @@ export async function listFolderContents(folderId: string,
     idFolderNameMap: Map<string, string>,
     rootFolderName: string,
     ignoreFolder = "",
-    fileType = PDF_TYPE) {
+    fileType = PDF_TYPE,
+    rowCounterController = "") {
 
     if (!idFolderNameMap.has(folderId)) {
         const folderPath = await getFolderPathRelativeToRootFolder(folderId, drive)
@@ -122,7 +129,7 @@ export async function listFolderContents(folderId: string,
         console.log(`_query(${++idx}) ${_query}`)
         do {
             //: GaxiosResponse<drive_v3.Schema$FileList> 
-            const response= await drive.files.list({
+            const response = await drive.files.list({
                 q: _query,
                 fields: 'nextPageToken, files(id, name, mimeType,size,parents,webViewLink,thumbnailLink,createdTime)',
                 pageSize: 1000, // Increase the page size to retrieve more files if necessary
@@ -141,7 +148,7 @@ export async function listFolderContents(folderId: string,
         if (files && files.length) {
             for (const file of files) {
                 try {
-                    addFileMetadataToArray(file, folderId, googleDriveFileData, idFolderNameMap);
+                    addFileMetadataToArray(file, folderId, googleDriveFileData, idFolderNameMap, rowCounterController);
                     if (file.mimeType === FOLDER_MIME_TYPE) {
                         await listFolderContents(file?.id || '', drive,
                             umbrellaFolder,
@@ -149,7 +156,8 @@ export async function listFolderContents(folderId: string,
                             idFolderNameMap,
                             rootFolderName,
                             ignoreFolder,
-                            fileType); // Recursively call the function for subfolders
+                            fileType,
+                            rowCounterController); // Recursively call the function for subfolders
                     }
                 }
                 catch (err) {
@@ -167,9 +175,11 @@ export async function listFolderContents(folderId: string,
     }
 }
 
-export const addFileMetadataToArray = (file: drive_v3.Schema$File, folderId: string,
+export const addFileMetadataToArray = (file: drive_v3.Schema$File,
+    folderId: string,
     googleDriveFileData: GoogleApiData[],
-    idFolderNameMap: Map<string, string>) => {
+    idFolderNameMap: Map<string, string>,
+    rowCounterController = "") => {
 
     const fileName = file.name || "";
     const filemimeType = file.mimeType || "";
@@ -182,7 +192,7 @@ export const addFileMetadataToArray = (file: drive_v3.Schema$File, folderId: str
 
     if (filemimeType !== FOLDER_MIME_TYPE) {
         googleDriveFileData.push({
-            index: ++FileConstUtils.ROW_COUNTER[1],
+            index: FileConstUtils.incrementColumnCounter(rowCounterController),
             fileName: fileName,
             googleDriveLink: webViewLink,
             sizeInfo: sizeInfo(fileSize),
@@ -192,6 +202,6 @@ export const addFileMetadataToArray = (file: drive_v3.Schema$File, folderId: str
             thumbnailLink: thumbnailLink,
         });
 
-        console.log(`${FileConstUtils.ROW_COUNTER[0]}/${FileConstUtils.ROW_COUNTER[1]}). ${ellipsis(fileName, 40)} `);
+        console.log(`${FileConstUtils.getRowCounter(rowCounterController)[0]}/${FileConstUtils.getRowCounter(rowCounterController)[1]}). ${ellipsis(fileName, 40)} `);
     }
 }
