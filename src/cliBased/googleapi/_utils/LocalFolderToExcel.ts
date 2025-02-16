@@ -28,8 +28,9 @@ export const createExcelFilePathName = (mainExcelDataLength: number, folderName:
 
 const folderToExcel = async (folder: string, _excelRoot: string) => {
     console.log(`folderToExcel ${folder}`);
-    FileConstsUtils.incrementRowCounter()
-    const jsonArray: FileStats[] = await FileUtils.getAllPDFFilesWithMedata(folder, true)
+    const rowCounterController = Math.random().toString(36).substring(7);
+    FileConstsUtils.incrementRowCounter(rowCounterController);
+    const jsonArray: FileStats[] = await FileUtils.getAllPDFFilesWithMedata(folder, true,rowCounterController)
     const { totalFileCount, totalPageCount, totalSizeRaw } = createMetadata(jsonArray);
     addSummaryToExcel(jsonArray, totalFileCount, totalPageCount, totalSizeRaw);
     const _fileName = createExcelFilePathName(jsonArray.length, path.parse(folder)?.base, _excelRoot, "-Final-Merged-Catalog-");

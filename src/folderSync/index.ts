@@ -1,18 +1,17 @@
 import * as FileUtils from "../utils/FileStatsUtils";
-import * as FileConstUtils from "../utils/constants";
 import { FileStats } from "../imgToPdf/utils/types";
 import * as _ from 'lodash';
+import * as FileConstsUtils from "../utils/constants";
 
 
 export const compareFolders = async (src: string, dest: string) => {
     try {
         console.log(`sync src ${src}`);
-        const srcJsonArray = await FileUtils.getAllFileListingWithoutStats({directoryPath:src})
-
-        FileConstUtils.incrementRowCounter();
-
+        const srcJsonArray = await FileUtils.getAllFileListingWithoutStats({ directoryPath: src })
+        const rowCounterController = Math.random().toString(36).substring(7);
+        FileConstsUtils.incrementRowCounter(rowCounterController);
         console.log(`sync dest ${dest}`);
-        const destJsonArray = await FileUtils.getAllFileListingWithoutStats({directoryPath:dest})
+        const destJsonArray = await FileUtils.getAllFileListingWithoutStats({ directoryPath: dest })
 
 
         const umMatchedItemsLtoR: Array<FileStats | undefined> = []
