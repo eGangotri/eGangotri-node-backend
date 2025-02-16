@@ -1,6 +1,6 @@
 import * as express from 'express';
 import { downloadFromGoogleDriveToProfile } from '../cliBased/googleapi/GoogleDriveApiReadAndDownload';
-import { DOWNLOAD_COMPLETED_COUNT, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT, resetDownloadCounters, resetDownloadCounters2 } from '../cliBased/pdf/utils';
+import {  DOWNLOAD_COMPLETED_COUNT2, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT2, resetDownloadCounters2 } from '../cliBased/pdf/utils';
 import { timeInfo } from '../mirror/FrontEndBackendCommonCode';
 import { PDF_TYPE } from '../cliBased/googleapi/_utils/constants';
 import { genLinksAndFolders, validateGenGDriveLinks } from '../services/yarnListMakerService';
@@ -103,6 +103,7 @@ gDriveRoute.post('/getGoogleDriveListingAsExcel', async (req: any, resp: any) =>
                 const _resps = [];
                 for (let i = 0; i < _links.length; i++) {
                     console.log(`getGoogleDriveListingAsExcel:loop ${_links[i]} ${_folders[i]} (${allNotJustPdfs})`)
+                    const resetRowCounter = Math.random().toString(36).substring(7);
                     FileConstUtils.resetRowCounter();
                     const listingResult = await generateGoogleDriveListingExcel(_links[i],
                         _folders[i], reduced,
@@ -150,15 +151,16 @@ gDriveRoute.post('/downloadGDriveItemsViaExcel', async (req: any, resp: any) => 
             });
         }
         const excelLinksData = convertGDriveExcelToLinkData(excelPath);
-        resetDownloadCounters()
-        const _results = await downloadGDriveData(excelLinksData, profileOrPath);
+        const downloadCounterController = Math.random().toString(36).substring(7);
+        resetDownloadCounters2(downloadCounterController)
+        const _results = await downloadGDriveData(excelLinksData, profileOrPath,downloadCounterController);
 
-        console.log(`Success count: ${DOWNLOAD_COMPLETED_COUNT}`);
-        console.log(`Error count: ${DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT}`);
+        console.log(`Success count: ${DOWNLOAD_COMPLETED_COUNT2(downloadCounterController)}`);
+        console.log(`Error count: ${DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT2(downloadCounterController)}`);
         const _resp = {
-            status: `${DOWNLOAD_COMPLETED_COUNT} out of ${DOWNLOAD_COMPLETED_COUNT + DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT} made it`,
-            success_count: DOWNLOAD_COMPLETED_COUNT,
-            error_count: DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT,
+            status: `${DOWNLOAD_COMPLETED_COUNT2(downloadCounterController)} out of ${DOWNLOAD_COMPLETED_COUNT2(downloadCounterController) + DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT2(downloadCounterController)} made it`,
+            success_count: DOWNLOAD_COMPLETED_COUNT2(downloadCounterController),
+            error_count: DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT2(downloadCounterController),
             ..._results
         }
         console.log(`_resp : ${JSON.stringify(_resp)}`);
