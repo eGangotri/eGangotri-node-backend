@@ -175,7 +175,8 @@ export const convertGDriveExcelToLinkData =
 
 
 export const downloadGDriveData = async (googleDriveData:GDriveExcelData[],
-  pdfDumpFolder:string
+  pdfDumpFolder:string,
+  downloadCounterController = ""
 ) => {
   const promises = googleDriveData.map(_data => {
     console.log(`_data: ${JSON.stringify(_data)}}`);
@@ -186,7 +187,8 @@ export const downloadGDriveData = async (googleDriveData:GDriveExcelData[],
     }
 
     return downloadFileFromGoogleDrive(_data.linkToFileLocation,
-      pdfDumpWithPathAppended, _data.titleInGoogleDrive, _data?.sizeInBytes, "")
+      pdfDumpWithPathAppended, _data.titleInGoogleDrive, _data?.sizeInBytes, "",
+      downloadCounterController)
   });
   const results = await Promise.all(promises);
   return results
