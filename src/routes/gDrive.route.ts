@@ -150,6 +150,16 @@ gDriveRoute.post('/downloadGDriveItemsViaExcel', async (req: any, resp: any) => 
                 }
             });
         }
+        const checkValidPath = isValidPath(excelPath);
+        if (!checkValidPath) {
+            return resp.status(400).send({
+                response: {
+                    "status": "failed",
+                    "success": false,
+                    "msg": `Invalid Excel (${excelPath}). Pls. provide a valid Excel`
+                }
+            });
+        }   
         const excelLinksData = convertGDriveExcelToLinkData(excelPath);
         const downloadCounterController = Math.random().toString(36).substring(7);
         resetDownloadCounters2(downloadCounterController)
