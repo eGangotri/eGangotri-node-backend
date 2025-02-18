@@ -34,8 +34,8 @@ export const isValidDirectory = async (dirPath: string): Promise<boolean> => {
     }
 };
 
-
-export const countPDFsInFolder = async (folderPath: string, ignoreFolder: string = "@#@#$@#$"): Promise<number> => {
+export const countPDFsInFolder = async (folderPath: string, 
+    ignoreFolders: string[] = ["2#@#$JIESFSF"]): Promise<number> => {
     let pdfCount = 0;
 
     const readDirRecursive = async (dir: string) => {
@@ -45,7 +45,7 @@ export const countPDFsInFolder = async (folderPath: string, ignoreFolder: string
             const fullPath = path.join(dir, entry.name);
 
             if (entry.isDirectory()) {
-                if (entry.name === ignoreFolder) {
+                if (ignoreFolders.includes(entry.name)) {
                     console.log(`Ignoring folder: ${fullPath}`);
                     continue;
                 }
@@ -59,6 +59,7 @@ export const countPDFsInFolder = async (folderPath: string, ignoreFolder: string
     await readDirRecursive(folderPath);
     return pdfCount;
 };
+
 
 export const removeExcept = async (folder: any, except: Array<string>) => {
     const contentList = await fs.promises.readdir(folder)

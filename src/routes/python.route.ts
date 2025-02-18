@@ -1,6 +1,6 @@
 import * as express from 'express';
 import { DEFAULT_PDF_PAGE_EXTRACTION_COUNT } from '../cliBased/pdf/extractFirstAndLastNPages';
-import { runPthonPdfExtractionInLoop } from '../services/pythonCLIService';
+import { runPthonCopyPdfInLoop, runPthonPdfExtractionInLoop } from '../services/pythonRestService';
 
 export const pythonRoute = express.Router();
 
@@ -41,10 +41,46 @@ pythonRoute.post('/getFirstAndLastNPages', async (req: any, resp: any) => {
             return;
         }
         const combinedResults = await runPthonPdfExtractionInLoop(_srcFolders, destRootFolder, firstNPages, lastNPages);
-        const stats = combinedResults.filter((x:{success:boolean}) => x.success === true).length;
+        const stats = combinedResults.filter((x: { success: boolean }) => x.success === true).length;
         console.log(`combinedResults extractFirstN: ${stats} of ${combinedResults.length} processed successfully`);
         resp.status(200).send({
-            response : {
+            response: {
+                successes: stats === combinedResults.length,
+                _cumulativeMsg: `${stats} of ${combinedResults.length} processed successfully`,
+                ...combinedResults,
+            }
+        });
+    }
+
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})
+
+pythonRoute.post('/copyAllPdfs', async (req: any, resp: any) => {
+    try {
+        const srcFoldersAsCSV = req?.body?.srcFolders;
+        let destRootFolder = req?.body?.destRootFolder;
+        const _srcFolders: string[] = srcFoldersAsCSV.split(',').map((x: string) => x.trim());
+        console.log(`copyAllPdfs _folders(${_srcFolders.length}) ${_srcFolders} 
+        destRootFolder ${destRootFolder}`);
+
+        if (!srcFoldersAsCSV || !destRootFolder) {
+            resp.status(300).send({
+                response: {
+                    "status": "failed",
+                    "success": false,
+                    "msg": "Pls. provide Src Folder and Dest Folder"
+                }
+            });
+            return;
+        }
+        const combinedResults = await runPthonCopyPdfInLoop(_srcFolders, destRootFolder);
+        const stats = combinedResults.filter((x: { success: boolean }) => x.success === true).length;
+        console.log(`combinedResults copyAllPdfs: ${stats} of ${combinedResults.length} processed successfully`);
+        resp.status(200).send({
+            response: {
                 successes: stats === combinedResults.length,
                 _cumulativeMsg: `${stats} of ${combinedResults.length} processed successfully`,
                 ...combinedResults,
