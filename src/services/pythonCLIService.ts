@@ -3,7 +3,7 @@ import { makePythonCall } from "./pythonLauncherService";
 import fs from 'fs';
 import path from 'path';
 
-export const runPthonPdfExtractionInLoop = async (_srcFolders: string[],
+export const runPthonPdfExtractionInLoopDeprecated = async (_srcFolders: string[],
     destRootFolder: string,
     firstNPages: number,
     lastNPages: number) => {
@@ -12,7 +12,7 @@ export const runPthonPdfExtractionInLoop = async (_srcFolders: string[],
     for (let srcFolder of _srcFolders) {
         try {
             console.log(`runPthonPdfExtractionInLoop srcFolder ${srcFolder} `);
-            const pdfsToReduceCount = await countPDFsInFolder(srcFolder, "reduced");
+            const pdfsToReduceCount = await countPDFsInFolder(srcFolder, ["reduced"]);
             if (isValidDirectory(destRootFolder)) {
                 if (!fs.existsSync(`${destRootFolder}`)) {
                     fs.mkdirSync(`${destRootFolder}`, { recursive: true });

@@ -1,5 +1,5 @@
-import { PYTHON_SERVER_URL } from "db/connection";
-import { countPDFsInFolder, isValidDirectory } from "utils/FileUtils";
+import { PYTHON_SERVER_URL } from "../db/connection";
+import { countPDFsInFolder, isValidDirectory } from "../utils/FileUtils";
 import fs from 'fs';
 import path from 'path';
 
@@ -13,7 +13,7 @@ export const runPthonPdfExtractionInLoop = async (_srcFolders: string[],
     for (let srcFolder of _srcFolders) {
         try {
             console.log(`runPthonPdfExtractionInLoop srcFolder ${srcFolder} `);
-            const pdfsToReduceCount = await countPDFsInFolder(srcFolder, "reduced");
+            const pdfsToReduceCount = await countPDFsInFolder(srcFolder, ["reduced"]);
             if (isValidDirectory(commonDest)) {
                 if (!fs.existsSync(`${commonDest}`)) {
                     fs.mkdirSync(`${commonDest}`, { recursive: true });
@@ -46,7 +46,68 @@ export const runPthonPdfExtractionInLoop = async (_srcFolders: string[],
             combinedResults.push(result);
         }
         catch (err) {
-            console.log('Error', err);
+            console.log('Error runPthonPdfExtractionInLoop:', err);
+            combinedResults.push({
+                err,
+                msg: `Exception ${srcFolder}`,
+                success: false,
+                _srcFolder: srcFolder,
+                destRoot: specificDest,
+            });
+        }
+    }
+    return combinedResults;
+}
+
+export const runPthonCopyPdfInLoop = async (_srcFolders: string[],
+    commonDest: string) => {
+    const combinedResults = [];
+    let specificDest = commonDest;
+    for (let srcFolder of _srcFolders) {
+        try {
+            console.log(`runPthonCopyPdfInLoop srcFolder ${srcFolder} `);
+            const pdfsToMoveCount = await countPDFsInFolder(srcFolder, ["-copy"]);
+            if (isValidDirectory(commonDest)) {
+                if (!fs.existsSync(`${commonDest}`)) {
+                    fs.mkdirSync(`${commonDest}`, { recursive: true });
+                    console.log(`Folder created: ${commonDest}`);
+                }
+                else {
+                    console.log(`directory exists: ${commonDest}`);
+
+                }
+            }
+            else {
+                specificDest = `${srcFolder}\\-copy`;
+                if (!fs.existsSync(`${specificDest}`)) {
+                    fs.mkdirSync(`${specificDest}`, { recursive: true });
+                    console.log(`Folder created: ${specificDest}`);
+                }
+                console.log(`Folder created: ${specificDest}`);
+
+            }
+            console.log(`runPthonCopyPdfInLoop srcFolder ${srcFolder} specificDest ${specificDest}`);
+
+            const _resp = await executePythonPostCall(
+                {
+                    "input_folder": srcFolder,
+                    "output_folder": specificDest,
+                }, 'copyOnlyPdfs');
+
+            const destRootDump = `${specificDest}\\${path.basename(srcFolder)}(${pdfsToMoveCount})`;
+            const pdfsMovedCount = await countPDFsInFolder(destRootDump);
+            const result = {
+                msg: `${pdfsToMoveCount} pdfs moved to new dest with count ${pdfsMovedCount}`,
+                srcFolder,
+                destRootDump,
+                isReductionCountMatch: pdfsToMoveCount === pdfsMovedCount,
+                ..._resp,
+            }
+            console.log('result', result);
+            combinedResults.push(result);
+        }
+        catch (err) {
+            console.log('Error runPthonCopyPdfInLoop:', err);
             combinedResults.push({
                 err,
                 msg: `Exception ${srcFolder}`,
@@ -63,12 +124,14 @@ const checkPythonServer = async (): Promise<{ success: boolean, message: string 
     // Check if the server is running
     const serverCheckResponse = await fetch(PYTHON_SERVER_URL);
     if (!serverCheckResponse.ok) {
+        console.log('Python server is not running');
         return {
             success: false,
             message: 'Python server is not running'
         }
     }
     else {
+        console.log('Python server is running');
         return {
             success: true,
             message: 'Python server is running'
