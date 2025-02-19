@@ -1,7 +1,4 @@
-<<<<<<< HEAD
-=======
 zipDump/*.zip
->>>>>>> 94ae3b987dd0a3e988dbdea22162cc68a699ace3
 /src/cliBasedX
 token.json
 *.csv
@@ -43,7 +40,7 @@ bower_components
 build/Release
 
 # Dependency directories
-node_modules/
+node_modules*/
 jspm_packages/
 functions/
 
