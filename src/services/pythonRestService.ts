@@ -62,12 +62,13 @@ export const runPthonPdfExtractionInLoop = async (_srcFolders: string[],
 export const runPthonCopyPdfInLoop = async (_srcFolders: string[],
     commonDest: string) => {
     const combinedResults = [];
-    let specificDest = commonDest;
+    let specificDest = `${commonDest}`;
     for (let srcFolder of _srcFolders) {
         try {
             console.log(`runPthonCopyPdfInLoop srcFolder ${srcFolder} `);
             const pdfsToMoveCount = await countPDFsInFolder(srcFolder, ["-copy"]);
             if (isValidDirectory(commonDest)) {
+                specificDest = `${specificDest}\\${path.basename(srcFolder)}(${pdfsToMoveCount})`
                 if (!fs.existsSync(`${commonDest}`)) {
                     fs.mkdirSync(`${commonDest}`, { recursive: true });
                     console.log(`Folder created: ${commonDest}`);
@@ -78,22 +79,22 @@ export const runPthonCopyPdfInLoop = async (_srcFolders: string[],
                 }
             }
             else {
-                specificDest = `${srcFolder}\\-copy`;
+                specificDest = `${srcFolder}\\-copy}\\${path.basename(srcFolder)}(${pdfsToMoveCount})`
                 if (!fs.existsSync(`${specificDest}`)) {
                     fs.mkdirSync(`${specificDest}`, { recursive: true });
-                    console.log(`Folder created: ${specificDest}`);
+                    console.log(`Copy Folder created: ${specificDest}`);
                 }
                 console.log(`Folder created: ${specificDest}`);
-
             }
             console.log(`runPthonCopyPdfInLoop srcFolder ${srcFolder} specificDest ${specificDest}`);
 
-            const _resp = await executePythonPostCall(
-                {
+            const _resp = await executePythonPostCall({
                     "input_folder": srcFolder,
                     "output_folder": specificDest,
                 }, 'copyOnlyPdfs');
-
+            console.log(`runPthonCopyPdfInLoop
+                 srcFolder ${srcFolder} specificDest ${specificDest} pdfsToMoveCount ${pdfsToMoveCount}
+                 _resp ${JSON.stringify(_resp)}`);
             const destRootDump = `${specificDest}\\${path.basename(srcFolder)}(${pdfsToMoveCount})`;
             const pdfsMovedCount = await countPDFsInFolder(destRootDump);
             const result = {
