@@ -123,7 +123,7 @@ export const runPythonCopyPdfInLoop = async (_srcFolders: string[],
 
 
 export const runCr2ToJpgInLoop = async (_srcFolders: string[],
-    commonDest: string) => {
+    commonDest: string = undefined) => {
     const combinedResults = [];
     let specificDest = `${commonDest}`;
     for (let srcFolder of _srcFolders) {
