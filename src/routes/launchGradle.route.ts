@@ -12,6 +12,7 @@ import { itemsUsheredVerficationAndDBFlagUpdate } from '../services/itemsUshered
 import { getLatestUploadCycle } from '../services/uploadCycleService';
 import { checkIfEmpty } from '../utils/FileUtils';
 import { timeInfo } from '../mirror/FrontEndBackendCommonCode';
+import { runCr2ToJpgInLoop } from '../services/pythonRestService';
 
 export const launchGradleRoute = express.Router();
 
@@ -535,12 +536,13 @@ launchGradleRoute.post('/imgFilesToPdfGradleVersion', async (req: any, resp: any
         const results = [];
         const _folder = folder.includes(",") ? folder.split(",").map((link: string) => link.trim()) : [folder.trim()];
         console.log(`gradle/imgFilesToPdf:folder: ${_folder} imgType: ${imgType}`);
+        if (imgType === "CR2") {
+            const res = await runCr2ToJpgInLoop(_folder);
+            results.push(res);
+        }
+        else {
+            for (const aFolder of _folder) {
 
-        for (const aFolder of _folder) {
-            if (imgType === "CR2") {
-
-            }
-            else {
                 console.log(`imgToPdf for ${aFolder}`)
                 const escapedFolder = aFolder.replace(/\\/g, '\\\\');
                 const _cmd = `gradle imgToPdf --args="\\"${escapedFolder}\\" \\"${imgType}\\""`;
