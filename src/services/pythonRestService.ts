@@ -125,28 +125,16 @@ export const runPythonCopyPdfInLoop = async (_srcFolders: string[],
 export const runCr2ToJpgInLoop = async (_srcFolders: string[],
     commonDest: string = undefined) => {
     const combinedResults = [];
-    let specificDest = `${commonDest}`;
+    let specificDest = ""
     for (let srcFolder of _srcFolders) {
         try {
+            specificDest = commonDest ? `${commonDest}` : `${srcFolder}\\-cr2-jpg`;
             console.log(`runCr2ToJpgInLoop srcFolder ${srcFolder} `);
-            if (isValidDirectory(commonDest)) {
-                specificDest = `${specificDest}\\${path.basename(srcFolder)}`
-                if (!fs.existsSync(`${commonDest}`)) {
-                    fs.mkdirSync(`${commonDest}`, { recursive: true });
-                    console.log(`Folder created: ${commonDest}`);
-                }
-                else {
-                    console.log(`directory exists: ${commonDest}`);
-                }
+            if (!fs.existsSync(`${specificDest}`)) {
+                fs.mkdirSync(`${specificDest}`, { recursive: true });
+                console.log(`Copy Folder created: ${specificDest}`);
             }
-            else {
-                specificDest = `${srcFolder}\\-cr2-jpg}\\${path.basename(srcFolder)}`
-                if (!fs.existsSync(`${specificDest}`)) {
-                    fs.mkdirSync(`${specificDest}`, { recursive: true });
-                    console.log(`Copy Folder created: ${specificDest}`);
-                }
-                console.log(`Folder created: ${specificDest}`);
-            }
+            console.log(`Folder created: ${specificDest}`);
             console.log(`runCr2ToJpgInLoop srcFolder ${srcFolder} specificDest ${specificDest}`);
 
             const _resp = await executePythonPostCall({
