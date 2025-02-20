@@ -59,7 +59,7 @@ export const runPthonPdfExtractionInLoop = async (_srcFolders: string[],
     return combinedResults;
 }
 
-export const runPthonCopyPdfInLoop = async (_srcFolders: string[],
+export const runPythonCopyPdfInLoop = async (_srcFolders: string[],
     commonDest: string) => {
     const combinedResults = [];
     let specificDest = `${commonDest}`;
@@ -89,9 +89,9 @@ export const runPthonCopyPdfInLoop = async (_srcFolders: string[],
             console.log(`runPthonCopyPdfInLoop srcFolder ${srcFolder} specificDest ${specificDest}`);
 
             const _resp = await executePythonPostCall({
-                    "input_folder": srcFolder,
-                    "output_folder": specificDest,
-                }, 'copyOnlyPdfs');
+                "input_folder": srcFolder,
+                "output_folder": specificDest,
+            }, 'copyOnlyPdfs');
             console.log(`runPthonCopyPdfInLoop
                  srcFolder ${srcFolder} specificDest ${specificDest} pdfsToMoveCount ${pdfsToMoveCount}
                  _resp ${JSON.stringify(_resp)}`);
@@ -121,6 +121,64 @@ export const runPthonCopyPdfInLoop = async (_srcFolders: string[],
     return combinedResults;
 }
 
+
+export const runCr2ToJpgInLoop = async (_srcFolders: string[],
+    commonDest: string) => {
+    const combinedResults = [];
+    let specificDest = `${commonDest}`;
+    for (let srcFolder of _srcFolders) {
+        try {
+            console.log(`runCr2ToJpgInLoop srcFolder ${srcFolder} `);
+            if (isValidDirectory(commonDest)) {
+                specificDest = `${specificDest}\\${path.basename(srcFolder)}`
+                if (!fs.existsSync(`${commonDest}`)) {
+                    fs.mkdirSync(`${commonDest}`, { recursive: true });
+                    console.log(`Folder created: ${commonDest}`);
+                }
+                else {
+                    console.log(`directory exists: ${commonDest}`);
+                }
+            }
+            else {
+                specificDest = `${srcFolder}\\-cr2-jpg}\\${path.basename(srcFolder)}`
+                if (!fs.existsSync(`${specificDest}`)) {
+                    fs.mkdirSync(`${specificDest}`, { recursive: true });
+                    console.log(`Copy Folder created: ${specificDest}`);
+                }
+                console.log(`Folder created: ${specificDest}`);
+            }
+            console.log(`runCr2ToJpgInLoop srcFolder ${srcFolder} specificDest ${specificDest}`);
+
+            const _resp = await executePythonPostCall({
+                "cr2_folder": srcFolder,
+                "output_jpg_path": specificDest,
+            }, 'cr2ToJpg');
+
+            console.log(`runPthonCopyPdfInLoop
+                 srcFolder ${srcFolder} specificDest ${specificDest} 
+                 _resp ${JSON.stringify(_resp)}`);
+
+            const result = {
+                srcFolder,
+                specificDest,
+                ..._resp,
+            }
+            console.log('result', result);
+            combinedResults.push(result);
+        }
+        catch (err) {
+            console.log('Error runPthonCopyPdfInLoop:', err);
+            combinedResults.push({
+                err,
+                msg: `Exception ${srcFolder}`,
+                success: false,
+                _srcFolder: srcFolder,
+                destRoot: specificDest,
+            });
+        }
+    }
+    return combinedResults;
+}
 const checkPythonServer = async (): Promise<{ success: boolean, message: string }> => {
     // Check if the server is running
     const serverCheckResponse = await fetch(PYTHON_SERVER_URL);

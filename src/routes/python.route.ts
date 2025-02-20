@@ -1,6 +1,6 @@
 import * as express from 'express';
 import { DEFAULT_PDF_PAGE_EXTRACTION_COUNT } from '../cliBased/pdf/extractFirstAndLastNPages';
-import { runPthonCopyPdfInLoop, runPthonPdfExtractionInLoop } from '../services/pythonRestService';
+import { runPythonCopyPdfInLoop, runPthonPdfExtractionInLoop } from '../services/pythonRestService';
 
 export const pythonRoute = express.Router();
 
@@ -76,7 +76,7 @@ pythonRoute.post('/copyAllPdfs', async (req: any, resp: any) => {
             });
             return;
         }
-        const combinedResults = await runPthonCopyPdfInLoop(_srcFolders, destRootFolder);
+        const combinedResults = await runPythonCopyPdfInLoop(_srcFolders, destRootFolder);
         const stats = combinedResults.filter((x: { success: boolean }) => x.success === true).length;
         console.log(`combinedResults copyAllPdfs: ${stats} of ${combinedResults.length} processed successfully`);
         resp.status(200).send({

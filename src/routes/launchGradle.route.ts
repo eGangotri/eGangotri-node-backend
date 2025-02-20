@@ -537,12 +537,17 @@ launchGradleRoute.post('/imgFilesToPdfGradleVersion', async (req: any, resp: any
         console.log(`gradle/imgFilesToPdf:folder: ${_folder} imgType: ${imgType}`);
 
         for (const aFolder of _folder) {
-            console.log(`imgToPdf for ${aFolder}`)
-            const escapedFolder = aFolder.replace(/\\/g, '\\\\');
-            const _cmd = `gradle imgToPdf --args="\\"${escapedFolder}\\" \\"${imgType}\\""`;
-            console.log(`_cmd ${_cmd}`);
-            const res = await makeGradleCall(_cmd)
-            results.push(res);
+            if (imgType === "CR2") {
+
+            }
+            else {
+                console.log(`imgToPdf for ${aFolder}`)
+                const escapedFolder = aFolder.replace(/\\/g, '\\\\');
+                const _cmd = `gradle imgToPdf --args="\\"${escapedFolder}\\" \\"${imgType}\\""`;
+                console.log(`_cmd ${_cmd}`);
+                const res = await makeGradleCall(_cmd)
+                results.push(res);
+            }
         }
         const endTime = Date.now();
         const timeTaken = endTime - startTime;

@@ -50,7 +50,7 @@ export async function zipFiles(filePaths: string[],
     });
 }
 
-function findZipFiles(dir: string, zipFiles: string[] = []): string[] {
+export function findZipFiles(dir: string, zipFiles: string[] = []): string[] {
     const files = fs.readdirSync(dir);
     for (const file of files) {
         const filePath = path.join(dir, file);
@@ -66,7 +66,7 @@ function findZipFiles(dir: string, zipFiles: string[] = []): string[] {
 
 
 
-function unzipFilesDeprecated2(filePath: string, outputDir: string): Promise<void> {
+function unzipFiles(filePath: string, outputDir: string): Promise<void> {
     return new Promise((resolve, reject) => {
         yauzl.open(filePath, { lazyEntries: true }, (err, zipfile) => {
             if (err) {
@@ -119,89 +119,6 @@ function unzipFilesDeprecated2(filePath: string, outputDir: string): Promise<voi
             });
         });
     });
-}
-
-
-async function unzipFiles(filePath: string, outputDir: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    yauzl.open(filePath, { lazyEntries: true }, async (err, zipfile) => {
-      if (err) return reject(err);
-
-      try {
-        let activeOperations = 0;
-        const queue: yauzl.Entry[] = [];
-        let isProcessing = false;
-
-        // Process queue with concurrency control
-        const processQueue = async () => {
-          while (activeOperations < MAX_CONCURRENCY && queue.length > 0) {
-            const entry = queue.shift()!;
-            activeOperations++;
-            
-            try {
-              if (/\/$/.test(entry.fileName)) {
-                // Directory entry
-                const dirPath = path.join(outputDir, entry.fileName);
-                await fs.promises.mkdir(dirPath, { recursive: true });
-              } else {
-                // File entry
-                await new Promise<void>((resolveFile, rejectFile) => {
-                  zipfile.openReadStream(entry, async (err, readStream) => {
-                    if (err) return rejectFile(err);
-
-                    try {
-                      const filePath = path.join(outputDir, entry.fileName);
-                      const dirPath = path.dirname(filePath);
-                      
-                      // Create parent directory first
-                      await fs.promises.mkdir(dirPath, { recursive: true });
-                      
-                      const writeStream = fs.createWriteStream(filePath);
-                      
-                      // Use stream.pipeline for proper error handling
-                      await pipeline(readStream, writeStream);
-                      resolveFile();
-                    } catch (error) {
-                      rejectFile(error);
-                    }
-                  });
-                });
-              }
-            } catch (error) {
-              reject(error);
-              return;
-            } finally {
-              activeOperations--;
-              processQueue(); // Continue processing
-            }
-          }
-
-          // Check completion when queue is empty
-          if (queue.length === 0 && activeOperations === 0 && isProcessing) {
-            zipfile.close();
-            resolve();
-          }
-        };
-
-        zipfile.on("entry", (entry) => {
-          queue.push(entry);
-          if (!isProcessing) {
-            isProcessing = true;
-            processQueue();
-          }
-        });
-
-        zipfile.on("end", () => {
-          isProcessing = false;
-          processQueue(); // Final check in case entries finished before queue was empty
-        });
-
-        zipfile.readEntry();
-      } catch (error) {
-        reject(error);
-      }
-    });
-  });
 }
 
 export async function unzipAllFilesInDirectory(pathToZipFiles: string, _unzipHere: string = "", ignoreFolder = ""):
