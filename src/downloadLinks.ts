@@ -1,5 +1,5 @@
 const puppeteer = require('puppeteer');
-import fs from 'fs';
+import * as fsPromise from 'fs/promises';
 
 (async event => {
     const link = 'https://203.88.139.46/ihg/tree_1/brwhtm/';
@@ -17,7 +17,6 @@ import fs from 'fs';
         await page.setViewport({ width: 1199, height: 900 });
 
         await page.goto(link);
-
 
         const hrefs: string[] = await getHrefs(page);
 
@@ -39,9 +38,7 @@ import fs from 'fs';
                             await page.goto(subHref);
                             const _content = await page.$eval('pre', (el:any) => el.innerText);
                             console.log(`_content ${_content}`)
-                            fs.writeFile(`./downloads/${folderName}_${fileName}`, _content, 'utf8', function (err) {
-                                if (err) return console.log(err);
-                            });
+                            await fsPromise.writeFile(`./downloads/${folderName}_${fileName}`, _content, 'utf8');
                         }
                         else if(subHref.endsWith('.htm')){
                             const splitArray =  subHref.split("/")
@@ -51,9 +48,7 @@ import fs from 'fs';
                             await page.goto(subHref);
                             const _content = await page.content();
                             console.log(`_content ${_content}`)
-                            fs.writeFile(`./downloads/${folderName}_${fileName}`, _content, 'utf8' ,function (err) {
-                                if (err) return console.log(err);
-                            });
+                            await fs.writeFile(`./downloads/${folderName}_${fileName}`, _content, 'utf8');
                         }
                     }
                 }
