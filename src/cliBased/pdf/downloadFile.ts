@@ -17,7 +17,7 @@ export const downloadFileFromGoogleDrive = async (driveLinkOrFolderId: string,
     downloadCounterController = "") => {
     console.log(`downloadFileFromGoogleDrive ${driveLinkOrFolderId}`)
     const result = await downloadGDriveFileUsingGDriveApi(driveLinkOrFolderId, destPath,
-        fileName, fileSizeRaw, gDriveDownloadTaskId,downloadCounterController);
+        fileName, fileSizeRaw, gDriveDownloadTaskId, downloadCounterController);
     return result;
 }
 
@@ -33,10 +33,10 @@ export const downloadFileFromUrl = async (
     let _result: { success?: boolean, status?: string, error?: string } = {};
     try {
         await new Promise((resolve, reject) => {
-            dl.on('end', () => {
+            dl.on('end', async () => {
                 const index = `(${DOWNLOAD_COMPLETED_COUNT + 1}${dataLength > 0 ? "/" + dataLength : ""})`;
                 console.log(`${index}. Downloaded ${fileName}`);
-                _result = checkFileSizeConsistency(fileDumpFolder, fileName, fileSizeRaw);
+                _result = await checkFileSizeConsistency(fileDumpFolder, fileName, fileSizeRaw);
                 if (_result?.success) {
                     incrementDownloadComplete();
                     _result = {
@@ -79,7 +79,7 @@ export const downloadGDriveFileUsingGDriveApi = (
     driveLinkOrFileID: string,
     destPath: string,
     fileName: string = "",
-    fileSizeRaw = "0", 
+    fileSizeRaw = "0",
     gDriveDownloadTaskId: string = "",
     downloadCounterController = "") => {
     return new Promise(async (resolve, reject) => {
@@ -128,10 +128,11 @@ export const downloadGDriveFileUsingGDriveApi = (
 
             response.data.pipe(dest);
 
-            dest.on('finish', () => {
+            dest.on('finish', async () => {
                 console.log(`Download complete for "${fileName}"`);
+                const _fileConsistency = await checkFileSizeConsistency(destPath, fileName, fileSizeRaw);
                 const _result = fileSizeRaw
-                    ? checkFileSizeConsistency(destPath, fileName, fileSizeRaw)
+                    ? _fileConsistency
                     : { success: true };
 
                 if (_result?.success) {

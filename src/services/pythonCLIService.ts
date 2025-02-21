@@ -1,6 +1,5 @@
 import { checkFolderExistsSync, countPDFsInFolder, createFolderIfNotExistsAsync, isValidDirectory } from "../utils/FileUtils";
 import { makePythonCall } from "./pythonLauncherService";
-import fs from 'fs';
 import path from 'path';
 
 export const runPthonPdfExtractionInLoopDeprecated = async (_srcFolders: string[],

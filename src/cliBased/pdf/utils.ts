@@ -1,6 +1,6 @@
 import axios from 'axios';
 import fs from 'fs';
-import { getFilzeSize, sizeInfo } from "../../mirror/FrontEndBackendCommonCode";
+import { getFileSizeAsync, sizeInfo } from "../../mirror/FrontEndBackendCommonCode";
 import { extractGoogleDriveId } from "../../mirror/GoogleDriveUtilsCommonCode";
 
 export let DOWNLOAD_COMPLETED_COUNT = 0;
@@ -63,9 +63,9 @@ export function getDownloadCounters2(requestId: string) {
 }
 
 
-export const checkFileSizeConsistency = (pdfDumpFolder: string, fileName: string, fileSizeRaw: string) => {
+export const checkFileSizeConsistency = async (pdfDumpFolder: string, fileName: string, fileSizeRaw: string) => {
     if (fileSizeRaw !== "0") {
-        const fileSizeOfDwnldFile = getFilzeSize(`${pdfDumpFolder}\\${fileName}`);
+        const fileSizeOfDwnldFile = await getFileSizeAsync(`${pdfDumpFolder}\\${fileName}`);
         const fileSizeRawAsInt = parseInt(fileSizeRaw);
         if (fileSizeOfDwnldFile != fileSizeRawAsInt) {
             console.log(`Downloaded file size for (${fileName}) ${fileSizeOfDwnldFile} does not match with expected size ${fileSizeRaw}`);
@@ -120,8 +120,8 @@ export const downloadPdfFromUrlSlow = async (
         response.data.pipe(writer);
 
         await new Promise((resolve, reject) => {
-            writer.on('finish', () => {
-                _result = checkFileSizeConsistency(pdfDumpFolder, fileName, fileSizeRaw);
+            writer.on('finish', async () => {
+                _result = await checkFileSizeConsistency(pdfDumpFolder, fileName, fileSizeRaw);
                 if (_result?.success) {
                     const index = `(${DOWNLOAD_COMPLETED_COUNT + 1}${dataLength > 0 ? "/" + dataLength : ""})`;
                     console.log(`${index}. Downloaded(slow): ${fileName}`);
