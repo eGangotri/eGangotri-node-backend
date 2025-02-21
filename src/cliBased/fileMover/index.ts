@@ -4,16 +4,40 @@ import { FileStats } from "imgToPdf/utils/types";
 
 import * as path from 'path';
 import * as fs from 'fs';
+import * as fsPromise from 'fs/promises';
 import { launchWinExplorer } from "./util";
-import { error } from "console";
 
-export async function moveFilesAndFlatten(sourceDir: string,
-    targetDir: string,
-    pdfOnly = true,
-    ignorePaths = []) {
-    //implement alogrithm
-    //(1) check if any file is open or any file is already present in source Dir
-    // if yes then send msg otherwise continut
+export const moveAFile = async (sourceFileAbsPath: string, targetDir: string, fileName: string, pdfOnly = true) => {
+    const targetFile = path.join(targetDir, fileName);
+    const result = { fileCollisionsResolvedByRename: "", renamedWithoutCollision: "", error: "", targetFile: "" };
+
+    if (!pdfOnly || (pdfOnly && fileName.endsWith('.pdf'))) {
+        try {
+            if (!fs.existsSync(targetFile)) {
+                await fsPromise.rename(sourceFileAbsPath, targetFile);
+                result.renamedWithoutCollision = `${fileName}`;
+                result.targetFile = targetFile;
+            } else {
+                const extension = path.extname(targetFile); // .pdf with .
+                const newName = `${targetFile.replace(`${extension}`, `_1${extension}`)}`;
+                console.log(`File (${extension}) already exists in target dir ${targetFile}. Renaming to ${newName}`);
+                if (!fs.existsSync(newName)) {
+                    await fsPromise.rename(sourceFileAbsPath, newName);
+                    result.fileCollisionsResolvedByRename = `${fileName}`;
+                    console.log(`File already exists in target dir ${targetFile}. Renaming to ${newName}`);
+                } else {
+                    console.error(`File already exists in target dir ${targetFile}. Renaming to ${newName} failed`);
+                    result.error = `File already exists in target dir ${targetFile}. Renaming to ${newName} failed`;
+                }
+            }
+        } catch (err) {
+            result.error = `Error moving file ${sourceFileAbsPath}: ${err.message}`;
+        }
+    }
+    return result;
+};
+
+export async function moveFilesAndFlatten(sourceDir: string, targetDir: string, pdfOnly = true, ignorePaths = []) {
     if (sourceDir === targetDir) {
         return {
             msg: `sourceDir(${sourceDir}) and targetDir(${targetDir}) are same, cancelling move operation`,
@@ -21,18 +45,12 @@ export async function moveFilesAndFlatten(sourceDir: string,
         };
     }
     console.log(`sourceDir ${sourceDir} targetDir ${targetDir}`);
-    let counter = 0;
-    let dirs = [sourceDir];
+
     const allSrcPdfs: FileStats[] = await getAllPDFFilesWithIgnorePathsSpecified(sourceDir, ignorePaths);
-    const fileCollisionsResolvedByRename = [];
-    const filesMoved = [];
-    const filesAbsPathMoved = [];
-    const filesMovedNewAbsPath = [];
-    const errorList = []
     if (allSrcPdfs.length === 0) {
         return {
             success: false,
-            msg: `Nothing-To-Move.No files found in source dir ${sourceDir}`
+            msg: `Nothing-To-Move. No files found in source dir ${sourceDir}`
         };
     }
 
@@ -40,53 +58,57 @@ export async function moveFilesAndFlatten(sourceDir: string,
     if (inUseCheck.success === false) {
         return inUseCheck;
     }
-    //check for collisions
+
     const allDestPdfs: FileStats[] = await getAllPDFFiles(targetDir);
     const collisionCheck = checkCollision(allSrcPdfs, allDestPdfs);
-
     if (collisionCheck.success === false) {
         return collisionCheck;
     }
 
     const _count = allSrcPdfs?.length;
+    const fileCollisionsResolvedByRename = [];
+    const filesMoved = [];
+    const filesAbsPathMoved = [];
+    const filesMovedNewAbsPath = [];
+    const errorList = [];
+
+    const dirs = [sourceDir];
     while (dirs.length > 0) {
         const currentDir = dirs.pop();
-        const files = fs.readdirSync(currentDir, { withFileTypes: true });
+        const files = await fsPromise.readdir(currentDir, { withFileTypes: true });
 
         for (let file of files) {
             const sourceFile = path.join(currentDir, file.name);
 
             if (file.isDirectory()) {
                 dirs.push(sourceFile);
-            }
-            else if (ignorePaths && ignorePaths.some((item: string) => sourceFile.includes(item))) {
+            } else if (ignorePaths && ignorePaths.some((item: string) => sourceFile.includes(item))) {
                 console.log(`:Ignoring ${sourceFile} due to ${ignorePaths}:`);
                 continue;
-            }
-            else {
+            } else {
                 filesMoved.push(`${file.name}`);
                 filesAbsPathMoved.push(sourceFile);
-                const moveAFileRes = moveAFile(sourceFile, targetDir, file.name, pdfOnly);
+                const moveAFileRes = await moveAFile(sourceFile, targetDir, file.name, pdfOnly);
 
-                if (moveAFileRes.renamedWithoutCollision.length > 0) {
-                    fileCollisionsResolvedByRename.push(moveAFileRes.fileCollisionsResolvedByRename)
-                }
-                else if (moveAFileRes.error.length > 0) {
+                if (moveAFileRes.renamedWithoutCollision) {
+                    filesMovedNewAbsPath.push(moveAFileRes.targetFile);
+                } else if (moveAFileRes.error) {
                     errorList.push(moveAFileRes.error);
+                } else if (moveAFileRes.fileCollisionsResolvedByRename) {
+                    fileCollisionsResolvedByRename.push(moveAFileRes.fileCollisionsResolvedByRename);
                 }
-                else if (moveAFileRes.fileCollisionsResolvedByRename.length > 0) {
-                    fileCollisionsResolvedByRename.push(moveAFileRes.fileCollisionsResolvedByRename)
-                }
-                filesMovedNewAbsPath.push(moveAFileRes.targetFile);
             }
         }
     }
-    const msg = `All ${_count} files moved from Source dir ${sourceDir}  to target dir ${targetDir}`
+
+    const msg = `All ${_count} files moved from Source dir ${sourceDir} to target dir ${targetDir}`;
     console.log(msg);
+
     const allSrcPdfsAfter: FileStats[] = await getAllPDFFiles(sourceDir);
     const allDestPdfsAfter: FileStats[] = await getAllPDFFiles(targetDir);
-    await launchWinExplorer(targetDir)
-    await launchWinExplorer(sourceDir)
+    await launchWinExplorer(targetDir);
+    await launchWinExplorer(sourceDir);
+
     return {
         success: (allSrcPdfsAfter?.length === 0 && ((allDestPdfsAfter?.length - allDestPdfs?.length) === _count)),
         msg,
@@ -101,38 +123,6 @@ export async function moveFilesAndFlatten(sourceDir: string,
         errors: errorList
     };
 }
-
-
-export const moveAFile = (sourceFileAbsPath: string,
-    targetDir: string,
-    fileName: string,
-    pdfOnly = true) => {
-    const targetFile = path.join(targetDir, fileName);
-    const result = { fileCollisionsResolvedByRename: "", renamedWithoutCollision: "", error: "", targetFile: "" };
-    if (!pdfOnly || (pdfOnly && fileName.endsWith('.pdf'))) {
-        if (!fs.existsSync(targetFile)) {
-            fs.renameSync(sourceFileAbsPath, targetFile);
-            result.renamedWithoutCollision = `${fileName}`;
-            result.targetFile = targetFile;
-        }
-        else {
-            const extension = path.extname(targetFile); //.pdf with .
-            const newName = `${targetFile.replace(`${extension}`, `_1${extension}`)}`
-            console.log(`File (${extension}) already exists in target dir ${targetFile}. renaming to ${newName} `);
-            if (!fs.existsSync(newName)) {
-                fs.renameSync(sourceFileAbsPath, newName);
-                result.fileCollisionsResolvedByRename = `${fileName}`;
-                console.log(`File already exists in target dir ${targetFile}. renaming to ${newName}`);
-            }
-            else {
-                console.error(`File already exists in target dir ${targetFile}. renaming to ${newName} failed`);
-                result.error = `File already exists in target dir ${targetFile}. renaming to ${newName} failed`;
-            }
-        }
-    }
-    return result;
-}
-
 const checkIfAnyFileInUse = (allSrcPdfs: FileStats[]) => {
     //check if any is in use
     const filesInUse = allSrcPdfs.filter(file => isFileInUse(file.absPath));
