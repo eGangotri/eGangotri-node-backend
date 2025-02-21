@@ -13,13 +13,5 @@ const nonLatin = (jsonArray: LocalFileHeaders) => {
     return nonLatinCharacters
 }
 
-const leftExcelPath = "C:\\_catalogWork\\_collation\\local\\Treasures23"
-const leftExcel = `${leftExcelPath}\\${fs.readdirSync(leftExcelPath).find(x => x.includes(".xlsx"))}`;
-
-console.log(leftExcel)
-
-const leftJsonArray = excelToJson(leftExcel)
-console.log(`leftJsonArray ${leftJsonArray.length}`)
-leftJsonArray.filter(x => nonLatin(x as LocalFileHeaders));
 
 //pnpm run findNonLatin
