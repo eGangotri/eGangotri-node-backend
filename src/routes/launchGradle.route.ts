@@ -127,7 +127,7 @@ launchGradleRoute.get('/launchUploaderViaUploadCycleId', async (req: any, resp: 
         //to account for nulls
         const _failedForUploadCycleId = uploadCyclesByCycleId.filter(x => x?.uploadFlag !== true)
         if (_failedForUploadCycleId.length > 0) {
-            const jsonFileName = createJsonFileForUpload(uploadCycleId,
+            const jsonFileName = await createJsonFileForUpload(uploadCycleId,
                 _failedForUploadCycleId,
                 `${_failedForUploadCycleId.length}-of-${uploadCyclesByCycleId.length}`)
             const res = await launchUploaderViaJson(jsonFileName)
@@ -271,7 +271,7 @@ const reuploadFailedLogic = async (uploadCycleId: string) => {
     //to account for nulls
     const _failedForUploacCycleId = uploadCyclesByCycleId.filter(x => x?.uploadFlag !== true)
     if (_failedForUploacCycleId.length > 0) {
-        const jsonFileName = createJsonFileForUpload(uploadCycleId,
+        const jsonFileName = await createJsonFileForUpload(uploadCycleId,
             _failedForUploacCycleId,
             `${_failedForUploacCycleId.length}-of-${uploadCyclesByCycleId.length}`)
 
