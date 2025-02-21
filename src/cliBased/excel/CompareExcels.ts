@@ -1,8 +1,8 @@
 import { GDriveExcelHeaders, LocalFileHeaders } from "../googleapi/types";
 import { LOCAL_FILE_NAME_HEADER, titleInGoogleDrive } from "../googleapi/_utils/constants";
 import { excelToJson } from "./ExcelUtils";
-import * as fs from 'fs';
 import * as _ from 'lodash';
+import * as fsPromise from 'fs/promises';
 
 
 let noMatch: string[] = []
@@ -103,22 +103,4 @@ const compareLocalToReduced = (localArray: LocalFileHeaders[], localReducedArray
     report();
 }
 
-const leftExcelPath = "C:\\_catalogWork\\_collation\\local\\Treasures24"
-//"C:\\_catalogWork\\_collation\\_googleDriveExcels\\Treasures 32";
-const rightExcelPath = "C:\\_catalogWork\\_collation\\_catReducedLocalPdfExcels\\Treasures24 (1174)"
-// C:\\_catalogWork\\_collation\\local\\Treasures32";
-
-const leftExcel = `${leftExcelPath}\\${fs.readdirSync(leftExcelPath).find(x => x.includes(".xlsx"))}`;
-const rightExcel = `${rightExcelPath}\\${fs.readdirSync(rightExcelPath).find(x => x.includes(".xlsx"))}`;
-
-console.log(leftExcel)
-console.log(rightExcel + "\n");
-
-const leftJsonArray = excelToJson(leftExcel)
-const rightJsonArray = excelToJson(rightExcel)
-
-console.log(`leftJsonArray ${leftJsonArray.length}`)
-console.log(`rightJsonArray ${rightJsonArray.length}\n`)
-
-compareLocalToReduced(leftJsonArray, rightJsonArray);
 //pnpm run compareExcels
