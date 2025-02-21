@@ -3,14 +3,14 @@ import fs from 'fs';
 import moment from 'moment';
 import { DD_MM_YYYY_HH_MMFORMAT } from '../../../utils/utils';
 import * as path from "path";
-import { createDirIfNotExists } from 'utils/FileUtils';
+import { createDirIfNotExistsAsync } from 'utils/FileUtils';
 
 export async function createFileNameWithPathForExport(folderId: string,
     _umbrellaFolder: string,
     exportDestFolder: string,
     itemCount: number) {
     const _csvDumpFolder = `${exportDestFolder}\\${_umbrellaFolder}`;
-    await createDirIfNotExists(_csvDumpFolder);
+    await createDirIfNotExistsAsync(_csvDumpFolder);
     const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT) + "_HOURS"
     const fileNameWithPath = `${_csvDumpFolder}\\${_umbrellaFolder}-${itemCount}Items-${timeComponent}-${folderId}`;
     return fileNameWithPath;
