@@ -25,7 +25,6 @@
     "combineExcels": "ts-node ./src/cliBased/googleapi/_utils/CombineMainAndReducedExcelData",
     "excelutil": "ts-node ./src/cliBased/googleapi/_utils/ExcelUtils",
     "findLongestFileName": "ts-node ./src/utils/utils",
-    "mergeExcels": "ts-node ./src/cliBased/googleapi/_utils/MergeExcels",
     "callUrl": "ts-node ./src/cliBased/googleapi/_utils/ExcelUtils",
     "moveLongNames": "ts-node ./src/cliBased/googleapi/_utils/MoveLongFileNamesToRoot",
     "tallyWithLocal": "ts-node ./src/cliBased/googleapi/_utils/TallyLocalFolderWithGoogleDriveExcel",

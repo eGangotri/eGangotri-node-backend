@@ -3,10 +3,9 @@ import { getAllPDFFiles, getAllPDFFilesWithIgnorePathsSpecified } from "../../ut
 import { FileStats } from "imgToPdf/utils/types";
 
 import * as path from 'path';
-import * as fs from 'fs';
 import * as fsPromise from 'fs/promises';
 import { launchWinExplorer } from "./util";
-import { checkFolderExistsSync } from "utils/FileUtils";
+import { checkFolderExistsSync } from "../../utils/FileUtils";
 
 export const moveAFile = async (sourceFileAbsPath: string, targetDir: string, fileName: string, pdfOnly = true) => {
     const targetFile = path.join(targetDir, fileName);

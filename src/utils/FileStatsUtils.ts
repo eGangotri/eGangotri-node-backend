@@ -1,4 +1,3 @@
-import * as fs from 'fs';
 import * as fsPromise from 'fs/promises';
 
 import { getPdfPageCountUsingPdfLib } from "../imgToPdf/utils/PdfLibUtils";

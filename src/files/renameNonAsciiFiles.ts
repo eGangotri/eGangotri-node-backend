@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { getAllFileListingWithoutStats } from "../utils/FileStatsUtils";
 import os from "os";
-import { checkFolderExistsSync, createFolderIfNotExistsAsync } from "utils/FileUtils";
+import { createFolderIfNotExistsAsync } from "utils/FileUtils";
 
 export const renameNonAsciiFile = async (
     fileAbsPath: string,

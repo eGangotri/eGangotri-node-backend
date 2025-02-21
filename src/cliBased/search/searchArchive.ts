@@ -1,5 +1,4 @@
 import { excelToJson } from "../excel/ExcelUtils";
-import * as fs from 'fs';
 import * as _ from 'lodash';
 import { GDriveExcelHeaders } from "../../cliBased/googleapi/types";
 import { titleInGoogleDrive } from "../../cliBased/googleapi/_utils/constants";
@@ -52,11 +51,5 @@ function doReplacements(input: string): string {
     }
     return input;
 }
-const _excelPath = "C:\\_catalogWork\\_collation\\_googleDriveExcels\\Treasures";
 
-const leftExcel = `${_excelPath}\\${fs.readdirSync(_excelPath).find(x => x.includes(".xlsx"))}`;
-
-console.log(`leftExcel ${leftExcel}`)
-
-searchArchive(leftExcel);
 //pnpm run searchArchive
