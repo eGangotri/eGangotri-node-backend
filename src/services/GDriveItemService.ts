@@ -5,14 +5,12 @@ import { GDriveItem } from "../models/GDriveItem";
 import { excelToJson, jsonToExcel } from "../cliBased/excel/ExcelUtils";
 import { folderName, titleInGoogleDrive } from "../cliBased/googleapi/_utils/constants";
 import { DD_MM_YYYY_HH_MMFORMAT } from "../utils/constants";
-import fs from 'fs';
-import * as fsExtra from 'fs-extra';
 import moment from "moment";
 import path from "path";
 import _, { String } from "lodash";
 import { downloadFileFromGoogleDrive } from "../cliBased/pdf/downloadFile";
 import { GDriveExcelData } from "../cliBased/googleapi/types";
-import { checkFolderExistsSync } from "utils/FileUtils";
+import { createDirIfNotExists } from "utils/FileUtils";
 
 export async function getListOfGDriveItems(queryOptions: GDriveItemListOptionsType) {
   const { limit, mongoOptionsFilter } = setOptionsForGDriveListing(queryOptions)
@@ -179,13 +177,11 @@ export const downloadGDriveData = async (googleDriveData:GDriveExcelData[],
   pdfDumpFolder:string,
   downloadCounterController = ""
 ) => {
-  const promises = googleDriveData.map(_data => {
+  const promises = googleDriveData.map(async (_data) => {
     console.log(`_data: ${JSON.stringify(_data)}}`);
     const pdfDumpWithPathAppended = pdfDumpFolder + path.sep + _data.folderName;
     console.log(`pdfDumpWithPathAppended: ${pdfDumpWithPathAppended}`);
-    if (!checkFolderExistsSync(pdfDumpWithPathAppended)) {
-      fsExtra.ensureDirSync(pdfDumpWithPathAppended);
-    }
+    await createDirIfNotExists(pdfDumpWithPathAppended);
 
     return downloadFileFromGoogleDrive(_data.linkToFileLocation,
       pdfDumpWithPathAppended, _data.titleInGoogleDrive, _data?.sizeInBytes, "",

@@ -3,9 +3,7 @@ import { listFolderContentsAsArrayOfData } from './service/GoogleApiService';
 import { getGoogleDriveInstance } from './service/CreateGoogleDrive';
 import { downloadFileFromGoogleDrive } from '../pdf/downloadFile';
 import { getFolderInSrcRootForProfile } from '../../archiveUpload/ArchiveProfileUtils';
-import fs from 'fs';
 import path from 'path';
-import * as fsExtra from 'fs-extra';
 import { DOWNLOAD_COMPLETED_COUNT, DOWNLOAD_COMPLETED_COUNT2, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT2, DOWNLOAD_FAILED_COUNT, DOWNLOAD_FAILED_COUNT2, resetDownloadCounters, resetDownloadCounters2 } from '../../cliBased/pdf/utils';
 import { insertEntryForGDriveUploadHistory, updateEntryForGDriveUploadHistory } from '../../services/GdriveDownloadRecordService';
 import { getAllPdfsInFolders, getDirectoriesWithFullPath } from '../../imgToPdf/utils/Utils';
@@ -14,7 +12,7 @@ import { isValidPath } from '../../utils/utils';
 import { extractGoogleDriveId } from '../../mirror/GoogleDriveUtilsCommonCode';
 import { PDF_TYPE } from './_utils/constants';
 import { GDriveDownloadHistoryStatus } from '../../utils/constants';
-import { checkFolderExistsSync } from 'utils/FileUtils';
+import { checkFolderExistsSync, createDirIfNotExists } from 'utils/FileUtils';
 
 export const MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE = 200;
 // Create a new Google Drive instance
@@ -50,13 +48,11 @@ async function getAllFilesFromGDrive(driveLinkOrFolderID: string,
   
   updateEntryForGDriveUploadHistory(gDriveDownloadTaskId, GDriveDownloadHistoryStatus.InProgress,`Started download with ${googleDriveData.length} items`);
 
-  const promises = googleDriveData.map(_data => {
+  const promises = googleDriveData.map(async (_data) => {
     console.log(`googleDriveData.map(_data: ${JSON.stringify(_data)}}`);
     const fileDumpWithPathAppended = fileDumpFolder + path.sep + _data.parents;
     console.log(`fileDumpWithPathAppended: ${fileDumpWithPathAppended}`);
-    if (!checkFolderExistsSync(fileDumpWithPathAppended)) {
-      fsExtra.ensureDirSync(fileDumpWithPathAppended);
-    }
+    await createDirIfNotExists(fileDumpWithPathAppended);
 
     return downloadFileFromGoogleDrive(_data.googleDriveLink,
       fileDumpWithPathAppended, _data.fileName, _data?.fileSizeRaw, gDriveDownloadTaskId,downloadCounterController)

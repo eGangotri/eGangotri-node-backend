@@ -79,7 +79,7 @@ export async function getListOfDailyCatWorkReport(queryOptions: DailyCatWorkRepo
 
 
 export const generateCatCSVAsFile = async (res: Response, data: mongoose.Document[]) => {
-  const csvFileName = generateCsvDirAndName("CatalogStaff");
+  const csvFileName = await generateCsvDirAndName("CatalogStaff");
   try {
     // Define the CSV file headers
     const csvWriter = createObjectCsvWriter({
@@ -116,7 +116,7 @@ export const generateCatCSVAsFile = async (res: Response, data: mongoose.Documen
 
 
 export const generateCatCSVAsFileOfAggregates = async (res: Response, data: mongoose.Document[]) => {
-  const csvFileName = generateCsvDirAndName("CatalogStaffAggregates");
+  const csvFileName = await generateCsvDirAndName("CatalogStaffAggregates");
   try {
     // Define the CSV file headers
     const csvWriter = createObjectCsvWriter({
@@ -169,7 +169,7 @@ export const generateCatCSVAsFileOfAggregates = async (res: Response, data: mong
   }
 }
 export const generateCatCSVAsFileForOperatorAndEntryCountOnly = async (res: Response, data: mongoose.Document[]) => {
-  const csvFileName = generateCsvDirAndName("CatalogStaff");
+  const csvFileName = await  generateCsvDirAndName("CatalogStaff");
   try {
     // Define the CSV file headers
     const csvWriter = createObjectCsvWriter({
