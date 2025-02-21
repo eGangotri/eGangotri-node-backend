@@ -1,5 +1,6 @@
 import { PDFDocument } from 'pdf-lib'
 import * as fs from 'fs';
+import * as fsPromise from 'fs/promises';
 import { formatTime, getAllPdfs } from './Utils';
 import { PDF_SIZE_LIMITATIONS } from './PdfUtil';
 import * as path from 'path';
@@ -11,7 +12,7 @@ import { getFilzeSize } from '../../mirror/FrontEndBackendCommonCode';
 export async function getPdfPageCountUsingPdfLib(pdfPath: string) {
     try {
         if (getFilzeSize(pdfPath) <= PDF_SIZE_LIMITATIONS) {
-            const fileBuffer = await fs.promises.readFile(pdfPath);
+            const fileBuffer = await fsPromise.readFile(pdfPath);
             const pdfDoc = await PDFDocument.load(fileBuffer);
             return pdfDoc.getPageCount();
         }
@@ -42,7 +43,7 @@ export async function mergePDFDocuments(documents: Array<any>, pdfName: string) 
         console.log(` copiedPage ${++counter} to ${path.parse(pdfName).name}`)
     }
 
-    return await fs.promises.writeFile(pdfName, await mergedPdf.save());
+    return await fsPromise.writeFile(pdfName, await mergedPdf.save());
 }
 
 export async function mergePdfsInList(pdfFolders: Array<any>, pdfName: string) {

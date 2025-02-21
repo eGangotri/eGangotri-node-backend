@@ -2,15 +2,16 @@ import * as fs from 'fs';
 const v8 = require('v8');
 import * as path from 'path';
 import { PDF_EXT, PNG_EXT } from './constants';
+import * as fsPromise from 'fs/promises';
 
 export const getDirectories = async (source: string) => {
-     const subDirs = await fs.promises.readdir(source, { withFileTypes: true })
+     const subDirs = await fsPromise.readdir(source, { withFileTypes: true })
      return subDirs.filter(dirent => dirent.isDirectory())
           .map(dirent => dirent.name)
 }
 
 export const getDirectoriesWithFullPath = async (source: string) => {
-     const subDirs = await fs.promises.readdir(source, { withFileTypes: true })
+     const subDirs = await fsPromise.readdir(source, { withFileTypes: true })
      return subDirs.filter(dirent => dirent.isDirectory())
           .map(dirent => `${source}\\${dirent.name}`)
 }
@@ -75,7 +76,7 @@ export const getAllDotSumFiles = async (dir: string) => {
 }
 
 export const getAllFilesOfGivenType = async (dir: string, _types: Array<string> = []) => {
-     const contentList = await fs.promises.readdir(dir)
+     const contentList = await fsPromise.readdir(dir)
      let files = contentList.map((x) => dir + "\\" + x).filter((y) => {
           // console.log(`Found ${y}`)
           return _types.includes(path.extname(y).toLowerCase())
@@ -155,5 +156,5 @@ export const chunk = (arr:Array<any>, size:number) => {
 }
 
 export const mkDirIfDoesntExists = async (destFolder:string) => {
-     await fs.promises.mkdir(destFolder, {recursive:true});
+     await fsPromise.mkdir(destFolder, {recursive:true});
 }

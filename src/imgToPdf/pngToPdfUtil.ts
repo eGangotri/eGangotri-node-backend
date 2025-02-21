@@ -7,6 +7,7 @@ import { chunk, formatTime,
 import { getAllPngs } from './utils/ImgUtils';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as fsPromise from 'fs/promises';
 import { CHUNK_SIZE, HANDLE_CHECKSUM, INTRO_PAGE_ADJUSTMENT, REDUNDANT_FOLDER } from '.';
 import { PDF_SUB_FOLDER, PNG_SUB_FOLDER } from './utils/constants';
 import { appendAlphaCodeForNum } from './utils/PngUtils';
@@ -40,13 +41,13 @@ export async function chunkPngs(pngPdfDumpFolder: string) {
         for(let _png of _chunkedPngs){
             const newName = newFolderForChunkedPngs + "\\" + path.parse(_png).name + path.parse(_png).ext;
             //console.log(`newName: ${newName}`);
-            promiseArraySecond.push(fs.promises.rename(_png, newName))
+            promiseArraySecond.push(fsPromise.rename(_png, newName))
         }
     })
     await Promise.all(promiseArraySecond)
     //console.log(`async png chunking over.  Rename Failure Count: ${RENAME_FAILURE_MAP.size}`);
     for (const [_png, newName] of RENAME_FAILURE_MAP.entries()) {
-        await fs.promises.rename(_png, newName);
+        await fsPromise.rename(_png, newName);
     }
 }
 
@@ -103,7 +104,7 @@ async function testChunkPdfsFileCountIsCorrect(pngPdfDumpFolder:string, origPngC
 export async function handleDotSumFile(pngPdfDumpFolder: string, dotSumFiles: Array<string>) {
     if (dotSumFiles?.length > 0) {
         const newDotSumFile = pngPdfDumpFolder + "//" + path.parse(dotSumFiles[0]).name + path.parse(dotSumFiles[0]).ext
-        await fs.promises.writeFile(newDotSumFile, fs.readFileSync(dotSumFiles[0]));
+        await fsPromise.writeFile(newDotSumFile, fs.readFileSync(dotSumFiles[0]));
     }
 }
 

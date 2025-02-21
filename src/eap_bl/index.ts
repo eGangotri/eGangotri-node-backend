@@ -5,6 +5,7 @@ import * as FileUtils from "../utils/FileStatsUtils";
 import { FileStats } from "imgToPdf/utils/types";
 import os from "os";
 import * as fs from 'fs';
+import * as fsPromise from 'fs/promises';
 
 const eapBlExcelPath = "D:\\EAP1435_Metadata_CSDS.xlsm";
 const EAP_EXCEL_AS_JSON_ARRAY = []
@@ -74,7 +75,7 @@ export const generateEAPBLMetadataForProfile = async (profileName: string, excel
     // Check if the vanitize subfolder exists
     const vanitizePath = `${directoryPath}//_vanitized`;
     try {
-        await fs.promises.access(vanitizePath, fs.constants.F_OK);
+        await fsPromise.access(vanitizePath, fs.constants.F_OK);
         console.log(`Subfolder 'vanitize' exists in ${directoryPath}`);
         directoryPath = vanitizePath;
     } catch (err) {
