@@ -66,21 +66,11 @@ export const runPythonCopyPdfInLoop = async (_srcFolders: string[],
             const pdfsToMoveCount = await countPDFsInFolder(srcFolder, ["-copy"]);
             if (isValidDirectory(commonDest)) {
                 specificDest = `${specificDest}\\${path.basename(srcFolder)}(${pdfsToMoveCount})`
-                if (!checkFolderExistsSync(`${commonDest}`)) {
-                    fs.mkdirSync(`${commonDest}`, { recursive: true });
-                    console.log(`Folder created: ${commonDest}`);
-                }
-                else {
-                    console.log(`directory exists: ${commonDest}`);
-
-                }
+                await createDirIfNotExists(commonDest);
             }
             else {
                 specificDest = `${srcFolder}\\-copy}\\${path.basename(srcFolder)}(${pdfsToMoveCount})`
-                if (!checkFolderExistsSync(`${specificDest}`)) {
-                    fs.mkdirSync(`${specificDest}`, { recursive: true });
-                    console.log(`Copy Folder created: ${specificDest}`);
-                }
+                await createDirIfNotExists(specificDest);
                 console.log(`Folder created: ${specificDest}`);
             }
             console.log(`runPthonCopyPdfInLoop srcFolder ${srcFolder} specificDest ${specificDest}`);
