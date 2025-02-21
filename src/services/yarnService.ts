@@ -20,6 +20,7 @@ import { getLatestUploadCycleById } from "./uploadCycleService";
 import { FileMoveTracker } from "../models/FileMoveTracker";
 import { file } from "pdfkit";
 import { error } from "console";
+import { createDirIfNotExistsAsync } from "utils/FileUtils";
 
 const _root = "C:\\_catalogWork\\_collation\\local";
 
@@ -30,9 +31,7 @@ export const moveProfilesToFreeze = async (profileAsCSV: string,
     for (let profile of profileAsCSV.split(',')) {
         const srcPath = getFolderInSrcRootForProfile(profile.trim());
         const destPath = getFolderInDestRootForProfile(profile.trim());
-        if (!checkFolderExistsSync(destPath)) {
-            fs.mkdirSync(destPath, { recursive: true });
-        }
+        await createDirIfNotExistsAsync(destPath)
         if (isValidPath(srcPath) && isValidPath(destPath)) {
             _response.push(await moveFileSrcToDest(srcPath, destPath, flatten, ignorePaths));
         }
@@ -283,7 +282,7 @@ export const publishBookTitlesList = async (argFirst: string, options: {
 
             if (!options.onlyInfoNoExcel) {
                 console.log(`!onlyInfoNoExcel ${options.onlyInfoNoExcel}`)
-                const textFileWrittenTo = createPdfReportAsText(metadata, options.pdfsOnly, path.basename(folder));
+                const textFileWrittenTo = await createPdfReportAsText(metadata, options.pdfsOnly, path.basename(folder));
                 const excelWrittenTo = await createExcelReport(metadata, options.pdfsOnly, path.basename(folder))
                 console.log(`Published Folder Contents for ${folder}\n`)
                 _response.push({
@@ -333,9 +332,9 @@ export const publishBookTitlesList = async (argFirst: string, options: {
     };
 }
 
-function createPdfReportAsText(metadata: Array<FileStats>, pdfsOnly: boolean, folderBase: string) {
+async function createPdfReportAsText(metadata: Array<FileStats>, pdfsOnly: boolean, folderBase: string) {
     const report = generateTextFileContent(metadata, pdfsOnly);
-    const absPath = createFileName(pdfsOnly, metadata.length, folderBase, 'txt');
+    const absPath = await createFileName(pdfsOnly, metadata.length, folderBase, 'txt');
     fs.writeFileSync(absPath, report);
     return absPath;
 }
