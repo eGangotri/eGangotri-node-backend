@@ -1,6 +1,5 @@
 import { PYTHON_SERVER_URL } from "../db/connection";
 import { countPDFsInFolder, createDirIfNotExists, isValidDirectory } from "../utils/FileUtils";
-import fs from 'fs';
 import path from 'path';
 
 

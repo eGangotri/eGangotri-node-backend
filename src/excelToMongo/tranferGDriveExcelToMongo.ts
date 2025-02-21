@@ -77,7 +77,8 @@ export async function gDriveExceltoMongo(directoryPathOrExcel: string) {
     try {
         let gDriveExcel = directoryPathOrExcel
         if (!directoryPathOrExcel.endsWith(".xlsx")) {
-            gDriveExcel = getLatestExcelFile(directoryPathOrExcel)?.latestFilePath
+            const latest = await getLatestExcelFile(directoryPathOrExcel)
+            gDriveExcel = latest.latestFilePath
         }
 
         await connectToMongo(["forUpload"]);

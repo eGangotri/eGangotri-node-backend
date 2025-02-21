@@ -2,18 +2,20 @@ import { combineGDriveAndReducedPdfExcels } from "../cliBased/googleapi/_utils/C
 import { getLatestExcelFile } from "../utils/utils"
 import path from 'path';
 
-export const pickLatestExcelsAndCombineGDriveAndReducedPdfExcels = (mainFilePathAbs: string,
+export const pickLatestExcelsAndCombineGDriveAndReducedPdfExcels = async (mainFilePathAbs: string,
     secondaryFilePathAbs: string, destExcelPath: string) => {
     let mainExcelPath = ""
     let secondaryExcelPath = ""
     if (!mainFilePathAbs.endsWith(".xlsx")) {
-        mainExcelPath = getLatestExcelFile(mainFilePathAbs)?.latestFilePath
+        const latest = await getLatestExcelFile(mainFilePathAbs)
+        mainExcelPath = latest?.latestFilePath
     }
     else {
         mainExcelPath = mainFilePathAbs
     }
     if (!secondaryFilePathAbs.endsWith(".xlsx")) {
-        secondaryExcelPath = getLatestExcelFile(secondaryFilePathAbs)?.latestFilePath
+        const latest2 = await getLatestExcelFile(secondaryFilePathAbs)
+        secondaryExcelPath = latest2.latestFilePath
     }
 
     else {
