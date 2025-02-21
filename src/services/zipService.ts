@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import * as fsPromise from 'fs/promises';
 import archiver from 'archiver';
 import * as path from 'path';
 import { getAllZipFiles } from '../utils/FileStatsUtils';
