@@ -1,7 +1,6 @@
 import { PDF_FONT } from "../imgToPdf/utils/PdfDecoratorUtils";
 import * as PdfLibUtils from '../imgToPdf/utils/PdfLibUtils';
 import * as fsPromise from 'fs/promises';
-import * as fs from 'fs';
 import { getAllPdfsInFolders, mkDirIfDoesntExists } from "../imgToPdf/utils/Utils";
 import { prepareDocument } from "../imgToPdf/utils/PdfUtils";
 const path = require('path');

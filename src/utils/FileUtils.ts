@@ -16,7 +16,20 @@ interface FileInfo {
     file2?: string;
 }
 
-export const checkFolderExistsSync = (folderPath:string) => {
+export function isValidPath(path: string): boolean {
+    let isValid = false;
+    (async () => {
+        try {
+            await fsPromise.access(path);
+            isValid = true;
+        } catch {
+            isValid = false;
+        }
+    })();
+    return isValid;
+}
+
+export const checkFolderExistsSync = (folderPath: string) => {
     return (async () => {
         try {
             await fsPromise.access(folderPath);
@@ -76,15 +89,20 @@ export const countPDFsInFolder = async (folderPath: string,
 
 
 export const removeExcept = async (folder: any, except: Array<string>) => {
-    const contentList = await fsPromise.readdir(folder)
+    const contentList = await fsPromise.readdir(folder);
     const files = contentList.map((x) => folder + "\\" + x).filter((y) => {
-        console.log(`Found ${y}`)
-        return !except.includes(y)
-    }).map(e => fs.unlink(e, (err) => {
-        if (err) throw err;
-        console.log(`${e} was deleted`);
-    }))
+        console.log(`Found ${y}`);
+        return !except.includes(y);
+    });
 
+    for (const file of files) {
+        try {
+            await fsPromise.unlink(file);
+            console.log(`${file} was deleted`);
+        } catch (err) {
+            console.error(`Error deleting ${file}: ${err}`);
+        }
+    }
 }
 
 export const createFolderIfNotExistsAsync = async (dirPath: string) => {
@@ -95,11 +113,6 @@ export const createFolderIfNotExistsAsync = async (dirPath: string) => {
     }
 }
 
-const _fsPromise = {
-    readdir: promisify(fs.readdir),
-    stat: promisify(fs.stat)
-};
-
 export const checkIfEmpty = async (srcPath: string): Promise<boolean> => {
     if (!srcPath) {
         console.log('srcPath is empty.');
@@ -107,10 +120,10 @@ export const checkIfEmpty = async (srcPath: string): Promise<boolean> => {
     }
 
     try {
-        const files = await _fsPromise.readdir(srcPath);
+        const files = await fsPromise.readdir(srcPath);
         for (const file of files) {
             const filePath = path.join(srcPath, file);
-            const stats = await _fsPromise.stat(filePath);
+            const stats = await fsPromise.stat(filePath);
 
             if (stats.isFile()) {
                 console.log('The directory has at least one file.');
@@ -225,3 +238,13 @@ const duplicateBySizeCheck = (metadata: FileStats[], metadata2: FileStats[]) => 
     });
     return duplicates;
 }
+
+export const isFileInUse = async (file: string): Promise<boolean> => {
+    try {
+        const fd = await fsPromise.open(file, 'r+');
+        await fd.close();
+        return false;
+    } catch (err) {
+        return true;
+    }
+};

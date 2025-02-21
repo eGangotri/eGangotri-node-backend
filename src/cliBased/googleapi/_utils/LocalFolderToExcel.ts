@@ -1,15 +1,15 @@
 import path from "path";
+import * as _ from 'lodash';
+import moment from "moment";
+import os from "os";
+
 import * as FileUtils from "../../../utils/FileStatsUtils";
 import * as FileConstsUtils from "../../../utils/constants";
-import * as fs from 'fs';
-import { DD_MM_YYYY_HH_MMFORMAT } from "../../../utils/utils";
-import moment from "moment";
 import { jsonToExcel } from "../../excel/ExcelUtils";
-import * as _ from 'lodash';
-import { FileStats } from "../../../imgToPdf/utils/types";
+import { DD_MM_YYYY_HH_MMFORMAT } from "../../../utils/utils";
 import { addSummaryToExcel, createMetadata } from "excelToMongo/Util";
-import os from "os";
-import { checkFolderExistsSync, createFolderIfNotExistsAsync } from "utils/FileUtils";
+import { FileStats } from "../../../imgToPdf/utils/types";
+import { createFolderIfNotExistsAsync } from "../../../utils/FileUtils";
 
 export const createExcelFilePathName = async (mainExcelDataLength: number, folderName: String, _excelRoot: string, suffix: string) => {
     const _excelPath = `${_excelRoot}\\local`;

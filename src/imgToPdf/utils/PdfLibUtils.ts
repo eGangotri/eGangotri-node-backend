@@ -3,14 +3,15 @@ import * as fsPromise from 'fs/promises';
 import { formatTime, getAllPdfs } from './Utils';
 import { PDF_SIZE_LIMITATIONS } from './PdfUtil';
 import * as path from 'path';
-import { getFilzeSize } from '../../mirror/FrontEndBackendCommonCode';
+import { getFileSizeAsync } from '../../mirror/FrontEndBackendCommonCode';
 
 /**
  *  Only handles files < 2 GB
  */
 export async function getPdfPageCountUsingPdfLib(pdfPath: string) {
     try {
-        if (getFilzeSize(pdfPath) <= PDF_SIZE_LIMITATIONS) {
+        const fileSize = await getFileSizeAsync(pdfPath);
+        if (fileSize <= PDF_SIZE_LIMITATIONS) {
             const fileBuffer = await fsPromise.readFile(pdfPath);
             const pdfDoc = await PDFDocument.load(fileBuffer);
             return pdfDoc.getPageCount();
@@ -23,7 +24,8 @@ export async function getPdfPageCountUsingPdfLib(pdfPath: string) {
 }
 
 export async function getPdfFirstPageDimensionsUsingPdfLib(pdfPath: string) {
-    if (getFilzeSize(pdfPath) <= PDF_SIZE_LIMITATIONS) {
+    const fileSize = await getFileSizeAsync(pdfPath);
+    if (fileSize <= PDF_SIZE_LIMITATIONS) {
         const _file = await fsPromise.readFile(pdfPath);
         const pdfDoc = await PDFDocument.load(_file, { ignoreEncryption: true });
         return [pdfDoc.getPages()[0].getWidth(), pdfDoc.getPages()[0].getHeight()]

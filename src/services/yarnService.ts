@@ -1,4 +1,4 @@
-import { isValidPath } from "../utils/utils";
+import { isValidPath } from "../utils/FileUtils";
 import { moveAFile, moveFilesAndFlatten } from "../cliBased/fileMover";
 import { getFolderInDestRootForProfile, getFolderInSrcRootForProfile } from "../archiveUpload/ArchiveProfileUtils";
 import * as fsPromise from 'fs/promises';
@@ -19,7 +19,7 @@ import { getLatestUploadCycleById } from "./uploadCycleService";
 import { FileMoveTracker } from "../models/FileMoveTracker";
 import { file } from "pdfkit";
 import { error } from "console";
-import { createFolderIfNotExistsAsync } from "utils/FileUtils";
+import { createFolderIfNotExistsAsync } from "../utils/FileUtils";
 
 const _root = "C:\\_catalogWork\\_collation\\local";
 

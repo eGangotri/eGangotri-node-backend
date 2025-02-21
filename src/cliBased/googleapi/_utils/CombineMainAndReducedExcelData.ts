@@ -6,7 +6,7 @@ import * as _ from 'lodash';
 import { DD_MM_YYYY_HH_MMFORMAT } from "../../../utils/utils";
 import moment from "moment";
 import path from "path";
-import { checkFolderExistsSync, createFolderIfNotExistsAsync } from "utils/FileUtils";
+import {  createFolderIfNotExistsAsync } from "../../../utils/FileUtils";
 
 const ignoreDiff = true;
 const foundItems: string[] = [];

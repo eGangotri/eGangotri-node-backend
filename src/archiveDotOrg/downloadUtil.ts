@@ -2,7 +2,7 @@ import { downloadFileFromUrl } from "../cliBased/pdf/downloadFile";
 import { DOWNLOAD_COMPLETED_COUNT, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT, resetDownloadCounters } from "../cliBased/pdf/utils";
 import { getFolderInSrcRootForProfile } from "../archiveUpload/ArchiveProfileUtils";
 import { ArchiveLinkData } from "./types";
-import { isValidPath } from "../utils/utils";
+import { isValidPath } from "../utils/FileUtils";
 import { checkFolderExistsSync, createFolderIfNotExistsAsync } from "../utils/FileUtils";
 import { DOUBLE_HASH_SEPARATOR } from "./utils";
 

@@ -1,5 +1,4 @@
-import * as fs from 'fs';
-const v8 = require('v8');
+import * as v8 from 'v8';
 import * as path from 'path';
 import { PDF_EXT, PNG_EXT } from './constants';
 import * as fsPromise from 'fs/promises';
@@ -43,13 +42,13 @@ export async function folderCountEqualsPDFCount(srcFolderCount: number, dest: st
 
 export async function deleteFiles(files: Array<string>) {
      for (let file of files) {
-          try {
-               fs.unlinkSync(file);
-          } catch (err) {
-               console.error(err)
-          }
-     };
-}
+         try {
+             await fsPromise.unlink(file);
+         } catch (err) {
+             console.error(err);
+         }
+     }
+ }
 
 export const getAllPdfs = async (dir: string) => {
      return await getAllFilesOfGivenType(dir, [PDF_EXT]);

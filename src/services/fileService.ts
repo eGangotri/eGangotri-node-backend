@@ -2,7 +2,7 @@ import { getAllFileListingWithoutStats } from "../utils/FileStatsUtils";
 import path from 'path';
 import * as fsPromise from 'fs/promises';
 import { callAksharamukha } from "../aksharamukha/convert";
-import { createFolderIfNotExistsAsync } from "utils/FileUtils";
+import { createFolderIfNotExistsAsync } from "../utils/FileUtils";
 
 export const multipleTextScriptConversion = async (folderPath: string, scriptFrom: string, scriptTo: string) => {
     console.log(`folderPath: ${folderPath} scriptFrom: ${scriptFrom} scriptTo: ${scriptTo}`);

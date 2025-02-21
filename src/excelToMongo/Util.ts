@@ -18,7 +18,8 @@ export function filesOnGivenDate(folderName: string, dateString: string = ""): s
   const formattedDate = dateString != "ALL" ? (dateString || (moment(new Date())).format('DD-MMM-YYYY')) : "ALL";
   console.log(`\nSearching for Files in ${folderName} for ${formattedDate}`);
 
-  fs.readdirSync(path.resolve("/", folderName)).forEach(file => {
+  const _files = fs.readdirSync(path.resolve("/", folderName))
+  _files.forEach(file => {
     if (dateString === "ALL") {
       processableFiles.push(`${folderName}/${file}`);
     }

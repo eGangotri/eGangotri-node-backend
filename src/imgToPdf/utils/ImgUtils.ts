@@ -1,4 +1,3 @@
-import * as fs from 'fs';
 import { PNG_EXT, TIFF_EXT } from './constants';
 import { deleteFiles, getAllFilesOfGivenType } from './Utils';
 
