@@ -193,7 +193,9 @@ export const moveFilesInArray = async (srcPaths: string[], destPaths: string[]) 
         }
 
         try {
-            fs.mkdirSync(destPath, { recursive: true });
+            if (!fs.existsSync(destPath)) {
+                fs.mkdirSync(destPath, { recursive: true });
+            }
             fs.renameSync(srcPath, destPath);
             results.push({
                 success: true,
@@ -202,17 +204,27 @@ export const moveFilesInArray = async (srcPaths: string[], destPaths: string[]) 
                 msg: `File renamed successfully from ${srcPath} to ${destPath}`
             });
         } catch (err) {
+            if (err.code === 'EPERM') {
+                console.error(`Permission error: ${err.message}`);
+            } else {
+                console.error(`Error renaming file: ${err.message}`);
+            }
             results.push({
                 success: false,
                 src: srcPath,
                 dest: destPath,
-                msg: `Error renaming file from ${srcPath} to ${destPath}: ${err.message}`,
+                msg: `Error:(${err?.code}) renaming file from ${srcPath} to ${destPath}: ${err.message}`,
                 err: err
             });
         }
     }
 
+    const successCount = results.filter(result => result.success).length;
+    const failureCount = results.filter(result => !result.success).length;
     return {
+        msg: `Moved ${successCount}/${srcPaths.length} files. ${failureCount}/${srcPaths.length} files failed`,
+        successCount,
+        failureCount,
         success: results.every(result => result.success),
         results
     };

@@ -8,7 +8,7 @@ import { multipleTextScriptConversion } from '../services/fileService';
 import { renameFilesViaExcel } from '../services/fileUtilsService';
 import { moveFileInListToDest, moveFilesInArray, moveFileSrcToDest } from '../services/yarnService';
 import { FileMoveTracker } from '../models/FileMoveTracker';
-
+import path from 'path';
 
 export const fileUtilsRoute = express.Router();
 fileUtilsRoute.get('/file-move-list', async (req, res) => {
@@ -69,7 +69,7 @@ fileUtilsRoute.post('/reverse-file-move', async (req: any, resp: any) => {
                 }
             });
         }
-        const moveResult = await moveFilesInArray(filesAbsPathMoved as string[], filesMovedNewAbsPath as string[]);
+        const moveResult = await moveFilesInArray(filesMovedNewAbsPath as string[], filesAbsPathMoved as string[], );
         if (moveResult.success) {
             fileMoveTracker.reversed = true;
             await fileMoveTracker.save();
