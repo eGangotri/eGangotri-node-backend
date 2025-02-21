@@ -193,7 +193,8 @@ export const moveFilesInArray = async (srcPaths: string[], destPaths: string[]) 
         }
 
         try {
-            fs.mkdirSync(destDir, { recursive: true });
+            fs.mkdirSync(destPath, { recursive: true });
+            fs.renameSync(srcPath, destPath);
             results.push({
                 success: true,
                 src: srcPath,
