@@ -1,6 +1,6 @@
 import { getAllFileListingWithoutStats } from "../utils/FileStatsUtils";
 import path from 'path';
-import { promises as fs } from 'fs';
+import * as fsPromise from 'fs/promises';
 import { callAksharamukha } from "../aksharamukha/convert";
 import { createFolderIfNotExistsAsync } from "utils/FileUtils";
 
@@ -17,7 +17,7 @@ export const multipleTextScriptConversion = async (folderPath: string, scriptFro
     for (const file of allDotTxts) {
         let x = 0;
         try {
-            const fileContents = await fs.readFile(file.absPath, 'utf8');
+            const fileContents = await fsPromise.readFile(file.absPath, 'utf8');
             const { base: fileNameWithExt, name: fileName, ext } = path.parse(file.absPath);
             const payload = {
                 "source": scriptFrom,
@@ -38,7 +38,7 @@ export const multipleTextScriptConversion = async (folderPath: string, scriptFro
             const newFilePath = path.join(dumpDirectory, `${fileName}${ext}`);
             console.log(`scriptConvertedContents of ${fileNameWithExt}: ${scriptConvertedContents}`);
             // Write the contents to the new file
-            await fs.writeFile(newFilePath, scriptConvertedContents, 'utf8');
+            await fsPromise.writeFile(newFilePath, scriptConvertedContents, 'utf8');
             console.log(`File written to ${newFilePath}`);
             scriptConvertedFiles.push(newFilePath);
             x++;

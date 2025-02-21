@@ -1,12 +1,10 @@
 import { PDFDocument, PDFPage } from 'pdf-lib';
-import fs from 'fs';
 import * as _ from 'lodash';
 import * as path from 'path';
 import { getAllPDFFiles } from '../../utils/FileStatsUtils';
 import { createFolderIfNotExistsAsync } from '../../utils/FileUtils';
 
-
-const fsPromises = require('fs').promises;
+import * as fsPromise from 'fs/promises';
 
 let FINAL_REPORT: string[] = [];
 let PDF_PROCESSING_COUNTER = 0;
@@ -19,7 +17,7 @@ async function createPartialPdf(inputPath: string,
     firstNPages: number = DEFAULT_PDF_PAGE_EXTRACTION_COUNT,
     lastNPages: number = DEFAULT_PDF_PAGE_EXTRACTION_COUNT
 ): Promise<number> {
-    const existingPdfBytes = await fsPromises.readFile(inputPath)
+    const existingPdfBytes = await fsPromise.readFile(inputPath)
 
     const pdfDoc = await PDFDocument.load(existingPdfBytes);
     let range: number[] = []
@@ -44,7 +42,7 @@ async function createPartialPdf(inputPath: string,
 
     const filename = path.parse(inputPath).name
     const suffixWithPageCount = padNumbersWithZeros(pdfPageCount)
-    await fsPromises.writeFile(`${outputPath}//${filename}_${suffixWithPageCount}.pdf`, newPdfBytes);
+    await fsPromise.writeFile(`${outputPath}//${filename}_${suffixWithPageCount}.pdf`, newPdfBytes);
     return pdfPageCount
 }
 
