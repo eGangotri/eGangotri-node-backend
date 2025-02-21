@@ -48,7 +48,7 @@ import * as fsPromise from 'fs/promises';
                             await page.goto(subHref);
                             const _content = await page.content();
                             console.log(`_content ${_content}`)
-                            await fs.writeFile(`./downloads/${folderName}_${fileName}`, _content, 'utf8');
+                            await fsPromise.writeFile(`./downloads/${folderName}_${fileName}`, _content, 'utf8');
                         }
                     }
                 }

@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import * as fsPromise from 'fs/promises';
 import { promisify } from 'util';
 
 import * as path from 'path';
@@ -27,7 +28,7 @@ export function removeFolderWithContents(folder: string) {
 
 export const isValidDirectory = async (dirPath: string): Promise<boolean> => {
     try {
-        const stats = await fs.promises.stat(dirPath);
+        const stats = await fsPromise.stat(dirPath);
         return stats.isDirectory();
     } catch (error) {
         return false;
@@ -39,7 +40,7 @@ export const countPDFsInFolder = async (folderPath: string,
     let pdfCount = 0;
 
     const readDirRecursive = async (dir: string) => {
-        const entries = await fs.promises.readdir(dir, { withFileTypes: true });
+        const entries = await fsPromise.readdir(dir, { withFileTypes: true });
 
         for (const entry of entries) {
             const fullPath = path.join(dir, entry.name);
@@ -62,7 +63,7 @@ export const countPDFsInFolder = async (folderPath: string,
 
 
 export const removeExcept = async (folder: any, except: Array<string>) => {
-    const contentList = await fs.promises.readdir(folder)
+    const contentList = await fsPromise.readdir(folder)
     const files = contentList.map((x) => folder + "\\" + x).filter((y) => {
         console.log(`Found ${y}`)
         return !except.includes(y)

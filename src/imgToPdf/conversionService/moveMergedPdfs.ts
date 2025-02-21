@@ -2,6 +2,7 @@ import { getAllPdfs, getDirectories, getDirectoriesWithFullPath, mkDirIfDoesntEx
 
 const FINAL_PDF_LOC = 'finalPdfsTmpLoc';
 import * as fs from 'fs';
+import * as fsPromise from 'fs/promises';
 
 async function moveMergedPdfs(rootDir: string) {
   const discardableFolder = `${rootDir}_disc_`
@@ -30,7 +31,7 @@ async function moveMergedPdfs(rootDir: string) {
   const destFolderName = `${pdfFolder}\\${folder}`
   await mkDirIfDoesntExists(pdfFolder);
   console.log(`renaming ${srcPdfFolder} -> ${destFolderName}`);
-  return fs.promises.rename(srcPdfFolder, destFolderName)
+  return fsPromise.rename(srcPdfFolder, destFolderName)
   });
   await Promise.all(renamingPromises);
 }

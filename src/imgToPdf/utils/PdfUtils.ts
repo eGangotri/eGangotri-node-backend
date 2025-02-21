@@ -46,7 +46,7 @@ export async function prepareDocument(pdfPath: string, pdfName:string)
     var buffers: Array<any> = [];
     doc.on('data', buffers.push.bind(buffers));
     doc.on('end', function () {
-        fs.promises.writeFile(pdfPathWithName, Buffer.concat(buffers));
+        fsPromise.writeFile(pdfPathWithName, Buffer.concat(buffers));
     });
     doc.on("error", (err: any) => console.log("error" + err));
     return doc
