@@ -3,7 +3,7 @@ import { DOWNLOAD_COMPLETED_COUNT, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT, resetDownlo
 import { getFolderInSrcRootForProfile } from "../archiveUpload/ArchiveProfileUtils";
 import { ArchiveLinkData } from "./types";
 import { isValidPath } from "../utils/utils";
-import { checkFolderExistsSync, createDirIfNotExists, createFolderIfNotExists } from "../utils/FileUtils";
+import { checkFolderExistsSync, createDirIfNotExistsAsync, createFolderIfNotExists } from "../utils/FileUtils";
 import { DOUBLE_HASH_SEPARATOR } from "./utils";
 
 
@@ -22,8 +22,8 @@ export const downloadPdfFromArchiveToProfile = async (pdfLinks: ArchiveLinkData[
   const folderWithProfileName = pdfDumpFolder + "\\" + pdfLinks[0].acct;
   console.log(`folderWithProfileName ${folderWithProfileName} folderWithProfileName`)
 
-  await createDirIfNotExists(pdfDumpFolder);
-  await createDirIfNotExists(folderWithProfileName);
+  await createDirIfNotExistsAsync(pdfDumpFolder);
+  await createDirIfNotExistsAsync(folderWithProfileName);
 
   try {
     resetDownloadCounters()

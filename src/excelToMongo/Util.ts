@@ -6,7 +6,7 @@ import { DD_MM_YYYY_FORMAT } from '../utils/utils';
 import { FileStats } from 'imgToPdf/utils/types';
 import { sizeInfo } from '../mirror/FrontEndBackendCommonCode';
 import * as _ from 'lodash';
-import { checkFolderExistsSync, createDirIfNotExists } from 'utils/FileUtils';
+import { checkFolderExistsSync, createDirIfNotExistsAsync } from 'utils/FileUtils';
 /**
  * 
  * @param folderName 
@@ -38,7 +38,7 @@ export function filesOnGivenDate(folderName: string, dateString: string = ""): s
 export const generateCsvDirAndName = async (infix: string) => {
   const CSVS_DIR = ".//_csvs";
   await fsExtra.emptyDir(CSVS_DIR);
-  await createDirIfNotExists(CSVS_DIR);
+  await createDirIfNotExistsAsync(CSVS_DIR);
   console.log(`CSVs Directory Created: ${CSVS_DIR}`);
   const csvFileName = `${CSVS_DIR}//eGangotri-${infix}-DailyWorkReport${moment(new Date()).format(DD_MM_YYYY_FORMAT)}.csv`;
   return csvFileName;

@@ -1,6 +1,6 @@
 import { createLogger, format, transports } from 'winston';
 import * as os from 'os';
-import {  createDirIfNotExists } from 'utils/FileUtils';
+import {  createDirIfNotExistsAsync } from 'utils/FileUtils';
 
 const { combine, timestamp, printf } = format;
 
@@ -14,7 +14,7 @@ const logsDirectory = `${homeDirectory}/egangotri/logs`;
 const now = new Date();
 const weekYearSuffix = getWeekOfYear(now);
 
-createDirIfNotExists(logsDirectory);
+createDirIfNotExistsAsync(logsDirectory);
 
 const logger = createLogger({
     level: 'info',

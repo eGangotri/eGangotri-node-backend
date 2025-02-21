@@ -87,7 +87,7 @@ export const removeExcept = async (folder: any, except: Array<string>) => {
 
 }
 
-export const createDirIfNotExists = async (dirPath: string) => {
+export const createDirIfNotExistsAsync = async (dirPath: string) => {
     try {
         await fsPromise.access(dirPath);
     } catch {
