@@ -9,20 +9,17 @@ import * as _ from 'lodash';
 import { FileStats } from "../../../imgToPdf/utils/types";
 import { addSummaryToExcel, createMetadata } from "excelToMongo/Util";
 import os from "os";
-import { checkFolderExistsSync } from "utils/FileUtils";
+import { checkFolderExistsSync, createDirIfNotExistsAsync } from "utils/FileUtils";
 
-export const createExcelFilePathName = (mainExcelDataLength: number, folderName: String, _excelRoot: string, suffix: string) => {
+export const createExcelFilePathName = async (mainExcelDataLength: number, folderName: String, _excelRoot: string, suffix: string) => {
     const _excelPath = `${_excelRoot}\\local`;
 
-    if (!checkFolderExistsSync(_excelPath)) {
-        fs.mkdirSync(_excelPath);
-    }
+    await createDirIfNotExistsAsync(_excelPath)
     const excelPathWithFolderName = `${_excelPath}\\${folderName}`;
 
     const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)
-    if (!checkFolderExistsSync(excelPathWithFolderName)) {
-        fs.mkdirSync(excelPathWithFolderName);
-    }
+    await createDirIfNotExistsAsync(excelPathWithFolderName)
+
     const mergedExcelFileName = `${excelPathWithFolderName}\\${folderName}${timeComponent}-${suffix}`;
     return `${mergedExcelFileName}-${mainExcelDataLength}.xlsx`;
 }
@@ -31,10 +28,10 @@ const folderToExcel = async (folder: string, _excelRoot: string) => {
     console.log(`folderToExcel ${folder}`);
     const rowCounterController = Math.random().toString(36).substring(7);
     FileConstsUtils.incrementRowCounter(rowCounterController);
-    const jsonArray: FileStats[] = await FileUtils.getAllPDFFilesWithMedata(folder, true,rowCounterController)
+    const jsonArray: FileStats[] = await FileUtils.getAllPDFFilesWithMedata(folder, true, rowCounterController)
     const { totalFileCount, totalPageCount, totalSizeRaw } = createMetadata(jsonArray);
     addSummaryToExcel(jsonArray, totalFileCount, totalPageCount, totalSizeRaw);
-    const _fileName = createExcelFilePathName(jsonArray.length, path.parse(folder)?.base, _excelRoot, "-Final-Merged-Catalog-");
+    const _fileName = await createExcelFilePathName(jsonArray.length, path.parse(folder)?.base, _excelRoot, "-Final-Merged-Catalog-");
     jsonToExcel(jsonArray, _fileName)
 }
 

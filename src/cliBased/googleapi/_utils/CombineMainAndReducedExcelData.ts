@@ -6,7 +6,7 @@ import * as _ from 'lodash';
 import { DD_MM_YYYY_HH_MMFORMAT } from "../../../utils/utils";
 import moment from "moment";
 import path from "path";
-import { checkFolderExistsSync } from "utils/FileUtils";
+import { checkFolderExistsSync, createDirIfNotExistsAsync } from "utils/FileUtils";
 
 const ignoreDiff = true;
 const foundItems: string[] = [];
@@ -44,7 +44,8 @@ const combineExcels = (mainExcelFileName: string, secondaryExcelFileName: string
         return {
             ..._errorsCheck,
             ...res,
-            subject        }
+            subject
+        }
     }
 
     catch (err) {
@@ -123,7 +124,7 @@ const fillPageCount = (excelJson: GDriveExcelHeaders[]) => {
     })
 }
 
-const exec = () => {
+const exec = async () => {
     const _root = "C:\\_catalogWork\\_collation";
     const trCount = 60
     const treasureFolder = `Treasures ${trCount}`
@@ -139,15 +140,14 @@ const exec = () => {
 
     const combinedExcelPath = `${_root}\\_catCombinedExcels\\${treasureFolder}`;
 
-    if (!checkFolderExistsSync(combinedExcelPath)) {
-        fs.mkdirSync(combinedExcelPath);
-    }
+    await createDirIfNotExistsAsync(combinedExcelPath)
+
     const combinedExcelFileName = `${combinedExcelPath}\\${treasureFolder}-Catalog-${timeComponent}`;
 
     combineExcels(mainExcelFileName, secondaryExcelFileName, combinedExcelFileName)
 }
 
-export const combineGDriveAndReducedPdfExcels = (mainFilePathAbs: string,
+export const combineGDriveAndReducedPdfExcels = async (mainFilePathAbs: string,
     secondaryFilePathAbs: string,
     destRoot = "C:\\_catalogWork\\_collation") => {
     const terminalFolder = path.basename(path.dirname(mainFilePathAbs));
@@ -155,10 +155,7 @@ export const combineGDriveAndReducedPdfExcels = (mainFilePathAbs: string,
 
     const combinedExcelPath = `${destRoot}\\_catCombinedExcels\\${terminalFolder}`;
     console.log(`_combinedExcelPath ${combinedExcelPath}`)
-    if (!checkFolderExistsSync(combinedExcelPath)) {
-        fs.mkdirSync(combinedExcelPath, { recursive: true });
-    }
-
+    await createDirIfNotExistsAsync(combinedExcelPath)
     const combinedExcelFileName = `${combinedExcelPath}\\${terminalFolder}-Catalog-${timeComponent}`;
 
     return combineExcels(mainFilePathAbs, secondaryFilePathAbs, combinedExcelFileName)

@@ -30,7 +30,8 @@ export const pickLatestExcelsAndCombineGDriveAndReducedPdfExcels = async (mainFi
         }
     }
     console.log(`pickLatestExcelsAndCombineGDriveAndReducedPdfExcels mainExcelPath ${mainExcelPath} secondaryExcelPath ${secondaryExcelPath}`)
-    return combineGDriveAndReducedPdfExcels(mainExcelPath, secondaryExcelPath, destExcelPath)
+    const _cmbned = await combineGDriveAndReducedPdfExcels(mainExcelPath, secondaryExcelPath, destExcelPath)
+    return _cmbned;
 }
 
 
