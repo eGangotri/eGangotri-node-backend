@@ -1,11 +1,12 @@
 import { createPdf, createPdfFromDotSum, createRedundantPdf } from './utils/PdfUtils';
-import { chunk, formatTime, 
-    getAllDotSumFiles, getAllPdfsInFolders, 
-    getAllPngsInFolders, getDirectories, 
+import {
+    chunk, formatTime,
+    getAllDotSumFiles, getAllPdfsInFolders,
+    getAllPngsInFolders, getDirectories,
     getDirectoriesWithFullPath,
-     mkDirIfDoesntExists } from './utils/Utils';
+    mkDirIfDoesntExists
+} from './utils/Utils';
 import { getAllPngs } from './utils/ImgUtils';
-import * as fs from 'fs';
 import * as path from 'path';
 import * as fsPromise from 'fs/promises';
 import { CHUNK_SIZE, HANDLE_CHECKSUM, INTRO_PAGE_ADJUSTMENT, REDUNDANT_FOLDER } from '.';
@@ -35,10 +36,10 @@ export async function chunkPngs(pngPdfDumpFolder: string) {
     });
     await Promise.all(promiseArrayFirst)
 
-    const promiseArraySecond:Array<Promise<any>> = []
-    chunkedPngs.map((_chunkedPngs,index:number) => {
+    const promiseArraySecond: Array<Promise<any>> = []
+    chunkedPngs.map((_chunkedPngs, index: number) => {
         const newFolderForChunkedPngs = pngPdfDumpFolder + PNG_SUB_FOLDER + `-${appendAlphaCodeForNum(index + 1)}`
-        for(let _png of _chunkedPngs){
+        for (let _png of _chunkedPngs) {
             const newName = newFolderForChunkedPngs + "\\" + path.parse(_png).name + path.parse(_png).ext;
             //console.log(`newName: ${newName}`);
             promiseArraySecond.push(fsPromise.rename(_png, newName))
@@ -64,7 +65,7 @@ export async function distributedLoadBasedPngToPdfConverter(pngPdfDumpFolder: st
     await chunkPngs(pngPdfDumpFolder)
     let END_TIME = Number(Date.now())
     console.log(`Time Taken for chunkPngs ${formatTime(END_TIME - START_TIME)}`);
-    const pngCountCheck  = await testChunkPngsFileCountIsCorrect(pngPdfDumpFolder, origPngCount);
+    const pngCountCheck = await testChunkPngsFileCountIsCorrect(pngPdfDumpFolder, origPngCount);
     if (pngCountCheck) {
         START_TIME = Number(Date.now())
         await chunkedPngsToChunkedPdfs(pngPdfDumpFolder)
@@ -80,20 +81,20 @@ export async function distributedLoadBasedPngToPdfConverter(pngPdfDumpFolder: st
     }
 
 }
-async function testChunkPngsFileCountIsCorrect(pngPdfDumpFolder:string, origPngCount:number) {
+async function testChunkPngsFileCountIsCorrect(pngPdfDumpFolder: string, origPngCount: number) {
     const _pngs = pngPdfDumpFolder + PNG_SUB_FOLDER
     const _folders = (await getDirectoriesWithFullPath(_pngs)).filter(
-        (dir:any) => !dir.match(/ignore/)
+        (dir: any) => !dir.match(/ignore/)
     );
     const pngsInFolders = await getAllPngsInFolders(_folders);
-    const countCheck =  pngsInFolders.length == origPngCount
+    const countCheck = pngsInFolders.length == origPngCount
     //console.log(`:testChunkPngsFileCountIsCorrect: (${pngsInFolders.length} == ${origPngCount}) == ${countCheck} `)
     return countCheck
 }
-async function testChunkPdfsFileCountIsCorrect(pngPdfDumpFolder:string, origPngCount:number) {
+async function testChunkPdfsFileCountIsCorrect(pngPdfDumpFolder: string, origPngCount: number) {
     const _pdfs = pngPdfDumpFolder + PDF_SUB_FOLDER
     const _folders = (await getDirectoriesWithFullPath(_pdfs)).filter(
-        (dir:any) => !dir.match(/ignore/)
+        (dir: any) => !dir.match(/ignore/)
     );
     const pdfsInFolders = await getAllPdfsInFolders(_folders);
     const countCheck = pdfsInFolders.length == origPngCount + INTRO_PAGE_ADJUSTMENT
@@ -104,7 +105,8 @@ async function testChunkPdfsFileCountIsCorrect(pngPdfDumpFolder:string, origPngC
 export async function handleDotSumFile(pngPdfDumpFolder: string, dotSumFiles: Array<string>) {
     if (dotSumFiles?.length > 0) {
         const newDotSumFile = pngPdfDumpFolder + "//" + path.parse(dotSumFiles[0]).name + path.parse(dotSumFiles[0]).ext
-        await fsPromise.writeFile(newDotSumFile, fs.readFileSync(dotSumFiles[0]));
+        const dotSumFile = await fsPromise.readFile(dotSumFiles[0]);
+        await fsPromise.writeFile(newDotSumFile, dotSumFile);
     }
 }
 
@@ -129,12 +131,14 @@ export async function chunkedPngsToChunkedPdfs(pngPdfDumpFolder: string) {
         return createPdf(`${_pngs}-${alphaAppended}`, `${_pdfs}-${alphaAppended}`, index === 0)
     });
 
-    await Promise.all(promises)
+    await Promise.all(promises);
+
     if (HANDLE_CHECKSUM) {
         const dotSumFile = await getAllDotSumFiles(pngPdfDumpFolder)
         if (dotSumFile?.length > 0) {
             const lastPdfDumpFolder = `${_pdfs}-${appendAlphaCodeForNum(pngToPdfCounter)}`
-            await createPdfFromDotSum(fs.readFileSync(dotSumFile[0]).toString(), lastPdfDumpFolder);
+            const firstDotSumFile = await fsPromise.readFile(dotSumFile[0]);
+            await createPdfFromDotSum(firstDotSumFile.toString(), lastPdfDumpFolder);
         }
     }
 

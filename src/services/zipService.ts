@@ -8,7 +8,6 @@ import { getNonFolderFileCount } from '../archiveDotOrg/utils';
 import { pipeline } from "stream/promises";
 import { checkFolderExistsSync, createFolderIfNotExistsAsync } from 'utils/FileUtils';
 
-const MAX_CONCURRENCY = 4; // Adjust based on your system resources
 
 const UNZIP_FOLDER = "\\unzipped";
 

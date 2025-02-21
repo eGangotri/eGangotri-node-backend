@@ -2,12 +2,12 @@ import { getFolderInSrcRootForProfile } from "../archiveUpload/ArchiveProfileUti
 import { excelToJson } from "../cliBased/excel/ExcelUtils";
 import { getAllPDFFiles } from "../utils/FileStatsUtils";
 import { isValidPath } from "../utils/utils";
-import * as fs from "fs";
 import * as path from 'path';
 import { FileStats } from "../imgToPdf/utils/types";
 import { GDriveExcelHeadersFileRenamerV2 } from "../cliBased/googleapi/types";
 import { isNumber } from "../mirror/utils";
 import { checkFolderExistsSync } from "utils/FileUtils";
+import * as fsPromise from 'fs/promises';
 
 interface RenameReportType {
     errorList: string[],
@@ -44,7 +44,7 @@ export const renameFilesViaExcel = async (excelPath: string, folderOrProfile: st
             let _newFileName = sanitizeFileName(excelRow["Composite Title"]);
             const origName = excelRow["Orig Name"]?.trim()
             if ((_newFileName?.length > 0 && origName?.length > 0) && (!_newFileName.startsWith("=") && !origName.startsWith("="))) {
-                renameFileViaFormula(origName, _newFileName, localFileStats, renameReport)
+                await renameFileViaFormula(origName, _newFileName, localFileStats, renameReport)
             }
             else {
                 renameFileViaReadingColumns(excelRow, localFileStats, renameReport)
@@ -58,7 +58,7 @@ export const renameFilesViaExcel = async (excelPath: string, folderOrProfile: st
     return renameReport;
 }
 
-export const renameFileViaFormula = (origName: string,
+export const renameFileViaFormula = async (origName: string,
     newName: string,
     localFileStats: FileStats[],
     renameReport: RenameReportType) => {
@@ -71,7 +71,7 @@ export const renameFileViaFormula = (origName: string,
         }
         return fileStat.fileName === origName
     });
-    _renameFileInFolder(_fileInFolder, newName, renameReport)
+    await _renameFileInFolder(_fileInFolder, newName, renameReport)
 }
 
 export const renameFileViaReadingColumns = (excelData: GDriveExcelHeadersFileRenamerV2,
@@ -130,7 +130,7 @@ const removeExtraneousChars = (fileNameFrag: any) => {
     return sanitized?.trim();
 }
 
-export const _renameFileInFolder = (_fileInFolder: FileStats, newFileName: string, renameReport: RenameReportType) => {
+export const _renameFileInFolder = async (_fileInFolder: FileStats, newFileName: string, renameReport: RenameReportType) => {
     if (!_fileInFolder) {
         renameReport.errorList.push(`No File in Local renameable to ${newFileName}.`)
         return
@@ -150,7 +150,7 @@ export const _renameFileInFolder = (_fileInFolder: FileStats, newFileName: strin
             if(checkFolderExistsSync(newPath)){
                 throw new Error(`${newPath} already exists`);
             }
-            fs.renameSync(absPath, newPath);
+            await fsPromise.rename(absPath, newPath);
             console.log(`File renamed to ${newFileName}`)
             renameReport.success.push(`File ${absPath} renamed to ${newFileName}`)
         }
