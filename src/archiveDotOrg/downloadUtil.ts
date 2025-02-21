@@ -3,7 +3,7 @@ import { DOWNLOAD_COMPLETED_COUNT, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT, resetDownlo
 import { getFolderInSrcRootForProfile } from "../archiveUpload/ArchiveProfileUtils";
 import { ArchiveLinkData } from "./types";
 import { isValidPath } from "../utils/utils";
-import { checkFolderExistsSync, createDirIfNotExistsAsync, createFolderIfNotExists } from "../utils/FileUtils";
+import { checkFolderExistsSync, createDirIfNotExistsAsync } from "../utils/FileUtils";
 import { DOUBLE_HASH_SEPARATOR } from "./utils";
 
 
@@ -65,10 +65,10 @@ const downloadArchivePdfs = async (linkData: ArchiveLinkData[], pdfDumpFolder: s
   }
 }
 
-export const adjustLinkedDataForMultipleItems = (linkData: ArchiveLinkData[], pdfDumpFolder: string) => {
+export const adjustLinkedDataForMultipleItems = async (linkData: ArchiveLinkData[], pdfDumpFolder: string) => {
   const linkDataWithMultiItems = [];
 
-  linkData.map(pdfLink => {
+  for (const pdfLink of linkData) {
     if (!pdfLink?.allNames?.includes(DOUBLE_HASH_SEPARATOR) && pdfLink?.allFormats?.trim().includes("PDF")) {
       const _name = pdfLink?.allNames?.trim();
       console.log(`for pdfs pdfLink.pdfDownloadUrl ${pdfLink.pdfDownloadUrl} and ${_name}`);
@@ -77,28 +77,27 @@ export const adjustLinkedDataForMultipleItems = (linkData: ArchiveLinkData[], pd
         pdfDownloadUrl: pdfLink.pdfDownloadUrl,
         name: _name.length > 0 ? _name : pdfLink.originalTitle + ".pdf"
       });
-    }
-    else {
+    } else {
       const allNames = pdfLink?.allNames?.split(DOUBLE_HASH_SEPARATOR);
-      allNames?.forEach(_name => {
+      for (let i = 0; i < allNames.length; i++) {
+        const _name = allNames[i];
         console.log(`pdfLink.pdfDownloadUrl ${pdfLink.pdfDownloadUrl}`);
-        const pdfDumpSubFolder = pdfDumpFolder + "\\" + pdfLink.uniqueIdentifier
-        createFolderIfNotExists(pdfDumpSubFolder);
+        const pdfDumpSubFolder = pdfDumpFolder + "\\" + pdfLink.uniqueIdentifier;
+        await createDirIfNotExistsAsync(pdfDumpSubFolder);
         linkDataWithMultiItems.push({
           pdfDumpFolder: pdfDumpSubFolder,
           pdfDownloadUrl: `${pdfLink.pdfDownloadUrl}/${_name}`,
           name: _name
-        })
-      });
+        });
+      }
     }
-  });
+  }
+
   return linkDataWithMultiItems;
-
 }
-
 export const downloadArchiveItems = async (_linkData: ArchiveLinkData[], pdfDumpFolder: string) => {
 
-  const _linkDataWithMultiItems = adjustLinkedDataForMultipleItems(_linkData, pdfDumpFolder);
+  const _linkDataWithMultiItems = await adjustLinkedDataForMultipleItems(_linkData, pdfDumpFolder);
 
   const promises = _linkDataWithMultiItems.map(pdfLink => {
     try {

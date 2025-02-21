@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { getAllFileListingWithoutStats } from "../utils/FileStatsUtils";
 import os from "os";
-import { checkFolderExistsSync } from "utils/FileUtils";
+import { checkFolderExistsSync, createDirIfNotExistsAsync } from "utils/FileUtils";
 
 export const renameNonAsciiFile = async (
     fileAbsPath: string,
@@ -31,9 +31,8 @@ export const renameNonAsciiFile = async (
         const dumpDirectory = path.join(dir, DEFAULT_TARGET_SCRIPT_ROMAN_COLLOQUIAL);
         // Create the new file path
         const newFilePath = path.join(dumpDirectory, `${_renamedFile}${ext}`);
-        if (!checkFolderExistsSync(dumpDirectory)) {
-            fs.mkdirSync(dumpDirectory);
-        }
+       await createDirIfNotExistsAsync(dumpDirectory)
+
         //deliberately not using async
         // Copy the file
         fs.copyFile(fileAbsPath, newFilePath, function (err) {

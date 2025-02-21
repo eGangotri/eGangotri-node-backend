@@ -3,29 +3,29 @@ import fs from 'fs';
 import * as _ from 'lodash';
 import * as path from 'path';
 import { getAllPDFFiles } from '../../utils/FileStatsUtils';
-import { createFolderIfNotExists } from '../../utils/FileUtils';
+import { createDirIfNotExistsAsync } from '../../utils/FileUtils';
 
 
 const fsPromises = require('fs').promises;
 
 let FINAL_REPORT: string[] = [];
 let PDF_PROCESSING_COUNTER = 0;
-export const DEFAULT_PDF_PAGE_EXTRACTION_COUNT:number = 10;
+export const DEFAULT_PDF_PAGE_EXTRACTION_COUNT: number = 10;
 
-async function createPartialPdf(inputPath: string, 
-    outputPath: string, 
+async function createPartialPdf(inputPath: string,
+    outputPath: string,
     pdfsToBeProcessedCount: number,
-     index: string,
-     firstNPages: number = DEFAULT_PDF_PAGE_EXTRACTION_COUNT,
-     lastNPages: number = DEFAULT_PDF_PAGE_EXTRACTION_COUNT
-    ): Promise<number> {
+    index: string,
+    firstNPages: number = DEFAULT_PDF_PAGE_EXTRACTION_COUNT,
+    lastNPages: number = DEFAULT_PDF_PAGE_EXTRACTION_COUNT
+): Promise<number> {
     const existingPdfBytes = await fsPromises.readFile(inputPath)
 
     const pdfDoc = await PDFDocument.load(existingPdfBytes);
     let range: number[] = []
     const pdfPageCount = pdfDoc.getPages().length
 
-    console.log(`Pdf Extraction: Folder # (${parseInt(index)+1}) Pdf No. ${++counter}/${pdfsToBeProcessedCount}
+    console.log(`Pdf Extraction: Folder # (${parseInt(index) + 1}) Pdf No. ${++counter}/${pdfsToBeProcessedCount}
          pdfPageCount ${pdfPageCount}
          extracting: ${firstNPages} and ${lastNPages} pages
          `);
@@ -49,23 +49,23 @@ async function createPartialPdf(inputPath: string,
 }
 
 export const loopFolderForExtraction = async (rootFolder: string,
-     outputRoot: string, 
-     loopIndex: string,
-     firstNPages: number,
-     lastNPages: number) => {
+    outputRoot: string,
+    loopIndex: string,
+    firstNPages: number,
+    lastNPages: number) => {
     const allPdfs = await getAllPDFFiles(rootFolder)
     const pdfsToBeProcessedCount = allPdfs.length;
     const outputPath = `${outputRoot}\\${path.parse(rootFolder).name} (${pdfsToBeProcessedCount})`;
     console.log(`rootFolder ${rootFolder} ${outputRoot} ${loopIndex}`);
-    createFolderIfNotExists(outputPath)
+    await createDirIfNotExistsAsync(outputPath)
     let errorCount = 0;
     for (const [index, pdf] of allPdfs.entries()) {
         const _path = path.parse(pdf.absPath);
         const subDir = _path.dir.replace(rootFolder, '')
-        let _subFolder = `${outputPath}\\${subDir}`
-        createFolderIfNotExists(_subFolder);
+        let _subFolder = `${outputPath}\\${subDir}`;
+        await createDirIfNotExistsAsync(_subFolder);
         try {
-            await createPartialPdf(pdf.absPath, _subFolder, pdfsToBeProcessedCount, loopIndex,firstNPages, lastNPages);
+            await createPartialPdf(pdf.absPath, _subFolder, pdfsToBeProcessedCount, loopIndex, firstNPages, lastNPages);
             PDF_PROCESSING_COUNTER++;
         }
         catch (error) {
@@ -112,7 +112,7 @@ export const extractFirstAndLastNPagesDeprecated = async (_srcFoldersWithPath: s
     destRootFolder: string,
     firstNPages: number,
     lastNPages: number) => {
-    
+
     let errors = [];
     FINAL_REPORT = []
     const dumpFolder = []
@@ -121,7 +121,7 @@ export const extractFirstAndLastNPagesDeprecated = async (_srcFoldersWithPath: s
         console.log(`extractFirstAndLastNPages:Started processing
              ${folder} to
              ${destRootFolder}
-            for-extracting ${firstNPages} pages f ${firstNPages }-${lastNPages}`)
+            for-extracting ${firstNPages} pages f ${firstNPages}-${lastNPages}`)
         PDF_PROCESSING_COUNTER = 0;
         counter = 0
         try {
@@ -140,7 +140,7 @@ export const extractFirstAndLastNPagesDeprecated = async (_srcFoldersWithPath: s
         success: `${errors.length === 0 ? `Success(All ${_srcFoldersWithPath.length})` : `${errors.length} of ${_srcFoldersWithPath.length} failed`}`,
         "Sources": ` ${_srcFoldersWithPath}`,
         "Dest": destRootFolder,
-        pageRange: `${(firstNPages===lastNPages)?firstNPages:`${firstNPages}-${lastNPages}`}`,
+        pageRange: `${(firstNPages === lastNPages) ? firstNPages : `${firstNPages}-${lastNPages}`}`,
         report: FINAL_REPORT,
         dumpFolder: dumpFolder.join(","),
         failures: errors,
@@ -154,6 +154,6 @@ const srcRootFolder = "F:\\_playground2\\_common\\testDiscardAfterUse";
 // const _folders = [20]
 // const _srcFoldersWithPath = _folders.map(x => `${srcRootFolder}\\Treasures${x}`)
 
-//extractFirstAndLastNPagesDeprecated([srcRootFolder], 
-  //  `${srcRootFolder}\\1`,25,25)
+//extractFirstAndLastNPagesDeprecated([srcRootFolder],
+//  `${srcRootFolder}\\1`,25,25)
 //pnpm run extractFirstAndLastNPages

@@ -6,7 +6,7 @@ import { getAllZipFiles } from '../utils/FileStatsUtils';
 import * as yauzl from 'yauzl';
 import { getNonFolderFileCount } from '../archiveDotOrg/utils';
 import { pipeline } from "stream/promises";
-import { checkFolderExistsSync } from 'utils/FileUtils';
+import { checkFolderExistsSync, createDirIfNotExistsAsync } from 'utils/FileUtils';
 
 const MAX_CONCURRENCY = 4; // Adjust based on your system resources
 
@@ -79,24 +79,25 @@ function unzipFiles(filePath: string, outputDir: string): Promise<void> {
             zipfile.readEntry();
             let entryFileName = "";
 
-            zipfile.on("entry", (entry) => {
+            zipfile.on("entry", async (entry) => {
                 // Construct the full output path
                 const outputPath = path.join(outputDir, entry.fileName);
                 entryFileName = entry.fileName;
                 // Create directory for entry if needed
                 if (/\/$/.test(entry.fileName)) {
                     // Directory entry
-                    fs.mkdirSync(outputPath, { recursive: true });
+                    await createDirIfNotExistsAsync(outputPath)
+
                     zipfile.readEntry(); // Continue to the next entry
                 } else {
                     // File entry
-                    zipfile.openReadStream(entry, (err, readStream) => {
+                    zipfile.openReadStream(entry, async (err, readStream) => {
                         if (err) {
                             return reject(err);
                         }
 
                         // Ensure the output directory exists
-                        fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+                        await createDirIfNotExistsAsync(path.dirname(outputPath))
 
                         const writeStream = fs.createWriteStream(outputPath);
                         readStream.pipe(writeStream);
@@ -148,9 +149,8 @@ export async function unzipAllFilesInDirectory(pathToZipFiles: string, _unzipHer
                     error_msg.push(`Folder already exists ${zipFile.absPath}`);
                     continue;
                 }
-                if (!checkFolderExistsSync(outputDir)) {
-                    fs.mkdirSync(outputDir, { recursive: true });
-                }
+               await createDirIfNotExistsAsync(outputDir)
+
                 console.log(`${++idx}). unzipping ${zipFile.absPath} to ${outputDir} `)
                 await unzipFiles(zipFile.absPath, outputDir);
                 console.log(`Unzipped ${zipFile.absPath} to 

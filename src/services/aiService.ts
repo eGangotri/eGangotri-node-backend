@@ -9,7 +9,7 @@ import { AI_SERVER } from '../db/connection';
 import { USER_HOME } from '../archiveUpload/constants';
 import { aksharaMukhaAutoDetectScriptToRomanColloguial } from '../aksharamukha/convert';
 import path from 'path';
-import { checkFolderExistsSync } from 'utils/FileUtils';
+import { checkFolderExistsSync, createDirIfNotExistsAsync } from 'utils/FileUtils';
 
 const DD_MM_YYYY_HH_MMFORMAT = 'DD-MM-YYYY-HH-mm'; // Define your date format
 const FIRST_N_PAGE_COUNT = 7;
@@ -87,9 +87,7 @@ export const zipFilesInFolder = async (folderPath: string) => {
         const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)
         const outputDir = path.join(USER_HOME, 'Downloads', '_output', `output-${timeComponent}`);
         // Create the output directory if it does not exist
-        if (!checkFolderExistsSync(outputDir)) {
-            fs.mkdirSync(outputDir, { recursive: true });
-        }
+        await createDirIfNotExistsAsync(outputDir)
 
         //await extractFirstAndLastNPages([folderPath], outputDir, FIRST_N_PAGE_COUNT, 0);
         const _resp = await getAllPDFFilesWithIgnorePathsSpecified(folderPath);

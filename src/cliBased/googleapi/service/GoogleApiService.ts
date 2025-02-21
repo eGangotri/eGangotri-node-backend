@@ -42,7 +42,7 @@ export async function listFolderContentsAndGenerateCSVAndExcel(_folderIdOrUrl: s
     ignoreFolder = "",
     type = PDF_TYPE, rowCounterController = "") {
     const gDriveFolderId = extractGoogleDriveId(_folderIdOrUrl)
-    FileUtils.createFolderIfNotExists(exportDestFolder);
+    await FileUtils.createDirIfNotExistsAsync(exportDestFolder);
 
     const googleDriveFileData: Array<GoogleApiData> = await listFolderContentsAsArrayOfData(gDriveFolderId,
         drive, umbrellaFolder, ignoreFolder, type)
@@ -77,7 +77,7 @@ export async function listFolderContentsAndGenerateExcelV2ForPdfRenamer(_folderI
     type = PDF_TYPE,
     rowCounterController = "") {
     const folderId = extractGoogleDriveId(_folderIdOrUrl)
-    FileUtils.createFolderIfNotExists(exportDestFolder);
+    await FileUtils.createDirIfNotExistsAsync(exportDestFolder);
 
     const googleDriveFileData: Array<GoogleApiData> = await listFolderContentsAsArrayOfData(folderId,
         drive, umbrellaFolder, ignoreFolder, type)

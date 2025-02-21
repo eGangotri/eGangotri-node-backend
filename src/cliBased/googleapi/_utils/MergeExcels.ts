@@ -13,7 +13,7 @@ import {
   titleInGoogleDrive, titleInOriginal,
   yearOfPublication
 } from './constants';
-import { checkFolderExistsSync } from 'utils/FileUtils';
+import { checkFolderExistsSync, createDirIfNotExistsAsync } from 'utils/FileUtils';
 
 const mergeExcelJsons = (mainExcelData: GDriveExcelHeaders[], secondaryExcelDataAdjusted: GDriveExcelHeaders[]) => {
   const combinedExcelJsons = mainExcelData.map(x => findCorrespondingExcelHeader(x, secondaryExcelDataAdjusted));
@@ -50,7 +50,8 @@ const findCorrespondingExcelHeader = (firstExcelRow: GDriveExcelHeaders, seconda
   return combinedObject;
 }
 
-const mergeExcels = (mainExcelFileName: string, secondaryExcelFileName: string) => {
+//deprecated
+const mergeExcels = async (mainExcelFileName: string, secondaryExcelFileName: string) => {
   const mainExcelData: GDriveExcelHeaders[] = excelToJson(mainExcelFileName);
   const secondaryExcelData: GDriveExcelHeaders[] = excelToJson(secondaryExcelFileName, "Published Books");
 
@@ -68,7 +69,7 @@ const mergeExcels = (mainExcelFileName: string, secondaryExcelFileName: string) 
     //process.exit(0);
   }
 
-  const fileNameWithLength = createMergedExcelFilePathName(mainExcelNonEmptyRowCount);
+  const fileNameWithLength = await createMergedExcelFilePathName(mainExcelNonEmptyRowCount);
   jsonToExcel(_mergedExcelJsons, fileNameWithLength);
 }
 
@@ -96,12 +97,11 @@ const findErroneous = (_mergedExcelJsons: GDriveExcelHeaders[]) => {
   }
 }
 
-const createMergedExcelFilePathName = (mainExcelDataLength: number) => {
+const createMergedExcelFilePathName = async (mainExcelDataLength: number) => {
   const mergedExcelPath = `${_root}\\merged\\${treasureFolder}`;
 
-  if (!checkFolderExistsSync(mergedExcelPath)) {
-    fs.mkdirSync(mergedExcelPath);
-  }
+ await createDirIfNotExistsAsync(mergedExcelPath)
+
   const mergedExcelFileName = `${mergedExcelPath}\\${treasureFolder}-Final-Merged-Catalog-${timeComponent}`;
   return `${mergedExcelFileName}-${mainExcelDataLength}.xlsx`;
 }
