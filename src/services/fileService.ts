@@ -2,7 +2,7 @@ import { getAllFileListingWithoutStats } from "../utils/FileStatsUtils";
 import path from 'path';
 import { promises as fs } from 'fs';
 import { callAksharamukha } from "../aksharamukha/convert";
-import { createDirIfNotExistsAsync } from "utils/FileUtils";
+import { createFolderIfNotExistsAsync } from "utils/FileUtils";
 
 export const multipleTextScriptConversion = async (folderPath: string, scriptFrom: string, scriptTo: string) => {
     console.log(`folderPath: ${folderPath} scriptFrom: ${scriptFrom} scriptTo: ${scriptTo}`);
@@ -32,7 +32,7 @@ export const multipleTextScriptConversion = async (folderPath: string, scriptFro
             const dumpDirectory = path.join(folderPath, scriptTo);
 
             // Ensure the dump directory exists
-            await createDirIfNotExistsAsync(dumpDirectory);
+            await createFolderIfNotExistsAsync(dumpDirectory);
 
             // Create the new file path
             const newFilePath = path.join(dumpDirectory, `${fileName}${ext}`);

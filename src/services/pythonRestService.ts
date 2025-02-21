@@ -1,5 +1,5 @@
 import { PYTHON_SERVER_URL } from "../db/connection";
-import { countPDFsInFolder, createDirIfNotExistsAsync, isValidDirectory } from "../utils/FileUtils";
+import { countPDFsInFolder, createFolderIfNotExistsAsync, isValidDirectory } from "../utils/FileUtils";
 import path from 'path';
 
 
@@ -14,7 +14,7 @@ export const runPthonPdfExtractionInLoop = async (_srcFolders: string[],
             console.log(`runPthonPdfExtractionInLoop srcFolder ${srcFolder} `);
             const pdfsToReduceCount = await countPDFsInFolder(srcFolder, ["reduced"]);
             if (isValidDirectory(commonDest)) {
-                await createDirIfNotExistsAsync(commonDest);
+                await createFolderIfNotExistsAsync(commonDest);
             }
             else {
                 specificDest = `${srcFolder}\\reduced`;
@@ -65,11 +65,11 @@ export const runPythonCopyPdfInLoop = async (_srcFolders: string[],
             const pdfsToMoveCount = await countPDFsInFolder(srcFolder, ["-copy"]);
             if (isValidDirectory(commonDest)) {
                 specificDest = `${specificDest}\\${path.basename(srcFolder)}(${pdfsToMoveCount})`
-                await createDirIfNotExistsAsync(commonDest);
+                await createFolderIfNotExistsAsync(commonDest);
             }
             else {
                 specificDest = `${srcFolder}\\-copy}\\${path.basename(srcFolder)}(${pdfsToMoveCount})`
-                await createDirIfNotExistsAsync(specificDest);
+                await createFolderIfNotExistsAsync(specificDest);
                 console.log(`Folder created: ${specificDest}`);
             }
             console.log(`runPthonCopyPdfInLoop srcFolder ${srcFolder} specificDest ${specificDest}`);
@@ -116,7 +116,7 @@ export const runCr2ToJpgInLoop = async (_srcFolders: string[],
         try {
             specificDest = commonDest ? `${commonDest}` : `${srcFolder}\\-cr2-jpg`;
             console.log(`runCr2ToJpgInLoop srcFolder ${srcFolder} `);
-            await createDirIfNotExistsAsync(specificDest);
+            await createFolderIfNotExistsAsync(specificDest);
             console.log(`Folder created: ${specificDest}`);
             console.log(`runCr2ToJpgInLoop srcFolder ${srcFolder} specificDest ${specificDest}`);
 

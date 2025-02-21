@@ -12,7 +12,7 @@ import { isValidPath } from '../../utils/utils';
 import { extractGoogleDriveId } from '../../mirror/GoogleDriveUtilsCommonCode';
 import { PDF_TYPE } from './_utils/constants';
 import { GDriveDownloadHistoryStatus } from '../../utils/constants';
-import { checkFolderExistsSync, createDirIfNotExistsAsync } from 'utils/FileUtils';
+import { checkFolderExistsSync, createFolderIfNotExistsAsync } from 'utils/FileUtils';
 
 export const MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE = 200;
 // Create a new Google Drive instance
@@ -52,7 +52,7 @@ async function getAllFilesFromGDrive(driveLinkOrFolderID: string,
     console.log(`googleDriveData.map(_data: ${JSON.stringify(_data)}}`);
     const fileDumpWithPathAppended = fileDumpFolder + path.sep + _data.parents;
     console.log(`fileDumpWithPathAppended: ${fileDumpWithPathAppended}`);
-    await createDirIfNotExistsAsync(fileDumpWithPathAppended);
+    await createFolderIfNotExistsAsync(fileDumpWithPathAppended);
 
     return downloadFileFromGoogleDrive(_data.googleDriveLink,
       fileDumpWithPathAppended, _data.fileName, _data?.fileSizeRaw, gDriveDownloadTaskId,downloadCounterController)

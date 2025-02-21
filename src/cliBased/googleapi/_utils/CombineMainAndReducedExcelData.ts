@@ -6,7 +6,7 @@ import * as _ from 'lodash';
 import { DD_MM_YYYY_HH_MMFORMAT } from "../../../utils/utils";
 import moment from "moment";
 import path from "path";
-import { checkFolderExistsSync, createDirIfNotExistsAsync } from "utils/FileUtils";
+import { checkFolderExistsSync, createFolderIfNotExistsAsync } from "utils/FileUtils";
 
 const ignoreDiff = true;
 const foundItems: string[] = [];
@@ -140,7 +140,7 @@ const exec = async () => {
 
     const combinedExcelPath = `${_root}\\_catCombinedExcels\\${treasureFolder}`;
 
-    await createDirIfNotExistsAsync(combinedExcelPath)
+    await createFolderIfNotExistsAsync(combinedExcelPath)
 
     const combinedExcelFileName = `${combinedExcelPath}\\${treasureFolder}-Catalog-${timeComponent}`;
 
@@ -155,7 +155,7 @@ export const combineGDriveAndReducedPdfExcels = async (mainFilePathAbs: string,
 
     const combinedExcelPath = `${destRoot}\\_catCombinedExcels\\${terminalFolder}`;
     console.log(`_combinedExcelPath ${combinedExcelPath}`)
-    await createDirIfNotExistsAsync(combinedExcelPath)
+    await createFolderIfNotExistsAsync(combinedExcelPath)
     const combinedExcelFileName = `${combinedExcelPath}\\${terminalFolder}-Catalog-${timeComponent}`;
 
     return combineExcels(mainFilePathAbs, secondaryFilePathAbs, combinedExcelFileName)

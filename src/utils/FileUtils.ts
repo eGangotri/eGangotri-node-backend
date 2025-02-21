@@ -87,23 +87,13 @@ export const removeExcept = async (folder: any, except: Array<string>) => {
 
 }
 
-export const createDirIfNotExistsAsync = async (dirPath: string) => {
+export const createFolderIfNotExistsAsync = async (dirPath: string) => {
     try {
         await fsPromise.access(dirPath);
     } catch {
         await fsPromise.mkdir(dirPath, { recursive: true });
     }
 }
-
-export function createFolderIfNotExists(folderPath: string): void {
-    if (!checkFolderExistsSync(folderPath)) {
-        fs.mkdirSync(folderPath, { recursive: true });
-        console.log(`Folder created: ${folderPath}`);
-    } else {
-        // console.log(`Folder already exists: ${folderPath}`);
-    }
-}
-
 
 const _fsPromise = {
     readdir: promisify(fs.readdir),
