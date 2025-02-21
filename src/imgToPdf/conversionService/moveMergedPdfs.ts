@@ -11,15 +11,6 @@ async function moveMergedPdfs(rootDir: string) {
   await mkDirIfDoesntExists(discardableFolder);
   renamers(rootDir,pdfFolder);
   console.log(`01`);
-  //Since 
-  // fs.renameSync(rootDir, discardableFolder)
-  // keeps failing, we try a diff approach
-  //;
-  // renamers(rootDir,discardableFolder);
-  // console.log(`12`);
-  //  // also fails fs.renameSync(pdfFolder, rootDir)
-  //  renamers(pdfFolder, rootDir);
-
   console.log(`Shifted all Pdfs to be under ${rootDir}. unwanted files dumped to ${discardableFolder}`);
 
 }

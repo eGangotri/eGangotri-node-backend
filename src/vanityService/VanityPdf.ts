@@ -137,22 +137,24 @@ export const addTextToIntroPdf = (doc: any, text: string, width: number,
 const mergeVanityPdf = async (_introPdf: string, origPdf: string,
     finalDumpGround: string,
     suffix: string = "",
-    pdfSuffix:string = "") => {
+    pdfSuffix: string = "") => {
     var origFileName = path.basename(origPdf);
     var destDir = path.dirname(_introPdf);
 
     await mkDirIfDoesntExists(finalDumpGround);
 
-    const pdfsForMerge = [origPdf, _introPdf].map((_pdf) => {
-        console.log(`_pdf: ${_pdf}`)
-        return fs.readFileSync(_pdf)
-    });
+    const pdfsForMerge = [];
+    for (const _pdf of [origPdf, _introPdf]) {
+        console.log(`_pdf: ${_pdf}`);
+        const pdfContent = await fsPromise.readFile(_pdf);
+        pdfsForMerge.push(pdfContent);
+    }
     let _fileNameWithSuffix = origFileName.replace(".pdf", "");
-    if(suffix.length>0){
+    if (suffix.length > 0) {
         _fileNameWithSuffix = `${_fileNameWithSuffix} ${suffix?.trim()}`
     }
 
-    if(pdfSuffix.length>0){
+    if (pdfSuffix.length > 0) {
         _fileNameWithSuffix = `${_fileNameWithSuffix} ${pdfSuffix?.trim()}`
     }
     const finalPdfPath = `${finalDumpGround}\\${_fileNameWithSuffix}.pdf`
