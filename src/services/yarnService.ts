@@ -2,6 +2,8 @@ import { isValidPath } from "../utils/utils";
 import { moveAFile, moveFilesAndFlatten } from "../cliBased/fileMover";
 import { getFolderInDestRootForProfile, getFolderInSrcRootForProfile } from "../archiveUpload/ArchiveProfileUtils";
 import * as fs from 'fs';
+import * as fsPromise from 'fs/promises';
+
 import { getAllFileListingWithStats, getAllPDFFiles, getAllPDFFilesWithMedata } from "../utils/FileStatsUtils";
 import { FileStats } from "../imgToPdf/utils/types";
 import { sizeInfo } from "../mirror/FrontEndBackendCommonCode";
@@ -175,7 +177,7 @@ export const moveFilesInArray = async (srcPaths: string[], destPaths: string[]) 
     if (srcPaths.length !== destPaths.length) {
         throw new Error('Source and destination arrays must have the same length');
     }
-    console.log(`moveFilesInArray srcPaths ${srcPaths?.length} destPaths ${destPaths?.length}`)
+    console.log(`moveFilesInArray srcPaths ${srcPaths?.length} destPaths ${destPaths?.length}`);
     const results = [];
 
     for (let i = 0; i < srcPaths.length; i++) {
@@ -193,10 +195,8 @@ export const moveFilesInArray = async (srcPaths: string[], destPaths: string[]) 
         }
 
         try {
-            if (!fs.existsSync(destPath)) {
-                fs.mkdirSync(destPath, { recursive: true });
-            }
-            fs.renameSync(srcPath, destPath);
+            await fsPromise.mkdir(path.dirname(destPath), { recursive: true });
+            await fsPromise.rename(srcPath, destPath);
             results.push({
                 success: true,
                 src: srcPath,
