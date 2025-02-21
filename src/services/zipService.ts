@@ -53,7 +53,7 @@ export async function zipFiles(
 }
 
 
-function unzipFilesOld(filePath: string, outputDir: string): Promise<void> {
+function unzipFiles(filePath: string, outputDir: string): Promise<void> {
     return new Promise((resolve, reject) => {
         yauzl.open(filePath, { lazyEntries: true }, (err, zipfile) => {
             if (err) {
@@ -115,61 +115,8 @@ import { promisify } from 'util';
 const openZip = promisify(yauzl.open);
 
 
-async function unzipFiles(filePath: string, outputDir: string): Promise<void> {
-    try {
-        const zipfile = await openZip(filePath);
-
-        zipfile.readEntry();
-        let entryFileName = "";
-
-        zipfile.on("entry", async (entry) => {
-            const outputPath = path.join(outputDir, entry.fileName);
-            entryFileName = entry.fileName;
-
-            if (/\/$/.test(entry.fileName)) {
-                // Directory entry
-                await createFolderIfNotExistsAsync(outputPath);
-                zipfile.readEntry(); // Continue to the next entry
-            } else {
-                // File entry
-                const readStream = await new Promise<fs.ReadStream>((resolve, reject) => {
-                    zipfile.openReadStream(entry, (err, readStream) => {
-                        if (err) {
-                            reject(err);
-                        } else {
-                            resolve(readStream as fs.ReadStream);
-                        }
-                    });
-                });
-
-                await createFolderIfNotExistsAsync(path.dirname(outputPath));
-
-                const writeStream = fs.createWriteStream(outputPath);
-                readStream.pipe(writeStream);
-
-                await new Promise((resolve, reject) => {
-                    writeStream.on("finish", resolve);
-                    writeStream.on("error", reject);
-                });
-
-                zipfile.readEntry(); // Continue to the next entry
-            }
-        });
-
-        await new Promise<void>((resolve, reject) => {
-            zipfile.on("end", resolve);
-            zipfile.on("error", reject);
-        });
-
-        console.log(`yauzl-extracted ${entryFileName} to ${outputDir}`);
-    } catch (err) {
-        console.error(`Received error in yauzl: ${JSON.stringify(err)}`);
-        throw err;
-    }
-}
-
 export async function unzipAllFilesInDirectory(pathToZipFiles: string,
-     _unzipHere: string = ""):
+    _unzipHere: string = ""):
     Promise<{
         success_count: number,
         error_count: number,
@@ -188,17 +135,8 @@ export async function unzipAllFilesInDirectory(pathToZipFiles: string,
         for (const zipFile of _zipFiles) {
             try {
                 const outputDir = path.join(_unzipHere, path.basename(zipFile.absPath, '.zip'));
-                console.log(`checking ${zipFile.absPath} for ${outputDir}/${_unzipHere}`)
-                const exists = await checkFolderExistsAsync(outputDir);
-                if (exists) {
-                    console.log(`Folder already exists-> ${outputDir} <-
-                        for ${zipFile.absPath} to `);
-                    error_count++;
-                    error_msg.push(`Folder already exists ${zipFile.absPath}`);
-                    continue;
-                }
-               await createFolderIfNotExistsAsync(outputDir)
-
+                console.log(`checking ${zipFile.absPath} for ${outputDir}`)
+                await createFolderIfNotExistsAsync(outputDir)
                 console.log(`${++idx}). unzipping ${zipFile.absPath} to ${outputDir} `)
                 await unzipFiles(zipFile.absPath, outputDir);
                 console.log(`Unzipped ${zipFile.absPath} to 

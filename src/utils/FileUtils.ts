@@ -16,35 +16,50 @@ interface FileInfo {
     file2?: string;
 }
 
-export async function isValidPath(path: string): Promise<boolean> {
+export const isValidDirectory = async (dirPath: string): Promise<boolean> => {
     try {
-        await fsPromise.access(path);
-        return true; // Path is valid
-    } catch {
-        return false; // Path is not valid
+        const stats = await fsPromise.stat(dirPath);
+        return stats.isDirectory();
+    } catch (error) {
+        return false;
     }
-}
+};
 
-export async function isValidPathAsync(path: string): Promise<boolean> {
+/**
+ * Checks if a string is a valid file path.
+ * @param filePath The path to validate.
+ * @param checkExists If true, also checks if the path exists on the file system.
+ * @returns True if the path is valid (and exists, if `checkExists` is true).
+ */
+export const isValidPath = async (filePath: string): Promise<boolean> => {
     try {
-        await fsPromise.access(path);
-        return true; // Path is valid
-    } catch {
-        return false; // Path is not valid
+        // Normalize the path to resolve `.`, `..`, and duplicate separators
+        const normalizedPath = path.normalize(filePath);
+
+        // Check for invalid characters based on the platform
+        const invalidChars = process.platform === 'win32' ? /[<>:"|?*]/ : /[\0]/;
+        if (invalidChars.test(normalizedPath)) {
+            return false;
+        }
+        return true;
+    } catch (err) {
+        // If the path does not exist or is invalid, return false
+        return false;
     }
-}
+};
+
 export const checkFolderExistsAsync = async (folderPath: string): Promise<boolean> => {
     try {
-        await fsPromise.access(folderPath);
-        console.log(`***Folder exists: ${folderPath}`);
-        return true; // Folder exists
+        const stats = await fsPromise.stat(folderPath);
+        console.log(`***stats: ${stats.isDirectory()}`)
+        return stats.isDirectory(); // Returns true only if it's a directory
     } catch (err) {
         if (err.code === 'ENOENT') {
-            console.log(`***Folder doenst exists: ${folderPath}`);
+            console.log(`***not exists: `)
 
             return false; // Folder does not exist
         }
-        throw err; // Re-throw other errors (e.g., permission issues)
+        throw err; // Re-throw other errors
     }
 };
 
@@ -67,15 +82,6 @@ export function removeFolderWithContents(folder: string) {
         }
     })
 }
-
-export const isValidDirectory = async (dirPath: string): Promise<boolean> => {
-    try {
-        const stats = await fsPromise.stat(dirPath);
-        return stats.isDirectory();
-    } catch (error) {
-        return false;
-    }
-};
 
 export const countPDFsInFolder = async (folderPath: string,
     ignoreFolders: string[] = ["2#@#$JIESFSF"]): Promise<number> => {
