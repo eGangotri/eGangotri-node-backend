@@ -6,17 +6,17 @@ import { excelToJson } from "../../excel/ExcelUtils";
 import { titleInGoogleDrive } from "./constants";
 import { getAllPDFFiles } from '../../../utils/FileStatsUtils';
 import { FileStats } from '../../../imgToPdf/utils/types';
+import * as fsPromise from 'fs/promises';
 
-const _excelToJson = () => {
+const _excelToJson = async () => {
     const _root = "C:\\_catalogWork\\_collation";
-    const treasureFolder = "Treasures 60"
-    const mainExcelPath = `${_root}\\_googleDriveExcels\\${treasureFolder}`
-    const mainExcelFileName = `${mainExcelPath}\\${fs.readdirSync(mainExcelPath)[0]}`;
+    const treasureFolder = "Treasures 60";
+    const mainExcelPath = `${_root}\\_googleDriveExcels\\${treasureFolder}`;
+    const files = await fsPromise.readdir(mainExcelPath);
+    const mainExcelFileName = `${mainExcelPath}\\${files[0]}`;
     const mainExcelData: GDriveExcelHeaders[] = excelToJson(mainExcelFileName);
-    return mainExcelData
-
+    return mainExcelData;
 }
-
 const findCorrespondingExcelHeader = (local: FileStats, excelJson: GDriveExcelHeaders[]) => {
     const combinedObject: FileStats = local;
     let localTitle = local.fileName;
@@ -37,7 +37,7 @@ const FOUND_PDFS: string[] = [];
 const tally = async (rootFolder: string) => {
     const localJson = await getAllPDFFiles(rootFolder)
 
-    const excelJson = _excelToJson();
+    const excelJson = await _excelToJson();
     const matchedItems = localJson.filter(local => findCorrespondingExcelHeader(local, excelJson));
 
     console.log(`localJson ${JSON.stringify(localJson.length)} excelJson ${JSON.stringify(excelJson.length)}`)
