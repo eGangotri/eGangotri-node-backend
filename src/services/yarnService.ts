@@ -57,8 +57,10 @@ export const moveItemsInListOfProfileToFreeze = async (uploadCycleId: string) =>
 
     for (let archiveProfile of archiveProfiles) {
         const destPath = getFolderInDestRootForProfile(archiveProfile.archiveProfile.trim());
-        if (!fs.existsSync(destPath)) {
-            fs.mkdirSync(destPath, { recursive: true });
+        try {
+            await fsPromise.access(destPath);
+        } catch {
+            await fsPromise.mkdir(destPath, { recursive: true });
         }
         if (isValidPath(destPath)) {
             const _moveResponse = await moveFileInListToDest(archiveProfile, destPath);
@@ -282,7 +284,7 @@ export const publishBookTitlesList = async (argFirst: string, options: {
             if (!options.onlyInfoNoExcel) {
                 console.log(`!onlyInfoNoExcel ${options.onlyInfoNoExcel}`)
                 const textFileWrittenTo = createPdfReportAsText(metadata, options.pdfsOnly, path.basename(folder));
-                const excelWrittenTo = createExcelReport(metadata, options.pdfsOnly, path.basename(folder))
+                const excelWrittenTo = await createExcelReport(metadata, options.pdfsOnly, path.basename(folder))
                 console.log(`Published Folder Contents for ${folder}\n`)
                 _response.push({
                     success: true,
@@ -368,18 +370,21 @@ const createMetadataSummary = (totalFileCount: number, totalPageCount: number, t
     Total Pages: ${totalPageCount}`
 }
 
-function createFileName(pdfsOnly: boolean, fileCount: number, folderBase: string, ext: string) {
+async function createFileName(pdfsOnly: boolean, fileCount: number, folderBase: string, ext: string) {
     const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT) + "_HOURS"
     const fileName = `${folderBase}_MegaList_${pdfsOnly ? 'pdfs_only' : 'all_files'}-${fileCount}Items-${timeComponent}.${ext}`;
     const filePath = `${_root}\\${folderBase}`;
-    if (!fs.existsSync(filePath)) {
-        fs.mkdirSync(filePath);
+    try {
+        await fsPromise.access(filePath);
+    } catch {
+        await fsPromise.mkdir(filePath, { recursive: true });
     }
+
     const absPath = `${filePath}\\${fileName}`;
     return absPath;
 }
-function createExcelReport(fileStats: Array<FileStats>, pdfsOnly: boolean, folderBase: string) {
-    const absPath = createFileName(pdfsOnly, fileStats.length, folderBase, 'xlsx');
+async function createExcelReport(fileStats: Array<FileStats>, pdfsOnly: boolean, folderBase: string) {
+    const absPath = await createFileName(pdfsOnly, fileStats.length, folderBase, 'xlsx');
     const { totalFileCount, totalPageCount, totalSizeRaw } = createMetadata(fileStats);
     addSummaryToExcel(fileStats, totalFileCount, totalPageCount, totalSizeRaw);
     jsonToExcel(fileStats, absPath)
