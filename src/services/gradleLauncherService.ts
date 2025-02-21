@@ -1,3 +1,4 @@
+import { promisify } from 'util';
 import { exec, spawn } from 'child_process';
 import { WORKING_DIR } from '../common';
 import { ArchiveProfileAndTitle } from '../mirror/types';
@@ -119,7 +120,7 @@ export async function snap2htmlCmdCall(rootFolderPath: string, snap2htmlFileName
 }
 
 const COMMAND_PROMO_MAX_BUFFER_SIZE = 1024 * 1024 * 1024;
-export function makeGradleCall(_cmd: string): Promise<string> {
+export function makeGradleCallOld(_cmd: string): Promise<string> {
     console.log(`makeGradleCall ${_cmd} `);
 
     return new Promise((resolve, reject) => {
@@ -144,3 +145,25 @@ export function makeGradleCall(_cmd: string): Promise<string> {
 }
 
 
+const execAsync = promisify(exec); // Promisify the exec function for async/await usage
+
+export async function makeGradleCall(_cmd: string): Promise<string> {
+    console.log(`makeGradleCall ${_cmd}`);
+    try {
+        const { stdout, stderr } = await execAsync(_cmd, {
+            maxBuffer: COMMAND_PROMO_MAX_BUFFER_SIZE,
+            cwd: `${WORKING_DIR}`,
+        });
+
+        if (stderr) {
+            console.error(`stderr: ${stderr}`);
+            throw new Error(stderr); // Treat stderr as an error
+        }
+
+        console.log(`stdout: ${stdout}`);
+        return stdout; // Resolve with the stdout
+    } catch (error) {
+        console.error(`Error executing Gradle command: ${error.message}`);
+        throw error; // Re-throw the error for the caller to handle
+    }
+}
