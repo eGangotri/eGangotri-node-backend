@@ -7,7 +7,7 @@ import { genLinksAndFolders, validateGenGDriveLinks } from '../services/yarnList
 import { generateGoogleDriveListingExcel, getGDriveContentsAsJson } from '../cliBased/googleapi/GoogleDriveApiReadAndExport';
 import { formatTime } from '../imgToPdf/utils/Utils';
 import { convertGDriveExcelToLinkData, downloadGDriveData } from '../services/GDriveItemService';
-import { isValidPath } from '../utils/utils';
+import { isValidPath } from '../utils/FileUtils';
 import { getFolderInSrcRootForProfile } from '../archiveUpload/ArchiveProfileUtils';
 import { verifyGDriveLocalIntegrity } from '../services/GDriveService';
 import * as FileConstUtils from '../utils/constants';

@@ -1,4 +1,3 @@
-import fs from 'fs';
 import path from 'path';
 import * as fsPromise from 'fs/promises';
 
@@ -8,16 +7,6 @@ export const Utils = {};
 
 export const DD_MM_YYYY_FORMAT = 'DD-MMM-YYYY'
 export const DD_MM_YYYY_HH_MMFORMAT = 'DD-MMM-YYYY-HH-mm'
-
-export function isValidPath(path: string): boolean {
-  try {
-    fs.accessSync(path);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
 
 export const findTopNLongestFileNames = async (directory: string, n: number = 1, includePathInCalc = false) => {
   let longestFileNames: string[] = [];

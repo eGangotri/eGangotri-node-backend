@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import * as fsPromise from 'fs/promises';
 /**
  * 
  * @param num All Code in this file should be same in both FE and BE Code.
@@ -43,6 +44,12 @@ export function roundOff(num: number) {
   
 export function getFilzeSize(pdfPath: string) {
   let stats = fs.statSync(pdfPath)
+  let fileSizeInBytes = stats.size;
+  return fileSizeInBytes;
+}
+
+export async function getFileSizeAsync(pdfPath: string) {
+  let stats = await fsPromise.stat(pdfPath);
   let fileSizeInBytes = stats.size;
   return fileSizeInBytes;
 }

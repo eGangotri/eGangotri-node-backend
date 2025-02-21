@@ -1,7 +1,6 @@
 import * as fsPromise from 'fs/promises';
 
 import { getPdfPageCountUsingPdfLib } from "../imgToPdf/utils/PdfLibUtils";
-import { getFilzeSize } from '../mirror/FrontEndBackendCommonCode';
 import * as path from 'path';
 import * as Mirror from "../mirror/FrontEndBackendCommonCode"
 import { FileStatsOptions } from '../imgToPdf/utils/types';
@@ -10,7 +9,6 @@ import _ from 'lodash';
 import { PDF_EXT, ZIP_EXT } from '../imgToPdf/utils/constants';
 
 import { FileStats } from "imgToPdf/utils/types";
-import { file } from 'pdfkit';
 import { formatTime } from '../imgToPdf/utils/Utils';
 import * as FileConstUtils from '../utils/constants';
 
@@ -53,7 +51,7 @@ export async function getAllFileStats(filestatsOptions: FileStatsOptions): Promi
                     continue;
                 }
                 const _path = path.parse(fullPath);
-                const rawSize = getFilzeSize(fullPath) || 0;
+                const rawSize = await Mirror.getFileSizeAsync(fullPath) || 0;
 
                 let fileStat: FileStats = {
                     rowCounter:FileConstUtils.incrementColumnCounter(rowCounterController),

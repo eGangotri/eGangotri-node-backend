@@ -1,7 +1,7 @@
 import * as express from 'express';
 import { launchUploader, launchUploaderViaAbsPath, launchUploaderViaExcelV1, launchUploaderViaExcelV3, launchUploaderViaExcelV3Multi, launchUploaderViaJson, loginToArchive, makeGradleCall, moveToFreeze, reuploadMissed, snap2htmlCmdCall } from '../services/gradleLauncherService';
 import { ArchiveProfileAndTitle, UploadCycleArchiveProfile } from '../mirror/types';
-import { isValidPath } from '../utils/utils';
+import { isValidPath } from '../utils/FileUtils';
 import { getFolderInDestRootForProfile, getFolderInSrcRootForProfile } from '../archiveUpload/ArchiveProfileUtils';
 import { ItemsUshered } from '../models/itemsUshered';
 import { UploadCycle } from '../models/uploadCycle';

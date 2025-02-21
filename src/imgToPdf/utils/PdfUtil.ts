@@ -1,5 +1,4 @@
 import {  getPdfPageCountUsingPdfLib } from "./PdfLibUtils";
-import * as fs from 'fs';
 
 import { addReport, INTRO_PAGE_ADJUSTMENT } from "..";
 import { getAllTifs } from "./ImgUtils";

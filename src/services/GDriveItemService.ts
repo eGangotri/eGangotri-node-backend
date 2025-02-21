@@ -10,7 +10,7 @@ import path from "path";
 import _, { String } from "lodash";
 import { downloadFileFromGoogleDrive } from "../cliBased/pdf/downloadFile";
 import { GDriveExcelData } from "../cliBased/googleapi/types";
-import { createFolderIfNotExistsAsync } from "utils/FileUtils";
+import { createFolderIfNotExistsAsync } from "../utils/FileUtils";
 
 export async function getListOfGDriveItems(queryOptions: GDriveItemListOptionsType) {
   const { limit, mongoOptionsFilter } = setOptionsForGDriveListing(queryOptions)

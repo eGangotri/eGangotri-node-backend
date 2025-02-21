@@ -1,11 +1,10 @@
-import { isFileInUse } from "../../archiveDotOrg/fileUtils";
 import { getAllPDFFiles, getAllPDFFilesWithIgnorePathsSpecified } from "../../utils/FileStatsUtils";
 import { FileStats } from "imgToPdf/utils/types";
 
 import * as path from 'path';
 import * as fsPromise from 'fs/promises';
 import { launchWinExplorer } from "./util";
-import { checkFolderExistsSync } from "../../utils/FileUtils";
+import { checkFolderExistsSync, isFileInUse } from "../../utils/FileUtils";
 
 export const moveAFile = async (sourceFileAbsPath: string, targetDir: string, fileName: string, pdfOnly = true) => {
     const targetFile = path.join(targetDir, fileName);
@@ -54,7 +53,7 @@ export async function moveFilesAndFlatten(sourceDir: string, targetDir: string, 
         };
     }
 
-    const inUseCheck = checkIfAnyFileInUse(allSrcPdfs);
+    const inUseCheck = await checkIfAnyFileInUse(allSrcPdfs);
     if (inUseCheck.success === false) {
         return inUseCheck;
     }
@@ -123,9 +122,17 @@ export async function moveFilesAndFlatten(sourceDir: string, targetDir: string, 
         errors: errorList
     };
 }
-const checkIfAnyFileInUse = (allSrcPdfs: FileStats[]) => {
-    //check if any is in use
-    const filesInUse = allSrcPdfs.filter(file => isFileInUse(file.absPath));
+
+const checkIfAnyFileInUse = async (allSrcPdfs: FileStats[]) => {
+    // Check if any file is in use
+    const filesInUsePromises = allSrcPdfs.map(async (file) => {
+        const isUse = await isFileInUse(file.absPath);
+        return { file, isUse };
+    });
+
+    const filesInUseResults = await Promise.all(filesInUsePromises);
+    const filesInUse = filesInUseResults.filter(result => result.isUse).map(result => result.file);
+
     if (filesInUse.length > 0) {
         console.error(`Following files are in use, cancelling move operation: ${filesInUse.map(file => file.fileName)}`);
         return {
@@ -133,13 +140,12 @@ const checkIfAnyFileInUse = (allSrcPdfs: FileStats[]) => {
             msg: `Following files are in use, cancelling move operation`,
             filesInUse: filesInUse.map(file => file.absPath)
         };
-    }
-    else {
+    } else {
         return {
             success: true,
         };
     }
-}
+};
 
 const checkCollision = (allSrcPdfs: FileStats[], allDestPdfs: FileStats[]) => {
     const allSrcFileNames = allSrcPdfs.map((x) => x.fileName);

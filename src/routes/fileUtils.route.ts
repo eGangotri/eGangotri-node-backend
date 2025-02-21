@@ -144,7 +144,7 @@ fileUtilsRoute.post('/topLongFileNames', async (req: any, resp: any) => {
         const topN = req.body.topN || 1;
         const includePathInCalc = req.body.includePathInCalc || false;
         console.log(`folder: ${folder} topN: ${topN} includePathInCalc: ${includePathInCalc}`);
-        const longestFileName = findTopNLongestFileNames(folder, topN, includePathInCalc);
+        const longestFileName = await findTopNLongestFileNames(folder, topN, includePathInCalc);
         resp.status(200).send({
             response: {
                 googleDriveLimit: "Google Drive API has a limit of 255 characters for file names - path inclusive",

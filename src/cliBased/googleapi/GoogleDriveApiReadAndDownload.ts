@@ -8,7 +8,7 @@ import { DOWNLOAD_COMPLETED_COUNT, DOWNLOAD_COMPLETED_COUNT2, DOWNLOAD_DOWNLOAD_
 import { insertEntryForGDriveUploadHistory, updateEntryForGDriveUploadHistory } from '../../services/GdriveDownloadRecordService';
 import { getAllPdfsInFolders, getDirectoriesWithFullPath } from '../../imgToPdf/utils/Utils';
 import { addHeaderAndFooterToPDF } from '../../pdfHeaderFooter';
-import { isValidPath } from '../../utils/utils';
+import { isValidPath } from "../../utils/FileUtils";
 import { extractGoogleDriveId } from '../../mirror/GoogleDriveUtilsCommonCode';
 import { PDF_TYPE } from './_utils/constants';
 import { GDriveDownloadHistoryStatus } from '../../utils/constants';
