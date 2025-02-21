@@ -1,5 +1,6 @@
 import { PDF_FONT } from "../imgToPdf/utils/PdfDecoratorUtils";
 import * as PdfLibUtils from '../imgToPdf/utils/PdfLibUtils';
+import * as fsPromise from 'fs/promises';
 import * as fs from 'fs';
 import { getAllPdfsInFolders, mkDirIfDoesntExists } from "../imgToPdf/utils/Utils";
 import { prepareDocument } from "../imgToPdf/utils/PdfUtils";
@@ -28,7 +29,7 @@ export const moveOrignalToSeparateFolder = async (pdfToVanitize: string, finalDu
         await mkDirIfDoesntExists(finalDumpGround);
         const newName = finalDumpGround + "\\" + path.parse(pdfToVanitize).name.trim() + path.parse(pdfToVanitize).ext
         console.log(`renaming ${pdfToVanitize} to ${newName}`)
-        fs.renameSync(pdfToVanitize, newName);
+        await fsPromise.rename(pdfToVanitize, newName);
     }
     catch (err) {
         console.log(`moveOrignalToSeparateFolder:err ${err}`)
@@ -206,4 +207,4 @@ export const vanitizePdfForProfiles = async (profileAsCSV: string, suffix: strin
     console.log(`vanitizePdfForProfiles:responseList ${responseList}`);
     return responseList;
 }
-//pnpm run vanity 
+//pnpm run vanity
