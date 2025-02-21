@@ -122,8 +122,8 @@ export const moveFileInListToDest = async (profileData: {
         msg: `${_renamedWithoutCollision.length} files moved from Source ${profileData?.archiveProfilePath || ""} to target dir ${destPath}.
         \n${_fileCollisionsResolvedByRename.length} files had collisions resolved by renaming.
         \n${errorList.length} file(s) had errors while moving`,
-         errorList,
-         errorAbsPathList,
+        errorList,
+        errorAbsPathList,
         fileMoved: _renamedWithoutCollision,
         filesAbsPathMoved: filesAbsPathMoved,
         fileCollisionsResolvedByRename: _fileCollisionsResolvedByRename,
@@ -170,6 +170,52 @@ export const moveFileSrcToDest = async (srcPath: string,
         };
     }
 }
+
+export const moveFilesInArray = async (srcPaths: string[], destPaths: string[]) => {
+    if (srcPaths.length !== destPaths.length) {
+        throw new Error('Source and destination arrays must have the same length');
+    }
+    console.log(`moveFilesInArray srcPaths ${srcPaths?.length} destPaths ${destPaths?.length}`)
+    const results = [];
+
+    for (let i = 0; i < srcPaths.length; i++) {
+        const srcPath = srcPaths[i];
+        const destPath = destPaths[i];
+        const srcFileName = path.basename(srcPath);
+        const destFileName = path.basename(destPath);
+
+        if (srcFileName !== destFileName) {
+            results.push({
+                success: false,
+                msg: `File name mismatch: ${srcFileName} does not match ${destFileName}`
+            });
+            continue;
+        }
+
+        try {
+            fs.mkdirSync(destDir, { recursive: true });
+            results.push({
+                success: true,
+                src: srcPath,
+                dest: destPath,
+                msg: `File renamed successfully from ${srcPath} to ${destPath}`
+            });
+        } catch (err) {
+            results.push({
+                success: false,
+                src: srcPath,
+                dest: destPath,
+                msg: `Error renaming file from ${srcPath} to ${destPath}: ${err.message}`,
+                err: err
+            });
+        }
+    }
+
+    return {
+        success: results.every(result => result.success),
+        results
+    };
+};
 
 const getFoldersFromInput = (argFirst: string) => {
     const profileOrPaths = argFirst.includes(",") ? argFirst.split(",").map((link: string) => link.trim()) : [argFirst.trim()];

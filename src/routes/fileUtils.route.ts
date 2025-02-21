@@ -6,7 +6,7 @@ import { callAksharamukha, DEFAULT_TARGET_SCRIPT_ROMAN_COLLOQUIAL } from '../aks
 import { convertJpgsToPdfInAllSubFolders } from '../imgToPdf/jpgToPdf';
 import { multipleTextScriptConversion } from '../services/fileService';
 import { renameFilesViaExcel } from '../services/fileUtilsService';
-import { moveFileInListToDest } from '../services/yarnService';
+import { moveFileInListToDest, moveFilesInArray, moveFileSrcToDest } from '../services/yarnService';
 import { FileMoveTracker } from '../models/FileMoveTracker';
 
 
@@ -14,28 +14,79 @@ export const fileUtilsRoute = express.Router();
 fileUtilsRoute.get('/file-move-list', async (req, res) => {
     console.log(`GET /file-move-list`);
     try {
-      const page = parseInt(req.query.page as string) || 1;
-      const limit = parseInt(req.query.limit as string) || 10;
-      const skip = (page - 1) * limit;
-  
-      const totalCount = await FileMoveTracker.countDocuments();
-      const fileMoveTrackers = await FileMoveTracker.find()
-        .skip(skip)
-        .limit(limit)
-        .sort({ createdAt: -1 });
-  
-      res.json({
-        data: fileMoveTrackers,
-        currentPage: page,
-        totalPages: Math.ceil(totalCount / limit),
-        totalCount,
-      });
-    } catch (error) {
-      console.error('Error fetching file move trackers:', error);
-      res.status(500).json({ error: 'Internal server error' });
-    }
-  });
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
+        const skip = (page - 1) * limit;
 
+        const totalCount = await FileMoveTracker.countDocuments();
+        const fileMoveTrackers = await FileMoveTracker.find()
+            .skip(skip)
+            .limit(limit)
+            .sort({ createdAt: -1 });
+
+        res.json({
+            data: fileMoveTrackers,
+            currentPage: page,
+            totalPages: Math.ceil(totalCount / limit),
+            totalCount,
+        });
+    } catch (error) {
+        console.error('Error fetching file move trackers:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+fileUtilsRoute.post('/reverse-file-move', async (req: any, resp: any) => {
+    console.log(`reverse-file-move ${JSON.stringify(req.body)} `)
+    try {
+        const id = req?.body?.id;
+        if (!id) {
+            resp.status(300).send({
+                response: {
+                    "status": "failed",
+                    "success": false,
+                    "message": "Pls. provide File Move Tracker Id"
+                }
+            });
+        }
+        const fileMoveTracker = await FileMoveTracker.findById(id);
+        if (!fileMoveTracker) {
+            resp.status(300).send({
+                response: {
+                    "status": "failed",
+                    "success": false,
+                    "message": "File Move Tracker not found"
+                }
+            });
+        }
+        const { filesAbsPathMoved, filesMovedNewAbsPath, reversed } = fileMoveTracker;
+        if (reversed) {
+            resp.status(300).send({
+                response: {
+                    "status": "failed",
+                    "success": false,
+                    "message": "Already Reversed"
+                }
+            });
+        }
+        const moveResult = await moveFilesInArray(filesAbsPathMoved as string[], filesMovedNewAbsPath as string[]);
+        if (moveResult.success) {
+            fileMoveTracker.reversed = true;
+            await fileMoveTracker.save();
+        }
+        console.log(`moveResult ${JSON.stringify(moveResult)} `)
+        resp.status(200).send({
+            response: {
+                ...moveResult
+            }
+        });
+    }
+
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})
 
 fileUtilsRoute.post('/findByFileSize', async (req: any, resp: any) => {
     try {

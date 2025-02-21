@@ -27,6 +27,7 @@ export async function moveFilesAndFlatten(sourceDir: string,
     const fileCollisionsResolvedByRename = [];
     const filesMoved = [];
     const filesAbsPathMoved = [];
+    const filesMovedNewAbsPath = [];
     const errorList = []
     if (allSrcPdfs.length === 0) {
         return {
@@ -63,7 +64,7 @@ export async function moveFilesAndFlatten(sourceDir: string,
                 continue;
             }
             else {
-                filesMoved.push(`${++counter}/${_count}). ${file.name}`);
+                filesMoved.push(`${file.name}`);
                 filesAbsPathMoved.push(sourceFile);
                 const moveAFileRes = moveAFile(sourceFile, targetDir, file.name, pdfOnly);
 
@@ -76,7 +77,7 @@ export async function moveFilesAndFlatten(sourceDir: string,
                 else if (moveAFileRes.fileCollisionsResolvedByRename.length > 0) {
                     fileCollisionsResolvedByRename.push(moveAFileRes.fileCollisionsResolvedByRename)
                 }
-
+                filesMovedNewAbsPath.push(moveAFileRes.targetFile);
             }
         }
     }
@@ -96,6 +97,7 @@ export async function moveFilesAndFlatten(sourceDir: string,
         fileCollisionsResolvedByRename,
         filesMoved,
         filesAbsPathMoved,
+        filesMovedNewAbsPath,
         errors: errorList
     };
 }
@@ -106,11 +108,12 @@ export const moveAFile = (sourceFileAbsPath: string,
     fileName: string,
     pdfOnly = true) => {
     const targetFile = path.join(targetDir, fileName);
-    const result = { fileCollisionsResolvedByRename: "", renamedWithoutCollision: "", error: "" };
+    const result = { fileCollisionsResolvedByRename: "", renamedWithoutCollision: "", error: "", targetFile: "" };
     if (!pdfOnly || (pdfOnly && fileName.endsWith('.pdf'))) {
         if (!fs.existsSync(targetFile)) {
             fs.renameSync(sourceFileAbsPath, targetFile);
             result.renamedWithoutCollision = `${fileName}`;
+            result.targetFile = targetFile;
         }
         else {
             const extension = path.extname(targetFile); //.pdf with .
