@@ -6,7 +6,7 @@ import { DD_MM_YYYY_FORMAT } from '../utils/utils';
 import { FileStats } from 'imgToPdf/utils/types';
 import { sizeInfo } from '../mirror/FrontEndBackendCommonCode';
 import * as _ from 'lodash';
-import { checkFolderExistsSync, createFolderIfNotExistsAsync } from 'utils/FileUtils';
+import { checkFolderExistsSync, createFolderIfNotExistsAsync } from '../utils/FileUtils';
 /**
  * 
  * @param folderName 

@@ -13,7 +13,7 @@ import {
   titleInGoogleDrive, titleInOriginal,
   yearOfPublication
 } from './constants';
-import { checkFolderExistsSync, createFolderIfNotExistsAsync } from 'utils/FileUtils';
+import { checkFolderExistsSync, createFolderIfNotExistsAsync } from '../../../utils/FileUtils';
 
 const mergeExcelJsons = (mainExcelData: GDriveExcelHeaders[], secondaryExcelDataAdjusted: GDriveExcelHeaders[]) => {
   const combinedExcelJsons = mainExcelData.map(x => findCorrespondingExcelHeader(x, secondaryExcelDataAdjusted));

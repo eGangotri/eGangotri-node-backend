@@ -9,7 +9,7 @@ import { AI_SERVER } from '../db/connection';
 import { USER_HOME } from '../archiveUpload/constants';
 import { aksharaMukhaAutoDetectScriptToRomanColloguial } from '../aksharamukha/convert';
 import path from 'path';
-import { checkFolderExistsSync, createFolderIfNotExistsAsync } from 'utils/FileUtils';
+import { createFolderIfNotExistsAsync } from '../utils/FileUtils';
 
 const DD_MM_YYYY_HH_MMFORMAT = 'DD-MM-YYYY-HH-mm'; // Define your date format
 const FIRST_N_PAGE_COUNT = 7;

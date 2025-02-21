@@ -3,7 +3,7 @@ import fs from 'fs';
 import moment from 'moment';
 import { DD_MM_YYYY_HH_MMFORMAT } from '../../../utils/utils';
 import * as path from "path";
-import { createFolderIfNotExistsAsync } from 'utils/FileUtils';
+import { createFolderIfNotExistsAsync } from '../../../utils/FileUtils';
 
 export async function createFileNameWithPathForExport(folderId: string,
     _umbrellaFolder: string,

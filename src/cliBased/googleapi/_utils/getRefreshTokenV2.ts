@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import * as readline from 'readline';
 
 import { SCOPES, TOKEN_PATH, _credentials } from './credentials_googleapi';
-import { checkFolderExistsSync } from 'utils/FileUtils';
+import { checkFolderExistsSync } from '../../../utils/FileUtils';
 
 // Set up OAuth2 credentials
 const credentials = {
