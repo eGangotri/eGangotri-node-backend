@@ -78,15 +78,14 @@ export const runPythonCopyPdfInLoop = async (_srcFolders: string[],
                 "input_folder": srcFolder,
                 "output_folder": specificDest,
             }, 'copyOnlyPdfs');
+            
             console.log(`runPthonCopyPdfInLoop
                  srcFolder ${srcFolder} specificDest ${specificDest} pdfsToMoveCount ${pdfsToMoveCount}
                  _resp ${JSON.stringify(_resp)}`);
-            const destRootDump = `${specificDest}\\${path.basename(srcFolder)}(${pdfsToMoveCount})`;
-            const pdfsMovedCount = await countPDFsInFolder(destRootDump);
+            const pdfsMovedCount = await countPDFsInFolder(_resp.output_folder);
             const result = {
                 msg: `${pdfsToMoveCount} pdfs moved to new dest with count ${pdfsMovedCount}`,
                 srcFolder,
-                destRootDump,
                 isReductionCountMatch: pdfsToMoveCount === pdfsMovedCount,
                 ..._resp,
             }
