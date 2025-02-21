@@ -6,7 +6,7 @@ import moment from 'moment';
 import { DD_MM_YYYY_FORMAT } from '../utils/constants';
 import { FETCH_ACRHIVE_METADATA_COUNTER } from './archiveScraper';
 import * as path from 'path';
-import { promises as fs } from 'fs';
+import * as fsPromise from 'fs/promises';
 
 export const DOUBLE_HASH_SEPARATOR = "##";
 export const ARCHIVE_EXCEL_PATH = `${os.homedir()}\\Downloads`;
@@ -256,7 +256,7 @@ function createArchiveLinkData(
 }
 export async function getNonFolderFileCount(directory: string): Promise<number> {
     try {
-        const files = await fs.readdir(directory, { withFileTypes: true });
+        const files = await fsPromise.readdir(directory, { withFileTypes: true });
         const nonFolderFiles = files.filter(file => !file.isDirectory());
         return nonFolderFiles.length;
     } catch (error) {
@@ -267,7 +267,7 @@ export async function getNonFolderFileCount(directory: string): Promise<number> 
 
 export async function getZipFileCount(directory: string): Promise<number> {
     try {
-        const files = await fs.readdir(directory, { withFileTypes: true });
+        const files = await fsPromise.readdir(directory, { withFileTypes: true });
         const zipFiles = files.filter(file => !file.isDirectory() && !file.name.endsWith('.zip') && !file.name.endsWith('.rar'));
         return zipFiles.length;
     } catch (error) {
