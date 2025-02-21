@@ -1,6 +1,4 @@
-import fs from "fs";
-var fsPromises = require("fs").promises;
-const csv = require("csv-parse");
+import * as fsPromise from 'fs/promises';
 
 import { ItemsQueued } from "../models/itemsQueued";
 import { v4 as uuidv4 } from "uuid";
@@ -43,11 +41,12 @@ export async function convertFileToMongoDBInsertableFormat(
   docType: DOC_TYPE
 ) {
   const itemsArray: any[] = [];
-  const fileCreateDate: Date = fs.statSync(csvFileName).birthtime;
+  const _stats = await fsPromise.stat(csvFileName)
+  const fileCreateDate: Date = _stats.birthtime;
 
   const records: Array<string> = [];
 
-  const allFileContents = fs.readFileSync(csvFileName, "utf-8");
+  const allFileContents = await fsPromise.readFile(csvFileName, "utf-8");
   const splitLinesArray = allFileContents.split(/\r?\n/);
   for (let x = 0; x < splitLinesArray.length; x++) {
     const line = splitLinesArray[x];

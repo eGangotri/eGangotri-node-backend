@@ -5,8 +5,7 @@ import * as path from 'path';
 import { getAllZipFiles } from '../utils/FileStatsUtils';
 import * as yauzl from 'yauzl';
 import { getNonFolderFileCount } from '../archiveDotOrg/utils';
-import { pipeline } from "stream/promises";
-import { checkFolderExistsSync, createFolderIfNotExistsAsync } from 'utils/FileUtils';
+import { checkFolderExistsSync, createFolderIfNotExistsAsync } from '../utils/FileUtils';
 
 
 const UNZIP_FOLDER = "\\unzipped";

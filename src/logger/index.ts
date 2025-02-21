@@ -1,6 +1,6 @@
 import { createLogger, format, transports } from 'winston';
 import * as os from 'os';
-import {  createFolderIfNotExistsAsync } from 'utils/FileUtils';
+import {  createFolderIfNotExistsAsync } from '../utils/FileUtils';
 
 const { combine, timestamp, printf } = format;
 
