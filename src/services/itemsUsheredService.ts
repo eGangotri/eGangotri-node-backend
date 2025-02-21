@@ -56,13 +56,14 @@ export const itemsUsheredVerficationAndDBFlagUpdate = async (uploadCycleIdForVer
 }
 
 export const selectedItemsVerficationAndDBFlagUpdate = async (uploadsForVerification: SelectedUploadItem[]) => {
-  const results: SelectedUploadItem[] = [];
-  let counter = 0;
   const total = uploadsForVerification.length;
-  for (const forVerification of uploadsForVerification) {
-    const res = await checkUrlValidityForUploadItems(forVerification, counter++, total);
-    results.push(res);
-  }
+  const promises = 
+  uploadsForVerification.map((forVerification, index) =>
+    checkUrlValidityForUploadItems(forVerification, index, total)
+  )
+
+  const results: SelectedUploadItem[] = await Promise.all(promises);
+
   await bulkUpdateUploadedFlag(results);
   const failures = results.filter((x: SelectedUploadItem) => x?.isValid !== true) || []//accomodates null also   
 
