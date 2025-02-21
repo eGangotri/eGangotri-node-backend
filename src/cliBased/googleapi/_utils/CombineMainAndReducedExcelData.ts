@@ -1,11 +1,11 @@
+import moment from "moment";
+import path from "path";
+import * as fsPromise from 'fs/promises';
+import * as _ from 'lodash';
 import { excelToJson, jsonToExcel } from "../../excel/ExcelUtils";
 import { GDriveExcelHeaders } from "../types";
 import { emptyExcelHeaderObj, linkToFileLocation, linkToTruncatedFileLocation, numPages, thumbnail, titleInGoogleDrive } from "./constants";
-import * as fs from 'fs';
-import * as _ from 'lodash';
 import { DD_MM_YYYY_HH_MMFORMAT } from "../../../utils/utils";
-import moment from "moment";
-import path from "path";
 import {  createFolderIfNotExistsAsync } from "../../../utils/FileUtils";
 
 const ignoreDiff = true;
@@ -130,11 +130,13 @@ const exec = async () => {
     const treasureFolder = `Treasures ${trCount}`
     const treasureFolder2 = `Treasures${trCount}`
 
-    const mainExcelPath = `${_root}\\_googleDriveExcels\\${treasureFolder}`
-    const mainExcelFileName = `${mainExcelPath}\\${fs.readdirSync(mainExcelPath)[0]}`;
+    const mainExcelPath = `${_root}\\_googleDriveExcels\\${treasureFolder}`;
+    const dirContents = await fsPromise.readdir(mainExcelPath);
+    const mainExcelFileName = `${mainExcelPath}\\${dirContents[0]}`;
 
-    const secondaryExcelPath = `${_root}\\_catReducedDrivePdfExcels\\${treasureFolder2}`
-    const secondaryExcelFileName = `${secondaryExcelPath}\\${fs.readdirSync(secondaryExcelPath)[0]}`;
+    const secondaryExcelPath = `${_root}\\_catReducedDrivePdfExcels\\${treasureFolder2}`;
+    const dirContents2 = await fsPromise.readdir(secondaryExcelPath);
+    const secondaryExcelFileName = `${secondaryExcelPath}\\${dirContents2[0]}`;
 
     const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)
 

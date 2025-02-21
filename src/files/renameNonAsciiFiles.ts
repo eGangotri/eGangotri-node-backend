@@ -1,8 +1,8 @@
-import { callAksharamukha, DEFAULT_TARGET_SCRIPT_ROMAN_COLLOQUIAL } from "../aksharamukha/convert";
-import fs from 'fs';
 import path from 'path';
-import { getAllFileListingWithoutStats } from "../utils/FileStatsUtils";
+import * as fsPromise from 'fs/promises';
 import os from "os";
+import { callAksharamukha, DEFAULT_TARGET_SCRIPT_ROMAN_COLLOQUIAL } from "../aksharamukha/convert";
+import { getAllFileListingWithoutStats } from "../utils/FileStatsUtils";
 import { createFolderIfNotExistsAsync } from "../utils/FileUtils";
 
 export const renameNonAsciiFile = async (
@@ -31,14 +31,13 @@ export const renameNonAsciiFile = async (
         const dumpDirectory = path.join(dir, DEFAULT_TARGET_SCRIPT_ROMAN_COLLOQUIAL);
         // Create the new file path
         const newFilePath = path.join(dumpDirectory, `${_renamedFile}${ext}`);
-       await createFolderIfNotExistsAsync(dumpDirectory)
+        await createFolderIfNotExistsAsync(dumpDirectory)
 
-        //deliberately not using async
-        // Copy the file
-        fs.copyFile(fileAbsPath, newFilePath, function (err) {
-            if (err) throw err;
-            console.log('File copied!');
+
+        await fsPromise.copyFile(fileAbsPath, newFilePath).catch((err) => {
+            console.error(`Error copying file: ${err}`);
         });
+        console.log('File copied!');
         return { old: fileNameWithExt, new: `${_renamedFile}${ext}` }
     }
     return { old: fileNameWithExt, new: "" }
@@ -52,7 +51,7 @@ export const renameAllNonAsciiInFolder = async (
 ) => {
     let RENAME_COUNTER = 0;
 
-    const files = await getAllFileListingWithoutStats({directoryPath:folder, ignorePaths:[DEFAULT_TARGET_SCRIPT_ROMAN_COLLOQUIAL]});
+    const files = await getAllFileListingWithoutStats({ directoryPath: folder, ignorePaths: [DEFAULT_TARGET_SCRIPT_ROMAN_COLLOQUIAL] });
     const promises = [];
     for (const file of files) {
         promises.push(renameNonAsciiFile(file.absPath, sourceScript, targetScript, RENAME_COUNTER++))
@@ -63,5 +62,5 @@ export const renameAllNonAsciiInFolder = async (
 }
 const homeDirectory = os.homedir();
 
-const _fn =  `${homeDirectory}\\Downloads\\test`;
+const _fn = `${homeDirectory}\\Downloads\\test`;
 //renameAllNonAsciiInFolder(_fn, "Tamil");

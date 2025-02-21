@@ -4,8 +4,7 @@
 
 import { getAllPDFFiles } from "../../../utils/FileStatsUtils";
 import * as path from 'path';
-import fs from 'fs';
-import { move } from "fs-extra";
+import * as fsPromise from 'fs/promises';
 
 const MAX_FILE_NAME_PERMITTED = 165
 
@@ -13,10 +12,11 @@ const MOVED_FILE_LIST: string[] = []
 const CANT_MOVE_FILE_LIST: string[] = []
 let TOTAL_FILE_COUNT = 0;
 
-function moveFile(sourcePath: string, destinationPath: string) {
+async function moveFile(sourcePath: string, destinationPath: string) {
     console.log(`moveFile \n${sourcePath} \n${destinationPath}`);
     try {
-        fs.renameSync(sourcePath, destinationPath);
+        await fsPromise.rename(sourcePath, destinationPath);
+        console.log(`File ${destinationPath} moved successfully.`);
         console.log(`File ${destinationPath} moved successfully.`);
         MOVED_FILE_LIST.push(destinationPath)
     } catch (err) {
@@ -41,7 +41,7 @@ const _execute = async (rootFolder: string) => {
                 CANT_MOVE_FILE_LIST.push(`${rootFolder}\\${pdfName}.pdf`)
             }
             else {
-                moveFile(pdf.absPath, `${rootFolder}\\${pdfName}.pdf`)
+                await moveFile(pdf.absPath, `${rootFolder}\\${pdfName}.pdf`)
             }
         }
     }

@@ -1,9 +1,9 @@
+import path from 'path';
 import { _credentials } from './_utils/credentials_googleapi';
 import { listFolderContentsAsArrayOfData } from './service/GoogleApiService';
 import { getGoogleDriveInstance } from './service/CreateGoogleDrive';
 import { downloadFileFromGoogleDrive } from '../pdf/downloadFile';
 import { getFolderInSrcRootForProfile } from '../../archiveUpload/ArchiveProfileUtils';
-import path from 'path';
 import { DOWNLOAD_COMPLETED_COUNT, DOWNLOAD_COMPLETED_COUNT2, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT2, DOWNLOAD_FAILED_COUNT, DOWNLOAD_FAILED_COUNT2, resetDownloadCounters, resetDownloadCounters2 } from '../../cliBased/pdf/utils';
 import { insertEntryForGDriveUploadHistory, updateEntryForGDriveUploadHistory } from '../../services/GdriveDownloadRecordService';
 import { getAllPdfsInFolders, getDirectoriesWithFullPath } from '../../imgToPdf/utils/Utils';
