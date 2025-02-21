@@ -32,7 +32,7 @@ yarnRoute.post('/unzipAllFolders', async (req: any, resp: any) => {
         const _folder = folder.includes(",") ? folder.split(",").map((link: string) => link.trim()) : [folder.trim()];
 
         for (const link of _folder) {
-            const res = await unzipAllFilesInDirectory(link, "", ignoreFolder);
+            const res = await unzipAllFilesInDirectory(link);
             results.push(res);
         }
 
