@@ -1,7 +1,6 @@
 import { isValidPath } from "../utils/utils";
 import { moveAFile, moveFilesAndFlatten } from "../cliBased/fileMover";
 import { getFolderInDestRootForProfile, getFolderInSrcRootForProfile } from "../archiveUpload/ArchiveProfileUtils";
-import * as fs from 'fs';
 import * as fsPromise from 'fs/promises';
 
 import { getAllFileListingWithStats, getAllPDFFiles, getAllPDFFilesWithMedata } from "../utils/FileStatsUtils";
@@ -335,7 +334,7 @@ export const publishBookTitlesList = async (argFirst: string, options: {
 async function createPdfReportAsText(metadata: Array<FileStats>, pdfsOnly: boolean, folderBase: string) {
     const report = generateTextFileContent(metadata, pdfsOnly);
     const absPath = await createFileName(pdfsOnly, metadata.length, folderBase, 'txt');
-    fs.writeFileSync(absPath, report);
+    await fsPromise.writeFile(absPath, report);
     return absPath;
 }
 
