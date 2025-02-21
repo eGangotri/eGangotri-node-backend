@@ -55,11 +55,8 @@ export const moveItemsInListOfProfileToFreeze = async (uploadCycleId: string) =>
 
     for (let archiveProfile of archiveProfiles) {
         const destPath = getFolderInDestRootForProfile(archiveProfile.archiveProfile.trim());
-        try {
-            await fsPromise.access(destPath);
-        } catch {
-            await fsPromise.mkdir(destPath, { recursive: true });
-        }
+      
+        await createFolderIfNotExistsAsync(destPath)
         if (isValidPath(destPath)) {
             const _moveResponse = await moveFileInListToDest(archiveProfile, destPath);
             _response.push(_moveResponse);

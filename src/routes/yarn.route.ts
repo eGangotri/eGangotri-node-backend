@@ -164,7 +164,7 @@ yarnRoute.post('/yarnMoveProfilesToFreeze', async (req: any, resp: any) => {
 })
 
 yarnRoute.post('/yarnMoveFilesInListToFreeze', async (req: any, resp: any) => {
-    console.log(`moveProfilesToFreeze ${JSON.stringify(req.body)} `)
+    console.log(`yarnMoveFilesInListToFreeze ${JSON.stringify(req.body)} `)
     try {
         const _uploadCycleId = req.body.uploadCycleId;
 

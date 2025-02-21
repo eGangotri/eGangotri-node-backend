@@ -25,25 +25,49 @@ export const isValidDirectory = async (dirPath: string): Promise<boolean> => {
     }
 };
 
-/**
- * Checks if a string is a valid file path.
- * @param filePath The path to validate.
- * @param checkExists If true, also checks if the path exists on the file system.
- * @returns True if the path is valid (and exists, if `checkExists` is true).
- */
-export const isValidPath = async (filePath: string): Promise<boolean> => {
+export const isValidPath = (filePath: string): boolean => {
     try {
         // Normalize the path to resolve `.`, `..`, and duplicate separators
-        const normalizedPath = path.normalize(filePath);
+        const normalizedPath = path.normalize(filePath.trim());
+        console.log(`Normalized Path: ${normalizedPath}`);
 
         // Check for invalid characters based on the platform
-        const invalidChars = process.platform === 'win32' ? /[<>:"|?*]/ : /[\0]/;
-        if (invalidChars.test(normalizedPath)) {
+        if (process.platform === 'win32') {
+            // Split the path into drive letter and the rest of the path
+            const [driveLetter, restOfPath] = normalizedPath.split(/^([A-Za-z]:\\)(.*)/).filter(Boolean);
+
+            // Check if the drive letter is valid (e.g., "F:\")
+            if (!driveLetter || !/^[A-Za-z]:\\$/.test(driveLetter)) {
+                console.log(`Invalid drive letter: ${driveLetter}`);
+                return false;
+            }
+
+            // Check the rest of the path for invalid characters
+            const invalidChars = /[<>:"|?*]/;
+            if (invalidChars.test(restOfPath)) {
+                console.log(`Invalid characters found in path: ${restOfPath}`);
+                return false;
+            }
+        } else {
+            // For non-Windows platforms, check for null characters
+            const invalidChars = /[\0]/;
+            if (invalidChars.test(normalizedPath)) {
+                console.log(`Invalid characters found in path: ${normalizedPath}`);
+                return false;
+            }
+        }
+
+        // Check if the normalized path is absolute
+        if (!path.isAbsolute(normalizedPath)) {
+            console.log(`Path is not absolute: ${normalizedPath}`);
             return false;
         }
+
+        console.log(`***isValidPath: ${normalizedPath}`);
         return true;
     } catch (err) {
-        // If the path does not exist or is invalid, return false
+        // If any error occurs, return false
+        console.log(`Error occurred: ${err.message}`);
         return false;
     }
 };
