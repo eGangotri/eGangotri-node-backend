@@ -2,6 +2,7 @@ import { createLogger, format, transports } from 'winston';
 import * as os from 'os';
 import * as fs from 'fs';
 import * as fsExtra from "fs-extra";
+import { checkFolderExistsSync } from 'utils/FileUtils';
 
 const { combine, timestamp, printf } = format;
 
@@ -14,7 +15,8 @@ const logsDirectory = `${homeDirectory}/egangotri/logs`;
 
 const now = new Date();
 const weekYearSuffix = getWeekOfYear(now);
-if (!fs.existsSync(logsDirectory)) {
+
+if (!checkFolderExistsSync(logsDirectory)) {
     fsExtra.ensureDirSync(logsDirectory);
 }
 

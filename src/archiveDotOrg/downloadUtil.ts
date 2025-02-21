@@ -5,7 +5,7 @@ import fs from 'fs';
 import * as fsExtra from "fs-extra";
 import { ArchiveLinkData } from "./types";
 import { isValidPath } from "../utils/utils";
-import { createFolderIfNotExists } from "../utils/FileUtils";
+import { checkFolderExistsSync, createFolderIfNotExists } from "../utils/FileUtils";
 import { DOUBLE_HASH_SEPARATOR } from "./utils";
 
 
@@ -13,7 +13,7 @@ export const downloadPdfFromArchiveToProfile = async (pdfLinks: ArchiveLinkData[
 
   const pdfDumpFolder = isValidPath(profileOrPath) ? profileOrPath : getFolderInSrcRootForProfile(profileOrPath);
   console.log(`downloadPdfFromArchiveToProfile:pdfDumpFolder ${pdfDumpFolder}`);
-  if (!fs.existsSync(pdfDumpFolder)) {
+  if (!checkFolderExistsSync(pdfDumpFolder)) {
     console.log(`No corresponding folder ${pdfDumpFolder} to profile  ${profileOrPath} exists`)
     return {
       "success": false,
@@ -24,7 +24,7 @@ export const downloadPdfFromArchiveToProfile = async (pdfLinks: ArchiveLinkData[
   const folderWithProfileName = pdfDumpFolder + "\\" + pdfLinks[0].acct;
   console.log(`folderWithProfileName ${folderWithProfileName} folderWithProfileName`)
 
-  if (!fs.existsSync(pdfDumpFolder) || !fs.existsSync(folderWithProfileName)) {
+  if (!checkFolderExistsSync(pdfDumpFolder) || !checkFolderExistsSync(folderWithProfileName)) {
     fsExtra.ensureDirSync(folderWithProfileName);
     fsExtra.ensureDirSync(folderWithProfileName);
   }

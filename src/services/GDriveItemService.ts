@@ -12,6 +12,7 @@ import path from "path";
 import _, { String } from "lodash";
 import { downloadFileFromGoogleDrive } from "../cliBased/pdf/downloadFile";
 import { GDriveExcelData } from "../cliBased/googleapi/types";
+import { checkFolderExistsSync } from "utils/FileUtils";
 
 export async function getListOfGDriveItems(queryOptions: GDriveItemListOptionsType) {
   const { limit, mongoOptionsFilter } = setOptionsForGDriveListing(queryOptions)
@@ -182,7 +183,7 @@ export const downloadGDriveData = async (googleDriveData:GDriveExcelData[],
     console.log(`_data: ${JSON.stringify(_data)}}`);
     const pdfDumpWithPathAppended = pdfDumpFolder + path.sep + _data.folderName;
     console.log(`pdfDumpWithPathAppended: ${pdfDumpWithPathAppended}`);
-    if (!fs.existsSync(pdfDumpWithPathAppended)) {
+    if (!checkFolderExistsSync(pdfDumpWithPathAppended)) {
       fsExtra.ensureDirSync(pdfDumpWithPathAppended);
     }
 

@@ -13,6 +13,7 @@ import {
   titleInGoogleDrive, titleInOriginal,
   yearOfPublication
 } from './constants';
+import { checkFolderExistsSync } from 'utils/FileUtils';
 
 const mergeExcelJsons = (mainExcelData: GDriveExcelHeaders[], secondaryExcelDataAdjusted: GDriveExcelHeaders[]) => {
   const combinedExcelJsons = mainExcelData.map(x => findCorrespondingExcelHeader(x, secondaryExcelDataAdjusted));
@@ -98,7 +99,7 @@ const findErroneous = (_mergedExcelJsons: GDriveExcelHeaders[]) => {
 const createMergedExcelFilePathName = (mainExcelDataLength: number) => {
   const mergedExcelPath = `${_root}\\merged\\${treasureFolder}`;
 
-  if (!fs.existsSync(mergedExcelPath)) {
+  if (!checkFolderExistsSync(mergedExcelPath)) {
     fs.mkdirSync(mergedExcelPath);
   }
   const mergedExcelFileName = `${mergedExcelPath}\\${treasureFolder}-Final-Merged-Catalog-${timeComponent}`;

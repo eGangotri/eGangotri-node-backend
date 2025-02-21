@@ -6,6 +6,7 @@ import { getAllZipFiles } from '../utils/FileStatsUtils';
 import * as yauzl from 'yauzl';
 import { getNonFolderFileCount } from '../archiveDotOrg/utils';
 import { pipeline } from "stream/promises";
+import { checkFolderExistsSync } from 'utils/FileUtils';
 
 const MAX_CONCURRENCY = 4; // Adjust based on your system resources
 
@@ -141,13 +142,13 @@ export async function unzipAllFilesInDirectory(pathToZipFiles: string, _unzipHer
         for (const zipFile of zipFiles) {
             try {
                 const outputDir = path.join(_unzipHere, path.basename(zipFile.absPath, '.zip'));
-                if (fs.existsSync(outputDir)) {
+                if (checkFolderExistsSync(outputDir)) {
                     console.log(`Folder already exists ${outputDir} for ${zipFile.absPath} to `);
                     error_count++;
                     error_msg.push(`Folder already exists ${zipFile.absPath}`);
                     continue;
                 }
-                if (!fs.existsSync(outputDir)) {
+                if (!checkFolderExistsSync(outputDir)) {
                     fs.mkdirSync(outputDir, { recursive: true });
                 }
                 console.log(`${++idx}). unzipping ${zipFile.absPath} to ${outputDir} `)
@@ -204,7 +205,7 @@ export async function verifyUnzipSuccessInDirectory(pathToZipFiles: string,
             try {
                 const outputDir = path.join(_unzipHere, path.basename(zipFile.absPath, '.zip'));
                 console.log(`checking ${zipFile.absPath} for ${outputDir}`)
-                if (!fs.existsSync(outputDir)) {
+                if (!checkFolderExistsSync(outputDir)) {
                     console.log(`no corresponding ${outputDir} to ${zipFile.absPath} `)
                     error_msg.push(`No output directory found for ${zipFile.absPath} to ${outputDir} `);
                     error_count++;
