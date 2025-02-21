@@ -2,7 +2,7 @@ import { readFile, utils } from 'xlsx';
 import { connectToMongo } from '../services/dbService';
 import { ArchiveItem } from '../models/ArchiveItem';
 import { ArchiveExcelHeaderToJSONMAPPING, printMongoTransactions, replaceExcelHeadersWithJsonKeysForArchiveItem } from './utils';
-import fs from 'fs/promises';
+import * as fsPromise from 'fs/promises';
 import path from 'path';
 import os from "os";
 import { getCountArchiveItems } from '../services/archiveItemService';
@@ -60,7 +60,7 @@ export async function archiveExceltoMongo(directoryPathOrExcel: string, source: 
             }
         }
         else {
-            const files = await fs.readdir(directoryPathOrExcel);
+            const files = await fsPromise.readdir(directoryPathOrExcel);
             const rootFolderAsSource = path.basename(directoryPathOrExcel);
             const resultMap = []
             let excelCount = 0;
