@@ -75,7 +75,7 @@ export const downloadFileFromUrl = async (
     return _result;
 }
 
-export const downloadGDriveFileUsingGDriveApiX = (
+export const downloadGDriveFileUsingGDriveApiOld = (
     driveLinkOrFileID: string,
     destPath: string,
     fileName: string = "",
