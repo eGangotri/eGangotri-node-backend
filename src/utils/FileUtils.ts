@@ -16,7 +16,7 @@ interface FileInfo {
     file2?: string;
 }
 
-export const checkFolderExistsSync = (folderPath) => {
+export const checkFolderExistsSync = (folderPath:string) => {
     return (async () => {
         try {
             await fsPromise.access(folderPath);
