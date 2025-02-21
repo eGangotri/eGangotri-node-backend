@@ -1,5 +1,4 @@
 import { PDFDocument } from 'pdf-lib'
-import * as fs from 'fs';
 import * as fsPromise from 'fs/promises';
 import { formatTime, getAllPdfs } from './Utils';
 import { PDF_SIZE_LIMITATIONS } from './PdfUtil';
@@ -25,13 +24,12 @@ export async function getPdfPageCountUsingPdfLib(pdfPath: string) {
 
 export async function getPdfFirstPageDimensionsUsingPdfLib(pdfPath: string) {
     if (getFilzeSize(pdfPath) <= PDF_SIZE_LIMITATIONS) {
-        const pdfDoc = await PDFDocument.load(fs.readFileSync(pdfPath), { ignoreEncryption: true });
+        const _file = await fsPromise.readFile(pdfPath);
+        const pdfDoc = await PDFDocument.load(_file, { ignoreEncryption: true });
         return [pdfDoc.getPages()[0].getWidth(), pdfDoc.getPages()[0].getHeight()]
     }
     else return [];
 }
-
-
 
 export async function mergePDFDocuments(documents: Array<any>, pdfName: string) {
     const mergedPdf = await PDFDocument.create();
@@ -51,13 +49,13 @@ export async function mergePdfsInList(pdfFolders: Array<any>, pdfName: string) {
     const START_TIME = Number(Date.now())
     if (flattened.length === 1) {
         console.log(`Single PDF merely copy ${flattened}`)
-        fs.copyFileSync(flattened[0], pdfName);
+        await fsPromise.copyFile(flattened[0], pdfName);
     }
     else {
         console.log(`Merging ${flattened.length} pdfs from  ${pdfFolders.length} Folders`)
-        const pdfForMerge = flattened.map((x) => {
-            return fs.readFileSync(x)
-        })
+        const pdfForMerge = await Promise.all(flattened.map(async (x) => {
+            return await fsPromise.readFile(x)
+        }))
         await mergePDFDocuments(pdfForMerge, pdfName);
     }
     const EMD_TIME = Number(Date.now())

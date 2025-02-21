@@ -1,8 +1,7 @@
 import { getAllPdfs, getDirectories, getDirectoriesWithFullPath, mkDirIfDoesntExists } from "../utils/Utils";
+import * as fsPromise from 'fs/promises';
 
 const FINAL_PDF_LOC = 'finalPdfsTmpLoc';
-import * as fs from 'fs';
-import * as fsPromise from 'fs/promises';
 
 async function moveMergedPdfs(rootDir: string) {
   const discardableFolder = `${rootDir}_disc_`

@@ -1,6 +1,4 @@
 import { getAllTifs } from './utils/ImgUtils';
-import * as fs from 'fs';
-
 import {
     formatTime,
      garbageCollect,

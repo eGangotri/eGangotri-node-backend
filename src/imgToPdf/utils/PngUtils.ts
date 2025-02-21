@@ -1,6 +1,5 @@
 import { getAllPngs, getAllTifs } from "./ImgUtils";
 import * as path from 'path';
-import * as fs from 'fs';
 import { size } from "lodash";
 import { mkDirIfDoesntExists } from "./Utils";
 const sharp = require("sharp");

@@ -1,6 +1,6 @@
 const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
 import os from "os";
-import fs from "fs";
+import * as fsPromise from 'fs/promises';
 
 async function addHeader(headerText: string, srcPdfPath: string, destPath: string = "") {
     await addHeaderAndFooterToPDF("", headerText, srcPdfPath, destPath);
@@ -12,7 +12,7 @@ async function addFooter(footerText: string, srcPdfPath: string, destPath: strin
 export async function addHeaderAndFooterToPDF(headerText: string, footerText: string, srcPdfPath: string, destPath: string = "") {
 
     // Load the existing PDF
-    const existingPdfBytes = fs.readFileSync(srcPdfPath);
+    const existingPdfBytes = await fsPromise.readFile(srcPdfPath);
 
     const pdfDoc = await PDFDocument.load(existingPdfBytes);
 
@@ -69,7 +69,7 @@ export async function addHeaderAndFooterToPDF(headerText: string, footerText: st
     if (destPath === "") {
         destPath = srcPdfPath;
     }
-    fs.writeFileSync(destPath, pdfBytes);
+    await fsPromise.writeFile(destPath, pdfBytes);
 }
 
 const headerText = "This is the header text.";
