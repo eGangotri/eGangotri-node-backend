@@ -1,7 +1,7 @@
 import moment from 'moment';
 import { DD_MM_YYYY_HH_MMFORMAT } from '../utils/constants';
 import path from 'path';
-import fs from 'fs';
+import * as fsPromise from 'fs/promises';
 import { jsonToExcel } from '../cliBased/excel/ExcelUtils';
 import { ItemsUshered } from '../models/itemsUshered';
 import { UploadCycle } from '../models/uploadCycle';
@@ -41,13 +41,13 @@ export const findMissedUploads = async (uploadCycleId: string): Promise<UploadCy
     return missing;
 }
 
-export const createJsonFileForUpload = (uploadCycleId: string, _failedForUploacCycleId: any[], statusString: string) => {
+export const createJsonFileForUpload = async (uploadCycleId: string, _failedForUploacCycleId: any[], statusString: string) => {
     const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)
     const folder = (process.env.HOME || process.env.USERPROFILE) + path.sep + 'Downloads' + path.sep;
     const suffix = `${uploadCycleId}-${statusString}-${timeComponent}.json`;
     const jsonFileName = folder + `reupload-failed-in-upload-cycle-id-${suffix}`;
     console.log(`jsonFileName ${jsonFileName}`)
-    fs.writeFileSync(jsonFileName, JSON.stringify(_failedForUploacCycleId, null, 2));
+    await fsPromise.writeFile(jsonFileName, JSON.stringify(_failedForUploacCycleId, null, 2));
     return jsonFileName
 }
 
