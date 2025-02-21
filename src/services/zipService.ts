@@ -10,7 +10,7 @@ import { checkFolderExistsSync, createFolderIfNotExistsAsync } from '../utils/Fi
 
 const UNZIP_FOLDER = "\\unzipped";
 
-export async function zipFiles(filePaths: string[],
+export async function zipFilesOld(filePaths: string[],
     outputZipPath: string,
     rootDirToMaintainOrigFolderOrder = ""): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -48,6 +48,50 @@ export async function zipFiles(filePaths: string[],
 
         archive.finalize();
     });
+}
+import archiver from 'archiver';
+
+export async function zipFiles(
+    filePaths: string[],
+    outputZipPath: string,
+    rootDirToMaintainOrigFolderOrder: string = ""
+): Promise<void> {
+    const output = fs.createWriteStream(outputZipPath);
+    const archive = archiver('zip', {
+        zlib: { level: 9 } // Sets the compression level.
+    });
+
+    // Handle the 'close' event when the archive is finalized
+    output.on('close', () => {
+        console.log(`Archive ${outputZipPath} created successfully. Total bytes: ${archive.pointer()}`);
+    });
+
+    // Handle errors in the archive process
+    archive.on('error', (err) => {
+        throw err; // Throw the error to be caught by the caller
+    });
+
+    // Pipe the archive data to the output file
+    archive.pipe(output);
+
+    // Add files to the archive
+    filePaths.forEach((filePath) => {
+        if (rootDirToMaintainOrigFolderOrder === "") {
+            const fileName = filePath.split('\\').pop(); // Extract the file name
+            if (fileName) {
+                archive.file(filePath, { name: fileName });
+            }
+        } else {
+            console.log(`filePath: ${filePath}, rootDirToMaintainOrigFolderOrder: ${rootDirToMaintainOrigFolderOrder}`);
+            const relativePath = filePath.split(rootDirToMaintainOrigFolderOrder).pop(); // Use the provided root directory
+            if (relativePath) {
+                archive.file(filePath, { name: relativePath });
+            }
+        }
+    });
+
+    // Finalize the archive
+    await archive.finalize();
 }
 
 export function findZipFiles(dir: string, zipFiles: string[] = []): string[] {
@@ -122,7 +166,9 @@ function unzipFiles(filePath: string, outputDir: string): Promise<void> {
     });
 }
 
-export async function unzipAllFilesInDirectory(pathToZipFiles: string, _unzipHere: string = "", ignoreFolder = ""):
+export async function unzipAllFilesInDirectory(pathToZipFiles: string,
+     _unzipHere: string = "",
+      ignoreFolder = ""):
     Promise<{
         success_count: number,
         error_count: number,
