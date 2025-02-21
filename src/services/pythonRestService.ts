@@ -1,5 +1,5 @@
 import { PYTHON_SERVER_URL } from "../db/connection";
-import { countPDFsInFolder, isValidDirectory } from "../utils/FileUtils";
+import { countPDFsInFolder, createDirIfNotExists, isValidDirectory } from "../utils/FileUtils";
 import fs from 'fs';
 import path from 'path';
 
@@ -15,10 +15,7 @@ export const runPthonPdfExtractionInLoop = async (_srcFolders: string[],
             console.log(`runPthonPdfExtractionInLoop srcFolder ${srcFolder} `);
             const pdfsToReduceCount = await countPDFsInFolder(srcFolder, ["reduced"]);
             if (isValidDirectory(commonDest)) {
-                if (!checkFolderExistsSync(`${commonDest}`)) {
-                    fs.mkdirSync(`${commonDest}`, { recursive: true });
-                    console.log(`Folder created: ${commonDest}`);
-                }
+                await createDirIfNotExists(commonDest);
             }
             else {
                 specificDest = `${srcFolder}\\reduced`;
@@ -130,10 +127,7 @@ export const runCr2ToJpgInLoop = async (_srcFolders: string[],
         try {
             specificDest = commonDest ? `${commonDest}` : `${srcFolder}\\-cr2-jpg`;
             console.log(`runCr2ToJpgInLoop srcFolder ${srcFolder} `);
-            if (!checkFolderExistsSync(`${specificDest}`)) {
-                fs.mkdirSync(`${specificDest}`, { recursive: true });
-                console.log(`Copy Folder created: ${specificDest}`);
-            }
+            await createDirIfNotExists(specificDest);
             console.log(`Folder created: ${specificDest}`);
             console.log(`runCr2ToJpgInLoop srcFolder ${srcFolder} specificDest ${specificDest}`);
 
