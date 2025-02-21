@@ -98,7 +98,7 @@ export const moveFileInListToDest = async (profileData: {
                  absPathOfFilesToMove ${absPathOfFileToMove}
                  destFolderOrProfile: ${destFolderOrProfile} 
                  destPath ${destPath}`)
-            const moveAFileRes = moveAFile(absPathOfFileToMove, destFolderOrProfile, path.basename(absPathOfFileToMove));
+            const moveAFileRes = await moveAFile(absPathOfFileToMove, destFolderOrProfile, path.basename(absPathOfFileToMove));
 
             if (moveAFileRes.renamedWithoutCollision.length > 0) {
                 _renamedWithoutCollision.push(moveAFileRes.renamedWithoutCollision)
