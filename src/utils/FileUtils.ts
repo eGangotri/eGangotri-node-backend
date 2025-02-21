@@ -16,6 +16,19 @@ interface FileInfo {
     file2 ?: string;
 }
 
+export const checkFolderExistsSync = (folderPath) => {
+    return (async () => {
+      try {
+        await fsPromise.access(folderPath);
+        return true; // Folder exists
+      } catch (err) {
+        if (err.code === 'ENOENT') {
+          return false; // Folder does not exist
+        }
+        throw err; // Re-throw other errors (e.g., permission issues)
+      }
+    })();
+  };
 
 export function removeFolderWithContents(folder: string) {
     fs.rm(folder, { recursive: true, force: true }, (err) => {
@@ -76,7 +89,7 @@ export const removeExcept = async (folder: any, except: Array<string>) => {
 
 
 export function createFolderIfNotExists(folderPath: string): void {
-    if (!fs.existsSync(folderPath)) {
+    if (!checkFolderExistsSync(folderPath)) {
         fs.mkdirSync(folderPath, { recursive: true });
         console.log(`Folder created: ${folderPath}`);
     } else {

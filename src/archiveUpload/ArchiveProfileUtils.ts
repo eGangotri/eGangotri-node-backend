@@ -1,11 +1,12 @@
 import * as fs from 'fs';
 import path from 'path'
 import { ARCHIVE_METADATA_PROPERTIES_FILE, DEST_ROOT, LOCAL_FOLDERS_PROPERTIES_FILE, SRC_ROOT } from './constants';
+import { checkFolderExistsSync } from 'utils/FileUtils';
 
 
 const getFoldersCorrespondingToProfile = (root: string): Map<string, string> => {
     const properties = new Map<string, string>();
-    if (!fs.existsSync(LOCAL_FOLDERS_PROPERTIES_FILE)) {
+    if (!checkFolderExistsSync(LOCAL_FOLDERS_PROPERTIES_FILE)) {
         console.log(`No Local Folder ${LOCAL_FOLDERS_PROPERTIES_FILE} found`);
         return properties;
     }
@@ -69,7 +70,7 @@ export const getHeaderAndFooterTextForProfile = (profile: string) => {
 
 const getArchiveMetadataProperties = () => {
     const properties = new Map<string, string>();
-    if (!fs.existsSync(ARCHIVE_METADATA_PROPERTIES_FILE)) {
+    if (!checkFolderExistsSync(ARCHIVE_METADATA_PROPERTIES_FILE)) {
         console.log(`No Local Folder ${ARCHIVE_METADATA_PROPERTIES_FILE} found`);
         return properties;
     }

@@ -1,3 +1,4 @@
+import { checkFolderExistsSync } from "utils/FileUtils";
 import { formatTime } from "./Utils";
 import * as fs from 'fs';
 
@@ -9,7 +10,7 @@ const opts = {
 };
 
 export function mergeUsingEasyPdf(pdfs: Array<any>, mergerPdf: string) {
-    if (fs.existsSync(mergerPdf)) {
+    if (checkFolderExistsSync(mergerPdf)) {
         fs.writeFileSync(mergerPdf, "");
     }
     const flattened = pdfs.flat(1);

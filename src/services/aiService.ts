@@ -9,6 +9,7 @@ import { AI_SERVER } from '../db/connection';
 import { USER_HOME } from '../archiveUpload/constants';
 import { aksharaMukhaAutoDetectScriptToRomanColloguial } from '../aksharamukha/convert';
 import path from 'path';
+import { checkFolderExistsSync } from 'utils/FileUtils';
 
 const DD_MM_YYYY_HH_MMFORMAT = 'DD-MM-YYYY-HH-mm'; // Define your date format
 const FIRST_N_PAGE_COUNT = 7;
@@ -86,7 +87,7 @@ export const zipFilesInFolder = async (folderPath: string) => {
         const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)
         const outputDir = path.join(USER_HOME, 'Downloads', '_output', `output-${timeComponent}`);
         // Create the output directory if it does not exist
-        if (!fs.existsSync(outputDir)) {
+        if (!checkFolderExistsSync(outputDir)) {
             fs.mkdirSync(outputDir, { recursive: true });
         }
 

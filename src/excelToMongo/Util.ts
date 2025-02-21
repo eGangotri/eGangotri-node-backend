@@ -6,6 +6,7 @@ import { DD_MM_YYYY_FORMAT } from '../utils/utils';
 import { FileStats } from 'imgToPdf/utils/types';
 import { sizeInfo } from '../mirror/FrontEndBackendCommonCode';
 import * as _ from 'lodash';
+import { checkFolderExistsSync } from 'utils/FileUtils';
 /**
  * 
  * @param folderName 
@@ -38,7 +39,7 @@ export const generateCsvDirAndName = (infix: string) => {
 
   const CSVS_DIR = ".//_csvs"
   fsExtra.emptyDirSync(CSVS_DIR);
-  if (!fs.existsSync(CSVS_DIR)) {
+  if (!checkFolderExistsSync(CSVS_DIR)) {
     console.log('creating: ', CSVS_DIR);
     fs.mkdirSync(CSVS_DIR)
   }

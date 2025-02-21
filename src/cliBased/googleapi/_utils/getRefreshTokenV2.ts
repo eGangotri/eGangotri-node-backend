@@ -4,6 +4,7 @@ import * as fs from 'fs';
 import * as readline from 'readline';
 
 import { SCOPES, TOKEN_PATH, _credentials } from './credentials_googleapi';
+import { checkFolderExistsSync } from 'utils/FileUtils';
 
 // Set up OAuth2 credentials
 const credentials = {
@@ -28,7 +29,7 @@ async function authorize(): Promise<OAuth2Client> {
    // new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
 
     // Check if we have previously stored a token.
-    if (fs.existsSync(TOKEN_PATH)) {
+    if (checkFolderExistsSync(TOKEN_PATH)) {
         const token = fs.readFileSync(TOKEN_PATH, 'utf-8');
         oAuth2Client.setCredentials(JSON.parse(token));
     } else {

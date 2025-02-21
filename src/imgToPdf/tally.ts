@@ -10,6 +10,7 @@ import {
 } from './utils/Utils';
 import { addReport, INTRO_PAGE_ADJUSTMENT, printReport } from './index';
 import {  getPdfPageCountUsingPdfLib } from "./utils/PdfLibUtils";
+import { checkFolderExistsSync } from 'utils/FileUtils';
 
 
 // const tifFolderMain = "D:\\NMM\\August-2019\\02-08-2019";
@@ -41,7 +42,7 @@ const pdfFolder = "E:\\ramtek-3";
         const pdfPath = `${pdfFolder}\\${subfolder}.pdf`
         subFolderCount++
         console.log(`Testing Item #${subFolderCount} of ${pdfCounts} pdfs :${pdfPath}\n`);
-        if (!fs.existsSync(pdfPath)) {
+        if (!checkFolderExistsSync(pdfPath)) {
             addReport(`****Error ${pdfPath} was never created`);
             NOT_CREATED.push(folderForChecking);
             continue;

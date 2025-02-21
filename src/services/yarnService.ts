@@ -30,7 +30,7 @@ export const moveProfilesToFreeze = async (profileAsCSV: string,
     for (let profile of profileAsCSV.split(',')) {
         const srcPath = getFolderInSrcRootForProfile(profile.trim());
         const destPath = getFolderInDestRootForProfile(profile.trim());
-        if (!fs.existsSync(destPath)) {
+        if (!checkFolderExistsSync(destPath)) {
             fs.mkdirSync(destPath, { recursive: true });
         }
         if (isValidPath(srcPath) && isValidPath(destPath)) {

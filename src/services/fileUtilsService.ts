@@ -7,6 +7,7 @@ import * as path from 'path';
 import { FileStats } from "../imgToPdf/utils/types";
 import { GDriveExcelHeadersFileRenamerV2 } from "../cliBased/googleapi/types";
 import { isNumber } from "../mirror/utils";
+import { checkFolderExistsSync } from "utils/FileUtils";
 
 interface RenameReportType {
     errorList: string[],
@@ -136,7 +137,7 @@ export const _renameFileInFolder = (_fileInFolder: FileStats, newFileName: strin
     }
     console.log(`_fileInFolder: ${JSON.stringify(_fileInFolder?.absPath)} `);
     const absPath = _fileInFolder?.absPath
-    if (fs.existsSync(absPath)) {
+    if (checkFolderExistsSync(absPath)) {
         try {
             const parentDir = path.dirname(absPath);
             const newPath = path.join(parentDir, newFileName);
@@ -146,7 +147,7 @@ export const _renameFileInFolder = (_fileInFolder: FileStats, newFileName: strin
             if(newPath.length < 8){
                 throw new Error(`${newPath} length is too short`);
             }
-            if(fs.existsSync(newPath)){
+            if(checkFolderExistsSync(newPath)){
                 throw new Error(`${newPath} already exists`);
             }
             fs.renameSync(absPath, newPath);

@@ -1,4 +1,4 @@
-import { countPDFsInFolder, isValidDirectory } from "../utils/FileUtils";
+import { checkFolderExistsSync, countPDFsInFolder, isValidDirectory } from "../utils/FileUtils";
 import { makePythonCall } from "./pythonLauncherService";
 import fs from 'fs';
 import path from 'path';
@@ -14,7 +14,7 @@ export const runPthonPdfExtractionInLoopDeprecated = async (_srcFolders: string[
             console.log(`runPthonPdfExtractionInLoop srcFolder ${srcFolder} `);
             const pdfsToReduceCount = await countPDFsInFolder(srcFolder, ["reduced"]);
             if (isValidDirectory(destRootFolder)) {
-                if (!fs.existsSync(`${destRootFolder}`)) {
+                if (!checkFolderExistsSync(`${destRootFolder}`)) {
                     fs.mkdirSync(`${destRootFolder}`, { recursive: true });
                     console.log(`Folder created: ${destRootFolder}`);
                 }

@@ -4,6 +4,7 @@ import { excelToJson, jsonToExcel } from "../../cliBased/excel/ExcelUtils";
 import { DD_MM_YYYY_HH_MMFORMAT } from "../../utils/constants";
 import * as fs from "fs";
 import { FipExcelOne } from "./utils";
+import { checkFolderExistsSync } from "utils/FileUtils";
 
 const base = "D:\\FIP\\_IFP\\_IFP"
 /**
@@ -24,10 +25,10 @@ const _rename = (item: FipExcelOne) => {
         const splitFilename = item.absPath.split("-")
         const _newFileNam = `${splitFilename[0]} ${(item.title.length <= 120) ? item.title : item.title.substring(0, 120)} - ${splitFilename[1]}`
         console.log(`_newFileNam ${_newFileNam}`)
-        if (fs.existsSync(_newFileNam)) {
+        if (checkFolderExistsSync(_newFileNam)) {
             console.log(`File exists ${item.absPath}. renaming to ${item.absPath}_ignore`);
         }
-        else if (fs.existsSync(item.absPath)) {
+        else if (checkFolderExistsSync(item.absPath)) {
             try {
                 fs.renameSync(item.absPath, _newFileNam);
                 console.log(`File renamed to ${_newFileNam}`)

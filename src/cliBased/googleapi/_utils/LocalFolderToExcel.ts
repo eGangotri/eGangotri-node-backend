@@ -9,17 +9,18 @@ import * as _ from 'lodash';
 import { FileStats } from "../../../imgToPdf/utils/types";
 import { addSummaryToExcel, createMetadata } from "excelToMongo/Util";
 import os from "os";
+import { checkFolderExistsSync } from "utils/FileUtils";
 
 export const createExcelFilePathName = (mainExcelDataLength: number, folderName: String, _excelRoot: string, suffix: string) => {
     const _excelPath = `${_excelRoot}\\local`;
 
-    if (!fs.existsSync(_excelPath)) {
+    if (!checkFolderExistsSync(_excelPath)) {
         fs.mkdirSync(_excelPath);
     }
     const excelPathWithFolderName = `${_excelPath}\\${folderName}`;
 
     const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)
-    if (!fs.existsSync(excelPathWithFolderName)) {
+    if (!checkFolderExistsSync(excelPathWithFolderName)) {
         fs.mkdirSync(excelPathWithFolderName);
     }
     const mergedExcelFileName = `${excelPathWithFolderName}\\${folderName}${timeComponent}-${suffix}`;

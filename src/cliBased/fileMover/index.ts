@@ -6,6 +6,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as fsPromise from 'fs/promises';
 import { launchWinExplorer } from "./util";
+import { checkFolderExistsSync } from "utils/FileUtils";
 
 export const moveAFile = async (sourceFileAbsPath: string, targetDir: string, fileName: string, pdfOnly = true) => {
     const targetFile = path.join(targetDir, fileName);
@@ -13,7 +14,7 @@ export const moveAFile = async (sourceFileAbsPath: string, targetDir: string, fi
 
     if (!pdfOnly || (pdfOnly && fileName.endsWith('.pdf'))) {
         try {
-            if (!fs.existsSync(targetFile)) {
+            if (!checkFolderExistsSync(targetFile)) {
                 await fsPromise.rename(sourceFileAbsPath, targetFile);
                 result.renamedWithoutCollision = `${fileName}`;
                 result.targetFile = targetFile;
@@ -21,7 +22,7 @@ export const moveAFile = async (sourceFileAbsPath: string, targetDir: string, fi
                 const extension = path.extname(targetFile); // .pdf with .
                 const newName = `${targetFile.replace(`${extension}`, `_1${extension}`)}`;
                 console.log(`File (${extension}) already exists in target dir ${targetFile}. Renaming to ${newName}`);
-                if (!fs.existsSync(newName)) {
+                if (!checkFolderExistsSync(newName)) {
                     await fsPromise.rename(sourceFileAbsPath, newName);
                     result.fileCollisionsResolvedByRename = `${fileName}`;
                     console.log(`File already exists in target dir ${targetFile}. Renaming to ${newName}`);

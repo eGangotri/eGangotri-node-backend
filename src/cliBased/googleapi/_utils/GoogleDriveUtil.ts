@@ -3,13 +3,14 @@ import fs from 'fs';
 import moment from 'moment';
 import { DD_MM_YYYY_HH_MMFORMAT } from '../../../utils/utils';
 import * as path from "path";
+import { checkFolderExistsSync } from 'utils/FileUtils';
 
 export function createFileNameWithPathForExport(folderId: string,
      _umbrellaFolder: string,
       exportDestFolder: string,
     itemCount: number) {
     const _csvDumpFolder = `${exportDestFolder}\\${_umbrellaFolder}`;
-    if (!fs.existsSync(_csvDumpFolder)) {
+    if (!checkFolderExistsSync(_csvDumpFolder)) {
         fs.mkdirSync(_csvDumpFolder);
     }
     const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT) + "_HOURS"

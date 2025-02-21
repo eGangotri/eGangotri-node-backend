@@ -6,6 +6,7 @@ import * as _ from 'lodash';
 import { DD_MM_YYYY_HH_MMFORMAT } from "../../../utils/utils";
 import moment from "moment";
 import path from "path";
+import { checkFolderExistsSync } from "utils/FileUtils";
 
 const ignoreDiff = true;
 const foundItems: string[] = [];
@@ -138,7 +139,7 @@ const exec = () => {
 
     const combinedExcelPath = `${_root}\\_catCombinedExcels\\${treasureFolder}`;
 
-    if (!fs.existsSync(combinedExcelPath)) {
+    if (!checkFolderExistsSync(combinedExcelPath)) {
         fs.mkdirSync(combinedExcelPath);
     }
     const combinedExcelFileName = `${combinedExcelPath}\\${treasureFolder}-Catalog-${timeComponent}`;
@@ -154,7 +155,7 @@ export const combineGDriveAndReducedPdfExcels = (mainFilePathAbs: string,
 
     const combinedExcelPath = `${destRoot}\\_catCombinedExcels\\${terminalFolder}`;
     console.log(`_combinedExcelPath ${combinedExcelPath}`)
-    if (!fs.existsSync(combinedExcelPath)) {
+    if (!checkFolderExistsSync(combinedExcelPath)) {
         fs.mkdirSync(combinedExcelPath, { recursive: true });
     }
 

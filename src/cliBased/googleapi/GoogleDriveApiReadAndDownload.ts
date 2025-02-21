@@ -14,6 +14,7 @@ import { isValidPath } from '../../utils/utils';
 import { extractGoogleDriveId } from '../../mirror/GoogleDriveUtilsCommonCode';
 import { PDF_TYPE } from './_utils/constants';
 import { GDriveDownloadHistoryStatus } from '../../utils/constants';
+import { checkFolderExistsSync } from 'utils/FileUtils';
 
 export const MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE = 200;
 // Create a new Google Drive instance
@@ -53,7 +54,7 @@ async function getAllFilesFromGDrive(driveLinkOrFolderID: string,
     console.log(`googleDriveData.map(_data: ${JSON.stringify(_data)}}`);
     const fileDumpWithPathAppended = fileDumpFolder + path.sep + _data.parents;
     console.log(`fileDumpWithPathAppended: ${fileDumpWithPathAppended}`);
-    if (!fs.existsSync(fileDumpWithPathAppended)) {
+    if (!checkFolderExistsSync(fileDumpWithPathAppended)) {
       fsExtra.ensureDirSync(fileDumpWithPathAppended);
     }
 
@@ -74,7 +75,7 @@ export const addHeaderFooterToPDFsInProfile = async (profile: string) => {
   const pdfDumpFolder = getFolderInSrcRootForProfile(profile)
   console.log(`addHeaderFooterToPDFsInProfile:pdfDumpFolder ${pdfDumpFolder}`)
   try {
-    if (fs.existsSync(pdfDumpFolder)) {
+    if (checkFolderExistsSync(pdfDumpFolder)) {
       const _folders = (await getDirectoriesWithFullPath(pdfDumpFolder)).filter(
         (dir: any) => !dir.match(/ignore/)
       );
@@ -116,7 +117,7 @@ export const downloadFromGoogleDriveToProfile = async (driveLinkOrFolderId: stri
   console.log(`downloadFromGoogleDriveToProfile:fileDumpFolder ${fileDumpFolder}`)
   let gDriveDownloadTaskId = "0"
   try {
-    if (fs.existsSync(fileDumpFolder)) {
+    if (checkFolderExistsSync(fileDumpFolder)) {
       resetDownloadCounters2(downloadCounterController);
       gDriveDownloadTaskId = await insertEntryForGDriveUploadHistory(driveLinkOrFolderId, profileOrPath, fileType, fileDumpFolder, "Initiated Downloading");
       const _results = await getAllFilesFromGDrive(driveLinkOrFolderId, "",

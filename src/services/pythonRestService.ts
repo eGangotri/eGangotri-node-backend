@@ -15,7 +15,7 @@ export const runPthonPdfExtractionInLoop = async (_srcFolders: string[],
             console.log(`runPthonPdfExtractionInLoop srcFolder ${srcFolder} `);
             const pdfsToReduceCount = await countPDFsInFolder(srcFolder, ["reduced"]);
             if (isValidDirectory(commonDest)) {
-                if (!fs.existsSync(`${commonDest}`)) {
+                if (!checkFolderExistsSync(`${commonDest}`)) {
                     fs.mkdirSync(`${commonDest}`, { recursive: true });
                     console.log(`Folder created: ${commonDest}`);
                 }
@@ -69,7 +69,7 @@ export const runPythonCopyPdfInLoop = async (_srcFolders: string[],
             const pdfsToMoveCount = await countPDFsInFolder(srcFolder, ["-copy"]);
             if (isValidDirectory(commonDest)) {
                 specificDest = `${specificDest}\\${path.basename(srcFolder)}(${pdfsToMoveCount})`
-                if (!fs.existsSync(`${commonDest}`)) {
+                if (!checkFolderExistsSync(`${commonDest}`)) {
                     fs.mkdirSync(`${commonDest}`, { recursive: true });
                     console.log(`Folder created: ${commonDest}`);
                 }
@@ -80,7 +80,7 @@ export const runPythonCopyPdfInLoop = async (_srcFolders: string[],
             }
             else {
                 specificDest = `${srcFolder}\\-copy}\\${path.basename(srcFolder)}(${pdfsToMoveCount})`
-                if (!fs.existsSync(`${specificDest}`)) {
+                if (!checkFolderExistsSync(`${specificDest}`)) {
                     fs.mkdirSync(`${specificDest}`, { recursive: true });
                     console.log(`Copy Folder created: ${specificDest}`);
                 }
@@ -130,7 +130,7 @@ export const runCr2ToJpgInLoop = async (_srcFolders: string[],
         try {
             specificDest = commonDest ? `${commonDest}` : `${srcFolder}\\-cr2-jpg`;
             console.log(`runCr2ToJpgInLoop srcFolder ${srcFolder} `);
-            if (!fs.existsSync(`${specificDest}`)) {
+            if (!checkFolderExistsSync(`${specificDest}`)) {
                 fs.mkdirSync(`${specificDest}`, { recursive: true });
                 console.log(`Copy Folder created: ${specificDest}`);
             }
