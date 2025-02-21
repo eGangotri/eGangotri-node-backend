@@ -25,19 +25,19 @@ export const itemsUsheredVerficationAndDBFlagUpdate = async (uploadCycleIdForVer
   });
 
   const _itemsUsheredFilter = itemsUsheredByUploadCycle.filter(x => x?.uploadFlag !== true)
-  const results: SelectedUploadItem[] = [];
-  let counter = 0
   const total = itemsUsheredByUploadCycle.length;
+  const promises =
+    _itemsUsheredFilter.map((item, index) =>
+      checkUrlValidityForUploadItems({
+        id: item._id,
+        archiveId: `${item.archiveItemId}`,
+        isValid: true,
+        title: item.title
+      }, index, total)
+    );
+    
+  const results: SelectedUploadItem[] = await Promise.all(promises);
 
-  for (const item of _itemsUsheredFilter) {
-    const res = await checkUrlValidityForUploadItems({
-      id: item._id,
-      archiveId: `${item.archiveItemId}`,
-      isValid: true,
-      title: item.title
-    }, counter++, total);
-    results.push(res);
-  }
   await bulkUpdateUploadedFlag(results);
   await updadeAllUplodVerfiedFlagInUploadCycle(uploadCycleIdForVerification);
   const _profilesAsSet = _.uniq(itemsUsheredByUploadCycle.map(x => x.archiveProfile))
@@ -57,10 +57,10 @@ export const itemsUsheredVerficationAndDBFlagUpdate = async (uploadCycleIdForVer
 
 export const selectedItemsVerficationAndDBFlagUpdate = async (uploadsForVerification: SelectedUploadItem[]) => {
   const total = uploadsForVerification.length;
-  const promises = 
-  uploadsForVerification.map((forVerification, index) =>
-    checkUrlValidityForUploadItems(forVerification, index, total)
-  )
+  const promises =
+    uploadsForVerification.map((forVerification, index) =>
+      checkUrlValidityForUploadItems(forVerification, index, total)
+    )
 
   const results: SelectedUploadItem[] = await Promise.all(promises);
 
@@ -112,7 +112,7 @@ export const handleEachRow = (uploadCycleId: string,
   let totalCount = 0
   let dateTimeUploadStarted = null;
   for (const key in usheredRow) {
-    const row:IItemsUshered[] = usheredRow[key]
+    const row: IItemsUshered[] = usheredRow[key]
     // console.log(`handleEachRow: ${key}: ${row}`);
     const uploadFlagSuccessCount = row.filter(x => x.uploadFlag === true).length;
     archiveProfileAndCount.push({
@@ -121,7 +121,7 @@ export const handleEachRow = (uploadCycleId: string,
       uploadSuccessCount: uploadFlagSuccessCount
     })
     totalCount += row.length
-    if(!dateTimeUploadStarted) {
+    if (!dateTimeUploadStarted) {
       dateTimeUploadStarted = row[0]?.datetimeUploadStarted
     }
   }
@@ -137,7 +137,7 @@ export const handleEachRow = (uploadCycleId: string,
       count: row.length
     })
     totalQueueCount += row.length
-    if(!dateTimeQueueUploadStarted){
+    if (!dateTimeQueueUploadStarted) {
       dateTimeQueueUploadStarted = row[0]?.datetimeUploadStarted
     }
   }
@@ -184,13 +184,13 @@ export const getListOfUploadCyclesAndCorrespondingData = async (queryOptions: It
   const uploadCycleIdAndData: UploadCycleTableDataDictionary[] = []
   for (const [key, value] of groupedUploadCycles) {
     const usheredRow: IItemsUshered[] = groupedUsheredItems[key];
-    const queuedRow:IItemsQueued[] = groupedQueuedItems[key];
+    const queuedRow: IItemsQueued[] = groupedQueuedItems[key];
     const uploadCycleRow: any = value;
 
-    const groupedByArchiveProfiles:_.Dictionary<IItemsUshered[]> = _.groupBy(usheredRow, function (item: any) {
+    const groupedByArchiveProfiles: _.Dictionary<IItemsUshered[]> = _.groupBy(usheredRow, function (item: any) {
       return item.archiveProfile;
     });
-    const queuedRowGroupedByArchiveProfiles:_.Dictionary<IItemsQueued[]> = _.groupBy(queuedRow, function (item: any) {
+    const queuedRowGroupedByArchiveProfiles: _.Dictionary<IItemsQueued[]> = _.groupBy(queuedRow, function (item: any) {
       return item.archiveProfile;
     });
 
