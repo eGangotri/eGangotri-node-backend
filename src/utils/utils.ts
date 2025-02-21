@@ -1,5 +1,7 @@
 import fs from 'fs';
 import path from 'path';
+import * as fsPromise from 'fs/promises';
+
 import { SelectedUploadItem } from '../mirror/types';
 import { createArchiveLink } from '../mirror';
 export const Utils = {};
@@ -16,18 +18,19 @@ export function isValidPath(path: string): boolean {
   }
 }
 
-export const findTopNLongestFileNames = (directory: string, n: number = 1, includePathInCalc = false) => {
+
+export const findTopNLongestFileNames = async (directory: string, n: number = 1, includePathInCalc = false) => {
   let longestFileNames: string[] = [];
 
-  function processDirectory(dir: string) {
-    const files = fs.readdirSync(dir);
+  async function processDirectory(dir: string) {
+    const files = await fsPromise.readdir(dir);
 
     for (const file of files) {
       const filePath = path.join(dir, file);
-      const stat = fs.statSync(filePath);
+      const stat = await fsPromise.stat(filePath);
 
       if (stat.isDirectory()) {
-        processDirectory(filePath);
+        await processDirectory(filePath);
       } else {
         const fileName = includePathInCalc ? filePath : path.basename(filePath);
         longestFileNames.push(fileName);
@@ -39,24 +42,22 @@ export const findTopNLongestFileNames = (directory: string, n: number = 1, inclu
     }
   }
 
-  processDirectory(directory);
-  console.log('longestFileNames:', longestFileNames);
-  return longestFileNames;//.map(fileName => [fileName, fileName.length]);
-}
+  await processDirectory(directory);
+  return longestFileNames;
+};
 
-
-export const findHighestFileSize = (directory: string): number => {
+export const findHighestFileSize = async (directory: string): Promise<number> => {
   let highestSize = 0;
 
-  function processDirectory(dir: string) {
-    const files = fs.readdirSync(dir);
+  async function processDirectory(dir: string) {
+    const files = await fsPromise.readdir(dir);
 
     for (const file of files) {
       const filePath = path.join(dir, file);
-      const stat = fs.statSync(filePath);
+      const stat = await fsPromise.stat(filePath);
 
       if (stat.isDirectory()) {
-        processDirectory(filePath);
+        await processDirectory(filePath);
       } else {
         const fileSize = stat.size;
         if (fileSize > highestSize) {
@@ -66,11 +67,9 @@ export const findHighestFileSize = (directory: string): number => {
     }
   }
 
-  processDirectory(directory);
-
+  await processDirectory(directory);
   return highestSize;
-}
-
+};
 interface VerfiyUrlType {
   url: string;
   success: boolean;
@@ -105,36 +104,37 @@ export async function checkUrlValidity(url: string, counter: number, total: numb
 }
 
 
-export const getLatestExcelFile = (folderPath: string) => {
+export const getLatestExcelFile = async (folderPath: string) => {
   try {
-    const files = fs.readdirSync(folderPath);
-    const excelFiles = files.filter(file => path.extname(file).toLowerCase() === '.xlsx' || path.extname(file).toLowerCase() === '.xls');
+    const files = await fsPromise.readdir(folderPath);
+    const excelFiles = files.filter(
+      file => path.extname(file).toLowerCase() === '.xlsx' || path.extname(file).toLowerCase() === '.xls'
+    );
 
-    let latestFilePath;
-    let latestFileName;
+    let latestFilePath: string | undefined;
+    let latestFileName: string | undefined;
     let latestTime = 0;
 
-    excelFiles.forEach(file => {
+    for (const file of excelFiles) {
       const filePath = path.join(folderPath, file);
-      const stat = fs.statSync(filePath);
+      const stat = await fsPromise.stat(filePath);
 
       if (stat.mtimeMs > latestTime) {
         latestTime = stat.mtimeMs;
         latestFilePath = filePath;
         latestFileName = file;
       }
-    });
+    }
 
     return {
       latestFilePath,
-      latestFileName
+      latestFileName,
     };
-  }
-  catch (err) {
-    console.log(`Error in getLatestExcelFile ${err}`)
+  } catch (err) {
+    console.log(`Error in getLatestExcelFile: ${err}`);
     return {
       latestFilePath: undefined,
-      latestFileName: undefined
-    }
+      latestFileName: undefined,
+    };
   }
-}
+};
