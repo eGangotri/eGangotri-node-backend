@@ -16,33 +16,49 @@ interface FileInfo {
     file2?: string;
 }
 
-export function isValidPath(path: string): boolean {
-    let isValid = false;
-    (async () => {
-        try {
-            await fsPromise.access(path);
-            isValid = true;
-        } catch {
-            isValid = false;
-        }
-    })();
-    return isValid;
+export async function isValidPath(path: string): Promise<boolean> {
+    try {
+        await fsPromise.access(path);
+        return true; // Path is valid
+    } catch {
+        return false; // Path is not valid
+    }
 }
 
-export const checkFolderExistsSync = (folderPath: string) => {
-    return (async () => {
-        try {
-            await fsPromise.access(folderPath);
-            return true; // Folder exists
-        } catch (err) {
-            if (err.code === 'ENOENT') {
-                return false; // Folder does not exist
-            }
-            throw err; // Re-throw other errors (e.g., permission issues)
+export async function isValidPathAsync(path: string): Promise<boolean> {
+    try {
+        await fsPromise.access(path);
+        return true; // Path is valid
+    } catch {
+        return false; // Path is not valid
+    }
+}
+export const checkFolderExistsAsync = async (folderPath: string): Promise<boolean> => {
+    try {
+        await fsPromise.access(folderPath);
+        console.log(`***Folder exists: ${folderPath}`);
+        return true; // Folder exists
+    } catch (err) {
+        if (err.code === 'ENOENT') {
+            console.log(`***Folder doenst exists: ${folderPath}`);
+
+            return false; // Folder does not exist
         }
-    })();
+        throw err; // Re-throw other errors (e.g., permission issues)
+    }
 };
 
+export const checkFolderExistsSync = (folderPath: string): boolean => {
+    try {
+        fs.accessSync(folderPath);
+        return true; // Folder exists
+    } catch (err) {
+        if (err.code === 'ENOENT') {
+            return false; // Folder does not exist
+        }
+        throw err; // Re-throw other errors (e.g., permission issues)
+    }
+};
 export function removeFolderWithContents(folder: string) {
     fs.rm(folder, { recursive: true, force: true }, (err) => {
         if (err) {
