@@ -3,7 +3,7 @@ import { DOWNLOAD_COMPLETED_COUNT, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT, resetDownlo
 import { getFolderInSrcRootForProfile } from "../archiveUpload/ArchiveProfileUtils";
 import { ArchiveLinkData } from "./types";
 import { isValidPath } from "../utils/utils";
-import { checkFolderExistsSync, createDirIfNotExistsAsync } from "../utils/FileUtils";
+import { checkFolderExistsSync, createFolderIfNotExistsAsync } from "../utils/FileUtils";
 import { DOUBLE_HASH_SEPARATOR } from "./utils";
 
 
@@ -22,8 +22,8 @@ export const downloadPdfFromArchiveToProfile = async (pdfLinks: ArchiveLinkData[
   const folderWithProfileName = pdfDumpFolder + "\\" + pdfLinks[0].acct;
   console.log(`folderWithProfileName ${folderWithProfileName} folderWithProfileName`)
 
-  await createDirIfNotExistsAsync(pdfDumpFolder);
-  await createDirIfNotExistsAsync(folderWithProfileName);
+  await createFolderIfNotExistsAsync(pdfDumpFolder);
+  await createFolderIfNotExistsAsync(folderWithProfileName);
 
   try {
     resetDownloadCounters()
@@ -83,7 +83,7 @@ export const adjustLinkedDataForMultipleItems = async (linkData: ArchiveLinkData
         const _name = allNames[i];
         console.log(`pdfLink.pdfDownloadUrl ${pdfLink.pdfDownloadUrl}`);
         const pdfDumpSubFolder = pdfDumpFolder + "\\" + pdfLink.uniqueIdentifier;
-        await createDirIfNotExistsAsync(pdfDumpSubFolder);
+        await createFolderIfNotExistsAsync(pdfDumpSubFolder);
         linkDataWithMultiItems.push({
           pdfDumpFolder: pdfDumpSubFolder,
           pdfDownloadUrl: `${pdfLink.pdfDownloadUrl}/${_name}`,

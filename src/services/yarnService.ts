@@ -20,7 +20,7 @@ import { getLatestUploadCycleById } from "./uploadCycleService";
 import { FileMoveTracker } from "../models/FileMoveTracker";
 import { file } from "pdfkit";
 import { error } from "console";
-import { createDirIfNotExistsAsync } from "utils/FileUtils";
+import { createFolderIfNotExistsAsync } from "utils/FileUtils";
 
 const _root = "C:\\_catalogWork\\_collation\\local";
 
@@ -31,7 +31,7 @@ export const moveProfilesToFreeze = async (profileAsCSV: string,
     for (let profile of profileAsCSV.split(',')) {
         const srcPath = getFolderInSrcRootForProfile(profile.trim());
         const destPath = getFolderInDestRootForProfile(profile.trim());
-        await createDirIfNotExistsAsync(destPath)
+        await createFolderIfNotExistsAsync(destPath)
         if (isValidPath(srcPath) && isValidPath(destPath)) {
             _response.push(await moveFileSrcToDest(srcPath, destPath, flatten, ignorePaths));
         }

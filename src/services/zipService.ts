@@ -6,7 +6,7 @@ import { getAllZipFiles } from '../utils/FileStatsUtils';
 import * as yauzl from 'yauzl';
 import { getNonFolderFileCount } from '../archiveDotOrg/utils';
 import { pipeline } from "stream/promises";
-import { checkFolderExistsSync, createDirIfNotExistsAsync } from 'utils/FileUtils';
+import { checkFolderExistsSync, createFolderIfNotExistsAsync } from 'utils/FileUtils';
 
 const MAX_CONCURRENCY = 4; // Adjust based on your system resources
 
@@ -86,7 +86,7 @@ function unzipFiles(filePath: string, outputDir: string): Promise<void> {
                 // Create directory for entry if needed
                 if (/\/$/.test(entry.fileName)) {
                     // Directory entry
-                    await createDirIfNotExistsAsync(outputPath)
+                    await createFolderIfNotExistsAsync(outputPath)
 
                     zipfile.readEntry(); // Continue to the next entry
                 } else {
@@ -97,7 +97,7 @@ function unzipFiles(filePath: string, outputDir: string): Promise<void> {
                         }
 
                         // Ensure the output directory exists
-                        await createDirIfNotExistsAsync(path.dirname(outputPath))
+                        await createFolderIfNotExistsAsync(path.dirname(outputPath))
 
                         const writeStream = fs.createWriteStream(outputPath);
                         readStream.pipe(writeStream);
@@ -149,7 +149,7 @@ export async function unzipAllFilesInDirectory(pathToZipFiles: string, _unzipHer
                     error_msg.push(`Folder already exists ${zipFile.absPath}`);
                     continue;
                 }
-               await createDirIfNotExistsAsync(outputDir)
+               await createFolderIfNotExistsAsync(outputDir)
 
                 console.log(`${++idx}). unzipping ${zipFile.absPath} to ${outputDir} `)
                 await unzipFiles(zipFile.absPath, outputDir);

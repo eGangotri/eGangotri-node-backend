@@ -1,4 +1,4 @@
-import { checkFolderExistsSync, countPDFsInFolder, createDirIfNotExistsAsync, isValidDirectory } from "../utils/FileUtils";
+import { checkFolderExistsSync, countPDFsInFolder, createFolderIfNotExistsAsync, isValidDirectory } from "../utils/FileUtils";
 import { makePythonCall } from "./pythonLauncherService";
 import fs from 'fs';
 import path from 'path';
@@ -14,7 +14,7 @@ export const runPthonPdfExtractionInLoopDeprecated = async (_srcFolders: string[
             console.log(`runPthonPdfExtractionInLoop srcFolder ${srcFolder} `);
             const pdfsToReduceCount = await countPDFsInFolder(srcFolder, ["reduced"]);
             if (isValidDirectory(destRootFolder)) {
-               await createDirIfNotExistsAsync(destRootFolder)
+               await createFolderIfNotExistsAsync(destRootFolder)
             }
             else {
                 destRoot = `${srcFolder}\\reduced`;

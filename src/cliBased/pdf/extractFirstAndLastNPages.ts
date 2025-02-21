@@ -3,7 +3,7 @@ import fs from 'fs';
 import * as _ from 'lodash';
 import * as path from 'path';
 import { getAllPDFFiles } from '../../utils/FileStatsUtils';
-import { createDirIfNotExistsAsync } from '../../utils/FileUtils';
+import { createFolderIfNotExistsAsync } from '../../utils/FileUtils';
 
 
 const fsPromises = require('fs').promises;
@@ -57,13 +57,13 @@ export const loopFolderForExtraction = async (rootFolder: string,
     const pdfsToBeProcessedCount = allPdfs.length;
     const outputPath = `${outputRoot}\\${path.parse(rootFolder).name} (${pdfsToBeProcessedCount})`;
     console.log(`rootFolder ${rootFolder} ${outputRoot} ${loopIndex}`);
-    await createDirIfNotExistsAsync(outputPath)
+    await createFolderIfNotExistsAsync(outputPath)
     let errorCount = 0;
     for (const [index, pdf] of allPdfs.entries()) {
         const _path = path.parse(pdf.absPath);
         const subDir = _path.dir.replace(rootFolder, '')
         let _subFolder = `${outputPath}\\${subDir}`;
-        await createDirIfNotExistsAsync(_subFolder);
+        await createFolderIfNotExistsAsync(_subFolder);
         try {
             await createPartialPdf(pdf.absPath, _subFolder, pdfsToBeProcessedCount, loopIndex, firstNPages, lastNPages);
             PDF_PROCESSING_COUNTER++;
