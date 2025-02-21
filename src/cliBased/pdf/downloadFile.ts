@@ -75,7 +75,7 @@ export const downloadFileFromUrl = async (
     return _result;
 }
 
-export const downloadGDriveFileUsingGDriveApi = (
+export const downloadGDriveFileUsingGDriveApiX = (
     driveLinkOrFileID: string,
     destPath: string,
     fileName: string = "",
@@ -172,5 +172,77 @@ export const downloadGDriveFileUsingGDriveApi = (
     });
 };
 
+export const downloadGDriveFileUsingGDriveApi = async (
+    driveLinkOrFileID: string,
+    destPath: string,
+    fileName: string = "",
+    fileSizeRaw: string = "0",
+    gDriveDownloadTaskId: string = "",
+    downloadCounterController: string = ""
+): Promise<{ status: string; success: boolean; destPath: string }> => {
+    const fileId = extractGoogleDriveId(driveLinkOrFileID);
+    console.log(`downloadGDriveFileUsingGDriveApi ${driveLinkOrFileID} ${fileId} to ${destPath}`);
+
+    if (!fileId) {
+        const errorMessage = `Invalid Google Drive link(${driveLinkOrFileID}) or File ID(${fileId})`;
+        console.error(errorMessage);
+        throw { success: false, error: errorMessage };
+    }
+
+    try {
+        const fileMetadata = await drive.files.get({ fileId, fields: 'name,mimeType' });
+        const mimeType = fileMetadata.data.mimeType;
+        fileName = fileName || fileMetadata.data.name;
+        const filePath = path.join(destPath, fileName);
+
+        await updateEntryForGDriveUploadHistory(gDriveDownloadTaskId, `started d/l of ${fileName}`, GDriveDownloadHistoryStatus.Queued);
+
+        const dest = fs.createWriteStream(filePath);
+
+        const exportMimeMap = {
+            'application/vnd.google-apps.document': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/vnd.google-apps.spreadsheet': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'application/vnd.google-apps.presentation': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        };
+
+        const exportMimeType = exportMimeMap[mimeType];
+        let response;
+
+        if (exportMimeType) {
+            response = await drive.files.export({ fileId, mimeType: exportMimeType }, { responseType: 'stream' });
+        } else if (!mimeType.startsWith('application/vnd.google-apps.')) {
+            response = await drive.files.get({ fileId, alt: 'media' }, { responseType: 'stream' });
+        } else {
+            throw { success: false, error: `Unsupported Google-native MIME type: ${mimeType}` };
+        }
+
+        response.data.pipe(dest);
+
+        await new Promise((resolve, reject) => {
+            dest.on('finish', resolve);
+            dest.on('error', reject);
+        });
+
+        console.log(`Download complete for "${fileName}"`);
+        const fileConsistency = await checkFileSizeConsistency(destPath, fileName, fileSizeRaw);
+        const result = fileSizeRaw ? fileConsistency : { success: true };
+
+        if (result?.success) {
+            incrementDownloadCompleted2(downloadCounterController);
+            updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, GDriveDownloadHistoryStatus.Completed, `completed d/l of ${fileName}`, destPath);
+            return { status: `Downloaded ${fileName} to ${destPath}`, success: true, destPath };
+        } else {
+            incrementDownloadFailed2(downloadCounterController);
+            updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, GDriveDownloadHistoryStatus.Failed, `failed d/l of ${fileName}`, destPath);
+            throw result;
+        }
+    } catch (error) {
+        const errorContext = `Error during ${error.response?.config?.url ? 'download' : 'metadata fetch'}`;
+        console.error(`${errorContext}:`, error.message);
+         incrementDownloadInError2(downloadCounterController);
+         updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, GDriveDownloadHistoryStatus.Failed, `${errorContext}: ${error.message}`, destPath);
+        throw { success: false, error: `${errorContext}: ${error.message}` };
+    }
+};
 
 //pnpm run downloadPdf

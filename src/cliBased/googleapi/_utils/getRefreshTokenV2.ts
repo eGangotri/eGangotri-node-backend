@@ -1,7 +1,7 @@
 import { google } from 'googleapis';
 import { OAuth2Client } from 'google-auth-library';
-import * as fs from 'fs';
 import * as readline from 'readline';
+import * as fsPromise from 'fs/promises';
 
 import { SCOPES, TOKEN_PATH, _credentials } from './credentials_googleapi';
 import { checkFolderExistsSync } from '../../../utils/FileUtils';
@@ -18,9 +18,6 @@ const credentials = {
 
 // Load credentials and authorize the client
 async function authorize(): Promise<OAuth2Client> {
-    // const credentialsX = JSON.parse(fs.readFileSync("credentials.json", 'utf-8'));
-    // const { client_secret, client_id, redirect_uris } = credentialsX.installed;
-    // console.log(client_secret, client_id, redirect_uris)
     const oAuth2Client = new google.auth.OAuth2(
         credentials.client_id,
         credentials.client_secret,
@@ -30,7 +27,7 @@ async function authorize(): Promise<OAuth2Client> {
 
     // Check if we have previously stored a token.
     if (checkFolderExistsSync(TOKEN_PATH)) {
-        const token = fs.readFileSync(TOKEN_PATH, 'utf-8');
+        const token = await fsPromise.readFile(TOKEN_PATH, 'utf-8');
         oAuth2Client.setCredentials(JSON.parse(token));
     } else {
         await getNewToken(oAuth2Client);
@@ -53,7 +50,7 @@ async function getNewToken(oAuth2Client: OAuth2Client): Promise<void> {
 
     const tokenResponse = await oAuth2Client.getToken(code);
     oAuth2Client.setCredentials(tokenResponse.tokens);
-    fs.writeFileSync(TOKEN_PATH, JSON.stringify(tokenResponse.tokens));
+    await fsPromise.writeFile(TOKEN_PATH, JSON.stringify(tokenResponse.tokens));
     console.log('Token stored to', TOKEN_PATH);
 }
 
