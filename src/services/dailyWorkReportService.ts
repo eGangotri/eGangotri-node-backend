@@ -81,7 +81,7 @@ export async function getListOfDailyWorkReport(queryOptions: ItemsListOptionsTyp
 
 
 export const generateCSVAsFile = async (res: Response, data: mongoose.Document[]) => {
-  const csvFileName = generateCsvDirAndName("ScanOpStaff");
+  const csvFileName = await generateCsvDirAndName("ScanOpStaff");
   try {
     // Define the CSV file headers
     const csvWriter = createObjectCsvWriter({
@@ -120,7 +120,7 @@ export const generateCSVAsFile = async (res: Response, data: mongoose.Document[]
 
 
 export const generateCSVAsFileOfAggregates = async (res: Response, data: mongoose.Document[]) => {
-  const csvFileName = generateCsvDirAndName("ScanOpStaff-Aggr");
+  const csvFileName = await generateCsvDirAndName("ScanOpStaff-Aggr");
   try {
     // Define the CSV file headers
     const csvWriter = createObjectCsvWriter({
@@ -204,7 +204,7 @@ export const generateCSVAsFileOfAggregates = async (res: Response, data: mongoos
 }
 
 export const generateCsvAsFileOnlyOperatorAndPdfCount = async (res: Response, data: mongoose.Document[]) => {
-  const csvFileName = generateCsvDirAndName("ScanOpStaff");
+  const csvFileName = await generateCsvDirAndName("ScanOpStaff");
   try {
     // Define the CSV file headers
     const csvWriter = createObjectCsvWriter({
@@ -227,7 +227,7 @@ export const generateCsvAsFileOnlyOperatorAndPdfCount = async (res: Response, da
 }
 
 export const generateCsvAsFileOnlyOperatorAndPdfCountAggregate = async (res: Response, data: mongoose.Document[]) => {
-  const csvFileName = generateCsvDirAndName("ScanOpStaffAgg");
+  const csvFileName = await generateCsvDirAndName("ScanOpStaffAgg");
   try {
     // Define the CSV file headers
     const csvWriter = createObjectCsvWriter({

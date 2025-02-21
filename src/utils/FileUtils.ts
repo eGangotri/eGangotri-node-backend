@@ -13,22 +13,22 @@ interface FileInfo {
     size: string;
     absPath: string;
     file: string;
-    file2 ?: string;
+    file2?: string;
 }
 
 export const checkFolderExistsSync = (folderPath) => {
     return (async () => {
-      try {
-        await fsPromise.access(folderPath);
-        return true; // Folder exists
-      } catch (err) {
-        if (err.code === 'ENOENT') {
-          return false; // Folder does not exist
+        try {
+            await fsPromise.access(folderPath);
+            return true; // Folder exists
+        } catch (err) {
+            if (err.code === 'ENOENT') {
+                return false; // Folder does not exist
+            }
+            throw err; // Re-throw other errors (e.g., permission issues)
         }
-        throw err; // Re-throw other errors (e.g., permission issues)
-      }
     })();
-  };
+};
 
 export function removeFolderWithContents(folder: string) {
     fs.rm(folder, { recursive: true, force: true }, (err) => {
@@ -48,7 +48,7 @@ export const isValidDirectory = async (dirPath: string): Promise<boolean> => {
     }
 };
 
-export const countPDFsInFolder = async (folderPath: string, 
+export const countPDFsInFolder = async (folderPath: string,
     ignoreFolders: string[] = ["2#@#$JIESFSF"]): Promise<number> => {
     let pdfCount = 0;
 
@@ -87,6 +87,13 @@ export const removeExcept = async (folder: any, except: Array<string>) => {
 
 }
 
+export const createDirIfNotExists = async (dirPath: string) => {
+    try {
+        await fsPromise.access(dirPath);
+    } catch {
+        await fsPromise.mkdir(dirPath, { recursive: true });
+    }
+}
 
 export function createFolderIfNotExists(folderPath: string): void {
     if (!checkFolderExistsSync(folderPath)) {
@@ -156,8 +163,8 @@ export const getDuplicatesOrUniquesBySize = async (folder: string, folder2: stri
             revDupLength: reverseDisjointSet.length,
             disjointSet,
             reverseDisjointSet,
-            [`"disjointSetASCSV"(${disjointSet?.length})`] : disjointSet.map((x: FileInfo) => x.absPath).join(","),
-            [`"reverseDisjointSetASCSV"(${reverseDisjointSet?.length})`] : reverseDisjointSet.map((x: FileInfo) => x.absPath).join(","),
+            [`"disjointSetASCSV"(${disjointSet?.length})`]: disjointSet.map((x: FileInfo) => x.absPath).join(","),
+            [`"reverseDisjointSetASCSV"(${reverseDisjointSet?.length})`]: reverseDisjointSet.map((x: FileInfo) => x.absPath).join(","),
         }
     }
     else {
@@ -182,7 +189,7 @@ export const getDuplicatesOrUniquesBySize = async (folder: string, folder2: stri
 }
 
 const disjointSetByFileSize = (metadata: FileStats[], metadata2: FileStats[]) => {
-    const disjointSet:FileInfo[] = [];
+    const disjointSet: FileInfo[] = [];
     console.log(`metadata ${JSON.stringify(metadata[0].size)} metadata2 ${JSON.stringify(metadata2[0].size)}`)
     metadata.forEach((file: FileStats) => {
         const match = metadata2.find((file2: FileStats) => {
@@ -207,7 +214,7 @@ const disjointSetByFileSize = (metadata: FileStats[], metadata2: FileStats[]) =>
 }
 
 const duplicateBySizeCheck = (metadata: FileStats[], metadata2: FileStats[]) => {
-    const duplicates:FileInfo[] = [];
+    const duplicates: FileInfo[] = [];
     console.log(`metadata ${JSON.stringify(metadata[0].size)} metadata2 ${JSON.stringify(metadata2[0].size)}`)
     metadata.forEach((file: FileStats) => {
         const match = metadata2.find((file2: FileStats) => {

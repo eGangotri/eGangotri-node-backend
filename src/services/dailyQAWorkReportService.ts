@@ -79,7 +79,7 @@ export async function getListOfDailyQAWorkReport(queryOptions: DailyQAWorkReport
 
 
 export const generateQACSVAsFile = async (res: Response, data: mongoose.Document[]) => {
-  const csvFileName = generateCsvDirAndName("QA");
+  const csvFileName = await generateCsvDirAndName("QA");
   try {
     // Define the CSV file headers
     const csvWriter = createObjectCsvWriter({
@@ -118,7 +118,7 @@ export const generateQACSVAsFile = async (res: Response, data: mongoose.Document
 
 
 export const generateQACSVAsFileOfAggregates = async (res: Response, data: mongoose.Document[]) => {
-  const csvFileName = generateCsvDirAndName("QAAggregates");
+  const csvFileName = await generateCsvDirAndName("QAAggregates");
   try {
     // Define the CSV file headers
     const csvWriter = createObjectCsvWriter({
@@ -176,7 +176,7 @@ export const generateQACSVAsFileOfAggregates = async (res: Response, data: mongo
   }
 }
 export const generateQACSVAsFileForOperatorAndEntryCountOnly = async (res: Response, data: mongoose.Document[]) => {
-  const csvFileName = generateCsvDirAndName("QA");
+  const csvFileName = await generateCsvDirAndName("QA");
   try {
     // Define the CSV file headers
     const csvWriter = createObjectCsvWriter({

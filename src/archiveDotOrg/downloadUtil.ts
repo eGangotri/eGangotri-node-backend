@@ -1,11 +1,9 @@
 import { downloadFileFromUrl } from "../cliBased/pdf/downloadFile";
 import { DOWNLOAD_COMPLETED_COUNT, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT, resetDownloadCounters } from "../cliBased/pdf/utils";
 import { getFolderInSrcRootForProfile } from "../archiveUpload/ArchiveProfileUtils";
-import fs from 'fs';
-import * as fsExtra from "fs-extra";
 import { ArchiveLinkData } from "./types";
 import { isValidPath } from "../utils/utils";
-import { checkFolderExistsSync, createFolderIfNotExists } from "../utils/FileUtils";
+import { checkFolderExistsSync, createDirIfNotExists, createFolderIfNotExists } from "../utils/FileUtils";
 import { DOUBLE_HASH_SEPARATOR } from "./utils";
 
 
@@ -24,10 +22,8 @@ export const downloadPdfFromArchiveToProfile = async (pdfLinks: ArchiveLinkData[
   const folderWithProfileName = pdfDumpFolder + "\\" + pdfLinks[0].acct;
   console.log(`folderWithProfileName ${folderWithProfileName} folderWithProfileName`)
 
-  if (!checkFolderExistsSync(pdfDumpFolder) || !checkFolderExistsSync(folderWithProfileName)) {
-    fsExtra.ensureDirSync(folderWithProfileName);
-    fsExtra.ensureDirSync(folderWithProfileName);
-  }
+  await createDirIfNotExists(pdfDumpFolder);
+  await createDirIfNotExists(folderWithProfileName);
 
   try {
     resetDownloadCounters()
