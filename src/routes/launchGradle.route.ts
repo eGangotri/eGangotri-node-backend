@@ -170,7 +170,7 @@ launchGradleRoute.get('/reuploadMissedViaUploadCycleId', async (req: any, resp: 
         const _missedForUploadCycleId: UploadCycleArchiveProfile[]
             = await findMissedUploads(uploadCycleId);
         if (uploadCycleByCycleId.mode.startsWith("Regular")) {
-            const _gradleResponseStreams: string[] = []
+            const _gradleResponseStreams: Record<string, any>[] = []
             for (let i = 0; i < _missedForUploadCycleId.length; i++) {
                 const archiveProfile = _missedForUploadCycleId[i].archiveProfile;
                 const missedAbsPaths = _missedForUploadCycleId[i].absolutePaths.map(x => {
