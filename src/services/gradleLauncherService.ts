@@ -41,7 +41,7 @@ const generateGradleCommandForChar = (args: string, gradleCommand: string, char:
     return _cmd
 }
 
-export function launchUploader(args: any, optionalParams: string = ""): Promise<string> {
+export function launchUploader(args: any, optionalParams: string = ""): Promise<Record<string, any>> {
     console.log(`launchUploader ${args} ${optionalParams}`);
     //export function launchUploader(args: any, optionalParams:object = { [key: string]: any} = {}): Promise<string> {
     let _cmd =generateGradleCommandForCSV(`${args}`, "uploadToArchive");
@@ -55,56 +55,56 @@ export function launchUploader(args: any, optionalParams: string = ""): Promise<
     return  makeGradleCall(_cmd)
 }
 
-export function launchUploaderViaExcelV1(profile: string, excelPath: string, uploadCycleId: string): Promise<string> {
+export function launchUploaderViaExcelV1(profile: string, excelPath: string, uploadCycleId: string): Promise<Record<string, any>> {
     const gradleArgsAsJSON = `{'profile': '${profile}','excelPath':'${path.basename(excelPath)}','uploadCycleId': '${uploadCycleId}'}`
     return makeGradleCall(
         `gradle uploadToArchiveViaExcelV1WithFourCols -PjsonArgs="${gradleArgsAsJSON}"`)
 }
 
-export function launchUploaderViaExcelV3(profile: string, excelPath: string, uploadCycleId: string, range: string = ""): Promise<string> {
+export function launchUploaderViaExcelV3(profile: string, excelPath: string, uploadCycleId: string, range: string = ""): Promise<Record<string, any>> {
     const gradleCmd = `gradle uploadToArchiveViaExcelV3WithOneCol --args="${profile} '${excelPath}' '${uploadCycleId}' '${range}'"`;
     return makeGradleCall(gradleCmd)
 }
 
-export function launchUploaderViaExcelV3Multi(profiles: string, excelPaths: string, uploadCycleId: string, range: string = ""): Promise<string> {
+export function launchUploaderViaExcelV3Multi(profiles: string, excelPaths: string, uploadCycleId: string, range: string = ""): Promise<Record<string, any>> {
     const gradleCmd = `gradle uploadToArchiveViaExcelV3WithOneColMulti --args="${profiles} '${excelPaths}' '${uploadCycleId}' '${range}'"`;
     return makeGradleCall(gradleCmd)
 }
-export function launchUploaderViaJson(args: any): Promise<string> {
+export function launchUploaderViaJson(args: any): Promise<Record<string, any>> {
     return makeGradleCall(generateGradleCommandForCSV(args, "uploadToArchiveJson"))
 }
 
-export function launchUploaderViaAbsPath(args: any): Promise<string> {
+export function launchUploaderViaAbsPath(args: any): Promise<Record<string, any>> {
     return makeGradleCall(generateGradleCommandForHashSeparated(args, "uploadToArchiveSelective"))
 }
 
-export function reuploadMissed(itemsForReupload: ArchiveProfileAndTitle[]): Promise<string> {
+export function reuploadMissed(itemsForReupload: ArchiveProfileAndTitle[]): Promise<Record<string, any>> {
     console.log(`reuploadMissed ${JSON.stringify(itemsForReupload)}`);
     const dataAsCSV = itemsForReupload.map((x: ArchiveProfileAndTitle) => x.archiveProfile + ", '" + x.title.trim() + "'").join(" ")
     return makeGradleCall(generateGradleCommand(dataAsCSV, "uploadToArchiveSelective"))
 }
 
-export function reuploadByUploadCycleId(args: any): Promise<string> {
+export function reuploadByUploadCycleId(args: any): Promise<Record<string, any>> {
     return makeGradleCall(generateGradleCommandForCSV(args, "uploadByUploadCycleId"))
 }
 
 //localhost/launchGradle/moveToFreeze?profiles="TEST,TMP"
-export function moveToFreeze(args: any): Promise<string> {
+export function moveToFreeze(args: any): Promise<Record<string, any>> {
     //gradle fileMover --args=JNGM_BEN JNGM_TAMIL JNGM_TEL JNGM BVT
     return makeGradleCall(generateGradleCommandForCSV(args, "fileMover"))
 }
 
-export function bookTitlesLaunchService(args: any): Promise<string> {
+export function bookTitlesLaunchService(args: any): Promise<Record<string, any>> {
     //gradle fileMover --args=JNGM_BEN JNGM_TAMIL JNGM_TEL JNGM BVT
     return makeGradleCall(generateGradleCommandForCSV(args, "bookTitles"))
 }
 
-export function loginToArchive(args: any): Promise<string> {
+export function loginToArchive(args: any): Promise<Record<string, any>> {
     //gradle loginToArchive --args=JNGM_BEN JNGM_TAMIL JNGM_TEL JNGM BVT
     return makeGradleCall(generateGradleCommandForCSV(args, "loginToArchive"))
 }
 
-export async function snap2htmlCmdCall(rootFolderPath: string, snap2htmlFileName: string = ""): Promise<{}> {
+export async function snap2htmlCmdCall(rootFolderPath: string, snap2htmlFileName: string = ""): Promise<Record<string, any>> {
     if (snap2htmlFileName === "" || !snap2htmlFileName?.endsWith(".html")) {
         snap2htmlFileName = `${path.basename(rootFolderPath)}.html`
     }
@@ -147,23 +147,31 @@ export function makeGradleCallOld(_cmd: string): Promise<string> {
 
 const execAsync = promisify(exec); // Promisify the exec function for async/await usage
 
-export async function makeGradleCall(_cmd: string): Promise<string> {
+export async function makeGradleCall(_cmd: string): Promise<Record<string, any>> {   
     console.log(`makeGradleCall ${_cmd}`);
+    let stdout: string;
+    let stderr: string;
     try {
         const { stdout, stderr } = await execAsync(_cmd, {
             maxBuffer: COMMAND_PROMO_MAX_BUFFER_SIZE,
             cwd: `${WORKING_DIR}`,
         });
+        console.log(`stdout: ${stdout}`);
 
         if (stderr) {
             console.error(`stderr: ${stderr}`);
             throw new Error(stderr); // Treat stderr as an error
         }
 
-        console.log(`stdout: ${stdout}`);
-        return stdout; // Resolve with the stdout
+        return {
+            stdout,
+        }; // Resolve with the stdout
     } catch (error) {
         console.error(`Error executing Gradle command: ${error.message}`);
-        throw error; // Re-throw the error for the caller to handle
+        return {
+            error: error.message,
+            stdout,
+            stderr,
+        }
     }
 }
