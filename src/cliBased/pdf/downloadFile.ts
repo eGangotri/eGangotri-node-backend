@@ -49,7 +49,7 @@ export const downloadFileFromUrl = async (
             });
 
             dl.on('error', (err) => {
-                incrementDownloadInError2(downloadArchiveCounterController);
+                incrementDownloadInError2(downloadCounterController);
                 if (err.code === 'ECONNRESET') {
                     console.error('Connection reset by peer');
                 }
@@ -64,7 +64,7 @@ export const downloadFileFromUrl = async (
         });
     } catch (err) {
         console.error(`downloadFileFromUrl err  ${JSON.stringify(err)}`);
-        incrementDownloadInError2(downloadArchiveCounterController);
+        incrementDownloadInError2(downloadCounterController);
         _result = {
             success: false,
             "error": `Failed download try/catch for ${fileName} to ${fileDumpFolder} with ${JSON.stringify(_result)}`
