@@ -3,7 +3,7 @@ import { MAX_ITEMS_RETRIEVABLE_IN_ARCHIVE_ORG, scrapeArchiveOrgProfiles } from '
 import { ArchiveDataRetrievalMsg, ArchiveDataRetrievalStatus } from '../archiveDotOrg/types';
 import { archiveExceltoMongo } from '../excelToMongo/transferArchiveExcelToMongo';
 import { downloadArchiveItems, downloadPdfFromArchiveToProfile } from '../archiveDotOrg/downloadUtil';
-import { DOWNLOAD_COMPLETED_COUNT, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT, resetDownloadCounters } from '../cliBased/pdf/utils';
+import { DOWNLOAD_COMPLETED_COUNT, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT, resetDownloadCounters, resetDownloadCounters2 } from '../cliBased/pdf/utils';
 import { alterExcelWithUploadedFlag, convertArchiveExcelToLinkData, getSuccessfullyUploadedItemsForUploadCycleId, validateDateRange } from '../services/yarnArchiveService';
 import _ from 'lodash';
 import { excelToJson, jsonToExcel } from '../cliBased/excel/ExcelUtils';
@@ -89,7 +89,7 @@ launchArchiveYarnRoute.post('/downloadArchivePdfs', async (req: any, resp: any) 
 
         const scrapedLinks: ArchiveDataRetrievalStatus[] = _archiveScrappedData.scrapedMetadata
         const results = []
-        resetDownloadCounters();
+        resetDownloadCounters2();
         for (const entry of scrapedLinks) {
             if (entry.success == false) {
                 results.push({
@@ -101,7 +101,8 @@ launchArchiveYarnRoute.post('/downloadArchivePdfs', async (req: any, resp: any) 
                 });
                 continue;
             }
-            const res = await downloadPdfFromArchiveToProfile(entry.archiveReport.linkData, profileOrPath);
+            const downloadArchiveCounterController = Math.random().toString(36).substring(7);
+            const res = await downloadPdfFromArchiveToProfile(entry.archiveReport.linkData, profileOrPath, downloadArchiveCounterController);
             results.push(res);
         }
 
@@ -311,8 +312,8 @@ launchArchiveYarnRoute.post('/downloadArchiveItemsViaExcel', async (req: any, re
             });
         }
         const _linkData = convertArchiveExcelToLinkData(excelPath);
-        resetDownloadCounters()
-        const _results = await downloadArchiveItems(_linkData, profileOrPath);
+        const downloadArchiveCounterController = Math.random().toString(36).substring(7);
+        const _results = await downloadArchiveItems(_linkData, profileOrPath,downloadArchiveCounterController);
 
         console.log(`Success count: ${DOWNLOAD_COMPLETED_COUNT}`);
         console.log(`Error count: ${DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT}`);
