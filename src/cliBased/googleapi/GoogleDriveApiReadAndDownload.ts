@@ -4,7 +4,7 @@ import { listFolderContentsAsArrayOfData } from './service/GoogleApiService';
 import { getGoogleDriveInstance } from './service/CreateGoogleDrive';
 import { downloadFileFromGoogleDrive } from '../pdf/downloadFile';
 import { getFolderInSrcRootForProfile } from '../../archiveUpload/ArchiveProfileUtils';
-import { DOWNLOAD_COMPLETED_COUNT, DOWNLOAD_COMPLETED_COUNT2, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT2, DOWNLOAD_FAILED_COUNT, DOWNLOAD_FAILED_COUNT2, resetDownloadCounters, resetDownloadCounters2 } from '../../cliBased/pdf/utils';
+import { DOWNLOAD_COMPLETED_COUNT2,  DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT2, DOWNLOAD_FAILED_COUNT2, resetDownloadCounters2 } from '../../cliBased/pdf/utils';
 import { insertEntryForGDriveUploadHistory, updateEntryForGDriveUploadHistory } from '../../services/GdriveDownloadRecordService';
 import { getAllPdfsInFolders, getDirectoriesWithFullPath } from '../../imgToPdf/utils/Utils';
 import { addHeaderAndFooterToPDF } from '../../pdfHeaderFooter';
@@ -127,7 +127,7 @@ export const downloadFromGoogleDriveToProfile = async (driveLinkOrFolderId: stri
         success_count: DOWNLOAD_COMPLETED_COUNT2(downloadCounterController),
         error_count: DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT2(downloadCounterController),
         dl_wrong_size_count: `${DOWNLOAD_FAILED_COUNT2(downloadCounterController)}
-        ${DOWNLOAD_FAILED_COUNT > 0 ? "Google Drive Quota may have been filled.Typically takes 24 Hours to reset." : ""}`,
+        ${DOWNLOAD_FAILED_COUNT2(downloadCounterController) > 0 ? "Google Drive Quota may have been filled.Typically takes 24 Hours to reset." : ""}`,
         ..._results
       }
       console.log(`_resp : ${JSON.stringify(_resp)}`);
@@ -143,11 +143,11 @@ export const downloadFromGoogleDriveToProfile = async (driveLinkOrFolderId: stri
   catch (err) {
     console.log(`downloadFromGoogleDriveToProfile:Error (${fileDumpFolder}) ${JSON.stringify(err)}`)
     const _resp =  {
-      status: `${DOWNLOAD_COMPLETED_COUNT} out of ${DOWNLOAD_COMPLETED_COUNT + DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT + DOWNLOAD_FAILED_COUNT} made it`,
-      success_count: DOWNLOAD_COMPLETED_COUNT,
-      error_count: DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT,
-      dl_wrong_size_count: `${DOWNLOAD_FAILED_COUNT}
-      ${DOWNLOAD_FAILED_COUNT > 0 ? "Google Drive Quota may have been filled.Typically takes 24 Hours to reset." : ""}`,
+      status: `${DOWNLOAD_COMPLETED_COUNT2(downloadCounterController)} out of ${DOWNLOAD_COMPLETED_COUNT2(downloadCounterController) + DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT2(downloadCounterController) + DOWNLOAD_FAILED_COUNT2(downloadCounterController)} made it`,
+      success_count: DOWNLOAD_COMPLETED_COUNT2(downloadCounterController),
+      error_count: DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT2(downloadCounterController),
+      dl_wrong_size_count: `${DOWNLOAD_FAILED_COUNT2(downloadCounterController)}
+      ${DOWNLOAD_FAILED_COUNT2(downloadCounterController) > 0 ? "Google Drive Quota may have been filled.Typically takes 24 Hours to reset." : ""}`,
       "error": `${err} downloadFromGoogleDriveToProfile:Error (${fileDumpFolder}) ${JSON.stringify(err)}`
     }
     updateEntryForGDriveUploadHistory(gDriveDownloadTaskId,err, GDriveDownloadHistoryStatus.Failed, _resp);

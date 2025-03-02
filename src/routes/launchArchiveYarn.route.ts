@@ -3,7 +3,6 @@ import { MAX_ITEMS_RETRIEVABLE_IN_ARCHIVE_ORG, scrapeArchiveOrgProfiles } from '
 import { ArchiveDataRetrievalMsg, ArchiveDataRetrievalStatus } from '../archiveDotOrg/types';
 import { archiveExceltoMongo } from '../excelToMongo/transferArchiveExcelToMongo';
 import { downloadArchiveItems, downloadPdfFromArchiveToProfile } from '../archiveDotOrg/downloadUtil';
-import { DOWNLOAD_COMPLETED_COUNT, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT, resetDownloadCounters, resetDownloadCounters2 } from '../cliBased/pdf/utils';
 import { alterExcelWithUploadedFlag, convertArchiveExcelToLinkData, getSuccessfullyUploadedItemsForUploadCycleId, validateDateRange } from '../services/yarnArchiveService';
 import _ from 'lodash';
 import { excelToJson, jsonToExcel } from '../cliBased/excel/ExcelUtils';
@@ -12,6 +11,7 @@ import moment from 'moment';
 import { DD_MM_YYYY_HH_MMFORMAT } from '../utils/constants';
 import { generateEAPBLMetadataForProfile } from '../eap_bl';
 import { formatTime } from '../imgToPdf/utils/Utils';
+import { DOWNLOAD_COMPLETED_COUNT2, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT2 } from 'cliBased/pdf/utils';
 
 export const launchArchiveYarnRoute = express.Router();
 
@@ -89,7 +89,6 @@ launchArchiveYarnRoute.post('/downloadArchivePdfs', async (req: any, resp: any) 
 
         const scrapedLinks: ArchiveDataRetrievalStatus[] = _archiveScrappedData.scrapedMetadata
         const results = []
-        resetDownloadCounters2();
         for (const entry of scrapedLinks) {
             if (entry.success == false) {
                 results.push({
@@ -315,12 +314,12 @@ launchArchiveYarnRoute.post('/downloadArchiveItemsViaExcel', async (req: any, re
         const downloadArchiveCounterController = Math.random().toString(36).substring(7);
         const _results = await downloadArchiveItems(_linkData, profileOrPath,downloadArchiveCounterController);
 
-        console.log(`Success count: ${DOWNLOAD_COMPLETED_COUNT}`);
-        console.log(`Error count: ${DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT}`);
+        console.log(`Success count: ${DOWNLOAD_COMPLETED_COUNT2(downloadArchiveCounterController)}`);
+        console.log(`Error count: ${DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT2(downloadArchiveCounterController)}`);
         const _resp = {
-            status: `${DOWNLOAD_COMPLETED_COUNT} out of ${DOWNLOAD_COMPLETED_COUNT + DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT} made it`,
-            success_count: DOWNLOAD_COMPLETED_COUNT,
-            error_count: DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT,
+            status: `${DOWNLOAD_COMPLETED_COUNT2(downloadArchiveCounterController)} out of ${DOWNLOAD_COMPLETED_COUNT2(downloadArchiveCounterController) + DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT2(downloadArchiveCounterController)} made it`,
+            success_count: DOWNLOAD_COMPLETED_COUNT2(downloadArchiveCounterController),
+            error_count: DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT2(downloadArchiveCounterController),
             ..._results
         }
         console.log(`_resp : ${JSON.stringify(_resp)}`);
