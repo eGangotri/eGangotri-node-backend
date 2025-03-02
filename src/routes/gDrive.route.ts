@@ -28,25 +28,31 @@ gDriveRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
          ${googleDriveLink?.split(",").map((link: string) => link + "\n ")} 
         profile ${profile} fileType ${fileType} ignoreFolder ${ignoreFolder}`)
         if (!googleDriveLink || !profile) {
-            resp.status(400).send({
+            return resp.status(400).send({
                 response: {
                     "status": "failed",
                     "message": "googleDriveLink and profile are mandatory"
                 }
             });
         }
-        const results = [];
+
         const links = googleDriveLink.includes(",") ? googleDriveLink.split(",").map((link: string) => link.trim()) : [googleDriveLink.trim()];
         const downloadCounterController = Math.random().toString(36).substring(7);
         resetDownloadCounters2(downloadCounterController);
-        for (const [index, link] of links.entries()) {     
-            console.log(`:downloadFromGoogleDrive:loop ${index + 1} ${link} ${profile} ${ignoreFolder} ${fileType} ${downloadCounterController}`)    
-            const res = await downloadFromGoogleDriveToProfile(link, profile, ignoreFolder, fileType,downloadCounterController);
-            results.push(res);
-        }
+        
+        // Process all downloads concurrently using Promise.all
+        const downloadPromises = links.map((link: string, index: number) => {
+            console.log(`:downloadFromGoogleDrive:loop ${index + 1} ${link} ${profile} ${ignoreFolder} ${fileType} ${downloadCounterController}`);
+            return downloadFromGoogleDriveToProfile(link, profile, ignoreFolder, fileType, downloadCounterController);
+        });
+
+        // Wait for all downloads to complete
+        const results = await Promise.all(downloadPromises);
+        
         const resultsSummary = results.map((res: any, index: number) => {
             return `(${index + 1}). Succ: ${res.success_count} Err: ${res.error_count} Wrong Size: ${res.dl_wrong_size_count}`;
         });
+
         const endTime = Date.now();
         const timeTaken = endTime - startTime;
         console.log(`Time taken to download for /downloadFromGoogleDrive: ${timeInfo(timeTaken)}`);
@@ -57,7 +63,6 @@ gDriveRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
             response: results
         });
     }
-
     catch (err: any) {
         console.log('Error', err);
         resp.status(400).send(err);
@@ -237,4 +242,3 @@ gDriveRoute.post('/verifyLocalDownloadSameAsGDrive', async (req: any, resp: any)
         resp.status(400).send(err);
     }
 })
-
