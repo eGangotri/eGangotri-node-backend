@@ -11,7 +11,7 @@ import moment from 'moment';
 import { DD_MM_YYYY_HH_MMFORMAT } from '../utils/constants';
 import { generateEAPBLMetadataForProfile } from '../eap_bl';
 import { formatTime } from '../imgToPdf/utils/Utils';
-import { DOWNLOAD_COMPLETED_COUNT2, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT2 } from 'cliBased/pdf/utils';
+import { DOWNLOAD_COMPLETED_COUNT2, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT2 } from '../cliBased/pdf/utils';
 
 export const launchArchiveYarnRoute = express.Router();
 
