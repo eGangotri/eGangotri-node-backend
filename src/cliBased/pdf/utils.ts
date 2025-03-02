@@ -3,26 +3,26 @@ import fs from 'fs';
 import { getFileSizeAsync, sizeInfo } from "../../mirror/FrontEndBackendCommonCode";
 import { extractGoogleDriveId } from "../../mirror/GoogleDriveUtilsCommonCode";
 
-export let DOWNLOAD_COMPLETED_COUNT = 0;
-export let DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT = 0;
-export let DOWNLOAD_FAILED_COUNT = 0;
+//  let DOWNLOAD_COMPLETED_COUNT = 0;
+//  let DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT = 0;
+//  let DOWNLOAD_FAILED_COUNT = 0;
 
-export const incrementDownloadComplete = () => {
-    DOWNLOAD_COMPLETED_COUNT++
-}
-export const incrementDownloadInError = () => {
-    DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT++
-}
+// const incrementDownloadCompleteX = () => {
+//     DOWNLOAD_COMPLETED_COUNT++
+// }
+// const incrementDownloadInErrorX = () => {
+//     DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT++
+// }
 
-export const incrementDownloadFailed = () => {
-    DOWNLOAD_FAILED_COUNT++
-}
-//deprecated
-export const resetDownloadCounters = () => {
-    DOWNLOAD_COMPLETED_COUNT = 0;
-    DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT = 0;
-    DOWNLOAD_FAILED_COUNT = 0;
-}
+// const incrementDownloadFailedX = () => {
+//     DOWNLOAD_FAILED_COUNT++
+// }
+// //deprecated
+// const resetDownloadCountersX = () => {
+//     DOWNLOAD_COMPLETED_COUNT = 0;
+//     DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT = 0;
+//     DOWNLOAD_FAILED_COUNT = 0;
+// }
 
 let downloadCounters = {};
 
@@ -63,13 +63,15 @@ export function getDownloadCounters2(requestId: string) {
 }
 
 
-export const checkFileSizeConsistency = async (pdfDumpFolder: string, fileName: string, fileSizeRaw: string) => {
+export const checkFileSizeConsistency = async (pdfDumpFolder: string,
+    fileName: string, fileSizeRaw: string, downloadCounterController = ""
+) => {
     if (fileSizeRaw !== "0") {
         const fileSizeOfDwnldFile = await getFileSizeAsync(`${pdfDumpFolder}\\${fileName}`);
         const fileSizeRawAsInt = parseInt(fileSizeRaw);
         if (fileSizeOfDwnldFile != fileSizeRawAsInt) {
             console.log(`Downloaded file size for (${fileName}) ${fileSizeOfDwnldFile} does not match with expected size ${fileSizeRaw}`);
-            incrementDownloadFailed();
+            incrementDownloadFailed2(downloadCounterController);
             return {
                 status: `Downloaded ${fileName} to ${pdfDumpFolder}
                 but FileSize (${sizeInfo(fileSizeOfDwnldFile)} !== ${sizeInfo(fileSizeRawAsInt)}) dont match`,

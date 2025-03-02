@@ -120,30 +120,6 @@ export async function snap2htmlCmdCall(rootFolderPath: string, snap2htmlFileName
 }
 
 const COMMAND_PROMO_MAX_BUFFER_SIZE = 1024 * 1024 * 1024;
-export function makeGradleCallOld(_cmd: string): Promise<string> {
-    console.log(`makeGradleCall ${_cmd} `);
-
-    return new Promise((resolve, reject) => {
-        exec(_cmd, {
-            maxBuffer: COMMAND_PROMO_MAX_BUFFER_SIZE,
-            cwd: `${WORKING_DIR}`
-        }, (error, stdout, stderr) => {
-            if (error) {
-                console.log(`error: ${error.message}`);
-                reject(error);
-                return;
-            }
-            if (stderr) {
-                console.log(`stderr: ${stderr}`);
-                reject(new Error(stderr));
-                return;
-            }
-            console.log(`stdout: ${stdout}`);
-            resolve(stdout);
-        })
-    });
-}
-
 
 const execAsync = promisify(exec); // Promisify the exec function for async/await usage
 

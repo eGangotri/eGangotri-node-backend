@@ -1,6 +1,7 @@
 const { DownloaderHelper } = require('node-downloader-helper');
 import fs from 'fs';
-import { DOWNLOAD_COMPLETED_COUNT, checkFileSizeConsistency, incrementDownloadComplete, incrementDownloadCompleted2, incrementDownloadFailed2, incrementDownloadInError, incrementDownloadInError2 } from "./utils";
+import {  DOWNLOAD_COMPLETED_COUNT2, checkFileSizeConsistency, 
+     incrementDownloadCompleted2, incrementDownloadFailed2,  incrementDownloadInError2 } from "./utils";
 import { extractGoogleDriveId } from '../../mirror/GoogleDriveUtilsCommonCode';
 import { getGoogleDriveInstance } from '../googleapi/service/CreateGoogleDrive';
 import * as path from 'path';
@@ -26,7 +27,7 @@ export const downloadFileFromUrl = async (
     downloadUrl: string,
     fileName: string,
     dataLength: number,
-    fileSizeRaw = "0") => {
+    fileSizeRaw = "0",downloadCounterController= "") => {
     console.log(`downloadFileFromUrl ${downloadUrl} to ${fileDumpFolder}`)
 
     const dl = new DownloaderHelper(downloadUrl, fileDumpFolder, { fileName: fileName });//
@@ -34,11 +35,11 @@ export const downloadFileFromUrl = async (
     try {
         await new Promise((resolve, reject) => {
             dl.on('end', async () => {
-                const index = `(${DOWNLOAD_COMPLETED_COUNT + 1}${dataLength > 0 ? "/" + dataLength : ""})`;
+                const index = `(${DOWNLOAD_COMPLETED_COUNT2(downloadCounterController) + 1}${dataLength > 0 ? "/" + dataLength : ""})`;
                 console.log(`${index}. Downloaded ${fileName}`);
-                _result = await checkFileSizeConsistency(fileDumpFolder, fileName, fileSizeRaw);
+                _result = await checkFileSizeConsistency(fileDumpFolder, fileName, fileSizeRaw,downloadCounterController);
                 if (_result?.success) {
-                    incrementDownloadComplete();
+                    incrementDownloadCompleted2(downloadCounterController);
                     _result = {
                         "status": `Downloaded ${fileName} to ${fileDumpFolder}`,
                         success: true
@@ -48,7 +49,7 @@ export const downloadFileFromUrl = async (
             });
 
             dl.on('error', (err) => {
-                incrementDownloadInError();
+                incrementDownloadInError2(downloadArchiveCounterController);
                 if (err.code === 'ECONNRESET') {
                     console.error('Connection reset by peer');
                 }
@@ -63,7 +64,7 @@ export const downloadFileFromUrl = async (
         });
     } catch (err) {
         console.error(`downloadFileFromUrl err  ${JSON.stringify(err)}`);
-        incrementDownloadInError();
+        incrementDownloadInError2(downloadArchiveCounterController);
         _result = {
             success: false,
             "error": `Failed download try/catch for ${fileName} to ${fileDumpFolder} with ${JSON.stringify(_result)}`
@@ -130,7 +131,7 @@ export const downloadGDriveFileUsingGDriveApiOld = (
 
             dest.on('finish', async () => {
                 console.log(`Download complete for "${fileName}"`);
-                const _fileConsistency = await checkFileSizeConsistency(destPath, fileName, fileSizeRaw);
+                const _fileConsistency = await checkFileSizeConsistency(destPath, fileName, fileSizeRaw, downloadCounterController);
                 const _result = fileSizeRaw
                     ? _fileConsistency
                     : { success: true };
@@ -224,7 +225,7 @@ export const downloadGDriveFileUsingGDriveApi = async (
         });
 
         console.log(`Download complete for "${fileName}"`);
-        const fileConsistency = await checkFileSizeConsistency(destPath, fileName, fileSizeRaw);
+        const fileConsistency = await checkFileSizeConsistency(destPath, fileName, fileSizeRaw, downloadCounterController);
         const result = fileSizeRaw ? fileConsistency : { success: true };
 
         if (result?.success) {

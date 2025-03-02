@@ -277,9 +277,8 @@ const reuploadFailedLogic = async (uploadCycleId: string) => {
 
         const res = await launchUploaderViaJson(jsonFileName)
         return {
-            noFailedUploads: false,
             res,
-            failureCount: _itemsUsheredData.failureCount
+            failedItemsAttemptedReupload: _itemsUsheredData.failureCount
         }
     }
     else {
@@ -315,22 +314,15 @@ launchGradleRoute.get('/reuploadFailed', async (req: any, resp: any) => {
                 });
             }
             else {
-                const _failCount = _reuploadFailedLogic.failureCount || 1;
-                const timeOutPeriod = ((_failCount / 20) * 1000 * 60) + (1000 * 60 * 5); // 5 minutes for each failed item
-                console.log(`timeOutPeriod ${timeOutPeriod}`)
-
                 resp.status(200).send({
                     response: {
                         success: true,
                         ..._reuploadFailedLogic
                     }
                 });
-                setTimeout(() => reuploadFailedLogic(uploadCycleId), timeOutPeriod);
-
             }
         }
     }
-
     catch (err: any) {
         console.log('Error', err);
         resp.status(400).send({
