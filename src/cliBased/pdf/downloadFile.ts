@@ -5,7 +5,7 @@ import {  DOWNLOAD_COMPLETED_COUNT2, checkFileSizeConsistency,
 import { extractGoogleDriveId } from '../../mirror/GoogleDriveUtilsCommonCode';
 import { getGoogleDriveInstance } from '../googleapi/service/CreateGoogleDrive';
 import * as path from 'path';
-import { updateEntryForGDriveUploadHistory, updateEmbeddedFileByFileName } from '../../services/GdriveDownloadRecordService';
+import { updateEntryForGDriveUploadHistory, _updateEmbeddedFileByFileName } from '../../services/GdriveDownloadRecordService';
 import { GDriveDownloadHistoryStatus } from '../../utils/constants';
 
 const drive = getGoogleDriveInstance();
@@ -138,7 +138,7 @@ export const downloadGDriveFileUsingGDriveApiOld = (
 
                 if (_result?.success) {
                     incrementDownloadCompleted2(downloadCounterController);
-                    updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, GDriveDownloadHistoryStatus.Completed, `completed d/l of ${fileName}`, destPath);
+                    _updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, GDriveDownloadHistoryStatus.Completed, `completed d/l of ${fileName}`, destPath);
                     resolve({
                         status: `Downloaded ${fileName} to ${destPath}`,
                         success: true,
@@ -147,14 +147,14 @@ export const downloadGDriveFileUsingGDriveApiOld = (
                 } else {
                     reject(_result);
                     incrementDownloadFailed2(downloadCounterController);
-                    updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, GDriveDownloadHistoryStatus.Failed, `failed d/l of ${fileName}`, destPath);
+                    _updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, GDriveDownloadHistoryStatus.Failed, `failed d/l of ${fileName}`, destPath);
                 }
             });
 
             dest.on('error', (err) => {
                 console.error('Error writing file:', err);
                 incrementDownloadInError2(downloadCounterController);
-                updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, GDriveDownloadHistoryStatus.Failed, `error d/l of ${fileName}`, destPath);
+                _updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, GDriveDownloadHistoryStatus.Failed, `error d/l of ${fileName}`, destPath);
                 reject({
                     success: false,
                     error: `Error writing file for ${fileName}: ${err.message}`,
@@ -164,7 +164,7 @@ export const downloadGDriveFileUsingGDriveApiOld = (
             const errorContext = `Error during ${error.response?.config?.url ? 'download' : 'metadata fetch'}`;
             console.error(`${errorContext}:`, error.message);
             incrementDownloadInError2(downloadCounterController);
-            updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, GDriveDownloadHistoryStatus.Failed, `${errorContext}: ${error.message}`, destPath);
+            _updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, GDriveDownloadHistoryStatus.Failed, `${errorContext}: ${error.message}`, destPath);
             reject({
                 success: false,
                 error: `${errorContext}: ${error.message}`,
@@ -230,18 +230,18 @@ export const downloadGDriveFileUsingGDriveApi = async (
 
         if (result?.success) {
             incrementDownloadCompleted2(downloadCounterController);
-            updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, GDriveDownloadHistoryStatus.Completed, `completed d/l of ${fileName}`, destPath);
+            _updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, GDriveDownloadHistoryStatus.Completed, `completed d/l of ${fileName}`, destPath);
             return { status: `Downloaded ${fileName} to ${destPath}`, success: true, destPath };
         } else {
             incrementDownloadFailed2(downloadCounterController);
-            updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, GDriveDownloadHistoryStatus.Failed, `failed d/l of ${fileName}`, destPath);
+            _updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, GDriveDownloadHistoryStatus.Failed, `failed d/l of ${fileName}`, destPath);
             throw result;
         }
     } catch (error) {
         const errorContext = `Error during ${error.response?.config?.url ? 'download' : 'metadata fetch'}`;
         console.error(`${errorContext}:`, error.message);
          incrementDownloadInError2(downloadCounterController);
-         updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, GDriveDownloadHistoryStatus.Failed, `${errorContext}: ${error.message}`, destPath);
+         _updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, GDriveDownloadHistoryStatus.Failed, `${errorContext}: ${error.message}`, destPath);
         throw { success: false, error: `${errorContext}: ${error.message}` };
     }
 };

@@ -39,7 +39,8 @@ gDriveRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
         const links = googleDriveLink.includes(",") ? googleDriveLink.split(",").map((link: string) => link.trim()) : [googleDriveLink.trim()];
         const downloadCounterController = Math.random().toString(36).substring(7);
         resetDownloadCounters2(downloadCounterController);
-        for (const [index, link] of links.entries()) {         
+        for (const [index, link] of links.entries()) {     
+            console.log(`:downloadFromGoogleDrive:loop ${index + 1} ${link} ${profile} ${ignoreFolder} ${fileType} ${downloadCounterController}`)    
             const res = await downloadFromGoogleDriveToProfile(link, profile, ignoreFolder, fileType,downloadCounterController);
             results.push(res);
         }
