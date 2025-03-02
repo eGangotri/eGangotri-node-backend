@@ -38,12 +38,11 @@ gDriveRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
 
         const links = googleDriveLink.includes(",") ? googleDriveLink.split(",").map((link: string) => link.trim()) : [googleDriveLink.trim()];
         const downloadCounterController = Math.random().toString(36).substring(7);
-        resetDownloadCounters2(downloadCounterController);
         
         // Process all downloads concurrently using Promise.all
         const downloadPromises = links.map((link: string, index: number) => {
             console.log(`:downloadFromGoogleDrive:loop ${index + 1} ${link} ${profile} ${ignoreFolder} ${fileType} ${downloadCounterController}`);
-            return downloadFromGoogleDriveToProfile(link, profile, ignoreFolder, fileType, downloadCounterController);
+            return downloadFromGoogleDriveToProfile(link, profile, ignoreFolder, fileType, `${downloadCounterController}-${index}`);
         });
 
         // Wait for all downloads to complete
