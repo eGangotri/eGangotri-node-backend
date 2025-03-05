@@ -1,6 +1,6 @@
 import * as express from 'express';
 import { downloadFromGoogleDriveToProfile } from '../cliBased/googleapi/GoogleDriveApiReadAndDownload';
-import {  DOWNLOAD_COMPLETED_COUNT2, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT2, resetDownloadCounters2 } from '../cliBased/pdf/utils';
+import {  DOWNLOAD_COMPLETED_COUNT, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT } from '../cliBased/pdf/utils';
 import { timeInfo } from '../mirror/FrontEndBackendCommonCode';
 import { PDF_TYPE } from '../cliBased/googleapi/_utils/constants';
 import { genLinksAndFolders, validateGenGDriveLinks } from '../services/yarnListMakerService';
@@ -169,12 +169,12 @@ gDriveRoute.post('/downloadGDriveItemsViaExcel', async (req: any, resp: any) => 
         const downloadCounterController = Math.random().toString(36).substring(7);
         const _results = await downloadGDriveData(excelLinksData, profileOrPath,downloadCounterController);
 
-        console.log(`Success count: ${DOWNLOAD_COMPLETED_COUNT2(downloadCounterController)}`);
-        console.log(`Error count: ${DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT2(downloadCounterController)}`);
+        console.log(`Success count: ${DOWNLOAD_COMPLETED_COUNT(downloadCounterController)}`);
+        console.log(`Error count: ${DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT(downloadCounterController)}`);
         const _resp = {
-            status: `${DOWNLOAD_COMPLETED_COUNT2(downloadCounterController)} out of ${DOWNLOAD_COMPLETED_COUNT2(downloadCounterController) + DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT2(downloadCounterController)} made it`,
-            success_count: DOWNLOAD_COMPLETED_COUNT2(downloadCounterController),
-            error_count: DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT2(downloadCounterController),
+            status: `${DOWNLOAD_COMPLETED_COUNT(downloadCounterController)} out of ${DOWNLOAD_COMPLETED_COUNT(downloadCounterController) + DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT(downloadCounterController)} made it`,
+            success_count: DOWNLOAD_COMPLETED_COUNT(downloadCounterController),
+            error_count: DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT(downloadCounterController),
             ..._results
         }
 

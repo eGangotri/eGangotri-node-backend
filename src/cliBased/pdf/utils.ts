@@ -3,42 +3,41 @@ import { extractGoogleDriveId } from "../../mirror/GoogleDriveUtilsCommonCode";
 
 let downloadCounters = {};
 
-export const DOWNLOAD_COMPLETED_COUNT2 = (requestId: string) => {
-    return downloadCounters[requestId].completed;
+export const DOWNLOAD_COMPLETED_COUNT = (requestId: string) => {
+    return getDownloadCounters(requestId)?.completed;
 }
 
-export const DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT2 = (requestId: string) => {
-    return downloadCounters[requestId].inError;
+export const DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT = (requestId: string) => {
+    return getDownloadCounters(requestId)?.inError;
 }
 
-export const DOWNLOAD_FAILED_COUNT2 = (requestId: string) => {
-    return downloadCounters[requestId].failed;
+export const DOWNLOAD_FAILED_COUNT = (requestId: string) => {
+    return getDownloadCounters(requestId)?.failed;
 }
 
-export function resetDownloadCounters2(requestId: string) {
-    downloadCounters[requestId] = {
-        completed: 0,
-        inError: 0,
-        failed: 0
-    };
+
+export function incrementDownloadCompleted(requestId: string) {
+    getDownloadCounters(requestId).completed++;
 }
 
-export function incrementDownloadCompleted2(requestId: string) {
-    downloadCounters[requestId].completed++;
+export function incrementDownloadInError(requestId: string) {
+    getDownloadCounters(requestId).inError++;
 }
 
-export function incrementDownloadInError2(requestId: string) {
-    downloadCounters[requestId].inError++;
+export function incrementDownloadFailed(requestId: string) {
+    getDownloadCounters(requestId).failed++;
 }
 
-export function incrementDownloadFailed2(requestId: string) {
-    downloadCounters[requestId].failed++;
+export function getDownloadCounters(requestId: string) {
+    if (!downloadCounters[requestId]) {
+        downloadCounters[requestId] = {
+            completed: 0,
+            inError: 0,
+            failed: 0
+        };
+        return downloadCounters[requestId];
+    }
 }
-
-export function getDownloadCounters2(requestId: string) {
-    return downloadCounters[requestId];
-}
-
 
 export const checkFileSizeConsistency = async (pdfDumpFolder: string,
     fileName: string, fileSizeRaw: string, downloadCounterController = ""
@@ -48,7 +47,7 @@ export const checkFileSizeConsistency = async (pdfDumpFolder: string,
         const fileSizeRawAsInt = parseInt(fileSizeRaw);
         if (fileSizeOfDwnldFile != fileSizeRawAsInt) {
             console.log(`Downloaded file size for (${fileName}) ${fileSizeOfDwnldFile} does not match with expected size ${fileSizeRaw}`);
-            incrementDownloadFailed2(downloadCounterController);
+            incrementDownloadFailed(downloadCounterController);
             return {
                 status: `Downloaded ${fileName} to ${pdfDumpFolder}
                 but FileSize (${sizeInfo(fileSizeOfDwnldFile)} !== ${sizeInfo(fileSizeRawAsInt)}) dont match`,
