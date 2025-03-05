@@ -54,7 +54,7 @@ launchGradleRoute.get('/launchUploader', async (req: any, resp: any) => {
                 itemsUsheredVerficationAndDBFlagUpdate(uploadCycleId);
                 setTimeout(() => {
                     itemsUsheredVerficationAndDBFlagUpdate(uploadCycleId);
-                }, 300000); // 5 minutes
+                }, 1800000); // 30 minutes
             });
 
             resp.status(200).send({

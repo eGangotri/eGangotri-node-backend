@@ -4,7 +4,7 @@ import { listFolderContentsAsArrayOfData } from './service/GoogleApiService';
 import { getGoogleDriveInstance } from './service/CreateGoogleDrive';
 import { downloadFileFromGoogleDrive } from '../pdf/downloadFile';
 import { getFolderInSrcRootForProfile } from '../../archiveUpload/ArchiveProfileUtils';
-import { DOWNLOAD_COMPLETED_COUNT2,  DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT2, DOWNLOAD_FAILED_COUNT2, resetDownloadCounters2 } from '../../cliBased/pdf/utils';
+import { DOWNLOAD_COMPLETED_COUNT, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT, DOWNLOAD_FAILED_COUNT } from '../../cliBased/pdf/utils';
 import { insertEntryForGDriveUploadHistory, updateEntryForGDriveUploadHistory } from '../../services/GdriveDownloadRecordService';
 import { getAllPdfsInFolders, getDirectoriesWithFullPath } from '../../imgToPdf/utils/Utils';
 import { addHeaderAndFooterToPDF } from '../../pdfHeaderFooter';
@@ -38,15 +38,18 @@ async function getAllFilesFromGDrive(driveLinkOrFolderID: string,
     console.log(`restriction to ${maxLimit} items only for now. Cannot continue`);
     const msg = `restriction to ${maxLimit} items only for now. Link has ${googleDriveData.length} items Cannot continue`
 
-    updateEntryForGDriveUploadHistory(gDriveDownloadTaskId, GDriveDownloadHistoryStatus.Failed, msg, { totalPdfsToDownload: googleDriveData.length});
+    await updateEntryForGDriveUploadHistory(gDriveDownloadTaskId,
+      msg, GDriveDownloadHistoryStatus.Failed, { totalPdfsToDownload: googleDriveData.length });
     return {
       totalPdfsToDownload: googleDriveData.length,
       success: false,
       msg
     }
   }
-  
-  updateEntryForGDriveUploadHistory(gDriveDownloadTaskId, GDriveDownloadHistoryStatus.InProgress,`Started download with ${googleDriveData.length} items`);
+
+  await updateEntryForGDriveUploadHistory(gDriveDownloadTaskId,
+    `Started download with ${googleDriveData.length} items`,
+    GDriveDownloadHistoryStatus.InProgress);
 
   const promises = googleDriveData.map(async (_data) => {
     console.log(`googleDriveData.map(_data: ${JSON.stringify(_data)}}`);
@@ -55,11 +58,14 @@ async function getAllFilesFromGDrive(driveLinkOrFolderID: string,
     await createFolderIfNotExistsAsync(fileDumpWithPathAppended);
 
     return downloadFileFromGoogleDrive(_data.googleDriveLink,
-      fileDumpWithPathAppended, _data.fileName, _data?.fileSizeRaw, gDriveDownloadTaskId,downloadCounterController)
+      fileDumpWithPathAppended, _data.fileName, _data?.fileSizeRaw, gDriveDownloadTaskId, downloadCounterController)
   });
   const results = await Promise.all(promises);
   const resultsAsString = results.map((result: any) => JSON.stringify(result)).join(",");
-  updateEntryForGDriveUploadHistory(gDriveDownloadTaskId, "completed", resultsAsString);
+  await updateEntryForGDriveUploadHistory(gDriveDownloadTaskId,
+    resultsAsString,
+    GDriveDownloadHistoryStatus.Completed
+  );
 
   return {
     totalPdfsToDownload: googleDriveData.length,
@@ -116,21 +122,23 @@ export const downloadFromGoogleDriveToProfile = async (driveLinkOrFolderId: stri
     if (await checkFolderExistsAsync(fileDumpFolder)) {
       gDriveDownloadTaskId = await insertEntryForGDriveUploadHistory(driveLinkOrFolderId, profileOrPath, fileType, fileDumpFolder, "Initiated Downloading");
       const _results = await getAllFilesFromGDrive(driveLinkOrFolderId, "",
-        fileDumpFolder, ignoreFolder, fileType, gDriveDownloadTaskId,downloadCounterController);
+        fileDumpFolder, ignoreFolder, fileType, gDriveDownloadTaskId, downloadCounterController);
 
-      console.log(`Success count: ${DOWNLOAD_COMPLETED_COUNT2(downloadCounterController)}`);
-      console.log(`Error count: ${DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT2(downloadCounterController)}`);
+      console.log(`Success count: ${DOWNLOAD_COMPLETED_COUNT(downloadCounterController)}`);
+      console.log(`Error count: ${DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT(downloadCounterController)}`);
       const _resp = {
         totalPdfsToDownload: _results.totalPdfsToDownload,
-        status: `${DOWNLOAD_COMPLETED_COUNT2(downloadCounterController)} out of ${DOWNLOAD_COMPLETED_COUNT2(downloadCounterController) + DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT2(downloadCounterController) + DOWNLOAD_FAILED_COUNT2(downloadCounterController)} made it`,
-        success_count: DOWNLOAD_COMPLETED_COUNT2(downloadCounterController),
-        error_count: DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT2(downloadCounterController),
-        dl_wrong_size_count: `${DOWNLOAD_FAILED_COUNT2(downloadCounterController)}
-        ${DOWNLOAD_FAILED_COUNT2(downloadCounterController) > 0 ? "Google Drive Quota may have been filled.Typically takes 24 Hours to reset." : ""}`,
+        status: `${DOWNLOAD_COMPLETED_COUNT(downloadCounterController)} out of ${DOWNLOAD_COMPLETED_COUNT(downloadCounterController) + DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT(downloadCounterController) + DOWNLOAD_FAILED_COUNT(downloadCounterController)} made it`,
+        success_count: DOWNLOAD_COMPLETED_COUNT(downloadCounterController),
+        error_count: DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT(downloadCounterController),
+        dl_wrong_size_count: `${DOWNLOAD_FAILED_COUNT(downloadCounterController)}
+        ${DOWNLOAD_FAILED_COUNT(downloadCounterController) > 0 ? "Google Drive Quota may have been filled.Typically takes 24 Hours to reset." : ""}`,
         ..._results
       }
       console.log(`_resp : ${JSON.stringify(_resp)}`);
-      updateEntryForGDriveUploadHistory(gDriveDownloadTaskId, JSON.stringify(_resp), GDriveDownloadHistoryStatus.Completed,_resp);
+      await updateEntryForGDriveUploadHistory(gDriveDownloadTaskId,
+        JSON.stringify(_resp),
+        GDriveDownloadHistoryStatus.Completed, _resp);
       return _resp;
     }
     console.log(`No corresponding folder ${fileDumpFolder} to profile ${profileOrPath} exists`)
@@ -141,15 +149,16 @@ export const downloadFromGoogleDriveToProfile = async (driveLinkOrFolderId: stri
   }
   catch (err) {
     console.log(`downloadFromGoogleDriveToProfile:Error (${fileDumpFolder}) ${JSON.stringify(err)}`)
-    const _resp =  {
-      status: `${DOWNLOAD_COMPLETED_COUNT2(downloadCounterController)} out of ${DOWNLOAD_COMPLETED_COUNT2(downloadCounterController) + DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT2(downloadCounterController) + DOWNLOAD_FAILED_COUNT2(downloadCounterController)} made it`,
-      success_count: DOWNLOAD_COMPLETED_COUNT2(downloadCounterController),
-      error_count: DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT2(downloadCounterController),
-      dl_wrong_size_count: `${DOWNLOAD_FAILED_COUNT2(downloadCounterController)}
-      ${DOWNLOAD_FAILED_COUNT2(downloadCounterController) > 0 ? "Google Drive Quota may have been filled.Typically takes 24 Hours to reset." : ""}`,
+    const _resp = {
+      status: `${DOWNLOAD_COMPLETED_COUNT(downloadCounterController)} out of ${DOWNLOAD_COMPLETED_COUNT(downloadCounterController) + DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT(downloadCounterController) + DOWNLOAD_FAILED_COUNT(downloadCounterController)} made it`,
+      success_count: DOWNLOAD_COMPLETED_COUNT(downloadCounterController),
+      error_count: DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT(downloadCounterController),
+      dl_wrong_size_count: `${DOWNLOAD_FAILED_COUNT(downloadCounterController)}
+      ${DOWNLOAD_FAILED_COUNT(downloadCounterController) > 0 ? "Google Drive Quota may have been filled.Typically takes 24 Hours to reset." : ""}`,
       "error": `${err} downloadFromGoogleDriveToProfile:Error (${fileDumpFolder}) ${JSON.stringify(err)}`
     }
-    updateEntryForGDriveUploadHistory(gDriveDownloadTaskId,err, GDriveDownloadHistoryStatus.Failed, _resp);
+    await updateEntryForGDriveUploadHistory(gDriveDownloadTaskId, err,
+      GDriveDownloadHistoryStatus.Failed, _resp);
     return _resp
   }
 }

@@ -1,5 +1,6 @@
 import { QuickStatus } from 'models/GDriveDownloadHistorySchema';
 import { GLOBAL_SERVER_NAME } from '../db/connection';
+import { GDriveDownloadHistoryStatus } from 'utils/constants';
 
 const GDRIVE_DOWNLOAD_HISTORY_PATH = `${GLOBAL_SERVER_NAME}/gDriveDownloadRoute`;
 
@@ -36,7 +37,9 @@ export const insertEntryForGDriveUploadHistory =
 }
 
 export const updateEntryForGDriveUploadHistory = async (gDriveDownloadTaskId: string,
-  msg: string, status: string, quickStatus: QuickStatus = {}) => {
+  msg: string,
+   status: GDriveDownloadHistoryStatus,
+    quickStatus: QuickStatus = {}) => {
   const params = { msg, status };
   if (quickStatus && quickStatus?.status?.length > 0) {
     params['quickStatus'] = quickStatus;
@@ -55,7 +58,9 @@ export const updateEntryForGDriveUploadHistory = async (gDriveDownloadTaskId: st
     if (!response.ok) {
       console.log(`HTTP error! status: ${response.status}`);
     }
-    console.log(`updateEntryForGDriveUploadHistory/${msg}/${status}/${JSON.stringify(quickStatus)} with ${JSON.stringify(response)}`);
+    console.log(`updateEntryForGDriveUploadHistory/${msg}/
+      ${status}/
+      ${JSON.stringify(quickStatus)} with ${JSON.stringify(response)}`);
   } catch (error) {
     console.error(`updateEntryForGDriveUploadHistory:error/${msg}/${status}: ${JSON.stringify(error)}`);
     throw error; // Re-throw to allow caller to handle
@@ -67,7 +72,7 @@ export const _updateEmbeddedFileByFileName = async (gDriveDownloadTaskId: string
   const params = setParams(msg, status, fileName, filePath);
 
   try {
-    const response = await fetch(`${GDRIVE_DOWNLOAD_HISTORY_PATH}/_updateEmbeddedFileByFileName/1/${gDriveDownloadTaskId}`,
+    const response = await fetch(`${GDRIVE_DOWNLOAD_HISTORY_PATH}/updateEmbeddedFileByFileName/1/${gDriveDownloadTaskId}`,
       {
         method: 'POST',
         headers: {
@@ -77,7 +82,7 @@ export const _updateEmbeddedFileByFileName = async (gDriveDownloadTaskId: string
       }
     );
     if (!response.ok) {
-      console.log(`HTTP error! status: ${response.status} `, fileName);
+      console.log(`_updateEmbeddedFileByFileName:HTTP error! status: ${response.status} `, fileName);
     }
     console.log(`_updateEmbeddedFileByFileName/2/${msg}/${status} with ${JSON.stringify(response)}`);
   } catch (error) {

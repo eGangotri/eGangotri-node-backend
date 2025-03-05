@@ -1,5 +1,5 @@
 import { downloadFileFromUrl } from "../cliBased/pdf/downloadFile";
-import { DOWNLOAD_COMPLETED_COUNT2, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT2, resetDownloadCounters2 } from "../cliBased/pdf/utils";
+import { DOWNLOAD_COMPLETED_COUNT, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT } from "../cliBased/pdf/utils";
 import { getFolderInSrcRootForProfile } from "../archiveUpload/ArchiveProfileUtils";
 import { ArchiveLinkData } from "./types";
 import { isValidPath } from "../utils/FileUtils";
@@ -27,16 +27,15 @@ export const downloadPdfFromArchiveToProfile = async (pdfLinks: ArchiveLinkData[
   await createFolderIfNotExistsAsync(folderWithProfileName);
 
   try {
-    resetDownloadCounters2(downloadArchiveCounterController)
     const _results = await downloadArchivePdfs(pdfLinks,
       folderWithProfileName,downloadArchiveCounterController);
 
-    console.log(`Success count: ${DOWNLOAD_COMPLETED_COUNT2(downloadArchiveCounterController)}`);
-    console.log(`Error count: ${DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT2(downloadArchiveCounterController)}`);
+    console.log(`Success count: ${DOWNLOAD_COMPLETED_COUNT(downloadArchiveCounterController)}`);
+    console.log(`Error count: ${DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT(downloadArchiveCounterController)}`);
     const _resp = {
-      status: `${DOWNLOAD_COMPLETED_COUNT2(downloadArchiveCounterController)} out of ${DOWNLOAD_COMPLETED_COUNT2(downloadArchiveCounterController) + DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT2(downloadArchiveCounterController)} made it`,
-      success_count: DOWNLOAD_COMPLETED_COUNT2(downloadArchiveCounterController),
-      error_count: DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT2(downloadArchiveCounterController),
+      status: `${DOWNLOAD_COMPLETED_COUNT(downloadArchiveCounterController)} out of ${DOWNLOAD_COMPLETED_COUNT(downloadArchiveCounterController) + DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT(downloadArchiveCounterController)} made it`,
+      success_count: DOWNLOAD_COMPLETED_COUNT(downloadArchiveCounterController),
+      error_count: DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT(downloadArchiveCounterController),
       ..._results
     }
     console.log(`_resp : ${JSON.stringify(_resp)}`);

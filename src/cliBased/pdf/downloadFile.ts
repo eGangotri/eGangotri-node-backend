@@ -1,7 +1,9 @@
 const { DownloaderHelper } = require('node-downloader-helper');
 import fs from 'fs';
-import {  DOWNLOAD_COMPLETED_COUNT2, checkFileSizeConsistency, 
-     incrementDownloadCompleted2, incrementDownloadFailed2,  incrementDownloadInError2 } from "./utils";
+import {
+    DOWNLOAD_COMPLETED_COUNT, checkFileSizeConsistency,
+    incrementDownloadCompleted, incrementDownloadFailed, incrementDownloadInError
+} from "./utils";
 import { extractGoogleDriveId } from '../../mirror/GoogleDriveUtilsCommonCode';
 import { getGoogleDriveInstance } from '../googleapi/service/CreateGoogleDrive';
 import * as path from 'path';
@@ -27,7 +29,7 @@ export const downloadFileFromUrl = async (
     downloadUrl: string,
     fileName: string,
     dataLength: number,
-    fileSizeRaw = "0",downloadCounterController= "") => {
+    fileSizeRaw = "0", downloadCounterController = "") => {
     console.log(`downloadFileFromUrl ${downloadUrl} to ${fileDumpFolder}`)
 
     const dl = new DownloaderHelper(downloadUrl, fileDumpFolder, { fileName: fileName });//
@@ -35,11 +37,11 @@ export const downloadFileFromUrl = async (
     try {
         await new Promise((resolve, reject) => {
             dl.on('end', async () => {
-                const index = `(${DOWNLOAD_COMPLETED_COUNT2(downloadCounterController) + 1}${dataLength > 0 ? "/" + dataLength : ""})`;
+                const index = `(${DOWNLOAD_COMPLETED_COUNT(downloadCounterController) + 1}${dataLength > 0 ? "/" + dataLength : ""})`;
                 console.log(`${index}. Downloaded ${fileName}`);
-                _result = await checkFileSizeConsistency(fileDumpFolder, fileName, fileSizeRaw,downloadCounterController);
+                _result = await checkFileSizeConsistency(fileDumpFolder, fileName, fileSizeRaw, downloadCounterController);
                 if (_result?.success) {
-                    incrementDownloadCompleted2(downloadCounterController);
+                    incrementDownloadCompleted(downloadCounterController);
                     _result = {
                         "status": `Downloaded ${fileName} to ${fileDumpFolder}`,
                         success: true
@@ -49,7 +51,7 @@ export const downloadFileFromUrl = async (
             });
 
             dl.on('error', (err) => {
-                incrementDownloadInError2(downloadCounterController);
+                incrementDownloadInError(downloadCounterController);
                 if (err.code === 'ECONNRESET') {
                     console.error('Connection reset by peer');
                 }
@@ -64,7 +66,7 @@ export const downloadFileFromUrl = async (
         });
     } catch (err) {
         console.error(`downloadFileFromUrl err  ${JSON.stringify(err)}`);
-        incrementDownloadInError2(downloadCounterController);
+        incrementDownloadInError(downloadCounterController);
         _result = {
             success: false,
             "error": `Failed download try/catch for ${fileName} to ${fileDumpFolder} with ${JSON.stringify(_result)}`
@@ -99,7 +101,9 @@ export const downloadGDriveFileUsingGDriveApi = async (
         fileName = fileName || fileMetadata.data.name;
         const filePath = path.join(destPath, fileName);
 
-        await updateEntryForGDriveUploadHistory(gDriveDownloadTaskId, `started d/l of ${fileName}`, GDriveDownloadHistoryStatus.Queued);
+        await updateEntryForGDriveUploadHistory(gDriveDownloadTaskId,
+             `started d/l of ${fileName}`, 
+             GDriveDownloadHistoryStatus.Queued);
 
         const dest = fs.createWriteStream(filePath);
 
@@ -132,19 +136,25 @@ export const downloadGDriveFileUsingGDriveApi = async (
         const result = fileSizeRaw ? fileConsistency : { success: true };
 
         if (result?.success) {
-            incrementDownloadCompleted2(downloadCounterController);
-            _updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, GDriveDownloadHistoryStatus.Completed, `completed d/l of ${fileName}`, destPath);
+            incrementDownloadCompleted(downloadCounterController);
+            await _updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, GDriveDownloadHistoryStatus.Completed, `completed d/l of ${fileName}`, destPath);
             return { status: `Downloaded ${fileName} to ${destPath}`, success: true, destPath };
         } else {
-            incrementDownloadFailed2(downloadCounterController);
-            _updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, GDriveDownloadHistoryStatus.Failed, `failed d/l of ${fileName}`, destPath);
+            console.log(`downloadGDriveFileUsingGDriveApi else-1`)
+            incrementDownloadFailed(downloadCounterController);
+            console.log(`downloadGDriveFileUsingGDriveApi else-2`)
+
+            await _updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, GDriveDownloadHistoryStatus.Failed, `failed d/l of ${fileName}`, destPath);
+            console.log(`downloadGDriveFileUsingGDriveApi else-3`)
             throw result;
         }
     } catch (error) {
-        const errorContext = `Error during (${error.response?.config?.url}) ${error.response?.config?.url ? 'download' : 'metadata fetch'} for ${fileName}`;
+        const errorContext = `Error during (${JSON.stringify(error)}) d/l for ${fileName}`;
         console.error(`${errorContext}:`, error.message);
-         incrementDownloadInError2(downloadCounterController);
-         _updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, GDriveDownloadHistoryStatus.Failed, `${errorContext}: ${error.message}`, destPath);
+        if (downloadCounterController) {
+            incrementDownloadInError(downloadCounterController);
+        }
+        await _updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, GDriveDownloadHistoryStatus.Failed, `${errorContext}: ${error.message}`, destPath);
         throw { success: false, error: `${errorContext}: ${error.message}` };
     }
 };

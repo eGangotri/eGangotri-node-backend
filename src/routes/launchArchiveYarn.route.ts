@@ -11,7 +11,7 @@ import moment from 'moment';
 import { DD_MM_YYYY_HH_MMFORMAT } from '../utils/constants';
 import { generateEAPBLMetadataForProfile } from '../eap_bl';
 import { formatTime } from '../imgToPdf/utils/Utils';
-import { DOWNLOAD_COMPLETED_COUNT2, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT2 } from '../cliBased/pdf/utils';
+import { DOWNLOAD_COMPLETED_COUNT, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT } from '../cliBased/pdf/utils';
 
 export const launchArchiveYarnRoute = express.Router();
 
@@ -314,12 +314,12 @@ launchArchiveYarnRoute.post('/downloadArchiveItemsViaExcel', async (req: any, re
         const downloadArchiveCounterController = Math.random().toString(36).substring(7);
         const _results = await downloadArchiveItems(_linkData, profileOrPath,downloadArchiveCounterController);
 
-        console.log(`Success count: ${DOWNLOAD_COMPLETED_COUNT2(downloadArchiveCounterController)}`);
-        console.log(`Error count: ${DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT2(downloadArchiveCounterController)}`);
+        console.log(`Success count: ${DOWNLOAD_COMPLETED_COUNT(downloadArchiveCounterController)}`);
+        console.log(`Error count: ${DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT(downloadArchiveCounterController)}`);
         const _resp = {
-            status: `${DOWNLOAD_COMPLETED_COUNT2(downloadArchiveCounterController)} out of ${DOWNLOAD_COMPLETED_COUNT2(downloadArchiveCounterController) + DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT2(downloadArchiveCounterController)} made it`,
-            success_count: DOWNLOAD_COMPLETED_COUNT2(downloadArchiveCounterController),
-            error_count: DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT2(downloadArchiveCounterController),
+            status: `${DOWNLOAD_COMPLETED_COUNT(downloadArchiveCounterController)} out of ${DOWNLOAD_COMPLETED_COUNT(downloadArchiveCounterController) + DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT(downloadArchiveCounterController)} made it`,
+            success_count: DOWNLOAD_COMPLETED_COUNT(downloadArchiveCounterController),
+            error_count: DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT(downloadArchiveCounterController),
             ..._results
         }
         console.log(`_resp : ${JSON.stringify(_resp)}`);
