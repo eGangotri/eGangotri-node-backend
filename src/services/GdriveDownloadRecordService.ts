@@ -44,7 +44,7 @@ export const updateEntryForGDriveUploadHistory = async (gDriveDownloadTaskId: st
   if (quickStatus && quickStatus?.status?.length > 0) {
     params['quickStatus'] = quickStatus;
   }
-  console.log(`quickStatus${JSON.stringify(quickStatus)}`);
+  console.log(`params ${params} quickStatus${JSON.stringify(quickStatus)}`);
   try {
     const response = await fetch(`${GDRIVE_DOWNLOAD_HISTORY_PATH}/updateGDriveDownload/${gDriveDownloadTaskId}`,
       {
@@ -56,7 +56,7 @@ export const updateEntryForGDriveUploadHistory = async (gDriveDownloadTaskId: st
       }
     );
     if (!response.ok) {
-      console.log(`HTTP error! status: ${response.status}`);
+      console.log(`updateGDriveDownload/HTTP error! status: ${response.status}`);
     }
     console.log(`updateEntryForGDriveUploadHistory/${msg}/
       ${status}/
@@ -70,7 +70,6 @@ export const updateEntryForGDriveUploadHistory = async (gDriveDownloadTaskId: st
 export const _updateEmbeddedFileByFileName = async (gDriveDownloadTaskId: string,
   fileName: string, status: string, msg: string, filePath: string = "") => {
   const params = setParams(msg, status, fileName, filePath);
-
   try {
     const response = await fetch(`${GDRIVE_DOWNLOAD_HISTORY_PATH}/updateEmbeddedFileByFileName/1/${gDriveDownloadTaskId}`,
       {
