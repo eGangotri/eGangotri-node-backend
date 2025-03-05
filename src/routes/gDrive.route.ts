@@ -167,7 +167,6 @@ gDriveRoute.post('/downloadGDriveItemsViaExcel', async (req: any, resp: any) => 
         }   
         const excelLinksData = convertGDriveExcelToLinkData(excelPath);
         const downloadCounterController = Math.random().toString(36).substring(7);
-        resetDownloadCounters2(downloadCounterController)
         const _results = await downloadGDriveData(excelLinksData, profileOrPath,downloadCounterController);
 
         console.log(`Success count: ${DOWNLOAD_COMPLETED_COUNT2(downloadCounterController)}`);
