@@ -4,15 +4,15 @@ import { extractGoogleDriveId } from "../../mirror/GoogleDriveUtilsCommonCode";
 let downloadCounters = {};
 
 export const DOWNLOAD_COMPLETED_COUNT = (requestId: string) => {
-    return getDownloadCounters(requestId)?.completed;
+    return getDownloadCounters(requestId)?.completed || 0;
 }
 
 export const DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT = (requestId: string) => {
-    return getDownloadCounters(requestId)?.inError;
+    return getDownloadCounters(requestId)?.inError || 0;
 }
 
 export const DOWNLOAD_FAILED_COUNT = (requestId: string) => {
-    return getDownloadCounters(requestId)?.failed;
+    return getDownloadCounters(requestId)?.failed || 0;
 }
 
 
@@ -37,6 +37,7 @@ export function getDownloadCounters(requestId: string) {
         };
         return downloadCounters[requestId];
     }
+    return downloadCounters[requestId];
 }
 
 export const checkFileSizeConsistency = async (pdfDumpFolder: string,
