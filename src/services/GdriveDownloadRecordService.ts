@@ -40,38 +40,48 @@ export const updateEntryForGDriveUploadHistory = async (gDriveDownloadTaskId: st
     params['quickStatus'] = quickStatus;
   }
   console.log(`quickStatus${JSON.stringify(quickStatus)}`);
-  fetch(`${GDRIVE_DOWNLOAD_HISTORY_PATH}/updateGDriveDownload/${gDriveDownloadTaskId}`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(params)
+  try {
+    const response = await fetch(`${GDRIVE_DOWNLOAD_HISTORY_PATH}/updateGDriveDownload/${gDriveDownloadTaskId}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(params)
+      }
+    );
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
-  ).then((response) => {
     console.log(`updateEntryForGDriveUploadHistory/${msg}/${status}/${JSON.stringify(quickStatus)} with ${JSON.stringify(response)}`);
-  }).catch((error) => {
-    console.log(`updateEntryForGDriveUploadHistory:error/${msg}/${status}: ${JSON.stringify(error)}`);
-  });
+  } catch (error) {
+    console.error(`updateEntryForGDriveUploadHistory:error/${msg}/${status}: ${JSON.stringify(error)}`);
+    throw error; // Re-throw to allow caller to handle
+  }
 };
 
 export const _updateEmbeddedFileByFileName = async (gDriveDownloadTaskId: string,
   fileName: string, status: string, msg: string, filePath: string = "") => {
   const params = setParams(msg, status, fileName, filePath);
 
-  fetch(`${GDRIVE_DOWNLOAD_HISTORY_PATH}/_updateEmbeddedFileByFileName/1/${gDriveDownloadTaskId}`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(params)
+  try {
+    const response = await fetch(`${GDRIVE_DOWNLOAD_HISTORY_PATH}/_updateEmbeddedFileByFileName/1/${gDriveDownloadTaskId}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(params)
+      }
+    );
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
-  ).then((response) => {
     console.log(`_updateEmbeddedFileByFileName/2/${msg}/${status} with ${JSON.stringify(response)}`);
-  }).catch((error) => {
-    console.log(`updateEmbeddedFileByFileName:error/${msg}/${status}: ${JSON.stringify(error)}`);
-  });
+  } catch (error) {
+    console.error(`_updateEmbeddedFileByFileName:error/${msg}/${status}: ${JSON.stringify(error)}`);
+    throw error; // Re-throw to allow caller to handle
+  }
 }
 
 const setParams = (msg: string, status: string, fileName: string, filePath: string) => {

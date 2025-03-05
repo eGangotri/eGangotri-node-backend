@@ -1,28 +1,5 @@
-import axios from 'axios';
-import fs from 'fs';
 import { getFileSizeAsync, sizeInfo } from "../../mirror/FrontEndBackendCommonCode";
 import { extractGoogleDriveId } from "../../mirror/GoogleDriveUtilsCommonCode";
-
-//  let DOWNLOAD_COMPLETED_COUNT = 0;
-//  let DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT = 0;
-//  let DOWNLOAD_FAILED_COUNT = 0;
-
-// const incrementDownloadCompleteX = () => {
-//     DOWNLOAD_COMPLETED_COUNT++
-// }
-// const incrementDownloadInErrorX = () => {
-//     DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT++
-// }
-
-// const incrementDownloadFailedX = () => {
-//     DOWNLOAD_FAILED_COUNT++
-// }
-// //deprecated
-// const resetDownloadCountersX = () => {
-//     DOWNLOAD_COMPLETED_COUNT = 0;
-//     DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT = 0;
-//     DOWNLOAD_FAILED_COUNT = 0;
-// }
 
 let downloadCounters = {};
 

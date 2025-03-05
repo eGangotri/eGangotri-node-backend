@@ -114,7 +114,6 @@ export const downloadFromGoogleDriveToProfile = async (driveLinkOrFolderId: stri
   let gDriveDownloadTaskId = "0"
   try {
     if (checkFolderExistsSync(fileDumpFolder)) {
-      resetDownloadCounters2(downloadCounterController);
       gDriveDownloadTaskId = await insertEntryForGDriveUploadHistory(driveLinkOrFolderId, profileOrPath, fileType, fileDumpFolder, "Initiated Downloading");
       const _results = await getAllFilesFromGDrive(driveLinkOrFolderId, "",
         fileDumpFolder, ignoreFolder, fileType, gDriveDownloadTaskId,downloadCounterController);
