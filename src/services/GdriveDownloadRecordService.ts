@@ -3,8 +3,10 @@ import { GLOBAL_SERVER_NAME } from '../db/connection';
 
 const GDRIVE_DOWNLOAD_HISTORY_PATH = `${GLOBAL_SERVER_NAME}/gDriveDownloadRoute`;
 
-export const insertEntryForGDriveUploadHistory = async (driveLinkOrFolderId: string,
-  profileOrPath: string, fileType: string, fileDumpFolder: string, msg: string) => {
+export const insertEntryForGDriveUploadHistory =
+ async (driveLinkOrFolderId: string,
+  profileOrPath: string, fileType: string,
+   fileDumpFolder: string, msg: string) => {
   const insertInDB = await fetch(`${GDRIVE_DOWNLOAD_HISTORY_PATH}/createGDriveDownload`,
     {
       method: 'POST',
@@ -22,7 +24,7 @@ export const insertEntryForGDriveUploadHistory = async (driveLinkOrFolderId: str
     }
   )
   if (!insertInDB.ok) {
-    console.log(`Failed to create GDriveDownload`);
+    console.log(`Failed to create GDriveDownload:`, fileDumpFolder);
     return "0";
   }
   else {
@@ -51,7 +53,7 @@ export const updateEntryForGDriveUploadHistory = async (gDriveDownloadTaskId: st
       }
     );
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      console.log(`HTTP error! status: ${response.status}`);
     }
     console.log(`updateEntryForGDriveUploadHistory/${msg}/${status}/${JSON.stringify(quickStatus)} with ${JSON.stringify(response)}`);
   } catch (error) {
@@ -75,7 +77,7 @@ export const _updateEmbeddedFileByFileName = async (gDriveDownloadTaskId: string
       }
     );
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      console.log(`HTTP error! status: ${response.status} `, fileName);
     }
     console.log(`_updateEmbeddedFileByFileName/2/${msg}/${status} with ${JSON.stringify(response)}`);
   } catch (error) {
