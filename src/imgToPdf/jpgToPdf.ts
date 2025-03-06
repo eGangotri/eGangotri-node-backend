@@ -62,7 +62,12 @@ export const convertJpgsToPdfInAllSubFolders = async (inputFolder: string, outpu
     let error_count = 0;
 
     try {
-        const allFiles = await getAllFileStats({ directoryPath: inputFolder, ignoreFolders: false, withLogs: false, withMetadata: false });
+        const allFiles = await getAllFileStats({ 
+            directoryPath: inputFolder, 
+            includeFolders: true, 
+            withLogs: false, 
+            withMetadata: false 
+        });
         const allFolders = allFiles.filter(file => file.ext === FOLDER)
         allFolders.push({
             absPath: inputFolder,
