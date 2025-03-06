@@ -12,12 +12,30 @@ import { FileStats } from "imgToPdf/utils/types";
 import { formatTime } from '../imgToPdf/utils/Utils';
 import * as FileConstUtils from '../utils/constants';
 
+export interface GetAllFileStatsOptions {
+    directoryPath: string;
+    filterExt?: string[];
+    ignorePaths?: string[];
+    ignoreFolders?: boolean;
+    withLogs?: boolean;
+    withMetadata?: boolean;
+    includeFolders?: boolean;
+}
 
-export async function getAllFileStats(filestatsOptions: FileStatsOptions): Promise<FileStats[]> {
+export async function getAllFileStats({
+    directoryPath,
+    filterExt = [],
+    ignorePaths = [],
+    ignoreFolders = false,
+    withLogs = false,
+    withMetadata = false,
+    includeFolders = false
+}: GetAllFileStatsOptions): Promise<FileStats[]> {
     const rowCounterController = Math.random().toString(36).substring(7);
     FileConstUtils.resetRowCounter(rowCounterController);
-    const queue = [filestatsOptions.directoryPath];
+    const queue = [directoryPath];
     let _files: FileStats[] = [];
+    let counter = 0;
 
     while (queue.length > 0) {
         const currentDir = queue.shift();
@@ -26,35 +44,34 @@ export async function getAllFileStats(filestatsOptions: FileStatsOptions): Promi
         for (const dirent of dirContent) {
             const fullPath = path.join(currentDir, dirent.name);
 
-            if (filestatsOptions?.ignorePaths && filestatsOptions?.ignorePaths?.some((item: string) => fullPath.includes(item))) {
-                console.log(`Ignoring ${fullPath} due to ${filestatsOptions?.ignorePaths}`);
+            if (ignorePaths && ignorePaths.some((item: string) => fullPath.includes(item))) {
+                console.log(`Ignoring ${fullPath} due to ${ignorePaths}`);
                 continue;
             }
-            // console.log(`not Ignoring ${fullPath} due to ${filestatsOptions?.ignorePaths}`);
+            // console.log(`not Ignoring ${fullPath} due to ${ignorePaths}`);
 
             if (dirent.isDirectory()) {
-                queue.push(fullPath);
-                if (!filestatsOptions.ignoreFolders) {
-                    const _path = path.parse(fullPath);
+                if (includeFolders) {
                     _files.push({
-                        rowCounter:FileConstUtils.incrementColumnCounter(rowCounterController),
+                        rowCounter: counter++,
                         absPath: fullPath,
-                        folder: _path.dir,
-                        fileName: _path.base,
-                        ext: "FOLDER"
+                        folder: path.parse(fullPath).dir,
+                        fileName: path.parse(fullPath).base,
+                        ext: FileConstUtils.FOLDER
                     })
                 }
+                queue.push(fullPath);
             } else if (dirent.isFile()) {
                 const ext = path.extname(fullPath);
-                if (!_.isEmpty(filestatsOptions.filterExt) &&
-                    (filestatsOptions?.filterExt?.every((item: string) => ext.toLowerCase() !== item))) {
+                if (!_.isEmpty(filterExt) &&
+                    (filterExt.every((item: string) => ext.toLowerCase() !== item))) {
                     continue;
                 }
                 const _path = path.parse(fullPath);
                 const rawSize = await Mirror.getFileSizeAsync(fullPath) || 0;
 
                 let fileStat: FileStats = {
-                    rowCounter:FileConstUtils.incrementColumnCounter(rowCounterController),
+                    rowCounter: counter++,
                     absPath: fullPath,
                     folder: _path.dir,
                     fileName: _path.base,
@@ -63,7 +80,7 @@ export async function getAllFileStats(filestatsOptions: FileStatsOptions): Promi
                     size: Mirror.sizeInfo(rawSize),
                 }
 
-                if (filestatsOptions.withLogs) {
+                if (withLogs) {
                     console.log(`${FileConstUtils.getRowCounter(rowCounterController)[0]}/${FileConstUtils.getRowCounter(rowCounterController)[1]}). ${JSON.stringify(ellipsis(fileStat.fileName, 40))} ${Mirror.sizeInfo(rawSize)}`);
                 }
                 _files.push(fileStat)

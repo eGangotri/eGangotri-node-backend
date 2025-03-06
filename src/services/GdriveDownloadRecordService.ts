@@ -68,10 +68,15 @@ export const updateEntryForGDriveUploadHistory = async (gDriveDownloadTaskId: st
 };
 
 export const _updateEmbeddedFileByFileName = async (gDriveDownloadTaskId: string,
-  fileName: string, status: string, msg: string, filePath: string = "") => {
+  fileName: string, 
+  status: string, 
+  msg: string, 
+  filePath: string = "") => {
   const params = setParams(msg, status, fileName, filePath);
+  console.log(`_updateEmbeddedFileByFileName/1/with 
+    ${JSON.stringify(params)}`);
   try {
-    const response = await fetch(`${GDRIVE_DOWNLOAD_HISTORY_PATH}/updateEmbeddedFileByFileName/1/${gDriveDownloadTaskId}`,
+    const response = await fetch(`${GDRIVE_DOWNLOAD_HISTORY_PATH}/updateEmbeddedFileByFileNameV2/${gDriveDownloadTaskId}`,
       {
         method: 'POST',
         headers: {
@@ -83,9 +88,8 @@ export const _updateEmbeddedFileByFileName = async (gDriveDownloadTaskId: string
     if (!response.ok) {
       console.log(`_updateEmbeddedFileByFileName:HTTP error! status: ${response.status} `, fileName);
     }
-    console.log(`_updateEmbeddedFileByFileName/2/${msg}/${status} with ${JSON.stringify(response)}`);
   } catch (error) {
-    console.error(`_updateEmbeddedFileByFileName:error/${msg}/${status}: ${JSON.stringify(error)}`);
+    console.error(`_updateEmbeddedFileByFileName:error/${JSON.stringify(params)}: ${JSON.stringify(error)}`);
     throw error; // Re-throw to allow caller to handle
   }
 }

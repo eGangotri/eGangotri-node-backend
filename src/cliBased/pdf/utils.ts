@@ -49,14 +49,18 @@ export const checkFileSizeConsistency = async (pdfDumpFolder: string,
         if (fileSizeOfDwnldFile != fileSizeRawAsInt) {
             console.log(`Downloaded file size for (${fileName}) ${fileSizeOfDwnldFile} does not match with expected size ${fileSizeRaw}`);
             incrementDownloadFailed(downloadCounterController);
-            return {
+            const _resp = {
                 status: `Downloaded ${fileName} to ${pdfDumpFolder}
                 but FileSize (${sizeInfo(fileSizeOfDwnldFile)} !== ${sizeInfo(fileSizeRawAsInt)}) dont match`,
                 success: false
             };
+            console.log(`checkFileSizeConsistency: ${JSON.stringify(_resp)}`);
+            return _resp;
         }
     }
-    return { success: true }
+    const _resp = { success: true, status: `Downloaded ${fileName} to ${pdfDumpFolder}` };
+    console.log(`checkFileSizeConsistency: ${JSON.stringify(_resp)}`);
+    return _resp;
 }
 
 

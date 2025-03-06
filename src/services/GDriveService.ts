@@ -6,7 +6,7 @@ import { GoogleApiData } from 'cliBased/googleapi/types';
 import { getAllFileStats } from '../utils/FileStatsUtils';
 import { PDF_EXT, ZIP_TYPE_EXT } from '../imgToPdf/utils/constants';
 import { FileStats } from '../imgToPdf/utils/types';
-
+import { FOLDER } from '../utils/constants';
 
 export const verifyGDriveLocalIntegrity = async (_links: string[],
     _folders: string[],
@@ -29,9 +29,8 @@ export const verifyGDriveLocalIntegrity = async (_links: string[],
             withLogs: true,
             withMetadata: true,
         });
-        localStats.push(_localStats)
+        localStats.push(_localStats.filter(file => file.ext !== FOLDER))
         comparisonResult.push(compareGDriveLocalJson(_gDriveStats, _localStats));
-
     }
     const endTime = Date.now();
     const timeTaken = endTime - startTime;
@@ -40,9 +39,9 @@ export const verifyGDriveLocalIntegrity = async (_links: string[],
     return {
         timeTaken: timeInfo(timeTaken),
         response: {
-            googleDriveFileData: gDriveFileStats,
             fileStats: localStats,
-            comparisonResult
+            comparisonResult,
+            googleDriveFileData: gDriveFileStats,
         }
     }
 }
@@ -85,12 +84,11 @@ export const compareGDriveLocalJson =
         }
 
         return {
-            gDriveFileTotal,
-            localFileTotal,
             success: failedMsgs.length === 0,
-            failedCount: failedMsgs.length,
-            failedMsgs: failedMsgs,
+            failedCount: failedMsgs.length,failedMsgs,
             successMsgs,
-            failedFiles: failedFiles
+            failedFiles,
+            gDriveFileTotal,
+            localFileTotal
         }
     }

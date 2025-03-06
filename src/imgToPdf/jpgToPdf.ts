@@ -2,6 +2,7 @@ import { PDFDocument } from 'pdf-lib';
 import { readdir, readFile, writeFile } from 'fs-extra';
 import path, { join } from 'path';
 import { getAllFileStats } from '../utils/FileStatsUtils';
+import { FOLDER } from '../utils/constants';
 
 export async function convertJpgsToPdf(inputFolder: string, outputFolder = "") {
     try {
@@ -62,12 +63,12 @@ export const convertJpgsToPdfInAllSubFolders = async (inputFolder: string, outpu
 
     try {
         const allFiles = await getAllFileStats({ directoryPath: inputFolder, ignoreFolders: false, withLogs: false, withMetadata: false });
-        const allFolders = allFiles.filter(file => file.ext === "FOLDER")
+        const allFolders = allFiles.filter(file => file.ext === FOLDER)
         allFolders.push({
             absPath: inputFolder,
             fileName: path.basename(inputFolder),
             folder: path.dirname(inputFolder),
-            ext: "FOLDER"
+            ext: FOLDER
         });
         const promise = []
         let counter = 0;

@@ -155,7 +155,7 @@ export const downloadFromGoogleDriveToProfile = async (driveLinkOrFolderId: stri
       error_count: DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT(downloadCounterController),
       dl_wrong_size_count: `${DOWNLOAD_FAILED_COUNT(downloadCounterController)}
       ${DOWNLOAD_FAILED_COUNT(downloadCounterController) > 0 ? "Google Drive Quota may have been filled.Typically takes 24 Hours to reset." : ""}`,
-      "error": `${err} downloadFromGoogleDriveToProfile:Error (${fileDumpFolder}) ${JSON.stringify(err)}`
+      "error": `downloadFromGoogleDriveToProfile:Error (${fileDumpFolder}) ${JSON.stringify(err)}`
     }
     await updateEntryForGDriveUploadHistory(gDriveDownloadTaskId, err,
       GDriveDownloadHistoryStatus.Failed, _resp);
