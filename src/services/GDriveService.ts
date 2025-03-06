@@ -1,4 +1,4 @@
-import * as express from 'express';
+import * as path from 'path';
 import { timeInfo } from '../mirror/FrontEndBackendCommonCode';
 import { PDF_TYPE, ZIP_TYPE } from '../cliBased/googleapi/_utils/constants';
 import { getGDriveContentsAsJson } from '../cliBased/googleapi/GoogleDriveApiReadAndExport';
@@ -16,12 +16,18 @@ export const verifyGDriveLocalIntegrity = async (_links: string[],
 
     const results = await Promise.all(
         _links.map(async (link, index) => {
-            console.log(`getGDriveContentsAsJson ${link} ${_folders[index]} (${fileType})`);
-            
+            console.log(`\n=== Processing folder ${index + 1}/${_folders.length} ===`);
+            console.log(`Directory: ${_folders[index]}`);
+            console.log(`Is absolute path: ${path.isAbsolute(_folders[index])}`);
+            console.log(`Normalized path: ${path.normalize(_folders[index])}`);
+            console.log(`File type filter: ${fileType}`);
+            console.log(`File extensions to look for: ${fileType === PDF_TYPE ? [PDF_EXT] : (fileType === ZIP_TYPE ? ZIP_TYPE_EXT : [])}`);
+            console.log(`Ignore folder: ${ignoreFolder}`);
+
             const [gDriveStats, localStats] = await Promise.all([
                 getGDriveContentsAsJson(link, "", ignoreFolder, fileType),
                 getAllFileStats({
-                    directoryPath: _folders[index],
+                    directoryPath: path.normalize(_folders[index]),
                     filterExt: fileType === PDF_TYPE ? [PDF_EXT] : (fileType === ZIP_TYPE ? ZIP_TYPE_EXT : []),
                     ignorePaths: [ignoreFolder],
                     withLogs: true,
@@ -30,10 +36,18 @@ export const verifyGDriveLocalIntegrity = async (_links: string[],
                 })
             ]);
 
+            console.log(`Found ${localStats.length} local files`);
+            console.log(`Found ${gDriveStats.length} Google Drive files`);
+
+            if (localStats.length === 0) {
+                console.log(`WARNING: No local files found in directory: ${_folders[index]}`);
+                console.log(`Using file type filter: ${fileType === PDF_TYPE ? [PDF_EXT] : (fileType === ZIP_TYPE ? ZIP_TYPE_EXT : [])}`);
+            }
+
             return {
+                comparison: compareGDriveLocalJson(gDriveStats, localStats),
                 gDriveStats,
                 localStats,
-                comparison: compareGDriveLocalJson(gDriveStats, localStats)
             };
         })
     );
@@ -41,28 +55,22 @@ export const verifyGDriveLocalIntegrity = async (_links: string[],
     const endTime = Date.now();
     const timeTaken = endTime - startTime;
     console.log(`Time taken to retrieve google drive Listings and local file listings: ${timeInfo(timeTaken)}`);
-    
+
     const comparisonResult = results.map(r => r.comparison);
     console.log(`comparisonResult: ${JSON.stringify(comparisonResult)}`);
-    
+
     return {
         timeTaken: timeInfo(timeTaken),
         response: {
-            fileStats: results.map(r => r.localStats),
             comparisonResult,
-            googleDriveFileData: results.map(r => r.gDriveStats),
+            localFileStats: results.map(r => r.localStats),
+            googleDriveFileStats: results.map(r => r.gDriveStats),
         }
     };
 }
 
 export interface ComparisonResult {
-    success: boolean;
-    failedCount: number;
-    failedMsgs: string[];
-    failedFiles: string[];
-    successMsgs: string[];
-    gDriveFileTotal: number;
-    localFileTotal: number;
+    [key: string]: string[]|string|number|boolean;
 }
 
 export const compareGDriveLocalJson = (
@@ -71,62 +79,94 @@ export const compareGDriveLocalJson = (
 ): ComparisonResult => {
     const failedMsgs: string[] = [];
     const failedFiles: string[] = [];
+    const missedGdriveItems: string[] = [];
+    const sizeMisMatchGdriveItems: string[] = [];
     const successMsgs: string[] = [];
     const gDriveFileTotal = googleDriveFileData?.length || 0;
     const localFileTotal = localFileStats?.length || 0;
 
-    // Create a map of local files by their path for efficient lookup
-    const localFileMap = new Map<string, FileStats>();
+    // Create a map of local files by filename for efficient lookup
+    const localFileMap = new Map<string, FileStats[]>();
+    console.log(`\n=== Local File Stats ===`);
+    console.log(`Total local files found: ${localFileStats.length}`);
+
     localFileStats.forEach(localFile => {
-        const pathKey = `${localFile.folder}/${localFile.fileName}`;
-        localFileMap.set(pathKey, localFile);
+        const normalizedFileName = localFile.fileName.trim();
+        if (!localFileMap.has(normalizedFileName)) {
+            localFileMap.set(normalizedFileName, []);
+        }
+        localFileMap.get(normalizedFileName).push(localFile);
     });
-    console.log(`localFileMap: ${JSON.stringify(localFileMap)}`);
+
+    console.log(`\n=== Google Drive Files ===`);
+    console.log(`Total Google Drive files: ${googleDriveFileData.length}`);
+
     // Check each Google Drive file against local files
     googleDriveFileData.forEach(gDriveItem => {
-        const expectedLocalPath = `${gDriveItem.parents}/${gDriveItem.fileName}`;
-        const localItem = localFileMap.get(expectedLocalPath);
-        if (!localItem) {
-            failedMsgs.push(`File not found locally: ${gDriveItem.fileName} (expected at ${expectedLocalPath})`);
-            failedFiles.push(gDriveItem.fileName);
+        const normalizedFileName = gDriveItem.fileName.trim();
+        console.log(`\nChecking Google Drive file: ${normalizedFileName}`);
+        console.log(`  Google Drive path: ${gDriveItem.parents}/${normalizedFileName}`);
+
+        const localItems = localFileMap.get(normalizedFileName);
+        if (!localItems || localItems.length === 0) {
+            console.log(`❌ File not found locally: ${normalizedFileName}`);
+            failedMsgs.push(`File not found locally: ${normalizedFileName} (expected at ${gDriveItem.parents}/${normalizedFileName})`);
+            failedFiles.push(normalizedFileName);
+            missedGdriveItems.push(gDriveItem.googleDriveLink);
             return;
         }
 
-        // Compare file sizes
+        // Compare file sizes with all matching local files
         const gDriveSize = parseInt(gDriveItem.fileSizeRaw);
-        if (gDriveSize !== localItem.rawSize) {
+        const matchingSizeFiles = localItems.filter(localItem => localItem.rawSize === gDriveSize);
+
+        if (matchingSizeFiles.length === 0) {
+            console.log(`❌ Size mismatch for all local copies of ${normalizedFileName}`);
+            localItems.forEach(localItem => {
+                console.log(`  Local copy at ${localItem.folder}: ${localItem.rawSize} bytes`);
+            });
+            console.log(`  Google Drive size: ${gDriveSize} bytes`);
             failedMsgs.push(
-                `File size mismatch: ${gDriveItem.fileName} ` +
-                `(GDrive: ${gDriveSize} bytes, Local: ${localItem.rawSize} bytes)`
+                `File size mismatch: ${normalizedFileName} ` +
+                `(GDrive: ${gDriveSize} bytes != Local: ${localItems.map(l => l.rawSize).join('/ ')} bytes)`
             );
-            failedFiles.push(gDriveItem.fileName);
+            failedFiles.push(normalizedFileName);
+            sizeMisMatchGdriveItems.push(gDriveItem.googleDriveLink);
         } else {
+            console.log(`✅ Found ${matchingSizeFiles.length} matching copies of ${normalizedFileName}`);
+            matchingSizeFiles.forEach(match => {
+                console.log(`  Matching copy at: ${match.folder}`);
+            });
             successMsgs.push(
-                `File match: ${gDriveItem.fileName} ` +
-                `(Size: ${gDriveSize} bytes, Path: ${expectedLocalPath})`
+                `File match: ${normalizedFileName} ` +
+                `(Size: ${gDriveSize} bytes, Found in ${matchingSizeFiles.length} location(s))`
             );
         }
     });
 
     // Check for extra local files that don't exist in Google Drive
-    const gDrivePathSet = new Set(
-        googleDriveFileData.map(item => `${item.parents}/${item.fileName}`)
+    const gDriveFileNames = new Set(
+        googleDriveFileData.map(item => item.fileName.trim())
     );
     localFileStats.forEach(localItem => {
-        const localPath = `${localItem.folder}/${localItem.fileName}`;
-        if (!gDrivePathSet.has(localPath)) {
-            failedMsgs.push(`Extra file found locally: ${localPath}`);
-            failedFiles.push(localItem.fileName);
+        const normalizedFileName = localItem.fileName.trim();
+        if (!gDriveFileNames.has(normalizedFileName)) {
+            console.log(`❌ Extra file found locally: ${normalizedFileName} at ${localItem.folder}`);
+            failedMsgs.push(`Extra file found locally: ${localItem.folder}/${normalizedFileName}`);
+            failedFiles.push(normalizedFileName);
         }
     });
 
     return {
         success: failedMsgs.length === 0,
         failedCount: failedMsgs.length,
-        failedMsgs,
-        failedFiles,
-        successMsgs,
         gDriveFileTotal,
-        localFileTotal
+        localFileTotal,
+        [`${missedGdriveItems}(${missedGdriveItems?.length})`]: missedGdriveItems,
+        [`${sizeMisMatchGdriveItems}(${sizeMisMatchGdriveItems?.length})`]: sizeMisMatchGdriveItems,
+        [`${failedMsgs}(${failedMsgs?.length})`]: failedMsgs,
+        [`${failedFiles}(${failedFiles?.length})`]: failedFiles,
+        [`${successMsgs}(${successMsgs?.length})`]: successMsgs,
+
     };
 };
