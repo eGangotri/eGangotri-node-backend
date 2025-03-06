@@ -10,7 +10,7 @@ import { getAllPdfsInFolders, getDirectoriesWithFullPath } from '../../imgToPdf/
 import { addHeaderAndFooterToPDF } from '../../pdfHeaderFooter';
 import { isValidPath } from "../../utils/FileUtils";
 import { extractGoogleDriveId } from '../../mirror/GoogleDriveUtilsCommonCode';
-import { PDF_TYPE } from './_utils/constants';
+import { PDF_TYPE, FOLDER_MIME_TYPE } from './_utils/constants';
 import { GDriveDownloadHistoryStatus } from '../../utils/constants';
 import { checkFolderExistsAsync, createFolderIfNotExistsAsync } from '../../utils/FileUtils';
 
@@ -25,9 +25,61 @@ async function getAllFilesFromGDrive(driveLinkOrFolderID: string,
   fileType = PDF_TYPE,
   gDriveDownloadTaskId: string,
   downloadCounterController = "") {
-  const folderId = extractGoogleDriveId(driveLinkOrFolderID)
-  console.log(`folderId: ${folderId}`)
-  const googleDriveData = await listFolderContentsAsArrayOfData(folderId,
+  const fileId = extractGoogleDriveId(driveLinkOrFolderID)
+  console.log(`fileId: ${fileId}`)
+  
+  // First check if it's a file
+  try {
+    const file = await drive.files.get({
+      fileId: fileId,
+      fields: 'id, name, mimeType, size, parents, webViewLink'
+    });
+
+    if (file.data && file.data.mimeType !== FOLDER_MIME_TYPE) {
+      // It's a single file, process it directly
+      const fileData = {
+        fileName: file.data.name || "",
+        googleDriveLink: file.data.webViewLink || "",
+        fileSizeRaw: file.data.size || "0",
+        parents: "" // For single files, we don't need parent folder structure
+      };
+
+      await createFolderIfNotExistsAsync(fileDumpFolder);
+      
+      await updateEntryForGDriveUploadHistory(gDriveDownloadTaskId,
+        `Started download of single file: ${fileData.fileName}`,
+        GDriveDownloadHistoryStatus.InProgress);
+
+      const result = await downloadFileFromGoogleDrive(
+        fileData.googleDriveLink,
+        fileDumpFolder,
+        fileData.fileName,
+        fileData.fileSizeRaw,
+        gDriveDownloadTaskId,
+        downloadCounterController
+      );
+
+      const resultAsString = JSON.stringify(result);
+      await updateEntryForGDriveUploadHistory(gDriveDownloadTaskId,
+        resultAsString,
+        GDriveDownloadHistoryStatus.Completed);
+
+      return {
+        totalPdfsToDownload: 1,
+        results: [result]
+      };
+    }
+  } catch (err) {
+    if (err?.response?.status !== 404) {
+      await updateEntryForGDriveUploadHistory(gDriveDownloadTaskId,
+        JSON.stringify(err),
+        GDriveDownloadHistoryStatus.Failed);
+      throw err;
+    }
+  }
+
+  // If we get here, it's a folder or the file wasn't found, try the folder logic
+  const googleDriveData = await listFolderContentsAsArrayOfData(fileId,
     drive,
     folderName,
     ignoreFolder, fileType);

@@ -4,7 +4,7 @@ import * as path from 'path';
 import { getAllZipFiles } from '../utils/FileStatsUtils';
 import * as yauzl from 'yauzl';
 import { getNonFolderFileCount } from '../archiveDotOrg/utils';
-import { checkFolderExistsAsync, checkFolderExistsSync, createFolderIfNotExistsAsync } from '../utils/FileUtils';
+import { checkFolderExistsAsync, createFolderIfNotExistsAsync } from '../utils/FileUtils';
 
 
 const UNZIP_FOLDER = "\\-unzipped";
@@ -191,7 +191,7 @@ export async function verifyUnzipSuccessInDirectory(pathToZipFiles: string,
             try {
                 const outputDir = path.join(_unzipHere, path.basename(zipFile.absPath, '.zip'));
                 console.log(`checking ${zipFile.absPath} for ${outputDir}`)
-                if (!checkFolderExistsSync(outputDir)) {
+                if (! ( await checkFolderExistsAsync(outputDir))) {
                     console.log(`no corresponding ${outputDir} to ${zipFile.absPath} `)
                     error_msg.push(`No output directory found for ${zipFile.absPath} to ${outputDir} `);
                     error_count++;
