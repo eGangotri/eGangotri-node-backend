@@ -62,14 +62,14 @@ gDriveDownloadRoute.post("/updateGDriveDownload/:id", async (req: Request, res: 
 });
 
 // Update an embedded object in the files array of an existing GDriveDownload entry by fileName
-gDriveDownloadRoute.post("/updateEmbeddedFileByFileName/1:id", async (req: Request, res: Response) => {
+gDriveDownloadRoute.post("/updateEmbeddedFileByFileNameV2/:id", async (req: Request, res: Response) => {
     const { id } = req.params;
     const { fileName, status, msg, filePath } = req.body;
     try {
-        console.log(`updateEmbeddedFileByFileName/2/${id}: ${fileName} ${filePath} ${id} ${status} ${msg}`);
+        console.log(`updateEmbeddedFileByFileName/1/${id}: ${fileName} ${filePath} ${id} ${status} ${msg}`);
         const gDriveDownload = await GDriveDownload.findById(id);
         if (!gDriveDownload) {
-            console.log(`updateEmbeddedFileByFileName/3/${id}:GDriveDownload not found`);
+            console.log(`updateEmbeddedFileByFileName/2/${id}:GDriveDownload not found`);
             res.status(404).json({ error: 'GDriveDownload not found' });
             return;
         }
@@ -84,18 +84,18 @@ gDriveDownloadRoute.post("/updateEmbeddedFileByFileName/1:id", async (req: Reque
             existingFiles.push(updateData);
             gDriveDownload.files = existingFiles;
             const _saved = await gDriveDownload.save();
-            console.log(`updateEmbeddedFileByFileName/4/${id}: file not found, added ${fileName} ${JSON.stringify(_saved)}`);
+            console.log(`updateEmbeddedFileByFileName/3/${id}: file not found, added ${fileName} ${JSON.stringify(_saved)}`);
             res.status(200).json(gDriveDownload);
         }
         else {
             if (status !== undefined) file.status = status;
             if (msg !== undefined) file.msg = msg;
             const _saved = await gDriveDownload.save();
-            console.log(`updateEmbeddedFileByFileName/5/${id}:file updated ${fileName}`);
+            console.log(`updateEmbeddedFileByFileName/4/${id}:file updated ${fileName}`);
             res.status(200).json(gDriveDownload);
         }
     } catch (error) {
-        console.log(`updateEmbeddedFileByFileName/6/${id}: ${fileName} error ${error.message}`);
+        console.log(`updateEmbeddedFileByFileName/5/${id}: ${fileName} error ${error.message}`);
         res.status(500).json({ error: error.message });
     }
 });
