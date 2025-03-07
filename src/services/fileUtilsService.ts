@@ -117,7 +117,7 @@ const createNewFileName = (excelData: GDriveExcelHeadersFileRenamerV2): string =
     return sanitizeFileName(newFileName);
 }
 
-const sanitizeFileName = (_fileName: any) => {
+export const sanitizeFileName = (_fileName: any) => {
     const _removeExtraneousChars = removeExtraneousChars(_fileName);
     const removeTrailingDash = _removeExtraneousChars?.endsWith("-") ? _removeExtraneousChars?.slice(0, -1)?.trim() : _removeExtraneousChars.trim();
     const removeExtraSpaces = removeTrailingDash.split(/\s+/).join(' ');
