@@ -162,11 +162,10 @@ export const compareGDriveLocalJson = (
         failedCount: failedMsgs.length,
         gDriveFileTotal,
         localFileTotal,
-        [`${missedGdriveItems}(${missedGdriveItems?.length})`]: missedGdriveItems,
-        [`${sizeMisMatchGdriveItems}(${sizeMisMatchGdriveItems?.length})`]: sizeMisMatchGdriveItems,
-        [`${failedMsgs}(${failedMsgs?.length})`]: failedMsgs,
-        [`${failedFiles}(${failedFiles?.length})`]: failedFiles,
-        [`${successMsgs}(${successMsgs?.length})`]: successMsgs,
-
+        [`Missed GDrive Items(${missedGdriveItems?.length})`]: missedGdriveItems,
+        [`Mismatched GDrive Items(${sizeMisMatchGdriveItems?.length})`]: sizeMisMatchGdriveItems,
+        [`Failed Msgs(${failedMsgs?.length})`]: failedMsgs,
+        [`Failed Files(${failedFiles?.length})`]: failedFiles,
+        [`Success Msgs(${successMsgs?.length})`]: successMsgs,
     };
 };

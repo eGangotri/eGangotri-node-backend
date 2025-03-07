@@ -90,9 +90,10 @@ yarnRoute.post('/verifyUnzipAllFolders', async (req: any, resp: any) => {
         
         const endTime = Date.now();
         const timeTaken = endTime - startTime;
-        console.log(`Time taken to Unzip All Folders : ${timeInfo(timeTaken)}`);
+        console.log(`Time taken to Verify 'Unzip All Folders' : ${timeInfo(timeTaken)}`);
 
         resp.status(200).send({
+            title:"UnZip Integrity Verification",
             timeTaken: timeInfo(timeTaken),
             resultsSummary,
             response: results

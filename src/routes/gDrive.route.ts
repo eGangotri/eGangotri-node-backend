@@ -57,6 +57,7 @@ gDriveRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
         console.log(`Time taken to download for /downloadFromGoogleDrive: ${timeInfo(timeTaken)}`);
 
         resp.status(200).send({
+            msg: `${links.length} links attempted-download to ${profile}`,
             timeTaken: timeInfo(timeTaken),
             resultsSummary,
             response: results

@@ -63,7 +63,6 @@ export const updateEntryForGDriveUploadHistory = async (gDriveDownloadTaskId: st
       ${JSON.stringify(quickStatus)} with ${JSON.stringify(response)}`);
   } catch (error) {
     console.error(`updateEntryForGDriveUploadHistory:error/${msg}/${status}: ${JSON.stringify(error)}`);
-    throw error; // Re-throw to allow caller to handle
   }
 };
 
@@ -90,7 +89,6 @@ export const _updateEmbeddedFileByFileName = async (gDriveDownloadTaskId: string
     }
   } catch (error) {
     console.error(`_updateEmbeddedFileByFileName:error/${JSON.stringify(params)}: ${JSON.stringify(error)}`);
-    throw error; // Re-throw to allow caller to handle
   }
 }
 

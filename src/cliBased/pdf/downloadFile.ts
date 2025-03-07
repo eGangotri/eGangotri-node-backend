@@ -85,14 +85,14 @@ export const downloadGDriveFileUsingGDriveApi = async (
     fileSizeRaw: string = "0",
     gDriveDownloadTaskId: string = "",
     downloadCounterController: string = ""
-): Promise<{ status: string; success: boolean; destPath: string }> => {
+): Promise<{ status: string; success: boolean; destPath: string , error?: string}> => {
     const fileId = extractGoogleDriveId(driveLinkOrFileID);
     console.log(`downloadGDriveFileUsingGDriveApi ${driveLinkOrFileID} ${fileId} to ${destPath}`);
 
     if (!fileId) {
         const errorMessage = `Invalid Google Drive link(${driveLinkOrFileID}) or File ID(${fileId})`;
         console.error(errorMessage);
-        throw { success: false, error: errorMessage };
+        return { status: errorMessage, success: false, error: errorMessage, destPath };
     }
 
     try {
@@ -145,8 +145,12 @@ export const downloadGDriveFileUsingGDriveApi = async (
             console.log(`downloadGDriveFileUsingGDriveApi else-2`)
 
             await _updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, GDriveDownloadHistoryStatus.Failed, `failed d/l of ${fileName}`, destPath);
-            console.log(`downloadGDriveFileUsingGDriveApi else-3`)
-            throw result;
+            console.log(`downloadGDriveFileUsingGDriveApi else-3`);
+            return {
+                status: `File Consistency Check Failed for download ${fileName} to ${destPath}`,
+                success: false,
+                destPath
+            };
         }
     } catch (error) {
         const errorContext = `Error during (${JSON.stringify(error)}) d/l for ${fileName}`;
@@ -155,8 +159,11 @@ export const downloadGDriveFileUsingGDriveApi = async (
             incrementDownloadInError(downloadCounterController);
         }
         await _updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, GDriveDownloadHistoryStatus.Failed, `${errorContext}: ${error.message}`, destPath);
-        throw { success: false, error: `${errorContext}: ${error.message}` };
-    }
+        return { status: `${errorContext}: ${error.message}`,
+                 success: false,
+                 error: `${errorContext}: ${error.message}`,
+                 destPath };
+    }   
 };
 
 //pnpm run downloadPdf
