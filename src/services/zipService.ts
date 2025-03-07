@@ -52,65 +52,82 @@ export async function zipFiles(
 
 function unzipFiles(filePath: string, outputDir: string): Promise<void> {
     return new Promise((resolve, reject) => {
-        yauzl.open(filePath, { lazyEntries: true }, (err, zipfile) => {
+        yauzl.open(filePath, { lazyEntries: true }, async (err, zipfile) => {
             if (err) {
-                console.error(`received error in yauzl: ${JSON.stringify(err)}`);
+                console.error(`Yauzl open error: ${JSON.stringify(err, Object.getOwnPropertyNames(err))}`);
                 return reject(err);
             }
+
+            // Enable Windows long path support
+            const longPathPrefix = process.platform === 'win32' ? '\\?\\' : '';
+            const sanitizedOutputDir = longPathPrefix + path.resolve(outputDir);
+
+            // Create root output directory first
+            await fs.promises.mkdir(sanitizedOutputDir, { recursive: true });
 
             const writeStreams = new Set<fs.WriteStream>();
             let hasError = false;
 
-            zipfile.readEntry();
-
             zipfile.on("entry", async (entry) => {
-                // Normalize the entry filename to use OS-specific path separators
-                const normalizedFileName = entry.fileName.split('/').join(path.sep);
-                const outputPath = path.join(outputDir, normalizedFileName);
+                try {
+                    // Sanitize and normalize path
+                    const normalizedFileName = entry.fileName.split('/').join(path.sep);
+                    const sanitizedFileName = sanitizeFileName(normalizedFileName);
+                    const outputPath = path.join(sanitizedOutputDir, sanitizedFileName);
 
-                // Create directory for entry if needed
-                if (/\/$/.test(normalizedFileName)) {
-                    // Directory entry
-                    await createFolderIfNotExistsAsync(outputPath);
-                    zipfile.readEntry(); // Continue to the next entry
-                } else {
-                    // File entry
+                    // Create directories recursively
+                    const dirPath = path.dirname(outputPath);
                     try {
-                        // Ensure the output directory exists
-                        await createFolderIfNotExistsAsync(path.dirname(outputPath));
-
-                        zipfile.openReadStream(entry, (err, readStream) => {
-                            if (err || hasError) {
-                                hasError = true;
-                                return reject(err);
-                            }
-
-                            const writeStream = fs.createWriteStream(outputPath);
-                            writeStreams.add(writeStream);
-
-                            writeStream.on("finish", () => {
-                                writeStreams.delete(writeStream);
-                                zipfile.readEntry(); // Continue to the next entry
-                            });
-
-                            writeStream.on("error", (err) => {
-                                hasError = true;
-                                console.error(`Error writing file ${normalizedFileName}: ${err}`);
-                                // Clean up all write streams
-                                writeStreams.forEach(stream => {
-                                    stream.destroy();
-                                    // Delete the partial file
-                                    fs.unlink(outputPath, () => {});
-                                });
-                                reject(err);
-                            });
-
-                            readStream.pipe(writeStream);
-                        });
+                        await fs.promises.mkdir(dirPath, { recursive: true });
                     } catch (err) {
-                        hasError = true;
-                        reject(err);
+                        if (err.code !== 'EEXIST') {
+                            throw err;
+                        }
                     }
+
+                    // If it's a directory entry (ends with separator), we're done
+                    if (/[\\/]$/.test(normalizedFileName)) {
+                        zipfile.readEntry();
+                        return;
+                    }
+
+                    // Handle file entry
+                    zipfile.openReadStream(entry, (err, readStream) => {
+                        if (err || hasError) {
+                            hasError = true;
+                            return reject(err);
+                        }
+
+                        // Use extended-length path for Windows
+                        const winSafeOutputPath = process.platform === 'win32'
+                            ? '\\?\\' + path.resolve(outputPath)
+                            : outputPath;
+
+                        const writeStream = fs.createWriteStream(winSafeOutputPath);
+                        writeStreams.add(writeStream);
+
+                        writeStream.on("finish", () => {
+                            writeStreams.delete(writeStream);
+                            console.log(`Successfully wrote file: ${outputPath}`);
+                            zipfile.readEntry();
+                        });
+
+                        writeStream.on("error", (err) => {
+                            hasError = true;
+                            console.error(`Error writing file ${normalizedFileName}: ${err}`);
+                            writeStreams.forEach(stream => {
+                                stream.destroy();
+                                fs.unlink(outputPath, () => {});
+                            });
+                            reject(err);
+                        });
+
+                        readStream.pipe(writeStream);
+                    });
+                } catch (err) {
+                    hasError = true;
+                    console.error(`Error processing entry ${entry.fileName}: ${err}`);
+                    reject(err);
                 }
             });
 
@@ -126,6 +143,9 @@ function unzipFiles(filePath: string, outputDir: string): Promise<void> {
                 console.error(`Error in zip file processing: ${err}`);
                 reject(err);
             });
+
+            // Start reading entries
+            zipfile.readEntry();
         });
     });
 }
@@ -135,16 +155,34 @@ import { promisify } from 'util';
 const openZip = promisify(yauzl.open);
 
 export async function unzipAllFilesInDirectory(pathToZipFiles: string,
-    _unzipHere: string = ""):
+    _unzipHere: string = "",
+    ignoreFolder = ""):
     Promise<{
         success_count: number,
         error_count: number,
         unzipFolder: string,
-        error_msg: string[]
+        error_msg: string[],
+        zipFilesFailed: {
+            count: number,
+            files: Array<{
+                name: string,
+                path: string,
+                errors: string[]
+            }>
+        }
     }> {
     let error_count = 0;
     let success_count = 0;
     const error_msg: string[] = [];
+    const zipFilesFailed = {
+        count: 0,
+        files: [] as Array<{
+            name: string,
+            path: string,
+            errors: string[]
+        }>
+    };
+
     try {
         const _zipFiles = await getAllZipFiles(pathToZipFiles);
         if (!_unzipHere || _unzipHere?.trim() === "") {
@@ -152,6 +190,7 @@ export async function unzipAllFilesInDirectory(pathToZipFiles: string,
         }
         let idx = 0;
         for (const zipFile of _zipFiles) {
+            const currentZipErrors: string[] = [];
             try {
                 const outputDir = path.join(_unzipHere, path.basename(zipFile.absPath, '.zip'));
                 console.log(`checking ${zipFile.absPath} for ${outputDir}`)
@@ -164,21 +203,34 @@ export async function unzipAllFilesInDirectory(pathToZipFiles: string,
             catch (error) {
                 const _err = `Error while unzipping ${zipFile.absPath} : ${JSON.stringify(error)} `;
                 console.log(_err);
+                currentZipErrors.push(_err);
+                error_msg.push(_err);
                 error_count++;
-                error_msg.push(_err)
+            }
+
+            // If we collected any errors for this zip file, add it to the failed list
+            if (currentZipErrors.length > 0) {
+                zipFilesFailed.files.push({
+                    name: path.basename(zipFile.absPath),
+                    path: zipFile.absPath,
+                    errors: currentZipErrors
+                });
+                zipFilesFailed.count++;
             }
         }
     }
     catch (error) {
-        console.log(`Error while getting zip files: ${JSON.stringify(error)} `);
+        const _err = `Error while getting zip files: ${JSON.stringify(error)} `;
+        console.log(_err);
         error_count++;
-        error_msg.push(`Error while getting zip files: ${JSON.stringify(error)} `);
+        error_msg.push(_err);
     }
     return {
         success_count,
         error_count,
         error_msg,
-        unzipFolder: _unzipHere
+        unzipFolder: _unzipHere,
+        zipFilesFailed
     };
 }
 
@@ -189,11 +241,28 @@ export async function verifyUnzipSuccessInDirectory(pathToZipFiles: string,
         success_count: number,
         error_count: number,
         unzipFolder: string,
-        error_msg: string[]
+        error_msg: string[],
+        zipFilesFailed: {
+            count: number,
+            files: Array<{
+                name: string,
+                path: string,
+                errors: string[]
+            }>
+        }
     }> {
     let error_count = 0;
     let success_count = 0;
     const error_msg: string[] = [];
+    const zipFilesFailed = {
+        count: 0,
+        files: [] as Array<{
+            name: string,
+            path: string,
+            errors: string[]
+        }>
+    };
+
     try {
         const _zipFiles = await getAllZipFiles(pathToZipFiles);
         if (!_unzipHere || _unzipHere === "") {
@@ -206,6 +275,8 @@ export async function verifyUnzipSuccessInDirectory(pathToZipFiles: string,
                 console.log(`Ignoring ${zipFile.absPath} `);
                 continue;
             }
+
+            const currentZipErrors: string[] = [];
             try {
                 const baseOutputDir = path.join(_unzipHere, path.basename(zipFile.absPath, '.zip'));
                 console.log(`\nChecking ${zipFile.absPath}`);
@@ -215,6 +286,7 @@ export async function verifyUnzipSuccessInDirectory(pathToZipFiles: string,
                 if (!(await checkFolderExistsAsync(baseOutputDir))) {
                     const err = `No corresponding base output directory found for ${zipFile.absPath} at ${baseOutputDir}`;
                     console.log(err);
+                    currentZipErrors.push(err);
                     error_msg.push(err);
                     error_count++;
                     continue;
@@ -276,6 +348,7 @@ export async function verifyUnzipSuccessInDirectory(pathToZipFiles: string,
                 if (unzippedFiles.size === 0) {
                     const err = `Output directory ${baseOutputDir} is empty for ${zipFile.absPath}`;
                     console.log(err);
+                    currentZipErrors.push(err);
                     error_msg.push(err);
                     error_count++;
                     continue;
@@ -310,16 +383,19 @@ export async function verifyUnzipSuccessInDirectory(pathToZipFiles: string,
                     if (missingFiles.length > 0) {
                         const err = `Missing files in ${baseOutputDir}:\n  ${missingFiles.join('\n  ')}`;
                         console.log(err);
+                        currentZipErrors.push(err);
                         error_msg.push(err);
                     }
                     if (sizeMismatches.length > 0) {
                         const err = `Size mismatches in ${baseOutputDir}:\n  ${sizeMismatches.join('\n  ')}`;
                         console.log(err);
+                        currentZipErrors.push(err);
                         error_msg.push(err);
                     }
                     if (extraFiles.length > 0) {
                         const err = `Extra files found in ${baseOutputDir}:\n  ${extraFiles.join('\n  ')}`;
                         console.log(err);
+                        currentZipErrors.push(err);
                         error_msg.push(err);
                     }
                     error_count++;
@@ -331,8 +407,19 @@ export async function verifyUnzipSuccessInDirectory(pathToZipFiles: string,
             } catch (error) {
                 const err = `Error verifying unzip for ${zipFile.absPath}: ${error}`;
                 console.log(err);
+                currentZipErrors.push(err);
                 error_msg.push(err);
                 error_count++;
+            }
+
+            // If we collected any errors for this zip file, add it to the failed list
+            if (currentZipErrors.length > 0) {
+                zipFilesFailed.files.push({
+                    name: path.basename(zipFile.absPath),
+                    path: zipFile.absPath,
+                    errors: currentZipErrors
+                });
+                zipFilesFailed.count++;
             }
         }
     } catch (error) {
@@ -346,6 +433,7 @@ export async function verifyUnzipSuccessInDirectory(pathToZipFiles: string,
         success_count,
         error_count,
         error_msg,
-        unzipFolder: _unzipHere
+        unzipFolder: _unzipHere,
+        zipFilesFailed
     };
 }
