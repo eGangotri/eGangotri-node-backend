@@ -151,6 +151,7 @@ function unzipFiles(filePath: string, outputDir: string): Promise<void> {
 }
 
 import { promisify } from 'util';
+import { sanitizeFileName } from './fileUtilsService';
 
 const openZip = promisify(yauzl.open);
 
