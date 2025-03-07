@@ -532,6 +532,7 @@ launchGradleRoute.post('/imgFilesToPdfGradleVersion', async (req: any, resp: any
             const res = await runCr2ToJpgInLoop(_folder);
             results.push(res);
         }
+        //TODO: doesnt handle CR2
         else {
             for (const aFolder of _folder) {
 

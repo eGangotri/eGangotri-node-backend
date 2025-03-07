@@ -193,10 +193,12 @@ export const downloadFromGoogleDriveToProfile = async (driveLinkOrFolderId: stri
         GDriveDownloadHistoryStatus.Completed, _resp);
       return _resp;
     }
+    else {
     console.log(`No corresponding folder ${fileDumpFolder} to profile ${profileOrPath} exists`)
     return {
       "success": false,
       msg: `No corresponding folder to profile (${profileOrPath}) exists`
+    }
     }
   }
   catch (err) {
