@@ -18,7 +18,7 @@ export const MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE = 200;
 // Create a new Google Drive instance
 const drive = getGoogleDriveInstance();
 
-async function getAllFilesFromGDrive(driveLinkOrFolderID: string,
+async function dwnldAllFilesFromGDrive(driveLinkOrFolderID: string,
   folderName: string,
   fileDumpFolder: string,
   ignoreFolder = "",
@@ -173,7 +173,7 @@ export const downloadFromGoogleDriveToProfile = async (driveLinkOrFolderId: stri
   try {
     if (await checkFolderExistsAsync(fileDumpFolder)) {
       gDriveDownloadTaskId = await insertEntryForGDriveUploadHistory(driveLinkOrFolderId, profileOrPath, fileType, fileDumpFolder, "Initiated Downloading");
-      const _results = await getAllFilesFromGDrive(driveLinkOrFolderId, "",
+      const _results = await dwnldAllFilesFromGDrive(driveLinkOrFolderId, "",
         fileDumpFolder, ignoreFolder, fileType, gDriveDownloadTaskId, downloadCounterController);
 
       console.log(`Success count: ${DOWNLOAD_COMPLETED_COUNT(downloadCounterController)}`);
