@@ -95,7 +95,7 @@ pythonRoute.post('/copyAllPdfs', async (req: any, resp: any) => {
     }
 })
 
-pythonRoute.post('/convert-folder-to-pdf', async (req: any, resp: any) => {
+pythonRoute.post('/convert-img-folder-to-pdf', async (req: any, resp: any) => {
     try {
         const src_folder = req?.body?.src_folder;
         const dest_folder = req?.body?.dest_folder;
@@ -111,12 +111,12 @@ pythonRoute.post('/convert-folder-to-pdf', async (req: any, resp: any) => {
             });
             return;
         }
-        console.log(`convert-folder-to-pdf src_folder ${src_folder} dest_folder ${dest_folder} img_type ${img_type}`);
+        console.log(`convert-img-folder-to-pdf src_folder ${src_folder} dest_folder ${dest_folder} img_type ${img_type}`);
         const _resp = await executePythonPostCall({
             "src_folder": src_folder,
             "dest_folder": dest_folder,
             img_type:   img_type
-        }, 'convert-folder-to-pdf');
+        }, 'convert-img-folder-to-pdf');
         
         resp.status(200).send({
             response: _resp
