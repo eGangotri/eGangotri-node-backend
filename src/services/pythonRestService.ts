@@ -168,7 +168,7 @@ const checkPythonServer = async (): Promise<{ success: boolean, message: string 
     }
 };
 
-const executePythonPostCall = async (body: Record<string, unknown>, resource: string): Promise<any> => {
+export const executePythonPostCall = async (body: Record<string, unknown>, resource: string): Promise<any> => {
     try {
         const serverStatus = await checkPythonServer();
         if (serverStatus.success) {
@@ -180,7 +180,10 @@ const executePythonPostCall = async (body: Record<string, unknown>, resource: st
                 body: JSON.stringify(body)
             });
             if (!response.ok) {
-                throw new Error(`Failed to fetch data from ${resource}`);
+                return {
+                    status: 'failed',
+                    message: `Failed to fetch data from ${resource}`
+                };
             }
 
             const data = await response.json();

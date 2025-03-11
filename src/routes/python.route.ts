@@ -1,6 +1,7 @@
 import * as express from 'express';
 import { DEFAULT_PDF_PAGE_EXTRACTION_COUNT } from '../cliBased/pdf/extractFirstAndLastNPages';
-import { runPythonCopyPdfInLoop, runPthonPdfExtractionInLoop } from '../services/pythonRestService';
+import { runPythonCopyPdfInLoop, runPthonPdfExtractionInLoop, executePythonPostCall } from '../services/pythonRestService';
+import { IMG_TYPE_ANY } from '../mirror/constants';
 
 export const pythonRoute = express.Router();
 
@@ -85,6 +86,74 @@ pythonRoute.post('/copyAllPdfs', async (req: any, resp: any) => {
                 _cumulativeMsg: `${stats} of ${combinedResults.length} processed successfully`,
                 ...combinedResults,
             }
+        });
+    }
+
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})
+
+pythonRoute.post('/convert-folder-to-pdf', async (req: any, resp: any) => {
+    try {
+        const src_folder = req?.body?.src_folder;
+        const dest_folder = req?.body?.dest_folder;
+        const img_type = req?.body?.img_type;
+
+        if (!src_folder || !dest_folder) {
+            resp.status(300).send({
+                response: {
+                    "status": "failed",
+                    "success": false,
+                    "msg": "Pls. provide Src Folder and Dest Folder"
+                }
+            });
+            return;
+        }
+        console.log(`convert-folder-to-pdf src_folder ${src_folder} dest_folder ${dest_folder} img_type ${img_type}`);
+        const _resp = await executePythonPostCall({
+            "src_folder": src_folder,
+            "dest_folder": dest_folder,
+            img_type:   img_type
+        }, 'convert-folder-to-pdf');
+        
+        resp.status(200).send({
+            response: _resp
+        });
+    }
+
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})
+
+pythonRoute.post('/verfiyImgtoPdf', async (req: any, resp: any) => {
+    try {
+        const folder_path = req?.body?.folder_path;
+        const img_type = req?.body?.img_type || IMG_TYPE_ANY;
+        const dest_folder = req?.body?.dest_folder;
+
+        if (!folder_path || !dest_folder) {
+            resp.status(300).send({
+                response: {
+                    "status": "failed",
+                    "success": false,
+                    "msg": "Pls. provide Src/Dest for Pdf->Img Verfication"
+                }
+            });
+            return;
+        }
+        console.log(`verfiyImgtoPdf folder_path ${folder_path} img_type ${img_type}`);
+        const _resp = await executePythonPostCall({
+            "folder_path": folder_path,
+            "dest_folder": dest_folder,
+            "img_type":   img_type
+        }, 'verfiyImgtoPdf');
+        
+        resp.status(200).send({
+            response: _resp
         });
     }
 
