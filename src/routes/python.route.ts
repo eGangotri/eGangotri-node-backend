@@ -131,11 +131,11 @@ pythonRoute.post('/convert-img-folder-to-pdf', async (req: any, resp: any) => {
 
 pythonRoute.post('/verfiyImgtoPdf', async (req: any, resp: any) => {
     try {
-        const folder_path = req?.body?.folder_path;
+        const src_folder = req?.body?.src_folder;
         const img_type = req?.body?.img_type || IMG_TYPE_ANY;
         const dest_folder = req?.body?.dest_folder;
 
-        if (!folder_path || !dest_folder) {
+        if (!src_folder || !dest_folder) {
             resp.status(300).send({
                 response: {
                     "status": "failed",
@@ -145,9 +145,9 @@ pythonRoute.post('/verfiyImgtoPdf', async (req: any, resp: any) => {
             });
             return;
         }
-        console.log(`verfiyImgtoPdf folder_path ${folder_path} img_type ${img_type}`);
+        console.log(`verfiyImgtoPdf folder_path ${src_folder} img_type ${img_type}`);
         const _resp = await executePythonPostCall({
-            "folder_path": folder_path,
+            "src_folder": src_folder,
             "dest_folder": dest_folder,
             "img_type":   img_type
         }, 'verfiyImgtoPdf');
