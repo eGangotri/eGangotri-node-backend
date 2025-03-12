@@ -42,15 +42,26 @@ pythonRoute.post('/getFirstAndLastNPages', async (req: any, resp: any) => {
             return;
         }
         const combinedResults = await runPthonPdfExtractionInLoop(_srcFolders, destRootFolder, firstNPages, lastNPages);
-        const stats = combinedResults.filter((x: { success: boolean }) => x.success === true).length;
-        console.log(`combinedResults extractFirstN: ${stats} of ${combinedResults.length} processed successfully`);
-        resp.status(200).send({
-            response: {
-                successes: stats === combinedResults.length,
-                _cumulativeMsg: `${stats} of ${combinedResults.length} processed successfully`,
-                ...combinedResults,
-            }
-        });
+        if(combinedResults){
+            const stats = combinedResults.filter((x: { success: boolean }) => x.success === true).length;
+            console.log(`combinedResults extractFirstN: ${stats} of ${combinedResults.length} processed successfully`);
+            resp.status(200).send({
+                response: {
+                    successes: stats === combinedResults.length,
+                    _cumulativeMsg: `${stats} of ${combinedResults.length} processed successfully`,
+                    ...combinedResults,
+                }
+            });
+        }
+        else {
+            resp.status(300).send({
+                response: {
+                    "status": "failed",
+                    "success": false,
+                    "msg": "Failed to extract PDFs"
+                }
+            });
+        }
     }
 
     catch (err: any) {
