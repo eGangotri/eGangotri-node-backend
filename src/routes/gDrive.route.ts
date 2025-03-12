@@ -1,16 +1,17 @@
 import * as express from 'express';
 import { downloadFromGoogleDriveToProfile } from '../cliBased/googleapi/GoogleDriveApiReadAndDownload';
-import {  DOWNLOAD_COMPLETED_COUNT, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT } from '../cliBased/pdf/utils';
+import { DOWNLOAD_COMPLETED_COUNT, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT } from '../cliBased/pdf/utils';
 import { timeInfo } from '../mirror/FrontEndBackendCommonCode';
 import { PDF_TYPE } from '../cliBased/googleapi/_utils/constants';
 import { genLinksAndFolders, validateGenGDriveLinks } from '../services/yarnListMakerService';
-import { generateGoogleDriveListingExcel, getGDriveContentsAsJson } from '../cliBased/googleapi/GoogleDriveApiReadAndExport';
+import { generateGoogleDriveListingExcel } from '../cliBased/googleapi/GoogleDriveApiReadAndExport';
 import { formatTime } from '../imgToPdf/utils/Utils';
 import { convertGDriveExcelToLinkData, downloadGDriveData } from '../services/GDriveItemService';
 import { isValidPath } from '../utils/FileUtils';
 import { verifyGDriveLocalIntegrity } from '../services/GDriveService';
 import * as FileConstUtils from '../utils/constants';
 import { verifyUnzipSuccessInDirectory } from '../services/zipService';
+import { getFolderInSrcRootForProfile } from '../archiveUpload/ArchiveProfileUtils';
 
 export const gDriveRoute = express.Router();
 
@@ -37,17 +38,18 @@ gDriveRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
         }
 
         const links = googleDriveLink.includes(",") ? googleDriveLink.split(",").map((link: string) => link.trim()) : [googleDriveLink.trim()];
+        const profiles = profile.includes(",") ? profile.split(",").map((p: string) => p.trim()) : [profile.trim()];
         const downloadCounterController = Math.random().toString(36).substring(7);
-        
+
         // Process all downloads concurrently using Promise.all
         const downloadPromises = links.map((link: string, index: number) => {
             console.log(`:downloadFromGoogleDrive:loop ${index + 1} ${link} ${profile} ${ignoreFolder} ${fileType} ${downloadCounterController}`);
-            return downloadFromGoogleDriveToProfile(link, profile, ignoreFolder, fileType, `${downloadCounterController}-${index}`);
+            return downloadFromGoogleDriveToProfile(link, profiles[index], ignoreFolder, fileType, `${downloadCounterController}-${index}`);
         });
 
         // Wait for all downloads to complete
         const results = await Promise.all(downloadPromises);
-        
+
         const resultsSummary = results.map((res: any, index: number) => {
             return `(${index + 1}). Succ: ${res.success_count} Err: ${res.error_count} Wrong Size: ${res.dl_wrong_size_count}`;
         });
@@ -56,11 +58,15 @@ gDriveRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
         const timeTaken = endTime - startTime;
         console.log(`Time taken to download for /downloadFromGoogleDrive: ${timeInfo(timeTaken)}`);
 
+        const profilesAsFolders = profiles.map(p => isValidPath(p) ? p : getFolderInSrcRootForProfile(p));
+        const testResult = await verifyGDriveLocalIntegrity(links, profilesAsFolders, ignoreFolder, fileType);
+
         resp.status(200).send({
             msg: `${links.length} links attempted-download to ${profile}`,
             timeTaken: timeInfo(timeTaken),
             resultsSummary,
-            response: results
+            response: results,
+            testResult
         });
     }
     catch (err: any) {
@@ -115,7 +121,7 @@ gDriveRoute.post('/getGoogleDriveListingAsExcel', async (req: any, resp: any) =>
                         _folders[i], reduced,
                         ignoreFolder,
                         pdfRenamerXlV2,
-                        allNotJustPdfs ? "" : PDF_TYPE,rowCounterController);
+                        allNotJustPdfs ? "" : PDF_TYPE, rowCounterController);
                     _resps.push(listingResult);
                 }
                 const endTime = Date.now();
@@ -165,10 +171,10 @@ gDriveRoute.post('/downloadGDriveItemsViaExcel', async (req: any, resp: any) => 
                     "msg": `Invalid Excel (${excelPath}). Pls. provide a valid Excel`
                 }
             });
-        }   
+        }
         const excelLinksData = convertGDriveExcelToLinkData(excelPath);
         const downloadCounterController = Math.random().toString(36).substring(7);
-        const _results = await downloadGDriveData(excelLinksData, profileOrPath,downloadCounterController);
+        const _results = await downloadGDriveData(excelLinksData, profileOrPath, downloadCounterController);
 
         console.log(`Success count: ${DOWNLOAD_COMPLETED_COUNT(downloadCounterController)}`);
         console.log(`Error count: ${DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT(downloadCounterController)}`);

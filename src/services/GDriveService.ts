@@ -13,10 +13,8 @@ export const verifyGDriveLocalIntegrity = async (_links: string[],
     ignoreFolder: string, fileType: string
 ) => {
     const startTime = Date.now();
-
     const results = await Promise.all(
         _links.map(async (link, index) => {
-            console.log(`\n=== Processing folder ${index + 1}/${_folders.length} ===`);
             console.log(`Directory: ${_folders[index]}`);
             console.log(`Is absolute path: ${path.isAbsolute(_folders[index])}`);
             console.log(`Normalized path: ${path.normalize(_folders[index])}`);
