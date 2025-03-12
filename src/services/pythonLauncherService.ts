@@ -38,7 +38,8 @@ export const makePythonCallOld = async (_srcFolder: string,
 
 const execAsync = promisify(exec); // Promisify the exec function for async/await usage
 
-export const makePythonCall = async (
+//deprecated
+export const makePythonCallDeprecated = async (
     _srcFolder: string,
     destFolder: string = "",
     firstNPages: number,

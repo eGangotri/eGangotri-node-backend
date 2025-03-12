@@ -23,7 +23,7 @@ const combineExcels = (mainExcelFileName: string, secondaryExcelFileName: string
 
     const subject = `Combining Excel Data: ${mainExcelFileName} and ${secondaryExcelFileName} to ${combinedExcelFileName}`
     if (dataMismatch && !ignoreDiff) {
-        console.log(`Cant proceed Data Mismatch`);
+        console.log(`Cant proceed Data Mismatch ${dataMismatch} ${ignoreDiff}`);
         combineExcelJsons(mainExcelData, secondaryExcelDataAdjusted)
         checkErroneous(mainExcelData);
         return {
@@ -63,7 +63,8 @@ const combineExcels = (mainExcelFileName: string, secondaryExcelFileName: string
 const checkErroneous = (_excelData: GDriveExcelHeaders[]) => {
     const _erroneous = _excelData.filter(x => !foundItems.includes(x[titleInGoogleDrive]));
     const errMsg = _.isEmpty(_erroneous) ? "" : JSON.stringify(_erroneous.map(x => `${x[titleInGoogleDrive]}`))
-    console.log("errorneous items in Main: ", errMsg === "" ? "None" : errMsg);
+    console.log(`errorneous items in Main: ${_excelData.length} ${_erroneous.length} 
+        ${errMsg === "" ? "None" : errMsg}`);
     return {
         errors: errMsg !== "",
         errMsg
