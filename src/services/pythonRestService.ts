@@ -25,8 +25,8 @@ export const runPthonPdfExtractionInLoop = async (_srcFolders: string[],
                 {
                     "input_folder": srcFolder,
                     "output_folder": specificDest,
-                    firstNPages,
-                    lastNPages
+                    "firstNPages":firstNPages,
+                    "lastNPages":lastNPages
                 }, 'extractFromPdf');
 
             const destRootDump = `${specificDest}\\${path.basename(srcFolder)}(${pdfsToReduceCount})`;
