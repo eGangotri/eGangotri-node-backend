@@ -9,6 +9,7 @@ pythonRoute.post('/getFirstAndLastNPages', async (req: any, resp: any) => {
     try {
         const srcFoldersAsCSV = req?.body?.srcFolders;
         let destRootFolder = req?.body?.destRootFolder;
+        const reducePdfSizeAlso = req?.body?.reducePdfSizeAlso || true;
         const nPages = req?.body?.nPages || DEFAULT_PDF_PAGE_EXTRACTION_COUNT;
         let firstNPages = DEFAULT_PDF_PAGE_EXTRACTION_COUNT;
         let lastNPages = DEFAULT_PDF_PAGE_EXTRACTION_COUNT;
@@ -41,7 +42,8 @@ pythonRoute.post('/getFirstAndLastNPages', async (req: any, resp: any) => {
             });
             return;
         }
-        const combinedResults = await runPthonPdfExtractionInLoop(_srcFolders, destRootFolder, firstNPages, lastNPages);
+        const combinedResults = await runPthonPdfExtractionInLoop(_srcFolders, 
+            destRootFolder, firstNPages, lastNPages, reducePdfSizeAlso);
         if(combinedResults){
             const stats = combinedResults.filter((x: { success: boolean }) => x.success === true).length;
             console.log(`combinedResults extractFirstN: ${stats} of ${combinedResults.length} processed successfully`);

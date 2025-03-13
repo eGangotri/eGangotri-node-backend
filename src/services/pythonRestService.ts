@@ -1,3 +1,4 @@
+import { trusted } from "mongoose";
 import { PYTHON_SERVER_URL } from "../db/connection";
 import { countPDFsInFolder, createFolderIfNotExistsAsync, isValidDirectory } from "../utils/FileUtils";
 import path from 'path';
@@ -5,8 +6,9 @@ import path from 'path';
 
 export const runPthonPdfExtractionInLoop = async (_srcFolders: string[],
     destRootFolder: string,
-    firstNPages: number,
-    lastNPages: number) => {
+    nFirstPages: number,
+    nLastPages: number,
+    reducePdfSizeAlso = true) => {
     const combinedResults = [];
     for (let input_folder of _srcFolders) {
         try {
@@ -15,22 +17,24 @@ export const runPthonPdfExtractionInLoop = async (_srcFolders: string[],
             if (isValidDirectory(destRootFolder)) {
                 await createFolderIfNotExistsAsync(destRootFolder);
             }
-            console.log(`runPthonPdfExtractionInLoop input_folder ${input_folder} 
-                output_folder ${destRootFolder} firstNPages ${firstNPages} lastNPages ${lastNPages}`);
+
+            const _payload = {
+                "input_folder": input_folder,
+                "output_folder": destRootFolder,
+                "nFirstPages": nFirstPages,
+                "nLastPages": nLastPages,
+                "reducePdfSizeAlso": reducePdfSizeAlso
+            }
+            console.log(`runPthonPdfExtractionInLoop payload: ${JSON.stringify(_payload)}`);
 
             const _resp = await executePythonPostCall(
-                {
-                    "input_folder": input_folder,
-                    "output_folder": destRootFolder,
-                    "firstNPages": firstNPages,
-                    "lastNPages": lastNPages
-                }, 'extractFromPdf');
+                _payload, 'extractFromPdf');
 
             if (_resp.status) {
-                const destRootDump = `${destRootFolder}\${path.basename(input_folder)}(${pdfsToReduceCount})`;
+                const destRootDump = `${destRootFolder}\\${path.basename(input_folder)}(${pdfsToReduceCount})`;
                 const pdfsReducedCount = await countPDFsInFolder(destRootDump);
                 const result = {
-                    msg: `${pdfsToReduceCount} pdfs processed to ${pdfsReducedCount} with first ${firstNPages} and last ${lastNPages} pages`,
+                    msg: `${pdfsToReduceCount} pdfs processed to ${pdfsReducedCount} with first ${nFirstPages} and last ${nLastPages} pages`,
                     srcFolder: input_folder,
                     destRootDump,
                     isReductionCountMatch: pdfsToReduceCount === pdfsReducedCount,
@@ -198,34 +202,44 @@ export const executePythonPostCall = async (body: Record<string, unknown>, resou
     try {
         const serverStatus = await checkPythonServer();
         if (serverStatus.status) {
-            const response = await fetch(`${PYTHON_SERVER_URL}/${resource}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(body)
-            });
-            if (!response.ok) {
-                return {
-                    status: false,
-                    message: `Failed to fetch data from ${resource}`
-                };
-            }
-
-            const data = await response.json();
-            return {
-                status: true,
-                message: 'Success',
-                data
-            };
+            const _res = await pythonPostCallInternal(body, resource);
+            return _res
         }
         else {
             return serverStatus
         }
     } catch (error) {
+        console.log('Error executePythonPostCall:', error);
         return {
             status: false,
-            message: "err thrown" + error.message
+            message: JSON.stringify(error,null,2)
         };
     }
 };
+
+export const pythonPostCallInternal = async (body: Record<string, unknown>, resource: string) => {
+    const response = await fetch(`${PYTHON_SERVER_URL}/${resource}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+    });
+    if (!response.ok) {
+        const errorData = await response.json();
+        console.log(`Error ${response.status} from ${resource}:`, JSON.stringify(errorData, null, 2));
+        return {
+            status: false,
+            message: `Error ${response.status} from ${resource}:`,
+            data: JSON.stringify(errorData, null, 2)
+        };
+    }
+
+    const data = await response.json();
+    console.log(`data ${JSON.stringify(data, null, 2)}`)
+    return {
+        status: true,
+        message: 'Success',
+        data
+    };
+}
