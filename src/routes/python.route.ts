@@ -175,3 +175,39 @@ pythonRoute.post('/verfiyImgtoPdf', async (req: any, resp: any) => {
         resp.status(400).send(err);
     }
 })
+
+
+pythonRoute.post('/mergePdfs', async (req: any, resp: any) => {
+    try {
+        const first_pdf_path = req?.body?.first_pdf_path;
+        const second_pdf_path = req?.body?.second_pdf_path
+        const third_pdf_path = req?.body?.third_pdf_path || ""
+
+        if (!first_pdf_path || !second_pdf_path) {
+            resp.status(300).send({
+                response: {
+                    "status": "failed",
+                    "success": false,
+                    "msg": "Pls. provide Complete Path for both Pdfs for merge"
+                }
+            });
+            return;
+        }
+        console.log(`mergePdfs first_pdf_path ${first_pdf_path} second_pdf_path ${second_pdf_path}`);
+        const _resp = await executePythonPostCall({
+            "first_pdf_path": first_pdf_path,
+            "second_pdf_path": second_pdf_path,
+            "third_pdf_path":   third_pdf_path
+        }, 'mergePdfs');
+        
+        resp.status(200).send({
+            response: _resp
+        });
+    }
+
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})
+
