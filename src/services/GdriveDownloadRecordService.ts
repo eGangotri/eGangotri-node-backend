@@ -86,9 +86,15 @@ export const _updateEmbeddedFileByFileName = async (gDriveDownloadTaskId: string
     );
     if (!response.ok) {
       console.log(`_updateEmbeddedFileByFileName:HTTP error! status: ${response.status} `, fileName);
+      const errorText = await response.text();
+      console.log(`_updateEmbeddedFileByFileName:Error details: ${errorText}`);
+    } else {
+      console.log(`_updateEmbeddedFileByFileName:Success for file: ${fileName}`);
     }
+    return response.ok;
   } catch (error) {
     console.error(`_updateEmbeddedFileByFileName:error/${JSON.stringify(params)}: ${JSON.stringify(error)}`);
+    return false;
   }
 }
 
