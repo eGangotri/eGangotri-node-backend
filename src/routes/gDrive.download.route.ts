@@ -67,32 +67,62 @@ gDriveDownloadRoute.post("/updateEmbeddedFileByFileNameV2/:id", async (req: Requ
     const { fileName, status, msg, filePath } = req.body;
     try {
         console.log(`updateEmbeddedFileByFileName/1/${id}: ${fileName} ${filePath} ${id} ${status} ${msg}`);
+        
+        // Find the document first to check if the file exists
         const gDriveDownload = await GDriveDownload.findById(id);
         if (!gDriveDownload) {
             console.log(`updateEmbeddedFileByFileName/2/${id}:GDriveDownload not found`);
             res.status(404).json({ error: 'GDriveDownload not found' });
             return;
         }
-        const file = gDriveDownload.files.find(file => file.fileName === fileName);
-        if (!file) {
-            const existingFiles = gDriveDownload.files;
+        
+        // Check if the file exists in the files array
+        const fileExists = gDriveDownload.files.some(file => file.fileName === fileName);
+        let updateResult;
+        
+        if (!fileExists) {
+            // If file doesn't exist, push a new file to the files array
             const updateData: any = {};
             if (status !== undefined) updateData.status = status;
             if (msg !== undefined) updateData.msg = msg;
             if (fileName !== undefined) updateData.fileName = fileName;
             if (filePath !== undefined) updateData.filePath = filePath;
-            existingFiles.push(updateData);
-            gDriveDownload.files = existingFiles;
-            const _saved = await gDriveDownload.save();
-            console.log(`updateEmbeddedFileByFileName/3/${id}: file not found, added ${fileName} ${JSON.stringify(_saved)}`);
-            res.status(200).json(gDriveDownload);
-        }
-        else {
-            if (status !== undefined) file.status = status;
-            if (msg !== undefined) file.msg = msg;
-            const _saved = await gDriveDownload.save();
-            console.log(`updateEmbeddedFileByFileName/4/${id}:file updated ${fileName}`);
-            res.status(200).json(gDriveDownload);
+            
+            // Use findOneAndUpdate with $push to add the new file atomically
+            updateResult = await GDriveDownload.findOneAndUpdate(
+                { _id: id },
+                { $push: { files: updateData } },
+                { new: true, runValidators: true }
+            );
+            
+            if (updateResult) {
+                console.log(`updateEmbeddedFileByFileName/3/${id}: file not found, added ${fileName}`);
+                res.status(200).json(updateResult);
+            } else {
+                console.log(`updateEmbeddedFileByFileName/3.1/${id}: update failed for ${fileName}`);
+                res.status(500).json({ error: 'Update failed' });
+            }
+        } else {
+            // If file exists, update the existing file in the array
+            // Use findOneAndUpdate with $set to update the file atomically
+            updateResult = await GDriveDownload.findOneAndUpdate(
+                { _id: id, "files.fileName": fileName },
+                { 
+                    $set: { 
+                        "files.$.status": status !== undefined ? status : gDriveDownload.files.find(f => f.fileName === fileName)?.status,
+                        "files.$.msg": msg !== undefined ? msg : gDriveDownload.files.find(f => f.fileName === fileName)?.msg
+                    } 
+                },
+                { new: true, runValidators: true }
+            );
+            
+            if (updateResult) {
+                console.log(`updateEmbeddedFileByFileName/4/${id}: file updated ${fileName}`);
+                res.status(200).json(updateResult);
+            } else {
+                console.log(`updateEmbeddedFileByFileName/4.1/${id}: update failed for ${fileName}`);
+                res.status(500).json({ error: 'Update failed' });
+            }
         }
     } catch (error) {
         console.log(`updateEmbeddedFileByFileName/5/${id}: ${fileName} error ${error.message}`);
