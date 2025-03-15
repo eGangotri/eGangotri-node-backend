@@ -58,15 +58,14 @@ gDriveRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
         const timeTaken = endTime - startTime;
         console.log(`Time taken to download for /downloadFromGoogleDrive: ${timeInfo(timeTaken)}`);
 
-        const profilesAsFolders = profiles.map(p => isValidPath(p) ? p : getFolderInSrcRootForProfile(p));
-        const testResult = await verifyGDriveLocalIntegrity(links, profilesAsFolders, ignoreFolder, fileType);
+        // const profilesAsFolders = profiles.map(p => isValidPath(p) ? p : getFolderInSrcRootForProfile(p));
+        // const testResult = await verifyGDriveLocalIntegrity(links, profilesAsFolders, ignoreFolder, fileType);
 
         resp.status(200).send({
             msg: `${links.length} links attempted-download to ${profile}`,
             timeTaken: timeInfo(timeTaken),
             resultsSummary,
             response: results,
-            testResult
         });
     }
     catch (err: any) {
