@@ -11,7 +11,6 @@ import { isValidPath } from '../utils/FileUtils';
 import { verifyGDriveLocalIntegrity } from '../services/GDriveService';
 import * as FileConstUtils from '../utils/constants';
 import { verifyUnzipSuccessInDirectory } from '../services/zipService';
-import { getFolderInSrcRootForProfile } from '../archiveUpload/ArchiveProfileUtils';
 
 export const gDriveRoute = express.Router();
 

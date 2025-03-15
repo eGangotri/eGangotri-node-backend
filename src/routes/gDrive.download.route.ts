@@ -29,7 +29,7 @@ gDriveDownloadRoute.post("/updateGDriveDownload/:id", async (req: Request, res: 
     const { id } = req.params;
     const { status, msg , quickStatus} = req.body;
     try {
-        console.log(`updateGDriveDownload:params: ${id} ${status} ${msg} ${quickStatus}`);
+        console.log(`updateGDriveDownload:params: ${id} ${status} ${msg} ${quickStatus||'quickStatus-NA'}`);
         const gDriveDownload = await GDriveDownload.findById(id);
         if (!gDriveDownload) {
             console.log(`updateGDriveDownload/${id}:GDriveDownload not found`);
