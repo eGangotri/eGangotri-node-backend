@@ -218,6 +218,7 @@ export const executePythonPostCall = async (body: Record<string, unknown>, resou
 };
 
 export const pythonPostCallInternal = async (body: Record<string, unknown>, resource: string) => {
+    console.log(`python call ${resource} ${JSON.stringify(body, null, 2)}`)
     const response = await fetch(`${PYTHON_SERVER_URL}/${resource}`, {
         method: 'POST',
         headers: {
