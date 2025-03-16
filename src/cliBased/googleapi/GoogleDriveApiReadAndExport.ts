@@ -10,7 +10,8 @@ import { getFolderName } from './_utils/GoogleDriveUtil';
 const drive = getGoogleDriveInstance();
 export const EXPORT_ROOT_FOLDER = `C:\\_catalogWork\\_collation\\`;
 
-export const getFolderNameFromGDrive = async (folderId: string) => {
+export const getFolderNameFromGDrive = async (driveLinkOrFolderID: string) => {
+  const folderId = extractGoogleDriveId(driveLinkOrFolderID)
   return getFolderName(folderId, drive);
 };
 

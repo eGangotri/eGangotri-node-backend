@@ -232,8 +232,9 @@ gDriveRoute.post('/verifyLocalDownloadSameAsGDrive', async (req: any, resp: any)
             });
         }
         else {
-            const rootFolderName = await getFolderNameFromGDrive(googleDriveLink) || "";
-            const foldersWithRoot = _linksGen._folders.map(folder => path.join(folder, rootFolderName));
+            const rootFolders = await Promise.all(_linksGen._links.map(async (link) => await getFolderNameFromGDrive(link) || ""));
+            const foldersWithRoot = _linksGen._folders.map((folder, index) => path.join(folder, rootFolders[index]));
+            console.log(`verifyLocalDownloadSameAsGDrive:foldersWithRoot: ${foldersWithRoot}  ${rootFolders}`);
             const _results = await verifyGDriveLocalIntegrity(_linksGen._links, foldersWithRoot, ignoreFolder, fileType);
             const endTime = Date.now();
             const timeTaken = endTime - startTime;
