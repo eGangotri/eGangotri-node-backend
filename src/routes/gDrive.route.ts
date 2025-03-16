@@ -204,12 +204,21 @@ gDriveRoute.post('/verifyLocalDownloadSameAsGDrive', async (req: any, resp: any)
     console.log(`verifyLocalDownloadSameAsGDrive ${JSON.stringify(req.body)}`)
     try {
         const googleDriveLink = req?.body?.googleDriveLink;
-        const folderName = req?.body?.folderName || "";
+        const folderOrProfile = req?.body?.folderOrProfile || "";
         const ignoreFolder = req?.body?.ignoreFolder || "";
         const fileType = req?.body?.fileType || PDF_TYPE;
         const startTime = Date.now();
+        if (!googleDriveLink || !folderOrProfile) {
+            return resp.status(400).send({
+                response: {
+                    "status": "failed",
+                    "success": false,
+                    "msg": `Invalid Google Drive Link (${googleDriveLink}) or Folder/Profile (${folderOrProfile}). Pls. provide valid values`
+                }
+            });
+        }
 
-        const { _links, _folders, error } = genLinksAndFolders(googleDriveLink, folderName)
+        const { _links, _folders, error } = genLinksAndFolders(googleDriveLink, folderOrProfile)
         if (error) {
             resp.status(400).send({
                 response: {

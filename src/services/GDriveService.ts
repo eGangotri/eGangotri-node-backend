@@ -6,7 +6,6 @@ import { GoogleApiData } from 'cliBased/googleapi/types';
 import { getAllFileStats } from '../utils/FileStatsUtils';
 import { PDF_EXT, ZIP_TYPE_EXT } from '../imgToPdf/utils/constants';
 import { FileStats } from '../imgToPdf/utils/types';
-import { FOLDER } from '../utils/constants';
 
 export const verifyGDriveLocalIntegrity = async (_links: string[],
     _folders: string[],
@@ -15,24 +14,22 @@ export const verifyGDriveLocalIntegrity = async (_links: string[],
     const startTime = Date.now();
     const results = await Promise.all(
         _links.map(async (link, index) => {
-            console.log(`Directory: ${_folders[index]}`);
-            console.log(`Is absolute path: ${path.isAbsolute(_folders[index])}`);
+            console.log(`Directory[${index}]: ${_folders[index]}`);
+            console.log(`Is absolute path[${index}] ${_folders[index]}: ${path.isAbsolute(_folders[index])}`);
             console.log(`Normalized path: ${path.normalize(_folders[index])}`);
             console.log(`File type filter: ${fileType}`);
             console.log(`File extensions to look for: ${fileType === PDF_TYPE ? [PDF_EXT] : (fileType === ZIP_TYPE ? ZIP_TYPE_EXT : [])}`);
             console.log(`Ignore folder: ${ignoreFolder}`);
 
-            const [gDriveStats, localStats] = await Promise.all([
-                getGDriveContentsAsJson(link, "", ignoreFolder, fileType),
-                getAllFileStats({
-                    directoryPath: path.normalize(_folders[index]),
-                    filterExt: fileType === PDF_TYPE ? [PDF_EXT] : (fileType === ZIP_TYPE ? ZIP_TYPE_EXT : []),
-                    ignorePaths: [ignoreFolder],
-                    withLogs: true,
-                    withMetadata: true,
-                    includeFolders: false
-                })
-            ]);
+            const gDriveStats = await getGDriveContentsAsJson(link, "", ignoreFolder, fileType);
+            const localStats = await getAllFileStats({
+                directoryPath: path.normalize(_folders[index]),
+                filterExt: fileType === PDF_EXT ? [PDF_EXT] : (ZIP_TYPE_EXT.includes(fileType) ? ZIP_TYPE_EXT : []),
+                ignorePaths: [ignoreFolder],
+                withLogs: true,
+                withMetadata: true,
+                includeFolders: false
+            })
 
             console.log(`Found ${localStats.length} local files`);
             console.log(`Found ${gDriveStats.length} Google Drive files`);
@@ -68,7 +65,7 @@ export const verifyGDriveLocalIntegrity = async (_links: string[],
 }
 
 export interface ComparisonResult {
-    [key: string]: string[]|string|number|boolean;
+    [key: string]: string[] | string | number | boolean;
 }
 
 export const compareGDriveLocalJson = (
@@ -96,14 +93,15 @@ export const compareGDriveLocalJson = (
         localFileMap.get(normalizedFileName).push(localFile);
     });
 
-    console.log(`\n=== Google Drive Files ===`);
+    console.log(`localFileMap ${localFileMap.size} ${localFileMap?.keys()}`);
     console.log(`Total Google Drive files: ${googleDriveFileData.length}`);
 
     // Check each Google Drive file against local files
     googleDriveFileData.forEach(gDriveItem => {
         const normalizedFileName = gDriveItem.fileName.trim();
         console.log(`\nChecking Google Drive file: ${normalizedFileName}`);
-        console.log(`  Google Drive path: ${gDriveItem.parents}/${normalizedFileName}`);
+        console.log(`  Google Drive path: ${gDriveItem.parents}
+                        ${normalizedFileName}`);
 
         const localItems = localFileMap.get(normalizedFileName);
         if (!localItems || localItems.length === 0) {
