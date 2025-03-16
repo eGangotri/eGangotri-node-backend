@@ -1,3 +1,4 @@
+import { isValidPath } from "utils/FileUtils";
 import { combineGDriveAndReducedPdfExcels } from "../cliBased/googleapi/_utils/CombineMainAndReducedExcelData"
 import { getLatestExcelFile } from "../utils/utils"
 import path from 'path';
@@ -53,10 +54,36 @@ export const genLinksAndFolders =
         else {
             _links.push(googleDriveLink.trim());
             _folders.push(folderName.trim());
+
         }
 
+        // Check if _links contains exclusively non-empty items
+        const hasEmptyLinks = _links.some(link => !link || link.trim() === '');
+        
+        // Check if all folders are valid
+        const hasInvalidFolders = _folders.some(folder => !folder || folder.trim() === '');
+        
+        // Check if links are valid Google Drive links
+        const isValidGDriveLink = (link: string): boolean => {
+            return link && link.trim() !== '' && 
+                (link.includes('drive.google.com') || 
+                 link.includes('docs.google.com') || 
+                 link.startsWith('https://'));
+        };
+        
+        const hasInvalidLinks = _links.some(link => !isValidGDriveLink(link));
+        
         return {
-            error: _links.length != _folders.length,
+            error: _links.length != _folders.length || hasEmptyLinks || hasInvalidFolders || hasInvalidLinks,
+            errorMessage: hasEmptyLinks 
+                ? "Links cannot be empty" 
+                : hasInvalidLinks 
+                ? "Invalid Google Drive links detected" 
+                : hasInvalidFolders 
+                ? "Invalid folder names detected" 
+                : _links.length != _folders.length 
+                ? "Number of links and folders don't match" 
+                : "",
             _links,
             _folders
         }
