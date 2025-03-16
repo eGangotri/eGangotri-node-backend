@@ -4,7 +4,7 @@ import { DOWNLOAD_COMPLETED_COUNT, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT } from '../c
 import { timeInfo } from '../mirror/FrontEndBackendCommonCode';
 import { PDF_TYPE, ZIP_TYPE } from '../cliBased/googleapi/_utils/constants';
 import { genLinksAndFolders, validateGenGDriveLinks } from '../services/yarnListMakerService';
-import { generateGoogleDriveListingExcel } from '../cliBased/googleapi/GoogleDriveApiReadAndExport';
+import { generateGoogleDriveListingExcel, getFolderNameFromGDrive } from '../cliBased/googleapi/GoogleDriveApiReadAndExport';
 import { formatTime } from '../imgToPdf/utils/Utils';
 import { convertGDriveExcelToLinkData, downloadGDriveData } from '../services/GDriveItemService';
 import { isValidPath } from '../utils/FileUtils';
@@ -12,7 +12,7 @@ import { verifyGDriveLocalIntegrity } from '../services/GDriveService';
 import * as FileConstUtils from '../utils/constants';
 import { verifyUnzipSuccessInDirectory } from '../services/zipService';
 import { getFolderInSrcRootForProfile } from '../archiveUpload/ArchiveProfileUtils';
-import { response } from 'express';
+import * as path from 'path';
 
 export const gDriveRoute = express.Router();
 
@@ -232,13 +232,15 @@ gDriveRoute.post('/verifyLocalDownloadSameAsGDrive', async (req: any, resp: any)
             });
         }
         else {
-            const _results = await verifyGDriveLocalIntegrity(_linksGen._links, _linksGen._folders, ignoreFolder, fileType);
+            const rootFolderName = await getFolderNameFromGDrive(googleDriveLink) || "";
+            const foldersWithRoot = _linksGen._folders.map(folder => path.join(folder, rootFolderName));
+            const _results = await verifyGDriveLocalIntegrity(_linksGen._links, foldersWithRoot, ignoreFolder, fileType);
             const endTime = Date.now();
             const timeTaken = endTime - startTime;
 
             if (fileType === ZIP_TYPE) {
                 // Get the unzip verification results
-                const unzipResults = await Promise.all(_linksGen._folders.map(async (folder) => {
+                const unzipResults = await Promise.all(foldersWithRoot.map(async (folder) => {
                     const result = await verifyUnzipSuccessInDirectory(folder, "", ignoreFolder);
                     return {
                         folder,
