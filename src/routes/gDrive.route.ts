@@ -2,7 +2,7 @@ import * as express from 'express';
 import { downloadFromGoogleDriveToProfile } from '../cliBased/googleapi/GoogleDriveApiReadAndDownload';
 import { DOWNLOAD_COMPLETED_COUNT, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT } from '../cliBased/pdf/utils';
 import { timeInfo } from '../mirror/FrontEndBackendCommonCode';
-import { PDF_TYPE } from '../cliBased/googleapi/_utils/constants';
+import { PDF_TYPE, ZIP_TYPE } from '../cliBased/googleapi/_utils/constants';
 import { genLinksAndFolders, validateGenGDriveLinks } from '../services/yarnListMakerService';
 import { generateGoogleDriveListingExcel } from '../cliBased/googleapi/GoogleDriveApiReadAndExport';
 import { formatTime } from '../imgToPdf/utils/Utils';
@@ -11,6 +11,8 @@ import { isValidPath } from '../utils/FileUtils';
 import { verifyGDriveLocalIntegrity } from '../services/GDriveService';
 import * as FileConstUtils from '../utils/constants';
 import { verifyUnzipSuccessInDirectory } from '../services/zipService';
+import { getFolderInSrcRootForProfile } from '../archiveUpload/ArchiveProfileUtils';
+import { response } from 'express';
 
 export const gDriveRoute = express.Router();
 
@@ -57,14 +59,15 @@ gDriveRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
         const timeTaken = endTime - startTime;
         console.log(`Time taken to download for /downloadFromGoogleDrive: ${timeInfo(timeTaken)}`);
 
-        // const profilesAsFolders = profiles.map(p => isValidPath(p) ? p : getFolderInSrcRootForProfile(p));
-        // const testResult = await verifyGDriveLocalIntegrity(links, profilesAsFolders, ignoreFolder, fileType);
+        const profilesAsFolders = profiles.map((p: string) => isValidPath(p) ? p : getFolderInSrcRootForProfile(p));
+        const testResult = await verifyGDriveLocalIntegrity(links, profilesAsFolders, ignoreFolder, fileType);
 
         resp.status(200).send({
-            msg: `${links.length} links attempted-download to ${profile}`,
+            msg: `${links.length} links attempted-download to ${profiles.length} profiles`,
             timeTaken: timeInfo(timeTaken),
             resultsSummary,
             response: results,
+            ...testResult
         });
     }
     catch (err: any) {
@@ -218,47 +221,57 @@ gDriveRoute.post('/verifyLocalDownloadSameAsGDrive', async (req: any, resp: any)
             });
         }
 
-        const { _links, _folders, error } = genLinksAndFolders(googleDriveLink, folderOrProfile)
-        if (error) {
+        const _linksGen = genLinksAndFolders(googleDriveLink, folderOrProfile)
+        if (_linksGen.error) {
             resp.status(400).send({
                 response: {
                     "status": "failed",
                     "success": false,
-                    "message": "Number of Links and Folder Names should match"
+                    "message": _linksGen.message
                 }
             });
         }
         else {
-            const _results = await verifyGDriveLocalIntegrity(_links, _folders, ignoreFolder, fileType);
+            const _results = await verifyGDriveLocalIntegrity(_linksGen._links, _linksGen._folders, ignoreFolder, fileType);
             const endTime = Date.now();
             const timeTaken = endTime - startTime;
 
-            // Get the unzip verification results
-            const unzipResults = await Promise.all(_folders.map(async (folder) => {
-                const result = await verifyUnzipSuccessInDirectory(folder, "", ignoreFolder);
-                return {
-                    folder,
-                    ...result
+            if (fileType === ZIP_TYPE) {
+                // Get the unzip verification results
+                const unzipResults = await Promise.all(_linksGen._folders.map(async (folder) => {
+                    const result = await verifyUnzipSuccessInDirectory(folder, "", ignoreFolder);
+                    return {
+                        folder,
+                        ...result
+                    };
+                }));
+
+                // Add unzip verification results to the response
+                const response = {
+                    ..._results,
+                    timeTaken: timeInfo(timeTaken),
+                    unzipVerification: {
+                        totalSuccessCount: unzipResults.reduce((sum, r) => sum + r.success_count, 0),
+                        totalErrorCount: unzipResults.reduce((sum, r) => sum + r.error_count, 0),
+                        resultsByFolder: unzipResults.map(result => ({
+                            folder: result.folder,
+                            successCount: result.success_count,
+                            errorCount: result.error_count,
+                            unzipFolder: result.unzipFolder,
+                            zipFilesFailed: result.zipFilesFailed
+                        }))
+                    }
                 };
-            }));
+                resp.status(200).send(response);
 
-            // Add unzip verification results to the response
-            const response = {
-                ..._results,
-                unzipVerification: {
-                    totalSuccessCount: unzipResults.reduce((sum, r) => sum + r.success_count, 0),
-                    totalErrorCount: unzipResults.reduce((sum, r) => sum + r.error_count, 0),
-                    resultsByFolder: unzipResults.map(result => ({
-                        folder: result.folder,
-                        successCount: result.success_count,
-                        errorCount: result.error_count,
-                        unzipFolder: result.unzipFolder,
-                        zipFilesFailed: result.zipFilesFailed
-                    }))
-                }
-            };
+            }
 
-            resp.status(200).send(response);
+            else {
+                resp.status(200).send({
+                    ..._results,
+                    timeTaken: timeInfo(timeTaken)
+                });
+            }
         }
     }
     catch (err: any) {
