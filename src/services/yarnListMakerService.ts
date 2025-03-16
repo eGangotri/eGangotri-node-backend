@@ -54,7 +54,6 @@ export const genLinksAndFolders =
         else {
             _links.push(googleDriveLink.trim());
             _folders.push(folderName.trim());
-
         }
 
         // Check if _links contains exclusively non-empty items
@@ -75,7 +74,7 @@ export const genLinksAndFolders =
         
         return {
             error: _links.length != _folders.length || hasEmptyLinks || hasInvalidFolders || hasInvalidLinks,
-            errorMessage: hasEmptyLinks 
+            message: hasEmptyLinks 
                 ? "Links cannot be empty" 
                 : hasInvalidLinks 
                 ? "Invalid Google Drive links detected" 
