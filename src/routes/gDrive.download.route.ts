@@ -6,13 +6,14 @@ export const gDriveDownloadRoute = express.Router();
 
 gDriveDownloadRoute.post("/createGDriveDownload", async (req: Request, res: Response) => {
     try {
-        const { googleDriveLink, profileNameOrAbsPath, downloadType, files, fileDumpFolder,msg } = req.body;
+        const { googleDriveLink, profileNameOrAbsPath, downloadType, files, fileDumpFolder, gDriveRootFolder, msg } = req.body;
         const newGDriveDownload = new GDriveDownload({
             googleDriveLink,
             profileNameOrAbsPath,
             downloadType,
             files,
             fileDumpFolder,
+            gDriveRootFolder,
             msg
         });
         await newGDriveDownload.save();
@@ -57,6 +58,39 @@ gDriveDownloadRoute.post("/updateGDriveDownload/:id", async (req: Request, res: 
         }
     } catch (error) {
         console.log(`updateGDriveDownload/${id}:error ${error.message}`);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+
+// Update the main schema of an existing GDriveDownload entry
+gDriveDownloadRoute.post("/markVerificationGDriveDownload/:id", async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { verify} = req.body;
+    try {
+        console.log(`markVerificationGDriveDownload:params: ${id} ${verify}`);
+        const gDriveDownload = await GDriveDownload.findById(id);
+        if (!gDriveDownload) {
+            console.log(`markVerificationGDriveDownload/${id}:GDriveDownload not found`);
+            res.status(404).json({ error: 'GDriveDownload not found' });
+        }
+
+        else {
+            if (verify !== undefined) {
+                gDriveDownload.verify = verify;
+            }
+           
+            const updatedGDriveDownload = await gDriveDownload.save();
+            console.log(`markVerificationGDriveDownload:updatedGDriveDownload/${id}: ${JSON.stringify(updatedGDriveDownload)}`);
+            if (!updatedGDriveDownload) {
+                console.log(`markVerificationGDriveDownload:GDriveDownload not found`);
+                res.status(404).json({ error: 'GDriveDownload not found' });
+                return;
+            }
+            res.status(200).json(updatedGDriveDownload);
+        }
+    } catch (error) {
+        console.log(`markVerificationGDriveDownload/${id}:error ${error.message}`);
         res.status(500).json({ error: error.message });
     }
 });

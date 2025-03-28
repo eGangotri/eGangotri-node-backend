@@ -56,8 +56,8 @@ export function setOptionsForGDriveListing(queryOptions: GDriveItemListOptionsTy
     mongoOptionsFilter = { ...mongoOptionsFilter, source: { $in: source } };
   }
 
-/*
-{"":"Treasure 56","page":1,"limit":10,"sortField":"createdTime","sortOrder":"asc"}*/
+  /*
+  {"":"Treasure 56","page":1,"limit":10,"sortField":"createdTime","sortOrder":"asc"}*/
   if (queryOptions?.archiveProfiles) {
     const archiveProfiles: string[] = replaceQuotesAndSplit(queryOptions?.archiveProfiles)
     console.log(`archiveProfiles ${archiveProfiles}`)
@@ -173,8 +173,8 @@ export const convertGDriveExcelToLinkData =
   }
 
 
-export const downloadGDriveData = async (googleDriveData:GDriveExcelData[],
-  pdfDumpFolder:string,
+export const downloadGDriveData = async (googleDriveData: GDriveExcelData[],
+  pdfDumpFolder: string,
   downloadCounterController = ""
 ) => {
   const promises = googleDriveData.map(async (_data) => {
@@ -192,27 +192,27 @@ export const downloadGDriveData = async (googleDriveData:GDriveExcelData[],
 }
 
 export async function getSourceStatistics() {
-    const result = await GDriveItem.aggregate([
-        {
-            $group: {
-                _id: "$source",
-                count: { $sum: 1 },
-                firstItemCreatedTime: { $min: "$createdTime" },
-                totalSizeInBytes: { $sum: { $toLong: "$sizeInBytes" } },
-                totalPageCount: { $sum: "$pageCount" }
-            }
-        },
-        {
-            $project: {
-                _id: 0,
-                source: "$_id",
-                count: 1,
-                firstItemCreatedTime: 1,
-                totalSizeInBytes: 1,
-                totalPageCount: 1
-            }
-        }
-    ]);
+  const result = await GDriveItem.aggregate([
+    {
+      $group: {
+        _id: "$source",
+        count: { $sum: 1 },
+        firstItemCreatedTime: { $min: "$createdTime" },
+        totalSizeInBytes: { $sum: { $toLong: "$sizeInBytes" } },
+        totalPageCount: { $sum: "$pageCount" }
+      }
+    },
+    {
+      $project: {
+        _id: 0,
+        source: "$_id",
+        count: 1,
+        firstItemCreatedTime: 1,
+        totalSizeInBytes: 1,
+        totalPageCount: 1
+      }
+    }
+  ]);
 
-    return result;
+  return result;
 }
