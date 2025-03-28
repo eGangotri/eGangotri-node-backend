@@ -35,9 +35,11 @@ export interface IGDriveDownload extends Document {
     googleDriveLink: string;
     profileNameOrAbsPath: string;
     fileDumpFolder: string;
+    gDriveRootFolder: string;
     downloadType: string;
     files: ICompositeDocument[];
     quickStatus: QuickStatus;
+    verify: boolean;    
 }
 
 const QuickStatusSchema: Schema = new Schema(
@@ -56,11 +58,13 @@ const GDriveDownloadHistorySchema: Schema = new Schema(
         googleDriveLink: { type: String, required: true },
         profileNameOrAbsPath: { type: String, required: true },
         fileDumpFolder: { type: String, required: true },
+        gDriveRootFolder: { type: String, required: false },
         status: { type: String, enum: Object.values(GDriveDownloadHistoryStatus), default: 'queued' },
         msg: { type: String, required: false },
         downloadType: { type: String, required: true },
         files: { type: [CompositeDocumentSchema], required: true },
         quickStatus: { type: QuickStatusSchema, required: false },
+        verify: { type: Boolean, required: false },
     },
     {
         timestamps: true,

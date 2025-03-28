@@ -1,13 +1,15 @@
-import { QuickStatus } from 'models/GDriveDownloadHistorySchema';
+import { QuickStatus } from '../models/GDriveDownloadHistorySchema';
 import { GLOBAL_SERVER_NAME } from '../db/connection';
-import { GDriveDownloadHistoryStatus } from 'utils/constants';
+import { GDriveDownloadHistoryStatus } from '../utils/constants';
 
 const GDRIVE_DOWNLOAD_HISTORY_PATH = `${GLOBAL_SERVER_NAME}/gDriveDownloadRoute`;
 
 export const insertEntryForGDriveUploadHistory =
  async (driveLinkOrFolderId: string,
   profileOrPath: string, fileType: string,
-   fileDumpFolder: string, msg: string) => {
+   fileDumpFolder: string, 
+   gDriveRootFolder: string,
+   msg: string) => {
   const insertInDB = await fetch(`${GDRIVE_DOWNLOAD_HISTORY_PATH}/createGDriveDownload`,
     {
       method: 'POST',
@@ -20,6 +22,7 @@ export const insertEntryForGDriveUploadHistory =
         downloadType: fileType,
         fileDumpFolder,
         msg,
+        gDriveRootFolder,
         files: []
       })
     }

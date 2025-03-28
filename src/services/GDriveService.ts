@@ -1,12 +1,11 @@
 import * as path from 'path';
 import { timeInfo } from '../mirror/FrontEndBackendCommonCode';
 import { PDF_TYPE, ZIP_TYPE } from '../cliBased/googleapi/_utils/constants';
-import { getFolderNameFromGDrive, getGDriveContentsAsJson } from '../cliBased/googleapi/GoogleDriveApiReadAndExport';
+import { getGDriveContentsAsJson } from '../cliBased/googleapi/GoogleDriveApiReadAndExport';
 import { GoogleApiData } from 'cliBased/googleapi/types';
 import { getAllFileStats } from '../utils/FileStatsUtils';
 import { PDF_EXT, ZIP_TYPE_EXT } from '../imgToPdf/utils/constants';
 import { FileStats } from '../imgToPdf/utils/types';
-import { getFolderName } from 'cliBased/googleapi/_utils/GoogleDriveUtil';
 
 export const verifyGDriveLocalIntegrity = async (_links: string[],
     _folders: string[],
@@ -22,7 +21,7 @@ export const verifyGDriveLocalIntegrity = async (_links: string[],
             console.log(`File extensions to look for: ${fileType === PDF_TYPE ? [PDF_EXT] : (fileType === ZIP_TYPE ? ZIP_TYPE_EXT : [])}`);
             console.log(`Ignore folder: ${ignoreFolder}`);
 
-            const gDriveStats = await getGDriveContentsAsJson(link, "", ignoreFolder, fileType);            
+            const gDriveStats = await getGDriveContentsAsJson(link, "", ignoreFolder, fileType);
             const localStats = await getAllFileStats({
                 directoryPath: path.normalize(_folders[index]),
                 filterExt: fileType === PDF_EXT ? [PDF_EXT] : (ZIP_TYPE_EXT.includes(fileType) ? ZIP_TYPE_EXT : []),

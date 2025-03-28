@@ -13,6 +13,7 @@ import { extractGoogleDriveId } from '../../mirror/GoogleDriveUtilsCommonCode';
 import { PDF_TYPE, FOLDER_MIME_TYPE } from './_utils/constants';
 import { GDriveDownloadHistoryStatus } from '../../utils/constants';
 import { checkFolderExistsAsync, createFolderIfNotExistsAsync } from '../../utils/FileUtils';
+import { getFolderNameFromGDrive } from './GoogleDriveApiReadAndExport';
 
 export const MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE = 200;
 // Create a new Google Drive instance
@@ -27,7 +28,7 @@ async function dwnldAllFilesFromGDrive(driveLinkOrFolderID: string,
   downloadCounterController = "") {
   const fileId = extractGoogleDriveId(driveLinkOrFolderID)
   console.log(`fileId: ${fileId}`)
-  
+
   // First check if it's a file
   try {
     const file = await drive.files.get({
@@ -45,7 +46,7 @@ async function dwnldAllFilesFromGDrive(driveLinkOrFolderID: string,
       };
 
       await createFolderIfNotExistsAsync(fileDumpFolder);
-      
+
       await updateEntryForGDriveUploadHistory(gDriveDownloadTaskId,
         `Started download of single file: ${fileData.fileName}`,
         GDriveDownloadHistoryStatus.InProgress);
@@ -172,7 +173,12 @@ export const downloadFromGoogleDriveToProfile = async (driveLinkOrFolderId: stri
   let gDriveDownloadTaskId = "0"
   try {
     if (await checkFolderExistsAsync(fileDumpFolder)) {
-      gDriveDownloadTaskId = await insertEntryForGDriveUploadHistory(driveLinkOrFolderId, profileOrPath, fileType, fileDumpFolder, "Initiated Downloading");
+      const gDriveRootFolder = await getFolderNameFromGDrive(driveLinkOrFolderId) || "";
+      console.log(`downloadFromGoogleDriveToProfile:gDriveRootFolder ${gDriveRootFolder}`)
+
+      gDriveDownloadTaskId = await insertEntryForGDriveUploadHistory(driveLinkOrFolderId, profileOrPath,
+        fileType, fileDumpFolder,
+        gDriveRootFolder, `Initiated Downloading ${driveLinkOrFolderId} /${gDriveRootFolder}`);
       const _results = await dwnldAllFilesFromGDrive(driveLinkOrFolderId, "",
         fileDumpFolder, ignoreFolder, fileType, gDriveDownloadTaskId, downloadCounterController);
 
@@ -185,7 +191,8 @@ export const downloadFromGoogleDriveToProfile = async (driveLinkOrFolderId: stri
         error_count: DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT(downloadCounterController),
         dl_wrong_size_count: `${DOWNLOAD_FAILED_COUNT(downloadCounterController)}
         ${DOWNLOAD_FAILED_COUNT(downloadCounterController) > 0 ? "Google Drive Quota may have been filled.Typically takes 24 Hours to reset." : ""}`,
-        ..._results
+        ..._results,
+        gDriveDownloadTaskId
       }
       console.log(`_resp : ${JSON.stringify(_resp)}`);
       await updateEntryForGDriveUploadHistory(gDriveDownloadTaskId,
@@ -194,11 +201,11 @@ export const downloadFromGoogleDriveToProfile = async (driveLinkOrFolderId: stri
       return _resp;
     }
     else {
-    console.log(`No corresponding folder ${fileDumpFolder} to profile ${profileOrPath} exists`)
-    return {
-      "success": false,
-      msg: `No corresponding folder to profile (${profileOrPath}) exists`
-    }
+      console.log(`No corresponding folder ${fileDumpFolder} to profile ${profileOrPath} exists`)
+      return {
+        "success": false,
+        msg: `No corresponding folder to profile (${profileOrPath}) exists`
+      }
     }
   }
   catch (err) {
