@@ -49,7 +49,8 @@
     "renameNonAsciiFiles": "ts-node ./src/files/renameNonAsciiFiles.ts",
     "jpgToPdf": "ts-node ./src/imgToPdf/jpgToPdf.ts",
     "convertEAPExcel": "ts-node ./src/eap_bl/index.ts",
-    "zipFiles": "ts-node ./src/services/zipService.ts"
+    "zipFiles": "ts-node ./src/services/zipService.ts",
+    "upload-to-archive": "ts-node ./src/uploadToArchive/index.ts"
   },
   "repository": {
     "type": "git",
