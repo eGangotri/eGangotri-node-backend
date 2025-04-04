@@ -37,7 +37,7 @@ async function main() {
 
         if (!profiles.length) {
             logger.error('No profiles specified');
-            process.exit(1);
+            return;
         }
 
         // Initialize archive handler
@@ -58,7 +58,7 @@ async function main() {
 
         if (!loginSuccess) {
             logger.error('Login failed');
-            process.exit(1);
+            return
         }
 
         // Process each profile
@@ -86,7 +86,7 @@ async function main() {
         await handler.close();
     } catch (error) {
         logger.error('Error in main process:', error);
-        process.exit(1);
+        return
     }
 }
 
@@ -125,6 +125,6 @@ async function getUploadableItems(profile: string, subjectDesc: string): Promise
 if (require.main === module) {
     main().catch(error => {
         logger.error('Unhandled error:', error);
-        process.exit(1);
+        return
     });
 }
