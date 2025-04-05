@@ -27,8 +27,11 @@ export class FileRetriever {
         if (this.folderMap) return this.folderMap;
 
         const userHome = process.env.HOME || process.env.USERPROFILE;
-        const eGangotriDir = path.join(userHome!, 'egangotri');
-        const localFoldersFile = path.join(eGangotriDir, 'local_folders.properties');
+        if (!userHome) {
+            throw new Error('Could not determine user home directory');
+        }
+        const eGangotriDir = path.join(userHome, 'egangotri');
+        const localFoldersFile = path.join(eGangotriDir, 'localFolders.properties');
         
         // Create egangotri directory if it doesn't exist
         await fs.ensureDir(eGangotriDir);
@@ -47,7 +50,7 @@ DEST_OTRO_ROOT=D:/eGangotri/archive_items_other
 # PROFILE2=D:/absolute/path/to/profile2
 `;
             await fs.writeFile(localFoldersFile, defaultContent, 'utf8');
-            logger.info(`Created default local_folders.properties at ${localFoldersFile}`);
+            logger.info(`Created default localFolders.properties at ${localFoldersFile}`);
         }
 
         try {

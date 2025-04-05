@@ -12,15 +12,15 @@ export const DEFAULT_CONFIG: UploadConfig = {
 };
 
 export const SELECTORS = {
-    LICENSE_PICKER_DIV: 'license-picker',
-    LICENSE_PICKER_RADIO_OPTION: 'license_picker',
-    CHOOSE_FILES_BUTTON: 'choose-files-to-upload',
-    PAGE_URL: 'page-url',
-    PAGE_URL_INPUT: 'page-url-input',
-    PAGE_URL_ITEM_ID: 'page-url-item-id',
-    UPLOAD_BUTTON: 'upload-and-create-your-item',
-    COLLECTION_DROPDOWN: 'collection',
-    MEDIA_TYPE: 'mediatypecollection'
+    LICENSE_PICKER_DIV: 'license_picker',
+    LICENSE_PICKER_RADIO_OPTION: 'license_radio_publicdomain',
+    CHOOSE_FILES_BUTTON: 'file_input_initial',
+    PAGE_URL: 'item_name',
+    PAGE_URL_INPUT: 'item_name_input',
+    PAGE_URL_ITEM_ID: 'item_name_text',
+    UPLOAD_BUTTON: 'upload_button',
+    COLLECTION_DROPDOWN: 'collection_select',
+    MEDIA_TYPE: 'mediatype_selector'
 };
 
 export const ARCHIVE_LOGIN_URL = 'https://archive.org/account/login';

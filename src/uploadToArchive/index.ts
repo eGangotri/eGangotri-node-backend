@@ -72,7 +72,7 @@ async function main() {
                 logger.info(`No files to upload for profile ${profile}`);
                 continue;
             }
-
+            console.log(`Found ${uploadItems.length} files to upload for profile ${profile}`);  
             // Upload files
             const result = await handler.uploadItems(uploadItems);
             
