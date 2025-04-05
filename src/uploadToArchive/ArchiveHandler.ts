@@ -1,4 +1,4 @@
-import puppeteer, { Browser, Page } from 'puppeteer';
+import puppeteer, { Browser, Page, ElementHandle } from 'puppeteer';
 import { ArchiveCredentials, UploadConfig, UploadItem, UploadResult } from './types';
 import { ARCHIVE_LOGIN_URL, ARCHIVE_UPLOAD_URL, DEFAULT_CONFIG, SELECTORS } from './config';
 import path from 'path';
@@ -75,31 +75,55 @@ export class ArchiveHandler {
         try {
             await page.goto(ARCHIVE_UPLOAD_URL);
 
-            // Wait for upload button and send file
-            await page.waitForSelector(`.${SELECTORS.CHOOSE_FILES_BUTTON}`);
-            const [fileChooser] = await Promise.all([
-                page.waitForFileChooser(),
-                page.click(`.${SELECTORS.CHOOSE_FILES_BUTTON}`)
-            ]);
-            await fileChooser.accept([item.path]);
+            // Wait for file drop zone to be ready
+            await page.waitForSelector('#file_drop_contents');
+            await page.waitForSelector('#file_input_initial', { visible: false });
+
+            // Use JavaScript to prepare the upload area
+            await page.evaluate(() => {
+                const dropZone = document.querySelector('#file_drop_contents > div:nth-child(2)');
+                if (dropZone) {
+                    dropZone.className = 'XXXX';
+                    dropZone.setAttribute('style', 'opacity: 1; display: block;');
+                }
+            });
+
+            // Set up file input with explicit wait
+            const fileInput = await page.waitForSelector('#file_input_initial') as ElementHandle<HTMLInputElement>;
+            if (!fileInput) {
+                throw new Error('File input element not found');
+            }
+
+            // Upload the file
+            await fileInput.uploadFile(item.path);
+            console.log(`Selected file for upload: ${item.path}`);
+
+            // Wait for upload to be recognized
+            await page.waitForFunction(
+                () => document.querySelector('#file_drop_contents')?.textContent?.includes('1 file selected'),
+                { timeout: 5000 }
+            );
 
             // Handle license
+            console.log('Setting license...');
             await page.waitForSelector(`#${SELECTORS.LICENSE_PICKER_DIV}`);
-            await page.click(`#${SELECTORS.LICENSE_PICKER_DIV}`);
+            await page.waitForSelector(`#${SELECTORS.LICENSE_PICKER_RADIO_OPTION}`);
             await page.click(`#${SELECTORS.LICENSE_PICKER_RADIO_OPTION}`);
 
             // Handle collection for non-PDF files
             if (!item.path.toLowerCase().endsWith('.pdf') && !item.collection) {
+                console.log('Setting collection for non-PDF file...');
                 await page.waitForSelector(`#${SELECTORS.COLLECTION_DROPDOWN}`);
-                await page.click(`#${SELECTORS.COLLECTION_DROPDOWN}`);
-                await page.select(`[name="${SELECTORS.MEDIA_TYPE}"]`, 'data:opensource_media');
+                await page.select(`#${SELECTORS.COLLECTION_DROPDOWN}`, 'opensource');
+                await page.waitForSelector(`#${SELECTORS.MEDIA_TYPE}`);
+                await page.select(`#${SELECTORS.MEDIA_TYPE}`, 'texts');
             }
 
             // Set custom identifier if provided
             if (item.archiveItemId) {
+                console.log(`Setting custom identifier: ${item.archiveItemId}`);
                 await page.waitForSelector(`#${SELECTORS.PAGE_URL}`);
-                await page.click(`#${SELECTORS.PAGE_URL}`);
-                await page.type(`.${SELECTORS.PAGE_URL_INPUT}`, item.archiveItemId);
+                await page.type(`#${SELECTORS.PAGE_URL}`, item.archiveItemId);
                 await page.keyboard.press('Enter');
 
                 // Handle potential alert
@@ -112,7 +136,8 @@ export class ArchiveHandler {
             }
 
             // Click upload button and wait for confirmation
-            await page.waitForSelector(`#${SELECTORS.UPLOAD_BUTTON}`);
+            console.log('Clicking upload button...');
+            await page.waitForSelector(`#${SELECTORS.UPLOAD_BUTTON}`, { visible: true });
             await page.click(`#${SELECTORS.UPLOAD_BUTTON}`);
             
             this.uploadCounter++;
