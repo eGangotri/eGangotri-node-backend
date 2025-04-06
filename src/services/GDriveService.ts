@@ -66,6 +66,15 @@ export const verifyGDriveLocalIntegrity = async (_links: string[],
 
 export interface ComparisonResult {
     [key: string]: string[] | string | number | boolean;
+    success: boolean,
+    failedCount: number,
+    gDriveFileTotal: number,
+    localFileTotal: number,
+    missedGdriveItems: string,
+    sizeMisMatchGdriveItems: string,
+    failedMsgs: string,
+    failedFiles: string,
+    successMsgs: string,
 }
 
 export const compareGDriveLocalJson = (
@@ -158,10 +167,10 @@ export const compareGDriveLocalJson = (
         failedCount: failedMsgs.length,
         gDriveFileTotal,
         localFileTotal,
-        [`Missed GDrive Items(${missedGdriveItems?.length})`]: missedGdriveItems,
-        [`Mismatched GDrive Items(${sizeMisMatchGdriveItems?.length})`]: sizeMisMatchGdriveItems,
-        [`Failed Msgs(${failedMsgs?.length})`]: failedMsgs,
-        [`Failed Files(${failedFiles?.length})`]: failedFiles,
-        [`Success Msgs(${successMsgs?.length})`]: successMsgs,
+        missedGdriveItems: `Missed GDrive Items(${missedGdriveItems?.length})` + missedGdriveItems,
+        sizeMisMatchGdriveItems: `Mismatched GDrive Items(${sizeMisMatchGdriveItems?.length})` + sizeMisMatchGdriveItems,
+        failedMsgs: `Failed Msgs(${failedMsgs?.length})` + failedMsgs,
+        failedFiles: `Failed Files(${failedFiles?.length})` + failedFiles,
+        successMsgs: `Success Msgs(${successMsgs?.length})` + successMsgs,
     };
 };
