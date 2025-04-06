@@ -339,74 +339,64 @@ gDriveRoute.post('/redownloadFromGDrive', async (req: any, resp: any) => {
             });
         }
         else {
-            const rootFolders = await Promise.all(_linksGen._links.map(async (link) => await getFolderNameFromGDrive(link) || ""));
-            const foldersWithRoot = _linksGen._folders.map((folder, index) => {
+            const rootFolders2 = await Promise.all(_linksGen._links.map(async (link) => await getFolderNameFromGDrive(link) || ""));
+            const foldersWithRoot2 = _linksGen._folders.map((folder, index) => {
                 const fileDumpFolder = isValidPath(folder) ? folder : getFolderInSrcRootForProfile(folder);
-                return path.join(fileDumpFolder, rootFolders[index]);
+                return path.join(fileDumpFolder, rootFolders2[index]);
             });
-            
-            const _results = await verifyGDriveLocalIntegrity(_linksGen._links, foldersWithRoot, ignoreFolder, fileType);
-            console.log(`verifyLocalDownloadSameAsGDrive:foldersWithRoot: ${foldersWithRoot}  ${rootFolders}`);
 
-           
-            const success = _results.response.comparisonResult.every(r => r.success);
-            if(!success){
-                const missedGdriveItems: string[] = _results.response.comparisonResult.map((x) => x.missedGdriveItems);
-                const sizeMisMatchGdriveItems: string[] = _results.response.comparisonResult.map((x) => x.sizeMisMatchGdriveItems);
-    
-            }
+            const _results = await verifyGDriveLocalIntegrity(_linksGen._links, foldersWithRoot2, ignoreFolder, fileType);
+            console.log(`verifyLocalDownloadSameAsGDrive:foldersWithRoot: ${foldersWithRoot2}  ${rootFolders2}`);
+
             const comparisonResult: ComparisonResult[] = _results.response.comparisonResult;
+            const success = comparisonResult.every(r => r.success);
+            if (!success) {
+                const missedGdriveItems: string[] = comparisonResult.map((x) => x.missedGdriveItems);
+                const sizeMisMatchGdriveItems: string[] = comparisonResult.map((x) => x.sizeMisMatchGdriveItems);
+                //foldersWithRoot2
+                const allFailedItems = [...missedGdriveItems, ...sizeMisMatchGdriveItems];
+                const failedItems = allFailedItems.filter((item) => item !== "");
 
-            const links = googleDriveLink.includes(",") ? googleDriveLink.split(",").map((link: string) => link.trim()) : [googleDriveLink.trim()];
-            const profiles = profile.includes(",") ?
-                profile.split(",").map((p: string) => p.trim()) :
-                Array(links.length).fill(profile.trim());
+                const downloadCounterController = Math.random().toString(36).substring(7);
+                const downloadPromises = failedItems.map((link: string, index: number) => {
+                    console.log(`:redownloadFromGDrive:loop ${index + 1} ${link} ${foldersWithRoot2} ${ignoreFolder} ${fileType} ${downloadCounterController}`);
+                    return downloadFromGoogleDriveToProfile(link, foldersWithRoot2[index], ignoreFolder, fileType, `${downloadCounterController}-${index}`);
+                });
 
-            const profilesAsFolders = profiles.map((p: string) => isValidPath(p) ? p : getFolderInSrcRootForProfile(p));
-            const downloadCounterController = Math.random().toString(36).substring(7);
+                // Wait for all downloads to complete
+                const results = await Promise.all(downloadPromises);
 
-            // Process all downloads concurrently using Promise.all
-            const downloadPromises = links.map((link: string, index: number) => {
-                console.log(`:redownloadFromGDrive:loop ${index + 1} ${link} ${profilesAsFolders} ${ignoreFolder} ${fileType} ${downloadCounterController}`);
-                return downloadFromGoogleDriveToProfile(link, profilesAsFolders[index], ignoreFolder, fileType, `${downloadCounterController}-${index}`);
-            });
+                const resultsSummary = results.map((res: any, index: number) => {
+                    return `(${index + 1}). Succ: ${res.success_count} Err: ${res.error_count} Wrong Size: ${res.dl_wrong_size_count}`;
+                });
 
-            // Wait for all downloads to complete
-            const results = await Promise.all(downloadPromises);
+                const endTime = Date.now();
+                const timeTaken = endTime - startTime;
+                console.log(`Time taken to download for /redownloadFromGDrive: ${timeInfo(timeTaken)}`);
 
-            const resultsSummary = results.map((res: any, index: number) => {
-                return `(${index + 1}). Succ: ${res.success_count} Err: ${res.error_count} Wrong Size: ${res.dl_wrong_size_count}`;
-            });
-
-            const endTime = Date.now();
-            const timeTaken = endTime - startTime;
-            console.log(`Time taken to download for /redownloadFromGDrive: ${timeInfo(timeTaken)}`);
-
-            const rootFolders = await Promise.all(links.map(async (link: string) => await getFolderNameFromGDrive(link) || ""));
-            const foldersWithRoot = profiles.map((folder: string, index: number) => {
-                const fileDumpFolder = isValidPath(folder) ? folder : getFolderInSrcRootForProfile(folder);
-                return path.join(fileDumpFolder, rootFolders[index]);
-            });
-
-            console.log(`redownloadFromGDrive:foldersWithRoot: ${foldersWithRoot}  ${rootFolders}`);
-            const testResult = await verifyGDriveLocalIntegrity(links, foldersWithRoot, ignoreFolder, fileType);
-
-            for (let i = 0; i < results.length; i++) {
-                const gDriveDownloadTaskId = results[i].gDriveDownloadTaskId;
-                const success = testResult.response.comparisonResult[i].success as boolean;
-                await markVerifiedForGDriveDownload(gDriveDownloadTaskId, success);
+                resp.status(200).send({
+                    msg: `${failedItems.length} links attempted-download to ${foldersWithRoot2.length} profiles`,
+                    failedItems,
+                    timeTaken: timeInfo(timeTaken),
+                    resultsSummary,
+                    response: results
+                });
             }
-
-            resp.status(200).send({
-                msg: `${links.length} links attempted-download to ${profiles.length} profiles`,
-                timeTaken: timeInfo(timeTaken),
-                resultsSummary,
-                response: results,
-                ...testResult
-            });
+            else {
+                const endTime = Date.now();
+                const timeTaken = endTime - startTime;
+                resp.status(200).send({
+                    msg: `No failed items to download`,
+                    failedItems: [],
+                    timeTaken: timeInfo(timeTaken),
+                    resultsSummary: [],
+                    response: []
+                });
+            }
         }
+    }
     catch (err: any) {
-            console.log('Error', err);
-            resp.status(400).send(err);
-        }
-    })
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})
