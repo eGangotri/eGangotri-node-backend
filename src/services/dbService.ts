@@ -1,13 +1,12 @@
 import { DOC_TYPE } from "../common";
 import { mongoDbUrlWithDbName } from "../db/connection";
 import mongoose from "mongoose";
-
 import * as _ from "lodash";
 import { getLimit } from "../routes/utils";
 import { ellipsis } from "../mirror/utils";
 import { ItemsListOptionsType } from "../types/listingTypes";
 import { BOOLEAN_FOUR_STATE } from "./ServiceUtils";
-
+import { checkDatabaseHealth, setupConnectionMonitoring, withRetry } from "../utils/dbRetry";
 
 export async function addItemsQueuedBulk(itemsArray: any[]) {
   return await addItemstoMongoBulk(itemsArray, DOC_TYPE.IQ);
@@ -100,25 +99,43 @@ export function setOptionsForItemListing(queryOptions: ItemsListOptionsType) {
 }
 
 
+
 export async function connectToMongo(_args: string[] = []) {
   const mongoDbUrl = mongoDbUrlWithDbName(!_.isEmpty(_args) ? _args[0] : "");
   console.log("\nAttempting to connect to DB:", ellipsis(mongoDbUrl));
   if (mongoDbUrl) {
     try {
-      await mongoose.connect(mongoDbUrl,
-        {
+      await withRetry(async () => {
+        await mongoose.connect(mongoDbUrl, {
           socketTimeoutMS: 100000,
           useUnifiedTopology: true,
-          // useNewUrlParser: true,
-          // useCreateIndex: true,
-          // useFindAndModify: false,
-          // poolSize: parseInt(process.env.POOL_SIZE!),
+          serverSelectionTimeoutMS: 5000,
+          heartbeatFrequencyMS: 30000,
+          retryWrites: true,
+          retryReads: true,
+          maxPoolSize: 10,
+          minPoolSize: 2,
+          autoReconnect: true,
+          reconnectTries: Number.MAX_VALUE,
+          reconnectInterval: 1000,
         } as mongoose.ConnectOptions);
-      const db = mongoose.connection;
-      db.on("error", () => {
-        console.log("connection error:");
+      }, {
+        maxRetries: 5,
+        retryDelay: 2000,
+        timeout: 15000
       });
-      db.once("open", () => {
+
+      // Setup connection monitoring
+      setupConnectionMonitoring();
+
+      // Initial health check
+      const isHealthy = await checkDatabaseHealth();
+      if (!isHealthy) {
+        throw new Error('Database health check failed after connection');
+      }
+
+      console.log(`Successfully connected to ${ellipsis(mongoDbUrl)}`);
+      mongoose.connection.once("open", () => {
         // we're connected!
         mongoose.set('debug', true)
         console.log(`we are connected to ${mongoDbUrl}`);

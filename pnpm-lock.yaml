@@ -74,6 +74,9 @@ importers:
       openai:
         specifier: ^4.85.2
         version: 4.85.2(ws@8.18.0)(zod@3.23.8)
+      opossum:
+        specifier: ^8.4.0
+        version: 8.4.0
       pdf-lib:
         specifier: ^1.17.1
         version: 1.17.1
@@ -1688,6 +1691,10 @@ packages:
         optional: true
       zod:
         optional: true
+
+  opossum@8.4.0:
+    resolution: {integrity: sha512-YYamqKu48bZCSTJKSWLLO4SSk8tKN2Gg2z1sJZVzHJYVObMO/xQpIzAh6re9HCMHRdB1dJvBjJH18DW7xYOicg==}
+    engines: {node: ^22 || ^21 || ^20 || ^18 || ^16}
 
   pac-proxy-agent@7.2.0:
     resolution: {integrity: sha512-TEB8ESquiLMc0lV8vcd5Ql/JAKAoyzHFXaStwjkzpOpC5Yv+pIzLfHvjTSdf3vpa2bMiUQrg9i6276yn8666aA==}
@@ -3901,6 +3908,8 @@ snapshots:
       zod: 3.23.8
     transitivePeerDependencies:
       - encoding
+
+  opossum@8.4.0: {}
 
   pac-proxy-agent@7.2.0:
     dependencies:
