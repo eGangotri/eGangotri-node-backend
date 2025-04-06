@@ -257,11 +257,22 @@ gDriveRoute.post('/verifyLocalDownloadSameAsGDrive', async (req: any, resp: any)
     console.log(`verifyLocalDownloadSameAsGDrive ${JSON.stringify(req.body)}`)
     try {
         const id = req?.body?.id || "";
-        const _gDriveDownload = await GDriveDownload.findById(id);
-        const googleDriveLink = _gDriveDownload?.googleDriveLink;
-        const folderOrProfile = _gDriveDownload?.fileDumpFolder;
-        const fileType = _gDriveDownload?.downloadType;
-        const ignoreFolder = _gDriveDownload?.ignoreFolder || GDRIVE_DEFAULT_IGNORE_FOLDER;
+        let googleDriveLink: string, folderOrProfile: string, fileType: string, ignoreFolder: string;
+        if (id) {
+            const _gDriveDownload = await GDriveDownload.findById(id);
+            googleDriveLink = _gDriveDownload?.googleDriveLink;
+            folderOrProfile = _gDriveDownload?.fileDumpFolder;
+            fileType = _gDriveDownload?.downloadType;
+            ignoreFolder = _gDriveDownload?.ignoreFolder || GDRIVE_DEFAULT_IGNORE_FOLDER;
+
+        }
+        else {
+            googleDriveLink = req?.body?.googleDriveLink;
+            folderOrProfile = req?.body?.profile;
+            fileType = req?.body?.downloadType;
+            ignoreFolder = GDRIVE_DEFAULT_IGNORE_FOLDER;
+        }
+
         const startTime = Date.now();
 
         if (!googleDriveLink || !folderOrProfile) {
