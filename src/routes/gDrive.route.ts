@@ -1,6 +1,10 @@
 import * as express from 'express';
-import { downloadFromGoogleDriveToProfile } from '../cliBased/googleapi/GoogleDriveApiReadAndDownload';
+import { downloadFromGoogleDriveToProfile, MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE } from '../cliBased/googleapi/GoogleDriveApiReadAndDownload';
 import { DOWNLOAD_COMPLETED_COUNT, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT } from '../cliBased/pdf/utils';
+import { listFolderContentsAsArrayOfData } from '../cliBased/googleapi/service/GoogleApiService';
+import { getGoogleDriveInstance } from '../cliBased/googleapi/service/CreateGoogleDrive';
+
+const drive = getGoogleDriveInstance();
 import { timeInfo } from '../mirror/FrontEndBackendCommonCode';
 import { PDF_TYPE, ZIP_TYPE } from '../cliBased/googleapi/_utils/constants';
 import { genLinksAndFolders, validateGenGDriveLinks } from '../services/yarnListMakerService';
@@ -15,7 +19,7 @@ import { getFolderInSrcRootForProfile } from '../archiveUpload/ArchiveProfileUti
 import * as path from 'path';
 import { markVerifiedForGDriveDownload } from '../services/gDriveDownloadService';
 import GDriveDownload from '../models/GDriveDownloadHistorySchema';
-import { FileStats } from 'imgToPdf/utils/types';
+import { extractGoogleDriveId } from '../mirror/GoogleDriveUtilsCommonCode';
 
 export const gDriveRoute = express.Router();
 
@@ -45,6 +49,33 @@ gDriveRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
         const profiles = profile.includes(",") ?
             profile.split(",").map((p: string) => p.trim()) :
             Array(links.length).fill(profile.trim());
+
+        // Check total file count across all links before proceeding
+        let totalFileCount = 0;
+        for (const link of links) {
+            const fileId = extractGoogleDriveId(link);
+            const googleDriveData = await listFolderContentsAsArrayOfData(fileId, drive, "", ignoreFolder, fileType);
+            if (googleDriveData.length > MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE) {
+                console.log(`:downloadFromGoogleDrive:googleDriveData.length > MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE: ${googleDriveData.length} > ${MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE}`)
+                return resp.status(400).send({
+                    response: {
+                        "status": "failed",
+                        "message": `Total ${fileType} files (${googleDriveData.length}) exceeds maximum limit of ${MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE}. Please download in smaller batches.`
+                    }
+                });
+            }
+            totalFileCount += googleDriveData.length;
+        }
+
+        if (totalFileCount > MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE) {
+            console.log(`:downloadFromGoogleDrive:totalFileCount > MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE: ${totalFileCount} > ${MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE}`)
+            return resp.status(400).send({
+                response: {
+                    "status": "failed",
+                    "message": `Total ${fileType} files (${totalFileCount}) exceeds maximum limit of ${MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE}. Please download in smaller batches.`
+                }
+            });
+        }
 
         const profilesAsFolders = profiles.map((p: string) => isValidPath(p) ? p : getFolderInSrcRootForProfile(p));
         const downloadCounterController = Math.random().toString(36).substring(7);
