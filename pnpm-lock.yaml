@@ -120,6 +120,9 @@ importers:
       '@types/node':
         specifier: 22.7.9
         version: 22.7.9
+      '@types/opossum':
+        specifier: ^8.1.8
+        version: 8.1.8
       '@types/pdfjs-dist':
         specifier: ^2.10.378
         version: 2.10.378
@@ -447,6 +450,9 @@ packages:
 
   '@types/node@22.7.9':
     resolution: {integrity: sha512-jrTfRC7FM6nChvU7X2KqcrgquofrWLFDeYC1hKfwNWomVvrn7JIksqf344WN2X/y8xrgqBd2dJATZV4GbatBfg==}
+
+  '@types/opossum@8.1.8':
+    resolution: {integrity: sha512-FTpWfHcpMgdLIdaTpL1D/nTlIH03T62RIQfzmwdEDAndYJwHDdUTkBvgXhaVp/zN74woiWEyb6DSNuZHPt1gmA==}
 
   '@types/pdfjs-dist@2.10.378':
     resolution: {integrity: sha512-TRdIPqdsvKmPla44kVy4jv5Nt5vjMfVjbIEke1CRULIrwKNRC4lIiZvNYDJvbUMNCFPNIUcOKhXTyMJrX18IMA==}
@@ -2571,6 +2577,10 @@ snapshots:
   '@types/node@22.7.9':
     dependencies:
       undici-types: 6.19.8
+
+  '@types/opossum@8.1.8':
+    dependencies:
+      '@types/node': 22.7.9
 
   '@types/pdfjs-dist@2.10.378':
     dependencies:
