@@ -15,7 +15,7 @@ import { GDriveDownloadHistoryStatus } from '../../utils/constants';
 import { checkFolderExistsAsync, createFolderIfNotExistsAsync } from '../../utils/FileUtils';
 import { getFolderNameFromGDrive } from './GoogleDriveApiReadAndExport';
 
-export const MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE = 200;
+export const MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE:number = Number(process.env.MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE || 200);
 // Create a new Google Drive instance
 const drive = getGoogleDriveInstance();
 
