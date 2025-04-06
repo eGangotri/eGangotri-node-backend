@@ -7,6 +7,7 @@ import { compareFolders } from '../folderSync';
 import { markUploadCycleAsMovedToFreeze } from '../services/uploadCycleService';
 import { unzipAllFilesInDirectory, verifyUnzipSuccessInDirectory } from '../services/zipService';
 import { FileMoveTracker } from '../models/FileMoveTracker';
+import { GDRIVE_DEFAULT_IGNORE_FOLDER } from 'services/GDriveService';
 
 export const yarnRoute = express.Router();
 
@@ -14,7 +15,7 @@ yarnRoute.post('/unzipAllFolders', async (req: any, resp: any) => {
     const startTime = Date.now();
     try {
         const folder = req?.body?.folder;
-        const ignoreFolder = req?.body?.ignoreFolder || "proc";
+        const ignoreFolder = req?.body?.ignoreFolder || GDRIVE_DEFAULT_IGNORE_FOLDER;
 
         console.log(`:unzipAllFolders:
         folders to unzip:
@@ -62,7 +63,7 @@ yarnRoute.post('/verifyUnzipAllFolders', async (req: any, resp: any) => {
     const startTime = Date.now();
     try {
         const folder = req?.body?.folder;
-        const ignoreFolder = req?.body?.ignoreFolder || "proc";
+        const ignoreFolder = req?.body?.ignoreFolder || GDRIVE_DEFAULT_IGNORE_FOLDER;
 
         console.log(`:verifyUnzipAllFolders:
         folders to unzip:

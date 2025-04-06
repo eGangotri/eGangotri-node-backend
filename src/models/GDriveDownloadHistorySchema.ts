@@ -37,6 +37,7 @@ export interface IGDriveDownload extends Document {
     fileDumpFolder: string;
     gDriveRootFolder: string;
     downloadType: string;
+    ignoreFolder: string;
     files: ICompositeDocument[];
     quickStatus: QuickStatus;
     verify: boolean;    
@@ -61,6 +62,7 @@ const GDriveDownloadHistorySchema: Schema = new Schema(
         gDriveRootFolder: { type: String, required: false },
         status: { type: String, enum: Object.values(GDriveDownloadHistoryStatus), default: 'queued' },
         msg: { type: String, required: false },
+        ignoreFolder: { type: String, required: false },
         downloadType: { type: String, required: true },
         files: { type: [CompositeDocumentSchema], required: true },
         quickStatus: { type: QuickStatusSchema, required: false },
