@@ -22,6 +22,27 @@ export interface GetAllFileStatsOptions {
     includeFolders?: boolean;
 }
 
+export async function getSingleFileStats(filePath: string, withLogs = false): Promise<FileStats[]> {
+    const _path = path.parse(filePath);
+    const rawSize = await Mirror.getFileSizeAsync(filePath) || 0;
+    
+    const fileStat: FileStats = {
+        rowCounter: 0,
+        absPath: filePath,
+        folder: _path.dir,
+        fileName: _path.base,
+        ext: path.extname(filePath),
+        rawSize,
+        size: Mirror.sizeInfo(rawSize),
+    }
+
+    if (withLogs) {
+        console.log(`File: ${ellipsis(fileStat.fileName, 40)} Size: ${fileStat.size}`);
+    }
+
+    return [fileStat];
+}
+
 export async function getAllFileStats({
     directoryPath,
     filterExt = [],

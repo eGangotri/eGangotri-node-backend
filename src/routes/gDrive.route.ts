@@ -17,7 +17,7 @@ import { markVerifiedForGDriveDownload } from '../services/gDriveDownloadService
 import GDriveDownload from '../models/GDriveDownloadHistorySchema';
 import { FileStats } from 'imgToPdf/utils/types';
 
-export const gDriveRoute = express.Router();    
+export const gDriveRoute = express.Router();
 
 //
 gDriveRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
@@ -62,10 +62,6 @@ gDriveRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
             return `(${index + 1}). Succ: ${res.success_count} Err: ${res.error_count} Wrong Size: ${res.dl_wrong_size_count}`;
         });
 
-        const endTime = Date.now();
-        const timeTaken = endTime - startTime;
-        console.log(`Time taken to download for /downloadFromGoogleDrive: ${timeInfo(timeTaken)}`);
-
         const rootFolders = await Promise.all(links.map(async (link: string) => await getFolderNameFromGDrive(link) || ""));
         const foldersWithRoot = profiles.map((folder: string, index: number) => {
             const fileDumpFolder = isValidPath(folder) ? folder : getFolderInSrcRootForProfile(folder);
@@ -80,6 +76,10 @@ gDriveRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
             const success = testResult.response.comparisonResult[i].success as boolean;
             await markVerifiedForGDriveDownload(gDriveDownloadTaskId, success);
         }
+
+        const endTime = Date.now();
+        const timeTaken = endTime - startTime;
+        console.log(`Time taken to download for /downloadFromGoogleDrive: ${timeInfo(timeTaken)}`);
 
         resp.status(200).send({
             msg: `${links.length} links attempted-download to ${profiles.length} profiles`,
