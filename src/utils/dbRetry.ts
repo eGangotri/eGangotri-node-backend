@@ -1,4 +1,4 @@
-import { CircuitBreaker } from 'opossum';
+import CircuitBreaker  from 'opossum';
 import mongoose from 'mongoose';
 import { logger } from './logger';
 

@@ -105,6 +105,7 @@
     "@types/lodash": "^4.17.15",
     "@types/mime-types": "^2.1.4",
     "@types/node": "22.7.9",
+    "@types/opossum": "^8.1.8",
     "@types/pdfjs-dist": "^2.10.378",
     "@types/pdfkit": "^0.12.12",
     "@types/uuid": "^8.3.4",
