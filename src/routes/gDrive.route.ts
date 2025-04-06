@@ -378,7 +378,7 @@ gDriveRoute.post('/redownloadFromGDrive', async (req: any, resp: any) => {
                 const downloadCounterController = Math.random().toString(36).substring(7);
                 const downloadPromises = failedGDriveItems.map((link: string, index: number) => {
                     console.log(`:redownloadFromGDrive:loop ${index + 1} ${link} ${localFailedFileFolders} ${ignoreFolder} ${fileType} ${downloadCounterController}`);
-                    return downloadFromGoogleDriveToProfile(link, localFailedFileFolders[index].folder, ignoreFolder, fileType, `${downloadCounterController}-${index}`);
+                    return downloadFromGoogleDriveToProfile(link, localFailedFileFolders[index]?.folder || folderOrProfile, ignoreFolder, fileType, `${downloadCounterController}-${index}`);
                 });
 
                 // Wait for all downloads to complete
