@@ -7,7 +7,7 @@ import { getAllFileStats } from '../utils/FileStatsUtils';
 import { PDF_EXT, ZIP_TYPE_EXT } from '../imgToPdf/utils/constants';
 import { FileStats } from '../imgToPdf/utils/types';
 
-export const GDRIVE_DEFAULT_IGNORE_FOLDER = GDRIVE_DEFAULT_IGNORE_FOLDER;
+export const GDRIVE_DEFAULT_IGNORE_FOLDER = "proc";
 
 export const verifyGDriveLocalIntegrity = async (_links: string[],
     _folders: string[],
