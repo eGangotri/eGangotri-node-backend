@@ -9,6 +9,7 @@ export const insertEntryForGDriveUploadHistory =
   profileOrPath: string, fileType: string,
    fileDumpFolder: string, 
    gDriveRootFolder: string,
+   ignoreFolder: string,
    msg: string) => {
   const insertInDB = await fetch(`${GDRIVE_DOWNLOAD_HISTORY_PATH}/createGDriveDownload`,
     {
@@ -23,6 +24,7 @@ export const insertEntryForGDriveUploadHistory =
         fileDumpFolder,
         msg,
         gDriveRootFolder,
+        ignoreFolder,
         files: []
       })
     }

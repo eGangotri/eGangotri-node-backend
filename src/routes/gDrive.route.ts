@@ -8,14 +8,16 @@ import { generateGoogleDriveListingExcel, getFolderNameFromGDrive } from '../cli
 import { formatTime } from '../imgToPdf/utils/Utils';
 import { convertGDriveExcelToLinkData, downloadGDriveData } from '../services/GDriveItemService';
 import { isValidPath } from '../utils/FileUtils';
-import { ComparisonResult, verifyGDriveLocalIntegrity } from '../services/GDriveService';
+import { ComparisonResult, GDRIVE_DEFAULT_IGNORE_FOLDER, verifyGDriveLocalIntegrity } from '../services/GDriveService';
 import * as FileConstUtils from '../utils/constants';
 import { verifyUnzipSuccessInDirectory } from '../services/zipService';
 import { getFolderInSrcRootForProfile } from '../archiveUpload/ArchiveProfileUtils';
 import * as path from 'path';
 import { markVerifiedForGDriveDownload } from '../services/gDriveDownloadService';
+import GDriveDownload from '../models/GDriveDownloadHistorySchema';
+import { FileStats } from 'imgToPdf/utils/types';
 
-export const gDriveRoute = express.Router();
+export const gDriveRoute = express.Router();    
 
 //
 gDriveRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
@@ -23,7 +25,7 @@ gDriveRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
     try {
         const googleDriveLink = req?.body?.googleDriveLink;
         const profile = req?.body?.profile;
-        const ignoreFolder = req?.body?.ignoreFolder || "proc";
+        const ignoreFolder = req?.body?.ignoreFolder || GDRIVE_DEFAULT_IGNORE_FOLDER;
         const fileType = req?.body?.fileType || PDF_TYPE;
 
         console.log(`:downloadFromGoogleDrive:
@@ -223,12 +225,14 @@ gDriveRoute.post('/downloadGDriveItemsViaExcel', async (req: any, resp: any) => 
 gDriveRoute.post('/verifyLocalDownloadSameAsGDrive', async (req: any, resp: any) => {
     console.log(`verifyLocalDownloadSameAsGDrive ${JSON.stringify(req.body)}`)
     try {
-        const googleDriveLink = req?.body?.googleDriveLink;
-        const folderOrProfile = req?.body?.folderOrProfile || "";
-        const ignoreFolder = req?.body?.ignoreFolder || "";
-        const fileType = req?.body?.fileType || PDF_TYPE;
-        const startTime = Date.now();
         const id = req?.body?.id || "";
+        const _gDriveDownload = await GDriveDownload.findById(id);
+        const googleDriveLink = _gDriveDownload?.googleDriveLink;
+        const folderOrProfile = _gDriveDownload?.fileDumpFolder;
+        const fileType = _gDriveDownload?.downloadType;
+        const ignoreFolder = _gDriveDownload?.ignoreFolder || GDRIVE_DEFAULT_IGNORE_FOLDER;
+        const startTime = Date.now();
+
         if (!googleDriveLink || !folderOrProfile) {
             return resp.status(400).send({
                 response: {
@@ -312,18 +316,19 @@ gDriveRoute.post('/verifyLocalDownloadSameAsGDrive', async (req: any, resp: any)
 gDriveRoute.post('/redownloadFromGDrive', async (req: any, resp: any) => {
     const startTime = Date.now();
     try {
-        const googleDriveLink = req?.body?.googleDriveLink;
-        const folderOrProfile = req?.body?.folderOrProfile || "";
-        const ignoreFolder = req?.body?.ignoreFolder || "";
-        const fileType = req?.body?.fileType || PDF_TYPE;
-        const startTime = Date.now();
         const id = req?.body?.id || "";
-        if (!googleDriveLink || !folderOrProfile) {
+        const _gDriveDownload = await GDriveDownload.findById(id);
+        const googleDriveLink = _gDriveDownload?.googleDriveLink;
+        const folderOrProfile = _gDriveDownload?.fileDumpFolder;
+        const fileType = _gDriveDownload?.downloadType;
+        const ignoreFolder = _gDriveDownload?.ignoreFolder || GDRIVE_DEFAULT_IGNORE_FOLDER;
+
+        if (!_gDriveDownload) {
             return resp.status(400).send({
                 response: {
                     "status": "failed",
                     "success": false,
-                    "msg": `Invalid Google Drive Link (${googleDriveLink}) or Folder/Profile (${folderOrProfile}). Pls. provide valid values`
+                    "msg": `Invalid Id(${id}). Pls. provide valid values`
                 }
             });
         }
@@ -348,20 +353,32 @@ gDriveRoute.post('/redownloadFromGDrive', async (req: any, resp: any) => {
 
             const _results = await verifyGDriveLocalIntegrity(_linksGen._links, foldersWithRoot2, ignoreFolder, fileType);
             console.log(`verifyLocalDownloadSameAsGDrive:foldersWithRoot: ${foldersWithRoot2}  ${rootFolders2}`);
-
-            const comparisonResult: ComparisonResult[] = _results.response.comparisonResult;
+            const resultResponse = _results.response;
+            const comparisonResult: ComparisonResult[] = resultResponse.comparisonResult;
             const success = comparisonResult.every(r => r.success);
             if (!success) {
-                const missedGdriveItems: string[] = comparisonResult.map((x) => x.missedGdriveItems);
-                const sizeMisMatchGdriveItems: string[] = comparisonResult.map((x) => x.sizeMisMatchGdriveItems);
+                const missedGdriveItems: string[] = comparisonResult.flatMap((x) => x.missedGdriveItems);
+                const sizeMisMatchGdriveItems: string[] = comparisonResult.flatMap((x) => x.sizeMisMatchGdriveItems);
                 //foldersWithRoot2
-                const allFailedItems = [...missedGdriveItems, ...sizeMisMatchGdriveItems];
-                const failedItems = allFailedItems.filter((item) => item !== "");
+                const allFailedGDriveItems = [...missedGdriveItems, ...sizeMisMatchGdriveItems];
+                const failedGDriveItems = allFailedGDriveItems.filter((item) => item !== "");
 
+                const failedFiles = comparisonResult.flatMap((x) => x.failedFiles);
+
+                const localFileFolders = resultResponse.localFileStats.flatMap(x => x);
+
+                console.log(`:redownloadFromGDrive:failedFiles: ${JSON.stringify(failedFiles)}`);
+                console.log(`:redownloadFromGDrive:localFileFolders: ${JSON.stringify(localFileFolders)}`);
+                console.log(`:redownloadFromGDrive:resultResponse.localFileStats: ${JSON.stringify(resultResponse.localFileStats)}`);
+
+                const localFailedFileFolders = localFileFolders.filter((file) => failedFiles.includes(file.fileName));
+                console.log(`:redownloadFromGDrive:localFailedFileFolders: ${JSON.stringify(localFailedFileFolders)}`);
+
+                console.log(`:redownloadFromGDrive:failedItems: ${failedGDriveItems}`);
                 const downloadCounterController = Math.random().toString(36).substring(7);
-                const downloadPromises = failedItems.map((link: string, index: number) => {
-                    console.log(`:redownloadFromGDrive:loop ${index + 1} ${link} ${foldersWithRoot2} ${ignoreFolder} ${fileType} ${downloadCounterController}`);
-                    return downloadFromGoogleDriveToProfile(link, foldersWithRoot2[index], ignoreFolder, fileType, `${downloadCounterController}-${index}`);
+                const downloadPromises = failedGDriveItems.map((link: string, index: number) => {
+                    console.log(`:redownloadFromGDrive:loop ${index + 1} ${link} ${localFailedFileFolders} ${ignoreFolder} ${fileType} ${downloadCounterController}`);
+                    return downloadFromGoogleDriveToProfile(link, localFailedFileFolders[index].folder, ignoreFolder, fileType, `${downloadCounterController}-${index}`);
                 });
 
                 // Wait for all downloads to complete
@@ -376,8 +393,8 @@ gDriveRoute.post('/redownloadFromGDrive', async (req: any, resp: any) => {
                 console.log(`Time taken to download for /redownloadFromGDrive: ${timeInfo(timeTaken)}`);
 
                 resp.status(200).send({
-                    msg: `${failedItems.length} links attempted-download to ${foldersWithRoot2.length} profiles`,
-                    failedItems,
+                    msg: `${failedGDriveItems.length} links attempted-download to ${foldersWithRoot2.length} profiles`,
+                    failedItems: failedGDriveItems,
                     timeTaken: timeInfo(timeTaken),
                     resultsSummary,
                     response: results

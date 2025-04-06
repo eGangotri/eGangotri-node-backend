@@ -7,9 +7,12 @@ import { getAllFileStats } from '../utils/FileStatsUtils';
 import { PDF_EXT, ZIP_TYPE_EXT } from '../imgToPdf/utils/constants';
 import { FileStats } from '../imgToPdf/utils/types';
 
+export const GDRIVE_DEFAULT_IGNORE_FOLDER = GDRIVE_DEFAULT_IGNORE_FOLDER;
+
 export const verifyGDriveLocalIntegrity = async (_links: string[],
     _folders: string[],
-    ignoreFolder: string, fileType: string
+    ignoreFolder: string = GDRIVE_DEFAULT_IGNORE_FOLDER,
+    fileType: string
 ) => {
     const startTime = Date.now();
     const results = await Promise.all(
@@ -24,7 +27,7 @@ export const verifyGDriveLocalIntegrity = async (_links: string[],
             const gDriveStats = await getGDriveContentsAsJson(link, "", ignoreFolder, fileType);
             const localStats = await getAllFileStats({
                 directoryPath: path.normalize(_folders[index]),
-                filterExt: fileType === PDF_EXT ? [PDF_EXT] : (ZIP_TYPE_EXT.includes(fileType) ? ZIP_TYPE_EXT : []),
+                filterExt: (fileType === PDF_TYPE || PDF_EXT.includes(fileType)) ? [PDF_EXT] : (fileType === ZIP_TYPE || ZIP_TYPE_EXT.includes(fileType) ? ZIP_TYPE_EXT : []),
                 ignorePaths: [ignoreFolder],
                 withLogs: true,
                 withMetadata: true,
@@ -70,11 +73,16 @@ export interface ComparisonResult {
     failedCount: number,
     gDriveFileTotal: number,
     localFileTotal: number,
-    missedGdriveItems: string,
-    sizeMisMatchGdriveItems: string,
-    failedMsgs: string,
-    failedFiles: string,
-    successMsgs: string,
+    missedGdriveItems: string[],
+    sizeMisMatchGdriveItems: string[],
+    failedMsgs: string[],
+    failedFiles: string[],
+    successMsgs: string[],
+    failedMsgsCount: number,
+    failedFilesCount: number,
+    successMsgsCount: number,
+    missedGdriveItemsCount: number,
+    sizeMisMatchGdriveItemsCount: number,
 }
 
 export const compareGDriveLocalJson = (
@@ -167,10 +175,15 @@ export const compareGDriveLocalJson = (
         failedCount: failedMsgs.length,
         gDriveFileTotal,
         localFileTotal,
-        missedGdriveItems: `Missed GDrive Items(${missedGdriveItems?.length})` + missedGdriveItems,
-        sizeMisMatchGdriveItems: `Mismatched GDrive Items(${sizeMisMatchGdriveItems?.length})` + sizeMisMatchGdriveItems,
-        failedMsgs: `Failed Msgs(${failedMsgs?.length})` + failedMsgs,
-        failedFiles: `Failed Files(${failedFiles?.length})` + failedFiles,
-        successMsgs: `Success Msgs(${successMsgs?.length})` + successMsgs,
+        failedMsgsCount: failedMsgs?.length || 0,
+        failedFilesCount: failedFiles?.length || 0,
+        successMsgsCount: successMsgs?.length || 0,
+        missedGdriveItems: missedGdriveItems,
+        missedGdriveItemsCount: missedGdriveItems?.length || 0,
+        sizeMisMatchGdriveItems: sizeMisMatchGdriveItems,
+        sizeMisMatchGdriveItemsCount: sizeMisMatchGdriveItems?.length || 0,
+        failedMsgs: failedMsgs,
+        failedFiles: failedFiles,
+        successMsgs: successMsgs,
     };
 };
