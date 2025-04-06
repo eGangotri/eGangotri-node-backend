@@ -11,27 +11,50 @@ import * as FileConstUtils from '../../../utils/constants';
 import { extractGoogleDriveId } from '../../../mirror/GoogleDriveUtilsCommonCode';
 import { constructGoogleApiQuery } from '../Utils';
 
-export async function listFolderContentsAsArrayOfData(folderId: string,
+export async function listFolderContentsAsArrayOfData(itemId: string,
     drive: drive_v3.Drive,
     umbrellaFolder: string = "",
     ignoreFolder = "",
     fileType = PDF_TYPE,
     rowCounterController = "") {
 
-    const rootFolderName = await getFolderName(folderId, drive) || "";
-    const _umbrellaFolder = umbrellaFolder?.length > 0 ? umbrellaFolder : rootFolderName;
+    // First check if the itemId is a folder or a file
+    const fileMetadata = await drive.files.get({
+        fileId: itemId,
+        fields: 'mimeType,name',
+        supportsAllDrives: true
+    });
 
-    console.log(`drive api folder metadata extraction process initiated: \
-    Umbrella Folder (${_umbrellaFolder}) 
-    Folder Id ${folderId} 
-    rootFolderName ${rootFolderName}.\n`)
-
-    const googleDriveFileData: Array<GoogleApiData> = []
+    console.log(`fileMetadata ${JSON.stringify(fileMetadata)}`)
+    const googleDriveFileData: Array<GoogleApiData> = [];
     let idFolderNameMap = new Map<string, string>();
 
-    await listFolderContents(folderId, drive, umbrellaFolder, 
-        googleDriveFileData, idFolderNameMap, rootFolderName,
-         ignoreFolder, fileType,rowCounterController);
+    if (fileMetadata.data?.mimeType === FOLDER_MIME_TYPE) {
+        // Handle folder case
+        const rootFolderName = fileMetadata.data.name || "";
+        const _umbrellaFolder = umbrellaFolder?.length > 0 ? umbrellaFolder : rootFolderName;
+
+        console.log(`drive api folder metadata extraction process initiated: \
+        Umbrella Folder (${_umbrellaFolder}) 
+        Folder Id ${itemId} 
+        rootFolderName ${rootFolderName}.\n`);
+
+        await listFolderContents(itemId, drive, umbrellaFolder,
+            googleDriveFileData, idFolderNameMap, rootFolderName,
+            ignoreFolder, fileType, rowCounterController);
+    } else  {
+        // Handle single file case
+        const file = await drive.files.get({
+            fileId: itemId,
+            fields: 'id, name, mimeType, size, parents, webViewLink, thumbnailLink, createdTime',
+            supportsAllDrives: true
+        });
+        
+        if (file.data) {
+            addFileMetadataToArray(file.data, file.data.parents?.[0] || '', googleDriveFileData, idFolderNameMap, rowCounterController);
+        }
+    } 
+
     return googleDriveFileData
 }
 
