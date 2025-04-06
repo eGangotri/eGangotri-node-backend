@@ -342,6 +342,7 @@ gDriveRoute.post('/redownloadFromGDrive', async (req: any, resp: any) => {
             const rootFolders2 = await Promise.all(_linksGen._links.map(async (link) => await getFolderNameFromGDrive(link) || ""));
             const foldersWithRoot2 = _linksGen._folders.map((folder, index) => {
                 const fileDumpFolder = isValidPath(folder) ? folder : getFolderInSrcRootForProfile(folder);
+                console.log(`:redownloadFromGDrive:loop ${index + 1} ${_linksGen._links[index]} ${folder} ${fileDumpFolder} ${ignoreFolder} ${fileType}`);
                 return path.join(fileDumpFolder, rootFolders2[index]);
             });
 
