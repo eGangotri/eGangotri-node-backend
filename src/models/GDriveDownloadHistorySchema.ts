@@ -71,6 +71,17 @@ const GDriveDownloadHistorySchema: Schema = new Schema(
     {
         timestamps: true,
         collection: 'GDriveDownloadHistory',
+        // Add indexes for frequently queried fields
+        indexes: [
+            { googleDriveLink: 1 },
+            { status: 1 },
+            { createdAt: -1 },
+            { profileNameOrAbsPath: 1 },
+            { downloadType: 1 },
+            // Compound indexes for common query patterns
+            { status: 1, createdAt: -1 },
+            { googleDriveLink: 1, status: 1 }
+        ]
     }
 );
 

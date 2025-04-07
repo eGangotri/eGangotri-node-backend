@@ -1,4 +1,4 @@
-export const MAX_ITEMS_LISTABLE=2500
+export const MAX_ITEMS_LISTABLE=250;
 export const DEFAULT_DAYS_BEFORE_CURRENT_FOR_SEARCH=1
 
 export const FOLDER = "FOLDER"

@@ -11,11 +11,33 @@ import { ellipsis } from "../mirror/utils";
 import { IItemsQueued } from "models/itemsQueued";
 
 export async function getListOfItemsUshered(queryOptions: ItemsListOptionsType) {
-  const { limit, mongoOptionsFilter } = setOptionsForItemListing(queryOptions)
-  const items = await ItemsUshered.find(mongoOptionsFilter)
-    .sort({ createdAt: -1 })
-    .limit(limit);
-  return items;
+  try {
+    const { limit, mongoOptionsFilter } = setOptionsForItemListing(queryOptions)
+    const page = queryOptions?.page || 1;
+    const skip = (page - 1) * limit;
+
+    // First get total count without timeout
+    const totalCount = await ItemsUshered.countDocuments(mongoOptionsFilter);
+    console.log(`Total documents matching filter: ${totalCount}`);
+
+    // Then get paginated results with increased timeout
+    const items = await ItemsUshered.find(mongoOptionsFilter)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .maxTimeMS(60000)  // Increase timeout to 60 seconds
+      .lean()  // Convert to plain JavaScript objects
+      .exec(); // Force execution of the query
+
+    console.log(`Retrieved ${items.length} items for page ${page}`);
+    return items;
+  } catch (error: any) {
+    console.error('Error in getListOfItemsUshered:', error.message);
+    if (error.message.includes('buffering timed out')) {
+      console.error('Query timed out. Consider using smaller page sizes or adding more specific filters.');
+    }
+    throw error;
+  }
 }
 
 export const itemsUsheredVerficationAndDBFlagUpdate = async (uploadCycleIdForVerification: string) => {
