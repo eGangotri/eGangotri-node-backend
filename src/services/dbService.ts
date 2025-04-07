@@ -107,17 +107,12 @@ export async function connectToMongo(_args: string[] = []) {
     try {
       await withRetry(async () => {
         await mongoose.connect(mongoDbUrl, {
-          socketTimeoutMS: 100000,
-          useUnifiedTopology: true,
-          serverSelectionTimeoutMS: 5000,
+          socketTimeoutMS: 300000, // 5 minutes
+          serverSelectionTimeoutMS: 60000, // 1 minute
           heartbeatFrequencyMS: 30000,
-          retryWrites: true,
-          retryReads: true,
-          maxPoolSize: 10,
-          minPoolSize: 2,
-          autoReconnect: true,
-          reconnectTries: Number.MAX_VALUE,
-          reconnectInterval: 1000,
+          maxPoolSize: 20,
+          minPoolSize: 5,
+          connectTimeoutMS: 60000, // 1 minute
         } as mongoose.ConnectOptions);
       }, {
         maxRetries: 5,

@@ -168,13 +168,13 @@ gDriveDownloadRoute.post("/updateEmbeddedFileByFileNameV2/:id", async (req: Requ
 gDriveDownloadRoute.get("/getGDriveDownloads", async (req: Request, res: Response) => {
     try {
         const page = Number.parseInt(req.query.page as string) || 1
-        const limit = Number.parseInt(req.query.limit as string) || 10
+        const limit = Number.parseInt(req.query.limit as string) || 20
         const skip = (page - 1) * limit
 
         const gdriveDownloads: IGDriveDownload[] = await GDriveDownload.find()
             .sort({ createdAt: -1 })
             .skip(skip)
-            .limit(100);
+            .limit(limit);
 
         const total = await GDriveDownload.countDocuments()
         const results = {

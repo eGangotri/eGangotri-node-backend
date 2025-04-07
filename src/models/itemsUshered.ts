@@ -32,4 +32,7 @@ const schema = new mongoose.Schema<IItemsUshered>(
     }
 );
 
+// Add index for sorting optimization
+schema.index({ createdAt: -1 });
+
 export const ItemsUshered = mongoose.model<IItemsUshered>(DOC_NAME, schema);
