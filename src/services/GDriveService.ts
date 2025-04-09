@@ -144,7 +144,10 @@ export const compareGDriveLocalJson = (
             ? gDriveItem.parents.substring(rootFolderName.length + 1)
             : gDriveItem.parents;
             
-        gDriveItem.localAbsPath = path.join(folderWithRootNormalized, relativePath, normalizedFileName);
+        const localItemTentativeLocation = path.join(folderWithRootNormalized, relativePath, normalizedFileName);
+        
+        gDriveItem.localAbsPath = localItemTentativeLocation;
+
         console.log(`gDriveItem.localAbsPath: ${gDriveItem.localAbsPath}`);
         if (!localItems || localItems.length === 0) {
             console.log(`❌ File not found locally: ${normalizedFileName}`);
