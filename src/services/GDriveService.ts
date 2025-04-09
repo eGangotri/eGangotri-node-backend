@@ -157,30 +157,51 @@ export const compareGDriveLocalJson = (
             return;
         }
 
-        // Compare file sizes with all matching local files
+        // First try to find an exact match by full path and size
         const gDriveSize = parseInt(gDriveItem.fileSizeRaw);
+        const exactPathMatch = localItems.find(localItem => 
+            localItem.folder === path.dirname(localItemTentativeLocation) && 
+            localItem.rawSize === gDriveSize
+        );
+
+        if (exactPathMatch) {
+            // Found exact match in both path and size
+            console.log(`✅ Found exact match for ${normalizedFileName} at ${exactPathMatch.folder}`);
+            successMsgs.push(
+                `Exact match: ${normalizedFileName} ` +
+                `(Size: ${gDriveSize} bytes, Location: ${exactPathMatch.folder})`
+            );
+            return;
+        }
+
+        // If no exact path match, check for size matches in any location
         const matchingSizeFiles = localItems.filter(localItem => localItem.rawSize === gDriveSize);
 
         if (matchingSizeFiles.length === 0) {
-            console.log(`❌ Size mismatch for all local copies of ${normalizedFileName}`);
+            console.log(`❌ Size mismatch for all copies of ${normalizedFileName}`);
+            console.log(`  Expected location: ${path.dirname(localItemTentativeLocation)}`);
             localItems.forEach(localItem => {
-                console.log(`  Local copy at ${localItem.folder}: ${localItem.rawSize} bytes`);
+                console.log(`  Found at ${localItem.folder}: ${localItem.rawSize} bytes`);
             });
             console.log(`  Google Drive size: ${gDriveSize} bytes`);
             failedMsgs.push(
                 `File size mismatch: ${normalizedFileName} ` +
-                `(GDrive: ${gDriveSize} bytes != Local: ${localItems.map(l => l.rawSize).join('/ ')} bytes)`
+                `(Expected at: ${path.dirname(localItemTentativeLocation)}, ` +
+                `GDrive: ${gDriveSize} bytes, Found in wrong locations with sizes: ${localItems.map(l => `${l.folder}:${l.rawSize}`).join(', ')})`
             );
             failedFiles.push(normalizedFileName);
             sizeMisMatchGdriveItems.push(gDriveItem.googleDriveLink);
         } else {
-            console.log(`✅ Found ${matchingSizeFiles.length} matching copies of ${normalizedFileName}`);
+            // Found size matches but in different locations
+            console.log(`⚠️ Found ${matchingSizeFiles.length} size-matching copies of ${normalizedFileName} but in different locations:`);
+            console.log(`  Expected location: ${path.dirname(localItemTentativeLocation)}`);
             matchingSizeFiles.forEach(match => {
-                console.log(`  Matching copy at: ${match.folder}`);
+                console.log(`  Found at: ${match.folder}`);
             });
             successMsgs.push(
-                `File match: ${normalizedFileName} ` +
-                `(Size: ${gDriveSize} bytes, Found in ${matchingSizeFiles.length} location(s))`
+                `Size match in different location: ${normalizedFileName} ` +
+                `(Expected at: ${path.dirname(localItemTentativeLocation)}, ` +
+                `Found ${matchingSizeFiles.length} copies with matching size in: ${matchingSizeFiles.map(m => m.folder).join(', ')})`
             );
         }
     });
