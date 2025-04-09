@@ -9,6 +9,10 @@ export interface GoogleApiData {
     thumbnailLink: string,
 }
 
+export interface GoogleApiDataWithLocalData extends GoogleApiData {
+    localAbsPath?: string
+}
+
 export interface GDriveExcelHeaders {
     "S.No": number | string;
     "Title in Google Drive": string;
