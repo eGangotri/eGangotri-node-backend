@@ -169,7 +169,7 @@ export const downloadFromGoogleDriveToProfile = async (driveLinkOrFolderId: stri
   ignoreFolder = "",
   fileType = PDF_TYPE,
   downloadCounterController = "",
-  gDriveDownloadTaskId = "0") => {
+  gDriveDownloadTaskId: string) => {
   const fileDumpFolder = isValidPath(profileOrPath) ? profileOrPath : getFolderInSrcRootForProfile(profileOrPath);
   console.log(`downloadFromGoogleDriveToProfile:fileDumpFolder ${fileDumpFolder}`)
   try {
@@ -177,7 +177,7 @@ export const downloadFromGoogleDriveToProfile = async (driveLinkOrFolderId: stri
       const gDriveRootFolder = await getFolderNameFromGDrive(driveLinkOrFolderId) || "";
       console.log(`downloadFromGoogleDriveToProfile:gDriveRootFolder ${gDriveRootFolder}`)
 
-      if (gDriveDownloadTaskId !== "0") {
+      if (!gDriveDownloadTaskId) {
         gDriveDownloadTaskId = await insertEntryForGDriveUploadHistory(driveLinkOrFolderId, profileOrPath,
           fileType, fileDumpFolder,
           gDriveRootFolder, ignoreFolder, `Initiated Downloading ${driveLinkOrFolderId} /${gDriveRootFolder}`);
