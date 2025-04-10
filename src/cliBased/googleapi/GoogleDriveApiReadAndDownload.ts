@@ -15,7 +15,7 @@ import { GDriveDownloadHistoryStatus } from '../../utils/constants';
 import { checkFolderExistsAsync, createFolderIfNotExistsAsync } from '../../utils/FileUtils';
 import { getFolderNameFromGDrive } from './GoogleDriveApiReadAndExport';
 
-export const MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE:number = Number(process.env.MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE || 200);
+export const MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE: number = Number(process.env.MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE || 200);
 // Create a new Google Drive instance
 const drive = getGoogleDriveInstance();
 
@@ -167,18 +167,21 @@ export const addHeaderFooterToPDFsInProfile = async (profile: string) => {
 export const downloadFromGoogleDriveToProfile = async (driveLinkOrFolderId: string,
   profileOrPath: string,
   ignoreFolder = "",
-  fileType = PDF_TYPE, downloadCounterController = "") => {
+  fileType = PDF_TYPE,
+  downloadCounterController = "",
+  gDriveDownloadTaskId = "0") => {
   const fileDumpFolder = isValidPath(profileOrPath) ? profileOrPath : getFolderInSrcRootForProfile(profileOrPath);
   console.log(`downloadFromGoogleDriveToProfile:fileDumpFolder ${fileDumpFolder}`)
-  let gDriveDownloadTaskId = "0"
   try {
     if (await checkFolderExistsAsync(fileDumpFolder)) {
       const gDriveRootFolder = await getFolderNameFromGDrive(driveLinkOrFolderId) || "";
       console.log(`downloadFromGoogleDriveToProfile:gDriveRootFolder ${gDriveRootFolder}`)
 
-      gDriveDownloadTaskId = await insertEntryForGDriveUploadHistory(driveLinkOrFolderId, profileOrPath,
-        fileType, fileDumpFolder,
-        gDriveRootFolder, ignoreFolder,`Initiated Downloading ${driveLinkOrFolderId} /${gDriveRootFolder}`);
+      if (gDriveDownloadTaskId !== "0") {
+        gDriveDownloadTaskId = await insertEntryForGDriveUploadHistory(driveLinkOrFolderId, profileOrPath,
+          fileType, fileDumpFolder,
+          gDriveRootFolder, ignoreFolder, `Initiated Downloading ${driveLinkOrFolderId} /${gDriveRootFolder}`);
+      }
       const _results = await dwnldAllFilesFromGDrive(driveLinkOrFolderId, "",
         fileDumpFolder, ignoreFolder, fileType, gDriveDownloadTaskId, downloadCounterController);
 
