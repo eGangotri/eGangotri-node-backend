@@ -10,7 +10,8 @@ export interface GoogleApiData {
 }
 
 export interface GoogleApiDataWithLocalData extends GoogleApiData {
-    localAbsPath?: string
+    localAbsPath?: string;
+    success?: boolean;
 }
 
 export interface GDriveExcelHeaders {

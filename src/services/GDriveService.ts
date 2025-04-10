@@ -140,6 +140,7 @@ export const compareGDriveLocalJson = (
             failedMsgs.push(`File not found locally: ${normalizedFileName} (expected at ${gDriveItem.parents}/${normalizedFileName})`);
             failedFiles.push(normalizedFileName);
             missedGdriveItems.push(gDriveItem.googleDriveLink);
+            gDriveItem.success = false;
             return;
         }
 
@@ -154,6 +155,7 @@ export const compareGDriveLocalJson = (
                 `Exact match: ${normalizedFileName} ` +
                 `(Size: ${gDriveSize} bytes, Location: ${localItemTentativeLocation})`
             );
+            gDriveItem.success = true;
             return;
         }
 
@@ -168,10 +170,11 @@ export const compareGDriveLocalJson = (
             );
             failedFiles.push(normalizedFileName);
             sizeMisMatchGdriveItems.push(gDriveItem.googleDriveLink);
+            gDriveItem.success = false;
         } 
     });
 
-    // Check for extra local files that don't exist in Google Drive
+    // will fail for non unique file names
     const gDriveFileNames = new Set(
         googleDriveFileData.map(item => item.fileName.trim())
     );
