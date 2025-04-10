@@ -20,6 +20,7 @@ import * as path from 'path';
 import { markVerifiedForGDriveDownload } from '../services/gDriveDownloadService';
 import GDriveDownload from '../models/GDriveDownloadHistorySchema';
 import { extractGoogleDriveId } from '../mirror/GoogleDriveUtilsCommonCode';
+import { GoogleApiDataWithLocalData } from '../cliBased/googleapi/types';
 
 export const gDriveRoute = express.Router();
 
@@ -417,11 +418,19 @@ gDriveRoute.post('/redownloadFromGDrive', async (req: any, resp: any) => {
                 console.log(`:redownloadFromGDrive:localFailedFileFolders: ${JSON.stringify(localFailedFileFolders)}`);
 
                 console.log(`:redownloadFromGDrive:failedItems: ${failedGDriveItems}`);
-                const downloadCounterController = _gDriveDownload?.id;
-                const downloadPromises = failedGDriveItems.map((link: string, index: number) => {
-                    console.log(`:redownloadFromGDrive:loop ${index + 1} ${link} ${localFailedFileFolders} ${ignoreFolder} ${fileType} ${downloadCounterController}`);
-                    return downloadFromGoogleDriveToProfile(link, localFailedFileFolders[index]?.folder || folderOrProfile, ignoreFolder, fileType, `${downloadCounterController}-${index}`, _gDriveDownload?.id);
+                const gDriveData: GoogleApiDataWithLocalData[] = resultResponse.googleDriveFileStats.flatMap((gDriveData: GoogleApiDataWithLocalData[]) => {
+                    return [...gDriveData];
                 });
+
+                const downloadPromises = gDriveData.map((gDriveData: GoogleApiDataWithLocalData, index: number) => {
+                    console.log(`:redownloadFromGDrive:loop ${index + 1} ${gDriveData.googleDriveLink} ${localFailedFileFolders} ${ignoreFolder} ${fileType} ${downloadCounterController}`);
+                    return downloadFromGoogleDriveToProfile(gDriveData.googleDriveLink, gDriveData.localAbsPath, ignoreFolder, fileType, `${downloadCounterController}-${index}`, _gDriveDownload?.id);
+                });
+
+                // const downloadPromises = failedGDriveItems.map((link: string, index: number) => {
+                //     console.log(`:redownloadFromGDrive:loop ${index + 1} ${link} ${localFailedFileFolders} ${ignoreFolder} ${fileType} ${downloadCounterController}`);
+                //     return downloadFromGoogleDriveToProfile(link, localFailedFileFolders[index]?.folder || folderOrProfile, ignoreFolder, fileType, `${downloadCounterController}-${index}`, _gDriveDownload?.id);
+                // });
 
                 // Wait for all downloads to complete
                 const results = await Promise.all(downloadPromises);
