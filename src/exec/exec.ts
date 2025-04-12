@@ -1,6 +1,9 @@
 import { exec } from 'child_process';
+import { promisify } from 'util';
 import { ReuploadType } from '../types/listingTypes';
 import * as _ from 'lodash';
+
+export const execPromise = promisify(exec);
 
 //const command = "gradle uploadToArchive";  
 const command = "" //'gradle loginToArchive --args="SPS VT  PANINI"';
