@@ -13,7 +13,8 @@ export const GDRIVE_DEFAULT_IGNORE_FOLDER = "proc";
 export const verifyGDriveLocalIntegrity = async (_links: string[],
     foldersWithRoot2: string[],
     ignoreFolder: string = GDRIVE_DEFAULT_IGNORE_FOLDER,
-    fileType: string
+    fileType: string,
+    sizeOnly: boolean = false
 ) => {
     const startTime = Date.now();
     const results = await Promise.all(
@@ -55,12 +56,10 @@ export const verifyGDriveLocalIntegrity = async (_links: string[],
             }
 
             return {
-                comparison: compareGDriveLocalJson(gDriveStats, localStats, _folderWithRoot),
+                comparison: sizeOnly ? compareGDriveLocalJsonBySize(gDriveStats, localStats) : compareGDriveLocalJson(gDriveStats, localStats, _folderWithRoot),
                 gDriveStats,
                 localStats,
             };
-
-
         })
     );
 
@@ -80,6 +79,73 @@ export const verifyGDriveLocalIntegrity = async (_links: string[],
         }
     };
 }
+
+export const compareGDriveLocalJsonBySize = (
+    googleDriveFileData: GoogleApiDataWithLocalData[],
+    localFileStats: FileStats[]
+): ComparisonResult => {
+    const failedMsgs: string[] = [];
+    const failedFiles: string[] = [];
+    const successMsgs: string[] = [];
+    const missedGdriveItems: string[] = [];
+    const sizeMisMatchGdriveItems: string[] = [];
+
+    const gDriveFileTotal = googleDriveFileData.length;
+    const localFileTotal = localFileStats.length;
+
+    // Create arrays of just the sizes
+    const gDriveSizes = googleDriveFileData.map(file => parseInt(file.fileSizeRaw)).sort((a, b) => a - b);
+    const localSizes = localFileStats.map(file => file.rawSize).sort((a, b) => a - b);
+
+    // Compare sizes arrays
+    const sizeMap = new Map<number, number>();
+    
+    // Count occurrences of each size in local files
+    localSizes.forEach(size => {
+        sizeMap.set(size, (sizeMap.get(size) || 0) + 1);
+    });
+
+    // Compare with GDrive files
+    googleDriveFileData.forEach(gDriveItem => {
+        const gDriveSize = parseInt(gDriveItem.fileSizeRaw);
+        
+        if (sizeMap.has(gDriveSize) && sizeMap.get(gDriveSize)! > 0) {
+            // Found a matching size
+            successMsgs.push(`Found size match: ${gDriveSize} bytes`);
+            sizeMap.set(gDriveSize, sizeMap.get(gDriveSize)! - 1);
+            gDriveItem.success = true;
+        } else {
+            // No matching size found
+            failedMsgs.push(`No matching size found for file of ${gDriveSize} bytes`);
+            sizeMisMatchGdriveItems.push(gDriveItem.googleDriveLink);
+            gDriveItem.success = false;
+        }
+    });
+
+    // Check for extra local files
+    sizeMap.forEach((count, size) => {
+        if (count > 0) {
+            failedMsgs.push(`Extra local file(s) found with size: ${size} bytes`);
+        }
+    });
+
+    return {
+        success: failedMsgs.length === 0,
+        failedCount: failedMsgs.length,
+        gDriveFileTotal,
+        localFileTotal,
+        failedMsgsCount: failedMsgs.length,
+        failedFilesCount: failedFiles.length,
+        successMsgsCount: successMsgs.length,
+        missedGdriveItems,
+        missedGdriveItemsCount: missedGdriveItems.length,
+        sizeMisMatchGdriveItems,
+        sizeMisMatchGdriveItemsCount: sizeMisMatchGdriveItems.length,
+        failedMsgs,
+        failedFiles,
+        successMsgs
+    };
+};
 
 export interface ComparisonResult {
     [key: string]: string[] | string | number | boolean;
