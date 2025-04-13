@@ -259,8 +259,9 @@ gDriveRoute.post('/verifyLocalDownloadSameAsGDrive', async (req: any, resp: any)
     console.log(`verifyLocalDownloadSameAsGDrive ${JSON.stringify(req.body)}`)
     try {
         const id = req?.body?.id || "";
+        const verifyBySizeOnly = req?.body?.verifyBySizeOnly || false;
         let googleDriveLink: string, folderOrProfile: string, fileType: string, ignoreFolder: string;
-        if (id) {
+        if (id && id !== "") {
             const _gDriveDownload = await GDriveDownload.findById(id);
             googleDriveLink = _gDriveDownload?.googleDriveLink;
             folderOrProfile = _gDriveDownload?.fileDumpFolder;
@@ -272,7 +273,7 @@ gDriveRoute.post('/verifyLocalDownloadSameAsGDrive', async (req: any, resp: any)
             googleDriveLink = req?.body?.googleDriveLink;
             folderOrProfile = req?.body?.profile;
             fileType = req?.body?.downloadType;
-            ignoreFolder = GDRIVE_DEFAULT_IGNORE_FOLDER;
+            ignoreFolder = req?.body?.ignoreFolder || GDRIVE_DEFAULT_IGNORE_FOLDER;
         }
 
         const startTime = Date.now();
@@ -305,7 +306,7 @@ gDriveRoute.post('/verifyLocalDownloadSameAsGDrive', async (req: any, resp: any)
             });
 
             console.log(`verifyLocalDownloadSameAsGDrive:foldersWithRoot: ${foldersWithRoot}  ${rootFolders}`);
-            const _results = await verifyGDriveLocalIntegrity(_linksGen._links, foldersWithRoot, ignoreFolder, fileType);
+            const _results = await verifyGDriveLocalIntegrity(_linksGen._links, foldersWithRoot, ignoreFolder, fileType, verifyBySizeOnly);
             const endTime = Date.now();
             const timeTaken = endTime - startTime;
 
