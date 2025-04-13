@@ -310,40 +310,48 @@ gDriveRoute.post('/verifyLocalDownloadSameAsGDrive', async (req: any, resp: any)
             const endTime = Date.now();
             const timeTaken = endTime - startTime;
 
-            const success = _results.response.comparisonResult.every(r => r.success);
-            await markVerifiedForGDriveDownload(id, success);
-            if (fileType === ZIP_TYPE) {
-                // Get the unzip verification results
-                const unzipResults = await Promise.all(foldersWithRoot.map(async (folder) => {
-                    const result = await verifyUnzipSuccessInDirectory(folder, "", ignoreFolder);
-                    return {
+            if (id && id !== "") {
+                const success = _results.response.comparisonResult.every(r => r.success);
+                await markVerifiedForGDriveDownload(id, success);
+                if (fileType === ZIP_TYPE) {
+                    // Get the unzip verification results
+                    const unzipResults = await Promise.all(foldersWithRoot.map(async (folder) => {
+                        const result = await verifyUnzipSuccessInDirectory(folder, "", ignoreFolder);
+                        return {
+                            success,
+                            folder,
+                            ...result
+                        };
+                    }));
+    
+                    // Add unzip verification results to the response
+                    const response = {
                         success,
-                        folder,
-                        ...result
+                        ..._results,
+                        timeTaken: timeInfo(timeTaken),
+                        unzipVerification: {
+                            totalSuccessCount: unzipResults.reduce((sum, r) => sum + r.success_count, 0),
+                            totalErrorCount: unzipResults.reduce((sum, r) => sum + r.error_count, 0),
+                            resultsByFolder: unzipResults.map(result => ({
+                                folder: result.folder,
+                                successCount: result.success_count,
+                                errorCount: result.error_count,
+                                unzipFolder: result.unzipFolder,
+                                zipFilesFailed: result.zipFilesFailed
+                            }))
+                        }
                     };
-                }));
-
-                // Add unzip verification results to the response
-                const response = {
-                    success,
-                    ..._results,
-                    timeTaken: timeInfo(timeTaken),
-                    unzipVerification: {
-                        totalSuccessCount: unzipResults.reduce((sum, r) => sum + r.success_count, 0),
-                        totalErrorCount: unzipResults.reduce((sum, r) => sum + r.error_count, 0),
-                        resultsByFolder: unzipResults.map(result => ({
-                            folder: result.folder,
-                            successCount: result.success_count,
-                            errorCount: result.error_count,
-                            unzipFolder: result.unzipFolder,
-                            zipFilesFailed: result.zipFilesFailed
-                        }))
-                    }
-                };
-                resp.status(200).send(response);
-
+                    resp.status(200).send(response);
+    
+                }
+    
+                else {
+                    resp.status(200).send({
+                        ..._results,
+                        timeTaken: timeInfo(timeTaken)
+                    });
+                }
             }
-
             else {
                 resp.status(200).send({
                     ..._results,
