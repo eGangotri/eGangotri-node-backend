@@ -10,6 +10,52 @@ import * as fsPromise from 'fs/promises';
 
 export const GDRIVE_DEFAULT_IGNORE_FOLDER = "proc";
 
+export const verifyGDriveLocalIntegirtyPerLink = async (gDriveLink:string, 
+    folderWithRoot:string, ignoreFolder:string, fileType:string,
+    sizeOnly:boolean) => {
+        const _folderWithRoot = path.normalize(folderWithRoot);
+        console.log(`Directory: ${_folderWithRoot}`);
+        console.log(`Is absolute path ${_folderWithRoot}: ${path.isAbsolute(_folderWithRoot)}`);
+        console.log(`File type filter: ${fileType}`);
+        console.log(`File extensions to look for: ${fileType === PDF_TYPE ? [PDF_EXT] : (fileType === ZIP_TYPE ? ZIP_TYPE_EXT : [])}`);
+        console.log(`Ignore folder: ${ignoreFolder}`);
+
+        const gDriveStats: GoogleApiDataWithLocalData[] = await getGDriveContentsAsJson(gDriveLink, "", ignoreFolder, fileType);
+        console.log(`gDriveStats ${gDriveStats.length}`);
+
+        let localStats: FileStats[] = [];
+        try {
+            const stats = await fsPromise.stat(_folderWithRoot);
+            localStats = stats.isDirectory() ? await getAllFileStats({
+                directoryPath: path.normalize(_folderWithRoot),
+                filterExt: (fileType === PDF_TYPE || PDF_EXT.includes(fileType)) ? [PDF_EXT] : (fileType === ZIP_TYPE || ZIP_TYPE_EXT.includes(fileType) ? ZIP_TYPE_EXT : []),
+                ignorePaths: [ignoreFolder],
+                withLogs: true,
+                withMetadata: true,
+                includeFolders: false
+            }) : await getSingleFileStats(_folderWithRoot, false);
+        } catch (err) {
+            console.log(`WARNING: Could not access path ${_folderWithRoot}: ${err.message}`);
+            if (err.code === 'ENOENT') {
+                console.log(`Directory/file does not exist: ${_folderWithRoot}`);
+            }
+        }
+
+        console.log(`Found ${localStats.length} local files`);
+        console.log(`Found ${gDriveStats.length} Google Drive files`);
+
+        if (localStats.length === 0) {
+            console.log(`WARNING: No local files found in directory: ${_folderWithRoot}`);
+            console.log(`Using file type filter: ${fileType === PDF_TYPE ? [PDF_EXT] : (fileType === ZIP_TYPE ? ZIP_TYPE_EXT : [])}`);
+        }
+
+        return {
+            comparison: sizeOnly ? compareGDriveLocalJsonBySize(gDriveStats, localStats) : compareGDriveLocalJson(gDriveStats, localStats, _folderWithRoot),
+            gDriveStats,
+            localStats,
+        };
+}
+
 export const verifyGDriveLocalIntegrity = async (_links: string[],
     foldersWithRoot2: string[],
     ignoreFolder: string = GDRIVE_DEFAULT_IGNORE_FOLDER,
@@ -17,51 +63,11 @@ export const verifyGDriveLocalIntegrity = async (_links: string[],
     sizeOnly: boolean = false
 ) => {
     const startTime = Date.now();
-    const results = await Promise.all(
-        _links.map(async (link, index) => {
-            const _folderWithRoot = path.normalize(foldersWithRoot2[index]);
-            console.log(`Directory[${index}]: ${_folderWithRoot}`);
-            console.log(`Is absolute path[${index}] ${_folderWithRoot}: ${path.isAbsolute(_folderWithRoot)}`);
-            console.log(`File type filter: ${fileType}`);
-            console.log(`File extensions to look for: ${fileType === PDF_TYPE ? [PDF_EXT] : (fileType === ZIP_TYPE ? ZIP_TYPE_EXT : [])}`);
-            console.log(`Ignore folder: ${ignoreFolder}`);
+    const verificationPromises = _links.map(async (link, index) => {
+        return verifyGDriveLocalIntegirtyPerLink(link, foldersWithRoot2[index], ignoreFolder, fileType, sizeOnly);
+    });
 
-            const gDriveStats: GoogleApiDataWithLocalData[] = await getGDriveContentsAsJson(link, "", ignoreFolder, fileType);
-            console.log(`gDriveStats ${gDriveStats.length}`);
-
-            let localStats: FileStats[] = [];
-            try {
-                const stats = await fsPromise.stat(_folderWithRoot);
-                localStats = stats.isDirectory() ? await getAllFileStats({
-                    directoryPath: path.normalize(_folderWithRoot),
-                    filterExt: (fileType === PDF_TYPE || PDF_EXT.includes(fileType)) ? [PDF_EXT] : (fileType === ZIP_TYPE || ZIP_TYPE_EXT.includes(fileType) ? ZIP_TYPE_EXT : []),
-                    ignorePaths: [ignoreFolder],
-                    withLogs: true,
-                    withMetadata: true,
-                    includeFolders: false
-                }) : await getSingleFileStats(_folderWithRoot, false);
-            } catch (err) {
-                console.log(`WARNING: Could not access path ${_folderWithRoot}: ${err.message}`);
-                if (err.code === 'ENOENT') {
-                    console.log(`Directory/file does not exist: ${_folderWithRoot}`);
-                }
-            }
-
-            console.log(`Found ${localStats.length} local files`);
-            console.log(`Found ${gDriveStats.length} Google Drive files`);
-
-            if (localStats.length === 0) {
-                console.log(`WARNING: No local files found in directory: ${_folderWithRoot}`);
-                console.log(`Using file type filter: ${fileType === PDF_TYPE ? [PDF_EXT] : (fileType === ZIP_TYPE ? ZIP_TYPE_EXT : [])}`);
-            }
-
-            return {
-                comparison: sizeOnly ? compareGDriveLocalJsonBySize(gDriveStats, localStats) : compareGDriveLocalJson(gDriveStats, localStats, _folderWithRoot),
-                gDriveStats,
-                localStats,
-            };
-        })
-    );
+    const results = await Promise.all(verificationPromises);
 
     const endTime = Date.now();
     const timeTaken = endTime - startTime;
