@@ -8,6 +8,8 @@ import { markUploadCycleAsMovedToFreeze } from '../services/uploadCycleService';
 import { unzipAllFilesInDirectory, verifyUnzipSuccessInDirectory } from '../services/zipService';
 import { FileMoveTracker } from '../models/FileMoveTracker';
 import { GDRIVE_DEFAULT_IGNORE_FOLDER } from '../services/GDriveService';
+import { isValidPath } from 'utils/FileUtils';
+import { getAllPDFFiles } from 'utils/FileStatsUtils';
 
 export const yarnRoute = express.Router();
 
@@ -25,7 +27,7 @@ yarnRoute.post('/unzipAllFolders', async (req: any, resp: any) => {
             resp.status(400).send({
                 response: {
                     "status": "failed",
-                    "message": "folder to unzip mandatory" 
+                    "message": "folder to unzip mandatory"
                 }
             });
         }
@@ -37,10 +39,10 @@ yarnRoute.post('/unzipAllFolders', async (req: any, resp: any) => {
             results.push(res);
         }
 
-        const resultsSummary = results.map((res: {success_count:number,error_count:number}, index: number) => {
+        const resultsSummary = results.map((res: { success_count: number, error_count: number }, index: number) => {
             return `(${index + 1}). Succ: ${res.success_count} Err: ${res.error_count}`;
         });
-        
+
         const endTime = Date.now();
         const timeTaken = endTime - startTime;
         console.log(`Time taken to Unzip All Folders : ${timeInfo(timeTaken)}`);
@@ -73,7 +75,7 @@ yarnRoute.post('/verifyUnzipAllFolders', async (req: any, resp: any) => {
             resp.status(400).send({
                 response: {
                     "status": "failed",
-                    "message": "folder to unzip for verfication mandatory" 
+                    "message": "folder to unzip for verfication mandatory"
                 }
             });
         }
@@ -85,16 +87,16 @@ yarnRoute.post('/verifyUnzipAllFolders', async (req: any, resp: any) => {
             results.push(res);
         }
 
-        const resultsSummary = results.map((res: {success_count:number,error_count:number}, index: number) => {
+        const resultsSummary = results.map((res: { success_count: number, error_count: number }, index: number) => {
             return `(${index + 1}). Succ: ${res.success_count} Err: ${res.error_count}`;
         });
-        
+
         const endTime = Date.now();
         const timeTaken = endTime - startTime;
         console.log(`Time taken to Verify 'Unzip All Folders' : ${timeInfo(timeTaken)}`);
 
         resp.status(200).send({
-            title:"UnZip Integrity Verification",
+            title: "UnZip Integrity Verification",
             timeTaken: timeInfo(timeTaken),
             resultsSummary,
             response: results
@@ -126,7 +128,22 @@ yarnRoute.post('/qaToDestFileMover', async (req: any, resp: any) => {
                 }
             });
         }
-        const listingResult = await moveFileSrcToDest(qaPath, dest, flatten, ignorePaths);
+
+        const destPath = isValidPath(dest) ? dest : getFolderInSrcRootForProfile(dest)
+
+        const allDestPdfs = await getAllPDFFiles(destPath);
+        if(allDestPdfs.length > 0) {
+            resp.status(300).send({
+                response: {
+                    "status": "failed",
+                    "success": false,
+                    "message": "Destination folder is not empty"
+                }
+            });
+            return;
+        }
+
+        const listingResult = await moveFileSrcToDest(qaPath, destPath, flatten, ignorePaths);
         resp.status(200).send({
             response: {
                 ...listingResult
@@ -184,7 +201,7 @@ yarnRoute.post('/yarnMoveFilesInListToFreeze', async (req: any, resp: any) => {
             await markUploadCycleAsMovedToFreeze(_uploadCycleId)
         }
         for (const res of _response) {
-            console.log(`Saving FileMoveTracker ${JSON.stringify(res)}`)    
+            console.log(`Saving FileMoveTracker ${JSON.stringify(res)}`)
             const tracker = new FileMoveTracker({
                 uploadCycleId: res._uploadCycleId,
                 ...res
