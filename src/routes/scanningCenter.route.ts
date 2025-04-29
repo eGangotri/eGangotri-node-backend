@@ -29,7 +29,7 @@ scanningCenterRoute.post('/addCenter', async (req: any, resp: any) => {
         if (await validateSuperAdminUserFromRequest(req)) {
             const center = new ScanningCenter(req.body);
             if (!center) {
-                return resp.status(300).send({
+                return resp.status(400).send({
                     response: {
                         "status": "failed",
                         "message": "Couldnt Save."
@@ -38,7 +38,7 @@ scanningCenterRoute.post('/addCenter', async (req: any, resp: any) => {
             }
             const centerRes = await addCentersAndLibraries(center);
             if (!centerRes.success) {
-                resp.status(300).send({
+                resp.status(400).send({
                     response: centerRes
                 });
             }

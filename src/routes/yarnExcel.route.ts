@@ -13,7 +13,7 @@ yarnExcelRoute.post('/createExcelV1OfAbsPathFromProfile', async (req: any, resp:
         const useFolderNameAsDesc = req?.body?.useFolderNameAsDesc;
 
         if (!profiles) {
-            resp.status(300).send({
+            resp.status(400).send({
                 response: {
                     "status": "failed",
                     "message": "Profile is mandatory"
@@ -47,7 +47,7 @@ yarnExcelRoute.post('/createExcelV3OfAbsPathFromProfile', async (req: any, resp:
         const profiles = req?.body?.profiles;
         const allNotJustPdfs = req?.body?.allNotJustPdfs;
         if (!profiles) {
-            resp.status(300).send({
+            resp.status(400).send({
                 response: {
                     "status": "failed",
                     "message": "Profile is mandatory"

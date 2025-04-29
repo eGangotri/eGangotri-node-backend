@@ -41,7 +41,7 @@ fileUtilsRoute.post('/reverse-file-move', async (req: any, resp: any) => {
     try {
         const id = req?.body?.id;
         if (!id) {
-            resp.status(300).send({
+            resp.status(400).send({
                 response: {
                     "status": "failed",
                     "success": false,
@@ -51,7 +51,7 @@ fileUtilsRoute.post('/reverse-file-move', async (req: any, resp: any) => {
         }
         const fileMoveTracker = await FileMoveTracker.findById(id);
         if (!fileMoveTracker) {
-            resp.status(300).send({
+            resp.status(400).send({
                 response: {
                     "status": "failed",
                     "success": false,
@@ -61,7 +61,7 @@ fileUtilsRoute.post('/reverse-file-move', async (req: any, resp: any) => {
         }
         const { filesAbsPathMoved, filesMovedNewAbsPath, reversed } = fileMoveTracker;
         if (reversed) {
-            resp.status(300).send({
+            resp.status(400).send({
                 response: {
                     "status": "failed",
                     "success": false,
@@ -116,7 +116,7 @@ fileUtilsRoute.post('/moveFilesAsCSVOfAbsPaths', async (req: any, resp: any) => 
 
         console.log(`moveFilesAsCSVOfAbsPaths count: ${absolutePaths?.length} to profileOrFolder(${profileOrFolder})`)
         if (!absolutePaths && !profileOrFolder) {
-            resp.status(300).send({
+            resp.status(400).send({
                 response: {
                     "status": "failed",
                     "success": false,

@@ -8,8 +8,8 @@ import { markUploadCycleAsMovedToFreeze } from '../services/uploadCycleService';
 import { unzipAllFilesInDirectory, verifyUnzipSuccessInDirectory } from '../services/zipService';
 import { FileMoveTracker } from '../models/FileMoveTracker';
 import { GDRIVE_DEFAULT_IGNORE_FOLDER } from '../services/GDriveService';
-import { isValidPath } from 'utils/FileUtils';
-import { getAllPDFFiles } from 'utils/FileStatsUtils';
+import { isValidPath } from '../utils/FileUtils';
+import { getAllPDFFiles } from '../utils/FileStatsUtils';
 
 export const yarnRoute = express.Router();
 
@@ -117,38 +117,40 @@ yarnRoute.post('/qaToDestFileMover', async (req: any, resp: any) => {
         const dest = req?.body?.dest || "";
         const flatten = req?.body?.flatten === "false" ? false : true;
         const ignorePaths = ["dont"];
+        const override = req?.body?.override || false;
 
         console.log(`qaToDestFileMover qaPath ${qaPath} for folder(${dest})`)
         if (!qaPath && !dest) {
-            resp.status(300).send({
+            resp.status(400).send({
                 response: {
                     "status": "failed",
                     "success": false,
                     "message": "Pls. provide Src and Dest Items"
                 }
             });
+            return;
         }
-
         const destPath = isValidPath(dest) ? dest : getFolderInSrcRootForProfile(dest)
-
         const allDestPdfs = await getAllPDFFiles(destPath);
-        if(allDestPdfs.length > 0) {
-            resp.status(300).send({
+        if (allDestPdfs.length > 0 && !override) {
+            resp.status(409).send({
                 response: {
                     "status": "failed",
                     "success": false,
-                    "message": "Destination folder is not empty"
+                    "message": `Destination folder ${destPath} is not empty with ${allDestPdfs.length} files`
                 }
             });
             return;
         }
 
-        const listingResult = await moveFileSrcToDest(qaPath, destPath, flatten, ignorePaths);
-        resp.status(200).send({
-            response: {
-                ...listingResult
-            }
-        });
+        else {
+            const listingResult = await moveFileSrcToDest(qaPath, destPath, flatten, ignorePaths);
+            resp.status(200).send({
+                response: {
+                    ...listingResult
+                }
+            });
+        }
     }
 
     catch (err: any) {
@@ -164,7 +166,7 @@ yarnRoute.post('/yarnMoveProfilesToFreeze', async (req: any, resp: any) => {
         const ignorePaths = req.body?.ignorePaths || ["dont"];
         const flatten = req?.body?.flatten === "false" ? false : true;
         if (!profileAsCSV) {
-            resp.status(300).send({
+            resp.status(400).send({
                 response: {
                     "status": "failed",
                     "success": false,
@@ -188,7 +190,7 @@ yarnRoute.post('/yarnMoveFilesInListToFreeze', async (req: any, resp: any) => {
         const _uploadCycleId = req.body.uploadCycleId;
 
         if (!_uploadCycleId) {
-            resp.status(300).send({
+            resp.status(400).send({
                 response: {
                     "status": "failed",
                     "success": false,
@@ -225,7 +227,7 @@ yarnRoute.post('/addHeaderFooter', async (req: any, resp: any) => {
         const profile = req?.body?.profile;
 
         if (!profile) {
-            resp.status(300).send({
+            resp.status(400).send({
                 response: {
                     "status": "failed",
                     "success": false,
@@ -254,7 +256,7 @@ yarnRoute.post('/vanitizePdfs', async (req: any, resp: any) => {
         const profile = req?.body?.profile;
         const suffix = req?.body?.suffix;
         if (!profile) {
-            resp.status(300).send({
+            resp.status(400).send({
                 response: {
                     "status": "failed",
                     "message": "profile is mandatory"
@@ -284,7 +286,7 @@ yarnRoute.post('/compareDirectories', async (req: any, resp: any) => {
         const destDir = req.body.destDir
         console.log(`/ compareDirectories srcDir ${srcDir} destDir ${destDir} `)
         if (!srcDir || !destDir) {
-            resp.status(300).send({
+            resp.status(400).send({
                 response: {
                     "status": "failed",
                     "message": "srcDir and destDir are mandatory"

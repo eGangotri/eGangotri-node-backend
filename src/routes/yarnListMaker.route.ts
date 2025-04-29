@@ -20,7 +20,7 @@ yarnListMakerRoute.post('/combineGDriveAndReducedPdfExcels', async (req: any, re
         `)
 
         if (!mainExcelPath || !secondaryExcelPath) {
-            resp.status(300).send({
+            resp.status(400).send({
                 response: {
                     "status": "failed",
                     "success": false,
@@ -54,7 +54,7 @@ yarnListMakerRoute.post('/dumpGDriveExcelToMongo', async (req: any, resp: any) =
         `)
 
         if (!comboExcelPath) {
-            resp.status(300).send({
+            resp.status(400).send({
                 response: {
                     "status": "failed",
                     "success": false,

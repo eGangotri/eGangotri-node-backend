@@ -9,7 +9,7 @@ launchAIRoute.post('/renamePdfsWithAI', async (req: any, resp: any) => {
         const folderPath = req?.body?.folderPath || "";
 
         if (!folderPath) {
-            return resp.status(300).send({
+            return resp.status(400).send({
                 "status": "failed",
                 response: {
                     "success": false,

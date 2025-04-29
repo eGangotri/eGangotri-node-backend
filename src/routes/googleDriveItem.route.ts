@@ -10,7 +10,7 @@ googleDriveItemRoute.post("/search", async (req: Request, resp: Response) => {
     try {
         const searchTerm = req.body.searchTerm;
         if (!searchTerm?.trim()) {
-            resp.status(300).send({
+            resp.status(400).send({
                 response: {
                     "status": "failed",
                     "success": false,
