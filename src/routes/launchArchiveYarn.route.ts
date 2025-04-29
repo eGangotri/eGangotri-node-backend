@@ -34,7 +34,7 @@ launchArchiveYarnRoute.post('/getArchiveListing', async (req: any, resp: any) =>
                 parsedDateRange = _validateDates.parsedDateRange;
             }
             else {
-                return resp.status(300).send({
+                return resp.status(400).send({
                     response: {
                         ..._validateDates
                     }
@@ -43,7 +43,7 @@ launchArchiveYarnRoute.post('/getArchiveListing', async (req: any, resp: any) =>
         }
 
         if (!archiveLinks) {
-            return resp.status(300).send({
+            return resp.status(400).send({
                 response: {
                     "status": "failed",
                     "success": false,
@@ -77,7 +77,7 @@ launchArchiveYarnRoute.post('/downloadArchivePdfs', async (req: any, resp: any) 
 
 
         if (!archiveLink || !profileOrPath) {
-            return resp.status(300).send({
+            return resp.status(400).send({
                 response: {
                     "status": "failed",
                     "success": false,
@@ -132,7 +132,7 @@ launchArchiveYarnRoute.post('/dumpArchiveExcelToMongo', async (req: any, resp: a
         `)
 
         if (!archiveExcelPath) {
-            resp.status(300).send({
+            resp.status(400).send({
                 response: {
                     "status": "failed",
                     "success": false,
@@ -302,7 +302,7 @@ launchArchiveYarnRoute.post('/downloadArchiveItemsViaExcel', async (req: any, re
         const startTime = Date.now();
 
         if (!excelPath || !profileOrPath) {
-            return resp.status(300).send({
+            return resp.status(400).send({
                 response: {
                     "status": "failed",
                     "success": false,
@@ -346,7 +346,7 @@ launchArchiveYarnRoute.post('/generateEapExcelV1', async (req: any, resp: any) =
         console.log(`generateEapExcelV1: ${profileName}`)
         const res = await generateEAPBLMetadataForProfile(profileName, excelOutputName);
         if (!res.success) {
-            resp.status(300).send({
+            resp.status(400).send({
                 response: {
                     ...res
                 }

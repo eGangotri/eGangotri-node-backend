@@ -33,7 +33,7 @@ pythonRoute.post('/getFirstAndLastNPages', async (req: any, resp: any) => {
         ${firstNPages}/${lastNPages}`)
 
         if (!srcFoldersAsCSV || !destRootFolder) {
-            resp.status(300).send({
+            resp.status(400).send({
                 response: {
                     "status": "failed",
                     "success": false,
@@ -56,7 +56,7 @@ pythonRoute.post('/getFirstAndLastNPages', async (req: any, resp: any) => {
             });
         }
         else {
-            resp.status(300).send({
+            resp.status(400).send({
                 response: {
                     "status": "failed",
                     "success": false,
@@ -81,7 +81,7 @@ pythonRoute.post('/copyAllPdfs', async (req: any, resp: any) => {
         destRootFolder ${destRootFolder}`);
 
         if (!srcFoldersAsCSV || !destRootFolder) {
-            resp.status(300).send({
+            resp.status(400).send({
                 response: {
                     "status": "failed",
                     "success": false,
@@ -115,7 +115,7 @@ pythonRoute.post('/convert-img-folder-to-pdf', async (req: any, resp: any) => {
         const img_type = req?.body?.img_type;
 
         if (!src_folder || !dest_folder) {
-            resp.status(300).send({
+            resp.status(400).send({
                 response: {
                     "status": "failed",
                     "success": false,
@@ -149,7 +149,7 @@ pythonRoute.post('/verfiyImgtoPdf', async (req: any, resp: any) => {
         const dest_folder = req?.body?.dest_folder;
 
         if (!src_folder || !dest_folder) {
-            resp.status(300).send({
+            resp.status(400).send({
                 response: {
                     "status": "failed",
                     "success": false,
@@ -184,7 +184,7 @@ pythonRoute.post('/mergePdfs', async (req: any, resp: any) => {
         const third_pdf_path = req?.body?.third_pdf_path || ""
 
         if (!first_pdf_path || !second_pdf_path) {
-            resp.status(300).send({
+            resp.status(400).send({
                 response: {
                     "status": "failed",
                     "success": false,

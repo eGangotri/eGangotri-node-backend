@@ -131,13 +131,13 @@ dailyCatWorkReportRoute.delete("/delete", async (req: Request, resp: Response) =
     if (_validate[0]) {
       if (_.isEmpty(_ids)) {
         console.log(`cannot proceed _id not provided`);
-        resp.status(300).send({
+        resp.status(400).send({
           response: `Must have param '_ids' containing one or more id as coma-separated value`,
         });
       }
       else {
         if (idsAsCSV.length > 10) {
-          resp.status(300).send({
+          resp.status(400).send({
             response: `Expected deletion of ${idsAsCSV.length} items but more than 10 is not allowed`,
           });
         }

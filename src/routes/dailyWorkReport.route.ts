@@ -134,7 +134,7 @@ dailyWorkReportRoute.delete("/delete", async (req: Request, resp: Response) => {
     if (_validate[0]) {
       if (_.isEmpty(_id)) {
         console.log(`cannot proceed _id not provided`);
-        resp.status(300).send({
+        resp.status(400).send({
           response: `Must have param _ids containing one or more _id as coma-separated value`,
         });
       }

@@ -10,7 +10,7 @@ pdfRenameRoute.post('/rename', async (req: any, resp: any) => {
         bodyEntries.dateOfExecution = new Date();
 
         if (!bodyEntries?.originalPdfName) {
-            return resp.status(300).send({
+            return resp.status(400).send({
                 response: {
                     "status": "failed",
                     "message": "No Original Pdf Name."
