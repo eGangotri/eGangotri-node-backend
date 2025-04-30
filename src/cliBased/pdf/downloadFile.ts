@@ -36,6 +36,10 @@ export const downloadFileFromUrl = async (
     let _result: { success?: boolean, status?: string, error?: string } = {};
     try {
         await new Promise((resolve, reject) => {
+            dl.on('error', (err) => {
+                dl.stop();
+                reject(err);
+            });
             dl.on('end', async () => {
                 const index = `(${DOWNLOAD_COMPLETED_COUNT(downloadCounterController) + 1}${dataLength > 0 ? "/" + dataLength : ""})`;
                 console.log(`${index}. Downloaded ${fileName}`);
@@ -127,8 +131,18 @@ export const downloadGDriveFileUsingGDriveApi = async (
         response.data.pipe(dest);
 
         await new Promise((resolve, reject) => {
-            dest.on('finish', resolve);
-            dest.on('error', reject);
+            response.data.on('error', (error) => {
+                dest.destroy();
+                reject(error);
+            });
+            dest.on('finish', () => {
+                dest.close();
+                resolve(null);
+            });
+            dest.on('error', (error) => {
+                dest.destroy();
+                reject(error);
+            });
         });
 
         console.log(`Download complete for "${fileName}"`);
