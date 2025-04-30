@@ -133,7 +133,7 @@ yarnRoute.post('/qaToDestFileMover', async (req: any, resp: any) => {
         const destPath = isValidPath(dest) ? dest : getFolderInSrcRootForProfile(dest)
         const allDestPdfs = await getAllPDFFiles(destPath);
         if (allDestPdfs.length > 0 && !override) {
-            resp.status(409).send({
+            resp.status(400).send({
                 response: {
                     "status": "failed",
                     "success": false,
