@@ -77,15 +77,26 @@ export async function checkUrlValidityForUploadItems(_forVerfication: SelectedUp
 
 export async function checkUrlValidity(url: string, counter: number, total: number): Promise<boolean> {
   try {
-    const response = await fetch(url, { method: 'HEAD' });
-    // Check if the response status code indicates success (2xx) or redirection (3xx)
-    if (response.ok && response.status === 200) {
-      return true;
-    }
-    else {
+    // First check if the URL exists
+    const response = await fetch(url);
+    if (!response.ok) {
       console.log(`Item # ${counter}/${total}*******response.status ${url} ${response.status} ${response.statusText}`)
       return false;
     }
+
+    // Get the page content
+    const html = await response.text();
+
+    // Check for PDF download option
+    const hasPDF = html.includes('PDF') && 
+                   (html.includes('Download Options') || html.includes('downloadable files'));
+
+    if (!hasPDF) {
+      console.log(`Item # ${counter}/${total}******* PDF not available for download at ${url}`);
+      return false;
+    }
+
+    return true;
   } catch (error) {
     console.log(`checkUrlValidity error ${error} `)
     return false;

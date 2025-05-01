@@ -13,6 +13,8 @@ import { getLatestUploadCycle } from '../services/uploadCycleService';
 import { checkIfEmpty } from '../utils/FileUtils';
 import { timeInfo } from '../mirror/FrontEndBackendCommonCode';
 import { runCr2ToJpgInLoop } from '../services/pythonRestService';
+import { isPDFCorrupted } from '../utils/pdfValidator';
+import { getAllPdfsInFolders } from '../imgToPdf/utils/Utils';
 
 export const launchGradleRoute = express.Router();
 
@@ -47,6 +49,25 @@ launchGradleRoute.get('/launchUploader', async (req: any, resp: any) => {
             return;
         }
         else {
+            const getAllUploadableFolders = req.query.profiles.split(",").map((profile: string) => getFolderInSrcRootForProfile(profile.trim()));
+            const _pdfs = await getAllPdfsInFolders(getAllUploadableFolders);
+            const corruptionCheck:Promise<{ isValid: boolean; error?: string; }>[] = []
+            for (let pdf of _pdfs) {
+                corruptionCheck.push(isPDFCorrupted(pdf))
+            }
+
+            const corruptionCheckRes = await Promise.all(corruptionCheck)
+            const isCorrupted = corruptionCheckRes.filter(result => !result.isValid)  
+            console.log(`isCorrupted ${isCorrupted.length}`)
+            if (isCorrupted.length > 0) {
+                resp.status(400).send({
+                    response: {
+                        success: false,
+                        message: `Cannot proceed.\r\nFollowing (${isCorrupted.length}) PDFs are corrupted: ${isCorrupted.map(x => x.error).join("\r\n")}`
+                    }
+                });
+                return;
+            }
             const res = await launchUploader(req.query.profiles, subjectDesc)
             //dont wait. let it run in background
             getLatestUploadCycle().then((uploadCycleId) => {
