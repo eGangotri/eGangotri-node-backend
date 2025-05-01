@@ -51,7 +51,7 @@ launchGradleRoute.get('/launchUploader', async (req: any, resp: any) => {
         else {
             const getAllUploadableFolders = req.query.profiles.split(",").map((profile: string) => getFolderInSrcRootForProfile(profile.trim()));
             const _pdfs = await getAllPdfsInFolders(getAllUploadableFolders);
-            const corruptionCheck:Promise<{ isValid: boolean; error?: string; }>[] = []
+            const corruptionCheck = []
             for (let pdf of _pdfs) {
                 corruptionCheck.push(isPDFCorrupted(pdf))
             }
@@ -63,7 +63,7 @@ launchGradleRoute.get('/launchUploader', async (req: any, resp: any) => {
                 resp.status(400).send({
                     response: {
                         success: false,
-                        message: `Cannot proceed.\r\nFollowing (${isCorrupted.length}) PDFs are corrupted: ${isCorrupted.map(x => x.error).join("\r\n")}`
+                        message: `Cannot proceed.\r\nFollowing (${isCorrupted.length}) PDFs are corrupted: ${isCorrupted.map(x => x.filePath).join(", ")}`
                     }
                 });
                 return;

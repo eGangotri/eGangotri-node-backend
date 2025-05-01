@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import { PDFDocument } from 'pdf-lib';
 
-export async function isPDFCorrupted(filePath: string): Promise<{ isValid: boolean; error?: string }> {
+export async function isPDFCorrupted(filePath: string): Promise<{ isValid: boolean; error?: string; filePath?: string }> {
     try {
         // Check if file exists
         if (!fs.existsSync(filePath)) {
@@ -20,7 +20,8 @@ export async function isPDFCorrupted(filePath: string): Promise<{ isValid: boole
     } catch (error) {
         return { 
             isValid: false, 
-            error: `PDF validation failed: ${error instanceof Error ? error.message : String(error)}`
+            error: `PDF validation failed: ${error instanceof Error ? error.message : String(error)}`,
+            filePath
         };
     }
 }
