@@ -68,14 +68,14 @@ export async function checkUrlValidityForUploadItems(_forVerfication: SelectedUp
   counter: number,
   total: number): Promise<SelectedUploadItem> {
   const url = createArchiveLink(_forVerfication.archiveId);
-  const _validity = await checkUrlValidity(url, counter, total);
+  const _validity = await checkArchiveUrlValidity(url, counter, total);
   return {
     ..._forVerfication,
     isValid: _validity
   }
 }
 
-export async function checkUrlValidity(url: string, counter: number, total: number): Promise<boolean> {
+export async function checkArchiveUrlValidity(url: string, counter: number, total: number): Promise<boolean> {
   try {
     // First check if the URL exists
     const response = await fetch(url);
@@ -86,10 +86,9 @@ export async function checkUrlValidity(url: string, counter: number, total: numb
 
     // Get the page content
     const html = await response.text();
-
+    console.log(`html ${html}`)
     // Check for PDF download option
-    const hasPDF = html.includes('PDF') && 
-                   (html.includes('Download Options') || html.includes('downloadable files'));
+    const hasPDF = html.includes('PDF');
 
     if (!hasPDF) {
       console.log(`Item # ${counter}/${total}******* PDF not available for download at ${url}`);
