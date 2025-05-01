@@ -50,23 +50,23 @@ export async function deleteFiles(files: Array<string>) {
      }
  }
 
-export const getAllPdfs = async (dir: string) => {
+export const getAllPdfs = async (dir: string): Promise<Array<string>> => {
      return await getAllFilesOfGivenType(dir, [PDF_EXT]);
 }
 
-export const getAllFilessInFoldersOfGivenType = async (dirs: Array<string>, _types:string) => {
-     let pdfs = [];
+export const getAllFilessInFoldersOfGivenType = async (dirs: Array<string>, _types:string): Promise<Array<string>> => {
+     let files = [];
      for(let dir of dirs){
           const _file = await getAllFilesOfGivenType(dir, [_types])
-          pdfs.push(_file);
+          files.push(_file);
      }
-     return pdfs.flat(1);
+     return files.flat(1);
 }
 
-export const getAllPdfsInFolders = async (dirs: Array<string>) => {
+export const getAllPdfsInFolders = async (dirs: Array<string>): Promise<Array<string>> => {
      return getAllFilessInFoldersOfGivenType(dirs, PDF_EXT)
 }
-export const getAllPngsInFolders = async (dirs: Array<string>) => {
+export const getAllPngsInFolders = async (dirs: Array<string>): Promise<Array<string>> => {
      return getAllFilessInFoldersOfGivenType(dirs, PNG_EXT)
 }
 
@@ -74,15 +74,38 @@ export const getAllDotSumFiles = async (dir: string) => {
      return await getAllFilesOfGivenType(dir, [".sum"]);
 }
 
-export const getAllFilesOfGivenType = async (dir: string, _types: Array<string> = []) => {
-     const contentList = await fsPromise.readdir(dir)
-     let files = contentList.map((x) => dir + "\\" + x).filter((y) => {
-          // console.log(`Found ${y}`)
-          return _types.includes(path.extname(y).toLowerCase())
-     })
-     // console.log(`Found ${files.length} ${files} ${_types.join(",")}(s) in ${dir}`)
+/**
+ * Retrieves all files of specified types from a given directory
+ * @param dir - The directory path to search in
+ * @param fileTypes - Array of file extensions to filter (e.g., ['.pdf', '.jpg'])
+ * @returns Promise<string[]> Array of full file paths matching the specified types
+ * @throws Error if directory is invalid or unreadable
+ */
+export const getAllFilesOfGivenType = async (dir: string, fileTypes: string[] = []): Promise<string[]> => {
+    try {
+        // Validate directory
+        if (!dir || typeof dir !== 'string') {
+            throw new Error('Invalid directory path provided');
+        }
 
-     return files;
+        // Normalize file types (ensure they start with dot and are lowercase)
+        const normalizedTypes = fileTypes.map(type => 
+            type.startsWith('.') ? type.toLowerCase() : `.${type.toLowerCase()}`
+        );
+
+        // Read directory contents
+        const contentList = await fsPromise.readdir(dir);
+
+        // Process files
+        const files = contentList
+            .map(filename => path.join(dir, filename))
+            .filter(filePath => normalizedTypes.length === 0 || 
+                normalizedTypes.includes(path.extname(filePath).toLowerCase()));
+
+        return files;
+    } catch (error) {
+        throw new Error(`Failed to get files from directory ${dir}: ${error.message}`);
+    }
 }
 
 export const getUploadableFolders = async (srcFolder: string, dest: string) => {
