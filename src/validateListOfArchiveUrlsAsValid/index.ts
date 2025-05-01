@@ -1,4 +1,4 @@
-import { checkUrlValidity } from "../utils/utils";
+import { checkArchiveUrlValidity } from "../utils/utils";
 
 
 const urlData = `
@@ -253,7 +253,7 @@ const urlData = `
        // console.log(`Opening ${line}: `);
 
         if (line?.trim().startsWith('http')) {
-            const result = await checkUrlValidity(line,0,0);
+            const result = await checkArchiveUrlValidity(line,0,0);
             console.log(`Opening ${line}: ${result}`);
         }
     }
