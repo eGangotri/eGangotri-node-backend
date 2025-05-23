@@ -53,7 +53,6 @@ export async function getAllFileStats({
     includeFolders = false
 }: GetAllFileStatsOptions): Promise<FileStats[]> {
     const rowCounterController = Math.random().toString(36).substring(7);
-    FileConstUtils.resetRowCounter(rowCounterController);
     const queue = [directoryPath];
     let _files: FileStats[] = [];
     let counter = 0;
