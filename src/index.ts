@@ -30,6 +30,7 @@ import { gDriveRoute } from "./routes/gDrive.route";
 import { gDriveDownloadRoute } from "./routes/gDrive.download.route";
 import { pythonRoute } from "./routes/python.route";
 import { launchCmdRoute } from "./routes/launchCmd.route";
+import { pythonArchiveRoute } from "routes/python.archive.route";
 
 const egangotri = express();
 const hostname = "localhost";
@@ -77,6 +78,7 @@ egangotri.use("/pdfRename", pdfRenameRoute);
 egangotri.use("/scanningCenter", scanningCenterRoute);
 egangotri.use("/gDriveUploadWorkReportRoute", gDriveUploadWorkReportRoute);
 egangotri.use("/launchCmd", launchCmdRoute);
+egangotri.use("/pythonArchive", pythonArchiveRoute);
 
 
 

@@ -24,9 +24,6 @@ export const incrementColumnCounter = (requestId: string) => {
   return rowCounters[requestId][1];
 };
 
-export const resetRowCounter = (requestId: string) => {
-  rowCounters[requestId] = [1, 0];
-};
 
 export const getRowCounter = (requestId: string) => {
   return rowCounters[requestId] || [1, 0];
