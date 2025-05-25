@@ -9,18 +9,21 @@ interface RetryConfig {
 }
 
 const DEFAULT_RETRY_CONFIG: RetryConfig = {
-  maxRetries: 3,
-  retryDelay: 1000,
-  timeout: 10000,
+  maxRetries: 5,
+  retryDelay: 5000,
+  timeout: 120000, // Match serverSelectionTimeoutMS
 };
 
 // Circuit breaker for database operations
 const breaker = new CircuitBreaker(async (operation: () => Promise<any>) => {
   return await operation();
 }, {
-  timeout: 10000, // Time in ms to wait for operation to resolve
-  errorThresholdPercentage: 50, // When 50% of requests fail, open the circuit
-  resetTimeout: 30000, // Time to wait before attempting to reconnect
+  timeout: 180000, // 3 minutes - match serverSelectionTimeoutMS
+  errorThresholdPercentage: 30, // Lower threshold - open circuit after 30% of requests fail
+  resetTimeout: 90000, // 1.5 minutes to wait before attempting to reconnect
+  rollingCountTimeout: 120000, // 2 minutes rolling window for error rate calculation
+  rollingCountBuckets: 10, // Number of buckets for error rate calculation
+  volumeThreshold: 3, // Minimum number of requests before error percentage is calculated
 });
 
 breaker.on('open', () => {
