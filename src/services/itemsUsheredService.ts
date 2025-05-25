@@ -16,17 +16,25 @@ export async function getListOfItemsUshered(queryOptions: ItemsListOptionsType) 
     const page = queryOptions?.page || 1;
     const skip = (page - 1) * limit;
 
-    // First get total count without timeout
-    const totalCount = await ItemsUshered.countDocuments(mongoOptionsFilter);
-    console.log(`Total documents matching filter: ${totalCount}`);
+    let totalCount = 0;
+    try {
+      // Add timeout to count operation
+      totalCount = await ItemsUshered.countDocuments(mongoOptionsFilter)
+        .maxTimeMS(30000);  // 30 second timeout for count
+      console.log(`Total documents matching filter: ${totalCount}`);
+    } catch (countError: any) {
+      console.error('Error counting documents:', countError.message);
+      // Continue with query even if count fails
+    }
 
-    // Then get paginated results with increased timeout
+    // Use a smaller batch size to improve performance
     const items = await ItemsUshered.find(mongoOptionsFilter)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
-      .maxTimeMS(60000)  // Increase timeout to 60 seconds
+      .maxTimeMS(60000)  // 60 second timeout
       .lean()  // Convert to plain JavaScript objects
+      .batchSize(100)  // Process in smaller batches
       .exec(); // Force execution of the query
 
     console.log(`Retrieved ${items.length} items for page ${page}`);
