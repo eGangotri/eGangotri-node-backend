@@ -120,3 +120,21 @@ Error: error:0308010C:digital envelope routines::unsupported
 }
 
 export NODE_OPTIONS=--openssl-legacy-provider
+
+
+
+### For VPN
+
+## if using VPN then dont use -srv .Use mongodb:// protocol
+## USE the direct connection to the shard servers and the explicit hostnames, which should bypass the DNS resolution issues caused by VPN.
+
+So 
+MONGO_DB_PROTOCOL="mongodb://"
+MONGO_DB_PATH="cluster0-shard-00-00.yqcrz.mongodb.net:27017,cluster0-shard-00-01.yqcrz.mongodb.net:27017,cluster0-shard-00-02.yqcrz.mongodb.net:27017"
+MONGO_DB_SUFFIXES="?retryWrites=true&w=majority&authSource=admin&ssl=true"
+
+instead of 
+MONGO_DB_PROTOCOL="mongodb-srv://"
+MONGO_DB_PATH="cluster0.yqcrz.mongodb.net"
+MONGO_DB_SUFFIXES="?retryWrites=true&w=majority"
+
