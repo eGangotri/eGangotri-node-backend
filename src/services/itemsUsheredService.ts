@@ -16,25 +16,31 @@ export async function getListOfItemsUshered(queryOptions: ItemsListOptionsType) 
     const page = queryOptions?.page || 1;
     const skip = (page - 1) * limit;
 
-    let totalCount = 0;
-    try {
-      // Add timeout to count operation
-      totalCount = await ItemsUshered.countDocuments(mongoOptionsFilter)
-        .maxTimeMS(30000);  // 30 second timeout for count
-      console.log(`Total documents matching filter: ${totalCount}`);
-    } catch (countError: any) {
-      console.error('Error counting documents:', countError.message);
-      // Continue with query even if count fails
-    }
+    // Skip the count operation entirely to avoid timeouts
+    // This is a performance optimization - we won't know the total count
+    // but the query will be much faster
+    
+    // Apply projection to only retrieve fields we need
+    // This reduces the amount of data transferred
+    const projection = {
+      _id: 1,
+      title: 1,
+      archiveItemId: 1,
+      archiveProfile: 1,
+      uploadCycleId: 1,
+      uploadFlag: 1,
+      datetimeUploadStarted: 1,
+      createdAt: 1
+    };
 
-    // Use a smaller batch size to improve performance
-    const items = await ItemsUshered.find(mongoOptionsFilter)
+    // Use a smaller batch size and increase server timeout
+    const items = await ItemsUshered.find(mongoOptionsFilter, projection)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
-      .maxTimeMS(60000)  // 60 second timeout
+      .maxTimeMS(120000)  // 2 minute timeout
       .lean()  // Convert to plain JavaScript objects
-      .batchSize(100)  // Process in smaller batches
+      .batchSize(50)  // Process in smaller batches
       .exec(); // Force execution of the query
 
     console.log(`Retrieved ${items.length} items for page ${page}`);
