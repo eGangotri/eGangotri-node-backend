@@ -1,5 +1,5 @@
 import { DOC_TYPE } from "../common";
-import { mongoDbUrlWithDbName } from "../db/connection";
+import { mongoDbUrlWithDbName, MONGO_OPTIONS } from "../db/connection";
 import mongoose from "mongoose";
 import * as _ from "lodash";
 import { getLimit } from "../routes/utils";
@@ -105,19 +105,29 @@ export async function connectToMongo(_args: string[] = []) {
   console.log("\nAttempting to connect to DB:", ellipsis(mongoDbUrl));
   if (mongoDbUrl) {
     try {
+      // Close any existing connections first to ensure clean state
+      if (mongoose.connection.readyState !== 0) {
+        console.log('Closing existing MongoDB connection before reconnecting...');
+        await mongoose.connection.close();
+      }
+
+      // Apply mongoose global settings before connecting
+      mongoose.set('strictQuery', false);
+      
+      // Only enable debug in development environment
+      const isDebug = process.env.NODE_ENV !== 'production';
+      if (isDebug) {
+        mongoose.set('debug', { color: true, shell: true });
+      }
+
+      // Connect with retry strategy
       await withRetry(async () => {
-        await mongoose.connect(mongoDbUrl, {
-          socketTimeoutMS: 300000, // 5 minutes
-          serverSelectionTimeoutMS: 60000, // 1 minute
-          heartbeatFrequencyMS: 30000,
-          maxPoolSize: 20,
-          minPoolSize: 5,
-          connectTimeoutMS: 60000, // 1 minute
-        } as mongoose.ConnectOptions);
+        // Use the optimized MONGO_OPTIONS from connection.ts
+        await mongoose.connect(mongoDbUrl, MONGO_OPTIONS as mongoose.ConnectOptions);
       }, {
         maxRetries: 5,
-        retryDelay: 2000,
-        timeout: 15000
+        retryDelay: 10000, // 10 seconds between retries for high-latency connections
+        timeout: 180000  // 3 minutes timeout matching serverSelectionTimeoutMS
       });
 
       // Setup connection monitoring
@@ -130,15 +140,21 @@ export async function connectToMongo(_args: string[] = []) {
       }
 
       console.log(`Successfully connected to ${ellipsis(mongoDbUrl)}`);
+      
+      // Set up connection event handlers
+      mongoose.connection.on("error", (err) => {
+        console.error(`MongoDB connection error: ${err}`);
+        // Don't crash the server on connection errors
+      });
+
       mongoose.connection.once("open", () => {
-        // we're connected!
-        mongoose.set('debug', true)
-        console.log(`we are connected to ${mongoDbUrl}`);
+        console.log(`MongoDB connection established to ${ellipsis(mongoDbUrl)}`);
       });
     } catch (err) {
-      console.log("could not connect to mongoose DB\n", err);
+      console.error("Failed to connect to MongoDB:", err);
+      // Don't throw here to prevent app crash, but log the error
     }
   } else {
-    console.log(`No ${mongoDbUrl}`);
+    console.error(`No MongoDB URL provided`);
   }
 }
