@@ -51,6 +51,7 @@ launchGradleRoute.get('/launchUploader', async (req: any, resp: any) => {
         else {
             const getAllUploadableFolders = req.query.profiles.split(",").map((profile: string) => getFolderInSrcRootForProfile(profile.trim()));
             const _pdfs = await getAllPdfsInFolders(getAllUploadableFolders);
+            console.log(`_pdfs count for upload in all profiles ${_pdfs.length}`)
             const corruptionCheck = []
             for (let pdf of _pdfs) {
                 corruptionCheck.push(isPDFCorrupted(pdf))
