@@ -30,12 +30,13 @@ import { gDriveRoute } from "./routes/gDrive.route";
 import { gDriveDownloadRoute } from "./routes/gDrive.download.route";
 import { pythonRoute } from "./routes/python.route";
 import { launchCmdRoute } from "./routes/launchCmd.route";
+import { ellipsis } from "./mirror/utils";
 
 const egangotri = express();
 const hostname = "localhost";
 const port = process.env.PORT || 8000;
 const args = process.argv.slice(2);
-console.log("Command-line arguments:", args);
+console.log("Command-line arguments:", ellipsis(args?.join(",")));
 const BODY_PARSER_LIMIT = '100mb';
 
 egangotri.use(express.json({limit: BODY_PARSER_LIMIT}));
