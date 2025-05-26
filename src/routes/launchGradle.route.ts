@@ -49,17 +49,20 @@ launchGradleRoute.get('/launchUploader', async (req: any, resp: any) => {
             return;
         }
         else {
-            const getAllUploadableFolders = req.query.profiles.split(",").map((profile: string) => getFolderInSrcRootForProfile(profile.trim()));
+            const _profiles = req.query.profiles.split(",");
+            const getAllUploadableFolders = _profiles.map((profile: string) => getFolderInSrcRootForProfile(profile.trim()));
             const _pdfs = await getAllPdfsInFolders(getAllUploadableFolders);
-            console.log(`_pdfs count for upload in all profiles ${_pdfs.length}`)
+            console.log(`pdfs count for upload in ${_profiles.length} profiles ${_pdfs.length}`)
             const corruptionCheck = []
+            console.log(`corruptionCheck...`)
+
             for (let pdf of _pdfs) {
                 corruptionCheck.push(isPDFCorrupted(pdf))
             }
 
             const corruptionCheckRes = await Promise.all(corruptionCheck)
             const isCorrupted = corruptionCheckRes.filter(result => !result.isValid)  
-            console.log(`isCorrupted ${isCorrupted.length}`)
+            console.log(`Corruption Check Done. isCorrupted ${isCorrupted.length}`)
             if (isCorrupted.length > 0) {
                 resp.status(400).send({
                     response: {

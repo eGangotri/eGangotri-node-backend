@@ -1,15 +1,16 @@
-import * as fs from 'fs';
+import * as fs from 'fs/promises';
+import { existsSync } from 'fs';
 import { PDFDocument } from 'pdf-lib';
 
 export async function isPDFCorrupted(filePath: string): Promise<{ isValid: boolean; error?: string; filePath?: string }> {
     try {
         // Check if file exists
-        if (!fs.existsSync(filePath)) {
+        if (!existsSync(filePath)) {
             return { isValid: false, error: 'File does not exist' };
         }
 
-        // Read the PDF file
-        const pdfBuffer = fs.readFileSync(filePath);
+        // Read the PDF file asynchronously
+        const pdfBuffer = await fs.readFile(filePath);
 
         // Try to load the PDF document
         await PDFDocument.load(pdfBuffer, {
