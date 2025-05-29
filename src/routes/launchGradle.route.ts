@@ -14,7 +14,7 @@ import { checkIfEmpty } from '../utils/FileUtils';
 import { timeInfo } from '../mirror/FrontEndBackendCommonCode';
 import { runCr2ToJpgInLoop } from '../services/pythonRestService';
 import { isPDFCorrupted } from '../utils/pdfValidator';
-import { getAllPdfsInFolders } from '../imgToPdf/utils/Utils';
+import { getAllPdfsInFoldersRecursive } from '../imgToPdf/utils/Utils';
 
 export const launchGradleRoute = express.Router();
 
@@ -51,7 +51,7 @@ launchGradleRoute.get('/launchUploader', async (req: any, resp: any) => {
         else {
             const _profiles = req.query.profiles.split(",");
             const getAllUploadableFolders = _profiles.map((profile: string) => getFolderInSrcRootForProfile(profile.trim()));
-            const _pdfs = await getAllPdfsInFolders(getAllUploadableFolders);
+            const _pdfs = await getAllPdfsInFoldersRecursive(getAllUploadableFolders);
             console.log(`pdfs count for upload in ${_profiles.length} profiles ${_pdfs.length}`)
             const corruptionCheck = []
             console.log(`corruptionCheck...`)

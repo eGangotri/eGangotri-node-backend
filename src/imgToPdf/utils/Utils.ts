@@ -66,6 +66,37 @@ export const getAllFilessInFoldersOfGivenType = async (dirs: Array<string>, _typ
 export const getAllPdfsInFolders = async (dirs: Array<string>): Promise<Array<string>> => {
      return getAllFilessInFoldersOfGivenType(dirs, PDF_EXT)
 }
+
+/**
+ * Recursively gets all PDF files from directories and their subdirectories
+ * @param dirs - Array of directory paths to search in
+ * @returns Promise<Array<string>> - Array of full paths to PDF files
+ */
+export const getAllPdfsInFoldersRecursive = async (dirs: Array<string>): Promise<Array<string>> => {
+    let allPdfs: string[] = [];
+    
+    for (const dir of dirs) {
+        try {
+            // Get all files in the current directory
+            const filesInDir = await getAllFilesOfGivenType(dir, [PDF_EXT]);
+            allPdfs = [...allPdfs, ...filesInDir];
+            
+            // Get all subdirectories
+            const subdirs = await getDirectoriesWithFullPath(dir);
+            
+            // Recursively process subdirectories
+            if (subdirs && subdirs.length > 0) {
+                const subDirPdfs = await getAllPdfsInFoldersRecursive(subdirs);
+                allPdfs = [...allPdfs, ...subDirPdfs];
+            }
+        } catch (error) {
+            console.error(`Error processing directory ${dir}:`, error);
+        }
+    }
+    
+    return allPdfs;
+}
+
 export const getAllPngsInFolders = async (dirs: Array<string>): Promise<Array<string>> => {
      return getAllFilessInFoldersOfGivenType(dirs, PNG_EXT)
 }
