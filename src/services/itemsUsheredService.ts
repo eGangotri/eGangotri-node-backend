@@ -43,7 +43,8 @@ export async function getListOfItemsUshered(queryOptions: ItemsListOptionsType) 
       .batchSize(50)  // Process in smaller batches
       .exec(); // Force execution of the query
 
-    console.log(`Retrieved ${items.length} items for page ${page}`);
+    console.log(`Retrieved ${items.length} 
+       ${page}`);
     return items;
   } catch (error: any) {
     console.error('Error in getListOfItemsUshered:', error.message);
@@ -60,8 +61,9 @@ export const itemsUsheredVerficationAndDBFlagUpdate = async (uploadCycleIdForVer
     uploadCycleId: uploadCycleIdForVerification,
   });
 
-  const _itemsUsheredFilter = itemsUsheredByUploadCycle.filter(x => x?.uploadFlag !== true)
+  const _itemsUsheredFilter = itemsUsheredByUploadCycle.filter(x => x?.uploadFlag === null || x?.uploadFlag === false || x?.uploadFlag === undefined)
   const total = itemsUsheredByUploadCycle.length;
+  console.log(`_itemsUsheredFilter ${_itemsUsheredFilter.length} Total: ${total}`)
   const promises =
     _itemsUsheredFilter.map((item, index) =>
       checkUrlValidityForUploadItems({
