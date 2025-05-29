@@ -11,7 +11,7 @@ import { genLinksAndFolders, validateGenGDriveLinks } from '../services/yarnList
 import { generateGoogleDriveListingExcel, getFolderNameFromGDrive } from '../cliBased/googleapi/GoogleDriveApiReadAndExport';
 import { formatTime } from '../imgToPdf/utils/Utils';
 import { convertGDriveExcelToLinkData, downloadGDriveData } from '../services/GDriveItemService';
-import { findInvalidFilePaths, findInvalidFilePaths, isValidPath } from '../utils/FileUtils';
+import { findInvalidFilePaths, isValidPath } from '../utils/FileUtils';
 import { ComparisonResult, GDRIVE_DEFAULT_IGNORE_FOLDER, verifyGDriveLocalIntegirtyPerLink, verifyGDriveLocalIntegrity } from '../services/GDriveService';
 import * as FileConstUtils from '../utils/constants';
 import { verifyUnzipSuccessInDirectory } from '../services/zipService';
@@ -86,7 +86,7 @@ gDriveRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
             return resp.status(400).send({
                 response: {
                     "status": "failed",
-                    "message": `Invalid paths: ${invalidPAths}`
+                    "message": `Invalid paths: ${invalidPAths} in ${profilesAsFolders}`
                 }
             });
         }
