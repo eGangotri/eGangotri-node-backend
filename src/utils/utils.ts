@@ -86,7 +86,6 @@ export async function checkArchiveUrlValidity(url: string, counter: number, tota
 
     // Get the page content
     const html = await response.text();
-    console.log(`html ${html}`)
     // Check for PDF download option
     const hasPDF = html.includes('PDF');
 

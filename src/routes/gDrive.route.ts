@@ -11,7 +11,7 @@ import { genLinksAndFolders, validateGenGDriveLinks } from '../services/yarnList
 import { generateGoogleDriveListingExcel, getFolderNameFromGDrive } from '../cliBased/googleapi/GoogleDriveApiReadAndExport';
 import { formatTime } from '../imgToPdf/utils/Utils';
 import { convertGDriveExcelToLinkData, downloadGDriveData } from '../services/GDriveItemService';
-import { isValidPath } from '../utils/FileUtils';
+import { findInvalidFilePaths, findInvalidFilePaths, isValidPath } from '../utils/FileUtils';
 import { ComparisonResult, GDRIVE_DEFAULT_IGNORE_FOLDER, verifyGDriveLocalIntegirtyPerLink, verifyGDriveLocalIntegrity } from '../services/GDriveService';
 import * as FileConstUtils from '../utils/constants';
 import { verifyUnzipSuccessInDirectory } from '../services/zipService';
@@ -80,6 +80,16 @@ gDriveRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
         }
 
         const profilesAsFolders = profiles.map((p: string) => isValidPath(p) ? p : getFolderInSrcRootForProfile(p));
+        const invalidPAths = await findInvalidFilePaths(profilesAsFolders);
+        if (invalidPAths.length > 0) {
+            console.log(`:downloadFromGoogleDrive:invalidPAths: ${invalidPAths}`);
+            return resp.status(400).send({
+                response: {
+                    "status": "failed",
+                    "message": `Invalid paths: ${invalidPAths}`
+                }
+            });
+        }
         const downloadCounterController = Math.random().toString(36).substring(7);
 
         // Process all downloads concurrently using Promise.all
