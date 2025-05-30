@@ -62,7 +62,7 @@ launchGradleRoute.get('/launchUploader', async (req: any, resp: any) => {
 
             const corruptionCheckRes = await Promise.all(corruptionCheck)
             const isCorrupted = corruptionCheckRes.filter(result => !result.isValid)  
-            console.log(`Corruption Check Done. isCorrupted ${isCorrupted.length}`)
+            console.log(`Corruption Check Done for PRofiles ${_profiles.join(", ")}. isCorrupted ${isCorrupted.length}`)
             if (isCorrupted.length > 0) {
                 resp.status(400).send({
                     response: {

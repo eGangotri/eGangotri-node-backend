@@ -140,7 +140,7 @@ export const moveFileSrcToDest = async (srcPath: string,
     ignorePaths = []) => {
     const destPath = isValidPath(destFolderOrProfile) ? destFolderOrProfile : getFolderInSrcRootForProfile(destFolderOrProfile)
     try {
-        console.log(`moveFileSrcToDest srcPath ${srcPath}/${destFolderOrProfile} destPath ${destPath}  flatten ${flatten}`)
+        console.log(`moveFileSrcToDest srcPath ${srcPath} -> ${destFolderOrProfile} destPath ${destPath}  flatten ${flatten}`)
         let _report
         if (flatten) {
             _report = await moveFilesAndFlatten(srcPath, destPath, true, ignorePaths);
