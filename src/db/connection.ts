@@ -25,18 +25,24 @@ export const MONGO_OPTIONS = {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     // Extreme timeout settings for high latency VPN connections
-    maxPoolSize: 30, // Reduced from 50 to avoid connection overhead
-    minPoolSize: 5,  // Reduced from 10
-    socketTimeoutMS: 900000, // 15 minutes (increased from 10)
-    connectTimeoutMS: 180000, // 3 minutes (increased from 2)
-    serverSelectionTimeoutMS: 180000, // 3 minutes (increased from 2)
-    heartbeatFrequencyMS: 120000, // 2 minutes (increased from 1 minute)
+    maxPoolSize: 20, // Further reduced to optimize connection management
+    minPoolSize: 3,  // Reduced to minimize idle connections
+    socketTimeoutMS: 1200000, // 20 minutes for long-running operations
+    connectTimeoutMS: 300000, // 5 minutes for initial connection
+    serverSelectionTimeoutMS: 300000, // 5 minutes for server selection
+    heartbeatFrequencyMS: 180000, // 3 minutes between heartbeats to reduce overhead
     // Add localThresholdMS to prefer closer servers
-    localThresholdMS: 1000, // Increased to be more lenient with latency
+    localThresholdMS: 5000, // Increased to be more lenient with latency
     // Additional options for high-latency connections
     bufferCommands: true, // Buffer commands when connection is lost
     autoIndex: false, // Don't build indexes automatically
     retryWrites: true, // Retry write operations
     retryReads: true, // Retry read operations
-    waitQueueTimeoutMS: 180000 // How long to wait for a connection from the pool
+    waitQueueTimeoutMS: 300000, // 5 minutes to wait for a connection from the pool
+    // Read preference settings
+    readPreference: 'nearest', // Prefer nearest server to reduce latency
+    readConcern: { level: 'available' }, // Accept potentially stale data for faster reads
+    // Write concern settings
+    w: 1, // Only require acknowledgment from primary
+    j: false, // Don't require journal commit for faster writes
 };

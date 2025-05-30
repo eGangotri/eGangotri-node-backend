@@ -15,6 +15,7 @@ import { timeInfo } from '../mirror/FrontEndBackendCommonCode';
 import { runCr2ToJpgInLoop } from '../services/pythonRestService';
 import { isPDFCorrupted } from '../utils/pdfValidator';
 import { getAllPdfsInFoldersRecursive } from '../imgToPdf/utils/Utils';
+import { DD_MM_YYYY_HH_MMFORMAT } from 'utils/constants';
 
 export const launchGradleRoute = express.Router();
 
@@ -54,13 +55,25 @@ launchGradleRoute.get('/launchUploader', async (req: any, resp: any) => {
             const _pdfs = await getAllPdfsInFoldersRecursive(getAllUploadableFolders);
             console.log(`pdfs count for upload in ${_profiles.length} profiles ${_pdfs.length}`)
             const corruptionCheck = []
-            console.log(`corruptionCheck...`)
-
+            
+            // Record start time for PDF validation
+            const startTime = Date.now();
+            console.log(`corruptionCheck started at ${startTime}`)
+            
+            // Use the optimized isPDFCorrupted with quickCheck option for faster validation
             for (let pdf of _pdfs) {
-                corruptionCheck.push(isPDFCorrupted(pdf))
+                corruptionCheck.push(isPDFCorrupted(pdf, { quickCheck: true }))
             }
-
+            
             const corruptionCheckRes = await Promise.all(corruptionCheck)
+            
+            // Calculate and log the time spent
+            const endTime = Date.now();
+            const timeSpentMs = endTime - startTime;
+            const timeSpentSec = (timeSpentMs / 1000).toFixed(2);
+            console.log(`PDF validation completed in ${timeSpentSec} seconds for ${_pdfs.length} files`);
+            console.log(`Average time per file: ${(timeSpentMs / Math.max(1, _pdfs.length)).toFixed(2)} ms`);
+            
             const isCorrupted = corruptionCheckRes.filter(result => !result.isValid)  
             console.log(`Corruption Check Done for PRofiles ${_profiles.join(", ")}. isCorrupted ${isCorrupted.length}`)
             if (isCorrupted.length > 0) {
