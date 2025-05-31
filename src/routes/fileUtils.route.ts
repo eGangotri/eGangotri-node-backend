@@ -1,6 +1,7 @@
-import * as express from 'express';
+import express from 'express';
+import * as fs from 'fs';
 import { findTopNLongestFileNames } from '../utils/utils';
-import { getDuplicatesOrUniquesBySize } from '../utils/FileUtils';
+import { findInvalidFilePaths, getDuplicatesOrUniquesBySize, isValidPath } from '../utils/FileUtils';
 import { renameAllNonAsciiInFolder } from '../files/renameNonAsciiFiles';
 import { callAksharamukha, DEFAULT_TARGET_SCRIPT_ROMAN_COLLOQUIAL } from '../aksharamukha/convert';
 import { convertJpgsToPdfInAllSubFolders } from '../imgToPdf/jpgToPdf';
@@ -8,7 +9,9 @@ import { multipleTextScriptConversion } from '../services/fileService';
 import { renameFilesViaExcel } from '../services/fileUtilsService';
 import { moveFileInListToDest, moveFilesInArray, moveFileSrcToDest } from '../services/yarnService';
 import { FileMoveTracker } from '../models/FileMoveTracker';
-import path from 'path';
+import { getAllPdfsInFoldersRecursive } from '../imgToPdf/utils/Utils';
+import { isPDFCorrupted } from '../utils/pdfValidator';
+import { getFolderInSrcRootForProfile } from '../archiveUpload/ArchiveProfileUtils';
 
 export const fileUtilsRoute = express.Router();
 fileUtilsRoute.get('/file-move-list', async (req, res) => {
@@ -69,7 +72,7 @@ fileUtilsRoute.post('/reverse-file-move', async (req: any, resp: any) => {
                 }
             });
         }
-        const moveResult = await moveFilesInArray(filesMovedNewAbsPath as string[], filesAbsPathMoved as string[], );
+        const moveResult = await moveFilesInArray(filesMovedNewAbsPath as string[], filesAbsPathMoved as string[],);
         if (moveResult.success) {
             fileMoveTracker.reversed = true;
             await fileMoveTracker.save();
@@ -321,5 +324,76 @@ fileUtilsRoute.post('/renameFilesViaExcel', async (req: any, resp: any) => {
     catch (err: any) {
         console.log('Error', err);
         resp.status(400).send(err);
+    }
+})
+
+fileUtilsRoute.post('/corruptPdfCheck', async (req: any, resp: any) => {
+    try {
+        const folderOrProfile = req.body.folderOrProfile || "";
+
+        if (!folderOrProfile || folderOrProfile === "") {
+            return resp.status(400).send({
+                response: {
+                    success: false,
+                    message: "folderOrProfile is mandatory"
+                }
+            });
+        }
+
+        const _profiles = folderOrProfile.includes(",") ?
+            folderOrProfile.split(",").map((p: string) => p.trim()) :
+            [folderOrProfile.trim()];
+
+        const profilesAsFolders = _profiles.map((p: string) => isValidPath(p) ? p : getFolderInSrcRootForProfile(p));
+        console.log(`:corruptPdfCheck:profilesAsFolders: ${profilesAsFolders} folderOrProfile   ${folderOrProfile}`);
+        const invalidPAths = await findInvalidFilePaths(profilesAsFolders);
+        if (invalidPAths.length > 0) {
+            console.log(`:corruptPdfCheck:invalidPAths: ${invalidPAths}`);
+            return resp.status(400).send({
+                response: {
+                    "status": "failed",
+                    "message": `Invalid paths: ${invalidPAths} in ${profilesAsFolders}`
+                }
+            });
+        }
+
+        // Use the recursive function to find PDFs in all subfolders
+        const _pdfs = await getAllPdfsInFoldersRecursive(profilesAsFolders);
+        console.log(`/corruptPdfCheck:pdfs count for upload in ${_profiles.length} profiles ${_pdfs.length} (including subfolders)`)
+        const corruptionCheck = []
+
+        if (_pdfs.length === 0) {
+            resp.status(400).send({
+                success: false,
+                message: `Cannot proceed. Empty folder(s) ${profilesAsFolders.join(", ")}`
+            });
+            return;
+        }
+        for (let pdf of _pdfs) {
+            corruptionCheck.push(isPDFCorrupted(pdf))
+        }   
+
+        const corruptionCheckRes = await Promise.all(corruptionCheck)
+        const isCorrupted = corruptionCheckRes.filter(result => !result.isValid)
+        console.log(`Corruption Check Done. isCorrupted ${isCorrupted.length}`)
+        if (isCorrupted.length > 0) {
+            resp.status(400).send({
+                response: {
+                    success: false,
+                    message: `Cannot proceed.\r\nFollowing (${isCorrupted.length}) PDFs are corrupted: ${isCorrupted.map(x => x.filePath).join(", ")}`
+                }
+            });
+            return;
+        }
+        resp.status(200).send({
+            response: {
+                success: true,
+                message: `Corruption Check Done. No corrupted PDFs found in ${folderOrProfile} holding ${_pdfs.length} PDFs.    `
+            }
+        });
+    }
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send({ response: err });
     }
 })
