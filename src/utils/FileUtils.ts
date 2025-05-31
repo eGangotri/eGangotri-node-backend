@@ -150,6 +150,25 @@ export const removeExcept = async (folder: any, except: Array<string>) => {
         }
     }
 }
+export const findInvalidFilePaths = async (filePaths: string[]): Promise<string[]> => {
+    const invalidPaths: string[] = [];
+    
+    // Check each path in parallel for better performance
+    await Promise.all(filePaths.map(async (filePath) => {
+        try {
+            // Resolve relative paths to absolute paths
+            const absolutePath = path.resolve(filePath);
+            
+            // Check if the path exists and is accessible
+            await fsPromise.access(absolutePath);
+        } catch (error) {
+            // If access fails, add to invalid paths
+            invalidPaths.push(filePath);
+        }
+    }));
+    
+    return invalidPaths;
+}
 
 export const createFolderIfNotExistsAsync = async (dirPath: string) => {
     try {
