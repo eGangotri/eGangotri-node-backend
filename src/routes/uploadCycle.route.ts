@@ -33,6 +33,13 @@ uploadCycleRoute.post("/add", async (req: Request, resp: Response) => {
         const _validate = await validateSuperAdminUserFromRequest(req);
         if (_validate[0]) {
             console.log("req.body:add")
+            try {
+                const clientIp = req.ip || req.socket.remoteAddress || 'UnknownIP';
+                req.body.uploadCenter = clientIp;
+            }
+            catch (err) {
+                console.log("Error getting client IP", err);
+            }
             const uq = new UploadCycle(req.body);
             await uq.save();
             resp.status(200).send(uq);
@@ -105,7 +112,7 @@ uploadCycleRoute.post("/deleteUploadCycleById", async (req: Request, resp: Respo
         if (uploadCycle) {
             uploadCycle.deleted = true;
             await uploadCycle.save();
-             resp.status(200).send({
+            resp.status(200).send({
                 response: {
                     success: true,
                     message: `uploadCycleId ${uploadCycleId} deleted`

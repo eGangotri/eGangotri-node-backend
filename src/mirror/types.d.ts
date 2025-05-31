@@ -36,6 +36,7 @@ export interface UploadCycleTableData {
     archiveProfileAndCountIntended?: ArchiveProfileAndCount[]; 
     allUploadVerified?: boolean|null;
     moveToFreeze ?: boolean;
+    uploadCenter?: string;
 }
 
 

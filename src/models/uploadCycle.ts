@@ -19,7 +19,8 @@ const schema = new mongoose.Schema(
         allUploadVerified: { type: Boolean, required: false, default: null },
         mode: { type: String, required: false, default: "Regular" },
         moveToFreeze: { type: Boolean, required: true, default: false },
-        deleted: { type: Boolean, required: false, default: false }
+        deleted: { type: Boolean, required: false, default: false },
+        uploadCenter: { type: String, required: false, default: "" }
     }, {
     collection: 'Upload_Cycle',
     timestamps: true
