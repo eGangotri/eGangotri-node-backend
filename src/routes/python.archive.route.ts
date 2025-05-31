@@ -1,13 +1,13 @@
 
 
-import { getArchiveMetadataForProfile, getFolderInSrcRootForProfile, isValidArchiveProfile } from 'archiveUpload/ArchiveProfileUtils';
+import { getArchiveMetadataForProfile, getFolderInSrcRootForProfile, isValidArchiveProfile } from '../archiveUpload/ArchiveProfileUtils';
 import * as express from 'express';
-import { getAllPdfsInFolders } from 'imgToPdf/utils/Utils';
-import { itemsUsheredVerficationAndDBFlagUpdate } from 'services/itemsUsheredService';
-import { executePythonPostCall } from 'services/pythonRestService';
-import { getLatestUploadCycle } from 'services/uploadCycleService';
-import { checkIfEmpty } from 'utils/FileUtils';
-import { isPDFCorrupted } from 'utils/pdfValidator';
+import { getAllPdfsInFolders } from '../imgToPdf/utils/Utils';
+import { itemsUsheredVerficationAndDBFlagUpdate } from '../services/itemsUsheredService';
+import { executePythonPostCall } from '../services/pythonRestService';
+import { getLatestUploadCycle } from '../services/uploadCycleService';
+import { checkIfEmpty, isValidPath } from '../utils/FileUtils';
+import { isPDFCorrupted } from '../utils/pdfValidator';
 
 export const pythonArchiveRoute = express.Router();
 
