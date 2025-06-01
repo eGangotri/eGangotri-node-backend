@@ -5,6 +5,7 @@ import * as path from 'path';
 import * as fsPromise from 'fs/promises';
 import { launchWinExplorer } from "./util";
 import { checkFolderExistsSync, isFileInUse } from "../../utils/FileUtils";
+import { isPDFCorrupted } from "../../utils/pdfValidator";
 
 export const moveAFile = async (sourceFileAbsPath: string, targetDir: string, fileName: string, pdfOnly = true) => {
     const targetFile = path.join(targetDir, fileName);
@@ -12,18 +13,42 @@ export const moveAFile = async (sourceFileAbsPath: string, targetDir: string, fi
 
     if (!pdfOnly || (pdfOnly && fileName.endsWith('.pdf'))) {
         try {
+            if (fileName.endsWith('.pdf')) {
+                const corruptionCheck = await isPDFCorrupted(sourceFileAbsPath)
+                if (!corruptionCheck.isValid) {
+                    result.error = `Corrupted or Non-Existent PDF ${sourceFileAbsPath}`;
+                    console.error(result.error);
+                    return result;
+                }
+            }
+
             if (!checkFolderExistsSync(targetFile)) {
                 await fsPromise.rename(sourceFileAbsPath, targetFile);
-                result.renamedWithoutCollision = `${fileName}`;
-                result.targetFile = targetFile;
+
+                // Verify if the file move was successful
+                if (checkFolderExistsSync(targetFile)) {
+                    result.renamedWithoutCollision = `${fileName}`;
+                    result.targetFile = targetFile;
+                } else {
+                    result.error = `Failed to move file ${sourceFileAbsPath} to ${targetFile}: File not found at destination after move`;
+                    console.error(result.error);
+                }
             } else {
                 const extension = path.extname(targetFile); // .pdf with .
                 const newName = `${targetFile.replace(`${extension}`, `_1${extension}`)}`;
                 console.log(`File (${extension}) already exists in target dir ${targetFile}. Renaming to ${newName}`);
                 if (!checkFolderExistsSync(newName)) {
                     await fsPromise.rename(sourceFileAbsPath, newName);
-                    result.fileCollisionsResolvedByRename = `${fileName}`;
-                    console.log(`File already exists in target dir ${targetFile}. Renaming to ${newName}`);
+
+                    // Verify if the renamed file move was successful
+                    if (checkFolderExistsSync(newName)) {
+                        result.fileCollisionsResolvedByRename = `${fileName}`;
+                        result.targetFile = newName;
+                        console.log(`File already exists in target dir ${targetFile}. Successfully renamed to ${newName}`);
+                    } else {
+                        result.error = `Failed to move file ${sourceFileAbsPath} to ${newName}: File not found at destination after move`;
+                        console.error(result.error);
+                    }
                 } else {
                     console.error(`File already exists in target dir ${targetFile}. Renaming to ${newName} failed`);
                     result.error = `File already exists in target dir ${targetFile}. Renaming to ${newName} failed`;
@@ -31,6 +56,7 @@ export const moveAFile = async (sourceFileAbsPath: string, targetDir: string, fi
             }
         } catch (err) {
             result.error = `Error moving file ${sourceFileAbsPath}: ${err.message}`;
+            console.error(`Error moving file ${sourceFileAbsPath}: ${err.message}`);
         }
     }
     return result;
