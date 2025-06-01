@@ -5,7 +5,7 @@ import { UploadCycle } from "../models/uploadCycle";
 import { getListOfUploadCycles, getUploadCycleById } from "../services/uploadCycleService";
 import { findMissedUploads } from "../services/GradleLauncherUtil";
 import { UploadCycleArchiveProfile } from "mirror/types";
-import { getServerNetworkInfo, getClientIp } from "../utils/networkUtils";
+import { getServerNetworkInfo } from "../utils/networkUtils";
 
 export const uploadCycleRoute = express.Router();
 
@@ -36,18 +36,8 @@ uploadCycleRoute.post("/add", async (req: Request, resp: Response) => {
             try {
                 // Get server network information using the utility function
                 const { serverIp, hostname } = getServerNetworkInfo();
-                
-                // Get client IP for logging
-                const clientIp = getClientIp(req);
-                
-                console.log(`Original client IP: ${clientIp}, Server IP: ${serverIp}`);
-                console.log(`from client ${req.body.uploadCenter || 'unknown'} setting to server IP: ${serverIp}`);
-                
                 // Use the server's IP address instead of the client IP
-                req.body.uploadCenter = serverIp;
-                
-                // Add hostname for additional identification
-                req.body.serverHostname = hostname;
+                req.body.uploadCenter = `${serverIp}${hostname}`;
             }
             catch (err) {
                 console.log("Error getting server IP", err);

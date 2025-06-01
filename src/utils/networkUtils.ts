@@ -39,11 +39,3 @@ export function getServerNetworkInfo(): { serverIp: string; hostname: string } {
     }
 }
 
-/**
- * Gets the client IP address from a request object
- * @param req Express request object
- * @returns Client IP address or 'UnknownIP' if not available
- */
-export function getClientIp(req: any): string {
-    return req.ip || req.socket.remoteAddress || 'UnknownIP';
-}
