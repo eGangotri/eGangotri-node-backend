@@ -330,7 +330,7 @@ fileUtilsRoute.post('/renameFilesViaExcel', async (req: any, resp: any) => {
 fileUtilsRoute.post('/corruptPdfCheck', async (req: any, resp: any) => {
     try {
         const folderOrProfile = req.body.folderOrProfile || "";
-
+        const deepCheck = req.body.deepCheck || false;
         if (!folderOrProfile || folderOrProfile === "") {
             return resp.status(400).send({
                 response: {
@@ -370,7 +370,7 @@ fileUtilsRoute.post('/corruptPdfCheck', async (req: any, resp: any) => {
             return;
         }
         for (let pdf of _pdfs) {
-            corruptionCheck.push(isPDFCorrupted(pdf))
+            corruptionCheck.push(isPDFCorrupted(pdf, {quickCheck: !deepCheck}))
         }   
 
         const corruptionCheckRes = await Promise.all(corruptionCheck)
@@ -380,7 +380,10 @@ fileUtilsRoute.post('/corruptPdfCheck', async (req: any, resp: any) => {
             resp.status(400).send({
                 response: {
                     success: false,
-                    message: `Cannot proceed.\r\nFollowing (${isCorrupted.length}) PDFs are corrupted: ${isCorrupted.map(x => x.filePath).join(", ")}`
+                    message: `Cannot proceed.\r\nFollowing (${isCorrupted.length}) PDFs are corrupted: 
+                    isCorrupted: ${JSON.stringify(isCorrupted.map(x => x.error).join(", "))}
+                    \r\n${isCorrupted.map(x => x.filePath).join(", ")}
+                    \r\nDeep Check: ${deepCheck}`
                 }
             });
             return;
@@ -388,7 +391,9 @@ fileUtilsRoute.post('/corruptPdfCheck', async (req: any, resp: any) => {
         resp.status(200).send({
             response: {
                 success: true,
-                message: `Corruption Check Done. No corrupted PDFs found in ${folderOrProfile} holding ${_pdfs.length} PDFs.    `
+                message: `Corruption Check Done.
+                 No corrupted PDFs found in ${folderOrProfile} holding ${_pdfs.length} PDFs.
+                 Deep Check: ${deepCheck}`
             }
         });
     }
