@@ -68,7 +68,7 @@ export async function listFolderContentsAndGenerateCSVAndExcel(_folderIdOrUrl: s
     await FileUtils.createFolderIfNotExistsAsync(exportDestFolder);
 
     const googleDriveFileData: Array<GoogleApiData> = await listFolderContentsAsArrayOfData(gDriveFolderId,
-        drive, umbrellaFolder, ignoreFolder, type)
+        drive, umbrellaFolder, ignoreFolder, type, rowCounterController)
     const fileNameWithPath = await createFileNameWithPathForExport(gDriveFolderId,
          umbrellaFolder, exportDestFolder, FileConstUtils.getRowCounter(rowCounterController)[1]);
     FileConstUtils.incrementRowCounter(rowCounterController);
@@ -103,7 +103,7 @@ export async function listFolderContentsAndGenerateExcelV2ForPdfRenamer(_folderI
     await FileUtils.createFolderIfNotExistsAsync(exportDestFolder);
 
     const googleDriveFileData: Array<GoogleApiData> = await listFolderContentsAsArrayOfData(folderId,
-        drive, umbrellaFolder, ignoreFolder, type)
+        drive, umbrellaFolder, ignoreFolder, type, rowCounterController)
     const fileNameWithPath = await createFileNameWithPathForExport(folderId, umbrellaFolder, exportDestFolder,
         FileConstUtils.getRowCounter(rowCounterController)[1]);
     FileConstUtils.incrementRowCounter(rowCounterController);

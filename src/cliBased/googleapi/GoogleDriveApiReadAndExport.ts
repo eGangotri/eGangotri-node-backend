@@ -27,18 +27,26 @@ export async function getGDriveContentsAsJson(driveLinkOrFolderID: string,
   return _data;
 }
 
-async function procOrigGoogleDrive(driveLinkOrFolderID: string, folderName: string,
-  ignoreFolder = "", pdfRenamerXlV2 = false, type = PDF_TYPE, rowCounterController = "") {
+async function procOrigGoogleDrive(driveLinkOrFolderID: string,
+   folderName: string,
+  ignoreFolder = "", 
+  pdfRenamerXlV2 = false, 
+  type = PDF_TYPE, 
+  rowCounterController = "") {
   if (pdfRenamerXlV2) {
     const res = await listFolderContentsAndGenerateExcelV2ForPdfRenamer(driveLinkOrFolderID, drive,
       `${EXPORT_ROOT_FOLDER}_googleDriveExcels`,
-      folderName, ignoreFolder, type);
+      folderName, ignoreFolder, type,rowCounterController);
     return res;
   }
   else {
-    const res = await listFolderContentsAndGenerateCSVAndExcel(driveLinkOrFolderID, drive,
+    const res = await listFolderContentsAndGenerateCSVAndExcel(driveLinkOrFolderID, 
+      drive,
       `${EXPORT_ROOT_FOLDER}_googleDriveExcels`,
-      folderName, ignoreFolder, type);
+      folderName, 
+      ignoreFolder,
+       type,
+       rowCounterController);
     return res;
   }
 }
@@ -65,6 +73,7 @@ export const generateGoogleDriveListingExcel = async (driveLinkOrFolderID: strin
   pdfRenamerXlV2 = false,
   type = PDF_TYPE,
   rowCounterController = "") => {
+    console.log(`generateGoogleDriveListingExcel:driveLinkOrFolderID ${driveLinkOrFolderID} ${type}`)
   //check if driveLinkOrFolderID is a valid google link
   if (!isValidDriveId(driveLinkOrFolderID)) {
     return {
