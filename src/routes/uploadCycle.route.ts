@@ -37,7 +37,7 @@ uploadCycleRoute.post("/add", async (req: Request, resp: Response) => {
                 // Get server network information using the utility function
                 const { serverIp, hostname } = getServerNetworkInfo();
                 // Use the server's IP address instead of the client IP
-                req.body.uploadCenter = `${serverIp}${hostname}`;
+                req.body.uploadCenter = `${serverIp}(${hostname})`;
             }
             catch (err) {
                 console.log("Error getting server IP", err);
