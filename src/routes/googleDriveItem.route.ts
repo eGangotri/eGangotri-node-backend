@@ -1,5 +1,4 @@
-const express = require("express");
-import e, { Request, Response } from "express";
+import express, { Request, Response } from "express";
 import { getDiffBetweenGDriveAndLocalFiles, getListOfGDriveItems, getSourceStatistics } from "../services/GDriveItemService";
 import { uploadToGDriveBasedOnDiffExcel } from "../cliBased/googleapi/GoogleDriveUpload";
 import { GDriveItemListOptionsType } from "types/listingTypes";
