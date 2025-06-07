@@ -8,7 +8,7 @@ import { extractGoogleDriveId } from '../../mirror/GoogleDriveUtilsCommonCode';
 import { getGoogleDriveInstance } from '../googleapi/service/CreateGoogleDrive';
 import * as path from 'path';
 import { updateEntryForGDriveUploadHistory, _updateEmbeddedFileByFileName } from '../../services/GdriveDownloadRecordService';
-import { GDriveDownloadHistoryStatus } from '../../utils/constants';
+import { DownloadHistoryStatus } from '../../utils/constants';
 
 const drive = getGoogleDriveInstance();
 
@@ -107,7 +107,7 @@ export const downloadGDriveFileUsingGDriveApi = async (
 
         await updateEntryForGDriveUploadHistory(gDriveDownloadTaskId,
              `started d/l of ${fileName}`, 
-             GDriveDownloadHistoryStatus.Queued);
+             DownloadHistoryStatus.Queued);
 
         const dest = fs.createWriteStream(filePath);
 
@@ -151,14 +151,14 @@ export const downloadGDriveFileUsingGDriveApi = async (
 
         if (result?.success) {
             incrementDownloadCompleted(downloadCounterController);
-            await _updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, GDriveDownloadHistoryStatus.Completed, `completed d/l of ${fileName}`, destPath);
+            await _updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, DownloadHistoryStatus.Completed, `completed d/l of ${fileName}`, destPath);
             return { status: `Downloaded ${fileName} to ${destPath}`, success: true, destPath };
         } else {
             console.log(`downloadGDriveFileUsingGDriveApi else-1`)
             incrementDownloadFailed(downloadCounterController);
             console.log(`downloadGDriveFileUsingGDriveApi else-2`)
 
-            await _updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, GDriveDownloadHistoryStatus.Failed, `failed d/l of ${fileName}`, destPath);
+            await _updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, DownloadHistoryStatus.Failed, `failed d/l of ${fileName}`, destPath);
             console.log(`downloadGDriveFileUsingGDriveApi else-3`);
             return {
                 status: `File Consistency Check Failed for download ${fileName} to ${destPath}`,
@@ -172,7 +172,7 @@ export const downloadGDriveFileUsingGDriveApi = async (
         if (downloadCounterController) {
             incrementDownloadInError(downloadCounterController);
         }
-        await _updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, GDriveDownloadHistoryStatus.Failed, `${errorContext}: ${error.message}`, destPath);
+        await _updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, DownloadHistoryStatus.Failed, `${errorContext}: ${error.message}`, destPath);
         return { status: `${errorContext}: ${error.message}`,
                  success: false,
                  error: `${errorContext}: ${error.message}`,

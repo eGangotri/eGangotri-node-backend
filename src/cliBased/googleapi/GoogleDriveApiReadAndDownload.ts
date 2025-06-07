@@ -11,7 +11,7 @@ import { addHeaderAndFooterToPDF } from '../../pdfHeaderFooter';
 import { isValidPath } from "../../utils/FileUtils";
 import { extractGoogleDriveId } from '../../mirror/GoogleDriveUtilsCommonCode';
 import { PDF_TYPE, FOLDER_MIME_TYPE } from './_utils/constants';
-import { GDriveDownloadHistoryStatus } from '../../utils/constants';
+import { DownloadHistoryStatus } from '../../utils/constants';
 import { checkFolderExistsAsync, createFolderIfNotExistsAsync } from '../../utils/FileUtils';
 import { getFolderNameFromGDrive } from './GoogleDriveApiReadAndExport';
 
@@ -49,7 +49,7 @@ async function dwnldAllFilesFromGDrive(driveLinkOrFolderID: string,
 
       await updateEntryForGDriveUploadHistory(gDriveDownloadTaskId,
         `Started download of single file: ${fileData.fileName}`,
-        GDriveDownloadHistoryStatus.InProgress);
+        DownloadHistoryStatus.InProgress);
 
       const result = await downloadFileFromGoogleDrive(
         fileData.googleDriveLink,
@@ -63,7 +63,7 @@ async function dwnldAllFilesFromGDrive(driveLinkOrFolderID: string,
       const resultAsString = JSON.stringify(result);
       await updateEntryForGDriveUploadHistory(gDriveDownloadTaskId,
         resultAsString,
-        GDriveDownloadHistoryStatus.Completed);
+        DownloadHistoryStatus.Completed);
 
       return {
         totalPdfsToDownload: 1,
@@ -74,7 +74,7 @@ async function dwnldAllFilesFromGDrive(driveLinkOrFolderID: string,
     if (err?.response?.status !== 404) {
       await updateEntryForGDriveUploadHistory(gDriveDownloadTaskId,
         JSON.stringify(err),
-        GDriveDownloadHistoryStatus.Failed);
+        DownloadHistoryStatus.Failed);
       throw err;
     }
   }
@@ -92,7 +92,7 @@ async function dwnldAllFilesFromGDrive(driveLinkOrFolderID: string,
     const msg = `restriction to ${maxLimit} items only for now. Link has ${googleDriveData.length} items Cannot continue`
 
     await updateEntryForGDriveUploadHistory(gDriveDownloadTaskId,
-      msg, GDriveDownloadHistoryStatus.Failed, { totalPdfsToDownload: googleDriveData.length });
+      msg, DownloadHistoryStatus.Failed, { totalPdfsToDownload: googleDriveData.length });
     return {
       totalPdfsToDownload: googleDriveData.length,
       success: false,
@@ -102,7 +102,7 @@ async function dwnldAllFilesFromGDrive(driveLinkOrFolderID: string,
 
   await updateEntryForGDriveUploadHistory(gDriveDownloadTaskId,
     `Started download with ${googleDriveData.length} items`,
-    GDriveDownloadHistoryStatus.InProgress);
+    DownloadHistoryStatus.InProgress);
 
   const promises = googleDriveData.map(async (_data) => {
     console.log(`googleDriveData.map(_data: ${JSON.stringify(_data)}}`);
@@ -117,7 +117,7 @@ async function dwnldAllFilesFromGDrive(driveLinkOrFolderID: string,
   const resultsAsString = results.map((result: any) => JSON.stringify(result)).join(",");
   await updateEntryForGDriveUploadHistory(gDriveDownloadTaskId,
     resultsAsString,
-    GDriveDownloadHistoryStatus.Completed
+    DownloadHistoryStatus.Completed
   );
 
   return {
@@ -200,7 +200,7 @@ export const downloadFromGoogleDriveToProfile = async (driveLinkOrFolderId: stri
       console.log(`_resp : ${JSON.stringify(_resp)}`);
       await updateEntryForGDriveUploadHistory(gDriveDownloadTaskId,
         JSON.stringify(_resp),
-        GDriveDownloadHistoryStatus.Completed, _resp);
+        DownloadHistoryStatus.Completed, _resp);
       return _resp;
     }
     else {
@@ -222,7 +222,7 @@ export const downloadFromGoogleDriveToProfile = async (driveLinkOrFolderId: stri
       "error": `downloadFromGoogleDriveToProfile:Error (${fileDumpFolder}) ${JSON.stringify(err)}`
     }
     await updateEntryForGDriveUploadHistory(gDriveDownloadTaskId, err,
-      GDriveDownloadHistoryStatus.Failed, _resp);
+      DownloadHistoryStatus.Failed, _resp);
     return _resp
   }
 }
