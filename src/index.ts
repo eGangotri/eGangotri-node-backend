@@ -32,6 +32,7 @@ import { pythonRoute } from "./routes/python.route";
 import { launchCmdRoute } from "./routes/launchCmd.route";
 import { ellipsis } from "./mirror/utils";
 import { pythonArchiveRoute } from "./routes/python.archive.route";
+import { imgToPdfRoute } from "./routes/imgToPdf.route";
 
 const egangotri = express();
 const hostname = "localhost";
@@ -80,8 +81,7 @@ egangotri.use("/scanningCenter", scanningCenterRoute);
 egangotri.use("/gDriveUploadWorkReportRoute", gDriveUploadWorkReportRoute);
 egangotri.use("/launchCmd", launchCmdRoute);
 egangotri.use("/pythonArchive", pythonArchiveRoute);
-
-
+egangotri.use("/imgToPdf", imgToPdfRoute);
 
 //Daily Work Report Routes
 egangotri.use("/dailyWorkReport", dailyWorkReportRoute);
