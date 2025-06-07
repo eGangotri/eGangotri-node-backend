@@ -14,6 +14,16 @@ imgToPdfRoute.post("/createImgToPdfEntry", async (req: Request, resp: Response) 
     }
 });
 
+imgToPdfRoute.post("/getAllImgToPdfEntries", async (req: Request, resp: Response) => {
+    try {
+        const docs = await ImageToPdfHistory.find({}).sort({ created_at: -1 });
+        resp.json({ entries: docs });
+    } catch (error) {
+        console.error('Error fetching ImageToPdfHistory entries:', error);
+        resp.status(500).json({ error: 'Failed to fetch ImageToPdfHistory entries' });
+    }
+});
+
 
 imgToPdfRoute.post("/updateImgToPdfEntry", async (req: Request, resp: Response) => {
     try {
