@@ -1,24 +1,26 @@
 import * as fs from 'fs';
 import path from 'path'
-import { ARCHIVE_METADATA_PROPERTIES_FILE, DEST_ROOT, LOCAL_FOLDERS_PROPERTIES_FILE, SRC_ROOT } from './constants';
+import { ARCHIVE_METADATA_PROPERTIES_FILES, DEST_ROOT, LOCAL_FOLDERS_PROPERTIES_FILE, LOCAL_FOLDERS_PROPERTIES_FILES, SRC_ROOT } from './constants';
 import { checkFolderExistsSync } from '../utils/FileUtils';
 
 
 const getFoldersCorrespondingToProfile = (root: string): Map<string, string> => {
     const properties = new Map<string, string>();
-    if (!checkFolderExistsSync(LOCAL_FOLDERS_PROPERTIES_FILE)) {
-        console.log(`No Local Folder ${LOCAL_FOLDERS_PROPERTIES_FILE} found`);
-        return properties;
-    }
-    const data = fs.readFileSync(LOCAL_FOLDERS_PROPERTIES_FILE, 'utf-8');
-    const lines = data.split(/\r?\n/);
-    lines.forEach((line) => {
-        const [key, value] = line.split('=');
-        const val = value?.replace(/\\\\/g, path.sep)
-        if (key?.trim() && val?.trim()) {
-            properties.set(key.trim(), val.trim());
+    for (const file of LOCAL_FOLDERS_PROPERTIES_FILES) {
+        if (!checkFolderExistsSync(file)) {
+            console.log(`No Local Folder ${file} found`);
+            continue;
         }
-    });
+        const data = fs.readFileSync(file, 'utf-8');
+        const lines = data.split(/\r?\n/);
+        lines.forEach((line) => {
+            const [key, value] = line.split('=');
+            const val = value?.replace(/\\\\/g, path.sep)
+            if (key?.trim() && val?.trim()) {
+                properties.set(key.trim(), val.trim());
+            }
+        });
+    }
 
     const profileAndFolder = new Map<string, string>();
     const rootPath = properties.get(root);
@@ -70,19 +72,21 @@ export const getHeaderAndFooterTextForProfile = (profile: string) => {
 
 const getArchiveMetadataProperties = () => {
     const properties = new Map<string, string>();
-    if (!checkFolderExistsSync(ARCHIVE_METADATA_PROPERTIES_FILE)) {
-        console.log(`No Local Folder ${ARCHIVE_METADATA_PROPERTIES_FILE} found`);
-        return properties;
-    }
-    const data = fs.readFileSync(ARCHIVE_METADATA_PROPERTIES_FILE, 'utf-8');
-    const lines = data.split(/\r?\n/);
-    lines.forEach((line) => {
-        const [key, value] = line.split('=');
-        const val = value?.replace(/\\\\/g, path.sep)
-        if (key?.trim() && val?.trim()) {
-            properties.set(key.trim(), val.trim());
+    for (const file of ARCHIVE_METADATA_PROPERTIES_FILES) {
+        if (!checkFolderExistsSync(file)) {
+            console.log(`No Local Folder ${file} found`);
+            continue;
         }
-    });
+        const data = fs.readFileSync(file, 'utf-8');
+        const lines = data.split(/\r?\n/);
+        lines.forEach((line) => {
+            const [key, value] = line.split('=');
+            const val = value?.replace(/\\\\/g, path.sep)
+            if (key?.trim() && val?.trim()) {
+                properties.set(key.trim(), val.trim());
+            }
+        });
+    }
     console.log(`archive.metadata.properties ${properties.size} items`);
     return properties;
 }
