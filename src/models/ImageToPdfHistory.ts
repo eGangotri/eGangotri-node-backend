@@ -4,10 +4,13 @@ const folderDetailSchema = new Schema({
   folder_path: String,
   image_count: Number,
   status: String,
-  errors: [String],
+  folderErrors: [String],
   error_count: Number,
   pdf_generated: Boolean,
-  pdf_path: String
+  pdf_path: String,
+  skipped: Boolean,
+  pdf_page_count: Number,
+  pages_match_images: Boolean
 });
 
 const summarySchema = new Schema({
@@ -33,12 +36,15 @@ const pathsSchema = new Schema({
 });
 
 const imageToPdfHistorySchema = new Schema({
+
   total_folders: Number,
   folders_detail: [folderDetailSchema],
   summary: summarySchema,
   memory_stats: memoryStatsSchema,
   paths: pathsSchema,
   created_at: { type: Date, default: Date.now }
+}, {
+  toJSON: { transform: function(doc, ret) { return ret; } }
 });
 
 export const ImageToPdfHistory = model('ImageToPdfHistory', imageToPdfHistorySchema);
