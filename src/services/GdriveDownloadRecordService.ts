@@ -1,6 +1,6 @@
 import { QuickStatus } from '../models/GDriveDownloadHistorySchema';
 import { GLOBAL_SERVER_NAME } from '../db/connection';
-import { GDriveDownloadHistoryStatus } from '../utils/constants';
+import { DownloadHistoryStatus } from '../utils/constants';
 
 const GDRIVE_DOWNLOAD_HISTORY_PATH = `${GLOBAL_SERVER_NAME}/gDriveDownloadRoute`;
 
@@ -43,7 +43,7 @@ export const insertEntryForGDriveUploadHistory =
 
 export const updateEntryForGDriveUploadHistory = async (gDriveDownloadTaskId: string,
   msg: string,
-   status: GDriveDownloadHistoryStatus,
+   status: DownloadHistoryStatus,
     quickStatus: QuickStatus = {}) => {
   const params = { msg, status };
   if (quickStatus && quickStatus?.status?.length > 0) {
