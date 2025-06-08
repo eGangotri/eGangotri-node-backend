@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import { ImageToPdfHistory } from "../models/ImageToPdfHistory";
+import { ImageToPdfHistory } from "../models/ImageToPdfHistorySchema";
 
 export const imgToPdfRoute = express.Router();
 
