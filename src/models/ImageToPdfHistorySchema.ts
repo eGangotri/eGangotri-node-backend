@@ -65,6 +65,7 @@ const FolderInfoSchema = new Schema<IFolderInfo>({
     status: { type: String, default: 'pending' }
 });
 
+const COLL_NAME = 'ImageToPdfHistory';
 // Main schema for Image to PDF History
 const ImageToPdfHistorySchema = new Schema<IImageToPdfHistory>({
     total_folders: { type: Number, default: 0 },
@@ -89,6 +90,9 @@ const ImageToPdfHistorySchema = new Schema<IImageToPdfHistory>({
         source: { type: String, required: true },
         destination: { type: String, required: true }
     })
-}, { timestamps: true });
+}, { 
+    timestamps: true,
+    collection: COLL_NAME  // Explicitly set the collection name to prevent lowercase/pluralization
+});
 
-export const ImageToPdfHistory = mongoose.model<IImageToPdfHistory>('ImageToPdfHistory', ImageToPdfHistorySchema);
+export const ImageToPdfHistory = mongoose.model<IImageToPdfHistory>(COLL_NAME, ImageToPdfHistorySchema);
