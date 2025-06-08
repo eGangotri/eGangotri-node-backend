@@ -65,7 +65,7 @@ const FolderInfoSchema = new Schema<IFolderInfo>({
     status: { type: String, default: 'pending' }
 });
 
-const COLL_NAME = 'ImageToPdfHistory';
+const COLL_NAME = 'Image_To_Pdf_History';
 // Main schema for Image to PDF History
 const ImageToPdfHistorySchema = new Schema<IImageToPdfHistory>({
     total_folders: { type: Number, default: 0 },
