@@ -18,8 +18,18 @@ export const mongoDbUrlWithDbName = (dbName: string) => {
 
     const _protocol = CONFS.MONGO_DB_PROTOCOL || "mongodb+srv://";
     const _suffix = CONFS.MONGO_DB_SUFFIXES || "?retryWrites=true&w=majority";
-    console.log(`${_protocol}${CONFS.MONGO_ATLAS_USER}:${CONFS.MONGO_ATLAS_PWD}@${CONFS.MONGO_DB_PATH}/${GLOBAL_DB_NAME}${_suffix}`)
-    return `${_protocol}${CONFS.MONGO_ATLAS_USER}:${CONFS.MONGO_ATLAS_PWD}@${CONFS.MONGO_DB_PATH}/${GLOBAL_DB_NAME}${_suffix}`;
+    
+    // Handle local MongoDB connection (no auth required)
+    if (!CONFS.MONGO_ATLAS_USER && !CONFS.MONGO_ATLAS_PWD) {
+        const connectionString = `${_protocol}${CONFS.MONGO_DB_PATH}/${GLOBAL_DB_NAME}${_suffix}`;
+        console.log(`Local MongoDB connection: ${connectionString}`);
+        return connectionString;
+    }
+    
+    // For remote MongoDB with authentication
+    const connectionString = `${_protocol}${CONFS.MONGO_ATLAS_USER}:${CONFS.MONGO_ATLAS_PWD}@${CONFS.MONGO_DB_PATH}/${GLOBAL_DB_NAME}${_suffix}`;
+    console.log(`MongoDB connection: ${connectionString.replace(/:([^:@]+)@/, ':****@')}`);
+    return connectionString;
 }
 export const MONGO_OPTIONS = {
     useNewUrlParser: true,

@@ -84,6 +84,7 @@ export async function checkArchiveUrlValidity(url: string, counter: number, tota
       return false;
     }
 
+    try {
     // Get the page content
     const html = await response.text();
     // Check for PDF download option
@@ -93,10 +94,15 @@ export async function checkArchiveUrlValidity(url: string, counter: number, tota
       console.log(`Item # ${counter}/${total}******* PDF not available for download at ${url}`);
       return false;
     }
+  }
+    catch (error) {
+      console.log(`checkUrlValidity (${url}) await response.text() error ${error} `)
+      return false;
+    }
 
     return true;
   } catch (error) {
-    console.log(`checkUrlValidity error ${error} `)
+    console.log(`checkUrlValidity (${url}) error ${error} `)
     return false;
   }
 }
