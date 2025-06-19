@@ -113,13 +113,13 @@ export async function connectToMongo(_args: string[] = []) {
 
       // Apply mongoose global settings before connecting
       mongoose.set('strictQuery', false);
-      
+
       // Only enable debug in development environment
       const isDebug = process.env.NODE_ENV !== 'production';
       if (isDebug) {
-        mongoose.set('debug', { color: true, shell: true });
+        // mongoose.set('debug', { color: true, shell: true });
       }
-
+      mongoose.set('debug', false);
       // Connect with retry strategy
       await withRetry(async () => {
         // Use the optimized MONGO_OPTIONS from connection.ts
@@ -140,7 +140,7 @@ export async function connectToMongo(_args: string[] = []) {
       }
 
       console.log(`Successfully connected to ${ellipsis(mongoDbUrl)}`);
-      
+
       // Set up connection event handlers
       mongoose.connection.on("error", (err) => {
         console.error(`MongoDB connection error: ${err}`);
