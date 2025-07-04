@@ -1,7 +1,7 @@
 import express from 'express';
 import * as fs from 'fs';
 import { findTopNLongestFileNames } from '../utils/utils';
-import { findInvalidFilePaths, getDuplicatesOrUniquesBySize, isValidPath } from '../utils/FileUtils';
+import { findInvalidFilePaths, getDuplicatesOrUniquesBySize, isValidPath,moveDuplicatesOrDisjointSetBySize } from '../utils/FileUtils';
 import { renameAllNonAsciiInFolder } from '../files/renameNonAsciiFiles';
 import { callAksharamukha, DEFAULT_TARGET_SCRIPT_ROMAN_COLLOQUIAL } from '../aksharamukha/convert';
 import { convertJpgsToPdfInAllSubFolders } from '../imgToPdf/jpgToPdf';
@@ -96,12 +96,20 @@ fileUtilsRoute.post('/findByFileSize', async (req: any, resp: any) => {
         const folder = req.body.folder1;
         const folder2 = req.body.folder2;
         const findDisjoint = req.body.findDisjoint || false;
-
+        const moveItems = req.body.moveItems || false;
         console.log(`folder: ${folder} folder2: ${folder2}`);
-        const result = await getDuplicatesOrUniquesBySize(folder, folder2, findDisjoint);
-        resp.status(200).send({
-            response: result
-        });
+        if (moveItems) {
+            const result = await moveDuplicatesOrDisjointSetBySize(folder, folder2, findDisjoint);
+            resp.status(200).send({
+                response: result
+            });
+        }
+        else {
+            const result = await getDuplicatesOrUniquesBySize(folder, folder2, findDisjoint);
+            resp.status(200).send({
+                response: result
+            });
+        }
     }
     catch (err: any) {
         console.log('Error', err);
@@ -370,8 +378,8 @@ fileUtilsRoute.post('/corruptPdfCheck', async (req: any, resp: any) => {
             return;
         }
         for (let pdf of _pdfs) {
-            corruptionCheck.push(isPDFCorrupted(pdf, {quickCheck: !deepCheck}))
-        }   
+            corruptionCheck.push(isPDFCorrupted(pdf, { quickCheck: !deepCheck }))
+        }
 
         const corruptionCheckRes = await Promise.all(corruptionCheck)
         const isCorrupted = corruptionCheckRes.filter(result => !result.isValid)
