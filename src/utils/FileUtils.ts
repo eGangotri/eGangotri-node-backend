@@ -272,21 +272,75 @@ export const getDuplicatesOrUniquesBySize =
         }
     }
 
-export const moveDuplicatesOrDisjointSetBySize = async (folder: string, folder2: string, findDisjoint: boolean = false, tmpFolder: string = "_tmp") => {
-    const _forMoving = await getDuplicatesOrUniquesBySize(folder, folder2, findDisjoint);
+export const moveDuplicatesOrDisjointSetBySize = async (folder1: string, folder2: string, findDisjoint: boolean = false, tmpFolder: string = "_tmp") => {
+    const _forMoving = await getDuplicatesOrUniquesBySize(folder1, folder2, findDisjoint);
     const _itemsMoved: { absPath: string, destPath: string }[] = [];
-    const _items:FileInfo[] = findDisjoint ? _forMoving.disjointSet : _forMoving.duplicates;
-    console.log(`items ${_items.length} ready for moving`);
+    const _items: FileInfo[] = []
+    if (folder1 === folder2) {
+        _items.push(...(findDisjoint ? _forMoving.disjointSet : _forMoving.duplicates));
+        // Track files by size to keep just one copy
+        const processedSizes = new Set<string>();
 
-    // Track files by size to keep just one copy
-    const processedSizes = new Set<string>();
-    
-    _items.forEach((x: FileInfo) => {
-        const absPath = x.absPath;
-        const fileSize = x.size;
+        _items.forEach((x: FileInfo) => {
+            const absPath = x.absPath;
+            const fileSize = x.size;
+
+            // If we've already kept a file with this size, move this one to _tmp
+            if (processedSizes.has(fileSize)) {
+                const fileDir = path.dirname(absPath);
+                const tmpDir = path.join(fileDir, tmpFolder);
+
+                // Create _tmp directory if it doesn't exist
+                if (!fs.existsSync(tmpDir)) {
+                    fs.mkdirSync(tmpDir, { recursive: true });
+                }
+
+                let destPath = path.join(tmpDir, path.basename(absPath));
+                // Handle name collisions by adding a number suffix if file already exists
+                let counter = 1;
+                while (fs.existsSync(destPath)) {
+                    const ext = path.extname(absPath);
+                    const baseName = path.basename(absPath, ext);
+                    destPath = path.join(tmpDir, `${baseName}_${counter}${ext}`);
+                    counter++;
+                }
+                try {
+                    fs.renameSync(absPath, destPath);
+                    console.log(`Moving ${absPath} to ${destPath}`);
+                    _itemsMoved.push({
+                        absPath,
+                        destPath,
+                    });
+                }
+                catch (e) {
+                    console.log(`Error moving file ${absPath} to ${destPath} ${e}`);
+                }
+            } else {
+                // Keep this file (first occurrence of this size)
+                processedSizes.add(fileSize);
+                console.log(`Keeping ${absPath} as the first copy for size ${fileSize}`);
+            }
+        });
+        console.log(`Kept ${processedSizes.size} files (one per size) and moved ${_itemsMoved.length} ${findDisjoint ? "disjoint" : "duplicates"} to _tmp.`);
+        return {
+            moveMsg: _itemsMoved.length > 0 ?
+                `Kept ${processedSizes.size} files (one per size) and moved ${_itemsMoved.length} ${findDisjoint ? "disjoint" : "duplicates"} to _tmp.` :
+                "No duplicates found, nothing moved",
+            _itemsMoved,
+            ..._forMoving,
+        }
+    }
+
+    else {
+        // For different folders, we only want to move duplicates from folder2
+        // For disjoint, we want files in folder2 that don't exist in folder1
+        // For duplicates, we want files in folder2 that have duplicates in folder1
+        const itemsToMove = findDisjoint ? _forMoving.disjointSet : _forMoving.duplicates;
         
-        // If we've already kept a file with this size, move this one to _tmp
-        if (processedSizes.has(fileSize)) {
+        console.log(`Moving ${itemsToMove.length} items from folder1 only (${findDisjoint ? "disjoint" : "duplicates"})`)
+        
+        itemsToMove.forEach((x: FileInfo) => {
+            const absPath = x.absPath;
             const fileDir = path.dirname(absPath);
             const tmpDir = path.join(fileDir, tmpFolder);
 
@@ -295,7 +349,15 @@ export const moveDuplicatesOrDisjointSetBySize = async (folder: string, folder2:
                 fs.mkdirSync(tmpDir, { recursive: true });
             }
 
-            const destPath = path.join(tmpDir, path.basename(absPath));
+            let destPath = path.join(tmpDir, path.basename(absPath));
+            // Handle name collisions by adding a number suffix if file already exists
+            let counter = 1;
+            while (fs.existsSync(destPath)) {
+                const ext = path.extname(absPath);
+                const baseName = path.basename(absPath, ext);
+                destPath = path.join(tmpDir, `${baseName}_${counter}${ext}`);
+                counter++;
+            }
             try {
                 fs.renameSync(absPath, destPath);
                 console.log(`Moving ${absPath} to ${destPath}`);
@@ -307,20 +369,18 @@ export const moveDuplicatesOrDisjointSetBySize = async (folder: string, folder2:
             catch (e) {
                 console.log(`Error moving file ${absPath} to ${destPath} ${e}`);
             }
-        } else {
-            // Keep this file (first occurrence of this size)
-            processedSizes.add(fileSize);
-            console.log(`Keeping ${absPath} as the first copy for size ${fileSize}`);
+        });
+        
+        console.log(`Moved ${_itemsMoved.length} ${findDisjoint ? "disjoint" : "duplicates"} 
+            from folder1 to _tmp. Left folder2 intact.`);
+        return {
+            moveMsg: _itemsMoved.length > 0 ?
+                `Moved ${_itemsMoved.length} ${findDisjoint ? "disjoint" : "duplicates"} from folder1
+                 to _tmp. Left folder2 intact.` :
+                "No files found to move from folder1",
+            _itemsMoved,
+            ..._forMoving,
         }
-    });
-    
-    console.log(`Kept ${processedSizes.size} files (one per size) and moved ${_itemsMoved.length} ${findDisjoint ? "disjoint" : "duplicates"} to _tmp.`);
-    return {
-        moveMsg: _itemsMoved.length > 0 ? 
-            `Kept ${processedSizes.size} files (one per size) and moved ${_itemsMoved.length} ${findDisjoint ? "disjoint" : "duplicates"} to _tmp.` : 
-            "No duplicates found, nothing moved",
-        _itemsMoved,
-        ..._forMoving,
     }
 }
 
