@@ -16,6 +16,21 @@ interface FileInfo {
     file2?: string;
 }
 
+interface FileSizeComparisonResult {
+    msg: string;
+    metadata1Length: number;
+    metadata2Length: number;
+    diff1: number;
+    diff2: number;
+    dupLength: number;
+    revDupLength: number;
+    duplicates?: FileInfo[];
+    reverseDuplicates?: FileInfo[];
+    disjointSet?: FileInfo[];
+    reverseDisjointSet?: FileInfo[];
+    [key: string]: any; // For the dynamic CSV properties
+}
+
 export const isValidDirectory = async (dirPath: string): Promise<boolean> => {
     try {
         const stats = await fsPromise.stat(dirPath);
@@ -152,13 +167,13 @@ export const removeExcept = async (folder: any, except: Array<string>) => {
 }
 export const findInvalidFilePaths = async (filePaths: string[]): Promise<string[]> => {
     const invalidPaths: string[] = [];
-    
+
     // Check each path in parallel for better performance
     await Promise.all(filePaths.map(async (filePath) => {
         try {
             // Resolve relative paths to absolute paths
             const absolutePath = path.resolve(filePath);
-            
+
             // Check if the path exists and is accessible
             await fsPromise.access(absolutePath);
         } catch (error) {
@@ -166,7 +181,7 @@ export const findInvalidFilePaths = async (filePaths: string[]): Promise<string[
             invalidPaths.push(filePath);
         }
     }));
-    
+
     return invalidPaths;
 }
 
@@ -211,50 +226,104 @@ export const checkIfEmpty = async (srcPath: string): Promise<boolean> => {
     return true;
 };
 
-export const getDuplicatesOrUniquesBySize = async (folder: string, folder2: string, findDisjoint = false) => {
-    const metadata = await getAllFileListingWithFileSizeStats(folder);
-    const metadata2 = await getAllFileListingWithFileSizeStats(folder2);
+export const getDuplicatesOrUniquesBySize =
+    async (folder: string, folder2: string, findDisjoint = false): Promise<FileSizeComparisonResult> => {
+        const metadata = await getAllFileListingWithFileSizeStats(folder);
+        const metadata2 = await getAllFileListingWithFileSizeStats(folder2);
 
-    if (findDisjoint) {
-        const disjointSet = disjointSetByFileSize(metadata2, metadata)
-        const reverseDisjointSet = disjointSetByFileSize(metadata2, metadata)
-        return {
-            msg: `${metadata.length} files in ${folder} 
+        if (findDisjoint) {
+            const disjointSet = disjointSetByFileSize(metadata2, metadata)
+            const reverseDisjointSet = disjointSetByFileSize(metadata2, metadata)
+            return {
+                msg: `${metadata.length} files in ${folder} 
             and ${metadata2.length} files in ${folder2}
             with ${disjointSet.length} uniques by size.`,
 
-            metadata1Length: metadata.length,
-            metadata2Length: metadata2.length,
-            diff1: metadata.length - disjointSet.length,
-            diff2: metadata2.length - reverseDisjointSet.length,
-            dupLength: disjointSet.length,
-            revDupLength: reverseDisjointSet.length,
-            disjointSet,
-            reverseDisjointSet,
-            [`"disjointSetASCSV"(${disjointSet?.length})`]: disjointSet.map((x: FileInfo) => x.absPath).join(","),
-            [`"reverseDisjointSetASCSV"(${reverseDisjointSet?.length})`]: reverseDisjointSet.map((x: FileInfo) => x.absPath).join(","),
+                metadata1Length: metadata.length,
+                metadata2Length: metadata2.length,
+                diff1: metadata.length - disjointSet.length,
+                diff2: metadata2.length - reverseDisjointSet.length,
+                dupLength: disjointSet.length,
+                revDupLength: reverseDisjointSet.length,
+                disjointSet,
+                reverseDisjointSet,
+                [`"disjointSetASCSV"(${disjointSet?.length})`]: disjointSet.map((x: FileInfo) => x.absPath).join(","),
+                [`"reverseDisjointSetASCSV"(${reverseDisjointSet?.length})`]: reverseDisjointSet.map((x: FileInfo) => x.absPath).join(","),
+            }
         }
-    }
-    else {
-        const duplicates = duplicateBySizeCheck(metadata, metadata2)
-        const reverseDuplicates = duplicateBySizeCheck(metadata2, metadata)
-        return {
-            msg: `${metadata.length} files in ${folder} and 
+        else {
+            const duplicates = duplicateBySizeCheck(metadata, metadata2)
+            const reverseDuplicates = duplicateBySizeCheck(metadata2, metadata)
+            return {
+                msg: `${metadata.length} files in ${folder} and 
             ${metadata2.length} files in ${folder2} 
             with ${duplicates.length} duplicates by size.`,
-            metadata1Length: metadata.length,
-            metadata2Length: metadata2.length,
-            diff1: metadata.length - duplicates.length,
-            diff2: metadata2.length - reverseDuplicates.length,
-            dupLength: duplicates.length,
-            revDupLength: reverseDuplicates.length,
-            duplicates,
-            reverseDuplicates,
-            [`"duplicatesASCSV"(${duplicates?.length})`]: duplicates.map((x: FileInfo) => x.absPath).join(","),
-            [`"reverseDuplicatesASCSV"(${reverseDuplicates?.length})`]: reverseDuplicates.map((x: FileInfo) => x.absPath).join(","),
+                metadata1Length: metadata.length,
+                metadata2Length: metadata2.length,
+                diff1: metadata.length - duplicates.length,
+                diff2: metadata2.length - reverseDuplicates.length,
+                dupLength: duplicates.length,
+                revDupLength: reverseDuplicates.length,
+                duplicates,
+                reverseDuplicates,
+                [`"duplicatesASCSV"(${duplicates?.length})`]: duplicates.map((x: FileInfo) => x.absPath).join(","),
+                [`"reverseDuplicatesASCSV"(${reverseDuplicates?.length})`]: reverseDuplicates.map((x: FileInfo) => x.absPath).join(","),
+            }
         }
     }
+
+export const moveDuplicatesOrDisjointSetBySize = async (folder: string, folder2: string, findDisjoint: boolean = false, tmpFolder: string = "_tmp") => {
+    const _forMoving = await getDuplicatesOrUniquesBySize(folder, folder2, findDisjoint);
+    const _itemsMoved: { absPath: string, destPath: string }[] = [];
+    const _items:FileInfo[] = findDisjoint ? _forMoving.disjointSet : _forMoving.duplicates;
+    console.log(`items ${_items.length} ready for moving`);
+
+    // Track files by size to keep just one copy
+    const processedSizes = new Set<string>();
+    
+    _items.forEach((x: FileInfo) => {
+        const absPath = x.absPath;
+        const fileSize = x.size;
+        
+        // If we've already kept a file with this size, move this one to _tmp
+        if (processedSizes.has(fileSize)) {
+            const fileDir = path.dirname(absPath);
+            const tmpDir = path.join(fileDir, tmpFolder);
+
+            // Create _tmp directory if it doesn't exist
+            if (!fs.existsSync(tmpDir)) {
+                fs.mkdirSync(tmpDir, { recursive: true });
+            }
+
+            const destPath = path.join(tmpDir, path.basename(absPath));
+            try {
+                fs.renameSync(absPath, destPath);
+                console.log(`Moving ${absPath} to ${destPath}`);
+                _itemsMoved.push({
+                    absPath,
+                    destPath,
+                });
+            }
+            catch (e) {
+                console.log(`Error moving file ${absPath} to ${destPath} ${e}`);
+            }
+        } else {
+            // Keep this file (first occurrence of this size)
+            processedSizes.add(fileSize);
+            console.log(`Keeping ${absPath} as the first copy for size ${fileSize}`);
+        }
+    });
+    
+    console.log(`Kept ${processedSizes.size} files (one per size) and moved ${_itemsMoved.length} ${findDisjoint ? "disjoint" : "duplicates"} to _tmp.`);
+    return {
+        moveMsg: _itemsMoved.length > 0 ? 
+            `Kept ${processedSizes.size} files (one per size) and moved ${_itemsMoved.length} ${findDisjoint ? "disjoint" : "duplicates"} to _tmp.` : 
+            "No duplicates found, nothing moved",
+        _itemsMoved,
+        ..._forMoving,
+    }
 }
+
 
 const disjointSetByFileSize = (metadata: FileStats[], metadata2: FileStats[]) => {
     const disjointSet: FileInfo[] = [];

@@ -99,7 +99,7 @@ export async function checkArchiveUrlValidity(url: string, counter: number, tota
       console.log(`checkUrlValidity (${url}) await response.text() error ${error} `)
       return false;
     }
-
+    
     return true;
   } catch (error) {
     console.log(`checkUrlValidity (${url}) error ${error} `)
