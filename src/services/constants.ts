@@ -70,7 +70,12 @@ export const CSV_HEADER_API2_SUBSET = [{
 {
   id: "workFromHome",
   title: "Work From Home",
-}]
+},
+{
+  id: "fileNames",
+  title: "File Name(s)",
+}
+]
 
 export const CSV_HEADER_API2_FOR_AGGREGATES =
   [

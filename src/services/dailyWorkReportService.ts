@@ -19,16 +19,29 @@ export function setOptionsForDailyWorkReportListing(queryOptions: DailyWorkRepor
   // Empty `filter` means "match all documents"
   // mongoOptionsFilter: {"dateOfReport":{"$gte":"2023-06-22T18:30:00.000Z","$lte":"2023-06-24T18:29:59.000Z"}}
   let mongoOptionsFilter = {};
-  if (queryOptions?.startDate && queryOptions?.endDate && moment(queryOptions?.startDate).isValid() && moment(queryOptions?.endDate).isValid()) {
-    const startDateWithTimeComponent = new Date(replaceQuotes(queryOptions?.startDate) + " 00:00:00");
-    const endDateWithTimeComponent = new Date(replaceQuotes(queryOptions?.endDate) + " 23:59:59");
-    console.log(`endDateWithTimeComponent ${endDateWithTimeComponent}  ${new Date()}`)
-    mongoOptionsFilter = {
-      createdAt: {
-        $gte: startDateWithTimeComponent,
-        $lte: endDateWithTimeComponent,
-      },
-    };
+  if (queryOptions?.startDate && queryOptions?.endDate) {
+    const startDateStr = replaceQuotes(queryOptions.startDate);
+    const endDateStr = replaceQuotes(queryOptions.endDate);
+    
+    // Parse dates using moment with strict parsing
+    const startMoment = moment(startDateStr, moment.ISO_8601, true);
+    const endMoment = moment(endDateStr, moment.ISO_8601, true);
+    
+    if (startMoment.isValid() && endMoment.isValid()) {
+      // Set time components and convert to Date objects
+      const startDateWithTimeComponent = startMoment.startOf('day').toDate();
+      const endDateWithTimeComponent = endMoment.endOf('day').toDate();
+      
+      console.log(`Date range: ${startDateWithTimeComponent} to ${endDateWithTimeComponent}`);
+      mongoOptionsFilter = {
+        createdAt: {
+          $gte: startDateWithTimeComponent,
+          $lte: endDateWithTimeComponent,
+        },
+      };
+    } else {
+      console.warn('Invalid date format provided:', { startDate: startDateStr, endDate: endDateStr });
+    }
   }
 
   if (queryOptions?.operatorName) {
@@ -75,13 +88,14 @@ export async function getListOfDailyWorkReport(queryOptions: ItemsListOptionsTyp
   const items = await DailyWorkReport.find(mongoOptionsFilter)
     .sort({ createdAt: -1 })
     .limit(limit);
+    console.log(`items ${JSON.stringify(items[0])}`)
   return items;
 }
 
 
 
 export const generateCSVAsFile = async (res: Response, data: mongoose.Document[]) => {
-  const csvFileName = await generateCsvDirAndName("ScanOpStaff");
+  const csvFileName = await generateCsvDirAndName("ScanOpStaffBooksScannedList");
   try {
     // Define the CSV file headers
     const csvWriter = createObjectCsvWriter({
@@ -92,8 +106,22 @@ export const generateCSVAsFile = async (res: Response, data: mongoose.Document[]
     const pdfCountSum = _.sum(data.map(x => x.get("totalPdfCount")))
     const pageCountSum = _.sum(data.map(x => x.get("totalPageCount")));
     const sizeCountRawSum = _.sum(data.map(x => x.get("totalSizeRaw") || 0));
-
-    await csvWriter.writeRecords(data);
+    
+    // Transform data to include pageCountStats
+    const transformedData = data.map(doc => {
+      const pageCountStats = doc.get("pageCountStats") || [];
+      const fileDetails = pageCountStats.map(stat => 
+        `${stat.fileName} (${stat.pageCount} pages, ${stat.fileSize})`
+      ).join("\n");
+      
+      return {
+        ...doc.toObject(),
+        fileNames: fileDetails
+      };
+    });
+    
+    console.log(`Transformed data sample: ${JSON.stringify(transformedData[0])}`)
+    await csvWriter.writeRecords(transformedData);
     await csvWriter.writeRecords([{
       dateOfReport: "Totals",
       operatorName: "",
