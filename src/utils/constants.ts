@@ -31,7 +31,7 @@ export const getRowCounter = (requestId: string) => {
 
 
 export 
-enum GDriveDownloadHistoryStatus {
+enum DownloadHistoryStatus {
   Queued = 'queued',
   InProgress = 'in-progress',
   Completed = 'completed',

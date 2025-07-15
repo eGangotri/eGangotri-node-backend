@@ -173,18 +173,18 @@ export const runCr2ToJpgInLoop = async (_srcFolders: string[],
 const checkPythonServer = async (): Promise<{ status: boolean, message: string }> => {
     // Check if the server is running
     const serverCheckResponse = await fetch(PYTHON_SERVER_URL);
-    if (!serverCheckResponse.ok) {
-        console.log('Python server is not running');
-        return {
-            status: false,
-            message: 'Python server is not running'
-        }
-    }
-    else {
+    if (serverCheckResponse?.ok) {
         console.log('Python server is running');
         return {
             status: true,
             message: 'Python server is running'
+        }
+    }
+    else {
+        console.log('Python server is not running');
+        return {
+            status: false,
+            message: 'Python server is not running'
         }
     }
 };
@@ -212,7 +212,7 @@ export const executePythonPostCall = async (body: Record<string, unknown>, resou
         console.log('Error executePythonPostCall:', error);
         return {
             status: false,
-            message: JSON.stringify(error,null,2)
+            message: "Python Server could be down"
         };
     }
 };
@@ -226,21 +226,31 @@ export const pythonPostCallInternal = async (body: Record<string, unknown>, reso
         },
         body: JSON.stringify(body)
     });
-    if (!response.ok) {
+    if (response?.ok) {
+        const data = await response.json();
+        console.log(`data ${JSON.stringify(data, null, 2)}`)
+        return {
+            status: true,
+            message: 'Success',
+            data
+        };
+    }
+    else {
+       try{
         const errorData = await response.json();
-        console.log(`Error ${response.status} from ${resource}:`, JSON.stringify(errorData, null, 2));
+        console.error(`Error ${response.status} from ${resource}:`, JSON.stringify(errorData, null, 2));
         return {
             status: false,
             message: `Error ${response.status} from ${resource}:`,
             data: JSON.stringify(errorData, null, 2)
         };
+       }
+       catch (error) {
+        console.error('Error pythonPostCallInternal:', error);
+        return {
+            status: false,
+            message: JSON.stringify(error, null, 2)
+        };  
+       }
     }
-
-    const data = await response.json();
-    console.log(`data ${JSON.stringify(data, null, 2)}`)
-    return {
-        status: true,
-        message: 'Success',
-        data
-    };
-}
+}   
