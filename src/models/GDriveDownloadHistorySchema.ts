@@ -1,10 +1,10 @@
 import mongoose, { Document, Schema } from 'mongoose';
-import { GDriveDownloadHistoryStatus } from '../utils/constants';
+import { DownloadHistoryStatus } from '../utils/constants';
 
 export interface ICompositeDocument {
     fileName: string;
     filePath: string;
-    status: GDriveDownloadHistoryStatus;
+    status: DownloadHistoryStatus;
     msg: string;
 }
 
@@ -21,14 +21,14 @@ const CompositeDocumentSchema: Schema = new Schema(
     {
         fileName: { type: String, required: true },
         filePath: { type: String, required: false },
-        status: { type: String, enum: Object.values(GDriveDownloadHistoryStatus), required: true },
+        status: { type: String, enum: Object.values(DownloadHistoryStatus), required: true },
         msg: { type: String, required: false },
     },
     { _id: false }
 );
 
 export interface IGDriveDownload extends Document {
-    status: GDriveDownloadHistoryStatus;
+    status: DownloadHistoryStatus;
     createdAt: Date;
     updatedAt: Date;
     msg: string;
@@ -60,7 +60,7 @@ const GDriveDownloadHistorySchema: Schema = new Schema(
         profileNameOrAbsPath: { type: String, required: true },
         fileDumpFolder: { type: String, required: true },
         gDriveRootFolder: { type: String, required: false },
-        status: { type: String, enum: Object.values(GDriveDownloadHistoryStatus), default: 'queued' },
+        status: { type: String, enum: Object.values(DownloadHistoryStatus), default: 'queued' },
         msg: { type: String, required: false },
         ignoreFolder: { type: String, required: false },
         downloadType: { type: String, required: true },
