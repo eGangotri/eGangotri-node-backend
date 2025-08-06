@@ -75,6 +75,7 @@
     "csv-parse": "latest",
     "csv-stringify": "^6.6.0",
     "csv-writer": "^1.6.0",
+    "docx-parser": "^0.2.1",
     "dotenv": "^16.4.7",
     "easy-pdf-merge": "^0.2.6",
     "exceljs": "^4.4.0",
