@@ -1,9 +1,15 @@
 
 import axios from 'axios';
 
-const AKSHARA_MUKHA_URL = 
-"https://www.aksharamukha.com/api/convert"
 
+const AKSHARA_MUKHA_GLOBAL_URL = "https://www.aksharamukha.com/api/convert"
+
+//git clone https://github.com/virtualvinodh/aksharamukha
+//docker compose up
+const ASKSHA_MUKHA_LOCAL_URL = "http://localhost:8085/api/convert"
+
+//const AKSHARA_MUKHA_URL = ASKSHA_MUKHA_LOCAL_URL
+const AKSHARA_MUKHA_URL = AKSHARA_MUKHA_GLOBAL_URL;//ASKSHA_MUKHA_LOCAL_URL
 //"http://aksharamukha-plugin.appspot.com/api/public"
 //Script Names: https://www.aksharamukha.com/explore
 export const DEFAULT_TARGET_SCRIPT_ROMAN_COLLOQUIAL = "RomanColloquial";
@@ -11,7 +17,7 @@ export const AKSHARA_MUKHA_DEVANAGARI = "Devanagari";
 export const AKSHARAMUKHA_IAST = "IAST";
 
 export const callAksharamukhaWithSpecifics = async (body: AksharaMukhaGetProps) => {
-    const result = await callAksharamukha(body);
+    const result = await callAksharamukha(body, true);
     const e_macronRemoval = result.replace(/ē/g, 'e')
     const n_tildaRemoval = e_macronRemoval.replace(/Jṭ/ig, 'gy')
 
@@ -20,33 +26,24 @@ export const callAksharamukhaWithSpecifics = async (body: AksharaMukhaGetProps) 
 }
 
 //Record<string, unknown>
-export const callAksharamukha = async (body: AksharaMukhaGetProps, asPost = false):Promise<string> => {
+export const callAksharamukha = async (body: AksharaMukhaGetProps, asPost = true): Promise<string> => {
     if (asPost) {
         const url = `${AKSHARA_MUKHA_URL}`;
         console.log(`POSTing to ${url} with body: ${JSON.stringify(body)}`);
         try {
-         
-            const x: Record<string, unknown> = {
-                "source": "Devanagari",
-                "target": "IAST",
-                "text": "ॐ नमः शिवाय शिवाय \n\n",
-                "nativize": true,
+            const response = await axios.post(AKSHARA_MUKHA_URL, {
+                ...body,
                 "postOptions": [],
                 "preOptions": []
-            }
-            // const response = await fetch(url, {
-            //     method: 'POST',
-            //     headers: {
-            //         'Content-Type': 'application/json'
-            //     },
-            //     body: JSON.stringify(x)
-            // });
-            const response = await axios.post(AKSHARA_MUKHA_URL, body, {
+            }, {
                 headers: {
                     'Content-Type': 'application/json'
                 }
             });
-    
+
+            console.log(`For input: ${body?.text} 
+                output: ${response.data}`);
+
             const responseText = await response.data;
             console.log('Raw response:', responseText);
             return responseText;
@@ -59,7 +56,8 @@ export const callAksharamukha = async (body: AksharaMukhaGetProps, asPost = fals
     else {
         const response = await fetch(`${AKSHARA_MUKHA_URL}?source=${body.source}&target=${body.target}&text=${body.text}&nativize=${body.nativize}`)
         const result = await response.text();
-        console.log(`For input: ${body?.text}`);
+        console.log(`For input: ${body?.text} 
+            output: ${result}`);
         return result;
     }
 }
@@ -103,7 +101,7 @@ export const aksharaMukhaAutoDetectScriptToRomanColloguial = async (text: string
         "text": text,
         "nativize": nativize,
     }
-    return callAksharamukha(body,true);
+    return callAksharamukha(body, true);
 }
 
 export interface AksharaMukhaGetProps {
@@ -135,3 +133,7 @@ const jsonBody: AksharaMukhaGetProps = {
 // })
 
 //pnpm run aksharamukha
+
+aksharamukhaIastToRomanColloquial("aham").then((res) => {
+    console.log(res)
+})

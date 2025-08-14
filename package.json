@@ -50,7 +50,9 @@
     "jpgToPdf": "ts-node ./src/imgToPdf/jpgToPdf.ts",
     "convertEAPExcel": "ts-node ./src/eap_bl/index.ts",
     "zipFiles": "ts-node ./src/services/zipService.ts",
-    "upload-to-archive": "ts-node ./src/uploadToArchive/index.ts"
+    "upload-to-archive": "ts-node ./src/uploadToArchive/index.ts",
+    "extract-catalog": "ts-node ./src/cliBased/pdf/extractCatalogFromPDF.ts",
+    "process-asha-catalog": "ts-node ./src/_adHoc/processAshaArchivesCatalog.ts"
   },
   "repository": {
     "type": "git",
@@ -71,7 +73,9 @@
     "axios": "^1.7.9",
     "child_process": "^1.0.2",
     "csv-parse": "latest",
+    "csv-stringify": "^6.6.0",
     "csv-writer": "^1.6.0",
+    "docx-parser": "^0.2.1",
     "dotenv": "^16.4.7",
     "easy-pdf-merge": "^0.2.6",
     "exceljs": "^4.4.0",
@@ -90,6 +94,7 @@
     "openai": "^4.85.2",
     "opossum": "^8.4.0",
     "pdf-lib": "^1.17.1",
+    "pdf-parse": "^1.1.1",
     "pdfjs-dist": "^4.10.38",
     "pdfkit": "^0.13.0",
     "puppeteer": "^22.15.0",
