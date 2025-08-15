@@ -55,10 +55,20 @@ export function launchUploader(args: any, optionalParams: string = ""): Promise<
     return  makeGradleCall(_cmd)
 }
 
-export function launchUploaderViaExcelV1(profile: string, excelPath: string, uploadCycleId: string): Promise<Record<string, any>> {
-    const gradleArgsAsJSON = `{'profile': '${profile}','excelPath':'${path.basename(excelPath)}','uploadCycleId': '${uploadCycleId}'}`
+export function launchUploaderViaExcelV1Old(profile: string, excelPath: string, uploadCycleId: string): Promise<Record<string, any>> {
+    
+    const gradleArgsAsJSON = `{'profile': '${profile}','excelPath':'${excelPath}','uploadCycleId': '${uploadCycleId}'}`
     return makeGradleCall(
         `gradle uploadToArchiveViaExcelV1WithFourCols -PjsonArgs="${gradleArgsAsJSON}"`)
+}
+
+export function launchUploaderViaExcelV1(profile: string, excelPath: string, uploadCycleId: string): Promise<Record<string, any>> {
+    // Escape backslashes in the path
+    const escapedExcelPath = excelPath.replace(/\\/g, '\\\\');
+    
+    const gradleArgsAsJSON = `{'profile': '${profile}','excelPath':'${escapedExcelPath}','range': '${uploadCycleId}'}`;
+    return makeGradleCall(
+        `gradle uploadToArchiveViaExcelV1WithFourCols -PjsonArgs="${gradleArgsAsJSON}"`);
 }
 
 export function launchUploaderViaExcelV3(profile: string, excelPath: string, uploadCycleId: string, range: string = ""): Promise<Record<string, any>> {
