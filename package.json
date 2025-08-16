@@ -52,7 +52,8 @@
     "zipFiles": "ts-node ./src/services/zipService.ts",
     "upload-to-archive": "ts-node ./src/uploadToArchive/index.ts",
     "extract-catalog": "ts-node ./src/cliBased/pdf/extractCatalogFromPDF.ts",
-    "process-asha-catalog": "ts-node ./src/_adHoc/processAshaArchivesCatalog.ts"
+    "process-asha-catalog": "ts-node ./src/_adHoc/processAshaArchivesCatalog.ts",
+    "copy-asha-pdfs": "ts-node ./src/_adHoc/ashaCatalogPdfCopy.ts"
   },
   "repository": {
     "type": "git",
