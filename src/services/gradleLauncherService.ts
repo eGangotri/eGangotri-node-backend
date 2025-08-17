@@ -73,11 +73,13 @@ export function launchUploaderViaExcelV1(profile: string, excelPath: string, upl
 
 export function launchUploaderViaExcelV3(profile: string, excelPath: string, uploadCycleId: string, range: string = ""): Promise<Record<string, any>> {
     const gradleCmd = `gradle uploadToArchiveViaExcelV3WithOneCol --args="${profile} '${excelPath}' '${uploadCycleId}' '${range}'"`;
+    console.log(`launchUploaderViaExcelV3 ${gradleCmd}`);
     return makeGradleCall(gradleCmd)
 }
 
 export function launchUploaderViaExcelV3Multi(profiles: string, excelPaths: string, uploadCycleId: string, range: string = ""): Promise<Record<string, any>> {
     const gradleCmd = `gradle uploadToArchiveViaExcelV3WithOneColMulti --args="${profiles} '${excelPaths}' '${uploadCycleId}' '${range}'"`;
+    console.log(`launchUploaderViaExcelV3Multi ${gradleCmd}`);
     return makeGradleCall(gradleCmd)
 }
 export function launchUploaderViaJson(args: any): Promise<Record<string, any>> {

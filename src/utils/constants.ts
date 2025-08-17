@@ -1,4 +1,4 @@
-export const MAX_ITEMS_LISTABLE=250; // Reduced from 250 to prevent MongoDB query timeouts
+export const MAX_ITEMS_LISTABLE=1000; // 250 is a stable value. to high a valuve can cause  MongoDB query timeouts
 export const DEFAULT_DAYS_BEFORE_CURRENT_FOR_SEARCH=1
 
 export const FOLDER = "FOLDER"
