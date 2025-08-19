@@ -77,32 +77,120 @@ export async function checkUrlValidityForUploadItems(_forVerfication: SelectedUp
 
 export async function checkArchiveUrlValidity(url: string, counter: number, total: number): Promise<boolean> {
   try {
-    // First check if the URL exists
-    const response = await fetch(url);
-    if (!response.ok) {
-      console.log(`Item # ${counter}/${total}*******response.status ${url} ${response.status} ${response.statusText}`)
-      return false;
-    }
-
-    try {
-    // Get the page content
-    const html = await response.text();
-    // Check for PDF download option
-    const hasPDF = html.includes('PDF');
-
-    if (!hasPDF) {
-      console.log(`Item # ${counter}/${total}******* PDF not available for download at ${url}`);
-      return false;
-    }
-  }
-    catch (error) {
-      console.log(`checkUrlValidity (${url}) await response.text() error ${error} `)
-      return false;
-    }
+    console.log(`Checking URL validity: ${url} (attempt 1/3)`);
     
-    return true;
+    // Try HTTPS first with 20 second timeout
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 20000);
+      
+      const fetchOptions = {
+        signal: controller.signal,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        }
+      };
+      
+      const response = await fetch(url, fetchOptions);
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) {
+        console.log(`Item # ${counter}/${total}******* response.status ${url} ${response.status} ${response.statusText}`);
+        throw new Error(`HTTP status ${response.status}`);
+      }
+      
+      // Get the page content
+      const html = await response.text();
+      // Check for PDF download option
+      const hasPDF = html.includes('PDF');
+      
+      if (!hasPDF) {
+        console.log(`Item # ${counter}/${total}******* PDF not available for download at ${url}`);
+        return false;
+      }
+      
+      return true;
+    } catch (error: any) {
+      console.log(`HTTPS attempt failed: ${error.message || error}`);
+      
+      // If HTTPS failed, try HTTP version
+      const httpUrl = url.replace('https://', 'http://');
+      console.log(`Trying HTTP instead: ${httpUrl} (attempt 2/3)`);
+      
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 20000);
+        
+        const fetchOptions = {
+          signal: controller.signal,
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+          }
+        };
+        
+        const httpResponse = await fetch(httpUrl, fetchOptions);
+        clearTimeout(timeoutId);
+        
+        if (!httpResponse.ok) {
+          console.log(`Item # ${counter}/${total}******* response.status ${httpUrl} ${httpResponse.status} ${httpResponse.statusText}`);
+          throw new Error(`HTTP status ${httpResponse.status}`);
+        }
+        
+        const html = await httpResponse.text();
+        const hasPDF = html.includes('PDF');
+        
+        if (!hasPDF) {
+          console.log(`Item # ${counter}/${total}******* PDF not available for download at ${httpUrl}`);
+          return false;
+        }
+        
+        return true;
+      } catch (httpError: any) {
+        console.log(`HTTP attempt also failed: ${httpError.message || httpError}`);
+        
+        // Final attempt with increased timeout
+        console.log(`Final attempt with increased timeout (attempt 3/3)`);
+        
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
+          
+          const fetchOptions = {
+            signal: controller.signal,
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            }
+          };
+          
+          const finalResponse = await fetch(url, fetchOptions);
+          clearTimeout(timeoutId);
+          
+          if (!finalResponse.ok) {
+            console.log(`Item # ${counter}/${total}******* final attempt response.status ${url} ${finalResponse.status} ${finalResponse.statusText}`);
+            throw new Error(`HTTP status ${finalResponse.status}`);
+          }
+          
+          const html = await finalResponse.text();
+          const hasPDF = html.includes('PDF');
+          
+          if (!hasPDF) {
+            console.log(`Item # ${counter}/${total}******* PDF not available for download at ${url}`);
+            return false;
+          }
+          
+          return true;
+        } catch (finalError: any) {
+          console.log(`Final attempt failed: ${finalError.message || finalError}`);
+          console.log(`All attempts to access ${url} failed. URL may be valid but unreachable from current network.`);
+          if (finalError.name === 'AbortError') {
+            console.log('The request was aborted due to timeout. This may indicate network connectivity issues.');
+          }
+          return false;
+        }
+      }
+    }
   } catch (error) {
-    console.log(`checkUrlValidity (${url}) error ${error} `)
+    console.log(`checkUrlValidity (${url}) unexpected error: ${error}. This may be due to network connectivity issues.`);
     return false;
   }
 }
