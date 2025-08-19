@@ -390,10 +390,10 @@ const disjointSetByFileSize = (metadata: FileStats[], metadata2: FileStats[]) =>
     console.log(`metadata ${JSON.stringify(metadata[0].size)} metadata2 ${JSON.stringify(metadata2[0].size)}`)
     metadata.forEach((file: FileStats) => {
         const match = metadata2.find((file2: FileStats) => {
-            if (file.rawSize === file2.rawSize && file.fileName !== file2.fileName) {
+            if (file.rawSize === file2.rawSize && file.absPath !== file2.absPath) {
                 console.log(`rawSize ${file.fileName}(${file.rawSize}) ${file2?.fileName}(${file2?.rawSize})`);
             }
-            return (file.rawSize === file2.rawSize && file.fileName !== file2.fileName);
+            return (file.rawSize === file2.rawSize && file.absPath !== file2.absPath);
         });
 
         // Check if match is undefined or null
@@ -415,10 +415,10 @@ const duplicateBySizeCheck = (metadata: FileStats[], metadata2: FileStats[]) => 
     console.log(`metadata ${JSON.stringify(metadata[0].size)} metadata2 ${JSON.stringify(metadata2[0].size)}`)
     metadata.forEach((file: FileStats) => {
         const match = metadata2.find((file2: FileStats) => {
-            if (file.rawSize === file2.rawSize && file.fileName !== file2.fileName) {
+            if (file.rawSize === file2.rawSize && file.absPath !== file2.absPath) {
                 console.log(`rawSize ${file.fileName}(${file.rawSize}) ${file2?.fileName}(${file2?.rawSize})`)
             }
-            return (file.rawSize === file2.rawSize && file.fileName !== file2.fileName)
+            return (file.rawSize === file2.rawSize && file.absPath !== file2.absPath)
         });
         //console.log(`match ${JSON.stringify(match)}`)
         if (match?.fileName.length > 0) {
