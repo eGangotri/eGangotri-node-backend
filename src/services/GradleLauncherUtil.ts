@@ -37,7 +37,7 @@ export const findMissedUploads = async (uploadCycleId: string): Promise<UploadCy
             })
         }
     }
-    console.log(`ArchiveProfiles found that have issues: ${missing.length}`)
+    console.log(`ArchiveProfiles found that have missed uploads: ${missing.length}`)
     return missing;
 }
 

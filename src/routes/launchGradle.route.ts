@@ -235,14 +235,17 @@ launchGradleRoute.get('/reuploadMissedViaUploadCycleId', async (req: any, resp: 
                 //Excel-;${excelFileName}-;${range}
                 let excelFileName = uploadCycleByCycleId.mode.split("-;")
                 let _excelFileName = ""
+                console.log(`excelFileName ${excelFileName}`)
                 if (excelFileName.length >= 2) {
                     _excelFileName = excelFileName[1]
                 }
                 else {
+                    const errorMsg = `Invalid Mode ${uploadCycleByCycleId.mode}. Couldnt retrieve Excel Name from ${uploadCycleByCycleId.mode}`
+                    console.log(errorMsg)
                     resp.status(400).send({
                         response: {
                             success: false,
-                            msg: `Invalid Mode ${uploadCycleByCycleId.mode}. Couldnt retrieve Excel Name from ${uploadCycleByCycleId.mode}`
+                            msg: errorMsg
                         }
                     });
                     return;
