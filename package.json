@@ -53,7 +53,8 @@
     "upload-to-archive": "ts-node ./src/uploadToArchive/index.ts",
     "extract-catalog": "ts-node ./src/cliBased/pdf/extractCatalogFromPDF.ts",
     "process-asha-catalog": "ts-node ./src/_adHoc/processAshaArchivesCatalog.ts",
-    "copy-asha-pdfs": "ts-node ./src/_adHoc/ashaCatalogPdfCopy.ts"
+    "copy-asha-pdfs": "ts-node ./src/_adHoc/ashaCatalogPdfCopy.ts",
+    "rename-pdfs-via-ai": "ts-node ./src/cliBased/ai/renaming-workflow/renamePdfsViaAI.ts"
   },
   "repository": {
     "type": "git",
@@ -70,6 +71,7 @@
   "homepage": "https://github.com/eGangotri/egangotri-node-backend#readme",
   "dependencies": {
     "@csv-js/csv": "0.0.2",
+    "@google/generative-ai": "^0.24.1",
     "archiver": "^7.0.1",
     "axios": "^1.7.9",
     "child_process": "^1.0.2",
