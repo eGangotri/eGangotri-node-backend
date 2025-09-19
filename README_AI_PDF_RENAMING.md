@@ -47,9 +47,11 @@ You can modify these options in the `renamePdfsViaAI.ts` file:
 
 - `inputFolders`: Array of folder paths containing PDFs to process
 - `outputFolder`: Set to a path to copy renamed files to a new location
-- `batchSize`: Number of PDFs to process in parallel (default: 5)
+- `batchSize`: Number of PDFs to process per batch (default: 3, lower to avoid rate limits)
 - `dryRun`: Set to true to see what would be renamed without actually renaming
 - `renameInPlace`: Set to false to copy files to outputFolder instead of renaming in place
+- `delayBetweenCallsMs`: Milliseconds to wait between API calls (default: 2000)
+- `delayBetweenBatchesMs`: Milliseconds to wait between batches (default: 10000)
 
 ## How It Works
 
@@ -67,6 +69,21 @@ The tool:
 - This tool requires an internet connection and a valid Google AI API key
 - Google's Gemini API has size limits for PDFs (typically around 20MB)
 - The first run may be in "dry run" mode to preview changes before actual renaming
-- If API calls fail (authentication issues, rate limits, etc.), the tool will fall back to using the existing filename
-- Detailed error messages will help diagnose issues with API connectivity or authentication
+- If API calls fail, the tool will fall back to using the existing filename
 - For large PDFs, the tool may need to be modified to process only the first few pages
+
+## Rate Limiting
+
+Google's AI API has rate limits that may cause 429 errors. The tool handles these issues by:
+
+1. Implementing exponential backoff with automatic retries (up to 3 attempts)
+2. Adding delays between API calls (default: 2 seconds)
+3. Adding delays between batches of PDFs (default: 10 seconds)
+4. Randomizing delays to avoid synchronized requests
+
+If you're still experiencing rate limit errors, you can:
+
+- Reduce the `batchSize` (1-2 PDFs per batch)
+- Increase the `delayBetweenCallsMs` (to 5000 or more)
+- Increase the `delayBetweenBatchesMs` (to 30000 or more)
+- Process smaller sets of PDFs at a time
