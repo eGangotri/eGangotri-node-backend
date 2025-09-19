@@ -11,6 +11,8 @@ interface Config {
     batchSize: number;
     dryRun: boolean;
     renameInPlace: boolean;
+    delayBetweenCallsMs?: number; // Delay between API calls in ms
+    delayBetweenBatchesMs?: number; // Delay between processing batches in ms
 }
 
 /**
@@ -34,6 +36,13 @@ function formatFilename(metadata: string): string {
 }
 
 /**
+ * Sleep for a specified number of milliseconds
+ * @param ms - milliseconds to sleep
+ * @returns Promise that resolves after the specified time
+ */
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+/**
  * Process a batch of PDFs with Google AI Studio
  * @param pdfs - Array of PDF file paths to process
  * @param config - Configuration options
@@ -43,10 +52,19 @@ async function processPdfBatch(pdfs: string[], config: Config): Promise<Metadata
     console.log(`Processing batch of ${pdfs.length} PDFs...`);
     
     const results: MetadataResult[] = [];
+    const delayBetweenCalls = config.delayBetweenCallsMs || 2000; // Default to 2 seconds between API calls
     
-    for (const pdfPath of pdfs) {
+    for (let i = 0; i < pdfs.length; i++) {
+        const pdfPath = pdfs[i];
         try {
             console.log(`Processing: ${path.basename(pdfPath)}`);
+            
+            // Add delay between API calls to avoid rate limiting, except for the first call
+            if (i > 0) {
+                console.log(`Waiting ${delayBetweenCalls/1000}s before next API call to avoid rate limits...`);
+                await sleep(delayBetweenCalls);
+            }
+            
             const result = await processWithGoogleAI(pdfPath);
             
             console.log(`Result for ${path.basename(pdfPath)}: ${result.extractedMetadata || 'No metadata extracted'}`);
@@ -130,9 +148,11 @@ async function main() {
                          process.argv.slice(2) : 
                          ["C:\\tmp\\aiTest\\aiSrc"],
             outputFolder: "C:\\tmp\\aiTest\\aiDest", // Set to a path to copy renamed files to a new location
-            batchSize: 5,       // Number of PDFs to process in parallel
+            batchSize: 3,       // Number of PDFs to process in a batch (reduced to avoid rate limits)
             dryRun: true,      // Set to true to see what would be renamed without actually renaming
             renameInPlace: false, // Set to false to copy files to outputFolder instead of renaming in place
+            delayBetweenCallsMs: 2000,  // Wait 2 seconds between API calls
+            delayBetweenBatchesMs: 10000  // Wait 10 seconds between batches
         };
         
         console.log(`Starting PDF renaming with Google AI Studio...`);
@@ -161,6 +181,12 @@ async function main() {
             }
             
             console.log(`Progress: ${processedCount}/${allPdfs.length} (${successCount} successfully renamed)`);
+            
+            // Add delay between batches to avoid rate limits, except for the last batch
+            if (i < batches.length - 1 && config.delayBetweenBatchesMs) {
+                console.log(`Waiting ${config.delayBetweenBatchesMs/1000}s before processing next batch to avoid rate limits...`);
+                await sleep(config.delayBetweenBatchesMs);
+            }
         }
         
         console.log(`\nComplete! Processed ${processedCount} PDFs`);
