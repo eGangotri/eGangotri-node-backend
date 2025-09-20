@@ -146,7 +146,7 @@ async function main() {
         const config: Config = {
             inputFolders: process.argv.length > 2 ? 
                          process.argv.slice(2) : 
-                         ["C:\\tmp\\aiTest\\aiSrc"],
+                         ["C:\\tmp\\aiTest"],
             outputFolder: "C:\\tmp\\aiTest\\aiDest", // Set to a path to copy renamed files to a new location
             batchSize: 3,       // Number of PDFs to process in a batch (reduced to avoid rate limits)
             dryRun: true,      // Set to true to see what would be renamed without actually renaming

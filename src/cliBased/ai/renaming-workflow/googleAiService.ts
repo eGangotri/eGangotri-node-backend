@@ -83,7 +83,8 @@ export async function processWithGoogleAI(
     const base64EncodedPdf = pdfBuffer.toString('base64');
     
     // Google AI Studio endpoint URL
-    const aiEndpoint = process.env.AI_ENDPOINT || 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent';
+    const aiEndpoint = process.env.AI_ENDPOINT || 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+    //'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent';
     
     console.log(`Sending PDF ${path.basename(pdfFilePath)} to Google AI service...`);
     
