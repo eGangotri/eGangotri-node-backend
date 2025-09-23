@@ -3,38 +3,11 @@ import * as dotenv from 'dotenv';
 import * as path from 'path';
 import * as fs from 'fs';
 import FormData from 'form-data';
+import { METADATA_EXTRACTION_PROMPT } from './constants';
 
 // Load environment variables
 dotenv.config();
 
-// Google AI Studio prompt for metadata extraction
-const METADATA_EXTRACTION_PROMPT = `The exercise below is to save the pdf with recognizable metadata.
-
-Print these details in Title Case
-
-Title Author Language Year Publisher in One Line in English only.
-
-If any entry is not visible then just leave it blank if author/title is not known then instead print Unknown.
-
-Make sure to only write the metadata not things like Title: etc.
-
-If there is no publisher then make the author the last entry.
-
-The last non-blank entry should be preceded by a hyphen which can only be publisher or author
-
-If there is a publisher and there is a title , the title and author should be separated by " by ".
-
-Dont use any quotes in the the result , example if name is O'Donnell then remove the quotes.
-if this is a magazine then Issue No Volume No year month , ciruclation cycle example bimonthly, trimonthly should be also shown and the word Magazine or Journal should display before the year
-No diacritics
-
-If the words are in Sanskrit and they are conjoined like Shishupalavadha due to the rules of Sanskrit compunding called Samasa separate them so that they are more online search friendly to something like Shishupala Vadha which will be easier for a modern reader to grasp.
-
-If you feel any pages in the front or back are missing, then you can add the text Missing Pages before the year to let the reader know he is in for some minor inconvenience
-
-ignore comas
-If the publisher has address info such Penguin India drop the portion that will describe the country
-ignore the pdf-header and pdf-footers which if provided is merely ascribing the custodians or scanning agencies which is irrelevant to our metadata extraction of the book`;
 
 export interface MetadataResult {
   originalFilePath: string;
