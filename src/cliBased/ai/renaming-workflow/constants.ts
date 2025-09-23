@@ -15,7 +15,9 @@ export  const METADATA_EXTRACTION_PROMPT = `The exercise below is to save a pdf 
 
 Print the followwing details in Title Case
 
-Title Author Language Year - Publisher in One Line in English only. The Hyphen will separate the main text from the Publisher
+Title Author Language Publication City Year - Publisher in One Line in English only. The Hyphen will separate the main text from the Publisher
+
+optionally Editor and/or Translator.
 
 If any entry is not visible then just leave it blank. 
 
@@ -36,6 +38,28 @@ Only Author or Publisher can be the last entry and should be preceeded by a hyph
 Never make title year etc the last entry. and there should never be a hyphen preceeding them, it is reserved for publisher or author.
 
 If there is a publisher and there is a title and author , the title and author should be separated by " By ".
+
+If Language is Sanskrit but script is not Devanagari then try to add the Script as well
+
+Example 
+Meghaduta by Kalidas Sanskrit in Tamil Script 1920 Chennai - Sharada Press
+
+If Multiple languages exist such as Sanskrit Original with Translation then add the information also 
+
+Example 
+Meghaduta by Kalidas Sanskrit Translated into English by T Ganesan 1920 Chennai - Sharada Press
+
+
+If there is a Editor of the Text different from the Author add Editor info 
+Example
+Raj Tarangini by Jonaraja Edited by Raghunath Singh Sanskrit 1960 Lucknow - Naval Kishore Press
+
+If Publisher is not available then treat the Press as Publisher.
+Example
+
+Rati Rahasya Edited by Mike Magee Sanskrit 1982 - Venkateshwar Press
+
+Keep Count of generated text under 170 characters
 
 Dont use any quotes in the the result , example if name is O'Donnell then remove the quotes.
 if this is a magazine then Issue No Volume No year month , ciruclation cycle example bimonthly, trimonthly should be also shown and the word Magazine or Journal should display before the year
