@@ -238,6 +238,8 @@ export async function aiRenameUsingReducedFolder(srcFolder: string, reducedFolde
         const batches = chunk(allPdfs, config.batchSize);
         const batchesReduced = chunk(allReducedPdfs, config.batchSize);
         const pairedBatches: BatchPair[] = buildPairedBatches(batches, batchesReduced);
+        const renamingTracker = []
+
         if(pairedBatches.length >0){
             console.log(`Processing ${JSON.stringify(pairedBatches[0])} batches...`)
         }
@@ -252,6 +254,7 @@ export async function aiRenameUsingReducedFolder(srcFolder: string, reducedFolde
             // Rename PDFs based on results
             for (let j = 0; j < results.length; j++) {
                 const result = results[j];
+                const reducedFilePath = pairedBtch.reducedPdfs[j];
                 const originalFilePath = pairedBtch.pdfs[j];
                 const fileName = path.basename(originalFilePath);
 
@@ -261,11 +264,20 @@ export async function aiRenameUsingReducedFolder(srcFolder: string, reducedFolde
                     extractedMetadata: result.extractedMetadata,
                     error: result.error
                 }, config);
-                
+
                 processedCount++;
                 if (newFilePath !== result.originalFilePath) {
                     successCount++;
                 }
+
+                renamingTracker.push({
+                    originalFilePath,
+                    reducedFilePath,
+                    fileName,
+                    extractedMetadata: result.extractedMetadata,
+                    error: result.error,
+                    newFilePath
+                })
             }
 
             console.log(`Progress: ${processedCount}/${allPdfs.length} (${successCount} successfully renamed)`);
@@ -281,8 +293,23 @@ export async function aiRenameUsingReducedFolder(srcFolder: string, reducedFolde
         console.log(`Successfully renamed: ${successCount}`);
         console.log(`Failed to rename: ${processedCount - successCount}`);
 
+        return {
+            processedCount,
+            successCount,
+            failedCount: processedCount - successCount,
+            success: true,
+            pairedBatches
+        }
+
     } catch (error) {
         console.error('Error in main process:', error);
-        process.exit(1);
+        return {
+            processedCount: 0,
+            successCount: 0,
+            failedCount: 0,
+            pairedBatches: [],
+            error: error,
+            success: false
+        }
     }
 }
