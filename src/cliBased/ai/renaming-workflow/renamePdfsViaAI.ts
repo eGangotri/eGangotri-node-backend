@@ -5,6 +5,7 @@ import { getAllPdfsInFoldersRecursive, chunk } from "../../../imgToPdf/utils/Uti
 import { processWithGoogleAI, MetadataResult } from './googleAiService';
 import { AI_RENAMING_WORKFLOW_CONFIG } from './constants';
 import { buildPairedBatches, BatchPair } from './utils';
+import { PdfAiRenamingTracker } from '../../../models/PdfAiRenamingTracker';
 
 // Configuration
 interface Config {
@@ -99,7 +100,7 @@ async function processPdfBatch(pdfs: string[], config: Config): Promise<Metadata
 
 
 
-async function renamePdf(result: MetadataResult, config: Config): Promise<string> {
+async function renamePdfUsingMetadata(result: MetadataResult, config: Config): Promise<string> {
     if (!result.extractedMetadata) {
         console.log(`Skipping rename for ${result.fileName} - no metadata extracted`);
         return result.originalFilePath;
@@ -177,11 +178,11 @@ async function main() {
 
             // Rename PDFs based on results
             for (const result of results) {
-                const newFilePath = await renamePdf(result, config);
+                // const newFilePath = await renamePdf(result, config);
                 processedCount++;
-                if (newFilePath !== result.originalFilePath) {
-                    successCount++;
-                }
+                // if (newFilePath !== result.originalFilePath) {
+                //     successCount++;
+                // }
             }
 
             console.log(`Progress: ${processedCount}/${allPdfs.length} (${successCount} successfully renamed)`);
@@ -238,49 +239,48 @@ export async function aiRenameUsingReducedFolder(srcFolder: string, reducedFolde
         const batches = chunk(allPdfs, config.batchSize);
         const batchesReduced = chunk(allReducedPdfs, config.batchSize);
         const pairedBatches: BatchPair[] = buildPairedBatches(batches, batchesReduced);
-        const renamingTracker = []
+        const renamingTracker: Array<{
+            originalFilePath: string;
+            reducedFilePath: string;
+            fileName: string;
+            extractedMetadata: string;
+            error?: string;
+            newFilePath: string;
+        }> = [];
 
-        if(pairedBatches.length >0){
+        if (pairedBatches.length > 0) {
             console.log(`Processing ${JSON.stringify(pairedBatches[0])} batches...`)
         }
         let processedCount = 0;
         let successCount = 0;
+
+        // We'll map AI results from reduced PDFs back to the original PDFs
+        const mappedResults: Array<{ meta: MetadataResult; reducedFilePath: string }> = [];
 
         for (let i = 0; i < pairedBatches.length; i++) {
             const pairedBtch = pairedBatches[i];
             console.log(`Processing batch ${i + 1}/${pairedBatches.length}...`);
             const results = await processPdfBatch(pairedBtch.reducedPdfs, config);
 
-            // Rename PDFs based on results
+            // Map each reduced result to its corresponding original file
             for (let j = 0; j < results.length; j++) {
-                const result = results[j];
-                const reducedFilePath = pairedBtch.reducedPdfs[j];
+                const aiRes = results[j];
                 const originalFilePath = pairedBtch.pdfs[j];
+                const reducedFilePath = pairedBtch.reducedPdfs[j];
                 const fileName = path.basename(originalFilePath);
-
-                const newFilePath = await renamePdf({
-                    originalFilePath: originalFilePath,
-                    fileName,
-                    extractedMetadata: result.extractedMetadata,
-                    error: result.error
-                }, config);
-
-                processedCount++;
-                if (newFilePath !== result.originalFilePath) {
-                    successCount++;
-                }
-
-                renamingTracker.push({
+                const mapped: MetadataResult = {
                     originalFilePath,
-                    reducedFilePath,
                     fileName,
-                    extractedMetadata: result.extractedMetadata,
-                    error: result.error,
-                    newFilePath
-                })
+                    extractedMetadata: aiRes.extractedMetadata,
+                    error: aiRes.error
+                };
+                mappedResults.push({ meta: mapped, reducedFilePath });
             }
 
-            console.log(`Progress: ${processedCount}/${allPdfs.length} (${successCount} successfully renamed)`);
+            processedCount += results.length;
+            successCount += results.filter(r => !r.error && !!r.extractedMetadata).length;
+
+            console.log(`Progress: ${processedCount}/${allPdfs.length} (${successCount} successfully extracted)`);
 
             // Add delay between batches to avoid rate limits, except for the last batch
             if (i < batches.length - 1 && config.delayBetweenBatchesMs) {
@@ -289,17 +289,75 @@ export async function aiRenameUsingReducedFolder(srcFolder: string, reducedFolde
             }
         }
 
-        console.log(`\nComplete! Processed ${processedCount} PDFs`);
-        console.log(`Successfully renamed: ${successCount}`);
-        console.log(`Failed to rename: ${processedCount - successCount}`);
+        // Validate aggregation
+        const metadataAggregationNoError = mappedResults.every(m => !m.meta.error);
+        if (metadataAggregationNoError && (mappedResults.length === allPdfs.length)) {
+            let renamedCount = 0;
+            for (let i = 0; i < mappedResults.length; i++) {
+                const item = mappedResults[i];
+                const renamingResultPath = await renamePdfUsingMetadata(item.meta, config);
+                renamedCount++;
+                console.log(`Renamed: ${item.meta.fileName} -> ${renamingResultPath}`);
+                renamingTracker.push({
+                    originalFilePath: item.meta.originalFilePath,
+                    reducedFilePath: item.reducedFilePath,
+                    fileName: item.meta.fileName,
+                    extractedMetadata: item.meta.extractedMetadata,
+                    error: item.meta.error,
+                    newFilePath: renamingResultPath
+                });
+            }
 
-        return {
-            processedCount,
-            successCount,
-            failedCount: processedCount - successCount,
-            success: true,
-            pairedBatches
+            console.log(`\nComplete! Processed ${processedCount} PDFs`);
+            console.log(`Successfully renamed: ${renamedCount}`);
+            console.log(`Failed to rename: ${processedCount - renamedCount}`);
+             
+            const _res = {
+                processedCount,
+                successCount,
+                failedCount: processedCount - successCount,
+                renamedCount,
+                success: true,
+                pairedBatches,
+                renamingResults: renamingTracker
+            }
+            // Persist success summary in DB
+            try {
+                await PdfAiRenamingTracker.create(_res);
+            } catch (dbErr) {
+                console.error('Failed saving PDF_AI_RENAMING_TRACKER (success):', dbErr);
+            }
+            return _res
         }
+
+        else {
+            // Persist failure summary in DB
+            try {
+                await PdfAiRenamingTracker.create({
+                    processedCount,
+                    successCount,
+                    failedCount: processedCount - successCount,
+                    success: false,
+                    pairedBatches,
+                    metaDataAggregated: mappedResults.map(m => m.meta),
+                    error: "Metadata aggregation failed"
+                });
+            } catch (dbErr) {
+                console.error('Failed saving PDF_AI_RENAMING_TRACKER (failure):', dbErr);
+            }
+
+            return {
+                success: false,
+                processedCount,
+                successCount,
+                failedCount: processedCount - successCount,
+                pairedBatches,
+                metaDataAggregated: mappedResults.map(m => m.meta),
+                renamingResults: [],
+                error: "Metadata aggregation failed"
+            }
+        }
+
 
     } catch (error) {
         console.error('Error in main process:', error);
@@ -313,3 +371,34 @@ export async function aiRenameUsingReducedFolder(srcFolder: string, reducedFolde
         }
     }
 }
+
+// async function renamePdf(results: MetadataResult, config: Config): Promise<any> {
+//     // Rename PDFs based on results
+//     for (let j = 0; j < results.length; j++) {
+//         const result = results[j];
+//         const reducedFilePath = pairedBtch.reducedPdfs[j];
+//         const originalFilePath = pairedBtch.pdfs[j];
+//         const fileName = path.basename(originalFilePath);
+
+//         const newFilePath = await renamePdf({
+//             originalFilePath: originalFilePath,
+//             fileName,
+//             extractedMetadata: result.extractedMetadata,
+//             error: result.error
+//         }, config);
+
+//         processedCount++;
+//         if (newFilePath !== result.originalFilePath) {
+//             successCount++;
+//         }
+
+//         renamingTracker.push({
+//             originalFilePath,
+//             reducedFilePath,
+//             fileName,
+//             extractedMetadata: result.extractedMetadata,
+//             error: result.error,
+//             newFilePath
+//         })
+//     }
+// }
