@@ -54,18 +54,3 @@ export interface SelectedUploadItem {
     isValid?: boolean;
     title?:string
 }
-
-export interface RenamePdfFormData {
-    originalPdfName: string;
-    title: string;
-    author: string;
-    publisher: string;
-    year: string;
-    era: 'AH' | 'CE' | 'Vikrami' | 'Shaka' | 'Bangabda';
-    editor: string;
-    commentator: string;
-    translator: string;
-    language: 'English' | 'Hindi' | 'Sanskrit' | 'Kannada' | 'Telugu' | 'Urdu' | 'Persian' | 'Other';
-    otherLanguage?: string;
-    dateOfExecution: Date;
-}
