@@ -1,6 +1,7 @@
 import * as express from 'express';
 import { zipAndSendFormData } from '../services/aiService';
 import { aiRenameUsingReducedFolder } from '../cliBased/ai/renaming-workflow/renamePdfsViaAI';
+import path from 'path';
 
 export const launchAIRoute = express.Router();
 
@@ -47,7 +48,13 @@ launchAIRoute.post('/aiRenamer', async (req: any, resp: any) => {
             });
         }
 
-        const outputFolder = req?.body?.outputFolder || `${srcFolder}\\renamer`;
+
+        let outputFolder = req?.body?.outputFolder || ""
+        if (!outputFolder) {
+            const parent = path.dirname(srcFolder);
+            outputFolder = path.join(parent, "renamer");
+        }
+        
         const _result = await aiRenameUsingReducedFolder(srcFolder, reducedFolder, outputFolder)
         resp.status(200).send({
             "status": "success",
