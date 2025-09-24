@@ -13,7 +13,7 @@ export function buildPairedPdfs(allPdfs: string[], allReducedPdfs: string[]): Pd
 
 export function buildPairedBatches(batches: string[][], batchesReduced: string[][]): BatchPair[] {
     if (batches.length !== batchesReduced.length) {
-        throw new Error(`Batch arrays must be the same length. batches=${batches.length}, batchesReduced=${batchesReduced.length}`);
+        return []
     }
     return batches.map((pdfs, index) => ({
         index,

@@ -6,7 +6,7 @@ import { getAllPdfsInFoldersRecursive, chunk } from "../../../imgToPdf/utils/Uti
 import { processWithGoogleAI, MetadataResult } from './googleAiService';
 import { buildPairedBatches, formatFilename } from './utils';
 import { PdfTitleAndFileRenamingTrackerViaAI } from '../../../models/pdfTitleAndFileRenamingTrackerViaAI';
-import { AiPdfRenaming } from '../../../models/AiPdfRenaming';
+import { AiPdfRenaming } from '../../../models/pdfTitleRenamingTrackerViaAI';
 import { AI_RENAMING_WORKFLOW_CONFIG, BatchPair, Config } from './constants';
 
 /**
@@ -123,10 +123,10 @@ export async function aiRenameUsingReducedFolder(srcFolder: string, reducedFolde
         dotenv.config();
 
         const config: Config = {
+            ...AI_RENAMING_WORKFLOW_CONFIG ,
             inputFolders: [srcFolder],
             reducedFolders: [reducedFolder],
-            outputFolder: outputFolder, // 
-            ...AI_RENAMING_WORKFLOW_CONFIG 
+            outputFolder: outputFolder,
         }
 
 
@@ -143,7 +143,20 @@ export async function aiRenameUsingReducedFolder(srcFolder: string, reducedFolde
         // Process PDFs in batches
         const batches = chunk(allPdfs, config.batchSize);
         const batchesReduced = chunk(allReducedPdfs, config.batchSize);
+       
+        if (batches.length !== batchesReduced.length) {
+            return {
+                processedCount,
+                successCount,
+                failedCount: processedCount - successCount,
+                pairedBatches: [],
+                error: `Batch arrays must be the same length. batches=${batches.length}, batchesReduced=${batchesReduced.length}`,
+                success: false
+            }
+        }
+
         const pairedBatches: BatchPair[] = buildPairedBatches(batches, batchesReduced);
+       
         const renamingTracker: Array<{
             originalFilePath: string;
             reducedFilePath: string;
@@ -245,14 +258,14 @@ export async function aiRenameUsingReducedFolder(srcFolder: string, reducedFolde
                 failedCount: processedCount - successCount,
                 renamedCount,
                 success: true,
+                renamingResults: renamingTracker,
                 pairedBatches,
-                renamingResults: renamingTracker
             }
             // Persist success summary in DB
             try {
                 await PdfTitleAndFileRenamingTrackerViaAI.create(_res);
             } catch (dbErr) {
-                console.error('Failed saving PDF_AI_RENAMING_TRACKER (success):', dbErr);
+                console.error('Failed saving PdfTitleAndFileRenamingTrackerViaAI (success):', dbErr);
             }
             return _res
         }
@@ -266,12 +279,12 @@ export async function aiRenameUsingReducedFolder(srcFolder: string, reducedFolde
                     successCount,
                     failedCount: processedCount - successCount,
                     success: false,
-                    pairedBatches,
                     metaDataAggregated: mappedResults.map(m => m.meta),
-                    error: "Metadata aggregation failed"
+                    error: "Metadata aggregation failed",
+                    pairedBatches,
                 });
             } catch (dbErr) {
-                console.error('Failed saving PDF_AI_RENAMING_TRACKER (failure):', dbErr);
+                console.error('Failed saving PdfTitleAndFileRenamingTrackerViaAI (failure):', dbErr);
             }
 
             return {
@@ -280,23 +293,21 @@ export async function aiRenameUsingReducedFolder(srcFolder: string, reducedFolde
                 processedCount,
                 successCount,
                 failedCount: processedCount - successCount,
-                pairedBatches,
                 metaDataAggregated: mappedResults.map(m => m.meta),
                 renamingResults: [],
-                error: "Metadata aggregation failed"
+                error: "Metadata aggregation failed",
+                pairedBatches,
             }
         }
-
-
     } catch (error) {
         console.error('Error in main process:', error);
         return {
             processedCount,
             successCount,
             failedCount: processedCount - successCount,
+            error: 'Error in main process:' + error,
+            success: false,
             pairedBatches: [],
-            error: error,
-            success: false
         }
     }
 }

@@ -1,25 +1,30 @@
 import * as mongoose from 'mongoose';
 
-const schema = new mongoose.Schema(
-    {
-        originalPdfName: { type: String, required: true },
-        title: { type: String, required: false },
-        author: { type: String, required: false },
-        publisher: { type: String, required: false },
-        year: { type: String, required: false },
-        era: { type: String, required: false },
-        editor: { type: String, required: false },
-        commentator: { type: String, required: false },
-        translator: { type: String, required: false },
-        language: { type: String, required: false },
-        otherLanguage: { type: String, required: false },
-        dateOfExecution: { type: Date, required: true, default: Date.now }
-    }, {
-        collection: 'PDF_TITLE_RENAMING_TRACKER_VIA_AI',
-        timestamps:true
-    }
+const PdfTitleRenamingTrackerViaAISchema = new mongoose.Schema(
+  {
+    runId: { type: String, required: true, index: true },
+
+    // Context of the run
+    srcFolder: { type: String, required: false },
+    reducedFolder: { type: String, required: false },
+    outputFolder: { type: String, required: false },
+    batchIndex: { type: Number, required: false },
+    indexInBatch: { type: Number, required: false },
+
+    // File details
+    originalFilePath: { type: String, required: true },
+    reducedFilePath: { type: String, required: false },
+    fileName: { type: String, required: true },
+
+    // AI metadata & outcome
+    extractedMetadata: { type: String, required: false },
+    error: { type: String, required: false },
+    newFilePath: { type: String, required: false },
+  },
+  {
+    collection: 'PDF_TITLE_RENAMING_TRACKER_VIA_AI',
+    timestamps: true,
+  }
 );
 
-export const PdfTitleRenamingTrackerViaAI = mongoose.model('PDF_TITLE_RENAMING_TRACKER_VIA_AI', schema);
-
-
+export const AiPdfRenaming = mongoose.model('PDF_TITLE_RENAMING_TRACKER_VIA_AI', PdfTitleRenamingTrackerViaAISchema);
