@@ -23,7 +23,6 @@ import "./logger/override";
 
 import { fileUtilsRoute } from "./routes/fileUtils.route";
 import { launchAIRoute } from "./routes/launchAI.route";
-import { pdfRenameRoute } from "./routes/pdfRename.route";
 import { scanningCenterRoute } from "./routes/scanningCenter.route";
 import { gDriveUploadWorkReportRoute } from "./routes/gDriveUploadWorkReportRoute";
 import { gDriveRoute } from "./routes/gDrive.route";
@@ -76,7 +75,6 @@ egangotri.use("/archiveItem", archiveItemRoute);
 egangotri.use("/googleDriveDB", googleDriveItemRoute);
 egangotri.use("/searchMongo", launchMongoRoute);
 egangotri.use("/fileUtil", fileUtilsRoute);
-egangotri.use("/pdfRename", pdfRenameRoute);
 egangotri.use("/scanningCenter", scanningCenterRoute);
 egangotri.use("/gDriveUploadWorkReportRoute", gDriveUploadWorkReportRoute);
 egangotri.use("/launchCmd", launchCmdRoute);
