@@ -1,3 +1,5 @@
+import { BatchPair, PdfPair } from "./constants";
+
 export function buildPairedPdfs(allPdfs: string[], allReducedPdfs: string[]): PdfPair[] {
     if (allPdfs.length !== allReducedPdfs.length) {
         throw new Error(`Input arrays must be the same length. allPdfs=${allPdfs.length}, allReducedPdfs=${allReducedPdfs.length}`);

@@ -2,7 +2,6 @@ import axios from 'axios';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
 import * as fs from 'fs';
-import FormData from 'form-data';
 import { METADATA_EXTRACTION_PROMPT } from './constants';
 
 // Load environment variables
