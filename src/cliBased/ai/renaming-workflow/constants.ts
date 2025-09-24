@@ -58,6 +58,10 @@ Title Language Year - Author in One Line in English only.
 
 If there is publisher then make the publisher the last entry.
 
+If there is no publisher then replace it by something like Series. Example Kavyamala Series, Choukhamba Sanskrit Series
+
+This information is generally in the end when the text advertises other publications by the same publisher.
+
 Only Author or Publisher can be the last entry and should be preceeded by a hyphen. 
 
 Never make title year etc the last entry. and there should never be a hyphen preceeding them, it is reserved for publisher or author.
