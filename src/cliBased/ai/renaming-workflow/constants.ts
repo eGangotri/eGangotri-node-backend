@@ -1,3 +1,27 @@
+// Configuration
+export interface Config {
+    inputFolders: string[];
+    reducedFolders?: string[];
+    outputFolder: string | null;
+    batchSize: number;
+    dryRun: boolean;
+    renameInPlace: boolean;
+    delayBetweenCallsMs?: number; // Delay between API calls in ms
+    delayBetweenBatchesMs?: number; // Delay between processing batches in ms
+}
+
+export type PdfPair = {
+    index: number;         // 0-based
+    pdf: string;           // item from allPdfs
+    reducedPdf: string;    // corresponding item from allReducedPdfs
+};
+
+export type BatchPair = {
+    index: number;          // 0-based
+    pdfs: string[];         // batch from allPdfs
+    reducedPdfs: string[];  // corresponding batch from allReducedPdfs
+};
+
 export const AI_RENAMING_WORKFLOW_CONFIG = {
     inputFolders: ["C:\\tmp\\Box- 2\\reduced\\Box- 2(12)"],
     outputFolder: "C:\\tmp\\Box- 2\\reduced\\Box- 2(12)\\renamed", // Set to a path to copy renamed files to a new location

@@ -52,9 +52,7 @@ launchAIRoute.post('/aiRenamer', async (req: any, resp: any) => {
         resp.status(200).send({
             "status": "success",
             response: {
-                "success": true,
-                "msg": "Renaming completed successfully",
-                "result": _result
+                ..._result
             }
         });
     }

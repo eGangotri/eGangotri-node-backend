@@ -1,10 +1,3 @@
-
-export type PdfPair = {
-    index: number;         // 0-based
-    pdf: string;           // item from allPdfs
-    reducedPdf: string;    // corresponding item from allReducedPdfs
-};
-
 export function buildPairedPdfs(allPdfs: string[], allReducedPdfs: string[]): PdfPair[] {
     if (allPdfs.length !== allReducedPdfs.length) {
         throw new Error(`Input arrays must be the same length. allPdfs=${allPdfs.length}, allReducedPdfs=${allReducedPdfs.length}`);
@@ -16,12 +9,6 @@ export function buildPairedPdfs(allPdfs: string[], allReducedPdfs: string[]): Pd
     }));
 }
 
-export type BatchPair = {
-    index: number;          // 0-based
-    pdfs: string[];         // batch from allPdfs
-    reducedPdfs: string[];  // corresponding batch from allReducedPdfs
-};
-
 export function buildPairedBatches(batches: string[][], batchesReduced: string[][]): BatchPair[] {
     if (batches.length !== batchesReduced.length) {
         throw new Error(`Batch arrays must be the same length. batches=${batches.length}, batchesReduced=${batchesReduced.length}`);
@@ -31,4 +18,25 @@ export function buildPairedBatches(batches: string[][], batchesReduced: string[]
         pdfs,
         reducedPdfs: batchesReduced[index],
     }));
+}
+
+
+/**
+ * Clean and format the metadata string for use as a filename
+ * @param metadata - The metadata string from Google AI
+ * @returns Cleaned and formatted string
+ */
+export function formatFilename(metadata: string): string {
+    // Remove any invalid filename characters
+    let cleanName = metadata
+        .replace(/[\\/:*?"<>|]/g, '') // Remove invalid filename characters
+        .replace(/\s+/g, ' ')          // Replace multiple spaces with single space
+        .trim();                        // Remove leading/trailing spaces
+
+    // Ensure the filename isn't too long (Windows has a 260 character path limit)
+    if (cleanName.length > 200) {
+        cleanName = cleanName.substring(0, 197) + '...';
+    }
+
+    return cleanName + '.pdf';
 }

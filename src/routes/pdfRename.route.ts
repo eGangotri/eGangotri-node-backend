@@ -1,6 +1,6 @@
 import * as express from 'express';
 import { RenamePdfFormData } from '../mirror/types';
-import { PdfRenamer } from '../models/pdfRenamer';
+import { PdfTitleRenamingTrackerViaAI as PdfRenamer } from '../models/pdfTitleRenamingTrackerViaAI';
 
 export const pdfRenameRoute = express.Router();
 
