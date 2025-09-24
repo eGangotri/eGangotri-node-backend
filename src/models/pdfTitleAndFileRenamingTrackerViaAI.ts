@@ -2,6 +2,7 @@ import * as mongoose from 'mongoose';
 
 const PdfAiRenamingTrackerSchema = new mongoose.Schema(
   {
+    runId: { type: String, required: true, index: true },
     processedCount: { type: Number, required: true },
     successCount: { type: Number, required: true },
     failedCount: { type: Number, required: true },
@@ -19,9 +20,9 @@ const PdfAiRenamingTrackerSchema = new mongoose.Schema(
     error: { type: mongoose.Schema.Types.Mixed, required: false }
   },
   {
-    collection: 'PDF_AI_RENAMING_TRACKER',
+    collection: 'PDF_TITLE_AND_FILE_RENAMING_TRACKER_VIA_AI',
     timestamps: true,
   }
 );
 
-export const PdfAiRenamingTracker = mongoose.model('PDF_AI_RENAMING_TRACKER', PdfAiRenamingTrackerSchema);
+export const PdfTitleAndFileRenamingTrackerViaAI = mongoose.model('PDF_TITLE_AND_FILE_RENAMING_TRACKER_VIA_AI', PdfAiRenamingTrackerSchema);

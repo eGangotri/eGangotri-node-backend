@@ -15,11 +15,11 @@ const schema = new mongoose.Schema(
         otherLanguage: { type: String, required: false },
         dateOfExecution: { type: Date, required: true, default: Date.now }
     }, {
-        collection: 'Pdf_Renamer',
+        collection: 'PDF_TITLE_RENAMING_TRACKER_VIA_AI',
         timestamps:true
     }
 );
 
-export const PdfRenamer = mongoose.model('Pdf_Renamer', schema);
+export const PdfTitleRenamingTrackerViaAI = mongoose.model('PDF_TITLE_RENAMING_TRACKER_VIA_AI', schema);
 
 
