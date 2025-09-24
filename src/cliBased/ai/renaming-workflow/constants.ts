@@ -23,8 +23,9 @@ export type BatchPair = {
 };
 
 export const AI_RENAMING_WORKFLOW_CONFIG = {
-    inputFolders: ["C:\\tmp\\Box- 2\\reduced\\Box- 2(12)"],
-    outputFolder: "C:\\tmp\\Box- 2\\reduced\\Box- 2(12)\\renamed", // Set to a path to copy renamed files to a new location
+    inputFolders: [],
+    reducedFolders: [],
+    outputFolder: "", // Set to a path to copy renamed files to a new location
     batchSize: 3,       // Number of PDFs to process in a batch (reduced to avoid rate limits)
     dryRun: false,      // Set to true to see what would be renamed without actually renaming
     renameInPlace: false, // Set to false to copy files to outputFolder instead of renaming in place
@@ -84,6 +85,20 @@ Example
 Rati Rahasya Edited by Mike Magee Sanskrit 1982 - Venkateshwar Press
 
 Keep Count of generated text under 170 characters
+
+If the original title in Hindi is liek this for example:
+
+मेघदुत रामनाथ ऐण्ड सन्स
+
+instead of transliterating to Ramanath aind sanz use the official English Ramanath and Sons
+
+if any Institutional publisher has two names one in English and one in Sanskrit/Hindi etc like Oriental Research Institute and 'Prachya Vidya Shodha Kendra'
+give preference to the English in the output.
+
+The output should be created with a Modern English User in mind with spellings and conventions 
+that modern users are familair with.
+
+This inturn will also help in easier google-searches.
 
 Dont use any quotes in the the result , example if name is O'Donnell then remove the quotes.
 if this is a magazine then Issue No Volume No year month , ciruclation cycle example bimonthly, trimonthly should be also shown and the word Magazine or Journal should display before the year
