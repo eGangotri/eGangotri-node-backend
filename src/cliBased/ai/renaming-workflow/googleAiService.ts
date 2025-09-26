@@ -22,9 +22,9 @@ const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
  * If the upload fails, throws an error and the caller should fallback to inline mode.
  */
 async function uploadPdfToFilesApi(pdfFilePath: string, apiKey: string): Promise<string> {
-  // Prefer the simple upload endpoint for small files using multipart/related
-  // Docs (v1beta): files:upload supports multipart/related with JSON metadata + binary content
-  const url = `https://generativelanguage.googleapis.com/v1beta/files:upload?key=${apiKey}`;
+  // Use the upload endpoint with uploadType=multipart
+  // Docs: https://generativelanguage.googleapis.com/upload/v1beta/files?uploadType=multipart
+  const url = `https://generativelanguage.googleapis.com/upload/v1beta/files?uploadType=multipart&key=${apiKey}`;
 
   const boundary = `----WSBoundary${Date.now()}`;
   const fileBuffer = fs.readFileSync(pdfFilePath);
@@ -33,7 +33,8 @@ async function uploadPdfToFilesApi(pdfFilePath: string, apiKey: string): Promise
   const jsonPart = Buffer.from(
     JSON.stringify({
       file: {
-        displayName: filename
+        display_name: filename,
+        mime_type: 'application/pdf'
       }
     }),
     'utf-8'
@@ -44,28 +45,80 @@ async function uploadPdfToFilesApi(pdfFilePath: string, apiKey: string): Promise
       `Content-Type: application/json; charset=UTF-8\r\n\r\n` +
       `${jsonPart.toString()}\r\n` +
       `--${boundary}\r\n` +
-      `Content-Type: application/pdf\r\n` +
-      `Content-Disposition: form-data; name="file"; filename="${filename}"\r\n\r\n`,
+      `Content-Type: application/pdf\r\n\r\n`,
     'utf-8'
   );
   const closing = Buffer.from(`\r\n--${boundary}--`, 'utf-8');
   const multipartBody = Buffer.concat([preamble, fileBuffer, closing]);
 
-  const resp = await axios.post(url, multipartBody, {
-    headers: {
-      'Content-Type': `multipart/related; boundary=${boundary}`,
-    },
-    maxBodyLength: Infinity,
-    maxContentLength: Infinity,
-  });
+  try {
+    console.log(`Files API: multipart upload -> ${url}`);
+    const resp = await axios.post(url, multipartBody, {
+      headers: {
+        'Content-Type': `multipart/related; boundary=${boundary}`,
+      },
+      maxBodyLength: Infinity,
+      maxContentLength: Infinity,
+    });
 
-  // Response usually contains a file object with name/uri
-  // Try common locations
-  const fileUri = resp.data?.file?.uri || resp.data?.file?.name || resp.data?.name || resp.data?.uri;
-  if (!fileUri) {
-    throw new Error(`Files API upload succeeded but response lacked a file URI: ${JSON.stringify(resp.data)}`);
+    // Response usually contains a file object with name/uri
+    // Try common locations
+    const fileName = resp.data?.file?.name || resp.data?.name || resp.data?.file?.uri || resp.data?.uri;
+    if (!fileName) {
+      throw new Error(`Files API upload succeeded but response lacked a file URI: ${JSON.stringify(resp.data)}`);
+    }
+    // Wait for file to become ACTIVE before using it
+    await waitForFileActive(fileName as string, apiKey);
+    return fileName as string;
+  } catch (e: any) {
+    // If multipart fails (commonly 400/404), fallback to raw media upload
+    if (e?.response?.status && e.response.status >= 400 && e.response.status < 500) {
+      console.warn(`Multipart upload failed with ${e.response.status}. Falling back to raw media upload.`);
+      const rawUrl = `https://generativelanguage.googleapis.com/upload/v1beta/files?uploadType=media&key=${apiKey}`;
+      console.log(`Files API: raw media upload -> ${rawUrl}`);
+      const rawResp = await axios.post(rawUrl, fileBuffer, {
+        headers: {
+          'Content-Type': 'application/pdf',
+          // X-Goog-Upload-File-Name is optional for simple media uploads
+        },
+        maxBodyLength: Infinity,
+        maxContentLength: Infinity,
+      });
+      const fileName = rawResp.data?.file?.name || rawResp.data?.name || rawResp.data?.file?.uri || rawResp.data?.uri;
+      if (!fileName) {
+        throw new Error(`Raw Files API upload succeeded but response lacked a file URI: ${JSON.stringify(rawResp.data)}`);
+      }
+      await waitForFileActive(fileName as string, apiKey);
+      return fileName as string;
+    }
+    throw e;
   }
-  return fileUri as string;
+}
+
+/**
+ * Poll the Files API until the file state is ACTIVE or timeout.
+ */
+async function waitForFileActive(fileNameOrUri: string, apiKey: string, options?: { maxWaitMs?: number; pollIntervalMs?: number }) {
+  const maxWaitMs = options?.maxWaitMs ?? Number(process.env.AI_FILES_MAX_WAIT_MS || 30000);
+  const pollIntervalMs = options?.pollIntervalMs ?? Number(process.env.AI_FILES_POLL_INTERVAL_MS || 1000);
+  const start = Date.now();
+  // fileName may come as 'files/abc123' or a full URI; the Files API expects 'v1beta/files/{name}'
+  const name = fileNameOrUri.startsWith('files/') ? fileNameOrUri : `files/${fileNameOrUri}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/${name}?key=${apiKey}`;
+  while (Date.now() - start < maxWaitMs) {
+    try {
+      const resp = await axios.get(url);
+      const state = resp.data?.state || resp.data?.file?.state;
+      if (state === 'ACTIVE') {
+        return;
+      }
+      // If PROCESSING or unknown, wait and poll again
+    } catch (e) {
+      // Ignore transient errors during poll and continue
+    }
+    await sleep(pollIntervalMs);
+  }
+  console.warn(`Files API: file ${name} did not reach ACTIVE within ${maxWaitMs}ms; proceeding anyway.`);
 }
 
 /**
@@ -138,6 +191,7 @@ export async function processWithGoogleAI(
         usedFilesApi = true;
         requestPayload = {
           contents: [{
+            role: 'user',
             parts: [
               { text: METADATA_EXTRACTION_PROMPT },
               {
@@ -159,6 +213,7 @@ export async function processWithGoogleAI(
         // Prepare request payload using inline_data for small PDFs
         requestPayload = {
           contents: [{
+            role: 'user',
             parts: [
               { text: METADATA_EXTRACTION_PROMPT },
               {
@@ -182,6 +237,7 @@ export async function processWithGoogleAI(
       // Fallback to inline_data if upload failed
       requestPayload = {
         contents: [{
+          role: 'user',
           parts: [
             { text: METADATA_EXTRACTION_PROMPT },
             {
