@@ -122,11 +122,19 @@ export async function aiRenameUsingReducedFolder(srcFolder: string, reducedFolde
         // Load environment variables
         dotenv.config();
 
+        // Allow overrides from environment
+        const envBatchSize = Number(process.env.AI_BATCH_SIZE || AI_RENAMING_WORKFLOW_CONFIG.batchSize);
+        const envDelayBetweenCallsMs = Number(process.env.AI_DELAY_BETWEEN_CALLS_MS || AI_RENAMING_WORKFLOW_CONFIG.delayBetweenCallsMs);
+        const envDelayBetweenBatchesMs = Number(process.env.AI_DELAY_BETWEEN_BATCHES_MS || AI_RENAMING_WORKFLOW_CONFIG.delayBetweenBatchesMs);
+
         const config: Config = {
             ...AI_RENAMING_WORKFLOW_CONFIG ,
             inputFolders: [srcFolder],
             reducedFolders: [reducedFolder],
             outputFolder: outputFolder,
+            batchSize: Number.isFinite(envBatchSize) && envBatchSize > 0 ? envBatchSize : AI_RENAMING_WORKFLOW_CONFIG.batchSize,
+            delayBetweenCallsMs: Number.isFinite(envDelayBetweenCallsMs) && envDelayBetweenCallsMs >= 0 ? envDelayBetweenCallsMs : AI_RENAMING_WORKFLOW_CONFIG.delayBetweenCallsMs,
+            delayBetweenBatchesMs: Number.isFinite(envDelayBetweenBatchesMs) && envDelayBetweenBatchesMs >= 0 ? envDelayBetweenBatchesMs : AI_RENAMING_WORKFLOW_CONFIG.delayBetweenBatchesMs,
         }
 
         if(!fs.existsSync(outputFolder)) {
