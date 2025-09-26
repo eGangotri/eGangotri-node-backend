@@ -1,4 +1,4 @@
-import { BatchPair, PdfPair } from "./constants";
+import { BatchPair, PdfPair } from "./types";
 
 export function buildPairedPdfs(allPdfs: string[], allReducedPdfs: string[]): PdfPair[] {
     if (allPdfs.length !== allReducedPdfs.length) {

@@ -3,17 +3,11 @@ import * as dotenv from 'dotenv';
 import * as path from 'path';
 import * as fs from 'fs';
 import { METADATA_EXTRACTION_PROMPT } from './constants';
+import { MetadataResult } from './types';
 
 // Load environment variables
 dotenv.config();
 
-
-export interface MetadataResult {
-  originalFilePath: string;
-  fileName: string;
-  extractedMetadata: string;
-  error?: string;
-}
 
 /**
  * Sleep for a specified number of milliseconds
@@ -148,6 +142,7 @@ export async function processWithGoogleAI(
     try {
       // Extract potential metadata from filename
       const fileName = path.basename(pdfFilePath, '.pdf');
+      console.log(`Using filename as fallback: ${fileName}`);
       return {
         originalFilePath: pdfFilePath,
         fileName: path.basename(pdfFilePath),

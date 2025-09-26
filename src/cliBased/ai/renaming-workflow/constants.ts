@@ -1,38 +1,3 @@
-// Configuration
-export interface Config {
-    inputFolders: string[];
-    reducedFolders?: string[];
-    outputFolder: string | null;
-    batchSize: number;
-    dryRun: boolean;
-    renameInPlace: boolean;
-    delayBetweenCallsMs?: number; // Delay between API calls in ms
-    delayBetweenBatchesMs?: number; // Delay between processing batches in ms
-}
-
-export type PdfPair = {
-    index: number;         // 0-based
-    pdf: string;           // item from allPdfs
-    reducedPdf: string;    // corresponding item from allReducedPdfs
-};
-
-export type BatchPair = {
-    index: number;          // 0-based
-    pdfs: string[];         // batch from allPdfs
-    reducedPdfs: string[];  // corresponding batch from allReducedPdfs
-};
-
-export const AI_RENAMING_WORKFLOW_CONFIG = {
-    inputFolders: [],
-    reducedFolders: [],
-    outputFolder: "", // Set to a path to copy renamed files to a new location
-    batchSize: 3,       // Number of PDFs to process in a batch (reduced to avoid rate limits)
-    dryRun: false,      // Set to true to see what would be renamed without actually renaming
-    renameInPlace: false, // Set to false to copy files to outputFolder instead of renaming in place
-    delayBetweenCallsMs: 2000,  // Wait 2 seconds between API calls
-    delayBetweenBatchesMs: 10000  // Wait 10 seconds between batches
-}
-
 
 // Google AI Studio prompt for metadata extraction
 export  const METADATA_EXTRACTION_PROMPT = `The exercise below is to save a pdf with recognizable metadata mostly English, Sanskrit and other languages that use Brahmi based scripts
