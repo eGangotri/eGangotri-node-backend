@@ -5,7 +5,9 @@ export  const METADATA_EXTRACTION_PROMPT = `The exercise below is to save a pdf 
 
 Print the followwing details in Title Case
 
-Title Sub Title Author Language Publication City Year - Publisher in One Line in English only. The Hyphen will separate the main text from the Publisher
+Title Sub Title Author Language Subject Publication City Year - Publisher in One Line in English only. 
+
+The Hyphen will separate the main text from the Publisher
 
 optionally Editor and/or Translator.
 
