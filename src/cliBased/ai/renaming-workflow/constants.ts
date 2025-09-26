@@ -15,6 +15,8 @@ If any entry is not visible then just leave it blank.
 
 if author/title is not known then instead print Unknown.
 
+If the Subject can be broadly guessed like Vedanta, Aesthetics etc it can be included, if uncertain can ignore.
+
 Make sure to only write the metadata not things like Title: etc.
 
 If book is completely in English then no need to mention language.
@@ -63,19 +65,36 @@ Rati Rahasya Edited by Mike Magee Sanskrit 1982 - Venkateshwar Press
 
 Keep Count of generated text under 170 characters
 
-If the original title in Hindi is liek this for example:
+If the original title in Hindi is like this for example:
 
-मेघदुत रामनाथ ऐण्ड सन्स
+कालिदास का आधुनिक हिंदी काव्य पर प्रभाव 
+Author: जानकी नाथ
+Publisher: रामनाथ ऐण्ड सन्ज़
+Year: 2025
+City: लखनऊ
 
 instead of transliterating to Ramanath aind sanz use the official English Ramanath and Sons
 
-if any Institutional publisher has two names one in English and one in Sanskrit/Hindi etc like Oriental Research Institute and 'Prachya Vidya Shodha Kendra'
-give preference to the English in the output.
+So should result in following
 
-The output should be created with a Modern English User in mind with spellings and conventions 
-that modern users are familair with.
+Kalidas Ka Adhunik Hindi Kavya Par Prabhav by Janaki Nath Ramanath and Sons 2025 Lucknow - Ramanath and Sons
 
-This inturn will also help in easier google-searches.
+Dont translate title into ENglish ever just translieration.
+
+if any Institutional publisher in the book has two names one in English and one in Sanskrit/Hindi etc like Oriental Research Institute and 'Prachya Vidya Shodha Kendra'
+give preference to the English in the output. But only if the publisher is mentioned in its English form.
+
+Example a Book might have 
+Central Institute of Tibetan Studies (CITS) but also Kendriya Uccha Tibbati Shiksha Sansthan 
+
+In this case the output should be Central Institute of Tibetan Studies.
+
+Otherwise dont translate to English.
+
+If there are multiple spellings possible in English spelling for entries in Sanskrit Hindi etc, give preference to Conventional English spellings.
+
+Example: Ram instead of Rama. Shiva instead of Siva or Shiv as per the English Conventions.
+
 
 Dont use any quotes in the the result , example if name is O'Donnell then remove the quotes.
 if this is a magazine then Issue No Volume No year month , ciruclation cycle example bimonthly, trimonthly should be also shown and the word Magazine or Journal should display before the year
@@ -85,7 +104,10 @@ If the year is in Vikrami or Samvat or Shaka or any other Calendar such as Benga
 
 If the words are in Sanskrit and they are conjoined like Shishupalavadha due to the rules of Sanskrit compunding called Samasa separate them so that they are more online search friendly to something like Shishupala Vadha which will be easier for a modern reader to find in online searched.
 
-If you feel any pages in the front or back are missing, then you can add the text Missing Pages before the year to let the reader know he is in for some minor inconvenience
+If you feel any pages in the front or back are missing, 
+then you can add the text Missing Pages 
+before the year or city of publication but not before the title 
+to let the reader know he is in for some minor inconvenience
 
 If metadata  is missing in the front due to missing pages then try the last few pages to find the metadata. 
 
