@@ -4,7 +4,6 @@ dotenv.config()
 const CONFS = process.env
 
 export let GLOBAL_DB_NAME = CONFS.MONGO_DB_NAME;
-export const AI_SERVER = CONFS.AI_SERVER;
 export let GLOBAL_SERVER_NAME = CONFS.SERVER_URL;
 export const PYTHON_SERVER_URL = CONFS.PYTHON_SERVER_URL;
 
