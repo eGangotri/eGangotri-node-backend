@@ -134,6 +134,6 @@ const jsonBody: AksharaMukhaGetProps = {
 
 //pnpm run aksharamukha
 
-aksharamukhaIastToRomanColloquial("aham").then((res) => {
-    console.log(res)
-})
+// aksharamukhaIastToRomanColloquial("aham").then((res) => {
+//     console.log(res)
+// })
