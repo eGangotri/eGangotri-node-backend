@@ -43,7 +43,7 @@ async function processPdfBatch(pdfs: string[], config: Config): Promise<Metadata
             console.log(`result: ${JSON.stringify(result)}`)
             console.log(`Result for ${path.basename(pdfPath)}: ${result.extractedMetadata || 'No metadata extracted'}`);
             if (result.error) {
-                console.error(`Error: ${result.error}`);
+                console.error(`processWithGoogleAI:Error: ${result.error}`);
             }
 
             results.push(result);
