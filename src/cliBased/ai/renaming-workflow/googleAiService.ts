@@ -23,7 +23,14 @@ const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
  * @param retryCount - Number of retries attempted (internal parameter)
  * @param initialDelay - Initial delay for exponential backoff in ms (internal parameter)
  * @returns Promise<MetadataResult> - The processed metadata result
- */
+  Make Sure:
+Go to Google Cloud Console for AI Stuido
+    Select your project
+    Go to "APIs & Services" > "Library"
+    Search for "Gemini API" or "Generative Language API"
+    Click "Enable"
+
+*/
 export async function processWithGoogleAI(
   pdfFilePath: string, 
   retryCount: number = 0, 
