@@ -17,6 +17,8 @@ if author/title is not known then instead print Unknown.
 
 Make sure to only write the metadata not things like Title: etc.
 
+If book is completely in English then no need to mention language.
+
 If there is no publisher then make the author the last entry preceeded by hyphen 
 
 So :
