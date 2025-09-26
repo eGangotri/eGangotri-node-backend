@@ -3,11 +3,11 @@ import * as path from 'path';
 import * as dotenv from 'dotenv';
 import { randomUUID } from 'crypto';
 import { getAllPdfsInFoldersRecursive, chunk } from "../../../imgToPdf/utils/Utils";
-import { processWithGoogleAI, MetadataResult } from './googleAiService';
+import { processWithGoogleAI } from './googleAiService';
 import { buildPairedBatches, formatFilename } from './utils';
 import { PdfTitleAndFileRenamingTrackerViaAI } from '../../../models/pdfTitleAndFileRenamingTrackerViaAI';
 import { AiPdfRenaming } from '../../../models/pdfTitleRenamingTrackerViaAI';
-import { AI_RENAMING_WORKFLOW_CONFIG, BatchPair, Config } from './constants';
+import { AI_RENAMING_WORKFLOW_CONFIG, BatchPair, Config, MetadataResult } from './types';
 
 /**
  * Sleep for a specified number of milliseconds
@@ -129,6 +129,10 @@ export async function aiRenameUsingReducedFolder(srcFolder: string, reducedFolde
             outputFolder: outputFolder,
         }
 
+        if(!fs.existsSync(outputFolder)) {
+            console.log(`Creating output folder: ${outputFolder}`);
+            fs.mkdirSync(outputFolder, { recursive: true });
+        }
 
         console.log(`Starting PDF renaming with Google AI Studio...`);
         console.log(`Input folders:`, config.inputFolders);
