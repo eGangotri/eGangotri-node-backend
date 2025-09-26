@@ -120,7 +120,7 @@ export async function processWithGoogleAI(
     // Handle specific error types with more informative messages
     let errorMessage = '';
     console.error(`try/catch: ${error?.message}  ${error?.response?.status}`);
-
+    console.error('Full error data:', JSON.stringify((error as any)?.response?.data, null, 2));
     if (axios.isAxiosError(error)) {
       const statusCode = error.response?.status;
 
@@ -169,6 +169,7 @@ export async function processWithGoogleAI(
         error: `${errorMessage}. Using filename instead.`
       };
     } catch (fallbackError) {
+      console.error('Full error data:', JSON.stringify((fallbackError as any)?.response?.data, null, 2));
       // If even the fallback fails
       return {
         originalFilePath: pdfFilePath,
