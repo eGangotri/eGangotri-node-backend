@@ -102,7 +102,8 @@ export async function processWithGoogleAI(
   } catch (error) {
     // Handle specific error types with more informative messages
     let errorMessage = '';
-    
+    console.error(`try/catch: ${error?.message}  ${error?.response?.status}`);
+
     if (axios.isAxiosError(error)) {
       const statusCode = error.response?.status;
       
@@ -142,7 +143,7 @@ export async function processWithGoogleAI(
     try {
       // Extract potential metadata from filename
       const fileName = path.basename(pdfFilePath, '.pdf');
-      console.log(`Using filename as fallback: ${fileName}`);
+      console.log(`Error Using filename as fallback: ${fileName}`);
       return {
         originalFilePath: pdfFilePath,
         fileName: path.basename(pdfFilePath),
