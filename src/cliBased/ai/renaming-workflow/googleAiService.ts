@@ -17,6 +17,58 @@ dotenv.config();
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 /**
+ * Upload a PDF to Google Generative Language Files API.
+ * Returns the file URI on success (e.g., files/abc123 or gs://bucket/object depending on API response).
+ * If the upload fails, throws an error and the caller should fallback to inline mode.
+ */
+async function uploadPdfToFilesApi(pdfFilePath: string, apiKey: string): Promise<string> {
+  // Prefer the simple upload endpoint for small files using multipart/related
+  // Docs (v1beta): files:upload supports multipart/related with JSON metadata + binary content
+  const url = `https://generativelanguage.googleapis.com/v1beta/files:upload?key=${apiKey}`;
+
+  const boundary = `----WSBoundary${Date.now()}`;
+  const fileBuffer = fs.readFileSync(pdfFilePath);
+  const filename = path.basename(pdfFilePath);
+
+  const jsonPart = Buffer.from(
+    JSON.stringify({
+      file: {
+        displayName: filename
+      }
+    }),
+    'utf-8'
+  );
+
+  const preamble = Buffer.from(
+    `--${boundary}\r\n` +
+      `Content-Type: application/json; charset=UTF-8\r\n\r\n` +
+      `${jsonPart.toString()}\r\n` +
+      `--${boundary}\r\n` +
+      `Content-Type: application/pdf\r\n` +
+      `Content-Disposition: form-data; name="file"; filename="${filename}"\r\n\r\n`,
+    'utf-8'
+  );
+  const closing = Buffer.from(`\r\n--${boundary}--`, 'utf-8');
+  const multipartBody = Buffer.concat([preamble, fileBuffer, closing]);
+
+  const resp = await axios.post(url, multipartBody, {
+    headers: {
+      'Content-Type': `multipart/related; boundary=${boundary}`,
+    },
+    maxBodyLength: Infinity,
+    maxContentLength: Infinity,
+  });
+
+  // Response usually contains a file object with name/uri
+  // Try common locations
+  const fileUri = resp.data?.file?.uri || resp.data?.file?.name || resp.data?.name || resp.data?.uri;
+  if (!fileUri) {
+    throw new Error(`Files API upload succeeded but response lacked a file URI: ${JSON.stringify(resp.data)}`);
+  }
+  return fileUri as string;
+}
+
+/**
  * Process PDF with Google AI Studio using direct PDF upload with retry logic
  * 
  * @param pdfFilePath - The original PDF file path
@@ -46,10 +98,10 @@ export async function processWithGoogleAI(
     // Read the PDF file as a buffer and check its size
     const pdfBuffer = fs.readFileSync(pdfFilePath);
     const fileSizeMB = pdfBuffer.length / (1024 * 1024);
-    const MAX_PDF_SIZE_MB = 10; // Gemini typically has ~10MB limit for PDFs
+    const INLINE_MAX_PDF_SIZE_MB = Number(process.env.AI_INLINE_MAX_MB || 8); // Safer inline cap; prefer Files API beyond this
 
-    if (fileSizeMB > MAX_PDF_SIZE_MB) {
-      console.warn(`WARNING: PDF file size (${fileSizeMB.toFixed(2)}MB) exceeds recommended limit of ${MAX_PDF_SIZE_MB}MB. API may reject the request.`);
+    if (fileSizeMB > INLINE_MAX_PDF_SIZE_MB) {
+      console.warn(`WARNING: PDF file size (${fileSizeMB.toFixed(2)}MB) exceeds inline limit of ${INLINE_MAX_PDF_SIZE_MB}MB. Will attempt Files API upload.`);
     }
 
     // Convert to base64
@@ -75,26 +127,79 @@ export async function processWithGoogleAI(
     const randomDelay = Math.floor(Math.random() * 500);
     await sleep(randomDelay);
 
-    // Prepare request payload in the format Google API expects
-    const requestPayload = {
-      contents: [{
-        parts: [
-          { text: METADATA_EXTRACTION_PROMPT },
-          {
-            inline_data: {
-              mime_type: 'application/pdf',
-              data: base64EncodedPdf
-            }
+    // Choose between Files API or inline_data based on size or env toggle
+    const preferFilesApi = String(process.env.AI_USE_FILES_API || 'true').toLowerCase() === 'true';
+    let requestPayload: any;
+    let usedFilesApi = false;
+
+    try {
+      if (preferFilesApi || fileSizeMB > INLINE_MAX_PDF_SIZE_MB) {
+        const fileUri = await uploadPdfToFilesApi(pdfFilePath, apiKey);
+        usedFilesApi = true;
+        requestPayload = {
+          contents: [{
+            parts: [
+              { text: METADATA_EXTRACTION_PROMPT },
+              {
+                file_data: {
+                  mime_type: 'application/pdf',
+                  file_uri: fileUri
+                }
+              }
+            ]
+          }],
+          generationConfig: {
+            temperature: 0.2,
+            topP: 0.8,
+            topK: 40,
+            maxOutputTokens: 300
           }
-        ]
-      }],
-      generationConfig: {
-        temperature: 0.2,
-        topP: 0.8,
-        topK: 40,
-        maxOutputTokens: 300
+        };
+      } else {
+        // Prepare request payload using inline_data for small PDFs
+        requestPayload = {
+          contents: [{
+            parts: [
+              { text: METADATA_EXTRACTION_PROMPT },
+              {
+                inline_data: {
+                  mime_type: 'application/pdf',
+                  data: base64EncodedPdf
+                }
+              }
+            ]
+          }],
+          generationConfig: {
+            temperature: 0.2,
+            topP: 0.8,
+            topK: 40,
+            maxOutputTokens: 300
+          }
+        };
       }
-    };
+    } catch (uploadErr) {
+      console.error('Files API upload failed, falling back to inline_data:', uploadErr);
+      // Fallback to inline_data if upload failed
+      requestPayload = {
+        contents: [{
+          parts: [
+            { text: METADATA_EXTRACTION_PROMPT },
+            {
+              inline_data: {
+                mime_type: 'application/pdf',
+                data: base64EncodedPdf
+              }
+            }
+          ]
+        }],
+        generationConfig: {
+          temperature: 0.2,
+          topP: 0.8,
+          topK: 40,
+          maxOutputTokens: 300
+        }
+      };
+    }
 
     // Make the API request to Google AI Studio
     const response = await axios.post(aiEndpoint, requestPayload, {
@@ -133,10 +238,22 @@ export async function processWithGoogleAI(
         console.error('API 400 body:', JSON.stringify(error.response?.data, null, 2));
       } else if (statusCode === 429) {
         // Rate limit handling with exponential backoff
-        const maxRetries = 3;
+        const maxRetries = Number(process.env.AI_MAX_RETRIES || 5);
         if (retryCount < maxRetries) {
-          const delayMs = initialDelay * Math.pow(2, retryCount); // Exponential backoff
-          console.warn(`Rate limit exceeded (429). Retrying in ${delayMs / 1000} seconds... (Attempt ${retryCount + 1}/${maxRetries})`);
+          // Respect Retry-After header if present (seconds)
+          const retryAfterHeader = (error.response?.headers?.['retry-after'] || error.response?.headers?.['Retry-After']) as string | undefined;
+          let serverDelayMs = 0;
+          if (retryAfterHeader) {
+            const retrySec = parseInt(retryAfterHeader, 10);
+            if (!Number.isNaN(retrySec) && retrySec > 0) {
+              serverDelayMs = retrySec * 1000;
+            }
+          }
+          // Exponential backoff with full jitter
+          const baseDelay = initialDelay * Math.pow(2, retryCount);
+          const jitter = Math.floor(Math.random() * baseDelay);
+          const delayMs = Math.max(serverDelayMs, jitter);
+          console.warn(`Rate limit exceeded (429). Retrying in ${(delayMs / 1000).toFixed(2)} seconds... (Attempt ${retryCount + 1}/${maxRetries})`);
           await sleep(delayMs);
 
           // Retry the request with increased retry count and delay
