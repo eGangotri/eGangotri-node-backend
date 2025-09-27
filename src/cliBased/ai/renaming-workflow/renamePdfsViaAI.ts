@@ -70,18 +70,26 @@ async function processPdfBatch(pdfs: string[], config: Config): Promise<Metadata
 
 
 
-async function renamePdfUsingMetadata(result: MetadataResult, config: Config): Promise<string> {
+async function renamePdfUsingMetadata(result: MetadataResult, 
+    config: Config,
+     outputFolder: string): Promise<string> {
     if (!result.extractedMetadata) {
         console.log(`Skipping rename for ${result.fileName} - no metadata extracted`);
         return result.originalFilePath;
     }
 
     const formattedFilename = formatFilename(result.extractedMetadata);
-    const originalDir = path.dirname(result.originalFilePath);
+    const pdfParentDir = path.dirname(result.originalFilePath);
 
+
+    const relativePath = path.relative(config.inputFolders[0], pdfParentDir);
+    
     // Determine the target directory
-    const targetDir = config.renameInPlace ? originalDir :
-        (config.outputFolder || path.join(originalDir, 'renamed'));
+    const targetDir = config.renameInPlace ? pdfParentDir :
+        path.join(outputFolder, relativePath);
+
+    console.log(`Target directory: ${targetDir}`);
+    console.log(`relativePath: ${relativePath}`);
 
     // Create output directory if it doesn't exist
     if (!config.dryRun && !config.renameInPlace && !fs.existsSync(targetDir)) {
@@ -113,8 +121,9 @@ async function renamePdfUsingMetadata(result: MetadataResult, config: Config): P
 
 
 
-export async function aiRenameUsingReducedFolder(srcFolder: string, reducedFolder: string, outputFolder: string) {
-    
+export async function aiRenameUsingReducedFolder(srcFolder: string, reducedFolder: string,
+    outputSuffix: string) {
+
     let processedCount = 0;
     let successCount = 0;
     try {
@@ -128,16 +137,17 @@ export async function aiRenameUsingReducedFolder(srcFolder: string, reducedFolde
         const envDelayBetweenBatchesMs = Number(process.env.AI_DELAY_BETWEEN_BATCHES_MS || AI_RENAMING_WORKFLOW_CONFIG.delayBetweenBatchesMs);
 
         const config: Config = {
-            ...AI_RENAMING_WORKFLOW_CONFIG ,
+            ...AI_RENAMING_WORKFLOW_CONFIG,
             inputFolders: [srcFolder],
             reducedFolders: [reducedFolder],
-            outputFolder: outputFolder,
+            outputSuffix,
             batchSize: Number.isFinite(envBatchSize) && envBatchSize > 0 ? envBatchSize : AI_RENAMING_WORKFLOW_CONFIG.batchSize,
             delayBetweenCallsMs: Number.isFinite(envDelayBetweenCallsMs) && envDelayBetweenCallsMs >= 0 ? envDelayBetweenCallsMs : AI_RENAMING_WORKFLOW_CONFIG.delayBetweenCallsMs,
             delayBetweenBatchesMs: Number.isFinite(envDelayBetweenBatchesMs) && envDelayBetweenBatchesMs >= 0 ? envDelayBetweenBatchesMs : AI_RENAMING_WORKFLOW_CONFIG.delayBetweenBatchesMs,
         }
 
-        if(!fs.existsSync(outputFolder)) {
+        const outputFolder = `${srcFolder}${outputSuffix}`;
+        if (!fs.existsSync(outputFolder)) {
             console.log(`Creating output folder: ${outputFolder}`);
             fs.mkdirSync(outputFolder, { recursive: true });
         }
@@ -155,7 +165,7 @@ export async function aiRenameUsingReducedFolder(srcFolder: string, reducedFolde
         // Process PDFs in batches
         const batches = chunk(allPdfs, config.batchSize);
         const batchesReduced = chunk(allReducedPdfs, config.batchSize);
-       
+
         if (batches.length !== batchesReduced.length) {
             return {
                 processedCount,
@@ -168,7 +178,7 @@ export async function aiRenameUsingReducedFolder(srcFolder: string, reducedFolde
         }
 
         const pairedBatches: BatchPair[] = buildPairedBatches(batches, batchesReduced);
-       
+
         const renamingTracker: Array<{
             originalFilePath: string;
             reducedFilePath: string;
@@ -246,7 +256,7 @@ export async function aiRenameUsingReducedFolder(srcFolder: string, reducedFolde
             let renamedCount = 0;
             for (let i = 0; i < mappedResults.length; i++) {
                 const item = mappedResults[i];
-                const renamingResultPath = await renamePdfUsingMetadata(item.meta, config);
+                const renamingResultPath = await renamePdfUsingMetadata(item.meta, config, outputFolder);
                 renamedCount++;
                 console.log(`Renamed: ${item.meta.fileName} -> ${renamingResultPath}`);
                 renamingTracker.push({
@@ -262,7 +272,7 @@ export async function aiRenameUsingReducedFolder(srcFolder: string, reducedFolde
             console.log(`\nComplete! Processed ${processedCount} PDFs`);
             console.log(`Successfully renamed: ${renamedCount}`);
             console.log(`Failed to rename: ${processedCount - renamedCount}`);
-             
+
             const _res = {
                 runId,
                 processedCount,

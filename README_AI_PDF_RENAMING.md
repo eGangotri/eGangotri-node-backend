@@ -20,6 +20,14 @@ This tool allows you to automatically rename PDF files based on their content us
      ```
      # Default endpoint is used if this is not specified
      # AI_ENDPOINT=https://custom-endpoint-if-needed.com
+
+     Make Sure
+      Go to Google Cloud Console
+      Select your project
+      Go to "APIs & Services" > "Library"
+      Search for "Gemini API" or "Generative Language API"
+      Click "Enable"
+
      ```
 
 3. **Install dependencies**:

@@ -134,8 +134,8 @@ export async function processWithGoogleAI(
         errorMessage = `Bad request: The PDF may be too large or in an unsupported format. Status code: ${statusCode}`;
         console.error(errorMessage);
         console.error('API 400 body:', JSON.stringify(error.response?.data, null, 2));
-      } else if (statusCode === 429) {
-        // Rate limit handling with exponential backoff
+      } else if (statusCode === 429 || statusCode === 503) {
+        // Rate limit (429) or Service Unavailable (503) handling with exponential backoff
         const maxRetries = Number(process.env.AI_MAX_RETRIES || 5);
         if (retryCount < maxRetries) {
           // Respect Retry-After header if present (seconds)
@@ -151,13 +151,16 @@ export async function processWithGoogleAI(
           const baseDelay = initialDelay * Math.pow(2, retryCount);
           const jitter = Math.floor(Math.random() * baseDelay);
           const delayMs = Math.max(serverDelayMs, jitter);
-          console.warn(`Rate limit exceeded (429). Retrying in ${(delayMs / 1000).toFixed(2)} seconds... (Attempt ${retryCount + 1}/${maxRetries})`);
+          
+          const errorType = statusCode === 429 ? 'Rate limit exceeded (429)' : 'Service Unavailable (503)';
+          console.warn(`${errorType}. Retrying in ${(delayMs / 1000).toFixed(2)} seconds... (Attempt ${retryCount + 1}/${maxRetries})`);
           await sleep(delayMs);
 
           // Retry the request with increased retry count and delay
           return processWithGoogleAI(pdfFilePath, retryCount + 1, initialDelay);
         } else {
-          errorMessage = `Rate limit exceeded: Too many requests to the API. Tried ${maxRetries} times with backoff. Status code: ${statusCode}`;
+          const errorType = statusCode === 429 ? 'Rate limit exceeded' : 'Service Unavailable';
+          errorMessage = `${errorType}: ${statusCode === 429 ? 'Too many requests to the API' : 'Google AI service is temporarily unavailable'}. Tried ${maxRetries} times with backoff. Status code: ${statusCode}`;
           console.error(errorMessage);
         }
       } else if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT') {
