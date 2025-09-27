@@ -34,7 +34,8 @@ Go to Google Cloud Console for AI Stuido
 
 */
 
-const aiEndpoint = `${process.env.AI_ENDPOINT_URI}/${process.env.AI_ENPOINT_MODEL}` ;
+const aiEndpoint = 
+`${process.env.AI_BASE_URL}${process.env.AI_API_VERSION}${process.env.AI_MODEL}${process.env.AI_METHOD}`;
 
 export async function processWithGoogleAI(
   pdfFilePath: string,
