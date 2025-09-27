@@ -37,6 +37,35 @@ Go to Google Cloud Console for AI Stuido
 const aiEndpoint = 
 `${process.env.AI_BASE_URL}${process.env.AI_API_VERSION}${process.env.AI_MODEL}${process.env.AI_METHOD}`;
 
+/**
+ * Extract concatenated text from a Gemini response in a robust way
+ */
+function extractTextFromCandidates(data: any): { text: string | undefined; finishReason?: string } {
+  try {
+    const candidates = data?.candidates;
+    if (!Array.isArray(candidates) || candidates.length === 0) {
+      return { text: undefined, finishReason: undefined };
+    }
+    const first = candidates[0];
+    const finishReason = first?.finishReason;
+    const parts = first?.content?.parts;
+    if (Array.isArray(parts) && parts.length > 0) {
+      const texts: string[] = [];
+      for (const p of parts) {
+        if (typeof p?.text === 'string' && p.text.trim().length > 0) {
+          texts.push(p.text);
+        }
+      }
+      if (texts.length > 0) {
+        return { text: texts.join('\n').trim(), finishReason };
+      }
+    }
+    return { text: undefined, finishReason };
+  } catch {
+    return { text: undefined };
+  }
+}
+
 export async function processWithGoogleAI(
   pdfFilePath: string,
   retryCount: number = 0,
@@ -81,6 +110,7 @@ export async function processWithGoogleAI(
     await sleep(randomDelay);
 
     // Always use inline_data (Files API path removed by request)
+    const maxOutputTokens = Number(process.env.AI_MAX_OUTPUT_TOKENS || 1024);
     const requestPayload = {
       contents: [{
         role: 'user',
@@ -98,7 +128,7 @@ export async function processWithGoogleAI(
         temperature: 0.2,
         topP: 0.8,
         topK: 40,
-        maxOutputTokens: 300
+        maxOutputTokens
       }
     };
 
@@ -112,14 +142,29 @@ export async function processWithGoogleAI(
       maxContentLength: Infinity
     });
 
-    // Extract the generated text from the Google API response format
-    const extractedMetadata = response.data.candidates?.[0]?.content?.parts?.[0]?.text ||
-      JSON.stringify(response.data);
+    // Extract the generated text from the Google API response format (Gemini 1.5/2.0/2.5 compatible)
+    const { text, finishReason } = extractTextFromCandidates(response.data);
+    const usage = response.data?.usageMetadata || {};
+    const promptTokenCount = usage?.promptTokenCount;
+    const totalTokenCount = usage?.totalTokenCount;
+
+    let extractedMetadata: string;
+    if (typeof text === 'string' && text.trim().length > 0) {
+      extractedMetadata = text.trim();
+    } else {
+      // If no text, include diagnostics: finishReason, configured maxOutputTokens, and usage metadata
+      const diagnostic = finishReason ? `No text returned. finishReason=${finishReason}` : 'No text returned.';
+      const usageInfo = `requestedMaxOutputTokens=${maxOutputTokens}` +
+        (typeof promptTokenCount === 'number' ? `, promptTokenCount=${promptTokenCount}` : '') +
+        (typeof totalTokenCount === 'number' ? `, totalTokenCount=${totalTokenCount}` : '');
+      console.warn(`Gemini response had no textual parts. ${diagnostic}. ${usageInfo}`);
+      extractedMetadata = '';
+    }
 
     return {
       originalFilePath: pdfFilePath,
       fileName: path.basename(pdfFilePath),
-      extractedMetadata: extractedMetadata.trim()
+      extractedMetadata: extractedMetadata
     };
 
   } catch (error) {
