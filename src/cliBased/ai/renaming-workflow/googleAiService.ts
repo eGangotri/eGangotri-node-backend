@@ -33,6 +33,9 @@ Go to Google Cloud Console for AI Stuido
     Click "Enable"
 
 */
+
+const aiEndpoint = `${process.env.AI_ENDPOINT_URI}/${process.env.AI_ENPOINT_MODEL}` ;
+
 export async function processWithGoogleAI(
   pdfFilePath: string,
   retryCount: number = 0,
@@ -58,11 +61,10 @@ export async function processWithGoogleAI(
     const base64EncodedPdf = pdfBuffer.toString('base64');
 
     // Google AI Studio endpoint URL
-    const aiEndpoint = process.env.AI_ENDPOINT || "";
 
     if ("" === aiEndpoint) {
       const error = `Google AI endpoint not found in environment variables. 
-      Please add AI_ENDPOINT to your .env file.`
+      Please add AI_ENDPOINT_URI and AI_ENPOINT_MODEL to your .env file.`
       console.log(error)
       return {
         originalFilePath: pdfFilePath,
