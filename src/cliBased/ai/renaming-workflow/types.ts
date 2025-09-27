@@ -2,7 +2,7 @@
 export interface Config {
     inputFolders: string[];
     reducedFolders?: string[];
-    outputFolder: string | null;
+    outputSuffix: string | null;
     batchSize: number;
     dryRun: boolean;
     renameInPlace: boolean;

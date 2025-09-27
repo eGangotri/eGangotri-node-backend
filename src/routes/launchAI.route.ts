@@ -21,15 +21,10 @@ launchAIRoute.post('/aiRenamer', async (req: any, resp: any) => {
         }
 
 
-        let outputFolder = req?.body?.outputFolder || ""
-        if (!outputFolder) {
-            outputFolder =`${srcFolder}_renamer`
-            if(!fs.existsSync(outputFolder)) {
-                fs.mkdirSync(outputFolder, { recursive: true });
-            }
-        }
-        
-        const _result = await aiRenameUsingReducedFolder(srcFolder, reducedFolder, outputFolder)
+        let outputSuffix = req?.body?.outputSuffix || "-renamer"
+      
+
+        const _result = await aiRenameUsingReducedFolder(srcFolder, reducedFolder, outputSuffix)
         resp.status(200).send({
             "status": "success",
             response: {
