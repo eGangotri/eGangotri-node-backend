@@ -3,13 +3,18 @@
 export  const METADATA_EXTRACTION_PROMPT = `The exercise below is to save a pdf with recognizable metadata mostly English, Sanskrit and other languages that use Brahmi based scripts
  and sometimes Urdu.
 
+The output should be in plain ASCII characters without exception.
+
+No diacritics should be ever used.
+
+Conventional English spellings of words in Sanskrit and other languages should be used.
+
+
 Print the followwing details in Title Case
 
-Title Sub Title Author Language Subject Publication City Year - Publisher in One Line in English only. 
+Title SubTitle Commentary Commentator Author Editor Translator Language Subject Publication City Year - Publisher in One Line in English only. 
 
 The Hyphen will separate the main text from the Publisher
-
-optionally Editor and/or Translator.
 
 If any entry is not visible then just leave it blank. 
 
@@ -18,6 +23,12 @@ if author/title is not known then instead print Unknown.
 If the Subject can be broadly guessed like Vedanta, Aesthetics etc it can be included, if uncertain can ignore.
 
 Make sure to only write the metadata not things like Title: etc.
+
+SubTitle is optional only if exists.
+Commentary/Commentator also called Tika/Tikakar or Vyakhya/Vyakhyakar in Sanskrit is optional.
+If exists then should be included
+
+Same for Editor Translator
 
 If book is completely in English then no need to mention language.
 
@@ -77,9 +88,9 @@ instead of transliterating to Ramanath aind sanz use the official English Ramana
 
 So should result in following
 
-Kalidas Ka Adhunik Hindi Kavya Par Prabhav by Janaki Nath Ramanath and Sons 2025 Lucknow - Ramanath and Sons
+Kalidas Ka Adhunik Hindi Kavya Par Prabhav by Janaki Nath 2025 Lucknow - Ramanath and Sons
 
-Dont translate title into ENglish ever just translieration.
+Dont translate title into English ever just translieration.
 
 if any Institutional publisher in the book has two names one in English and one in Sanskrit/Hindi etc like Oriental Research Institute and 'Prachya Vidya Shodha Kendra'
 give preference to the English in the output. But only if the publisher is mentioned in its English form.
@@ -91,14 +102,16 @@ In this case the output should be Central Institute of Tibetan Studies.
 
 Otherwise dont translate to English.
 
-If there are multiple spellings possible in English spelling for entries in Sanskrit Hindi etc, give preference to Conventional English spellings.
+If there are multiple spellings possible in English, spelling for entries in Sanskrit Hindi etc, give preference to Conventional English spellings.
 
 Example: Ram instead of Rama. Shiva instead of Siva or Shiv as per the English Conventions.
 
 
 Dont use any quotes in the the result , example if name is O'Donnell then remove the quotes.
-if this is a magazine then Issue No Volume No year month , ciruclation cycle example bimonthly, trimonthly should be also shown and the word Magazine or Journal should display before the year
-No diacritics should be ever used. Just plain ASCII characters and conventional spellings of Sanskrit and other languages
+if this is a magazine
+ then include Issue No., Volume No., year, month , ciruclation cycle 
+Example bimonthly, trimonthly should be also shown 
+and the word Magazine or Journal should display before the year.
 
 If the year is in Vikrami or Samvat or Shaka or any other Calendar such as Bengali Calendar or Gujarati Calendar then convert it to Common Era Year.
 
