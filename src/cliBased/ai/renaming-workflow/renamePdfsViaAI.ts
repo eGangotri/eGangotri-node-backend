@@ -6,7 +6,7 @@ import { getAllPdfsInFoldersRecursive, chunk } from "../../../imgToPdf/utils/Uti
 import { processWithGoogleAI } from './googleAiService';
 import { buildPairedBatches, formatFilename } from './utils';
 import { PdfTitleAndFileRenamingTrackerViaAI } from '../../../models/pdfTitleAndFileRenamingTrackerViaAI';
-import { AiPdfRenaming } from '../../../models/pdfTitleRenamingTrackerViaAI';
+import { PdfTitleRenamingViaAITracker } from '../../../models/pdfTitleRenamingTrackerViaAI';
 import { AI_RENAMING_WORKFLOW_CONFIG, BatchPair, Config, MetadataResult } from './types';
 
 /**
@@ -43,7 +43,7 @@ async function processPdfBatch(pdfs: string[], config: Config): Promise<Metadata
             console.log(`result: ${JSON.stringify(result)}`)
             console.log(`Result for ${path.basename(pdfPath)}: ${result.extractedMetadata || 'No metadata extracted'}`);
             if (result.error) {
-                console.error(`processWithGoogleAI:Error: ${result.error}`);
+                console.error(`processWithGoogleAI:Error(${path.basename(pdfPath)}): ${result.error}`);
             }
 
             results.push(result);
@@ -72,10 +72,13 @@ async function processPdfBatch(pdfs: string[], config: Config): Promise<Metadata
 
 async function renamePdfUsingMetadata(result: MetadataResult, 
     config: Config,
-     outputFolder: string): Promise<string> {
+     outputFolder: string): Promise<{ newFilePath: string; error?: string; }> {
     if (!result.extractedMetadata) {
         console.log(`Skipping rename for ${result.fileName} - no metadata extracted`);
-        return result.originalFilePath;
+        return {
+            newFilePath: result.originalFilePath,
+            error: 'No metadata extracted'
+        }
     }
 
     const formattedFilename = formatFilename(result.extractedMetadata);
@@ -100,7 +103,10 @@ async function renamePdfUsingMetadata(result: MetadataResult,
 
     if (config.dryRun) {
         console.log(`DRY RUN - Would rename: ${result.fileName} -> ${formattedFilename}`);
-        return result.originalFilePath;
+        return {
+            newFilePath: result.originalFilePath,
+            error: 'Dry run'
+        }
     }
 
     try {
@@ -112,16 +118,20 @@ async function renamePdfUsingMetadata(result: MetadataResult,
             fs.copyFileSync(result.originalFilePath, newFilePath);
         }
         console.log(`Renamed: ${result.fileName} -> ${formattedFilename}`);
-        return newFilePath;
+        return {
+            newFilePath:newFilePath,
+        };
     } catch (error) {
         console.error(`Failed to rename ${result.fileName}:`, error);
-        return result.originalFilePath;
+        return {
+            newFilePath: result.originalFilePath,
+            error: error.message || 'Unknown error occurred'
+        }
     }
 }
 
 
-
-export async function aiRenameUsingReducedFolder(srcFolder: string, reducedFolder: string,
+export async function aiRenameTitleUsingReducedFolder(srcFolder: string, reducedFolder: string,
     outputSuffix: string) {
 
     let processedCount = 0;
@@ -232,7 +242,7 @@ export async function aiRenameUsingReducedFolder(srcFolder: string, reducedFolde
                     newFilePath: undefined
                 }));
                 if (perItemDocs.length > 0) {
-                    await AiPdfRenaming.insertMany(perItemDocs);
+                    await PdfTitleRenamingViaAITracker.insertMany(perItemDocs);
                 }
             } catch (perItemErr) {
                 console.error('Failed inserting AI_PDF_RENAMING batch docs:', perItemErr);
@@ -257,15 +267,29 @@ export async function aiRenameUsingReducedFolder(srcFolder: string, reducedFolde
             for (let i = 0; i < mappedResults.length; i++) {
                 const item = mappedResults[i];
                 const renamingResultPath = await renamePdfUsingMetadata(item.meta, config, outputFolder);
+                if (renamingResultPath.error) {
+                    console.error(`Failed to rename ${item.meta.fileName}:`, renamingResultPath.error);
+                    renamingTracker.push({
+                        originalFilePath: item.meta.originalFilePath,
+                        reducedFilePath: item.reducedFilePath,
+                        fileName: item.meta.fileName,
+                        extractedMetadata: item.meta.extractedMetadata,
+                        error: renamingResultPath.error,
+                        newFilePath: renamingResultPath.newFilePath
+                    });
+                    continue;
+                }
+                
+                const newFilePath = renamingResultPath.newFilePath;
                 renamedCount++;
-                console.log(`Renamed: ${item.meta.fileName} -> ${renamingResultPath}`);
+                console.log(`Renamed: ${item.meta.fileName} -> ${newFilePath}`);
                 renamingTracker.push({
                     originalFilePath: item.meta.originalFilePath,
                     reducedFilePath: item.reducedFilePath,
                     fileName: item.meta.fileName,
                     extractedMetadata: item.meta.extractedMetadata,
                     error: item.meta.error,
-                    newFilePath: renamingResultPath
+                    newFilePath: newFilePath
                 });
             }
 

@@ -110,7 +110,7 @@ export async function processWithGoogleAI(
     await sleep(randomDelay);
 
     // Always use inline_data (Files API path removed by request)
-    const maxOutputTokens = Number(process.env.AI_MAX_OUTPUT_TOKENS || 1024);
+    const maxOutputTokens = Number(process.env.AI_MAX_OUTPUT_TOKENS || 8192);
     const requestPayload = {
       contents: [{
         role: 'user',
@@ -160,7 +160,7 @@ export async function processWithGoogleAI(
       console.warn(`Gemini response had no textual parts. ${diagnostic}. ${usageInfo}`);
       extractedMetadata = '';
     }
-
+    console.log(`extractedMetadata: ${extractedMetadata}`);
     return {
       originalFilePath: pdfFilePath,
       fileName: path.basename(pdfFilePath),
