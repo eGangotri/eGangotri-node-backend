@@ -7,6 +7,7 @@ import { processWithGoogleAI } from './googleAiService';
 import { buildPairedBatches, formatFilename } from './utils';
 import { PdfTitleAndFileRenamingTrackerViaAI } from '../../../models/pdfTitleAndFileRenamingTrackerViaAI';
 import { PdfTitleRenamingViaAITracker } from '../../../models/pdfTitleRenamingTrackerViaAI';
+import { isPDFCorrupted } from '../../../utils/pdfValidator';
 import { AI_RENAMING_WORKFLOW_CONFIG, BatchPair, Config, MetadataResult } from './types';
 
 /**
@@ -37,6 +38,21 @@ async function processPdfBatch(pdfs: string[], config: Config): Promise<Metadata
             if (i > 0) {
                 console.log(`Waiting ${delayBetweenCalls / 1000}s for next batch before next API call to avoid rate limits...`);
                 await sleep(delayBetweenCalls);
+            }
+
+            // Validate PDF quickly before sending to AI
+            const validateTimeout = Number(process.env.PDF_VALIDATE_TIMEOUT_MS || 5000);
+            const validity = await isPDFCorrupted(pdfPath, { quickCheck: true, timeoutMs: validateTimeout });
+            if (!validity.isValid) {
+                const errMsg = `Invalid/Corrupt PDF: ${validity.error || 'Unknown error'}`;
+                console.error(`${errMsg} (${path.basename(pdfPath)})`);
+                results.push({
+                    originalFilePath: pdfPath,
+                    fileName: path.basename(pdfPath),
+                    extractedMetadata: '',
+                    error: errMsg
+                });
+                continue;
             }
 
             const result = await processWithGoogleAI(pdfPath);
