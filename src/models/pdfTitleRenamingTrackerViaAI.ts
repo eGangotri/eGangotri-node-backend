@@ -22,9 +22,9 @@ const PdfTitleRenamingTrackerViaAISchema = new mongoose.Schema(
     newFilePath: { type: String, required: false },
   },
   {
-    collection: 'PDF_TITLE_RENAMING_TRACKER_VIA_AI',
+    collection: 'PDF_TITLE_RENAMING_VIA_AI_TRACKER',
     timestamps: true,
   }
 );
 
-export const AiPdfRenaming = mongoose.model('PDF_TITLE_RENAMING_TRACKER_VIA_AI', PdfTitleRenamingTrackerViaAISchema);
+export const PdfTitleRenamingViaAITracker = mongoose.model('PDF_TITLE_RENAMING_VIA_AI_TRACKER', PdfTitleRenamingTrackerViaAISchema);

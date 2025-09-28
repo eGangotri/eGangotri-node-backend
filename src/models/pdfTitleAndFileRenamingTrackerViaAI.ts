@@ -20,9 +20,9 @@ const PdfAiRenamingTrackerSchema = new mongoose.Schema(
     error: { type: mongoose.Schema.Types.Mixed, required: false }
   },
   {
-    collection: 'PDF_TITLE_AND_FILE_RENAMING_TRACKER_VIA_AI',
+    collection: 'PDF_TITLE_AND_FILE_RENAMING_VIA_AI_TRACKER',
     timestamps: true,
   }
 );
 
-export const PdfTitleAndFileRenamingTrackerViaAI = mongoose.model('PDF_TITLE_AND_FILE_RENAMING_TRACKER_VIA_AI', PdfAiRenamingTrackerSchema);
+export const PdfTitleAndFileRenamingTrackerViaAI = mongoose.model('PDF_TITLE_AND_FILE_RENAMING_VIA_AI_TRACKER', PdfAiRenamingTrackerSchema);

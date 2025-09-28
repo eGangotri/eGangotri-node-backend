@@ -1,5 +1,5 @@
+import { aiRenameTitleUsingReducedFolder } from '../cliBased/ai/renaming-workflow/renamePdfsViaAI';
 import * as express from 'express';
-import { aiRenameUsingReducedFolder } from '../cliBased/ai/renaming-workflow/renamePdfsViaAI';
 import * as fs from 'fs';
 
 export const launchAIRoute = express.Router();
@@ -24,7 +24,7 @@ launchAIRoute.post('/aiRenamer', async (req: any, resp: any) => {
         let outputSuffix = req?.body?.outputSuffix || "-renamer"
       
 
-        const _result = await aiRenameUsingReducedFolder(srcFolder, reducedFolder, outputSuffix)
+        const _result = await aiRenameTitleUsingReducedFolder(srcFolder, reducedFolder, outputSuffix)
         resp.status(200).send({
             "status": "success",
             response: {
