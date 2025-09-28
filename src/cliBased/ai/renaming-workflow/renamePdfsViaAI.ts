@@ -136,6 +136,7 @@ export async function aiRenameTitleUsingReducedFolder(srcFolder: string, reduced
 
     let processedCount = 0;
     let successCount = 0;
+    let errorCount = 0;
     try {
         const runId = randomUUID();
         // Load environment variables
@@ -181,6 +182,7 @@ export async function aiRenameTitleUsingReducedFolder(srcFolder: string, reduced
                 processedCount,
                 successCount,
                 failedCount: processedCount - successCount,
+                errorCount,
                 pairedBatches: [],
                 error: `Batch arrays must be the same length. batches=${batches.length}, batchesReduced=${batchesReduced.length}`,
                 success: false
