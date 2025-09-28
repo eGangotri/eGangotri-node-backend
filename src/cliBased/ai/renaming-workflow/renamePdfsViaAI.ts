@@ -35,7 +35,7 @@ async function processPdfBatch(pdfs: string[], config: Config): Promise<Metadata
 
             // Add delay between API calls to avoid rate limiting, except for the first call
             if (i > 0) {
-                console.log(`Waiting ${delayBetweenCalls / 1000}s before next API call to avoid rate limits...`);
+                console.log(`Waiting ${delayBetweenCalls / 1000}s for next batch before next API call to avoid rate limits...`);
                 await sleep(delayBetweenCalls);
             }
 
@@ -245,7 +245,7 @@ export async function aiRenameUsingReducedFolder(srcFolder: string, reducedFolde
 
             // Add delay between batches to avoid rate limits, except for the last batch
             if (i < batches.length - 1 && config.delayBetweenBatchesMs) {
-                console.log(`Waiting ${config.delayBetweenBatchesMs / 1000}s before processing next batch to avoid rate limits...`);
+                console.log(`Waiting (per batch) ${config.delayBetweenBatchesMs / 1000}s in-btwn batch calls before processing next batch to avoid rate limits...`);
                 await sleep(config.delayBetweenBatchesMs);
             }
         }
