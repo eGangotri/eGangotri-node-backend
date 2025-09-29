@@ -2,7 +2,7 @@ import { aiRenameTitleUsingReducedFolder } from '../cliBased/ai/renaming-workflo
 import * as express from 'express';
 import * as fs from 'fs';
 import { Request, Response } from 'express';
-import { PdfTitleAndFileRenamingTrackerViaAI } from '../models/pdfTitleAndFileRenamingTrackerViaAI';
+import { IPdfTitleAndFileRenamingTrackerViaAI, PdfTitleAndFileRenamingTrackerViaAI } from '../models/pdfTitleAndFileRenamingTrackerViaAI';
 import { IPdfTitleRenamingViaAITracker, PdfTitleRenamingViaAITracker } from '../models/pdfTitleRenamingTrackerViaAI';
 export const launchAIRoute = express.Router();
 
@@ -41,9 +41,8 @@ launchAIRoute.post('/aiRenamer', async (req: any, resp: any) => {
     }
 })
 
-
-// ai/titleRenamer/list
-launchAIRoute.get("/getAllTitleRenamerViaAIList", async (req: Request, res: express.Response) => {
+// ai/getAllTitleRenamedViaAIList
+launchAIRoute.get("/getAllTitleRenamedViaAIList", async (req: Request, res: express.Response) => {
     try {
         const page = Number.parseInt(req.query.page as string) || 1
         const limit = Number.parseInt(req.query.limit as string) || 20
@@ -64,6 +63,32 @@ launchAIRoute.get("/getAllTitleRenamerViaAIList", async (req: Request, res: expr
         res.json(results)
     } catch (error) {
         console.log(`/pdfTitleRenamedItems error: ${JSON.stringify(error.message)}`);
-        res.status(500).json({ message: "Error fetching GDrive downloads", error })
+        res.status(500).json({ message: "Error fetching pdfTitleRenamedItems", error })
+    }
+});
+
+//ai/getAllTitlePdfRenamedViaAIList
+launchAIRoute.get("/getAllTitlePdfRenamedViaAIList", async (req: Request, res: express.Response) => {
+    try {
+        const page = Number.parseInt(req.query.page as string) || 1
+        const limit = Number.parseInt(req.query.limit as string) || 20
+        const skip = (page - 1) * limit
+
+        const pdfTitlePdfRenamedItems: IPdfTitleAndFileRenamingTrackerViaAI[] = await PdfTitleAndFileRenamingTrackerViaAI.find()
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
+
+        const total = await PdfTitleAndFileRenamingTrackerViaAI.countDocuments()
+        const results = {
+            data: pdfTitlePdfRenamedItems,
+            currentPage: page,
+            totalPages: Math.ceil(total / limit),
+            totalItems: total,
+        }
+        res.json(results)
+    } catch (error) {
+        console.log(`/pdfTitlePdfRenamedItems error: ${JSON.stringify(error.message)}`);
+        res.status(500).json({ message: "Error fetching pdfTitlePdfRenamedItems", error })
     }
 });
