@@ -1,5 +1,33 @@
 import * as mongoose from 'mongoose';
 
+export interface IPdfTitleRenamingViaAITracker {
+  runId: string;
+
+  // Context of the run
+  srcFolder?: string;
+  reducedFolder?: string;
+  outputFolder?: string;
+  batchIndex?: number;
+  indexInBatch?: number;
+
+  // File details
+  originalFilePath: string;
+  reducedFilePath?: string;
+  fileName: string;
+
+  // AI metadata & outcome
+  extractedMetadata?: string;
+  error?: string;
+  newFilePath?: string;
+
+  // Mongoose timestamps
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export type PdfTitleRenamingViaAITrackerDocument = IPdfTitleRenamingViaAITracker & mongoose.Document;
+export type PdfTitleRenamingViaAITrackerModel = mongoose.Model<PdfTitleRenamingViaAITrackerDocument>;
+
 const PdfTitleRenamingTrackerViaAISchema = new mongoose.Schema(
   {
     runId: { type: String, required: true, index: true },
@@ -27,4 +55,8 @@ const PdfTitleRenamingTrackerViaAISchema = new mongoose.Schema(
   }
 );
 
-export const PdfTitleRenamingViaAITracker = mongoose.model('PDF_TITLE_RENAMING_VIA_AI_TRACKER', PdfTitleRenamingTrackerViaAISchema);
+export const PdfTitleRenamingViaAITracker: PdfTitleRenamingViaAITrackerModel =
+  mongoose.model<PdfTitleRenamingViaAITrackerDocument>(
+    'PDF_TITLE_RENAMING_VIA_AI_TRACKER',
+    PdfTitleRenamingTrackerViaAISchema
+  );
