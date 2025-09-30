@@ -4,15 +4,16 @@ import * as fs from 'fs';
 import { Request, Response } from 'express';
 import { IPdfTitleAndFileRenamingTrackerViaAI, PdfTitleAndFileRenamingTrackerViaAI } from '../models/pdfTitleAndFileRenamingTrackerViaAI';
 import { IPdfTitleRenamingViaAITracker, PdfTitleRenamingViaAITracker } from '../models/pdfTitleRenamingTrackerViaAI';
+import path from 'path';
 export const launchAIRoute = express.Router();
 
 //ai/aiRenamer
 launchAIRoute.post('/aiRenamer', async (req: any, resp: any) => {
     try {
-        const srcFolder = req?.body?.srcFolder;
-        const reducedFolder = req?.body?.reducedFolder || "";
+        const srcFolders = req?.body?.srcFolder;
+        const reducedFolders = req?.body?.reducedFolder || "";
 
-        if (!reducedFolder && !srcFolder) {
+        if (!reducedFolders && !srcFolders) {
             return resp.status(400).send({
                 "status": "failed",
                 response: {
@@ -23,14 +24,60 @@ launchAIRoute.post('/aiRenamer', async (req: any, resp: any) => {
         }
 
 
-        let outputSuffix = req?.body?.outputSuffix || "-renamer"
+        let outputSuffixes = req?.body?.outputSuffix
+
+        const srcFoldersList = srcFolders.split(",");
+        const reducedFoldersList = reducedFolders.split(",");
+        if (!outputSuffixes) {
+            outputSuffixes = "-renamer";
+        }
 
 
-        const _result = await aiRenameTitleUsingReducedFolder(srcFolder, reducedFolder, outputSuffix)
+        if (srcFoldersList.length !== reducedFoldersList.length) {
+            return resp.status(400).send({
+                "status": "failed",
+                response: {
+                    "success": false,
+                    "msg": "Pls. provide both Soruce Folder and Reduced Folder Path."
+                }
+            });
+        }
+
+        let outputSuffixesList = [];
+        if (!outputSuffixes) {
+            console.log("No output suffix provided, using default: -renamer");
+            outputSuffixesList = ["-renamer"];
+            reducedFoldersList.forEach((folder:string) => {
+                outputSuffixesList.push(`${path.basename(folder)}-renamer`);
+            });
+        }
+
+        else {
+            const outputSuffixesList = outputSuffixes.split(",");
+            if(srcFoldersList.length !== outputSuffixesList.length) {
+                return resp.status(400).send({
+                    "status": "failed",
+                    response: {
+                        "success": false,
+                        "msg": "OutputSuffixes Count doesnt match Src Folder Count"
+                    }
+                });
+            }
+        }
+
+
+        const _renamingResults = [];
+        for (let i = 0; i < srcFoldersList.length; i++) {
+            const _result = await aiRenameTitleUsingReducedFolder(srcFoldersList[i], reducedFoldersList[i], outputSuffixesList[i])
+            _renamingResults.push(_result);
+        }
+
         resp.status(200).send({
             "status": "success",
             response: {
-                ..._result
+                "success": true,
+                "msg": "Renaming completed successfully.",
+                "results": _renamingResults
             }
         });
     }

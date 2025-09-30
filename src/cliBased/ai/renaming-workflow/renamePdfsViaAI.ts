@@ -147,7 +147,8 @@ async function renamePdfUsingMetadata(result: MetadataResult,
 }
 
 
-export async function aiRenameTitleUsingReducedFolder(srcFolder: string, reducedFolder: string,
+export async function aiRenameTitleUsingReducedFolder(srcFolder: string, 
+    reducedFolder: string,
     outputSuffix: string) {
 
     let processedCount = 0;
@@ -286,6 +287,7 @@ export async function aiRenameTitleUsingReducedFolder(srcFolder: string, reduced
             for (let i = 0; i < mappedResults.length; i++) {
                 const item = mappedResults[i];
                 const renamingResultPath = await renamePdfUsingMetadata(item.meta, config, outputFolder);
+                const newFilePath = renamingResultPath.newFilePath;
                 if (renamingResultPath.error) {
                     console.error(`Failed to rename ${item.meta.fileName}:`, renamingResultPath.error);
                     renamingResults.push({
@@ -295,12 +297,11 @@ export async function aiRenameTitleUsingReducedFolder(srcFolder: string, reduced
                         extractedMetadata: item.meta.extractedMetadata,
                         error: renamingResultPath.error,
                         success: false,
-                        newFilePath: renamingResultPath.newFilePath
+                        newFilePath
                     });
                     continue;
                 }
                 
-                const newFilePath = renamingResultPath.newFilePath;
                 renamedCount++;
                 console.log(`Renamed: ${item.meta.fileName} -> ${newFilePath}`);
                 renamingResults.push({
