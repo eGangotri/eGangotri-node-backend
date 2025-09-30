@@ -78,12 +78,38 @@ launchAIRoute.post('/aiRenamer', async (req: any, resp: any) => {
             _renamingResults.push(_result);
         }
 
+        const _aggregatedResults = _renamingResults.map((result: any) => ({
+            runId: result.runId,
+            success: result.success,
+            processedCount: result.processedCount,
+            successCount: result.successCount,
+            failedCount: result.failedCount,
+            errorCount: result.errorCount ?? 0,
+            metaDataAggregated: result.metaDataAggregated,
+            renamingResults: result.renamingResults,
+            error: result.error,
+        }));
+
+        const summary = _aggregatedResults.reduce(
+            (acc: { runs: number; processedCount: number; successCount: number; failedCount: number; errorCount: number }, cur: any) => {
+                acc.runs += 1;
+                acc.processedCount += Number(cur.processedCount || 0);
+                acc.successCount += Number(cur.successCount || 0);
+                acc.failedCount += Number(cur.failedCount || 0);
+                acc.errorCount += Number(cur.errorCount || 0);
+                return acc;
+            },
+            { runs: 0, processedCount: 0, successCount: 0, failedCount: 0, errorCount: 0 }
+        );
+        const overallSuccess = summary.failedCount === 0 && _aggregatedResults.every((r: any) => r.success === true);
         resp.status(200).send({
             "status": "success",
             response: {
-                "success": true,
-                "msg": "Renaming completed successfully.",
-                "results": _renamingResults
+                "success": overallSuccess,
+                "msg": overallSuccess ? "Renaming completed successfully." : "Renaming completed with failures.",
+                "aggregated": _aggregatedResults,
+                "summary": summary,
+                "results": _renamingResults,
             }
         });
     }
