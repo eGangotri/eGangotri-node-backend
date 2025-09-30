@@ -2,19 +2,25 @@ import { trusted } from "mongoose";
 import { PYTHON_SERVER_URL } from "../db/connection";
 import { countPDFsInFolder, createFolderIfNotExistsAsync, isValidDirectory } from "../utils/FileUtils";
 import path from 'path';
+import { ExtractionErrorResult, ExtractionSuccessResult, PythonExtractionResult } from "./types";
 
 
-export const runPthonPdfExtractionInLoop = async (_srcFolders: string[],
+
+
+
+export const runPthonPdfExtractionInLoop = async (
+    _srcFolders: string[],
     destRootFolders: string[],
     nFirstPages: number,
     nLastPages: number,
-    reducePdfSizeAlso = true) => {
-    const combinedResults = [];
+    reducePdfSizeAlso = true
+): Promise<PythonExtractionResult[]> => {
+    const combinedResults: PythonExtractionResult[] = [];
     for (let i = 0; i < _srcFolders.length; i++) {
         let input_folder = _srcFolders[i];
         let destRootFolder = destRootFolders[i];
         try {
-            console.log(`runPthonPdfExtractionInLoop srcFolder ${input_folder} `);
+            console.log(`runPthonPdfExtractionInLoop srcFolder ${input_folder} destRootFolder ${destRootFolder} `);
             const pdfsToReduceCount = await countPDFsInFolder(input_folder, ["reduced"]);
             if (isValidDirectory(destRootFolder)) {
                 await createFolderIfNotExistsAsync(destRootFolder);
@@ -33,13 +39,14 @@ export const runPthonPdfExtractionInLoop = async (_srcFolders: string[],
                 _payload, 'extractFromPdf');
 
             if (_resp.status) {
-                const destRootDump = `${destRootFolder}\\${path.basename(input_folder)}(${pdfsToReduceCount})`;
+                const destRootDump = String(_resp.data?.output_folder ?? "");
                 const pdfsReducedCount = await countPDFsInFolder(destRootDump);
                 const result = {
                     msg: `${pdfsToReduceCount} pdfs processed to ${pdfsReducedCount} with first ${nFirstPages} and last ${nLastPages} pages`,
                     srcFolder: input_folder,
                     destRootDump,
                     isReductionCountMatch: pdfsToReduceCount === pdfsReducedCount,
+                    success: true,
                     ..._resp,
                 }
                 console.log('result', result);
@@ -47,7 +54,7 @@ export const runPthonPdfExtractionInLoop = async (_srcFolders: string[],
             }
             else {
                 combinedResults.push({
-                    err: _resp.message,
+                    err: _resp?.message,
                     msg: `Exception ${input_folder}`,
                     success: false,
                     _srcFolder: input_folder,

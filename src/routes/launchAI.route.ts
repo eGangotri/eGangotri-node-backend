@@ -44,32 +44,37 @@ launchAIRoute.post('/aiRenamer', async (req: any, resp: any) => {
         }
         console.log(`outputSuffixes: ${outputSuffixes}`);
 
-        let outputSuffixesList = [];
+        let outputSuffixesList: string[] = [];
         if (!outputSuffixes) {
             console.log("No output suffix provided, using default: -renamer");
-            reducedFoldersList.forEach((folder:string) => {
+            reducedFoldersList.forEach((folder: string) => {
                 outputSuffixesList.push(`${path.basename(folder)}-renamer`);
             });
         }
 
         else {
-            const outputSuffixesList = outputSuffixes.split(",");
-            console.log(`outputSiffixList: ${outputSuffixesList}`)
-            if(srcFoldersList.length !== outputSuffixesList.length) {
-                return resp.status(400).send({
-                    "status": "failed",
-                    response: {
-                        "success": false,
-                        "msg": "OutputSuffixes Count doesnt match Src Folder Count"
-                    }
-                });
+            outputSuffixesList = outputSuffixes.split(",").map((suffix: string) => suffix.trim());
+            console.log(`outputSiffixList(${outputSuffixesList.length}): ${outputSuffixesList}`)
+            if (srcFoldersList.length !== outputSuffixesList.length) {
+                // If a single suffix is provided, apply it to all src folders
+                if (outputSuffixesList.length === 1) {
+                    outputSuffixesList = Array(srcFoldersList.length).fill(outputSuffixesList[0]);
+                } else {
+                    return resp.status(400).send({
+                        "status": "failed",
+                        response: {
+                            "success": false,
+                            "msg": "OutputSuffixes Count doesnt match Src Folder Count"
+                        }
+                    });
+                }
             }
         }
-
-
+ 
         const _renamingResults = [];
         for (let i = 0; i < srcFoldersList.length; i++) {
-            const _result = await aiRenameTitleUsingReducedFolder(srcFoldersList[i], reducedFoldersList[i], outputSuffixesList[i])
+            const _result = await aiRenameTitleUsingReducedFolder(srcFoldersList[i],
+                 reducedFoldersList[i], outputSuffixesList[i])
             _renamingResults.push(_result);
         }
 
@@ -114,6 +119,68 @@ launchAIRoute.get("/getAllTitleRenamedViaAIList", async (req: Request, res: expr
         res.status(500).json({ message: "Error fetching pdfTitleRenamedItems", error })
     }
 });
+
+launchAIRoute.get("/getAllTitleRenamedViaAIListGroupedByRunId", async (req: Request, res: express.Response) => {
+    try {
+        const page = Number.parseInt(req.query.page as string) || 1;
+        const limit = Number.parseInt(req.query.limit as string) || 20;
+        const skip = (page - 1) * limit;
+
+        // Aggregate to group by runId and count documents per run
+        const pipeline = [
+            { $group: { _id: "$runId", count: { $sum: 1 }, maxCreatedAt: { $max: "$createdAt" }, minCreatedAt: { $min: "$createdAt" } } },
+            { $sort: { maxCreatedAt: -1 } },
+            { $skip: skip },
+            { $limit: limit },
+            { $project: { _id: 1, runId: "$_id", count: 1, createdAt: "$minCreatedAt" } },
+        ];
+
+        const grouped = await (PdfTitleRenamingViaAITracker as any).aggregate(pipeline);
+        const totalDistinctRunIds = (await PdfTitleRenamingViaAITracker.distinct("runId")).length;
+
+        const results = {
+            data: grouped as Array<{ _id: string; runId: string; count: number; createdAt: Date }>,
+            currentPage: page,
+            totalPages: Math.ceil(totalDistinctRunIds / limit),
+            totalItems: totalDistinctRunIds,
+        };
+        res.json(results);
+    } catch (error: any) {
+        console.log(`/pdfTitleRenamedItems error: ${JSON.stringify(error.message)}`);
+        res.status(500).json({ message: "Error fetching pdfTitleRenamedItems grouped by runId", error });
+    }
+});
+
+
+
+// ai/getAllTitleRenamedViaAIList by runId
+launchAIRoute.get("/getAllTitleRenamedViaAIList/:runId", async (req: Request, res: express.Response) => {
+    try {
+        const runId = req.params.runId;
+        const page = Number.parseInt(req.query.page as string) || 1
+        const limit = Number.parseInt(req.query.limit as string) || 20
+        const skip = (page - 1) * limit
+
+        const filter = { runId };
+        const pdfTitleRenamedItems: IPdfTitleRenamingViaAITracker[] = await PdfTitleRenamingViaAITracker.find(filter)
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
+
+        const total = await PdfTitleRenamingViaAITracker.countDocuments(filter)
+        const results = {
+            data: pdfTitleRenamedItems,
+            currentPage: page,
+            totalPages: Math.ceil(total / limit),
+            totalItems: total,
+        }
+        res.json(results)
+    } catch (error) {
+        console.log(`/pdfTitleRenamedItems error: ${JSON.stringify(error.message)}`);
+        res.status(500).json({ message: "Error fetching pdfTitleRenamedItems", error })
+    }
+})
+;
 
 //ai/getAllTitlePdfRenamedViaAIList
 launchAIRoute.get("/getAllTitlePdfRenamedViaAIList", async (req: Request, res: express.Response) => {

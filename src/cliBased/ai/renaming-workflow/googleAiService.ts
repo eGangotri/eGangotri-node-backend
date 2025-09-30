@@ -164,7 +164,7 @@ export async function processWithGoogleAI(
     return {
       originalFilePath: pdfFilePath,
       fileName: path.basename(pdfFilePath),
-      extractedMetadata: extractedMetadata
+      extractedMetadata: extractedMetadata,
     };
 
   } catch (error) {

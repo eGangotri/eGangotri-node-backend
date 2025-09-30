@@ -2,6 +2,7 @@ import * as express from 'express';
 import { DEFAULT_PDF_PAGE_EXTRACTION_COUNT } from '../cliBased/pdf/extractFirstAndLastNPages';
 import { runPythonCopyPdfInLoop, runPthonPdfExtractionInLoop, executePythonPostCall } from '../services/pythonRestService';
 import { IMG_TYPE_ANY } from '../mirror/constants';
+import { PythonExtractionResult } from 'services/types';
 
 export const pythonRoute = express.Router();
 
@@ -42,7 +43,7 @@ pythonRoute.post('/getFirstAndLastNPages', async (req: any, resp: any) => {
         }
 
         console.log(`getFirstAndLastNPages _folders(${_srcFolders.length}) ${_srcFolders} 
-        destRootFolder ${destRootFolderAsCSV}
+        ${_destRootFolders.length}  ${destRootFolderAsCSV}
         ${firstNPages}/${lastNPages}`)
 
         if (!srcFoldersAsCSV || !destRootFolderAsCSV) {
@@ -55,11 +56,11 @@ pythonRoute.post('/getFirstAndLastNPages', async (req: any, resp: any) => {
             });
             return;
         }
-        const combinedResults = await runPthonPdfExtractionInLoop(_srcFolders, 
+        const combinedResults: PythonExtractionResult[] = await runPthonPdfExtractionInLoop(_srcFolders, 
             _destRootFolders, firstNPages, lastNPages, reducePdfSizeAlso);
 
         if(combinedResults){
-            const stats = combinedResults.filter((x: { success: boolean }) => x.success === true).length;
+            const stats = combinedResults.filter((extractResult: PythonExtractionResult) => extractResult.success === true).length;
             console.log(`combinedResults extractFirstN: ${stats} of ${combinedResults.length} processed successfully`);
             resp.status(200).send({
                 response: {
