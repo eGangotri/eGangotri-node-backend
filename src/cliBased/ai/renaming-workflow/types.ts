@@ -10,13 +10,22 @@ export interface Config {
     delayBetweenBatchesMs?: number; // Delay between processing batches in ms
 }
 
-
+export interface RenamingResult{
+    originalFilePath: string;
+    reducedFilePath: string;
+    fileName: string;
+    extractedMetadata: string;
+    success: boolean;
+    error?: string;
+    newFilePath: string;
+}
 export interface MetadataResult {
     originalFilePath: string;
     fileName: string;
     extractedMetadata: string;
     error?: string;
-  }
+    newFilePath?: string;
+}
   
 export type PdfPair = {
     index: number;         // 0-based

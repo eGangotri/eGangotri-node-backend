@@ -8,7 +8,7 @@ import { buildPairedBatches, formatFilename } from './utils';
 import { PdfTitleAndFileRenamingTrackerViaAI } from '../../../models/pdfTitleAndFileRenamingTrackerViaAI';
 import { PdfTitleRenamingViaAITracker } from '../../../models/pdfTitleRenamingTrackerViaAI';
 import { isPDFCorrupted } from '../../../utils/pdfValidator';
-import { AI_RENAMING_WORKFLOW_CONFIG, BatchPair, Config, MetadataResult } from './types';
+import { AI_RENAMING_WORKFLOW_CONFIG, BatchPair, Config, MetadataResult, RenamingResult } from './types';
 
 /**
  * Sleep for a specified number of milliseconds
@@ -50,7 +50,7 @@ async function processPdfBatch(pdfs: string[], config: Config): Promise<Metadata
                     originalFilePath: pdfPath,
                     fileName: path.basename(pdfPath),
                     extractedMetadata: '',
-                    error: errMsg
+                    error: errMsg,
                 });
                 continue;
             }
@@ -62,7 +62,7 @@ async function processPdfBatch(pdfs: string[], config: Config): Promise<Metadata
                 console.error(`processWithGoogleAI:Error(${path.basename(pdfPath)}): ${result.error}`);
             }
 
-            results.push(result);
+            results.push({...result, newFilePath: result.extractedMetadata});
         } catch (error) {
             console.error(`Failed to process ${pdfPath}:`, error);
             results.push({
@@ -92,23 +92,18 @@ async function renamePdfUsingMetadata(result: MetadataResult,
     if (!result.extractedMetadata) {
         console.log(`Skipping rename for ${result.fileName} - no metadata extracted`);
         return {
-            newFilePath: result.originalFilePath,
+            newFilePath: "error",
             error: 'No metadata extracted'
         }
     }
 
     const formattedFilename = formatFilename(result.extractedMetadata);
     const pdfParentDir = path.dirname(result.originalFilePath);
-
-
     const relativePath = path.relative(config.inputFolders[0], pdfParentDir);
     
     // Determine the target directory
     const targetDir = config.renameInPlace ? pdfParentDir :
         path.join(outputFolder, relativePath);
-
-    console.log(`Target directory: ${targetDir}`);
-    console.log(`relativePath: ${relativePath}`);
 
     // Create output directory if it doesn't exist
     if (!config.dryRun && !config.renameInPlace && !fs.existsSync(targetDir)) {
@@ -117,10 +112,15 @@ async function renamePdfUsingMetadata(result: MetadataResult,
 
     const newFilePath = path.join(targetDir, formattedFilename);
 
+
+    console.log(`Target directory: ${targetDir}`);
+    console.log(`relativePath: ${relativePath}`);
+    console.log(`newFilePath: ${newFilePath}`);
+
     if (config.dryRun) {
-        console.log(`DRY RUN - Would rename: ${result.fileName} -> ${formattedFilename}`);
+        console.log(`DRY RUN - Would rename: ${result.fileName} -> ${newFilePath}`);
         return {
-            newFilePath: result.originalFilePath,
+            newFilePath,
             error: 'Dry run'
         }
     }
@@ -128,19 +128,20 @@ async function renamePdfUsingMetadata(result: MetadataResult,
     try {
         if (config.renameInPlace) {
             // Rename in place
-            fs.renameSync(result.originalFilePath, newFilePath);
+            fs.renameSync(result.originalFilePath, formattedFilename);
+            console.log(`Renamed: ${result.fileName} -> ${formattedFilename}`);
         } else {
             // Copy to new location
             fs.copyFileSync(result.originalFilePath, newFilePath);
+            console.log(`Copied: ${result.fileName} -> ${newFilePath}`);
         }
-        console.log(`Renamed: ${result.fileName} -> ${formattedFilename}`);
         return {
-            newFilePath:newFilePath,
+            newFilePath,
         };
     } catch (error) {
         console.error(`Failed to rename ${result.fileName}:`, error);
         return {
-            newFilePath: result.originalFilePath,
+            newFilePath: "err",
             error: error.message || 'Unknown error occurred'
         }
     }
@@ -208,15 +209,7 @@ export async function aiRenameTitleUsingReducedFolder(srcFolder: string,
 
         const pairedBatches: BatchPair[] = buildPairedBatches(batches, batchesReduced);
 
-        const renamingResults: Array<{
-            originalFilePath: string;
-            reducedFilePath: string;
-            fileName: string;
-            extractedMetadata: string;
-            success: boolean;
-            error?: string;
-            newFilePath: string;
-        }> = [];
+        const renamingResults: Array<RenamingResult> = [];
 
         if (pairedBatches.length > 0) {
             console.log(`Processing ${JSON.stringify(pairedBatches[0])} batches...`)
@@ -259,7 +252,7 @@ export async function aiRenameTitleUsingReducedFolder(srcFolder: string,
                     fileName: path.basename(pairedBtch.pdfs[j]),
                     extractedMetadata: aiRes.extractedMetadata,
                     error: aiRes.error,
-                    newFilePath: undefined
+                    newFilePath: aiRes.extractedMetadata
                 }));
                 if (perItemDocs.length > 0) {
                     await PdfTitleRenamingViaAITracker.insertMany(perItemDocs);
