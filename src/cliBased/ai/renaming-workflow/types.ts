@@ -1,8 +1,8 @@
 // Configuration
 export interface Config {
-    inputFolders: string[];
-    reducedFolders?: string[];
-    outputSuffix: string | null;
+    inputFolder: string;
+    reducedFolder: string;
+    outputSuffix: string;
     batchSize: number;
     dryRun: boolean;
     renameInPlace: boolean;
@@ -24,7 +24,6 @@ export interface MetadataResult {
     fileName: string;
     extractedMetadata: string;
     error?: string;
-    newFilePath?: string;
 }
   
 export type PdfPair = {
@@ -39,10 +38,10 @@ export type BatchPair = {
     reducedPdfs: string[];  // corresponding batch from allReducedPdfs
 };
 
-export const AI_RENAMING_WORKFLOW_CONFIG = {
-    inputFolders: [],
-    reducedFolders: [],
-    outputFolder: "", // Set to a path to copy renamed files to a new location
+export const AI_RENAMING_WORKFLOW_CONFIG:Config = {
+    inputFolder: "",
+    reducedFolder: "",
+    outputSuffix: "", // Set to a path to copy renamed files to a new location
     batchSize: 3,       // Number of PDFs to process in a batch (reduced to avoid rate limits)
     dryRun: false,      // Set to true to see what would be renamed without actually renaming
     renameInPlace: false, // Set to false to copy files to outputFolder instead of renaming in place

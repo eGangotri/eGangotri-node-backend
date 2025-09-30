@@ -62,7 +62,7 @@ async function processPdfBatch(pdfs: string[], config: Config): Promise<Metadata
                 console.error(`processWithGoogleAI:Error(${path.basename(pdfPath)}): ${result.error}`);
             }
 
-            results.push({...result, newFilePath: result.extractedMetadata});
+            results.push(result);
         } catch (error) {
             console.error(`Failed to process ${pdfPath}:`, error);
             results.push({
@@ -86,9 +86,9 @@ async function processPdfBatch(pdfs: string[], config: Config): Promise<Metadata
 
 
 
-async function renamePdfUsingMetadata(result: MetadataResult, 
+async function renamePdfUsingMetadata(result: MetadataResult,
     config: Config,
-     outputFolder: string): Promise<{ newFilePath: string; error?: string; }> {
+    outputFolder: string): Promise<{ newFilePath: string; error?: string; }> {
     if (!result.extractedMetadata) {
         console.log(`Skipping rename for ${result.fileName} - no metadata extracted`);
         return {
@@ -99,8 +99,8 @@ async function renamePdfUsingMetadata(result: MetadataResult,
 
     const formattedFilename = formatFilename(result.extractedMetadata);
     const pdfParentDir = path.dirname(result.originalFilePath);
-    const relativePath = path.relative(config.inputFolders[0], pdfParentDir);
-    
+    const relativePath = path.relative(config.inputFolder, pdfParentDir);
+
     // Determine the target directory
     const targetDir = config.renameInPlace ? pdfParentDir :
         path.join(outputFolder, relativePath);
@@ -148,10 +148,10 @@ async function renamePdfUsingMetadata(result: MetadataResult,
 }
 
 
-export async function aiRenameTitleUsingReducedFolder(srcFolder: string, 
+export async function aiRenameTitleUsingReducedFolder(inputFolder: string,
     reducedFolder: string,
-    outputSuffix: string) {
-
+    outputSuffix: string = "-renmer") {
+    console.log(`aiRenameTitleUsingReducedFolder srcFolder: ${inputFolder}, reducedFolder: ${reducedFolder}, outputSuffix: ${outputSuffix}`);
     let processedCount = 0;
     let successCount = 0;
     let errorCount = 0;
@@ -167,26 +167,28 @@ export async function aiRenameTitleUsingReducedFolder(srcFolder: string,
 
         const config: Config = {
             ...AI_RENAMING_WORKFLOW_CONFIG,
-            inputFolders: [srcFolder],
-            reducedFolders: [reducedFolder],
+            inputFolder,
+            reducedFolder,
             outputSuffix,
             batchSize: Number.isFinite(envBatchSize) && envBatchSize > 0 ? envBatchSize : AI_RENAMING_WORKFLOW_CONFIG.batchSize,
             delayBetweenCallsMs: Number.isFinite(envDelayBetweenCallsMs) && envDelayBetweenCallsMs >= 0 ? envDelayBetweenCallsMs : AI_RENAMING_WORKFLOW_CONFIG.delayBetweenCallsMs,
             delayBetweenBatchesMs: Number.isFinite(envDelayBetweenBatchesMs) && envDelayBetweenBatchesMs >= 0 ? envDelayBetweenBatchesMs : AI_RENAMING_WORKFLOW_CONFIG.delayBetweenBatchesMs,
         }
 
-        const outputFolder = `${srcFolder}${outputSuffix}`;
+        const outputFolder = path.join(path.dirname(inputFolder), outputSuffix);
+
+        console.log(`output folder: ${outputFolder}`);
         if (!fs.existsSync(outputFolder)) {
             console.log(`Creating output folder: ${outputFolder}`);
             fs.mkdirSync(outputFolder, { recursive: true });
         }
 
         console.log(`Starting PDF renaming with Google AI Studio...`);
-        console.log(`Input folders:`, config.inputFolders);
+        console.log(`Input folders:`, config.inputFolder);
 
         // Get all PDF files from input folders
-        const allPdfs = await getAllPdfsInFoldersRecursive(config.inputFolders);
-        const allReducedPdfs = await getAllPdfsInFoldersRecursive(config.reducedFolders);
+        const allPdfs = await getAllPdfsInFoldersRecursive([config.inputFolder]);
+        const allReducedPdfs = await getAllPdfsInFoldersRecursive([config.reducedFolder]);
 
         console.log(`Found ${allPdfs.length} PDFs to process`);
         console.log(`Found ${allReducedPdfs.length} PDFs to process`);
@@ -242,7 +244,7 @@ export async function aiRenameTitleUsingReducedFolder(srcFolder: string,
             try {
                 const perItemDocs = results.map((aiRes, j) => ({
                     runId,
-                    srcFolder,
+                    srcFolder: inputFolder,
                     reducedFolder,
                     outputFolder,
                     batchIndex: i,
@@ -252,7 +254,7 @@ export async function aiRenameTitleUsingReducedFolder(srcFolder: string,
                     fileName: path.basename(pairedBtch.pdfs[j]),
                     extractedMetadata: aiRes.extractedMetadata,
                     error: aiRes.error,
-                    newFilePath: aiRes.extractedMetadata
+                    newFilePath:path.join(outputFolder, aiRes.extractedMetadata)
                 }));
                 if (perItemDocs.length > 0) {
                     await PdfTitleRenamingViaAITracker.insertMany(perItemDocs);
@@ -280,7 +282,7 @@ export async function aiRenameTitleUsingReducedFolder(srcFolder: string,
             for (let i = 0; i < mappedResults.length; i++) {
                 const item = mappedResults[i];
                 const renamingResultPath = await renamePdfUsingMetadata(item.meta, config, outputFolder);
-                const newFilePath = renamingResultPath.newFilePath;
+                const newFilePath = renamingResultPath.newFilePath ?? "N/A";
                 if (renamingResultPath.error) {
                     console.error(`Failed to rename ${item.meta.fileName}:`, renamingResultPath.error);
                     renamingResults.push({
@@ -294,17 +296,17 @@ export async function aiRenameTitleUsingReducedFolder(srcFolder: string,
                     });
                     continue;
                 }
-                
+
                 renamedCount++;
                 console.log(`Renamed: ${item.meta.fileName} -> ${newFilePath}`);
                 renamingResults.push({
                     originalFilePath: item.meta.originalFilePath,
                     reducedFilePath: item.reducedFilePath,
                     fileName: item.meta.fileName,
-                    success:true,
+                    success: true,
                     extractedMetadata: item.meta.extractedMetadata,
                     error: item.meta.error,
-                    newFilePath: newFilePath
+                    newFilePath
                 });
             }
 
