@@ -42,11 +42,11 @@ launchAIRoute.post('/aiRenamer', async (req: any, resp: any) => {
                 }
             });
         }
+        console.log(`outputSuffixes: ${outputSuffixes}`);
 
         let outputSuffixesList = [];
         if (!outputSuffixes) {
             console.log("No output suffix provided, using default: -renamer");
-            outputSuffixesList = ["-renamer"];
             reducedFoldersList.forEach((folder:string) => {
                 outputSuffixesList.push(`${path.basename(folder)}-renamer`);
             });
@@ -54,6 +54,7 @@ launchAIRoute.post('/aiRenamer', async (req: any, resp: any) => {
 
         else {
             const outputSuffixesList = outputSuffixes.split(",");
+            console.log(`outputSiffixList: ${outputSuffixesList}`)
             if(srcFoldersList.length !== outputSuffixesList.length) {
                 return resp.status(400).send({
                     "status": "failed",
