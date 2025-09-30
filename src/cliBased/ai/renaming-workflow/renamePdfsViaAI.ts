@@ -207,11 +207,12 @@ export async function aiRenameTitleUsingReducedFolder(srcFolder: string, reduced
 
         const pairedBatches: BatchPair[] = buildPairedBatches(batches, batchesReduced);
 
-        const renamingTracker: Array<{
+        const renamingResults: Array<{
             originalFilePath: string;
             reducedFilePath: string;
             fileName: string;
             extractedMetadata: string;
+            success: boolean;
             error?: string;
             newFilePath: string;
         }> = [];
@@ -287,12 +288,13 @@ export async function aiRenameTitleUsingReducedFolder(srcFolder: string, reduced
                 const renamingResultPath = await renamePdfUsingMetadata(item.meta, config, outputFolder);
                 if (renamingResultPath.error) {
                     console.error(`Failed to rename ${item.meta.fileName}:`, renamingResultPath.error);
-                    renamingTracker.push({
+                    renamingResults.push({
                         originalFilePath: item.meta.originalFilePath,
                         reducedFilePath: item.reducedFilePath,
                         fileName: item.meta.fileName,
                         extractedMetadata: item.meta.extractedMetadata,
                         error: renamingResultPath.error,
+                        success: false,
                         newFilePath: renamingResultPath.newFilePath
                     });
                     continue;
@@ -301,10 +303,11 @@ export async function aiRenameTitleUsingReducedFolder(srcFolder: string, reduced
                 const newFilePath = renamingResultPath.newFilePath;
                 renamedCount++;
                 console.log(`Renamed: ${item.meta.fileName} -> ${newFilePath}`);
-                renamingTracker.push({
+                renamingResults.push({
                     originalFilePath: item.meta.originalFilePath,
                     reducedFilePath: item.reducedFilePath,
                     fileName: item.meta.fileName,
+                    success:true,
                     extractedMetadata: item.meta.extractedMetadata,
                     error: item.meta.error,
                     newFilePath: newFilePath
@@ -322,7 +325,7 @@ export async function aiRenameTitleUsingReducedFolder(srcFolder: string, reduced
                 failedCount: processedCount - successCount,
                 renamedCount,
                 success: true,
-                renamingResults: renamingTracker,
+                renamingResults,
                 pairedBatches,
             }
             // Persist success summary in DB
