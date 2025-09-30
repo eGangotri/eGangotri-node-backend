@@ -8,7 +8,7 @@ export const pythonRoute = express.Router();
 pythonRoute.post('/getFirstAndLastNPages', async (req: any, resp: any) => {
     try {
         const srcFoldersAsCSV = req?.body?.srcFolders;
-        let destRootFolder = req?.body?.destRootFolder;
+        let destRootFolderAsCSV = req?.body?.destRootFolder;
         const reducePdfSizeAlso = req?.body?.reducePdfSizeAlso || true;
         const nPages = req?.body?.nPages || DEFAULT_PDF_PAGE_EXTRACTION_COUNT;
         let firstNPages = DEFAULT_PDF_PAGE_EXTRACTION_COUNT;
@@ -28,11 +28,24 @@ pythonRoute.post('/getFirstAndLastNPages', async (req: any, resp: any) => {
             }
         }
         const _srcFolders: string[] = srcFoldersAsCSV.split(',').map((x: string) => x.trim());
+        const _destRootFolders: string[] = destRootFolderAsCSV.split(',').map((x: string) => x.trim());
+
+        if(_srcFolders.length !== _destRootFolders.length) {
+            resp.status(400).send({
+                response: {
+                    "status": "failed",
+                    "success": false,
+                    "msg": "Src Folder and Dest Folder Count Mismatch"
+                }
+            });
+            return;
+        }
+
         console.log(`getFirstAndLastNPages _folders(${_srcFolders.length}) ${_srcFolders} 
-        destRootFolder ${destRootFolder}
+        destRootFolder ${destRootFolderAsCSV}
         ${firstNPages}/${lastNPages}`)
 
-        if (!srcFoldersAsCSV || !destRootFolder) {
+        if (!srcFoldersAsCSV || !destRootFolderAsCSV) {
             resp.status(400).send({
                 response: {
                     "status": "failed",
@@ -43,7 +56,8 @@ pythonRoute.post('/getFirstAndLastNPages', async (req: any, resp: any) => {
             return;
         }
         const combinedResults = await runPthonPdfExtractionInLoop(_srcFolders, 
-            destRootFolder, firstNPages, lastNPages, reducePdfSizeAlso);
+            _destRootFolders, firstNPages, lastNPages, reducePdfSizeAlso);
+
         if(combinedResults){
             const stats = combinedResults.filter((x: { success: boolean }) => x.success === true).length;
             console.log(`combinedResults extractFirstN: ${stats} of ${combinedResults.length} processed successfully`);

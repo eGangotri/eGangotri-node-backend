@@ -5,12 +5,14 @@ import path from 'path';
 
 
 export const runPthonPdfExtractionInLoop = async (_srcFolders: string[],
-    destRootFolder: string,
+    destRootFolders: string[],
     nFirstPages: number,
     nLastPages: number,
     reducePdfSizeAlso = true) => {
     const combinedResults = [];
-    for (let input_folder of _srcFolders) {
+    for (let i = 0; i < _srcFolders.length; i++) {
+        let input_folder = _srcFolders[i];
+        let destRootFolder = destRootFolders[i];
         try {
             console.log(`runPthonPdfExtractionInLoop srcFolder ${input_folder} `);
             const pdfsToReduceCount = await countPDFsInFolder(input_folder, ["reduced"]);
