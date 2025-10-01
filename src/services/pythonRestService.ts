@@ -4,6 +4,34 @@ import { countPDFsInFolder, createFolderIfNotExistsAsync, isValidDirectory } fro
 import path from 'path';
 import { ExtractionErrorResult, ExtractionSuccessResult, PythonExtractionResult } from "./types";
 
+// Default data payload for extraction/copy operations used across the codebase
+export interface ExtractionOperationData {
+    input_folder: string;
+    output_folder: string;
+    nFirstPages: number;
+    nLastPages: number;
+}
+
+// Strongly typed structures for the merge-PDFs response payload
+export interface MergePdfsFileInfo {
+    path: string;
+    size_mb: number;
+    pages: number;
+}
+
+export interface MergePdfsDetails {
+    first_pdf: MergePdfsFileInfo;
+    second_pdf: MergePdfsFileInfo;
+    merged_pdf: MergePdfsFileInfo;
+    processing_time_seconds: number;
+}
+
+export interface MergePdfsResponseData {
+    status: 'success' | 'error';
+    message: string;
+    details: MergePdfsDetails;
+}
+
 
 
 
@@ -198,20 +226,21 @@ const checkPythonServer = async (): Promise<{ status: boolean, message: string }
     }
 };
 
-export const executePythonPostCall = async (body: Record<string, unknown>, resource: string): Promise<{
+export type PythonPostCallResult<TData = ExtractionOperationData> = {
     status: boolean;
     message: string;
-    data?: {
-        input_folder: string;
-        output_folder: string;
-        nFirstPages: number;
-        nLastPages: number;
-    };
-}> => {
+    data?: TData;
+    error?: unknown;
+};
+
+export const executePythonPostCall = async <TData = ExtractionOperationData>(
+    body: Record<string, unknown>,
+    resource: string
+): Promise<PythonPostCallResult<TData>> => {
     try {
         const serverStatus = await checkPythonServer();
         if (serverStatus.status) {
-            const _res = await pythonPostCallInternal(body, resource);
+            const _res = await pythonPostCallInternal<TData>(body, resource);
             return _res
         }
         else {
@@ -226,7 +255,7 @@ export const executePythonPostCall = async (body: Record<string, unknown>, resou
     }
 };
 
-export const pythonPostCallInternal = async (body: Record<string, unknown>, resource: string) => {
+export const pythonPostCallInternal = async <TData = ExtractionOperationData>(body: Record<string, unknown>, resource: string): Promise<PythonPostCallResult<TData>> => {
     console.log(`python call ${resource} ${JSON.stringify(body, null, 2)}`)
     const response = await fetch(`${PYTHON_SERVER_URL}/${resource}`, {
         method: 'POST',
@@ -236,7 +265,7 @@ export const pythonPostCallInternal = async (body: Record<string, unknown>, reso
         body: JSON.stringify(body)
     });
     if (response?.ok) {
-        const data = await response.json();
+        const data = await response.json() as TData;
         console.log(`data ${JSON.stringify(data, null, 2)}`)
         return {
             status: true,
@@ -251,14 +280,15 @@ export const pythonPostCallInternal = async (body: Record<string, unknown>, reso
         return {
             status: false,
             message: `Error ${response.status} from ${resource}:`,
-            data: JSON.stringify(errorData, null, 2)
+            error: errorData
         };
        }
        catch (error) {
         console.error('Error pythonPostCallInternal:', error);
         return {
             status: false,
-            message: JSON.stringify(error, null, 2)
+            message: JSON.stringify(error, null, 2),
+            error
         };  
        }
     }
