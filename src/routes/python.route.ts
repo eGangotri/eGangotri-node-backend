@@ -107,6 +107,7 @@ pythonRoute.get('/merge-multiple-pdf-tracker/common-runs', async (_req: any, res
                 $group: {
                     _id: '$commonRunId',
                     oldestCreatedAt: { $min: '$createdAt' },
+                    anyCount: { $first: '$pdfPathsToMergeCount' },
                 },
             },
             {
@@ -114,6 +115,7 @@ pythonRoute.get('/merge-multiple-pdf-tracker/common-runs', async (_req: any, res
                     _id: 0,
                     commonRunId: '$_id',
                     createdAt: '$oldestCreatedAt',
+                    pdfPathsToMergeCount: '$anyCount',
                 },
             },
             { $sort: { createdAt: -1 } },
@@ -340,6 +342,8 @@ pythonRoute.post('/mergeMutliplePdfs', async (req: any, resp: any) => {
         }
         const allResponses = []
         const commonRunId = new mongoose.Types.ObjectId();
+        const pdfPathsToMergeCount = pdfPaths.length;
+        let pdfPathsProcessedCount = 0;
         for (let pdfPath of pdfPaths) {
             const pdfPathAsArray = pdfPath.split(",");
             if (pdfPathAsArray.length < 2) {
@@ -390,10 +394,12 @@ pythonRoute.post('/mergeMutliplePdfs', async (req: any, resp: any) => {
             console.log(`operationResult ${JSON.stringify(operationResult)}`)
             console.log(`merged_pdf_path ${operationResult.data?.details?.merged_pdf?.path}`)
             console.log(`moveResults ${JSON.stringify(moveResults)}`)
+            pdfPathsProcessedCount++;
             // Persist tracker document for this merge
             try {
                 await MergeMultiplePdfTracker.create({
                     commonRunId,
+                    pdfPathsToMergeCount,
                     runId,
                     first_pdf_path,
                     second_pdf_path,
@@ -408,9 +414,9 @@ pythonRoute.post('/mergeMutliplePdfs', async (req: any, resp: any) => {
             allResponses.push(_resp)
         }
 
-        console.log(`Merged ${pdfPaths.length} runs of pdf-merge-operations`)
+        console.log(`Merged ${pdfPathsProcessedCount} of ${pdfPathsToMergeCount} runs of pdf-merge-operations`)
         resp.status(200).send({
-            status: `Merged ${pdfPaths.length} runs of pdf-merge-operations.`,
+            status: `Merged ${pdfPathsProcessedCount} of ${pdfPathsToMergeCount} runs of pdf-merge-operations.`,
             response: allResponses
         });
     }
