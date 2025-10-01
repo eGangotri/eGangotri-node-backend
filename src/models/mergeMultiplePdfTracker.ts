@@ -1,10 +1,23 @@
 import * as mongoose from 'mongoose';
 
+// Merge-PDFs response data shape from Python service
+export interface IMergePdfsFileInfo {
+  path: string;
+  size_mb: number;
+  pages: number;
+}
+
+export interface IMergePdfsDetails {
+  first_pdf: IMergePdfsFileInfo;
+  second_pdf: IMergePdfsFileInfo;
+  merged_pdf: IMergePdfsFileInfo;
+  processing_time_seconds: number;
+}
+
 export interface IMergeOperationData {
-  input_folder: string;
-  output_folder: string;
-  nFirstPages: number;
-  nLastPages: number;
+  status: 'success' | 'error';
+  message: string;
+  details: IMergePdfsDetails;
 }
 
 export interface IMergeOperationResult {
@@ -51,12 +64,43 @@ const MergeMultiplePdfTrackerSchema = new mongoose.Schema(
     operationResult: {
       status: { type: Boolean, required: true },
       message: { type: String, required: true },
-      data: {
-        input_folder: { type: String, required: false },
-        output_folder: { type: String, required: false },
-        nFirstPages: { type: Number, required: false },
-        nLastPages: { type: Number, required: false },
-      },
+      data: new mongoose.Schema(
+        {
+          status: { type: String, enum: ['success', 'error'], required: false },
+          message: { type: String, required: false },
+          details: new mongoose.Schema(
+            {
+              first_pdf: new mongoose.Schema(
+                {
+                  path: { type: String, required: false },
+                  size_mb: { type: Number, required: false },
+                  pages: { type: Number, required: false },
+                },
+                { _id: false }
+              ),
+              second_pdf: new mongoose.Schema(
+                {
+                  path: { type: String, required: false },
+                  size_mb: { type: Number, required: false },
+                  pages: { type: Number, required: false },
+                },
+                { _id: false }
+              ),
+              merged_pdf: new mongoose.Schema(
+                {
+                  path: { type: String, required: false },
+                  size_mb: { type: Number, required: false },
+                  pages: { type: Number, required: false },
+                },
+                { _id: false }
+              ),
+              processing_time_seconds: { type: Number, required: false },
+            },
+            { _id: false }
+          ),
+        },
+        { _id: false }
+      ),
     },
 
     moveResults: {

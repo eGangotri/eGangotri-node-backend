@@ -1,6 +1,6 @@
 import * as express from 'express';
 import { DEFAULT_PDF_PAGE_EXTRACTION_COUNT } from '../cliBased/pdf/extractFirstAndLastNPages';
-import { runPythonCopyPdfInLoop, runPthonPdfExtractionInLoop, executePythonPostCall } from '../services/pythonRestService';
+import { runPythonCopyPdfInLoop, runPthonPdfExtractionInLoop, executePythonPostCall, MergePdfsResponseData } from '../services/pythonRestService';
 import { IMG_TYPE_ANY } from '../mirror/constants';
 import { PythonExtractionResult } from 'services/types';
 import * as path from 'path';
@@ -97,6 +97,56 @@ pythonRoute.post('/getFirstAndLastNPages', async (req: any, resp: any) => {
         resp.status(400).send(err);
     }
 })
+
+
+// List all unique commonRunIds with the oldest createdAt per commonRunId
+pythonRoute.get('/merge-multiple-pdf-tracker/common-runs', async (_req: any, resp: any) => {
+    try {
+        const results = await MergeMultiplePdfTracker.aggregate([
+            {
+                $group: {
+                    _id: '$commonRunId',
+                    oldestCreatedAt: { $min: '$createdAt' },
+                },
+            },
+            {
+                $project: {
+                    _id: 0,
+                    commonRunId: '$_id',
+                    createdAt: '$oldestCreatedAt',
+                },
+            },
+            { $sort: { createdAt: -1 } },
+        ]);
+        resp.status(200).send({ response: results });
+    } catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+});
+
+// Return all tracker entries for a given commonRunId
+pythonRoute.get('/merge-multiple-pdf-tracker/by-common-run/:commonRunId', async (req: any, resp: any) => {
+    try {
+        const { commonRunId } = req.params;
+        if (!commonRunId || !mongoose.Types.ObjectId.isValid(commonRunId)) {
+            resp.status(400).send({
+                response: {
+                    status: 'failed',
+                    success: false,
+                    msg: 'Invalid or missing commonRunId',
+                },
+            });
+            return;
+        }
+        const _id = new mongoose.Types.ObjectId(commonRunId);
+        const docs = await MergeMultiplePdfTracker.find({ commonRunId: _id }).sort({ createdAt: 1 }).lean();
+        resp.status(200).send({ response: docs });
+    } catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+});
 
 pythonRoute.post('/copyAllPdfs', async (req: any, resp: any) => {
     try {
@@ -309,7 +359,7 @@ pythonRoute.post('/mergeMutliplePdfs', async (req: any, resp: any) => {
                 pdfPathsAsBody.third_pdf_path = third_pdf_path;
             }
             console.log(`Merging ${first_pdf_path} and ${second_pdf_path} ${third_pdf_path.length > 0 ? `and ${third_pdf_path}` : ""} `)
-            const _resp = await executePythonPostCall(pdfPathsAsBody, 'mergePdfs');
+            const _resp = await executePythonPostCall<MergePdfsResponseData>(pdfPathsAsBody, 'mergePdfs');
             const runId = new mongoose.Types.ObjectId();
             console.log(`Merged ${first_pdf_path} and ${second_pdf_path} ${third_pdf_path.length > 0 ? `and ${third_pdf_path}` : ""} `)
             // Move results array to record where originals were moved
@@ -330,18 +380,16 @@ pythonRoute.post('/mergeMutliplePdfs', async (req: any, resp: any) => {
             const operationResult = {
                 status: Boolean(respAny?.status ?? respAny?.success),
                 message: String(respAny?.message ?? respAny?.msg ?? ''),
-                data: respAny?.data ?? undefined,
+                data: respAny?.data as MergePdfsResponseData | undefined,
             } as {
                 status: boolean;
                 message: string;
-                data?: {
-                    input_folder: string;
-                    output_folder: string;
-                    nFirstPages: number;
-                    nLastPages: number;
-                };
+                data?: MergePdfsResponseData;
             };
 
+            console.log(`operationResult ${JSON.stringify(operationResult)}`)
+            console.log(`merged_pdf_path ${operationResult.data?.details?.merged_pdf?.path}`)
+            console.log(`moveResults ${JSON.stringify(moveResults)}`)
             // Persist tracker document for this merge
             try {
                 await MergeMultiplePdfTracker.create({
@@ -360,9 +408,9 @@ pythonRoute.post('/mergeMutliplePdfs', async (req: any, resp: any) => {
             allResponses.push(_resp)
         }
 
-        console.log(`Merged ${pdfPaths.length} pdfs  ${allResponses}`)
+        console.log(`Merged ${pdfPaths.length} runs of pdf-merge-operations`)
         resp.status(200).send({
-            status: `Merged ${pdfPaths.length} pdfs.`,
+            status: `Merged ${pdfPaths.length} runs of pdf-merge-operations.`,
             response: allResponses
         });
     }
