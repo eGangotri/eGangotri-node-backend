@@ -3,9 +3,20 @@ import { DEFAULT_PDF_PAGE_EXTRACTION_COUNT } from '../cliBased/pdf/extractFirstA
 import { runPythonCopyPdfInLoop, runPthonPdfExtractionInLoop, executePythonPostCall } from '../services/pythonRestService';
 import { IMG_TYPE_ANY } from '../mirror/constants';
 import { PythonExtractionResult } from 'services/types';
+import * as path from 'path';
+import * as fs from 'fs/promises';
+import * as mongoose from 'mongoose';
+import { MergeMultiplePdfTracker } from '../models/mergeMultiplePdfTracker';
+import { randomUUID } from 'crypto';
 
 export const pythonRoute = express.Router();
 
+export interface MergePdfsBody {
+    [key: string]: unknown;
+    first_pdf_path: string;
+    second_pdf_path: string;
+    third_pdf_path?: string;
+}
 pythonRoute.post('/getFirstAndLastNPages', async (req: any, resp: any) => {
     try {
         const srcFoldersAsCSV = req?.body?.srcFolders;
@@ -31,7 +42,7 @@ pythonRoute.post('/getFirstAndLastNPages', async (req: any, resp: any) => {
         const _srcFolders: string[] = srcFoldersAsCSV.split(',').map((x: string) => x.trim());
         const _destRootFolders: string[] = destRootFolderAsCSV.split(',').map((x: string) => x.trim());
 
-        if(_srcFolders.length !== _destRootFolders.length) {
+        if (_srcFolders.length !== _destRootFolders.length) {
             resp.status(400).send({
                 response: {
                     "status": "failed",
@@ -56,10 +67,10 @@ pythonRoute.post('/getFirstAndLastNPages', async (req: any, resp: any) => {
             });
             return;
         }
-        const combinedResults: PythonExtractionResult[] = await runPthonPdfExtractionInLoop(_srcFolders, 
+        const combinedResults: PythonExtractionResult[] = await runPthonPdfExtractionInLoop(_srcFolders,
             _destRootFolders, firstNPages, lastNPages, reducePdfSizeAlso);
 
-        if(combinedResults){
+        if (combinedResults) {
             const stats = combinedResults.filter((extractResult: PythonExtractionResult) => extractResult.success === true).length;
             console.log(`combinedResults extractFirstN: ${stats} of ${combinedResults.length} processed successfully`);
             resp.status(200).send({
@@ -143,9 +154,9 @@ pythonRoute.post('/convert-img-folder-to-pdf', async (req: any, resp: any) => {
         const _resp = await executePythonPostCall({
             "src_folder": src_folder,
             "dest_folder": dest_folder,
-            img_type:   img_type
+            img_type: img_type
         }, 'convert-img-folder-to-pdf');
-        
+
         resp.status(200).send({
             response: _resp
         });
@@ -177,9 +188,9 @@ pythonRoute.post('/verfiyImgtoPdf', async (req: any, resp: any) => {
         const _resp = await executePythonPostCall({
             "src_folder": src_folder,
             "dest_folder": dest_folder,
-            "img_type":   img_type
+            "img_type": img_type
         }, 'verfiyImgtoPdf');
-        
+
         resp.status(200).send({
             response: _resp
         });
@@ -212,9 +223,9 @@ pythonRoute.post('/mergePdfs', async (req: any, resp: any) => {
         const _resp = await executePythonPostCall({
             "first_pdf_path": first_pdf_path,
             "second_pdf_path": second_pdf_path,
-            "third_pdf_path":   third_pdf_path
+            "third_pdf_path": third_pdf_path
         }, 'mergePdfs');
-        
+
         resp.status(200).send({
             response: _resp
         });
@@ -226,3 +237,138 @@ pythonRoute.post('/mergePdfs', async (req: any, resp: any) => {
     }
 })
 
+
+
+// Move a file into destFolder/_dontOldMergedPdfs, preserving its path relative to destFolder when possible
+async function moveOriginalIntoDontOldSubfolder(filePath: string, destFolder: string): Promise<string> {
+    try {
+        const subRoot = path.join(destFolder, '_dontOldMergedPdfs');
+
+        // If file is already inside the _dontOldMergedPdfs folder, skip
+        const normalized = path.normalize(filePath);
+        if (normalized.startsWith(path.normalize(subRoot + path.sep))) {
+            return normalized;
+        }
+
+        // Compute path relative to destFolder if inside; else fall back to basename
+        let rel = path.relative(destFolder, normalized);
+        if (rel.startsWith('..') || path.isAbsolute(rel)) {
+            rel = path.basename(normalized);
+        }
+
+        const targetPath = path.join(subRoot, rel);
+        await fs.mkdir(path.dirname(targetPath), { recursive: true });
+        try {
+            await fs.rename(normalized, targetPath);
+        } catch (err) {
+            // Fallback to copy+unlink across devices or if file is in use
+            await fs.copyFile(normalized, targetPath);
+            await fs.unlink(normalized);
+        }
+        return targetPath;
+    } catch (e) {
+        console.warn(`Failed to move original PDF '${filePath}' to _dontOldMergedPdfs:`, e);
+        return filePath;
+    }
+}
+
+pythonRoute.post('/mergeMutliplePdfs', async (req: any, resp: any) => {
+    try {
+
+        const destFolder = req?.body?.destFolder;
+        const pdfPaths = req?.body?.pdfPaths;
+
+        if (!destFolder || !pdfPaths) {
+            resp.status(400).send({
+                response: {
+                    "status": "failed",
+                    "success": false,
+                    "msg": "Pls. provide PdfPaths and Dest Folder for merge"
+                }
+            });
+            return;
+        }
+        const allResponses = []
+        const commonRunId = new mongoose.Types.ObjectId();
+        for (let pdfPath of pdfPaths) {
+            const pdfPathAsArray = pdfPath.split(",");
+            if (pdfPathAsArray.length < 2) {
+                console.log(`Skipping ${pdfPath}`)
+                continue;
+            }
+            const first_pdf_path = pdfPathAsArray[0];
+            const second_pdf_path = pdfPathAsArray[1];
+
+            const pdfPathsAsBody: MergePdfsBody = {
+                "first_pdf_path": first_pdf_path,
+                "second_pdf_path": second_pdf_path,
+            }
+            let third_pdf_path = "";
+            if (pdfPathAsArray.length > 2) {
+                third_pdf_path = pdfPathAsArray[2];
+                pdfPathsAsBody.third_pdf_path = third_pdf_path;
+            }
+            console.log(`Merging ${first_pdf_path} and ${second_pdf_path} ${third_pdf_path.length > 0 ? `and ${third_pdf_path}` : ""} `)
+            const _resp = await executePythonPostCall(pdfPathsAsBody, 'mergePdfs');
+            const runId = new mongoose.Types.ObjectId();
+            console.log(`Merged ${first_pdf_path} and ${second_pdf_path} ${third_pdf_path.length > 0 ? `and ${third_pdf_path}` : ""} `)
+            // Move results array to record where originals were moved
+            const moveResults: Array<{ sourcePath: string; movedToPath: string }> = [];
+            if (_resp?.status) {
+                // Move the original PDFs into _dontOldMergedPdfs while preserving structure relative to destFolder
+                for (const p of pdfPathAsArray) {
+                    if (typeof p === 'string' && p.length > 0) {
+                        const movedToPath = await moveOriginalIntoDontOldSubfolder(p, destFolder);
+                        moveResults.push({ sourcePath: p, movedToPath });
+                        console.log(`Merged ${p} moved to ${movedToPath}`)
+                    }
+                }
+            }
+
+            // Normalize operation result to expected shape
+            const respAny = _resp as any;
+            const operationResult = {
+                status: Boolean(respAny?.status ?? respAny?.success),
+                message: String(respAny?.message ?? respAny?.msg ?? ''),
+                data: respAny?.data ?? undefined,
+            } as {
+                status: boolean;
+                message: string;
+                data?: {
+                    input_folder: string;
+                    output_folder: string;
+                    nFirstPages: number;
+                    nLastPages: number;
+                };
+            };
+
+            // Persist tracker document for this merge
+            try {
+                await MergeMultiplePdfTracker.create({
+                    commonRunId,
+                    runId,
+                    first_pdf_path,
+                    second_pdf_path,
+                    ...(third_pdf_path ? { third_pdf_path } : {}),
+                    operationResult,
+                    moveResults,
+                });
+            } catch (e) {
+                console.warn('Failed to persist MERGE_MULTIPLE_PDF_TRACKER doc', e);
+            }
+
+            allResponses.push(_resp)
+        }
+
+        console.log(`Merged ${pdfPaths.length} pdfs  ${allResponses}`)
+        resp.status(200).send({
+            status: `Merged ${pdfPaths.length} pdfs.`,
+            response: allResponses
+        });
+    }
+
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})
