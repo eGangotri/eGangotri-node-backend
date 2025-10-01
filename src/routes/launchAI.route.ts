@@ -5,6 +5,8 @@ import { Request, Response } from 'express';
 import { IPdfTitleAndFileRenamingTrackerViaAI, PdfTitleAndFileRenamingTrackerViaAI } from '../models/pdfTitleAndFileRenamingTrackerViaAI';
 import { IPdfTitleRenamingViaAITracker, PdfTitleRenamingViaAITracker } from '../models/pdfTitleRenamingTrackerViaAI';
 import path from 'path';
+import { ObjectId } from 'mongodb';
+import { randomUUID } from 'crypto';
 export const launchAIRoute = express.Router();
 
 //ai/aiRenamer
@@ -70,11 +72,12 @@ launchAIRoute.post('/aiRenamer', async (req: any, resp: any) => {
                 }
             }
         }
- 
+
         const _renamingResults = [];
+        const commonRunId:string = randomUUID()
         for (let i = 0; i < srcFoldersList.length; i++) {
             const _result = await aiRenameTitleUsingReducedFolder(srcFoldersList[i],
-                 reducedFoldersList[i], outputSuffixesList[i])
+                reducedFoldersList[i], outputSuffixesList[i], commonRunId)
             _renamingResults.push(_result);
         }
 
@@ -101,12 +104,25 @@ launchAIRoute.post('/aiRenamer', async (req: any, resp: any) => {
             },
             { runs: 0, processedCount: 0, successCount: 0, failedCount: 0, errorCount: 0 }
         );
+        const _processedCount = _renamingResults.map((result: any) => result.processedCount).join(",");
+        const _successCount = _renamingResults.map((result: any) => result.successCount).join(",");
+        const _failedCount = _renamingResults.map((result: any) => result.failedCount).join(",");
+        const _errorCount = _renamingResults.map((result: any) => result.errorCount).join(",");
+
         const overallSuccess = summary.failedCount === 0 && _aggregatedResults.every((r: any) => r.success === true);
+        const msg = 
+        `${srcFoldersList.length} folders processed in ${_renamingResults.length} operations
+        overallSuccess: ${overallSuccess}
+        _processedCount: ${_processedCount} (${summary.processedCount} )
+        _successCount: ${_successCount} (${summary.successCount})
+        _failedCount: ${_failedCount} (${summary.failedCount})
+        _errorCount: ${_errorCount} (${summary.errorCount})
+       
+        `
         resp.status(200).send({
             "status": "success",
             response: {
-                "success": overallSuccess,
-                "msg": overallSuccess ? "Renaming completed successfully." : "Renaming completed with failures.",
+                "msg": msg,
                 "aggregated": _aggregatedResults,
                 "summary": summary,
                 "results": _renamingResults,
@@ -206,7 +222,7 @@ launchAIRoute.get("/getAllTitleRenamedViaAIList/:runId", async (req: Request, re
         res.status(500).json({ message: "Error fetching pdfTitleRenamedItems", error })
     }
 })
-;
+    ;
 
 //ai/getAllTitlePdfRenamedViaAIList
 launchAIRoute.get("/getAllTitlePdfRenamedViaAIList", async (req: Request, res: express.Response) => {

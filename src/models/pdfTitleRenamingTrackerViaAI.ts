@@ -30,6 +30,7 @@ export type PdfTitleRenamingViaAITrackerModel = mongoose.Model<PdfTitleRenamingV
 
 const PdfTitleRenamingTrackerViaAISchema = new mongoose.Schema(
   {
+    commonRunId: { type: String, required: true, index: true },
     runId: { type: String, required: true, index: true },
 
     // Context of the run
