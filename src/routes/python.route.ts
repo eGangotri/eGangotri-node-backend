@@ -66,7 +66,7 @@ pythonRoute.post('/getFirstAndLastNPages', async (req: any, resp: any) => {
                 response: {
                     successes: stats === combinedResults.length,
                     _cumulativeMsg: `${stats} of ${combinedResults.length} processed successfully`,
-                    ...combinedResults,
+                    combinedResults,
                 }
             });
         }

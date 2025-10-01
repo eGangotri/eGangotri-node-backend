@@ -150,7 +150,7 @@ async function renamePdfUsingMetadata(result: MetadataResult,
 
 export async function aiRenameTitleUsingReducedFolder(inputFolder: string,
     reducedFolder: string,
-    outputSuffix: string = "-renmer") {
+    outputSuffix: string = "-renamer", commonRunId:string) {
     console.log(`aiRenameTitleUsingReducedFolder srcFolder: ${inputFolder}, reducedFolder: ${reducedFolder}, outputSuffix: ${outputSuffix}`);
     let processedCount = 0;
     let successCount = 0;
@@ -243,6 +243,7 @@ export async function aiRenameTitleUsingReducedFolder(inputFolder: string,
             // Persist per-item rows for this batch with common runId
             try {
                 const perItemDocs = results.map((aiRes, j) => ({
+                    commonRunId,
                     runId,
                     srcFolder: inputFolder,
                     reducedFolder,
@@ -315,6 +316,7 @@ export async function aiRenameTitleUsingReducedFolder(inputFolder: string,
             console.log(`Failed to rename: ${processedCount - renamedCount}`);
 
             const _res = {
+                commonRunId,
                 runId,
                 processedCount,
                 successCount,
@@ -337,6 +339,7 @@ export async function aiRenameTitleUsingReducedFolder(inputFolder: string,
             // Persist failure summary in DB
             try {
                 await PdfTitleAndFileRenamingTrackerViaAI.create({
+                    commonRunId,
                     runId,
                     processedCount,
                     successCount,
@@ -351,6 +354,7 @@ export async function aiRenameTitleUsingReducedFolder(inputFolder: string,
             }
 
             return {
+                commonRunId,
                 runId,
                 success: false,
                 processedCount,
