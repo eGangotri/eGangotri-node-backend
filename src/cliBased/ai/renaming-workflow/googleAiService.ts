@@ -1,8 +1,9 @@
 import * as dotenv from 'dotenv';
 import * as path from 'path';
 import { MetadataResult } from './types';
-import { processPdfForAIRenaming } from './utils';
-import { AI_ENDPOINT, sleep } from './constants';
+import { processLocalFileForAIRenaming } from './utils';
+import { AI_ENDPOINT, PDF_METADATA_EXTRACTION_PROMPT, sleep } from './constants';
+import { PDF_MIME_TYPE } from '../../../cliBased/googleapi/_utils/constants';
 
 
 
@@ -37,7 +38,7 @@ export async function processWithGoogleAI(
     const randomDelay = Math.floor(Math.random() * 500);
     await sleep(randomDelay);
 
-    const {extractedMetadata, error} = await processPdfForAIRenaming(pdfFilePath);
+    const {extractedMetadata, error} = await processLocalFileForAIRenaming(pdfFilePath, PDF_MIME_TYPE, PDF_METADATA_EXTRACTION_PROMPT);
 
     if (error || extractedMetadata === 'NIL') {
       return {

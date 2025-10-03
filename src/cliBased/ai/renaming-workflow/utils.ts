@@ -1,4 +1,4 @@
-import { AI_ENDPOINT, AI_MAX_OUTPUT_TOKENS, GOOGLE_AI_API_KEY, METADATA_EXTRACTION_PROMPT, sleep } from "./constants";
+import { AI_ENDPOINT, AI_MAX_OUTPUT_TOKENS, GOOGLE_AI_API_KEY, INLINE_MAX_FILE_SIZE_MB, PDF_METADATA_EXTRACTION_PROMPT, sleep } from "./constants";
 import { BatchPair, PdfPair } from "./types";
 import * as fs from 'fs';
 import axios from 'axios';
@@ -47,29 +47,61 @@ export function formatFilename(metadata: string): string {
     return cleanName + '.pdf';
 }
 
-export function convertToBasicEncodedString(pdfFilePath: string): string {
+export function convertLocalFileToBasicEncodedString(filePath: string): string {
     // Read the PDF file as a buffer and check its size
-    const pdfBuffer = fs.readFileSync(pdfFilePath);
-    const fileSizeMB = pdfBuffer.length / (1024 * 1024);
-    const INLINE_MAX_PDF_SIZE_MB = Number(process.env.AI_INLINE_MAX_MB || 8); // Safer inline cap; prefer Files API beyond this
+    const fileAsBuffer = fs.readFileSync(filePath);
+    const fileSizeMB = fileAsBuffer.length / (1024 * 1024);
 
-    if (fileSizeMB > INLINE_MAX_PDF_SIZE_MB) {
-        console.warn(`WARNING: PDF file size (${fileSizeMB.toFixed(2)}MB) exceeds inline limit of ${INLINE_MAX_PDF_SIZE_MB}MB. Request may be rejected by the API.`);
+    if (fileSizeMB > INLINE_MAX_FILE_SIZE_MB) {
+        console.warn(`WARNING: Dile size (${fileSizeMB.toFixed(2)}MB) exceeds inline limit of ${INLINE_MAX_FILE_SIZE_MB}MB. Request may be rejected by the API.`);
     }
 
     // Convert to base64
-    const base64EncodedPdf = pdfBuffer.toString('base64');
+    const base64EncodedFile = fileAsBuffer.toString('base64');
 
-    return base64EncodedPdf;
+    return base64EncodedFile;
 }
 
-export const processPdfForAIRenaming = async (pdfFilePath: string,
+/**
+ * Encode an in-memory payload (ArrayBuffer/Uint8Array/Buffer) to base64 with inline size check.
+ * This avoids any local file IO and can be used with bytes fetched from Google Drive (alt: 'media').
+ */
+export function convertBufferToBasicEncodedString(
+    data: ArrayBuffer | Uint8Array | Buffer,
+    label: string = 'file'
+): string {
+    const buf: Buffer = Buffer.isBuffer(data)
+        ? data as Buffer
+        : (data instanceof Uint8Array
+            ? Buffer.from(data)
+            : Buffer.from(data as ArrayBuffer));
+
+    const fileSizeMB = buf.length / (1024 * 1024);
+    if (fileSizeMB > INLINE_MAX_FILE_SIZE_MB) {
+        console.warn(`WARNING: ${label} size (${fileSizeMB.toFixed(2)}MB) exceeds inline limit of ${INLINE_MAX_FILE_SIZE_MB}MB. Request may be rejected by the API.`);
+    }
+    return buf.toString('base64');
+}
+
+export const processLocalFileForAIRenaming = async (filePath: string, mimeType: string,
+    prompt: string,
+    retryCount: number = 0,
+    initialDelay: number = 1000): Promise<{ extractedMetadata: string, error: string }> => {
+    console.log(`processLocalFileForAIRenaming ${filePath}...`);
+    const base64EncodedFile = convertLocalFileToBasicEncodedString(filePath);
+    const _result = await processFileForAIRenaming(base64EncodedFile, mimeType, prompt, retryCount, initialDelay);
+    if (_result.error) {
+        return { extractedMetadata: '', error: _result.error + ': ' + filePath };
+    }
+    return _result;
+}
+
+export const processFileForAIRenaming = async (base64EncodedFile: string, mimeType: string, prompt: string,
     retryCount: number = 0,
     initialDelay: number = 1000): Promise<{ extractedMetadata: string, error: string }> => {
 
-    const base64EncodedPdf = convertToBasicEncodedString(pdfFilePath);
     // Always use inline_data (Files API path removed by request)
-    const requestPayload = generatePayload(base64EncodedPdf);
+    const requestPayload = generatePayload(base64EncodedFile, mimeType);
 
     try {
         // Make the API request to Google AI Studio
@@ -145,7 +177,7 @@ export const processPdfForAIRenaming = async (pdfFilePath: string,
                     await sleep(delayMs);
 
                     // Retry the request with increased retry count and delay
-                    return processPdfForAIRenaming(pdfFilePath, retryCount + 1, initialDelay);
+                    return processFileForAIRenaming(base64EncodedFile, mimeType, prompt, retryCount + 1, initialDelay);
                 } else {
                     const errorType = statusCode === 429 ? 'Rate limit exceeded' : 'Service Unavailable';
                     errorMessage = `${errorType}: ${statusCode === 429 ? 'Too many requests to the API' : 'Google AI service is temporarily unavailable'}. Tried ${maxRetries} times with backoff. Status code: ${statusCode}`;
@@ -156,11 +188,11 @@ export const processPdfForAIRenaming = async (pdfFilePath: string,
                 console.error(errorMessage);
             } else {
                 errorMessage = `API error: ${error.message} (Status code: ${statusCode || 'unknown'})`;
-                console.error(`Error processing PDF with Google AI: ${pdfFilePath}`, error);
+                console.error(`Error processing PDF with Google AI:`, error);
             }
         } else {
             errorMessage = `Error processing PDF: ${error.message || 'Unknown error occurred'}`;
-            console.error(`Error processing PDF with Google AI: ${pdfFilePath}`, error);
+            console.error(`Error processing PDF with Google AI:`, error);
         }
 
         return {
@@ -200,15 +232,15 @@ function extractTextFromCandidates(data: any): { text: string | undefined; finis
     }
 }
 
-const generatePayload = (base64EncodedPdf: string) => {
+const generatePayload = (base64EncodedPdf: string, mimeType: string) => {
     return {
         contents: [{
             role: 'user',
             parts: [
-                { text: METADATA_EXTRACTION_PROMPT },
+                { text: PDF_METADATA_EXTRACTION_PROMPT },
                 {
                     inline_data: {
-                        mime_type: 'application/pdf',
+                        mime_type: mimeType,
                         data: base64EncodedPdf
                     }
                 }
@@ -223,4 +255,4 @@ const generatePayload = (base64EncodedPdf: string) => {
     };
 }
 
-processPdfForAIRenaming("C:\\tmp\\BN.pdf", 0, 1000);
+//processLocalFileForAIRenaming("C:\\tmp\\BN.pdf", "application/pdf", 0, 1000);

@@ -4,7 +4,7 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 
 // Google AI Studio prompt for metadata extraction
-export  const METADATA_EXTRACTION_PROMPT = `The exercise below is to save a pdf with recognizable metadata mostly English, Sanskrit and other languages that use Brahmi based scripts
+export const PDF_METADATA_EXTRACTION_PROMPT = `The exercise below is to save a pdf with recognizable metadata mostly English, Sanskrit and other languages that use Brahmi based scripts
  and sometimes Urdu.
 
 The output should be in plain ASCII characters without exception.
@@ -137,6 +137,43 @@ If the publisher has address info such Penguin India drop the portion that will 
 ignore the pdf-header and pdf-footers which if provided is merely ascribing the custodians or scanning agencies which is irrelevant to our metadata extraction of the book`;
 
 
+export const SIMPLE_TITLE_AUTHOR_PROMPT = `
+This is an exercise to extract the title and author of the Cover Page of a book saved as a one page pdf/jpeg/png file.
+
+If the Image is not a cover-page of  book or manuscript but a stack of books then return NIL.
+
+The output should be in plain ASCII characters without exception.
+
+No diacritics should be ever used.
+
+The output should be in Title Case.
+
+The output should be in one line.
+
+The output should be in English only.
+
+The output should be in the format: Title - Author - Language - Series OR Publisher
+
+The Language or Script should be in 2 Alphabet ISO 639-1 format.
+
+Conventional English spellings of words in Sanskrit and other languages should be used.
+
+Example: Ram instead of Rama. Shiva instead of Siva or Shiv as per the English Conventions.
+
+Dont use any quotes in the the result , example if name is O'Donnell then remove the quotes.
+
+If a Series is seen example Anand Ashram Series from Pune or Kashmir Series of Text and Studies from Srinagar
+then add it also - including the Series nummber - after Author and hyphen. 
+
+But use Acronyms or short forms so AAS or KSTS but KVM for Kavyamala.
+
+If no Series is there then do smae for Publisher. If No Publisher then Press but with acronyms 
+So Nirnaya Sagar Press is NSP, Naval Kishore Press is NKP, Motilal Banarsidas is MLBD.
+
+Keep results under 40 characters.
+
+If no author, title, publisher or series is found then return the First Prominent Line written
+`
 
 /**
  * Sleep for a specified number of milliseconds
@@ -152,3 +189,5 @@ export const AI_ENDPOINT =
 
 
 export const AI_MAX_OUTPUT_TOKENS = Number(process.env.AI_MAX_OUTPUT_TOKENS || 8192);
+
+export const INLINE_MAX_FILE_SIZE_MB = Number(process.env.AI_INLINE_MAX_MB || 8); // Safer inline cap; prefer Files API beyond this

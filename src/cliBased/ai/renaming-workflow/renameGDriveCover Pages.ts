@@ -2,16 +2,17 @@ import 'dotenv/config';
 import * as path from 'path';
 import { getGoogleDriveInstance } from '../../googleapi/service/CreateGoogleDrive';
 import { extractGoogleDriveId } from '../../../mirror/GoogleDriveUtilsCommonCode';
+import { ALLOWED_MIME_TYPES_FOR_RENAMING } from '../../googleapi/_utils/constants';
+import { convertBufferToBasicEncodedString, processFileForAIRenaming } from './utils';
+import { SIMPLE_TITLE_AUTHOR_PROMPT } from './constants';
 
 function buildNewName(
   originalName: string,
-  fileId: string,
+  extractedMetadata: string,
 ): string {
 
   const ext = path.extname(originalName) || '';
-  const newName = `${fileId}`;
-
-  
+  const newName = `${extractedMetadata}`;
   return `${newName}${ext}`;
 }
 
@@ -23,17 +24,38 @@ export async function renameDriveFileByLink(
 
   // Get current name and mimeType
   const meta = await drive.files.get({ fileId, fields: 'id, name, mimeType', supportsAllDrives: true });
+
+
   const oldName = meta.data.name || 'unnamed';
 
-  // Only allow common types (jpeg/pdf) unless you want to broaden support
+  // Fetch Drive bytes in-memory (no local file IO)
+  const mediaResp = await drive.files.get(
+    { fileId, alt: 'media' },
+    { responseType: 'arraybuffer' }
+  );
+  
+  const buf = Buffer.from(mediaResp.data as ArrayBuffer);
+  const base64EncodedFile = convertBufferToBasicEncodedString(buf, oldName);
+
+  // You now have:
+  // - base64EncodedFile
+  // - mime (from meta.data.mimeType)
+  // Build your AI request payload with inline_data using the correct mime:
+  // inline_data: { mime_type: mime, data: base64EncodedFile }
+
+
+  // Only allow common types (jpeg/pdf/gif/png) unless you want to broaden support
   const mime = meta.data.mimeType || '';
-  const allowed = ['application/pdf', 'image/jpeg', 'image/jpg'];
-  if (!allowed.includes(mime)) {
+  if (!ALLOWED_MIME_TYPES_FOR_RENAMING.includes(mime)) {
     // Not blocking, but warn in log
-    console.warn(`Warning: File mimeType ${mime} not in allowed list (${allowed.join(', ')}). Proceeding to rename anyway.`);
+    console.warn(`Warning: File mimeType ${mime} not in allowed list (${ALLOWED_MIME_TYPES_FOR_RENAMING.join(', ')}). Proceeding to rename anyway.`);
   }
 
-  const newName = buildNewName(oldName, fileId);
+  const {extractedMetadata, error} = await processFileForAIRenaming(base64EncodedFile, mime, SIMPLE_TITLE_AUTHOR_PROMPT);
+  if (error || extractedMetadata === 'NIL') {
+    throw new Error(`Failed to process file ${oldName}: ${error}`);
+  }
+  const newName = buildNewName(oldName, extractedMetadata);
 
   await drive.files.update({
     fileId,
@@ -79,5 +101,7 @@ if (require.main === module) {
 }
 
 /**
- * pnpm run rename-gdrive-img-files -- --link "https://drive.google.com/file/d/1RwSiTnZ6Jb1veKvZiclOInsf0khX42ah/view?usp=drive_link" --pattern "Aml-1-Rack-2-Item-1"
+ * pnpm run rename-gdrive-img-files -- --link "https://drive.google.com/file/d/1FhU5LGLSImhFILSSObrcfXGMsFHbGFNY/view?usp=drive_link" 
  */
+
+// https://drive.google.com/drive/folders/1CK6QWUJFkNrBl7BK8lA8ZM7970tXvmjJ?usp=drive_link
