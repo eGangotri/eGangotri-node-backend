@@ -12,6 +12,7 @@ import { renameDriveFileByLink } from '../cliBased/ai/renaming-workflow/renameGD
 import { AI_DELAY_BETWEEN_CALLS_MS, sleep } from '../cliBased/ai/renaming-workflow/constants';
 import { GDRIVE_DEFAULT_IGNORE_FOLDER } from '../services/GDriveService';
 import { getGDriveContentsAsJson } from '../cliBased/googleapi/GoogleDriveApiReadAndExport';
+import { renameCPSByLink } from 'services/aiServices';
 
 export const launchAIRoute = express.Router();
 
@@ -266,6 +267,7 @@ launchAIRoute.post('/renameGDriveCPs', async (req: any, resp: any) => {
             googleDriveLink:
              ${googleDriveLink} 
             `)
+
         if (!googleDriveLink) {
             return resp.status(400).send({
                 response: {
@@ -275,30 +277,24 @@ launchAIRoute.post('/renameGDriveCPs', async (req: any, resp: any) => {
             });
         }
 
-        const googleDriveData = await getGDriveContentsAsJson(googleDriveLink,
-            "", ignoreFolder, ALL_TYPE);
-        let totalFileCount = 0;
-
-        if (googleDriveData.length > MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE) {
-            console.log(`:reanmeCPs:googleDriveData.length > MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE: ${googleDriveData.length} > ${MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE}`)
+        const result = await renameCPSByLink(googleDriveLink, ignoreFolder);
+        if (result.error) {
             return resp.status(400).send({
                 response: {
                     "status": "failed",
-                    "message": `Total files (${googleDriveData.length}) exceeds maximum limit of ${MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE}. Please do smaller batches.`
+                    "message": result.error
                 }
             });
         }
-        totalFileCount += googleDriveData.length;
-
-        for (let i = 0; i < googleDriveData.length; i++) {
-            const googleDriveDataItem = googleDriveData[i];
-            if (i > 0) {
-                console.log(`Waiting ${AI_DELAY_BETWEEN_CALLS_MS / 1000}s for next batch before next API call to avoid rate limits...`);
-                await sleep(AI_DELAY_BETWEEN_CALLS_MS);
+        
+        return resp.status(200).send({
+            response: {
+                "status": "success",
+                "message": `${result.successCount} files renamed successfully, ${result.failureCount} files failed to rename`,
+                "totalFileCount": result.totalFileCount,
+                "response": result.response
             }
-            renameDriveFileByLink(googleDriveDataItem.googleDriveLink);
-        }
-
+        });
     }
     catch (err: any) {
         console.log('Error', err);
