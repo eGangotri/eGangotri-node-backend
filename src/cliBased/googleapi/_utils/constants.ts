@@ -2,6 +2,13 @@ export const SHEET_NAME = "Sheet 1";
 
 export const FOLDER_MIME_TYPE = 'application/vnd.google-apps.folder';
 export const PDF_MIME_TYPE = 'application/pdf';
+export const JPEG_MIME_TYPE = 'image/jpeg';
+export const JPG_MIME_TYPE = 'image/jpg';
+export const PNG_MIME_TYPE = 'image/png';
+export const GIF_MIME_TYPE = 'image/gif';
+
+export const ALLOWED_MIME_TYPES_FOR_RENAMING = [PDF_MIME_TYPE, JPEG_MIME_TYPE, JPG_MIME_TYPE, PNG_MIME_TYPE,GIF_MIME_TYPE];
+
 export const ZIP_MIME_TYPE = 'application/zip';
 
 export const PDF_TYPE = 'pdf';
