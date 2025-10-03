@@ -242,8 +242,8 @@ https://archive.org/services/search/beta/page_production/?user_query=&page_type=
               "client_ip": "121.50.33.34:sra",
               "preferred_client_useragent": null,
               "client_useragent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36",
-              "preferred_client_id": null,
-              "client_id": "121.50.33.34:sra:cip",
+              "preferred_CLIENT_ID": null,
+              "CLIENT_ID": "121.50.33.34:sra:cip",
               "application_id": "pageproduction"
             },
             "routing": {
