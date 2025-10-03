@@ -1,4 +1,5 @@
 import * as dotenv from 'dotenv';
+import { AI_RENAMING_WORKFLOW_CONFIG } from './types';
 
 // Load environment variables
 dotenv.config();
@@ -191,3 +192,11 @@ export const AI_ENDPOINT =
 export const AI_MAX_OUTPUT_TOKENS = Number(process.env.AI_MAX_OUTPUT_TOKENS || 8192);
 
 export const INLINE_MAX_FILE_SIZE_MB = Number(process.env.AI_INLINE_MAX_MB || 8); // Safer inline cap; prefer Files API beyond this
+
+
+
+// Allow overrides from environment
+export const AI_BATCH_SIZE = Number(process.env.AI_BATCH_SIZE || AI_RENAMING_WORKFLOW_CONFIG.batchSize);
+export const AI_DELAY_BETWEEN_CALLS_MS = Number(process.env.AI_DELAY_BETWEEN_CALLS_MS || AI_RENAMING_WORKFLOW_CONFIG.delayBetweenCallsMs);
+export const AI_DELAY_BETWEEN_BATCHES_MS = Number(process.env.AI_DELAY_BETWEEN_BATCHES_MS || AI_RENAMING_WORKFLOW_CONFIG.delayBetweenBatchesMs);
+export const PDF_VALIDATE_TIMEOUT_MS = Number(process.env.PDF_VALIDATE_TIMEOUT_MS);

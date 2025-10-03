@@ -4,7 +4,6 @@ import { DOWNLOAD_COMPLETED_COUNT, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT } from '../c
 import { listFolderContentsAsArrayOfData } from '../cliBased/googleapi/service/GoogleApiService';
 import { getGoogleDriveInstance } from '../cliBased/googleapi/service/CreateGoogleDrive';
 
-const drive = getGoogleDriveInstance();
 import { timeInfo } from '../mirror/FrontEndBackendCommonCode';
 import { PDF_TYPE, ZIP_TYPE } from '../cliBased/googleapi/_utils/constants';
 import { genLinksAndFolders, validateGenGDriveLinks } from '../services/yarnListMakerService';
@@ -24,6 +23,7 @@ import { createFolderIfNotExistsAsync } from '../utils/FileUtils';
 import { GoogleApiDataWithLocalData } from '../cliBased/googleapi/types';
 
 export const gDriveRoute = express.Router();
+const drive = getGoogleDriveInstance();
 
 //
 gDriveRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
