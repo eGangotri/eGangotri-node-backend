@@ -8,7 +8,6 @@ const credentials = {
 };
 
 
-//http://localhost:3000/callback?code=4/0AVGzR1Aj6c8JJyzixbKXogZpTfwnKD13JmguM6xXx67Fm9HaCTJVttZRRwBANhfObGw-ew&scope=https://www.googleapis.com/auth/drive.file
 let GOOGLE_DRIVE_INSTANCE: drive_v3.Drive
 
 export const getGoogleDriveInstance = () => {
