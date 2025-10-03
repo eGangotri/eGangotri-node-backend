@@ -3,43 +3,20 @@ import * as path from 'path';
 import { getGoogleDriveInstance } from '../../googleapi/service/CreateGoogleDrive';
 import { extractGoogleDriveId } from '../../../mirror/GoogleDriveUtilsCommonCode';
 
-type RenameOptions = {
-  preserveExtension?: boolean;
-  appendRandom?: boolean;
-  randomLength?: number;
-};
-
-// We rely on existing project auth flow via getGoogleDriveInstance()
-
-function randomString(len = 6): string {
-  const alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let out = '';
-  for (let i = 0; i < len; i++) {
-    out += alphabet[Math.floor(Math.random() * alphabet.length)];
-  }
-  return out;
-}
-
 function buildNewName(
-  targetPattern: string,
   originalName: string,
-  opts: RenameOptions
+  fileId: string,
 ): string {
-  const { preserveExtension = true, appendRandom = false, randomLength = 6 } = opts;
 
   const ext = path.extname(originalName) || '';
-  const patternHasExt = path.extname(targetPattern) !== '';
-  const base = appendRandom ? `${targetPattern}-${randomString(randomLength)}` : targetPattern;
-  if (preserveExtension && !patternHasExt && ext) {
-    return `${base}${ext}`;
-  }
-  return base;
+  const newName = `${fileId}`;
+
+  
+  return `${newName}${ext}`;
 }
 
 export async function renameDriveFileByLink(
   driveLinkOrId: string,
-  targetPattern: string,
-  options: RenameOptions = {}
 ): Promise<{ fileId: string; oldName: string; newName: string }> {
   const drive = getGoogleDriveInstance();
   const fileId = extractGoogleDriveId(driveLinkOrId);
@@ -56,7 +33,7 @@ export async function renameDriveFileByLink(
     console.warn(`Warning: File mimeType ${mime} not in allowed list (${allowed.join(', ')}). Proceeding to rename anyway.`);
   }
 
-  const newName = buildNewName(targetPattern, oldName, options);
+  const newName = buildNewName(oldName, fileId);
 
   await drive.files.update({
     fileId,
@@ -79,19 +56,14 @@ async function cli() {
   };
 
   const link = getArg('--link') || getArg('-l');
-  const pattern = getArg('--pattern') || getArg('-p');
 
-  if (!link || !pattern) {
-    console.log('Usage: ts-node renameGDRiveImgFiles.ts --link <gdrive_link_or_id> --pattern <Aml-1-Rack-2-Item-1>');
+  if (!link) {
+    console.log('Usage: ts-node renameGDRiveImgFiles.ts --link <gdrive_link_or_id>');
     process.exit(1);
   }
 
   try {
-    const res = await renameDriveFileByLink(link, pattern, {
-      preserveExtension: true,
-      appendRandom: false,
-      randomLength: 6
-    });
+    const res = await renameDriveFileByLink(link);
     console.log(`Renamed file (${res.fileId})`);
     console.log(`Old Name: ${res.oldName}`);
     console.log(`New Name: ${res.newName}`);
