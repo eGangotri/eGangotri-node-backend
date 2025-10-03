@@ -1,12 +1,16 @@
 import { aiRenameTitleUsingReducedFolder } from '../cliBased/ai/renaming-workflow/renamePdfsViaAI';
 import * as express from 'express';
-import * as fs from 'fs';
 import { Request, Response } from 'express';
 import { IPdfTitleAndFileRenamingTrackerViaAI, PdfTitleAndFileRenamingTrackerViaAI } from '../models/pdfTitleAndFileRenamingTrackerViaAI';
 import { IPdfTitleRenamingViaAITracker, PdfTitleRenamingViaAITracker } from '../models/pdfTitleRenamingTrackerViaAI';
 import path from 'path';
-import { ObjectId } from 'mongodb';
 import { randomUUID } from 'crypto';
+import { ALL_TYPE } from '../cliBased/googleapi/_utils/constants';
+import { MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE } from 'cliBased/googleapi/GoogleDriveApiReadAndDownload';
+import { renameDriveFileByLink } from 'cliBased/ai/renaming-workflow/renameGDriveCoverPages';
+import { AI_DELAY_BETWEEN_CALLS_MS, sleep } from 'cliBased/ai/renaming-workflow/constants';
+import { GDRIVE_DEFAULT_IGNORE_FOLDER } from 'services/GDriveService';
+import { getGDriveContentsAsJson } from 'cliBased/googleapi/GoogleDriveApiReadAndExport';
 export const launchAIRoute = express.Router();
 
 //ai/aiRenamer
@@ -74,7 +78,7 @@ launchAIRoute.post('/aiRenamer', async (req: any, resp: any) => {
         }
 
         const _renamingResults = [];
-        const commonRunId:string = randomUUID()
+        const commonRunId: string = randomUUID()
         for (let i = 0; i < srcFoldersList.length; i++) {
             const _result = await aiRenameTitleUsingReducedFolder(srcFoldersList[i],
                 reducedFoldersList[i], outputSuffixesList[i], commonRunId)
@@ -110,8 +114,8 @@ launchAIRoute.post('/aiRenamer', async (req: any, resp: any) => {
         const _errorCount = _renamingResults.map((result: any) => result.errorCount).join(",");
 
         const overallSuccess = summary.failedCount === 0 && _aggregatedResults.every((r: any) => r.success === true);
-        const msg = 
-        `${srcFoldersList.length} folders processed in ${_renamingResults.length} operations
+        const msg =
+            `${srcFoldersList.length} folders processed in ${_renamingResults.length} operations
         overallSuccess: ${overallSuccess}
         _processedCount: ${_processedCount} (${summary.processedCount} )
         _successCount: ${_successCount} (${summary.successCount})
@@ -249,3 +253,53 @@ launchAIRoute.get("/getAllTitlePdfRenamedViaAIList", async (req: Request, res: e
         res.status(500).json({ message: "Error fetching pdfTitlePdfRenamedItems", error })
     }
 });
+
+
+//ai/renameGDriveCPs
+launchAIRoute.post('/renameGDriveCPs', async (req: any, resp: any) => {
+    try {
+        const googleDriveLink = req?.body?.googleDriveLink;
+        const ignoreFolder = req?.body?.ignoreFolder || GDRIVE_DEFAULT_IGNORE_FOLDER;
+        console.log(`:downloadFromGoogleDrive:
+            googleDriveLink:
+             ${googleDriveLink} 
+            `)
+        if (!googleDriveLink) {
+            return resp.status(400).send({
+                response: {
+                    "status": "failed",
+                    "message": "googleDriveLink and profile are mandatory"
+                }
+            });
+        }
+
+        const googleDriveData = await getGDriveContentsAsJson(googleDriveLink,
+            "", ignoreFolder, ALL_TYPE);
+        let totalFileCount = 0;
+
+        if (googleDriveData.length > MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE) {
+            console.log(`:reanmeCPs:googleDriveData.length > MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE: ${googleDriveData.length} > ${MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE}`)
+            return resp.status(400).send({
+                response: {
+                    "status": "failed",
+                    "message": `Total files (${googleDriveData.length}) exceeds maximum limit of ${MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE}. Please do smaller batches.`
+                }
+            });
+        }
+        totalFileCount += googleDriveData.length;
+
+        for (let i = 0; i < googleDriveData.length; i++) {
+            const googleDriveDataItem = googleDriveData[i];
+            if (i > 0) {
+                console.log(`Waiting ${AI_DELAY_BETWEEN_CALLS_MS / 1000}s for next batch before next API call to avoid rate limits...`);
+                await sleep(AI_DELAY_BETWEEN_CALLS_MS);
+            }
+            renameDriveFileByLink(googleDriveDataItem.googleDriveLink);
+        }
+
+    }
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})

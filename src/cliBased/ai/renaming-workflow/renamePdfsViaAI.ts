@@ -9,13 +9,14 @@ import { PdfTitleAndFileRenamingTrackerViaAI } from '../../../models/pdfTitleAnd
 import { PdfTitleRenamingViaAITracker } from '../../../models/pdfTitleRenamingTrackerViaAI';
 import { isPDFCorrupted } from '../../../utils/pdfValidator';
 import { AI_RENAMING_WORKFLOW_CONFIG, BatchPair, Config, MetadataResult, RenamingResult } from './types';
+import { AI_BATCH_SIZE, AI_DELAY_BETWEEN_BATCHES_MS, AI_DELAY_BETWEEN_CALLS_MS, PDF_VALIDATE_TIMEOUT_MS, sleep } from './constants';
 
 /**
  * Sleep for a specified number of milliseconds
  * @param ms - milliseconds to sleep
  * @returns Promise that resolves after the specified time
  */
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+//const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 /**
  * Process a batch of PDFs with Google AI Studio
@@ -41,7 +42,7 @@ async function processPdfBatch(pdfs: string[], config: Config): Promise<Metadata
             }
 
             // Validate PDF quickly before sending to AI
-            const validateTimeout = Number(process.env.PDF_VALIDATE_TIMEOUT_MS || 5000);
+            const validateTimeout = Number(PDF_VALIDATE_TIMEOUT_MS || 5000);
             const validity = await isPDFCorrupted(pdfPath, { quickCheck: true, timeoutMs: validateTimeout });
             if (!validity.isValid) {
                 const errMsg = `Invalid/Corrupt PDF: ${validity.error || 'Unknown error'}`;
@@ -150,29 +151,22 @@ async function renamePdfUsingMetadata(result: MetadataResult,
 
 export async function aiRenameTitleUsingReducedFolder(inputFolder: string,
     reducedFolder: string,
-    outputSuffix: string = "-renamer", commonRunId:string) {
+    outputSuffix: string = "-renamer", commonRunId: string) {
     console.log(`aiRenameTitleUsingReducedFolder srcFolder: ${inputFolder}, reducedFolder: ${reducedFolder}, outputSuffix: ${outputSuffix}`);
     let processedCount = 0;
     let successCount = 0;
     let errorCount = 0;
     try {
         const runId = randomUUID();
-        // Load environment variables
-        dotenv.config();
-
-        // Allow overrides from environment
-        const envBatchSize = Number(process.env.AI_BATCH_SIZE || AI_RENAMING_WORKFLOW_CONFIG.batchSize);
-        const envDelayBetweenCallsMs = Number(process.env.AI_DELAY_BETWEEN_CALLS_MS || AI_RENAMING_WORKFLOW_CONFIG.delayBetweenCallsMs);
-        const envDelayBetweenBatchesMs = Number(process.env.AI_DELAY_BETWEEN_BATCHES_MS || AI_RENAMING_WORKFLOW_CONFIG.delayBetweenBatchesMs);
 
         const config: Config = {
             ...AI_RENAMING_WORKFLOW_CONFIG,
             inputFolder,
             reducedFolder,
             outputSuffix,
-            batchSize: Number.isFinite(envBatchSize) && envBatchSize > 0 ? envBatchSize : AI_RENAMING_WORKFLOW_CONFIG.batchSize,
-            delayBetweenCallsMs: Number.isFinite(envDelayBetweenCallsMs) && envDelayBetweenCallsMs >= 0 ? envDelayBetweenCallsMs : AI_RENAMING_WORKFLOW_CONFIG.delayBetweenCallsMs,
-            delayBetweenBatchesMs: Number.isFinite(envDelayBetweenBatchesMs) && envDelayBetweenBatchesMs >= 0 ? envDelayBetweenBatchesMs : AI_RENAMING_WORKFLOW_CONFIG.delayBetweenBatchesMs,
+            batchSize: Number.isFinite(AI_BATCH_SIZE) && AI_BATCH_SIZE > 0 ? AI_BATCH_SIZE : AI_RENAMING_WORKFLOW_CONFIG.batchSize,
+            delayBetweenCallsMs: Number.isFinite(AI_DELAY_BETWEEN_CALLS_MS) && AI_DELAY_BETWEEN_CALLS_MS >= 0 ? AI_DELAY_BETWEEN_CALLS_MS : AI_RENAMING_WORKFLOW_CONFIG.delayBetweenCallsMs,
+            delayBetweenBatchesMs: Number.isFinite(AI_DELAY_BETWEEN_BATCHES_MS) && AI_DELAY_BETWEEN_BATCHES_MS >= 0 ? AI_DELAY_BETWEEN_BATCHES_MS : AI_RENAMING_WORKFLOW_CONFIG.delayBetweenBatchesMs,
         }
 
         const outputFolder = path.join(path.dirname(inputFolder), outputSuffix);
@@ -255,7 +249,7 @@ export async function aiRenameTitleUsingReducedFolder(inputFolder: string,
                     fileName: path.basename(pairedBtch.pdfs[j]),
                     extractedMetadata: aiRes.extractedMetadata,
                     error: aiRes.error,
-                    newFilePath:path.join(outputFolder, aiRes.extractedMetadata)
+                    newFilePath: path.join(outputFolder, aiRes.extractedMetadata)
                 }));
                 if (perItemDocs.length > 0) {
                     await PdfTitleRenamingViaAITracker.insertMany(perItemDocs);
