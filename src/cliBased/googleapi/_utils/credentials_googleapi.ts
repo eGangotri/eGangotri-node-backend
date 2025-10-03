@@ -2,11 +2,15 @@ import * as dotenv from 'dotenv' // see https://github.com/motdotla/dotenv#how-d
 dotenv.config()
 const CONFS = process.env// Set up OAuth2 credentials
 export const _credentials = {
-    client_id: CONFS.client_id,
-    client_secret: CONFS.client_secret,
-    redirect_uris: [CONFS.redirect_uris],
+  client_id: CONFS.GOOGLE_DRIVE_CLIENT_ID,
+  client_secret: CONFS.GOOGLE_DRIVE_CLIENT_SECRET,
+  redirect_uris: [CONFS.GOOGLE_DRIVE_REDIRECT_URI],
 };
-export const SCOPES = CONFS.GOOGLE_DRIVE_API_SCOPE || 'https://www.googleapis.com/auth/drive.readonly';
-//['https://www.googleapis.com/auth/drive.file'];
+
+export const GOOGLE_DRIVE_REFRESH_TOKEN = CONFS.GOOGLE_DRIVE_REFRESH_TOKEN;
+export const SCOPES =
+  (process.env.GOOGLE_DRIVE_API_SCOPE
+    ? process.env.GOOGLE_DRIVE_API_SCOPE.split(',').map(s => s.trim()).filter(Boolean)
+    : ['https://www.googleapis.com/auth/drive']);
 
 export const TOKEN_PATH = './token.json'; // Path to store the token

@@ -1,11 +1,14 @@
 import { drive_v3, google } from 'googleapis';
-import { _credentials } from '../_utils/credentials_googleapi';
+import { _credentials, GOOGLE_DRIVE_REFRESH_TOKEN } from '../_utils/credentials_googleapi';
 
 // Set up OAuth2 credentials
 const credentials = {
     ..._credentials,
-    refresh_token: '1//0gNBMXupFzUULCgYIARAAGBASNwF-L9IrnF4rkWHpvRSV1TqBV7ujMRHZP-biHpMFJQvpWW-4e5dlNGlNyGfnCW0ywWv3XLkHtmc',
+    GOOGLE_DRIVE_REFRESH_TOKEN: GOOGLE_DRIVE_REFRESH_TOKEN
 };
+
+
+//http://localhost:3000/callback?code=4/0AVGzR1Aj6c8JJyzixbKXogZpTfwnKD13JmguM6xXx67Fm9HaCTJVttZRRwBANhfObGw-ew&scope=https://www.googleapis.com/auth/drive.file
 let GOOGLE_DRIVE_INSTANCE: drive_v3.Drive
 
 export const getGoogleDriveInstance = () => {
@@ -19,7 +22,7 @@ export const getGoogleDriveInstance = () => {
 
         // Set the credentials for the OAuth2 client
         oauth2Client.setCredentials({
-            refresh_token: credentials.refresh_token,
+            refresh_token: credentials.GOOGLE_DRIVE_REFRESH_TOKEN,
         });
 
         // Create a new Google Drive instance

@@ -20,7 +20,7 @@
     "move-merged-pdfs": "node -r ts-node/register ./src/imgToPdf/conversionService/moveMergedPdfs.ts",
     "vanity": "ts-node ./src/vanityService/VanityPdf.ts",
     "catalog": "ts-node ./src/cliBased/googleapi/GoogleDriveApiReadAndExport.ts",
-    "refresh": "ts-node ./src/cliBased/googleapi/_utils/getRefreshToken.ts",
+    "get-refresh-token": "ts-node ./src/cliBased/googleapi/_utils/getRefreshToken.ts",
     "extractFirstAndLastNPages": "cross-env NODE_OPTIONS=--max-old-space-size=16384 ts-node ./src/cliBased/pdf/extractFirstAndLastNPages.ts",
     "combineExcels": "ts-node ./src/cliBased/googleapi/_utils/CombineMainAndReducedExcelData",
     "excelutil": "ts-node ./src/cliBased/googleapi/_utils/ExcelUtils",
@@ -54,7 +54,8 @@
     "extract-catalog": "ts-node ./src/cliBased/pdf/extractCatalogFromPDF.ts",
     "process-asha-catalog": "ts-node ./src/_adHoc/processAshaArchivesCatalog.ts",
     "copy-asha-pdfs": "ts-node ./src/_adHoc/ashaCatalogPdfCopy.ts",
-    "rename-pdfs-via-ai": "ts-node ./src/cliBased/ai/renaming-workflow/renamePdfsViaAI.ts"
+    "rename-pdfs-via-ai": "ts-node ./src/cliBased/ai/renaming-workflow/renamePdfsViaAI.ts",
+    "rename-gdrive-img-files": "ts-node ./src/cliBased/ai/renaming-workflow/renameGDRiveImgFiles.ts"
   },
   "repository": {
     "type": "git",
