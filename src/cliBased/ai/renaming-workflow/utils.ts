@@ -96,12 +96,14 @@ export const processLocalFileForAIRenaming = async (filePath: string, mimeType: 
     return _result;
 }
 
-export const processFileForAIRenaming = async (base64EncodedFile: string, mimeType: string, prompt: string,
+export const processFileForAIRenaming = async (base64EncodedFile: string,
+     mimeType: string,
+      prompt: string,
     retryCount: number = 0,
     initialDelay: number = 1000): Promise<{ extractedMetadata: string, error: string }> => {
 
     // Always use inline_data (Files API path removed by request)
-    const requestPayload = generatePayload(base64EncodedFile, mimeType);
+    const requestPayload = generatePayload(base64EncodedFile, mimeType, prompt);
 
     try {
         // Make the API request to Google AI Studio
@@ -232,12 +234,12 @@ function extractTextFromCandidates(data: any): { text: string | undefined; finis
     }
 }
 
-const generatePayload = (base64EncodedPdf: string, mimeType: string) => {
+const generatePayload = (base64EncodedPdf: string, mimeType: string, prompt: string) => {
     return {
         contents: [{
             role: 'user',
             parts: [
-                { text: PDF_METADATA_EXTRACTION_PROMPT },
+                { text: prompt },
                 {
                     inline_data: {
                         mime_type: mimeType,

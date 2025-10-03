@@ -53,7 +53,8 @@ export async function renameDriveFileByLink(
 
   const {extractedMetadata, error} = await processFileForAIRenaming(base64EncodedFile, mime, SIMPLE_TITLE_AUTHOR_PROMPT);
   if (error || extractedMetadata === 'NIL') {
-    throw new Error(`Failed to process file ${oldName}: ${error}`);
+    console.log(`Failed to process file ${oldName}: ${error}`);
+    return { fileId, oldName, newName: oldName };
   }
   const newName = buildNewName(oldName, extractedMetadata);
 
