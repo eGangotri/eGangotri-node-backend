@@ -1,3 +1,7 @@
+import * as dotenv from 'dotenv';
+
+// Load environment variables
+dotenv.config();
 
 // Google AI Studio prompt for metadata extraction
 export  const METADATA_EXTRACTION_PROMPT = `The exercise below is to save a pdf with recognizable metadata mostly English, Sanskrit and other languages that use Brahmi based scripts
@@ -131,3 +135,20 @@ ignore comas
 If the publisher has address info such Penguin India drop the portion that will describe the country
 
 ignore the pdf-header and pdf-footers which if provided is merely ascribing the custodians or scanning agencies which is irrelevant to our metadata extraction of the book`;
+
+
+
+/**
+ * Sleep for a specified number of milliseconds
+ * @param ms - milliseconds to sleep
+ * @returns Promise that resolves after the specified time
+ */
+export const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+export const GOOGLE_AI_API_KEY = process.env.GOOGLE_AI_API_KEY;
+
+export const AI_ENDPOINT =
+  `${process.env.AI_BASE_URL}${process.env.AI_API_VERSION}${process.env.AI_MODEL}${process.env.AI_METHOD}`;
+
+
+export const AI_MAX_OUTPUT_TOKENS = Number(process.env.AI_MAX_OUTPUT_TOKENS || 8192);
