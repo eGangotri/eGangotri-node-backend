@@ -1,4 +1,4 @@
-import path from 'path'; 
+import path from 'path';
 import * as express from 'express';
 
 import { aiRenameTitleUsingReducedFolder } from '../cliBased/ai/renaming-workflow/renamePdfsViaAI';
@@ -272,22 +272,33 @@ launchAIRoute.post('/renameGDriveCPs', async (req: any, resp: any) => {
             });
         }
 
-        const result = await renameCPSByLink(googleDriveLink, ignoreFolder);
-        if (result.error) {
-            return resp.status(400).send({
-                response: {
-                    "status": "failed",
-                    "message": result.error
-                }
+        const links = googleDriveLink.includes(",") ? googleDriveLink.split(",").map((link: string) => link.trim()) : [googleDriveLink.trim()];
+        const megaResult = []
+        for (const link of links) {
+            const result = await renameCPSByLink(link, ignoreFolder);
+            megaResult.push({
+                "status": "success",
+                "message": `${result.successCount} files renamed successfully for ${link
+                    }, ${result.failureCount} files failed to rename`,
+                "totalFileCount": result.totalFileCount,
+                "response": result.response,
+                result: result
             });
         }
-        
+
+        const totalSuccessCount = megaResult.reduce((acc, result) => acc + result.successCount, 0);
+        const totalFailureCount = megaResult.reduce((acc, result) => acc + result.failureCount, 0);
+        const totalFileCount = megaResult.reduce((acc, result) => acc + result.totalFileCount, 0);
+        const totalErrorCount = megaResult.reduce((acc, result) => acc + (result?.error?.length > 0 ? 1 : 0), 0);
         return resp.status(200).send({
             response: {
                 "status": "success",
-                "message": `${result.successCount} files renamed successfully, ${result.failureCount} files failed to rename`,
-                "totalFileCount": result.totalFileCount,
-                "response": result.response
+                "message": `${megaResult.length} links processed`,
+                totalSuccessCount,
+                totalFailureCount,
+                totalFileCount,
+                totalErrorCount,
+                "response": megaResult
             }
         });
     }
