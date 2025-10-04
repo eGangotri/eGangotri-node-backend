@@ -115,7 +115,6 @@ export const processFileForAIRenaming = async (base64EncodedFile: string,
             maxBodyLength: Infinity,
             maxContentLength: Infinity
         });
-        console.log(`Response: ${JSON.stringify(response.data, null, 2)}`);
         // Extract the generated text from the Google API response format (Gemini 1.5/2.0/2.5 compatible)
         const { text, finishReason } = extractTextFromCandidates(response.data);
         const usage = response.data?.usageMetadata || {};

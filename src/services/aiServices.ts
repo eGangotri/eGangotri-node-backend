@@ -1,8 +1,8 @@
-import { AI_DELAY_BETWEEN_CALLS_MS } from "cliBased/ai/renaming-workflow/constants";
-import { renameDriveFileByLink } from "cliBased/ai/renaming-workflow/renameGDriveCoverPages";
-import { ALL_TYPE } from "cliBased/googleapi/_utils/constants";
-import { MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE } from "cliBased/googleapi/GoogleDriveApiReadAndDownload";
-import { getGDriveContentsAsJson } from "cliBased/googleapi/GoogleDriveApiReadAndExport";
+import { AI_DELAY_BETWEEN_CALLS_MS } from "../cliBased/ai/renaming-workflow/constants";
+import { renameDriveFileByLink } from "../cliBased/ai/renaming-workflow/renameGDriveCoverPages";
+import { ALL_TYPE } from "../cliBased/googleapi/_utils/constants";
+import { MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE } from "../cliBased/googleapi/GoogleDriveApiReadAndDownload";
+import { getGDriveContentsAsJson } from "../cliBased/googleapi/GoogleDriveApiReadAndExport";
 import { sleep } from "openai/core";
 
 export const renameCPSByLink = async (googleDriveLink: string,
