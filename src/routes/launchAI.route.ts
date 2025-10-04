@@ -6,13 +6,8 @@ import { Request, Response } from 'express';
 import { IPdfTitleAndFileRenamingTrackerViaAI, PdfTitleAndFileRenamingTrackerViaAI } from '../models/pdfTitleAndFileRenamingTrackerViaAI';
 import { IPdfTitleRenamingViaAITracker, PdfTitleRenamingViaAITracker } from '../models/pdfTitleRenamingTrackerViaAI';
 import { randomUUID } from 'crypto';
-import { ALL_TYPE } from '../cliBased/googleapi/_utils/constants';
-import { MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE } from '../cliBased/googleapi/GoogleDriveApiReadAndDownload';
-import { renameDriveFileByLink } from '../cliBased/ai/renaming-workflow/renameGDriveCoverPages';
-import { AI_DELAY_BETWEEN_CALLS_MS, sleep } from '../cliBased/ai/renaming-workflow/constants';
 import { GDRIVE_DEFAULT_IGNORE_FOLDER } from '../services/GDriveService';
-import { getGDriveContentsAsJson } from '../cliBased/googleapi/GoogleDriveApiReadAndExport';
-import { renameCPSByLink } from 'services/aiServices';
+import { renameCPSByLink } from '../services/aiServices';
 
 export const launchAIRoute = express.Router();
 

@@ -6,16 +6,6 @@ import { ALLOWED_MIME_TYPES_FOR_RENAMING } from '../../googleapi/_utils/constant
 import { convertBufferToBasicEncodedString, processFileForAIRenaming } from './utils';
 import { SIMPLE_TITLE_AUTHOR_PROMPT } from './constants';
 
-function buildNewName(
-  originalName: string,
-  extractedMetadata: string,
-): string {
-
-  const ext = path.extname(originalName) || '';
-  const newName = `${extractedMetadata}`;
-  return `${newName}${ext}`;
-}
-
 export async function renameDriveFileByLink(
   driveLinkOrId: string,
 ): Promise<{ fileId: string; oldName: string; newName: string }> {
@@ -33,7 +23,7 @@ export async function renameDriveFileByLink(
     { fileId, alt: 'media' },
     { responseType: 'arraybuffer' }
   );
-  
+
   const buf = Buffer.from(mediaResp.data as ArrayBuffer);
   const base64EncodedFile = convertBufferToBasicEncodedString(buf, oldName);
 
@@ -51,21 +41,24 @@ export async function renameDriveFileByLink(
     console.warn(`Warning: File mimeType ${mime} not in allowed list (${ALLOWED_MIME_TYPES_FOR_RENAMING.join(', ')}). Proceeding to rename anyway.`);
   }
 
-  const {extractedMetadata, error} = await processFileForAIRenaming(base64EncodedFile, mime, SIMPLE_TITLE_AUTHOR_PROMPT);
+  const { extractedMetadata, error } = await processFileForAIRenaming(base64EncodedFile, mime, SIMPLE_TITLE_AUTHOR_PROMPT);
   if (error || extractedMetadata === 'NIL') {
     console.log(`Failed to process file ${oldName}: ${error}`);
     return { fileId, oldName, newName: oldName };
   }
-  const newName = buildNewName(oldName, extractedMetadata);
 
-  await drive.files.update({
-    fileId,
-    requestBody: { name: newName },
-    fields: 'id, name',
-    supportsAllDrives: true
-  });
+  const ext = path.extname(extractedMetadata) || '';
 
-  return { fileId, oldName, newName };
+  if (extractedMetadata.length - ext.length > 3) {
+    await drive.files.update({
+      fileId,
+      requestBody: { name: extractedMetadata },
+      fields: 'id, name',
+      supportsAllDrives: true
+    });
+  }
+
+  return { fileId, oldName, newName: extractedMetadata };
 }
 
 // Simple CLI usage:
@@ -102,7 +95,7 @@ if (require.main === module) {
 }
 
 /**
- * pnpm run rename-gdrive-img-files -- --link "https://drive.google.com/file/d/1FhU5LGLSImhFILSSObrcfXGMsFHbGFNY/view?usp=drive_link" 
+ * pnpm run rename-gdrive-img-files -- --link "https://drive.google.com/file/d/1FhU5LGLSImhFILSSObrcfXGMsFHbGFNY/view?usp=drive_link"
  */
 
 // https://drive.google.com/drive/folders/1CK6QWUJFkNrBl7BK8lA8ZM7970tXvmjJ?usp=drive_link
