@@ -7,7 +7,7 @@ import { IPdfTitleAndFileRenamingTrackerViaAI, PdfTitleAndFileRenamingTrackerVia
 import { IPdfTitleRenamingViaAITracker, PdfTitleRenamingViaAITracker } from '../models/pdfTitleRenamingTrackerViaAI';
 import { randomUUID } from 'crypto';
 import { GDRIVE_DEFAULT_IGNORE_FOLDER } from '../services/GDriveService';
-import { renameCPSByLink } from '../services/aiServices';
+import { renameCPSByLink, RenameCPSByLinkResponse } from '../services/aiServices';
 
 export const launchAIRoute = express.Router();
 
@@ -273,23 +273,18 @@ launchAIRoute.post('/renameGDriveCPs', async (req: any, resp: any) => {
         }
 
         const links = googleDriveLink.includes(",") ? googleDriveLink.split(",").map((link: string) => link.trim()) : [googleDriveLink.trim()];
-        const megaResult = []
+        const megaResult: RenameCPSByLinkResponse[] = []
         for (const link of links) {
             const result = await renameCPSByLink(link, ignoreFolder);
-            megaResult.push({
-                "status": "success",
-                "message": `${result.successCount} files renamed successfully for ${link
-                    }, ${result.failureCount} files failed to rename`,
-                "totalFileCount": result.totalFileCount,
-                "response": result.response,
-                result: result
-            });
+            megaResult.push(result);
+            console.log(`response: ${JSON.stringify(result)}`)
         }
 
-        const totalSuccessCount = megaResult.reduce((acc, result) => acc + result.successCount, 0);
-        const totalFailureCount = megaResult.reduce((acc, result) => acc + result.failureCount, 0);
+        const totalSuccessCount = megaResult.reduce((acc, result) => acc + (Number(result.successCount) || 0), 0);
+        const totalFailureCount = megaResult.reduce((acc, result) => acc + (Number(result.failureCount) || 0), 0);
         const totalFileCount = megaResult.reduce((acc, result) => acc + result.totalFileCount, 0);
-        const totalErrorCount = megaResult.reduce((acc, result) => acc + (result?.error?.length > 0 ? 1 : 0), 0);
+        const totalErrorCount = megaResult.reduce((acc, result) => acc + ((result?.errors.length || 0)), 0);
+      
         return resp.status(200).send({
             response: {
                 "status": "success",
@@ -298,7 +293,8 @@ launchAIRoute.post('/renameGDriveCPs', async (req: any, resp: any) => {
                 totalFailureCount,
                 totalFileCount,
                 totalErrorCount,
-                "response": megaResult
+                "errors": megaResult.flatMap(result => result.errors),
+                "response": megaResult,
             }
         });
     }

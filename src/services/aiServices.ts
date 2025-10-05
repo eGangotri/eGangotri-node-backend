@@ -5,15 +5,19 @@ import { MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE } from "../cliBased/googleapi/GoogleD
 import { getGDriveContentsAsJson } from "../cliBased/googleapi/GoogleDriveApiReadAndExport";
 import { sleep } from "openai/core";
 
-export const renameCPSByLink = async (googleDriveLink: string,
-    ignoreFolder: string
-):Promise<{
+export type RenameCPSByLinkResponse = {
+    status?: string,
+    message?: string,
     response: any[],
     successCount: number,
     failureCount: number,
     totalFileCount: number,
-    error?: string
-}> => {
+    errors?: string[]
+}
+
+export const renameCPSByLink = async (googleDriveLink: string,
+    ignoreFolder: string
+): Promise<RenameCPSByLinkResponse> => {
     const googleDriveData = await getGDriveContentsAsJson(googleDriveLink,
         "", ignoreFolder, ALL_TYPE);
     let totalFileCount = 0;
@@ -25,7 +29,7 @@ export const renameCPSByLink = async (googleDriveLink: string,
             successCount: 0,
             failureCount: 0,
             totalFileCount: 0,
-            error: `Total files (${googleDriveData.length}) exceeds maximum limit of ${MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE}. Please do smaller batches.`
+            errors: [`Total files (${googleDriveData.length}) exceeds maximum limit of ${MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE}. Please do smaller batches.`]
         }
     }
 
@@ -33,11 +37,12 @@ export const renameCPSByLink = async (googleDriveLink: string,
     const response = []
     let failureCount = 0;
     let successCount = 0;
+    const errors = []
     for (let i = 0; i < googleDriveData.length; i++) {
         const googleDriveDataItem = googleDriveData[i];
         try {
             if (i > 0) {
-                console.log(`Waiting ${AI_DELAY_BETWEEN_CALLS_MS / 1000}s for next batch before next API call to avoid rate limits...`);
+                //console.log(`Waiting ${AI_DELAY_BETWEEN_CALLS_MS / 1000}s for next batch before next API call to avoid rate limits...`);
                 await sleep(AI_DELAY_BETWEEN_CALLS_MS);
             }
             const renameResult = await renameDriveFileByLink(googleDriveDataItem.googleDriveLink);
@@ -52,18 +57,22 @@ export const renameCPSByLink = async (googleDriveLink: string,
         catch (err) {
             console.log(`Error renaming file ${googleDriveDataItem.googleDriveLink}: ${err}`);
             failureCount++;
+            errors.push(`Error renaming file ${googleDriveDataItem.googleDriveLink}: ${err}`);
             continue;
         }
     }
 
     const results = {
-        response,
+        "status": "success",
+        "message": `${successCount} files renamed successfully for ${googleDriveLink
+        }, ${failureCount} files failed to rename`,
+        // Expose counts at the top level so aggregation below works
         successCount,
         failureCount,
         totalFileCount,
-    };
-    console.log(`response: ${JSON.stringify(results)}`)
-
-    return results
+        errors,
+        response,
+    }
 }
+
 

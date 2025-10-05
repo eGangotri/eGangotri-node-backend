@@ -37,7 +37,7 @@ async function processPdfBatch(pdfs: string[], config: Config): Promise<Metadata
 
             // Add delay between API calls to avoid rate limiting, except for the first call
             if (i > 0) {
-                console.log(`Waiting ${delayBetweenCalls / 1000}s for next batch before next API call to avoid rate limits...`);
+               // console.log(`Waiting ${delayBetweenCalls / 1000}s for next batch before next API call to avoid rate limits...`);
                 await sleep(delayBetweenCalls);
             }
 
