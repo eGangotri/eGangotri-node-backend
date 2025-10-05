@@ -17,10 +17,10 @@ export const downloadFileFromGoogleDrive = async (driveLinkOrFolderId: string,
     fileName: string = "",
     fileSizeRaw = "0",
     gDriveDownloadTaskId: string = "",
-    downloadCounterController = "") => {
+    runIdWithIndex = "") => {
     console.log(`downloadFileFromGoogleDrive ${driveLinkOrFolderId}`)
     const result = await downloadGDriveFileUsingGDriveApi(driveLinkOrFolderId, destPath,
-        fileName, fileSizeRaw, gDriveDownloadTaskId, downloadCounterController);
+        fileName, fileSizeRaw, gDriveDownloadTaskId, runIdWithIndex);
     return result;
 }
 
@@ -88,7 +88,7 @@ export const downloadGDriveFileUsingGDriveApi = async (
     fileName: string = "",
     fileSizeRaw: string = "0",
     gDriveDownloadTaskId: string = "",
-    downloadCounterController: string = ""
+    runIdWithIndex: string = ""
 ): Promise<{ status: string; success: boolean; destPath: string , error?: string}> => {
     const fileId = extractGoogleDriveId(driveLinkOrFileID);
     console.log(`downloadGDriveFileUsingGDriveApi ${driveLinkOrFileID} ${fileId} to ${destPath}`);
@@ -146,16 +146,16 @@ export const downloadGDriveFileUsingGDriveApi = async (
         });
 
         console.log(`Download complete for "${fileName}"`);
-        const fileConsistency = await checkFileSizeConsistency(destPath, fileName, fileSizeRaw, downloadCounterController);
+        const fileConsistency = await checkFileSizeConsistency(destPath, fileName, fileSizeRaw, runIdWithIndex);
         const result = fileSizeRaw ? fileConsistency : { success: true };
 
         if (result?.success) {
-            incrementDownloadCompleted(downloadCounterController);
+            incrementDownloadCompleted(runIdWithIndex);
             await _updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, DownloadHistoryStatus.Completed, `completed d/l of ${fileName}`, destPath);
             return { status: `Downloaded ${fileName} to ${destPath}`, success: true, destPath };
         } else {
             console.log(`downloadGDriveFileUsingGDriveApi else-1`)
-            incrementDownloadFailed(downloadCounterController);
+            incrementDownloadFailed(runIdWithIndex);
             console.log(`downloadGDriveFileUsingGDriveApi else-2`)
 
             await _updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, DownloadHistoryStatus.Failed, `failed d/l of ${fileName}`, destPath);
@@ -169,8 +169,8 @@ export const downloadGDriveFileUsingGDriveApi = async (
     } catch (error) {
         const errorContext = `Error during (${JSON.stringify(error)}) d/l for ${fileName}`;
         console.error(`${errorContext}:`, error.message);
-        if (downloadCounterController) {
-            incrementDownloadInError(downloadCounterController);
+        if (runIdWithIndex) {
+            incrementDownloadInError(runIdWithIndex);
         }
         await _updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, DownloadHistoryStatus.Failed, `${errorContext}: ${error.message}`, destPath);
         return { status: `${errorContext}: ${error.message}`,
