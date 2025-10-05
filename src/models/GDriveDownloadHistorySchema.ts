@@ -31,6 +31,7 @@ export interface IGDriveDownload extends Document {
     status: DownloadHistoryStatus;
     createdAt: Date;
     updatedAt: Date;
+    runId: string;
     msg: string;
     googleDriveLink: string;
     profileNameOrAbsPath: string;
@@ -57,6 +58,7 @@ const QuickStatusSchema: Schema = new Schema(
 const GDriveDownloadHistorySchema: Schema = new Schema(
     {
         googleDriveLink: { type: String, required: true },
+        runId: { type: String, required: true },
         profileNameOrAbsPath: { type: String, required: true },
         fileDumpFolder: { type: String, required: true },
         gDriveRootFolder: { type: String, required: false },
@@ -74,13 +76,14 @@ const GDriveDownloadHistorySchema: Schema = new Schema(
         // Add indexes for frequently queried fields
         indexes: [
             { googleDriveLink: 1 },
+            { runId: 1 },
             { status: 1 },
             { createdAt: -1 },
             { profileNameOrAbsPath: 1 },
             { downloadType: 1 },
             // Compound indexes for common query patterns
             { status: 1, createdAt: -1 },
-            { googleDriveLink: 1, status: 1 }
+            { googleDriveLink: 1, status: 1, runId: 1 }
         ]
     }
 );

@@ -21,6 +21,7 @@ import GDriveDownload from '../models/GDriveDownloadHistorySchema';
 import { extractGoogleDriveId } from '../mirror/GoogleDriveUtilsCommonCode';
 import { createFolderIfNotExistsAsync } from '../utils/FileUtils';
 import { GoogleApiDataWithLocalData } from '../cliBased/googleapi/types';
+import { randomUUID } from 'crypto';
 
 export const gDriveRoute = express.Router();
 const drive = getGoogleDriveInstance();
@@ -85,17 +86,15 @@ gDriveRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
             console.log(`:downloadFromGoogleDrive:invalidPAths: ${invalidPAths}`);
             return resp.status(400).send({
                 response: {
-                    "status": "failed",
                     "message": `Invalid paths: ${invalidPAths} in ${profilesAsFolders}`
                 }
             });
         }
-        const downloadCounterController = Math.random().toString(36).substring(7);
-
+        const runId = randomUUID();
         // Process all downloads concurrently using Promise.all
         const downloadPromises = links.map((link: string, index: number) => {
-            console.log(`:downloadFromGoogleDrive:loop ${index + 1} ${link} ${profilesAsFolders} ${ignoreFolder} ${fileType} ${downloadCounterController}`);
-            return downloadFromGoogleDriveToProfile(link, profilesAsFolders[index], ignoreFolder, fileType, `${downloadCounterController}-${index}`);
+            console.log(`:downloadFromGoogleDrive:loop ${index + 1} ${link} ${profilesAsFolders} ${ignoreFolder} ${fileType} ${runId}`);
+            return downloadFromGoogleDriveToProfile(link, profilesAsFolders[index], ignoreFolder, fileType, `${runId}:${index}`);
         });
 
         // Wait for all downloads to complete
