@@ -73,6 +73,7 @@ export const renameCPSByLink = async (googleDriveLink: string,
         errors,
         response,
     }
+    return results;
 }
 
 

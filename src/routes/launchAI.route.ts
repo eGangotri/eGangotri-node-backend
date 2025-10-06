@@ -277,13 +277,13 @@ launchAIRoute.post('/renameGDriveCPs', async (req: any, resp: any) => {
         for (const link of links) {
             const result = await renameCPSByLink(link, ignoreFolder);
             megaResult.push(result);
-            console.log(`response: ${JSON.stringify(result)}`)
+            console.log(`result: ${JSON.stringify(result)}`)
         }
 
-        const totalSuccessCount = megaResult.reduce((acc, result) => acc + (Number(result.successCount) || 0), 0);
-        const totalFailureCount = megaResult.reduce((acc, result) => acc + (Number(result.failureCount) || 0), 0);
-        const totalFileCount = megaResult.reduce((acc, result) => acc + result.totalFileCount, 0);
-        const totalErrorCount = megaResult.reduce((acc, result) => acc + ((result?.errors.length || 0)), 0);
+        const totalSuccessCount = megaResult.reduce((acc, result) => acc + (Number(result?.successCount) || 0), 0);
+        const totalFailureCount = megaResult.reduce((acc, result) => acc + (Number(result?.failureCount) || 0), 0);
+        const totalFileCount = megaResult.reduce((acc, result) => acc + (result?.totalFileCount || 0), 0);
+        const totalErrorCount = megaResult.reduce((acc, result) => acc + ((result?.errors?.length || 0)), 0);
       
         return resp.status(200).send({
             response: {
@@ -293,7 +293,7 @@ launchAIRoute.post('/renameGDriveCPs', async (req: any, resp: any) => {
                 totalFailureCount,
                 totalFileCount,
                 totalErrorCount,
-                "errors": megaResult.flatMap(result => result.errors),
+                "errors": megaResult.flatMap(result => result?.errors),
                 "response": megaResult,
             }
         });
