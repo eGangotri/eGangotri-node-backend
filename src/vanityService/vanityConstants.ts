@@ -80,6 +80,63 @@ We are grateful to historian, writer and editor, Priyamvad for the Hindi periodi
 Thanks are also due to the British Library’s Endangered Archives Programme (1435) for funding the project that involved rescue, scan, sharing and metadata creation. We also thank ICAS-MP and India Habitat Centre for facilitating exhibitions.<br>
 `
 
+const text_hyd = `This PDF you are browsing now is in a series of several scanned rare books and manuscripts from Sanskrit Academy, Hyderabad.<br>
+
+Address:<br>
+Manikeshwar Nagar Kaman,<br>
+Osmania University, Tarnaka,<br>
+Hyderabad, Telangana, 500007<br>
+
+https://sanskritacademy.net/<br>
+https://archive.org/details/@sanskrit_academy_hyd<br>
+
+The Academy is currently led by Director Shri Madhushan Penna.<br>
+His CV:<br>
+Prof. Penna madhusudan,<br>
+Director Sanskrit Academy, Hyderabad <br>
+Areas of interest<br>
+Yoga shastra, nyaya, yoga and vedanta philosophy.<br>
+
+Works<br>
+3 mahakavyas, 10 laghukavyas, 30 translations and 140 edited books<br>
+Sahitya Academy Awardee for Mahakavya on Gulabrao Maharaj. <br>
+
+Translated the Marathi Jnaneshwari in 9000 Sanskrit shlokas.<br>
+` 
+const text_hyd2 =
+`
+Honours<br>
+Honorary D.Litt by National Sanskrit University, Tirupati AP. for his unique contribution in Indian Philosophy.<br>
+-Vachaspati<br>
+-Yoga Ratna<br>
+-Shastra nidhi<br>
+-Utkrisht Sanskrit Pandit<br>
+-Yajna Surabhi<br>
+-Shastri (Karavir Peeth)<br>
+-Shastra Ratnakara<br><br>Awards<br> 
+- Sahitya Academy award<br>
+- Maharashtra govt sadhana award<br>
+- Pt. Satvalekar award<br>
+- Pt. Latkar shastri award<br> 
+- Pt. Ghatate award<br>
+- Somnath Trust Award with Gold Medal and title of Best Scholar<br> 
+- Sribhashyam national award<br>  
+and many other.<br>`
+
+const text_hyd3 =
+`
+Foreign Travel<br> 
+The Netherlands, Canada for  World Sanskrit Conference 2018.<br> 
+Indian embassy, Nepal 2023<br> <br> 
+
+DVDs on yoga, Indian philosophy and Sanskrit Literature.<br>
+
+mspenna67@gmail.com<br> 
+
+Digitization by eGangotri Trust/Sarayu Trust, New Delhi<br>
+Funding for Digitization: Shri Ravi Parimi, Hyderabad<br>
+`
+
 // Function to get image dimensions
 export const getImageDimensions = async (imagePath: string): Promise<{ width: number, height: number }> => {
     const image = sharp(imagePath);
@@ -91,7 +148,7 @@ export const formatIntroText = (_text: string) => _text.replace(/\n/g, '').repla
 
 export const getProfileVanityInfo = (profile: string, folder: string) => {
     let _tmpProfile = profile;
-    let vanityIntro = profileVanityTextMap[`${_tmpProfile}`]?.text || "";
+    let vanityIntro:string[] = profileVanityTextMap[`${_tmpProfile}`]?.text || [];
     if (vanityIntro.length === 0) {
         _tmpProfile = profile.split("-")[0]
         vanityIntro = profileVanityTextMap[`${_tmpProfile}`]?.text || "";
@@ -106,33 +163,39 @@ export const getProfileVanityInfo = (profile: string, folder: string) => {
 
 export const profileVanityTextMap = {
     "PZ": {
-        text: text_Peerzada,
+        text: [text_Peerzada],
         imgFile: "peerzada_forVanity.jpg",
         pdfSuffix: " - Mohd Ashraf Peerzada Collection",
     },
     "CHAMBAL": {
-        text: text_chambal,
+        text: [text_chambal],
         imgFile: "KrishnaPorwal_forVanity.jpeg",
         //seems the image dimensions forces the font size to behave differently in the generated pdf
         fontSize: 14,
     },
     "SR": {
-        text: text_csds,
+        text: [text_csds],
         imgFile: "..\\csdsBL.jpeg",
         fontSize: 14,
         singlePage: true
     },
     "TMP": {
-        text: text_csds,
+        text: [text_csds],
         imgFile: "..\\csdsBL.jpeg",
         fontSize: 14,
         singlePage: true
     },
     "TMP2": {
-        text: text_csds,
+        text: [text_csds2],
         imgFile: "..\\csdsBL.jpeg",
         fontSize: 14,
         singlePage: true
+    },
+    "SKT_HYD": {
+        text: [text_hyd, text_hyd2, text_hyd3],
+        imgFile: "sktAcad.jpeg",
+        fontSize: 9,
+        singlePage: false
     },
 }
 

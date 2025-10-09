@@ -37,7 +37,7 @@ export const moveOrignalToSeparateFolder = async (pdfToVanitize: string, finalDu
 // _orig_dont
 
 const createIntroPageWithImage = async (imagePath: string, pdfToVanitize: string,
-    text: string, fontSize: number,
+    text: string[], fontSize: number,
     singlePage: boolean = false) => {
     var imageFolderPath = path.dirname(pdfToVanitize);
     var _introPath = `${imageFolderPath}\\${_intros_dont}`;
@@ -53,11 +53,13 @@ const createIntroPageWithImage = async (imagePath: string, pdfToVanitize: string
     const [width, height] = await PdfLibUtils.getPdfFirstPageDimensionsUsingPdfLib(pdfToVanitize);
     if (singlePage) {
         await addImageToIntroPageAsWholePage(doc, imagePath, width, height)
-        addTextToIntroPdf(doc, text, width, height, fontSize, singlePage)
+        addTextToIntroPdf(doc, text.join("\n\n"), width, height, fontSize, singlePage)
     }
     else {
         await addImageToIntroPage(doc, imagePath, width, height)
-        addTextToIntroPdf(doc, text, width, height, fontSize, singlePage)
+        for (let i = 0; i < text.length; i++) {
+            addTextToIntroPdf(doc, text[i], width, height, fontSize, singlePage)
+        }
     }
 
     doc.save()
@@ -173,7 +175,8 @@ const vanitizePdfForProfile = async (profile: string, suffix: string = "") => {
 
         for (let i = 0; i < _pdfs.length; i++) {
             console.log(`creating vanity for: ${_pdfs[i]}`, await PdfLibUtils.getPdfFirstPageDimensionsUsingPdfLib(_pdfs[i]))
-            intros.push(await createIntroPageWithImage(imgFile, _pdfs[i], formatIntroText(vanityIntro), fontSize, singlePage));
+            intros.push(await createIntroPageWithImage(imgFile, _pdfs[i],
+                vanityIntro.map((text: string) => formatIntroText(text)), fontSize, singlePage));
         }
 
         for (let i = 0; i < _pdfs.length; i++) {
