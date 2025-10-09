@@ -3,7 +3,7 @@ import { ItemsUshered } from '../models/itemsUshered';
 import { Request, Response } from 'express';
 import { getListOfItemsUshered, getListOfUploadCyclesAndCorrespondingData, handleEachRow, itemsUsheredVerficationAndDBFlagUpdate, selectedItemsVerficationAndDBFlagUpdate } from '../services/itemsUsheredService';
 import * as _ from 'lodash';
-import { validateSuperAdminUserFromRequest } from '../services/userService';
+import { validateAdminSuperAdminUserFromRequest } from '../services/userService';
 import { ReuploadType } from '../types/listingTypes';
 import { gradleLaunchArchiveUpload } from '../exec/exec';
 import { ArchiveUploadExcelProps } from 'archiveDotOrg/archive.types';
@@ -30,7 +30,7 @@ export const itemsUsheredRoute = express.Router()
 itemsUsheredRoute.post('/add', async (req: any, resp: any) => {
 
     try {
-        const _validate = await validateSuperAdminUserFromRequest(req);
+        const _validate = await validateAdminSuperAdminUserFromRequest(req);
         if (_validate[0]) {
             console.log("req.body:add")
             const iq = new ItemsUshered(req.body);

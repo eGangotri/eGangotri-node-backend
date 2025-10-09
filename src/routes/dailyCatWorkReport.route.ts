@@ -2,7 +2,7 @@ const express = require("express");
 import { generateCatWorkReportCSV, generateCatWorkReportCSVApi2 } from "../services/CsvUtil";
 import { deleteRowsByIds } from "../services/dailyWorkReportService";
 import { Request, Response } from "express";
-import { validateSuperAdminUserFromRequest, validateUserFromRequest } from "../services/userService"
+import { validateAdminSuperAdminUserFromRequest, validateUserFromRequest } from "../services/userService"
 import { getDateTwoHoursBeforeNow, replaceQuotesAndSplit } from "../excelToMongo/Util";
 import _ from "lodash";
 import { DailyCatWorkReport } from "../models/dailyCatWorkReport";
@@ -127,7 +127,7 @@ dailyCatWorkReportRoute.delete("/delete", async (req: Request, resp: Response) =
   try {
     const _ids = req.body?._ids || "";
     const idsAsCSV = replaceQuotesAndSplit(_ids);
-    const _validate = await validateSuperAdminUserFromRequest(req);
+    const _validate = await validateAdminSuperAdminUserFromRequest(req);
     if (_validate[0]) {
       if (_.isEmpty(_ids)) {
         console.log(`cannot proceed _id not provided`);

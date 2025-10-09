@@ -1,7 +1,7 @@
 const express = require("express");
 import { User } from "../models/user";
 import e, { Request, Response } from "express";
-import { _userExists, _validateCredentials, getUsers, validateSuperAdminUserFromRequest } from "../services/userService";
+import { _userExists, _validateCredentials, getUsers, validateAdminSuperAdminUserFromRequest } from "../services/userService";
 import { LoginUsersDocument } from "../types/listingTypes";
 import { stripPassword } from "./utils";
 import { SUPERADMIN_ROLE } from "../mirror/FrontEndBackendCommonCodeConsts";
@@ -23,7 +23,7 @@ export const userRoute = express.Router();
 
 userRoute.post("/add", async (req: Request, resp: Response) => {
   try {
-    const _validate = await validateSuperAdminUserFromRequest(req);
+    const _validate = await validateAdminSuperAdminUserFromRequest(req);
     if (_validate[0]) {
       const user = new User(req.body);
       console.log(`userRoute /add ${JSON.stringify(user)}`);
@@ -61,7 +61,7 @@ userRoute.post("/add", async (req: Request, resp: Response) => {
  */
 userRoute.delete("/delete", async (req: Request, resp: Response) => {
   try {
-    const _validate = await validateSuperAdminUserFromRequest(req);
+    const _validate = await validateAdminSuperAdminUserFromRequest(req);
     console.log(`userRoute:_validate /delete ${"" + _validate}`);
 
     if (_validate[0]) {
@@ -106,7 +106,7 @@ userRoute.patch("/patch/:username", async (req: Request, resp: Response) => {
   try {
     const { username } = req.params;
 
-    const _validate = await validateSuperAdminUserFromRequest(req);
+    const _validate = await validateAdminSuperAdminUserFromRequest(req);
     if (_validate[0]) {
       const users: LoginUsersDocument[] = await getUsers({ username: req.body.username });
       if (users && users.length >= 1) {

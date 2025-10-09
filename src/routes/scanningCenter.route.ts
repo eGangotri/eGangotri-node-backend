@@ -1,7 +1,7 @@
 import * as express from 'express';
 import { addCentersAndLibraries, getCentersAndLibraries } from '../services/scanningCenterService';
 import { ScanningCenter } from '../models/scanningCenters';
-import { validateSuperAdminUserFromRequest } from '../services/userService';
+import { validateAdminSuperAdminUserFromRequest } from '../services/userService';
 
 export const scanningCenterRoute = express.Router();
 
@@ -26,7 +26,7 @@ scanningCenterRoute.get('/getCenters', async (req: any, resp: any) => {
 scanningCenterRoute.post('/addCenter', async (req: any, resp: any) => {
     try {
         const operatorName = req.body.operatorName
-        if (await validateSuperAdminUserFromRequest(req)) {
+        if (await validateAdminSuperAdminUserFromRequest(req)) {
             const center = new ScanningCenter(req.body);
             if (!center) {
                 return resp.status(400).send({

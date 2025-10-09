@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import express from "express";
-import { validateSuperAdminUserFromRequest } from "../services/userService";
+import { validateAdminSuperAdminUserFromRequest } from "../services/userService";
 import { UploadCycle } from "../models/uploadCycle";
 import { getListOfUploadCycles, getUploadCycleById } from "../services/uploadCycleService";
 import { findMissedUploads } from "../services/GradleLauncherUtil";
@@ -30,7 +30,7 @@ JSON Body
 
 uploadCycleRoute.post("/add", async (req: Request, resp: Response) => {
     try {
-        const _validate = await validateSuperAdminUserFromRequest(req);
+        const _validate = await validateAdminSuperAdminUserFromRequest(req);
         if (_validate[0]) {
             console.log("req.body:add")
             try {
