@@ -134,7 +134,7 @@ export const validateAdminSuperAdminUserFromRequest = async (req: Request) => {
   if (_.isEmpty(users)) {
     return [false, `Login failed for User "${username}"`];
   }
-  else if (users[0].role !== SUPERADMIN_ROLE || users[0].role !== ADMIN_ROLE) {
+  else if (users[0].role !== SUPERADMIN_ROLE && users[0].role !== ADMIN_ROLE) {
     return [false, `Username "${username}" doesnt have relevant privileges`];
   }
   else {
