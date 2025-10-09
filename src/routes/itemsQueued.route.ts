@@ -2,7 +2,7 @@ const express = require("express");
 import { ItemsQueued } from '../models/itemsQueued';
 import { Request, Response } from 'express';
 import { getListOfItemsQueued, getListOfItemsQueuedArrangedByProfile } from '../services/itemsQueuedService';
-import { validateSuperAdminUserFromRequest } from '../services/userService';
+import { validateAdminSuperAdminUserFromRequest } from '../services/userService';
 
 export const itemsQueuedRoute = express.Router()
 
@@ -25,7 +25,7 @@ JSON Body
 itemsQueuedRoute.post('/add', async (req:Request, resp:Response) => {
     
     try {
-        const _validate = await validateSuperAdminUserFromRequest(req)
+        const _validate = await validateAdminSuperAdminUserFromRequest(req)
         if (_validate[0]) {
             console.log("itemsQueuedRoute:post:req.body")
             const iq = new ItemsQueued(req.body);

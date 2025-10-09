@@ -1,7 +1,7 @@
 import { User } from "../models/user";
 import { getLimit } from "../routes/utils";
 import { replaceQuotesAndSplit } from "../excelToMongo/Util";
-import { SUPERADMIN_ROLE } from "../mirror/FrontEndBackendCommonCodeConsts";
+import { ADMIN_ROLE, SUPERADMIN_ROLE } from "../mirror/FrontEndBackendCommonCodeConsts";
 import { Request } from "express";
 import { LoginUsersDocument, UserListOptionsType } from "../types/listingTypes";
 import * as _ from 'lodash';
@@ -121,9 +121,10 @@ export const validateUserFromRequest = async (req: Request) => {
   return _user && _user?.length > 0;
 }
 
-export const validateSuperAdminUserFromRequest = async (req: Request) => {
+export const validateAdminSuperAdminUserFromRequest = async (req: Request) => {
   const username = req?.body?.superadmin_user;
   const password = req?.body?.superadmin_password;
+
   if (!username || !password) {
     return [false, "Superadmin Username or password missing"];
   }
@@ -133,7 +134,7 @@ export const validateSuperAdminUserFromRequest = async (req: Request) => {
   if (_.isEmpty(users)) {
     return [false, `Login failed for User "${username}"`];
   }
-  else if (users[0].role !== SUPERADMIN_ROLE) {
+  else if (users[0].role !== SUPERADMIN_ROLE || users[0].role !== ADMIN_ROLE) {
     return [false, `Username "${username}" doesnt have relevant privileges`];
   }
   else {

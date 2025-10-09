@@ -5,7 +5,7 @@ import { deleteRowsByIds, generateCSVAsFile, generateCSVAsFileOfAggregates, gene
 import { Request, Response } from "express";
 import { getDateTwoHoursBeforeNow } from "../excelToMongo/Util";
 import _ from "lodash";
-import { validateSuperAdminUserFromRequest, validateUserFromRequest } from "../services/userService";
+import { validateAdminSuperAdminUserFromRequest, validateUserFromRequest } from "../services/userService";
 
 export const dailyWorkReportRoute = express.Router();
 
@@ -130,7 +130,7 @@ dailyWorkReportRoute.delete("/delete", async (req: Request, resp: Response) => {
   try {
     const _id = req.body?._id;
 
-    const _validate = await validateSuperAdminUserFromRequest(req);
+    const _validate = await validateAdminSuperAdminUserFromRequest(req);
     if (_validate[0]) {
       if (_.isEmpty(_id)) {
         console.log(`cannot proceed _id not provided`);
