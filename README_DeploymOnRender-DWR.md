@@ -12,8 +12,10 @@ https://hub.docker.com/r/egangotri/egangotri-node-backend
 ## install docker locally
 Set docker path in PATH
 
-Login to Docker
-docker login -u "egangotri" -p "XXXXX" https://docker.io
+Login to Docker with user: egt@
+docker login -u egangotri
+enter Personal Access Token (PAT)
+
 
 ## Create DockerFile for eGangotri DWR
 Save it as Dockerfile
@@ -31,8 +33,13 @@ http://localhost:80/
 *** you need to be logged in with the correct acct e**trust@gmail.com
 otherwise you will keep getting access denied error.
 
+Check On
+
+https://hub.docker.com/r/egangotri/egangotri-node-backend/
 
 ## Deploy on Render
+Go to https://dashboard.render.com/
+Fires Time Only.
 Create a New Web Service.
 Share the DockerHub Image URL:
 https://hub.docker.com/r/egangotri/egangotri-node-backend/

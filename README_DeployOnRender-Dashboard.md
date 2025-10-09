@@ -11,8 +11,9 @@ https://hub.docker.com/r/egangotri/egangotri-node-backend
 ## install docker locally
 Set docker path in PATH
 
-Login to Docker
-docker login -u "egangotri" -p "XXXXX" https://docker.io
+Login to Docker with user: egt@
+docker login -u egangotri
+enter Personal Access Token (PAT)
 
 ## Create DockerFile for eGangotri Dashboard
 Save it as Dockerfile
