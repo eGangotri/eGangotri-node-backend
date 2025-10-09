@@ -31,19 +31,19 @@ userRoute.post("/add", async (req: Request, resp: Response) => {
       //Check if User exists
       const userExists = await _userExists(req)
       if (userExists) {
-        resp.status(200).send({ error: `User with username ${user.username} already exists` });
+        resp.status(200).json({ error: `User with username ${user.username} already exists` });
       }
       else {
         await user.save();
-        resp.status(200).send(stripPassword([user])[0]);
+        resp.status(200).json(stripPassword([user])[0]);
       }
     }
     else {
-      resp.status(200).send({ error: _validate[1] });
+      resp.status(200).json({ error: _validate[1] });
     }
   } catch (err) {
     console.log("Error", err);
-    resp.status(400).send({
+    resp.status(400).json({
       error: `exception thrown: ${err}`
     });
   }
@@ -67,28 +67,24 @@ userRoute.delete("/delete", async (req: Request, resp: Response) => {
     if (_validate[0]) {
       const users: LoginUsersDocument[] = await getUsers({ username: req.body.username });
       if (users && users.length >= 1) {
-        const userRoleMap = users.filter(x=>x.role === SUPERADMIN_ROLE)
-        if(_.isEmpty(userRoleMap)){
+        const userRoleMap = users.filter(x => x.role === SUPERADMIN_ROLE);
+        if (_.isEmpty(userRoleMap)) {
           console.log(`userRoute /delete ${JSON.stringify(users[0])}`);
           const _delete = await User.deleteMany({ username: req.body.username });
-          resp.sendStatus(200).send(_delete?.deletedCount);
+          resp.status(200).json({ deletedCount: _delete?.deletedCount ?? 0 });
+        } else {
+          resp.status(400).json({ error: "One or More Users requested for deletion is a superadmin.Cannot proceed." });
         }
-        else {
-          resp.sendStatus(200).send({ error: "One or More Users requested for deletion is a superadmin.Cannot proceed."});
-        }
+      } else {
+        resp.status(400).json({ error: _validate[1] });
       }
-      else {
-        resp.sendStatus(200).send({ error: _validate[1] });
-      }
-    }
-    else {
-      resp.sendStatus(200).send({ error: `Something went wrong ${_validate}` });
-
+    } else {
+      resp.status(400).json({ error: `Something went wrong ${_validate}` });
     }
   } catch (err) {
     console.log("Error", err);
-    resp.status(400).send({
-      error: err
+    resp.status(400).json({
+      error: err,
     });
   }
 });
@@ -112,19 +108,45 @@ userRoute.patch("/patch/:username", async (req: Request, resp: Response) => {
       if (users && users.length >= 1) {
         console.log(`userRoute /patch ${JSON.stringify(users[0])}`);
         const _update = await User.findOneAndUpdate({ username: username }, req.body);
-        resp.status(200).send(_update);
+        resp.status(200).json(_update);
       }
       else {
-        resp.status(200).send({ error: _validate[1] });
+        resp.status(200).json({ error: _validate[1] });
       }
     }
   } catch (err) {
     console.log("Error", err);
-    resp.status(400).send({
+    resp.status(400).json({
       error: err
     });
   }
 });
+
+
+// Alias route for edit (same as /patch/:username)
+userRoute.patch("/edit/:username", async (req: Request, resp: Response) => {
+  try {
+    const { username } = req.params;
+
+    const _validate = await validateAdminSuperAdminUserFromRequest(req);
+    if (_validate[0]) {
+      const users: LoginUsersDocument[] = await getUsers({ username: req.body.username });
+      if (users && users.length >= 1) {
+        console.log(`userRoute /edit ${JSON.stringify(users[0])}`);
+        const _update = await User.findOneAndUpdate({ username: username }, req.body);
+        resp.status(200).json(_update);
+      } else {
+        resp.status(200).json({ error: _validate[1] });
+      }
+    }
+  } catch (err) {
+    console.log("Error", err);
+    resp.status(400).json({
+      error: err,
+    });
+  }
+});
+
 /**
  * 	This "response": [
     {
@@ -144,12 +166,12 @@ userRoute.get("/list", async (req: Request, resp: Response) => {
     const users: LoginUsersDocument[] = await getUsers(req?.query);
     console.log(`users ${JSON.stringify(users)}`);
 
-    resp.status(200).send({
+    resp.status(200).json({
       response: stripPassword(users),
     });
   } catch (err: any) {
     console.log("Error", err);
-    resp.status(400).send(err);
+    resp.status(400).json(err);
   }
 });
 
@@ -167,10 +189,10 @@ userRoute.post(
     let response = {}
     try {
       response = await _validateCredentials(req);
-      resp.status(200).send(response);
+      resp.status(200).json(response);
     } catch (err: any) {
       console.log("Error", err);
-      resp.status(400).send(err);
+      resp.status(400).json(err);
     }
   }
 );
