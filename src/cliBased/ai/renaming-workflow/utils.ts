@@ -53,7 +53,7 @@ export function convertLocalFileToBasicEncodedString(filePath: string): string {
     const fileSizeMB = fileAsBuffer.length / (1024 * 1024);
 
     if (fileSizeMB > INLINE_MAX_FILE_SIZE_MB) {
-        console.warn(`WARNING: Dile size (${fileSizeMB.toFixed(2)}MB) exceeds inline limit of ${INLINE_MAX_FILE_SIZE_MB}MB. Request may be rejected by the API.`);
+        console.warn(`WARNING: File size (${fileSizeMB.toFixed(2)}MB) exceeds inline limit of ${INLINE_MAX_FILE_SIZE_MB}MB. Request may be rejected by the API.`);
     }
 
     // Convert to base64

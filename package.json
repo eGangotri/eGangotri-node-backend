@@ -55,7 +55,8 @@
     "process-asha-catalog": "ts-node ./src/_adHoc/processAshaArchivesCatalog.ts",
     "copy-asha-pdfs": "ts-node ./src/_adHoc/ashaCatalogPdfCopy.ts",
     "rename-pdfs-via-ai": "ts-node ./src/cliBased/ai/renaming-workflow/renamePdfsViaAI.ts",
-    "rename-gdrive-img-files": "ts-node ./src/cliBased/ai/renaming-workflow/renameGDRiveImgFiles.ts"
+    "rename-gdrive-img-files": "ts-node ./src/cliBased/ai/renaming-workflow/renameGDRiveImgFiles.ts",
+    "get-win64-chromedriver": "ts-node ./src/_adHoc/getWin64ChromedriverUrl.ts"
   },
   "repository": {
     "type": "git",
