@@ -18,3 +18,8 @@ export const stripPassword = (users: LoginUsersDocument[]) => {
   return strippedPasswords?.length ? strippedPasswords : []
 }
 
+export const  GDRIVE_CP_EXTRACTED_METADATA_RES = {
+  processedCount: 0,
+  failureCount: 0,
+  totalCount: 0
+}

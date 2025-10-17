@@ -5,6 +5,7 @@ import { extractGoogleDriveId } from '../../../mirror/GoogleDriveUtilsCommonCode
 import { ALLOWED_MIME_TYPES_FOR_RENAMING } from '../../googleapi/_utils/constants';
 import { convertBufferToBasicEncodedString, processFileForAIRenaming } from './utils';
 import { SIMPLE_TITLE_AUTHOR_PROMPT } from './constants';
+import { GDRIVE_CP_EXTRACTED_METADATA_RES } from 'routes/utils';
 
 export async function renameDriveFileByLink(
   driveLinkOrId: string,
@@ -41,6 +42,7 @@ export async function renameDriveFileByLink(
     console.warn(`Warning: File mimeType ${mime} not in allowed list (${ALLOWED_MIME_TYPES_FOR_RENAMING.join(', ')}). Proceeding to rename anyway.`);
   }
 
+  GDRIVE_CP_EXTRACTED_METADATA_RES.processedCount++;
   const { extractedMetadata, error } = await processFileForAIRenaming(base64EncodedFile, mime, SIMPLE_TITLE_AUTHOR_PROMPT);
   if (error || extractedMetadata === 'NIL') {
     console.log(`Failed to process file ${oldName}: ${error}`);

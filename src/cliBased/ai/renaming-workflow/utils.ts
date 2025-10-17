@@ -2,6 +2,7 @@ import { AI_ENDPOINT, AI_MAX_OUTPUT_TOKENS, GOOGLE_AI_API_KEY, INLINE_MAX_FILE_S
 import { BatchPair, PdfPair } from "./types";
 import * as fs from 'fs';
 import axios from 'axios';
+import { GDRIVE_CP_EXTRACTED_METADATA_RES } from "routes/utils";
 
 
 export function buildPairedPdfs(allPdfs: string[], allReducedPdfs: string[]): PdfPair[] {
@@ -124,6 +125,7 @@ export const processFileForAIRenaming = async (base64EncodedFile: string,
         let extractedMetadata: string;
         if (typeof text === 'string' && text.trim().length > 0) {
             extractedMetadata = text.trim();
+
         } else {
             // If no text, include diagnostics: finishReason, configured maxOutputTokens, and usage metadata
             const diagnostic = finishReason ? `No text returned. finishReason=${finishReason}` : 'No text returned.';
@@ -133,7 +135,7 @@ export const processFileForAIRenaming = async (base64EncodedFile: string,
             console.warn(`Gemini response had no textual parts. ${diagnostic}. ${usageInfo}`);
             extractedMetadata = '';
         }
-        console.log(`extractedMetadata: ${extractedMetadata}`);
+        console.log(`extractedMetadata(${GDRIVE_CP_EXTRACTED_METADATA_RES.processedCount}/${GDRIVE_CP_EXTRACTED_METADATA_RES.totalCount}): ${extractedMetadata}`);
         return {
             extractedMetadata,
             error: null
