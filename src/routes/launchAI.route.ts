@@ -167,16 +167,18 @@ launchAIRoute.post('/aiRenamer/:runId', async (req: Request, res: Response) => {
         let successes = 0;
         let failures = 0;
         const details: Array<{ originalFilePath: string; newFilePath?: string; error?: string }> = [];
-
+        console.log(`Failed Items Count: ${failedItems.length} ${JSON.stringify(failedItems)}`);
         for (const item of failedItems) {
             try {
-                const result = await processWithGoogleAI(item.originalFilePath);
+                const result = await processWithGoogleAI(item.reducedFilePath);
                 if (result?.extractedMetadata && !result?.error) {
                     const formatted = formatFilename(result.extractedMetadata);
                     const targetDir = item.outputFolder && item.outputFolder.trim().length > 0
                         ? item.outputFolder
                         : path.dirname(item.originalFilePath);
+
                     const newFilePath = path.join(targetDir, formatted);
+                    console.log(`Renaming ${item.originalFilePath} to ${newFilePath}`)
 
                     // ensure targetDir exists if using outputFolder
                     if (targetDir !== path.dirname(item.originalFilePath) && !fs.existsSync(targetDir)) {
@@ -321,7 +323,43 @@ launchAIRoute.get("/getAllTitleRenamedViaAIListGroupedByRunId", async (req: Requ
     }
 });
 
+launchAIRoute.post("/copyMetadataToOriginalFiles/:runId", async (req: Request, res: express.Response) => {
+    try {
+        const runId = req.params.runId;
+        const filter = { runId };
+        const pdfTitleRenamedItems: IPdfTitleRenamingViaAITracker[] = await PdfTitleRenamingViaAITracker.find(filter)
+            .sort({ createdAt: -1 })
+        const results = await Promise.all(
+            pdfTitleRenamedItems.map(async (item, index) => {
+                try {
+                    const dir = path.dirname(item.originalFilePath);
+                    const ext = path.extname(item.originalFilePath);
+                    const newName = String((item.extractedMetadata + ext) || item.fileName);
+                    const targetPath = path.join(dir, `${newName}`);
+                    console.log(`Renaming ${index + 1}/${pdfTitleRenamedItems.length}: ${item.originalFilePath} to ${targetPath}`);
+                    await fs.promises.rename(item.originalFilePath, targetPath);
+                    return true;
+                } catch (err: any) {
+                    console.error(`Failed to process ${item.originalFilePath}: ${err?.message || String(err)}`);
+                    return false;
+                }
+            })
+        );
 
+        const successCount = results.filter(Boolean).length;
+        const failureCount = results.length - successCount;
+
+        res.json({
+            status: `Success: ${successCount}, Failure: ${failureCount} of ${pdfTitleRenamedItems.length}`,
+            runId,
+            successCount,
+            failureCount,
+        })
+    } catch (error) {
+        console.log(`/pdfTitleRenamedItems error: ${JSON.stringify(error.message)}`);
+        res.status(500).json({ message: "Error fetching pdfTitleRenamedItems", error })
+    }
+})
 
 // ai/getAllTitleRenamedViaAIList by runId
 launchAIRoute.get("/getAllTitleRenamedViaAIList/:runId", async (req: Request, res: express.Response) => {
@@ -410,7 +448,7 @@ launchAIRoute.post('/renameGDriveCPs', async (req: any, resp: any) => {
         const totalFailureCount = megaResult.reduce((acc, result) => acc + (Number(result?.failureCount) || 0), 0);
         const totalFileCount = megaResult.reduce((acc, result) => acc + (result?.totalFileCount || 0), 0);
         const totalErrorCount = megaResult.reduce((acc, result) => acc + ((result?.errors?.length || 0)), 0);
-      
+
         return resp.status(200).send({
             response: {
                 "status": "success",
