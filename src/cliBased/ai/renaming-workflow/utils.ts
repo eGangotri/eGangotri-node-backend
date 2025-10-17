@@ -2,7 +2,7 @@ import { AI_ENDPOINT, AI_MAX_OUTPUT_TOKENS, GOOGLE_AI_API_KEY, INLINE_MAX_FILE_S
 import { BatchPair, PdfPair } from "./types";
 import * as fs from 'fs';
 import axios from 'axios';
-import { GDRIVE_CP_EXTRACTED_METADATA_RES } from "routes/utils";
+import { GDRIVE_CP_EXTRACTED_METADATA_RES } from "../../../routes/utils";
 
 
 export function buildPairedPdfs(allPdfs: string[], allReducedPdfs: string[]): PdfPair[] {
