@@ -1,3 +1,4 @@
+import { GDRIVE_CP_EXTRACTED_METADATA_RES } from "../routes/utils";
 import { AI_DELAY_BETWEEN_CALLS_MS } from "../cliBased/ai/renaming-workflow/constants";
 import { renameDriveFileByLink } from "../cliBased/ai/renaming-workflow/renameGDriveCoverPages";
 import { ALL_TYPE } from "../cliBased/googleapi/_utils/constants";
@@ -39,6 +40,8 @@ export const renameCPSByLink = async (googleDriveLink: string,
     let successCount = 0;
     const errors = []
     for (let i = 0; i < googleDriveData.length; i++) {
+        GDRIVE_CP_EXTRACTED_METADATA_RES.totalCount = googleDriveData.length;
+
         const googleDriveDataItem = googleDriveData[i];
         try {
             if (i > 0) {
@@ -65,7 +68,7 @@ export const renameCPSByLink = async (googleDriveLink: string,
     const results = {
         "status": "success",
         "message": `${successCount} files renamed successfully for ${googleDriveLink
-        }, ${failureCount} files failed to rename`,
+            }, ${failureCount} files failed to rename`,
         // Expose counts at the top level so aggregation below works
         successCount,
         failureCount,
