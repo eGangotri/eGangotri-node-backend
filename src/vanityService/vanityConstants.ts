@@ -197,5 +197,11 @@ export const profileVanityTextMap = {
         fontSize: 9,
         singlePage: false
     },
+    "SKT_HYD_MANU": {
+        text: [text_hyd, text_hyd2, text_hyd3],
+        imgFile: "..\\sktAcad.jpeg",
+        fontSize: 9,
+        singlePage: false
+    },
 }
 
