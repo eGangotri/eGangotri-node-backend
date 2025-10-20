@@ -128,7 +128,7 @@ gDriveRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
             timeTaken: timeInfo(timeTaken),
             resultsSummary,
             response: results,
-            ...testResult
+            testResult: testResult.response
         });
     }
     catch (err: any) {
@@ -453,10 +453,11 @@ gDriveRoute.post('/redownloadFromGDrive', async (req: any, resp: any) => {
 
                 resp.status(200).send({
                     msg: `${failedGDriveData.length} links attempted-download to ${foldersWithRoot2.length} profiles`,
-                    failedItems: failedGDriveData,
                     timeTaken: timeInfo(timeTaken),
                     resultsSummary,
-                    response: results
+                    response: results,
+                    failedItems: failedGDriveData,
+
                 });
             }
             else {
