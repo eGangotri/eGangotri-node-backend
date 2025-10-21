@@ -143,16 +143,30 @@ yarnRoute.post('/qaToDestFileMover', async (req: any, resp: any) => {
             return;
         }
 
-        else {
-            const listingResult = await moveFileSrcToDest(qaPath, destPath, flatten, ignorePaths);
-            resp.status(200).send({
-                response: {
-                    ...listingResult
-                }
-            });
-        }
-    }
+        const paths: string[] = qaPath.includes(",")
+            ? qaPath.split(",").map((p: string) => p.trim()).filter(Boolean)
+            : [qaPath.trim()];
 
+        console.log(`qaToDestFileMover paths ${paths}`)
+        const results: any[] = [];
+        for (const srcPath of paths) {
+            console.log(`qaToDestFileMover srcPath  ${srcPath} to ${destPath}`)
+            const listingResult = await moveFileSrcToDest(srcPath, destPath, flatten, ignorePaths);
+            results.push(listingResult);
+        }
+
+        const successCount = results.filter((res: any) => !!res?.success).length;
+        const failureCount = results.length - successCount;
+
+        resp.status(200).send({
+            response: {
+                total: results.length,
+                successCount,
+                failureCount,
+                results,
+            }
+        });
+    }
     catch (err: any) {
         console.log('Error', err);
         resp.status(400).send(err);
