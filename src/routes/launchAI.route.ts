@@ -363,6 +363,43 @@ launchAIRoute.post("/copyMetadataToOriginalFiles/:runId", async (req: Request, r
     }
 })
 
+//
+launchAIRoute.post("/cleanupRedRenamerFilers/:runId", async (req: Request, res: express.Response) => {
+    try {
+        const runId = req.params.runId;
+        const filter = { runId };
+        const pdfTitleRenamedItems: IPdfTitleRenamingViaAITracker[] = await PdfTitleRenamingViaAITracker.find(filter)
+     
+        if(pdfTitleRenamedItems.length === 0){
+            return res.status(404).json({ message: "No pdfTitleRenamedItems found for runId: " + runId })
+        }
+
+        const firstItem = pdfTitleRenamedItems[0];
+        const srcFolder = firstItem.srcFolder;
+        const reducedFolder = firstItem.reducedFolder;
+        const outputFolder = firstItem.outputFolder;
+
+        const parent = path.dirname(srcFolder);
+        const ignoreFolder = path.join(parent, "_ignore");
+
+        await fs.promises.mkdir(ignoreFolder, { recursive: true });
+
+        await fs.promises.rename(reducedFolder, path.join(ignoreFolder, path.basename(reducedFolder)));
+        await fs.promises.rename(outputFolder, path.join(ignoreFolder, path.basename(outputFolder)));
+        
+        const msg = `Folders ${reducedFolder} and ${outputFolder} moved to ${ignoreFolder}`;
+        res.json({
+            msg,
+            runId,
+        })
+    } catch (error) {
+        console.log(`/cleanupRedRenamerFilers error: ${JSON.stringify(error.message)}`);
+        res.status(500).json({ message: "Error in cleanupRedRenamerFilers", error })
+    }
+})
+
+
+
 // ai/getAllTitleRenamedViaAIList by runId
 launchAIRoute.get("/getAllTitleRenamedViaAIList/:runId", async (req: Request, res: express.Response) => {
     try {
