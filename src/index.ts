@@ -32,6 +32,7 @@ import { launchCmdRoute } from "./routes/launchCmd.route";
 import { ellipsis } from "./mirror/utils";
 import { pythonArchiveRoute } from "./routes/python.archive.route";
 import { imgToPdfRoute } from "./routes/imgToPdf.route";
+import { launchAIGDriveRoute } from "routes/launchAI.gdrive.route";
 
 const egangotri = express();
 const hostname = "localhost";
@@ -69,6 +70,8 @@ egangotri.use("/yarnListMaker", yarnListMakerRoute);
 egangotri.use("/pythonScripts", pythonRoute);
 egangotri.use("/yarnArchive", launchArchiveYarnRoute);
 egangotri.use("/ai", launchAIRoute);
+egangotri.use("/ai/gDrive", launchAIGDriveRoute);
+
 egangotri.use("/gDrive", gDriveRoute);
 
 egangotri.use("/archiveItem", archiveItemRoute);
