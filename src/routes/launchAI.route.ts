@@ -11,6 +11,7 @@ import { renameCPSByLink, RenameCPSByLinkResponse } from '../services/aiServices
 import { processWithGoogleAI } from '../cliBased/ai/renaming-workflow/googleAiService';
 import { formatFilename } from '../cliBased/ai/renaming-workflow/utils';
 import * as fs from 'fs';
+import { GDriveCpRenameHistory, IGDriveCpRenameHistory } from '../models/GDriveCpRenameHistory';
 
 export const launchAIRoute = express.Router();
 
@@ -310,10 +311,12 @@ launchAIRoute.get("/getAllTitleRenamedViaAIListGroupedByRunId", async (req: Requ
         const grouped = await (PdfTitleRenamingViaAITracker as any).aggregate(pipeline);
         const totalDistinctRunIds = (await PdfTitleRenamingViaAITracker.distinct("runId")).length;
         const results = {
-            data: grouped as Array<{ _id: string; 
-                    runId: string; count: number; 
-                      createdAt: Date,
-                    commonRunId:string }>,
+            data: grouped as Array<{
+                _id: string;
+                runId: string; count: number;
+                createdAt: Date,
+                commonRunId: string
+            }>,
             currentPage: page,
             totalPages: Math.ceil(totalDistinctRunIds / limit),
             totalItems: totalDistinctRunIds,
@@ -369,8 +372,8 @@ launchAIRoute.post("/cleanupRedRenamerFilers/:runId", async (req: Request, res: 
         const runId = req.params.runId;
         const filter = { runId };
         const pdfTitleRenamedItems: IPdfTitleRenamingViaAITracker[] = await PdfTitleRenamingViaAITracker.find(filter)
-     
-        if(pdfTitleRenamedItems.length === 0){
+
+        if (pdfTitleRenamedItems.length === 0) {
             return res.status(404).json({ message: "No pdfTitleRenamedItems found for runId: " + runId })
         }
 
@@ -386,7 +389,7 @@ launchAIRoute.post("/cleanupRedRenamerFilers/:runId", async (req: Request, res: 
 
         await fs.promises.rename(reducedFolder, path.join(ignoreFolder, path.basename(reducedFolder)));
         await fs.promises.rename(outputFolder, path.join(ignoreFolder, path.basename(outputFolder)));
-        
+
         const msg = `Folders ${reducedFolder} and ${outputFolder} moved to ${ignoreFolder}`;
         res.json({
             msg,
@@ -477,8 +480,9 @@ launchAIRoute.post('/renameGDriveCPs', async (req: any, resp: any) => {
 
         const links = googleDriveLink.includes(",") ? googleDriveLink.split(",").map((link: string) => link.trim()) : [googleDriveLink.trim()];
         const megaResult: RenameCPSByLinkResponse[] = []
+        const commonRunId: string = randomUUID()
         for (const link of links) {
-            const result = await renameCPSByLink(link, ignoreFolder);
+            const result = await renameCPSByLink(link, ignoreFolder, commonRunId);
             megaResult.push(result);
             console.log(`result: ${JSON.stringify(result)}`)
         }
@@ -504,5 +508,120 @@ launchAIRoute.post('/renameGDriveCPs', async (req: any, resp: any) => {
     catch (err: any) {
         console.log('Error', err);
         resp.status(400).send(err);
+    }
+})
+
+launchAIRoute.get('/gDriveRenamingHistory', async (req: any, resp: any) => {
+    try {
+        const runId = req?.body?.runId;
+        const page = Number.parseInt(req.query.page as string) || 1
+        const limit = Number.parseInt(req.query.limit as string) || 20
+        const skip = (page - 1) * limit
+        const filter = { runId };
+        const gDriveCpRenameHistoryItems: IGDriveCpRenameHistory[] = await GDriveCpRenameHistory.find(filter)
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
+
+        const total = await GDriveCpRenameHistory.countDocuments(filter)
+        const results = {
+            data: gDriveCpRenameHistoryItems,
+            currentPage: page,
+            totalPages: Math.ceil(total / limit),
+            totalItems: total,
+        }
+        resp.json(results)
+    } catch (error) {
+        console.log(`/gDriveCpRenameHistory error: ${JSON.stringify(error.message)}`);
+        resp.status(500).json({ message: "Error fetching gDriveCpRenameHistory", error })
+    }
+})
+
+launchAIRoute.get('/gDriveRenamingHistory/:runId', async (req: any, resp: any) => {
+    try {
+        const runId = req?.params?.runId;
+        const page = Number.parseInt(req.query.page as string) || 1
+        const limit = Number.parseInt(req.query.limit as string) || 20
+        const skip = (page - 1) * limit
+        const filter = { runId };
+        const gDriveCpRenameHistoryItems: IGDriveCpRenameHistory[] = await GDriveCpRenameHistory.find(filter)
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
+
+        const total = await GDriveCpRenameHistory.countDocuments(filter)
+        const results = {
+            data: gDriveCpRenameHistoryItems,
+            currentPage: page,
+            totalPages: Math.ceil(total / limit),
+            totalItems: total,
+        }
+        resp.json(results)
+    } catch (error) {
+        console.log(`/gDriveCpRenameHistory error: ${JSON.stringify(error.message)}`);
+        resp.status(500).json({ message: "Error fetching gDriveCpRenameHistory", error })
+    }
+});
+
+launchAIRoute.get('/gDriveRenamingHistoryGroupedByRunId', async (req: any, resp: any) => {
+    try {
+        const page = Number.parseInt(req.query.page as string) || 1;
+        const limit = Number.parseInt(req.query.limit as string) || 20;
+        const skip = (page - 1) * limit;
+
+        const pipeline = [
+            { $sort: { createdAt: 1 } },
+            {
+                $group: {
+                    _id: "$runId",
+                    commonRunId: { $first: "$commonRunId" },
+                    totalCount: { $sum: 1 },
+                    successCount: {
+                        $sum: { $cond: [{ $eq: ["$success", true] }, 1, 0] }
+                    },
+                    failureCount: {
+                        $sum: { $cond: [{ $eq: ["$success", false] }, 1, 0] }
+                    },
+                    firstCreatedAt: { $first: "$createdAt" },
+                    lastCreatedAt: { $last: "$createdAt" }
+                }
+            },
+            { $sort: { lastCreatedAt: -1 } },
+            { $skip: skip },
+            { $limit: limit },
+            {
+                $project: {
+                    _id: 0,
+                    runId: "$_id",
+                    commonRunId: 1,
+                    successCount: 1,
+                    failureCount: 1,
+                    totalCount: 1,
+                    createdAt: "$firstCreatedAt"
+                }
+            }
+        ];
+
+        const grouped = await (GDriveCpRenameHistory as any).aggregate(pipeline);
+        const totalDistinctRunIds = (await GDriveCpRenameHistory.distinct("runId")).length;
+
+        const results = {
+            data: grouped as Array<{
+                runId: string;
+                commonRunId: string;
+                successCount: number;
+                failureCount: number;
+                totalCount: number;
+                createdAt: Date;
+            }>,
+            currentPage: page,
+            totalPages: Math.ceil(totalDistinctRunIds / limit),
+            totalItems: totalDistinctRunIds,
+        };
+
+        resp.json(results);
+    } catch (error: any) {
+        console.log(`/gDriveRenamingHistoryGroupedByRunId error: ${JSON.stringify(error.message)}`);
+        resp.status(500).json({ message: "Error fetching gDriveCpRenameHistory grouped by runId", error })
     }
 })
