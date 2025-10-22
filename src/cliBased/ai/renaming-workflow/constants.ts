@@ -143,9 +143,7 @@ This is an exercise to extract the title and author of the Cover Page of a book 
 
 If the Image is not a cover-page of  book or manuscript but a stack of books then return NIL.
 
-The output should be in plain ASCII characters without exception.
-
-No diacritics should be ever used.
+Output must be limited to ASCII letters (A-Z, a-z), spaces, and the hyphen (-). Do not use any other symbols or diacritics.
 
 The output should be in Title Case.
 
