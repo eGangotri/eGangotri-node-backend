@@ -27,8 +27,8 @@ export interface IMergeOperationResult {
 }
 
 export interface IMergeMultiplePdfTracker {
-  commonRunId: mongoose.Types.ObjectId; // objectID
-  runId: mongoose.Types.ObjectId; // objectID
+  commonRunId: string;
+  runId: string;
   pdfPathsToMergeCount: number;
   // Inputs
   first_pdf_path: string;
@@ -54,8 +54,8 @@ export type MergeMultiplePdfTrackerModel = mongoose.Model<MergeMultiplePdfTracke
 
 const MergeMultiplePdfTrackerSchema = new mongoose.Schema(
   {
-    commonRunId: { type: mongoose.Schema.Types.ObjectId, required: true, index: true },
-    runId: { type: mongoose.Schema.Types.ObjectId, required: true, index: true },
+    commonRunId: { type: String, required: true, index: true },
+    runId: { type: String, required: true, index: true },
     pdfPathsToMergeCount: { type: Number, required: true },
     
     first_pdf_path: { type: String, required: true },
