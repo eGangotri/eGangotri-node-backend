@@ -11,7 +11,7 @@ import { formatFilename } from '../cliBased/ai/renaming-workflow/utils';
 import * as fs from 'fs';
 
 export const launchAIRoute = express.Router();
-
+const DISCARD_FOLDER_POST_AI_PROCESSING = "_discard";
 //ai/aiRenamer
 launchAIRoute.post('/aiRenamer', async (req: any, resp: any) => {
     try {
@@ -380,14 +380,14 @@ launchAIRoute.post("/cleanupRedRenamerFilers/:runId", async (req: Request, res: 
         const outputFolder = firstItem.outputFolder;
 
         const parent = path.dirname(srcFolder);
-        const ignoreFolder = path.join(parent, "_ignore");
+        const discardFolder = path.join(parent, DISCARD_FOLDER_POST_AI_PROCESSING)
 
-        await fs.promises.mkdir(ignoreFolder, { recursive: true });
+        await fs.promises.mkdir(discardFolder, { recursive: true });
 
-        await fs.promises.rename(reducedFolder, path.join(ignoreFolder, path.basename(reducedFolder)));
-        await fs.promises.rename(outputFolder, path.join(ignoreFolder, path.basename(outputFolder)));
+        await fs.promises.rename(reducedFolder, path.join(discardFolder, path.basename(reducedFolder)));
+        await fs.promises.rename(outputFolder, path.join(discardFolder, path.basename(outputFolder)));
 
-        const msg = `Folders ${reducedFolder} and ${outputFolder} moved to ${ignoreFolder}`;
+        const msg = `Folders ${reducedFolder} and ${outputFolder} moved to ${discardFolder}`;
         res.json({
             msg,
             runId,

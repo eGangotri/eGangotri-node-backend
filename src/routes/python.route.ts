@@ -6,8 +6,10 @@ import { PythonExtractionResult } from 'services/types';
 import * as path from 'path';
 import * as fs from 'fs/promises';
 import * as mongoose from 'mongoose';
-import { MergeMultiplePdfTracker } from '../models/mergeMultiplePdfTracker';
 import { randomUUID } from 'crypto';
+import { anyPdfCorruptedQuick } from '../services/pdfValidationService';
+import { saveMergeMultiplePdfTracker, getCommonRuns, getByCommonRun } from '../services/mergeMultiplePdfTrackerService';
+import { random } from 'lodash';
 
 export const pythonRoute = express.Router();
 
@@ -102,24 +104,7 @@ pythonRoute.post('/getFirstAndLastNPages', async (req: any, resp: any) => {
 // List all unique commonRunIds with the oldest createdAt per commonRunId
 pythonRoute.get('/merge-multiple-pdf-tracker/common-runs', async (_req: any, resp: any) => {
     try {
-        const results = await MergeMultiplePdfTracker.aggregate([
-            {
-                $group: {
-                    _id: '$commonRunId',
-                    oldestCreatedAt: { $min: '$createdAt' },
-                    anyCount: { $first: '$pdfPathsToMergeCount' },
-                },
-            },
-            {
-                $project: {
-                    _id: 0,
-                    commonRunId: '$_id',
-                    createdAt: '$oldestCreatedAt',
-                    pdfPathsToMergeCount: '$anyCount',
-                },
-            },
-            { $sort: { createdAt: -1 } },
-        ]);
+        const results = await getCommonRuns();
         resp.status(200).send({ response: results });
     } catch (err: any) {
         console.log('Error', err);
@@ -142,7 +127,7 @@ pythonRoute.get('/merge-multiple-pdf-tracker/by-common-run/:commonRunId', async 
             return;
         }
         const _id = new mongoose.Types.ObjectId(commonRunId);
-        const docs = await MergeMultiplePdfTracker.find({ commonRunId: _id }).sort({ createdAt: 1 }).lean();
+        const docs = await getByCommonRun(_id);
         resp.status(200).send({ response: docs });
     } catch (err: any) {
         console.log('Error', err);
@@ -345,6 +330,7 @@ pythonRoute.post('/mergeMutliplePdfs', async (req: any, resp: any) => {
         const pdfPathsToMergeCount = pdfPaths.length;
         let pdfPathsProcessedCount = 0;
         for (let pdfPath of pdfPaths) {
+            const runId = randomUUID();
             const pdfPathAsArray = pdfPath.split(",");
             if (pdfPathAsArray.length < 2) {
                 console.log(`Skipping ${pdfPath}`)
@@ -352,6 +338,7 @@ pythonRoute.post('/mergeMutliplePdfs', async (req: any, resp: any) => {
             }
             const first_pdf_path = pdfPathAsArray[0];
             const second_pdf_path = pdfPathAsArray[1];
+
 
             const pdfPathsAsBody: MergePdfsBody = {
                 "first_pdf_path": first_pdf_path,
@@ -362,9 +349,29 @@ pythonRoute.post('/mergeMutliplePdfs', async (req: any, resp: any) => {
                 third_pdf_path = pdfPathAsArray[2];
                 pdfPathsAsBody.third_pdf_path = third_pdf_path;
             }
+
+            const { anyCorrupted, results } = await anyPdfCorruptedQuick(
+                [first_pdf_path, second_pdf_path, third_pdf_path].filter(p => typeof p === 'string' && p.length > 0)
+            );
+            if (anyCorrupted) {
+                console.log(`Skipping ${first_pdf_path} and ${second_pdf_path} ${third_pdf_path.length > 0 ? `and ${third_pdf_path}` : ""} `)
+
+                await saveMergeMultiplePdfTracker({
+                    commonRunId,
+                    pdfPathsToMergeCount,
+                    runId,
+                    first_pdf_path,
+                    second_pdf_path,
+                    ...(third_pdf_path ? { third_pdf_path } : {}),
+                    operationResult: {status: false, message: "Corrupted PDFs", results},
+                    moveResults: [],
+                });
+
+                continue;
+            }
+
             console.log(`Merging ${first_pdf_path} and ${second_pdf_path} ${third_pdf_path.length > 0 ? `and ${third_pdf_path}` : ""} `)
             const _resp = await executePythonPostCall<MergePdfsResponseData>(pdfPathsAsBody, 'mergePdfs');
-            const runId = new mongoose.Types.ObjectId();
             console.log(`Merged ${first_pdf_path} and ${second_pdf_path} ${third_pdf_path.length > 0 ? `and ${third_pdf_path}` : ""} `)
             // Move results array to record where originals were moved
             const moveResults: Array<{ sourcePath: string; movedToPath: string }> = [];
@@ -395,21 +402,17 @@ pythonRoute.post('/mergeMutliplePdfs', async (req: any, resp: any) => {
             console.log(`merged_pdf_path ${operationResult.data?.details?.merged_pdf?.path}`)
             console.log(`moveResults ${JSON.stringify(moveResults)}`)
             pdfPathsProcessedCount++;
-            // Persist tracker document for this merge
-            try {
-                await MergeMultiplePdfTracker.create({
-                    commonRunId,
-                    pdfPathsToMergeCount,
-                    runId,
-                    first_pdf_path,
-                    second_pdf_path,
-                    ...(third_pdf_path ? { third_pdf_path } : {}),
-                    operationResult,
-                    moveResults,
-                });
-            } catch (e) {
-                console.warn('Failed to persist MERGE_MULTIPLE_PDF_TRACKER doc', e);
-            }
+            // Persist tracker document for this merge (service call)
+            await saveMergeMultiplePdfTracker({
+                commonRunId,
+                pdfPathsToMergeCount,
+                runId,
+                first_pdf_path,
+                second_pdf_path,
+                ...(third_pdf_path ? { third_pdf_path } : {}),
+                operationResult,
+                moveResults,
+            });
 
             allResponses.push(_resp)
         }
