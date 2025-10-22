@@ -32,7 +32,7 @@ import { launchCmdRoute } from "./routes/launchCmd.route";
 import { ellipsis } from "./mirror/utils";
 import { pythonArchiveRoute } from "./routes/python.archive.route";
 import { imgToPdfRoute } from "./routes/imgToPdf.route";
-import { launchAIGDriveRoute } from "routes/launchAI.gdrive.route";
+import { launchAIGDriveRoute } from "./routes/launchAI.gdrive.route";
 
 const egangotri = express();
 const hostname = "localhost";
