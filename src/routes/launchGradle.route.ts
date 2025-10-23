@@ -5,7 +5,7 @@ import { isValidPath } from '../utils/FileUtils';
 import { getFolderInDestRootForProfile, getFolderInSrcRootForProfile } from '../archiveUpload/ArchiveProfileUtils';
 import { ItemsUshered } from '../models/itemsUshered';
 import { UploadCycle } from '../models/uploadCycle';
-import { excelToJson } from '../cliBased/excel/ExcelUtils';
+import { excelToJson, addFolderMetadataSheet } from '../cliBased/excel/ExcelUtils';
 import { ArchiveUploadExcelProps } from '../archiveDotOrg/archive.types';
 import { createExcelV1FileForUpload, createExcelV3FileForUpload, createJsonFileForUpload, findMissedUploads } from '../services/GradleLauncherUtil';
 import { itemsUsheredVerficationAndDBFlagUpdate } from '../services/itemsUsheredService';
@@ -450,6 +450,11 @@ launchGradleRoute.get('/bookTitles', async (req: any, resp: any) => {
         console.log(`_cmd ${_cmd}`)
 
         const res = await makeGradleCall(_cmd)
+        const excelPath = res?.excelPath || ""
+        if(excelPath.endsWith(".xlsx")){
+            const metaRes = addFolderMetadataSheet(excelPath);
+            console.log(`addFolderMetadataSheet: ${JSON.stringify(metaRes)}`)
+        }
         resp.status(200).send({
             response: res
         });
