@@ -17,11 +17,11 @@ export const getDirectoriesWithFullPath = async (source: string) => {
 
 export function formatTime(timeLapseinMS: number) {
      const timeLapseInSecs = timeLapseinMS / 1000
-     const timeLapseInMins = timeLapseInSecs/60
-     const timeLapseInHrs = timeLapseInMins/60
+     const timeLapseInMins = timeLapseInSecs / 60
+     const timeLapseInHrs = timeLapseInMins / 60
      let timeLapse = `${timeLapseInSecs.toFixed(2)} sec(s)`
      if (timeLapseInHrs > 1) {
-          timeLapse = `${(timeLapseInMins/60).toFixed(2)} hour(s)`
+          timeLapse = `${(timeLapseInMins / 60).toFixed(2)} hour(s)`
      }
      else if (timeLapseInMins > 1) {
           timeLapse = `${timeLapseInMins.toFixed(2)} min(s)`
@@ -42,21 +42,21 @@ export async function folderCountEqualsPDFCount(srcFolderCount: number, dest: st
 
 export async function deleteFiles(files: Array<string>) {
      for (let file of files) {
-         try {
-             await fsPromise.unlink(file);
-         } catch (err) {
-             console.error(err);
-         }
+          try {
+               await fsPromise.unlink(file);
+          } catch (err) {
+               console.error(err);
+          }
      }
- }
+}
 
 export const getAllPdfs = async (dir: string): Promise<Array<string>> => {
      return await getAllFilesOfGivenType(dir, [PDF_EXT]);
 }
 
-export const getAllFilessInFoldersOfGivenType = async (dirs: Array<string>, _types:string): Promise<Array<string>> => {
+export const getAllFilessInFoldersOfGivenType = async (dirs: Array<string>, _types: string): Promise<Array<string>> => {
      let files = [];
-     for(let dir of dirs){
+     for (let dir of dirs) {
           const _file = await getAllFilesOfGivenType(dir, [_types])
           files.push(_file);
      }
@@ -73,28 +73,28 @@ export const getAllPdfsInFolders = async (dirs: Array<string>): Promise<Array<st
  * @returns Promise<Array<string>> - Array of full paths to PDF files
  */
 export const getAllPdfsInFoldersRecursive = async (dirs: Array<string>): Promise<Array<string>> => {
-    let allPdfs: string[] = [];
-    
-    for (const dir of dirs) {
-        try {
-            // Get all files in the current directory
-            const filesInDir = await getAllFilesOfGivenType(dir, [PDF_EXT]);
-            allPdfs = [...allPdfs, ...filesInDir];
-            
-            // Get all subdirectories
-            const subdirs = await getDirectoriesWithFullPath(dir);
-            
-            // Recursively process subdirectories
-            if (subdirs && subdirs.length > 0) {
-                const subDirPdfs = await getAllPdfsInFoldersRecursive(subdirs);
-                allPdfs = [...allPdfs, ...subDirPdfs];
-            }
-        } catch (error) {
-            console.error(`Error processing directory ${dir}:`, error);
-        }
-    }
-    
-    return allPdfs;
+     let allPdfs: string[] = [];
+
+     for (const dir of dirs) {
+          try {
+               // Get all files in the current directory
+               const filesInDir = await getAllFilesOfGivenType(dir, [PDF_EXT]);
+               allPdfs = [...allPdfs, ...filesInDir];
+
+               // Get all subdirectories
+               const subdirs = await getDirectoriesWithFullPath(dir);
+
+               // Recursively process subdirectories
+               if (subdirs && subdirs.length > 0) {
+                    const subDirPdfs = await getAllPdfsInFoldersRecursive(subdirs);
+                    allPdfs = [...allPdfs, ...subDirPdfs];
+               }
+          } catch (error) {
+               console.error(`Error processing directory ${dir}:`, error);
+          }
+     }
+
+     return allPdfs;
 }
 
 export const getAllPngsInFolders = async (dirs: Array<string>): Promise<Array<string>> => {
@@ -113,30 +113,30 @@ export const getAllDotSumFiles = async (dir: string) => {
  * @throws Error if directory is invalid or unreadable
  */
 export const getAllFilesOfGivenType = async (dir: string, fileTypes: string[] = []): Promise<string[]> => {
-    try {
-        // Validate directory
-        if (!dir || typeof dir !== 'string') {
-            throw new Error('Invalid directory path provided');
-        }
+     try {
+          // Validate directory
+          if (!dir || typeof dir !== 'string') {
+               throw new Error('Invalid directory path provided');
+          }
 
-        // Normalize file types (ensure they start with dot and are lowercase)
-        const normalizedTypes = fileTypes.map(type => 
-            type.startsWith('.') ? type.toLowerCase() : `.${type.toLowerCase()}`
-        );
+          // Normalize file types (ensure they start with dot and are lowercase)
+          const normalizedTypes = fileTypes.map(type =>
+               type.startsWith('.') ? type.toLowerCase() : `.${type.toLowerCase()}`
+          );
 
-        // Read directory contents
-        const contentList = await fsPromise.readdir(dir);
+          // Read directory contents
+          const contentList = await fsPromise.readdir(dir);
 
-        // Process files
-        const files = contentList
-            .map(filename => path.join(dir, filename))
-            .filter(filePath => normalizedTypes.length === 0 || 
-                normalizedTypes.includes(path.extname(filePath).toLowerCase()));
+          // Process files
+          const files = contentList
+               .map(filename => path.join(dir, filename))
+               .filter(filePath => normalizedTypes.length === 0 ||
+                    normalizedTypes.includes(path.extname(filePath).toLowerCase()));
 
-        return files;
-    } catch (error) {
-        throw new Error(`Failed to get files from directory ${dir}: ${error.message}`);
-    }
+          return files;
+     } catch (error) {
+          throw new Error(`Failed to get files from directory ${dir}: ${error.message}`);
+     }
 }
 
 export const getUploadableFolders = async (srcFolder: string, dest: string) => {
@@ -145,7 +145,7 @@ export const getUploadableFolders = async (srcFolder: string, dest: string) => {
 
      return dirs.map((subFolder, index) => {
           return {
-               folderNo: `${index+1}`,
+               folderNo: `${index + 1}`,
                src: `${srcFolder}\\${subFolder}`,
                dest: `${dest}_(${dirs.length})\\ramtek-${index + 1}_${subFolder}`
           }
@@ -176,9 +176,12 @@ var getStats = function (text: string = '') {
      });
 };
 
-function formatMem(heapSize: number) {
-     const heapSizeInMBs = (heapSize / 1024 / 1024);
-     const heapSizeInGBs = (heapSize / 1024 / 1024 / 1024);
+export function formatMemForHeapSizeInKB(heapSizeInKB: number) {
+     return formatMem(heapSizeInKB*1024)
+}
+export function formatMem(heapSizeInBytes: number) {
+     const heapSizeInMBs = (heapSizeInBytes / 1024 / 1024);
+     const heapSizeInGBs = (heapSizeInBytes / 1024 / 1024 / 1024);
      return heapSizeInGBs > 1 ? `${heapSizeInGBs.toFixed(2)} GB(s)` : `${heapSizeInMBs.toFixed(2)} Mb(s)`
 }
 
@@ -187,10 +190,10 @@ export function garbageCollect() {
      if (global.gc) {
           global.gc();
           const after = getMemUsage();
-     //      console.log(`Mem Usage reduced approximately from 
-     // \t${Math.round(before * 100) / 100} MB to
-     // \t${Math.round(after * 100) / 100} MB 
-     // \treleasing ${Math.round((before - after) * 100) / 100} MB `);
+          //      console.log(`Mem Usage reduced approximately from 
+          // \t${Math.round(before * 100) / 100} MB to
+          // \t${Math.round(after * 100) / 100} MB 
+          // \treleasing ${Math.round((before - after) * 100) / 100} MB `);
      }
 }
 
@@ -199,8 +202,8 @@ export function getMemUsage() {
      return used;
 }
 
-export const chunk = (arr:Array<any>, size:number) => {
-     if(size > arr.length || size < 1){
+export const chunk = (arr: Array<any>, size: number) => {
+     if (size > arr.length || size < 1) {
           return [arr]
      }
      return Array.from({ length: Math.ceil(arr.length / size) }, (v, i) =>
@@ -208,6 +211,6 @@ export const chunk = (arr:Array<any>, size:number) => {
      )
 }
 
-export const mkDirIfDoesntExists = async (destFolder:string) => {
-     await fsPromise.mkdir(destFolder, {recursive:true});
+export const mkDirIfDoesntExists = async (destFolder: string) => {
+     await fsPromise.mkdir(destFolder, { recursive: true });
 }

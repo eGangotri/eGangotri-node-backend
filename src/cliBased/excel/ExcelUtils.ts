@@ -5,7 +5,8 @@ import * as ExcelJS from 'exceljs';
 import * as path from 'path';
 import * as _ from 'lodash';
 import * as XLSX from "xlsx";
-import { title } from 'process';
+import { formatMem, formatMemForHeapSizeInKB } from '../../imgToPdf/utils/Utils';
+import { autoFitColumnsForAoa } from './SheetUtils';
 
 const setHeadersForExcel = () => {
   const headerArray = [
@@ -17,6 +18,7 @@ const setHeadersForExcel = () => {
     "Size with Units", "Size in Bytes", "Folder Name"
   ]
 }
+
 
 const convertDatatoJson = (googleDriveFileData: Array<GoogleApiData>) => {
   const jsonArray: GDriveExcelHeaders[] = []
@@ -293,7 +295,7 @@ export function addFolderMetadataSheet(excelPath: string): { success: boolean; m
       return { success: false, message: 'No rows found', totalFolders: 0 };
     }
 
-    const agg: Record<string, { sumD: number; sumG: number }> = {};
+    const agg: Record<string, { count: number; sumD: number; sumG: number }> = {};
     for (let i = 1; i < rows.length; i++) {
       const row = rows[i] || [];
       const folderNameRaw = row[2];
@@ -307,19 +309,32 @@ export function addFolderMetadataSheet(excelPath: string): { success: boolean; m
       const dNum = isNaN(dVal) ? 0 : dVal;
       const gNum = isNaN(gVal) ? 0 : gVal;
 
-      if (!agg[folderName]) agg[folderName] = { sumD: 0, sumG: 0 };
+      if (!agg[folderName]) agg[folderName] = { count: 0, sumD: 0, sumG: 0 };
+      agg[folderName].count += 1;
       agg[folderName].sumD += dNum;
       agg[folderName].sumG += gNum;
     }
 
-    const header = ['Folder Name', 'Sum of Column D', 'Sum of Column G'];
+    const header = ['Folder Name', 'Total Pdf Count', 'Total Page Count', 'Total Size', 'Total Size in KB'];
     const aoa: any[][] = [header];
     const keys = Object.keys(agg).sort((a, b) => a.localeCompare(b));
     for (const key of keys) {
-      aoa.push([key, agg[key].sumD, agg[key].sumG]);
+      const sizeInKB = agg[key].sumG;
+      const inGB = formatMemForHeapSizeInKB(sizeInKB)
+      aoa.push([key, agg[key].count, agg[key].sumD, inGB,sizeInKB]);
     }
 
+    // Add an empty row followed by totals
+    aoa.push([]);
+    const totalPdfCount = keys.reduce((acc, k) => acc + agg[k].count, 0);
+    const totalPageCount = keys.reduce((acc, k) => acc + agg[k].sumD, 0);
+    const totalSizeInKB = keys.reduce((acc, k) => acc + agg[k].sumG, 0);
+    const totalSizeFormatted = formatMemForHeapSizeInKB(totalSizeInKB);
+    aoa.push(['Totals', totalPdfCount, totalPageCount, totalSizeFormatted, totalSizeInKB]);
+
+    
     const metadataWs = xlsx.utils.aoa_to_sheet(aoa);
+    metadataWs['!cols'] = autoFitColumnsForAoa(aoa, { min: 10, max: 80, pad: 2 });
     const metadataSheetName = 'Metadata';
     wb.Sheets[metadataSheetName] = metadataWs;
     if (!wb.SheetNames.includes(metadataSheetName)) wb.SheetNames.push(metadataSheetName);

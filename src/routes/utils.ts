@@ -3,7 +3,7 @@ import { MAX_ITEMS_LISTABLE } from "../utils/constants";
 
 
 export const getLimit = (limit: string | undefined | number): number => {
-  if(limit === undefined) return MAX_ITEMS_LISTABLE;
+  if (limit === undefined) return MAX_ITEMS_LISTABLE;
   return typeof limit == 'number' ? limit : parseInt(limit || `${MAX_ITEMS_LISTABLE}`);
 }
 
@@ -18,8 +18,13 @@ export const stripPassword = (users: LoginUsersDocument[]) => {
   return strippedPasswords?.length ? strippedPasswords : []
 }
 
-export const  GDRIVE_CP_EXTRACTED_METADATA_RES = {
+export const GDRIVE_CP_EXTRACTED_METADATA_RES = {
   processedCount: 0,
   failureCount: 0,
   totalCount: 0
 }
+
+export const extractValue = (text: string, pattern: RegExp): string => {
+  const match = text?.match(pattern);
+  return match ? match[1] : 'Not found';
+};
