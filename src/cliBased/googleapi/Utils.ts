@@ -1,3 +1,4 @@
+import { GDRIVE_DEFAULT_IGNORE_FOLDER } from "../../services/GDriveService";
 import { ALL_TYPE, FOLDER_MIME_TYPE, PDF_MIME_TYPE, PDF_TYPE, ZIP_MIME_TYPE, ZIP_TYPE } from "./_utils/constants";
 
 const { google } = require('googleapis');
@@ -16,9 +17,18 @@ export function isValidDriveId(folderIdOrUrl: string) {
 export const constructGoogleApiQuery = (folderId: string, ignoreFolder: string, fileType: string) => {
     const pdfOnly = fileType === PDF_TYPE;
     const zipOnly = fileType === ZIP_TYPE;
-    const all = fileType.toLowerCase() === ALL_TYPE || ( fileType !== PDF_TYPE && fileType !== ZIP_TYPE);
+    const all = fileType.toLowerCase() === ALL_TYPE || (fileType !== PDF_TYPE && fileType !== ZIP_TYPE);
 
-    const conditionForIgnoreFolder = ignoreFolder?.length > 0 ? ` and not name contains '${ignoreFolder}'` : "";
+    const buildContains = (v: string) => `name contains '${v.replace(/'/g, "\\'")}'`;
+    let conditionForIgnoreFolder = ignoreFolder?.length > 0 ? ` and not name contains '${ignoreFolder}'` : "";
+
+    if (ignoreFolder && ignoreFolder.length > 0 && ignoreFolder === GDRIVE_DEFAULT_IGNORE_FOLDER) {
+        conditionForIgnoreFolder = ` and not (${buildContains(ignoreFolder)}${['proce', 'procl']
+            .map(ex => ` and not ${buildContains(ex)}`)
+            .join('')
+            })`
+    }
+
     const pdfOnlyFrag = `(mimeType='${PDF_MIME_TYPE}' or mimeType='${FOLDER_MIME_TYPE}')`
     const zipOnlyFrag = `((mimeType='${ZIP_MIME_TYPE}' or name contains '.zip' or name contains '.rar') or mimeType='${FOLDER_MIME_TYPE}')`
     const combinedCondition = (pdfOnly || zipOnly) ?
