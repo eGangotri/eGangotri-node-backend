@@ -113,20 +113,20 @@ launchAIRoute.post('/aiRenamer', async (req: any, resp: any) => {
         const _errorCount = _renamingResults.map((result: any) => result.errorCount).join(",");
 
         const overallSuccess = summary.failedCount === 0 && _aggregatedResults.every((r: any) => r.success === true);
-        const msg =
-            `${srcFoldersList.length} folders processed in ${_renamingResults.length} operations
-        overallSuccess: ${overallSuccess}
-        _processedCount: ${_processedCount} (${summary.processedCount} )
-        _successCount: ${_successCount} (${summary.successCount})
-        _failedCount: ${_failedCount} (${summary.failedCount})
-        _errorCount: ${_errorCount} (${summary.errorCount})
+        const msg = {
+            title: `${srcFoldersList.length} folders processed in ${_renamingResults.length} operations`,
+            overallSuccess,
+            _processedCount: `${_processedCount} (${summary.processedCount} )`,
+            _successCount: `${_successCount} (${summary.successCount})`,
+            _failedCount: `${_failedCount} (${summary.failedCount})`,
+            _errorCount: `${_errorCount} (${summary.errorCount})`,
        
-        `
+    }
         resp.status(200).send({
             "status": "success",
             response: {
-                "msg": msg,
-                "aggregated": _aggregatedResults,
+                "aggregatedSummary": msg,
+                "aggregatedResults": _aggregatedResults,
                 "summary": summary,
                 "results": _renamingResults,
             }
@@ -165,7 +165,8 @@ launchAIRoute.post('/aiRenamer/:runId', async (req: Request, res: Response) => {
         let successes = 0;
         let failures = 0;
         const details: Array<{ originalFilePath: string; newFilePath?: string; error?: string }> = [];
-        console.log(`Failed Items Count: ${failedItems.length} ${JSON.stringify(failedItems)}`);
+        console.log(`Failed Items Count: ${ failedItems.length } ${ JSON.stringify(failedItems)
+    }`);
         for (const item of failedItems) {
             try {
                 const result = await processWithGoogleAI(item.reducedFilePath);
@@ -176,7 +177,7 @@ launchAIRoute.post('/aiRenamer/:runId', async (req: Request, res: Response) => {
                         : path.dirname(item.originalFilePath);
 
                     const newFilePath = path.join(targetDir, formatted);
-                    console.log(`Renaming ${item.originalFilePath} to ${newFilePath}`)
+                    console.log(`Renaming ${ item.originalFilePath } to ${ newFilePath } `)
 
                     // ensure targetDir exists if using outputFolder
                     if (targetDir !== path.dirname(item.originalFilePath) && !fs.existsSync(targetDir)) {
@@ -191,11 +192,11 @@ launchAIRoute.post('/aiRenamer/:runId', async (req: Request, res: Response) => {
                         await PdfTitleRenamingViaAITracker.updateOne({ _id: (item as any)._id }, {
                             $set: {
                                 extractedMetadata: result.extractedMetadata,
-                                error: `File copy failed: ${copyErr?.message || copyErr}`,
+                                error: `File copy failed: ${ copyErr?.message || copyErr } `,
                             }
                         });
                         failures++;
-                        details.push({ originalFilePath: item.originalFilePath, error: `File copy failed: ${copyErr?.message || copyErr}` });
+                        details.push({ originalFilePath: item.originalFilePath, error: `File copy failed: ${ copyErr?.message || copyErr } ` });
                         continue;
                     }
 
@@ -259,7 +260,7 @@ launchAIRoute.post('/aiRenamer/:runId', async (req: Request, res: Response) => {
             details,
         });
     } catch (error: any) {
-        console.error(`/aiRenamer/:runId retry error: ${error?.message || String(error)}`);
+        console.error(`/ aiRenamer /:runId retry error: ${ error?.message || String(error) } `);
         return res.status(500).json({ status: 'failed', message: error?.message || String(error) });
     }
 });
@@ -285,7 +286,7 @@ launchAIRoute.get("/getAllTitleRenamedViaAIList", async (req: Request, res: expr
         }
         res.json(results)
     } catch (error) {
-        console.log(`/pdfTitleRenamedItems error: ${JSON.stringify(error.message)}`);
+        console.log(`/ pdfTitleRenamedItems error: ${ JSON.stringify(error.message) } `);
         res.status(500).json({ message: "Error fetching pdfTitleRenamedItems", error })
     }
 });
@@ -320,7 +321,7 @@ launchAIRoute.get("/getAllTitleRenamedViaAIListGroupedByRunId", async (req: Requ
         };
         res.json(results);
     } catch (error: any) {
-        console.log(`/pdfTitleRenamedItems error: ${JSON.stringify(error.message)}`);
+        console.log(`/ pdfTitleRenamedItems error: ${ JSON.stringify(error.message) } `);
         res.status(500).json({ message: "Error fetching pdfTitleRenamedItems grouped by runId", error });
     }
 });
@@ -338,35 +339,35 @@ launchAIRoute.post("/copyMetadataToOriginalFiles/:runId", async (req: Request, r
                     const dir = path.dirname(item.originalFilePath);
                     const ext = path.extname(item.originalFilePath);
                     const newName = String((item.extractedMetadata + ext) || item.fileName);
-                    const targetPath = path.join(dir, `${newName}`);
-                    console.log(`Renaming ${index + 1}/${pdfTitleRenamedItems.length}: ${item.originalFilePath} to ${targetPath}`);
-                    await fs.promises.rename(item.originalFilePath, targetPath);
-                    return true;
+                    const targetPath = path.join(dir, `${ newName } `);
+                    console.log(`Renaming ${ index + 1 }/${pdfTitleRenamedItems.length}: ${item.originalFilePath} to ${targetPath}`);
+await fs.promises.rename(item.originalFilePath, targetPath);
+return true;
                 } catch (err: any) {
-                    console.error(`Failed to process ${item.originalFilePath}: ${err?.message || String(err)}`);
-                    errors.push({
-                        filePath: item.originalFilePath,
-                        error: err?.message || String(err)
-                    })
-                    return false;
-                }
+    console.error(`Failed to process ${item.originalFilePath}: ${err?.message || String(err)}`);
+    errors.push({
+        filePath: item.originalFilePath,
+        error: err?.message || String(err)
+    })
+    return false;
+}
             })
         );
 
-        const successCount = results.filter(Boolean).length;
-        const failureCount = results.length - successCount;
+const successCount = results.filter(Boolean).length;
+const failureCount = results.length - successCount;
 
-        res.json({
-            status: `Success: ${successCount}, Failure: ${failureCount} of ${pdfTitleRenamedItems.length}`,
-            runId,
-            successCount,
-            failureCount,
-            errors
-        })
+res.json({
+    status: `Success: ${successCount}, Failure: ${failureCount} of ${pdfTitleRenamedItems.length}`,
+    runId,
+    successCount,
+    failureCount,
+    errors
+})
     } catch (error) {
-        console.log(`/pdfTitleRenamedItems error: ${JSON.stringify(error.message)}`);
-        res.status(500).json({ message: "Error fetching pdfTitleRenamedItems", error })
-    }
+    console.log(`/pdfTitleRenamedItems error: ${JSON.stringify(error.message)}`);
+    res.status(500).json({ message: "Error fetching pdfTitleRenamedItems", error })
+}
 })
 
 //
