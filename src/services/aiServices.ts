@@ -60,6 +60,12 @@ export const renameCPSByLink = async (googleDriveLink: string,
                 await recordGDriveCpRenameHistory({ commonRunId, runId, success: false, error: "Same as old name", googleDriveLink: googleDriveDataItem.googleDriveLink, fileId: renameResult.fileId, oldName: renameResult.oldName });
                 continue;
             }
+            else if (renameResult.newName?.trim().length === 0) {
+                console.log(`No New Name for ${renameResult.oldName}`);
+                failureCount++;
+                await recordGDriveCpRenameHistory({ commonRunId, runId, success: false, error: "No New Name", googleDriveLink: googleDriveDataItem.googleDriveLink, fileId: renameResult.fileId, oldName: renameResult.oldName });
+                continue;
+            }
             response.push(renameResult);
             successCount++;
             await recordGDriveCpRenameHistory({ commonRunId, runId, success: true, googleDriveLink: googleDriveDataItem.googleDriveLink, fileId: renameResult.fileId, oldName: renameResult.oldName, newName: renameResult.newName });
