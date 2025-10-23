@@ -330,7 +330,8 @@ launchAIRoute.post("/copyMetadataToOriginalFiles/:runId", async (req: Request, r
         const runId = req.params.runId;
         const filter = { runId };
         const pdfTitleRenamedItems: IPdfTitleRenamingViaAITracker[] = await PdfTitleRenamingViaAITracker.find(filter)
-            .sort({ createdAt: -1 })
+            .sort({ createdAt: -1 });
+        const errors = []
         const results = await Promise.all(
             pdfTitleRenamedItems.map(async (item, index) => {
                 try {
@@ -343,6 +344,10 @@ launchAIRoute.post("/copyMetadataToOriginalFiles/:runId", async (req: Request, r
                     return true;
                 } catch (err: any) {
                     console.error(`Failed to process ${item.originalFilePath}: ${err?.message || String(err)}`);
+                    errors.push({
+                        filePath: item.originalFilePath,
+                        error: err?.message || String(err)
+                    })
                     return false;
                 }
             })
@@ -356,6 +361,7 @@ launchAIRoute.post("/copyMetadataToOriginalFiles/:runId", async (req: Request, r
             runId,
             successCount,
             failureCount,
+            errors
         })
     } catch (error) {
         console.log(`/pdfTitleRenamedItems error: ${JSON.stringify(error.message)}`);

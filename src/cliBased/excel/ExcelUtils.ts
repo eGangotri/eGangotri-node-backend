@@ -281,3 +281,52 @@ export function getGoogleDriveId(link: string): string {
   return match ? match[1] : "";
 }
 
+
+export function addFolderMetadataSheet(excelPath: string): { success: boolean; message: string; totalFolders: number } {
+  try {
+    const wb = xlsx.readFile(excelPath);
+    const firstSheetName = wb.SheetNames[0];
+    const ws = wb.Sheets[firstSheetName];
+
+    const rows: any[][] = xlsx.utils.sheet_to_json(ws, { header: 1, defval: null });
+    if (!rows || rows.length === 0) {
+      return { success: false, message: 'No rows found', totalFolders: 0 };
+    }
+
+    const agg: Record<string, { sumD: number; sumG: number }> = {};
+    for (let i = 1; i < rows.length; i++) {
+      const row = rows[i] || [];
+      const folderNameRaw = row[2];
+      if (folderNameRaw === null || folderNameRaw === undefined || `${folderNameRaw}`.trim() === '') continue;
+      const folderName = `${folderNameRaw}`.trim();
+
+      const dValRaw = row[3];
+      const gValRaw = row[6];
+      const dVal = typeof dValRaw === 'number' ? dValRaw : parseFloat(`${dValRaw}`.replace(/,/g, ''));
+      const gVal = typeof gValRaw === 'number' ? gValRaw : parseFloat(`${gValRaw}`.replace(/,/g, ''));
+      const dNum = isNaN(dVal) ? 0 : dVal;
+      const gNum = isNaN(gVal) ? 0 : gVal;
+
+      if (!agg[folderName]) agg[folderName] = { sumD: 0, sumG: 0 };
+      agg[folderName].sumD += dNum;
+      agg[folderName].sumG += gNum;
+    }
+
+    const header = ['Folder Name', 'Sum of Column D', 'Sum of Column G'];
+    const aoa: any[][] = [header];
+    const keys = Object.keys(agg).sort((a, b) => a.localeCompare(b));
+    for (const key of keys) {
+      aoa.push([key, agg[key].sumD, agg[key].sumG]);
+    }
+
+    const metadataWs = xlsx.utils.aoa_to_sheet(aoa);
+    const metadataSheetName = 'Metadata';
+    wb.Sheets[metadataSheetName] = metadataWs;
+    if (!wb.SheetNames.includes(metadataSheetName)) wb.SheetNames.push(metadataSheetName);
+
+    xlsx.writeFile(wb, excelPath);
+    return { success: true, message: `Metadata written`, totalFolders: keys.length };
+  } catch (err: any) {
+    return { success: false, message: err?.message || 'Failed to write Metadata', totalFolders: 0 };
+  }
+}
