@@ -158,7 +158,7 @@ async function runGradle(resourcesDir: string): Promise<number> {
   });
 }
 
-async function main() {
+export async function updateChromeDriver() {
   try {
     const resourcesDir = parseResourcesDir();
     if (!(await fs.pathExists(resourcesDir))) {
@@ -209,4 +209,4 @@ async function main() {
 }
 
 // Run if executed directly
-main();
+updateChromeDriver();

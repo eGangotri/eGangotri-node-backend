@@ -6,6 +6,7 @@ import { getListOfUploadCycles, getUploadCycleById } from "../services/uploadCyc
 import { findMissedUploads } from "../services/GradleLauncherUtil";
 import { UploadCycleArchiveProfile } from "mirror/types";
 import { getServerNetworkInfo } from "../utils/networkUtils";
+import { updateChromeDriver } from "_adHoc/getWin64ChromedriverUrl";
 
 export const uploadCycleRoute = express.Router();
 
@@ -138,4 +139,21 @@ uploadCycleRoute.post("/deleteUploadCycleById", async (req: Request, resp: Respo
         resp.status(400).send(err);
     }
 });
+
+
+uploadCycleRoute.get('/updateChromeDriver', async (req: any, resp: any) => {
+    try {
+        await updateChromeDriver();
+        resp.status(200).send({
+            response: {
+                success: true,
+                message: 'ChromeDriver updated successfully'
+            }
+        });
+    }
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})
 

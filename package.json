@@ -20,7 +20,6 @@
     "move-merged-pdfs": "node -r ts-node/register ./src/imgToPdf/conversionService/moveMergedPdfs.ts",
     "vanity": "ts-node ./src/vanityService/VanityPdf.ts",
     "catalog": "ts-node ./src/cliBased/googleapi/GoogleDriveApiReadAndExport.ts",
-    "get-refresh-token": "ts-node ./src/cliBased/googleapi/_utils/getRefreshToken.ts",
     "extractFirstAndLastNPages": "cross-env NODE_OPTIONS=--max-old-space-size=16384 ts-node ./src/cliBased/pdf/extractFirstAndLastNPages.ts",
     "combineExcels": "ts-node ./src/cliBased/googleapi/_utils/CombineMainAndReducedExcelData",
     "excelutil": "ts-node ./src/cliBased/googleapi/_utils/ExcelUtils",
@@ -56,6 +55,7 @@
     "copy-asha-pdfs": "ts-node ./src/_adHoc/ashaCatalogPdfCopy.ts",
     "rename-pdfs-via-ai": "ts-node ./src/cliBased/ai/renaming-workflow/renamePdfsViaAI.ts",
     "rename-gdrive-img-files": "ts-node ./src/cliBased/ai/renaming-workflow/renameGDRiveImgFiles.ts",
+    "get-refresh-token": "ts-node ./src/cliBased/googleapi/_utils/getRefreshToken.ts",
     "get-win64-chromedriver": "ts-node ./src/_adHoc/getWin64ChromedriverUrl.ts"
   },
   "repository": {
