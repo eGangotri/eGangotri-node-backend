@@ -2,6 +2,7 @@ import { google } from 'googleapis';
 import { OAuth2Client } from 'google-auth-library';
 import * as readline from 'readline';
 import * as fsPromise from 'fs/promises';
+import * as path from 'path';
 
 import { SCOPES, TOKEN_PATH, _credentials } from './credentials_googleapi';
 import { checkFolderExistsSync } from '../../../utils/FileUtils';
@@ -70,22 +71,45 @@ async function getCodeFromUser(): Promise<string> {
     });
 }
 
-// Upload a file to Google Drive
-async function uploadFile(auth: OAuth2Client): Promise<void> {
-    const drive = google.drive({ version: 'v3', auth });
 
-    const response = await drive.files.get({
-        fileId: '19yDfS-1m1QJ9m806fMFDTXlMyVcwdza_',
-        fields: "name, parents",
-    });
-
-    console.log('File ID:', response.data?.id);
-}
 
 // Main function
-async function main() {
+export const refreshGdriveToken = async () => {
+    console.log(`getRefreshTokens: ${new Date()}`);
     const auth = await authorize();
-    await uploadFile(auth);
+    try {
+        const tokenPath = path.resolve(process.cwd(), 'token.json');
+        const envPath = path.resolve(process.cwd(), '.env');
+        const stat = await fsPromise.stat(tokenPath);
+        const tokenRaw = await fsPromise.readFile(tokenPath, 'utf-8');
+        const tokenJson = JSON.parse(tokenRaw);
+        const refreshToken: string | undefined = tokenJson?.refresh_token;
+        console.log(`token.json last modified (local): ${stat.mtime.toISOString()}`);
+        console.log(`refresh_token: ${refreshToken}`);
+
+        // Read existing .env and capture old value
+        let envRaw = '';
+        try {
+            envRaw = await fsPromise.readFile(envPath, 'utf-8');
+        } catch {}
+        let oldValue = '';
+        const match = envRaw.match(/^GOOGLE_DRIVE_REFRESH_TOKEN=(.*)$/m);
+        if (match) {
+            oldValue = match[1];
+        }
+
+        let newEnv = envRaw;
+        if (match) {
+            newEnv = envRaw.replace(/^GOOGLE_DRIVE_REFRESH_TOKEN=.*$/m, `GOOGLE_DRIVE_REFRESH_TOKEN=${refreshToken ?? ''}`);
+        } else {
+            const sep = envRaw.endsWith('\n') || envRaw.length === 0 ? '' : '\n';
+            newEnv = envRaw + sep + `GOOGLE_DRIVE_REFRESH_TOKEN=${refreshToken ?? ''}` + '\n';
+        }
+        await fsPromise.writeFile(envPath, newEnv, 'utf-8');
+        console.log(`Replacing GOOGLE_DRIVE_REFRESH_TOKEN: ${oldValue} -> ${refreshToken}`);
+    } catch (err) {
+        console.error('Failed to process token.json or update .env', err);
+    }
 }
 
-main().catch(console.error);
+refreshGdriveToken().catch(console.error);

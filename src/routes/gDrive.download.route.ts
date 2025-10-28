@@ -1,6 +1,7 @@
 const express = require("express");
 import { Request, Response } from 'express';
 import GDriveDownload, { IGDriveDownload } from '../models/GDriveDownloadHistorySchema';
+import { refreshGdriveToken } from '../cliBased/googleapi/_utils/getRefreshToken';
 
 export const gDriveDownloadRoute = express.Router();
 
@@ -190,3 +191,14 @@ gDriveDownloadRoute.get("/getGDriveDownloads", async (req: Request, res: Respons
         res.status(500).json({ message: "Error fetching GDrive downloads", error })
     }
 });
+
+gDriveDownloadRoute.get("/refreshToken", async (req: Request, res: Response) => {
+    try {
+        const refreshToken = await refreshGdriveToken();
+        res.json({ refreshToken });
+    } catch (error) {
+        console.log(`/refreshToken/error ${error.message}`);
+        res.status(500).json({ error: error.message });
+    }
+});
+ 
