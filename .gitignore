@@ -1,7 +1,6 @@
 zipDump/*.zip
 /src/cliBasedX
 token.json
-token2.json
 *.csv
 # Logs
 logs
