@@ -14,7 +14,7 @@ export interface FolderStats {
     folder: string;
     meta: FileStats[];
     pdfCount: number;
-    mistmatch?: boolean;
+    countMatch?: boolean;
 }
 export interface FileStatsOptions {
     directoryPath: string,
