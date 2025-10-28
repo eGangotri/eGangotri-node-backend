@@ -10,6 +10,7 @@ lerna-debug.log*
 downloads/
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
 # Runtime data
 pids
 *.pid
@@ -101,10 +102,5 @@ dist
 # TernJS port file
 .tern-port
 
-<<<<<<< HEAD
 aws_secrets
-=======
-aws_secrets
-src/zipDump/output-28-Aug-2024-23-07.zip
->>>>>>> 94ae3b987dd0a3e988dbdea22162cc68a699ace3
 bash.exe.stackdump
