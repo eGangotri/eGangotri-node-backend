@@ -3,7 +3,7 @@ import * as fsPromise from 'fs/promises';
 import { getPdfPageCountUsingPdfLib } from "../imgToPdf/utils/PdfLibUtils";
 import * as path from 'path';
 import * as Mirror from "../mirror/FrontEndBackendCommonCode"
-import { FileStatsOptions } from '../imgToPdf/utils/types';
+import { FileStatsOptions, FolderStats } from '../imgToPdf/utils/types';
 import { ellipsis } from '../mirror/utils';
 import _ from 'lodash';
 import { PDF_EXT, ZIP_EXT } from '../imgToPdf/utils/constants';
@@ -189,6 +189,31 @@ export async function getAllFileListingWithFileSizeStats(directoryPath: string):
             withLogs: true,
             withMetadata: false,
         })
+}
+
+export async function getAllFoldersWithPdfCount(directoryPath: string): 
+Promise<Record<string, FileStats[]>> {
+    const stats = await getAllFileStats(
+        {
+            directoryPath,
+            filterExt: [PDF_EXT],
+            ignoreFolders: false,
+            withLogs: false,
+            withMetadata: false,
+        })
+    const byDirectory: Record<string, FileStats[]> = {};
+    for (const stat of stats) {
+        const key = stat.folder;
+        if (!byDirectory[key]) {
+            byDirectory[key] = [];
+        }
+        delete stat.rowCounter;
+        delete stat.ext;
+        delete stat.rawSize;
+        delete stat.size;
+        byDirectory[key].push(stat);
+    }
+    return byDirectory;
 }
 
 export async function getAllFileListingWithStats(directoryPath: string): Promise<FileStats[]> {

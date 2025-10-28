@@ -33,6 +33,7 @@ import { ellipsis } from "./mirror/utils";
 import { pythonArchiveRoute } from "./routes/python.archive.route";
 import { imgToPdfRoute } from "./routes/imgToPdf.route";
 import { launchAIGDriveRoute } from "./routes/launchAI.gdrive.route";
+import { folderUtilsRoute } from "./routes/folderUtils.route";
 
 const egangotri = express();
 const hostname = "localhost";
@@ -78,6 +79,7 @@ egangotri.use("/archiveItem", archiveItemRoute);
 egangotri.use("/googleDriveDB", googleDriveItemRoute);
 egangotri.use("/searchMongo", launchMongoRoute);
 egangotri.use("/fileUtil", fileUtilsRoute);
+egangotri.use("/folderUtil", folderUtilsRoute);
 egangotri.use("/scanningCenter", scanningCenterRoute);
 egangotri.use("/gDriveUploadWorkReportRoute", gDriveUploadWorkReportRoute);
 egangotri.use("/launchCmd", launchCmdRoute);
