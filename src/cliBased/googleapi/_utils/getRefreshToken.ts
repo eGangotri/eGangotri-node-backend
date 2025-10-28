@@ -76,6 +76,7 @@ async function getCodeFromUser(): Promise<string> {
 // Main function
 export const refreshGdriveToken = async () => {
     console.log(`getRefreshTokens: ${new Date()}`);
+    console.log(`Warning. You must have your Root GMAIL Acct accessible in the system you are running this from: ${new Date()}`);
     const auth = await authorize();
     try {
         const tokenPath = path.resolve(process.cwd(), 'token.json');
