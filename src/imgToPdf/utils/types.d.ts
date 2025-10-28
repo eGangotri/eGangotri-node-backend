@@ -9,9 +9,12 @@ export interface FileStats {
     ext?: string;
 }
 
+
 export interface FolderStats {
-    fileStats: FileStats;
+    folder: string;
+    meta: FileStats[];
     pdfCount: number;
+    mistmatch?: boolean;
 }
 export interface FileStatsOptions {
     directoryPath: string,
