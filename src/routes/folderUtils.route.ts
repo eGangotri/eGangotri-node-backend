@@ -18,15 +18,15 @@ folderUtilsRoute.get('/findFolderWithPdfCount', async (req: any, resp: any) => {
             const pdfCount = metadata[key].length;
             const folder = key;
             const numericInBraces = getNumericInBraces(folder);
-            const mismatch = numericInBraces != pdfCount;
+            const countMatch = numericInBraces === pdfCount;
             return {
                 folder,
-                meta: metadata[key],
                 pdfCount,
-                mismatch
+                countMatch,
+                meta: metadata[key],
             }
         })
-        
+
         resp.status(200).send({
             response: metaDataWithCount
         });
