@@ -1,7 +1,8 @@
 import express from 'express';
 import * as fs from 'fs';
 import { getAllFileListingWithFileSizeStats, getAllFoldersWithPdfCount } from '../utils/FileStatsUtils';
-import { FileStats } from 'imgToPdf/utils/types';
+import { FileStats, FolderStats } from 'imgToPdf/utils/types';
+import { getNumericInBraces } from './utils';
 
 export const folderUtilsRoute = express.Router();
 
@@ -13,14 +14,18 @@ folderUtilsRoute.get('/findFolderWithPdfCount', async (req: any, resp: any) => {
         console.log(`folder: ${folder}`);
 
         const metadata: Record<string, FileStats[]> = await getAllFoldersWithPdfCount(folder);
-        const metaDataWithCount = Object.keys(metadata).map((key: string) => {
+        const metaDataWithCount: FolderStats[] = Object.keys(metadata).map((key: string) => {
+            const pdfCount = metadata[key].length;
+            const folder = key;
+            const numericInBraces = getNumericInBraces(folder);
+            const mismatch = numericInBraces != pdfCount;
             return {
-                folder: key,
+                folder,
                 meta: metadata[key],
-                pdfCount: metadata[key].length
+                pdfCount,
+                mismatch
             }
         })
-
         
         resp.status(200).send({
             response: metaDataWithCount
