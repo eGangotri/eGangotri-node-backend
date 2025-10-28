@@ -27,12 +27,12 @@ async function authorize(): Promise<OAuth2Client> {
    // new google.auth.OAuth2(CLIENT_ID, client_secret, redirect_uris[0]);
 
     // Check if we have previously stored a token.
-    if (checkFolderExistsSync(TOKEN_PATH)) {
-        const token = await fsPromise.readFile(TOKEN_PATH, 'utf-8');
-        oAuth2Client.setCredentials(JSON.parse(token));
-    } else {
+    // if (checkFolderExistsSync(TOKEN_PATH)) {
+    //     const token = await fsPromise.readFile(TOKEN_PATH, 'utf-8');
+    //     oAuth2Client.setCredentials(JSON.parse(token));
+    // } else {
         await getNewToken(oAuth2Client);
-    }
+   // }
 
     return oAuth2Client;
 }
