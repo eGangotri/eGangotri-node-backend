@@ -90,11 +90,13 @@ gDriveRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
                 }
             });
         }
-        const runId = randomUUID();
+        const commonRunId = randomUUID();
         // Process all downloads concurrently using Promise.all
         const downloadPromises = links.map((link: string, index: number) => {
-            console.log(`:downloadFromGoogleDrive:loop ${index + 1} ${link} ${profilesAsFolders} ${ignoreFolder} ${fileType} ${runId}`);
-            return downloadFromGoogleDriveToProfile(link, profilesAsFolders[index], ignoreFolder, fileType, `${runId}:${index}`);
+            const runId = randomUUID();
+            console.log(`:downloadFromGoogleDrive:loop ${index + 1} ${link} 
+                ${profilesAsFolders} ${ignoreFolder} ${fileType} ${runId} ${commonRunId}`);
+            return downloadFromGoogleDriveToProfile(link, profilesAsFolders[index], ignoreFolder, fileType, runId, commonRunId);
         });
 
         // Wait for all downloads to complete
@@ -183,7 +185,7 @@ gDriveRoute.post('/getGoogleDriveListingAsExcel', async (req: any, resp: any) =>
                         reduced,
                         ignoreFolder,
                         pdfRenamerXlV2,
-                        allNotJustPdfs === true ? "" : PDF_TYPE, 
+                        allNotJustPdfs === true ? "" : PDF_TYPE,
                         rowCounterController);
                     _resps.push(listingResult);
                 }
@@ -425,18 +427,18 @@ gDriveRoute.post('/redownloadFromGDrive', async (req: any, resp: any) => {
                     return [...gDriveData.filter((file) => !file.success)];
                 });
 
-                const downloadCounterController = _gDriveDownload?.id;
+                const gDriveDownloadId = _gDriveDownload?.id;
                 const downloadPromises = failedGDriveData.map(async (gDriveData: GoogleApiDataWithLocalData, index: number) => {
                     console.log(`:redownloadFromGDrive:loop ${index + 1} ${gDriveData.googleDriveLink} 
-                         ${ignoreFolder} ${fileType} ${downloadCounterController}`);
+                         ${ignoreFolder} ${fileType} ${gDriveDownloadId}`);
                     const _folder = path.dirname(gDriveData.localAbsPath);
                     await createFolderIfNotExistsAsync(_folder);
                     return downloadFromGoogleDriveToProfile(gDriveData.googleDriveLink,
                         _folder,
                         ignoreFolder,
                         fileType,
-                        `${downloadCounterController}-${Math.random().toString(36).substring(2)}${index}`,
-                        downloadCounterController);
+                        _gDriveDownload?.runId || "", _gDriveDownload?.commonRunId || "",
+                        gDriveDownloadId);
                 });
 
 

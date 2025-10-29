@@ -25,7 +25,7 @@ async function dwnldAllFilesFromGDrive(driveLinkOrFolderID: string,
   ignoreFolder = "",
   fileType = PDF_TYPE,
   gDriveDownloadTaskId: string,
-  runIdWithIndex = "") {
+  runId = "") {
   const fileId = extractGoogleDriveId(driveLinkOrFolderID)
   console.log(`fileId: ${fileId}`)
 
@@ -57,7 +57,7 @@ async function dwnldAllFilesFromGDrive(driveLinkOrFolderID: string,
         fileData.fileName,
         fileData.fileSizeRaw,
         gDriveDownloadTaskId,
-        runIdWithIndex
+        runId
       );
 
       const resultAsString = JSON.stringify(result);
@@ -111,7 +111,7 @@ async function dwnldAllFilesFromGDrive(driveLinkOrFolderID: string,
     await createFolderIfNotExistsAsync(fileDumpWithPathAppended);
 
     return downloadFileFromGoogleDrive(_data.googleDriveLink,
-      fileDumpWithPathAppended, _data.fileName, _data?.fileSizeRaw, gDriveDownloadTaskId, runIdWithIndex)
+      fileDumpWithPathAppended, _data.fileName, _data?.fileSizeRaw, gDriveDownloadTaskId, runId)
   });
   const results = await Promise.all(promises);
   const resultsAsString = results.map((result: any) => JSON.stringify(result)).join(",");
@@ -168,7 +168,8 @@ export const downloadFromGoogleDriveToProfile = async (driveLinkOrFolderId: stri
   profileOrPath: string,
   ignoreFolder = "",
   fileType = PDF_TYPE,
-  runIdWithIndex = "",
+  runId = "",
+  commonRunId = "",
   gDriveDownloadTaskId: string = "") => {
   const fileDumpFolder = isValidPath(profileOrPath) ? profileOrPath : getFolderInSrcRootForProfile(profileOrPath);
   console.log(`downloadFromGoogleDriveToProfile:fileDumpFolder ${fileDumpFolder}`)
@@ -177,24 +178,23 @@ export const downloadFromGoogleDriveToProfile = async (driveLinkOrFolderId: stri
       const gDriveRootFolder = await getFolderNameFromGDrive(driveLinkOrFolderId) || "";
       console.log(`downloadFromGoogleDriveToProfile:gDriveRootFolder ${gDriveRootFolder}`)
 
-      const runId = runIdWithIndex.split(":")[0];
       if (gDriveDownloadTaskId === "") {
         gDriveDownloadTaskId = await insertEntryForGDriveUploadHistory(driveLinkOrFolderId, profileOrPath,
           fileType, fileDumpFolder,
-          gDriveRootFolder, ignoreFolder, `Initiated Downloading ${driveLinkOrFolderId} /${gDriveRootFolder}`, runId);
+          gDriveRootFolder, ignoreFolder, `Initiated Downloading ${driveLinkOrFolderId} /${gDriveRootFolder}`, runId,commonRunId);
       }
       const _results = await dwnldAllFilesFromGDrive(driveLinkOrFolderId, "",
-        fileDumpFolder, ignoreFolder, fileType, gDriveDownloadTaskId, runIdWithIndex);
+        fileDumpFolder, ignoreFolder, fileType, gDriveDownloadTaskId, runId);
 
-      console.log(`Success count: ${DOWNLOAD_COMPLETED_COUNT(runIdWithIndex)}`);
-      console.log(`Error count: ${DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT(runIdWithIndex)}`);
+      console.log(`Success count: ${DOWNLOAD_COMPLETED_COUNT(runId)}`);
+      console.log(`Error count: ${DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT(runId)}`);
       const _resp = {
         totalPdfsToDownload: _results.totalPdfsToDownload,
-        status: `${DOWNLOAD_COMPLETED_COUNT(runIdWithIndex)} out of ${DOWNLOAD_COMPLETED_COUNT(runIdWithIndex) + DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT(runIdWithIndex) + DOWNLOAD_FAILED_COUNT(runIdWithIndex)} made it`,
-        success_count: DOWNLOAD_COMPLETED_COUNT(runIdWithIndex),
-        error_count: DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT(runIdWithIndex),
-        dl_wrong_size_count: `${DOWNLOAD_FAILED_COUNT(runIdWithIndex)}
-        ${DOWNLOAD_FAILED_COUNT(runIdWithIndex) > 0 ? "Google Drive Quota may have been filled.Typically takes 24 Hours to reset." : ""}`,
+        status: `${DOWNLOAD_COMPLETED_COUNT(runId)} out of ${DOWNLOAD_COMPLETED_COUNT(runId) + DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT(runId) + DOWNLOAD_FAILED_COUNT(runId)} made it`,
+        success_count: DOWNLOAD_COMPLETED_COUNT(runId),
+        error_count: DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT(runId),
+        dl_wrong_size_count: `${DOWNLOAD_FAILED_COUNT(runId)}
+        ${DOWNLOAD_FAILED_COUNT(runId) > 0 ? "Google Drive Quota may have been filled.Typically takes 24 Hours to reset." : ""}`,
         ..._results,
         gDriveDownloadTaskId
       }
@@ -215,11 +215,11 @@ export const downloadFromGoogleDriveToProfile = async (driveLinkOrFolderId: stri
   catch (err) {
     console.log(`downloadFromGoogleDriveToProfile:Error (${fileDumpFolder}) ${JSON.stringify(err)}`)
     const _resp = {
-      status: `${DOWNLOAD_COMPLETED_COUNT(runIdWithIndex)} out of ${DOWNLOAD_COMPLETED_COUNT(runIdWithIndex) + DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT(runIdWithIndex) + DOWNLOAD_FAILED_COUNT(runIdWithIndex)} made it`,
-      success_count: DOWNLOAD_COMPLETED_COUNT(runIdWithIndex),
-      error_count: DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT(runIdWithIndex),
-      dl_wrong_size_count: `${DOWNLOAD_FAILED_COUNT(runIdWithIndex)}
-      ${DOWNLOAD_FAILED_COUNT(runIdWithIndex) > 0 ? "Google Drive Quota may have been filled.Typically takes 24 Hours to reset." : ""}`,
+      status: `${DOWNLOAD_COMPLETED_COUNT(runId)} out of ${DOWNLOAD_COMPLETED_COUNT(runId) + DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT(runId) + DOWNLOAD_FAILED_COUNT(runId)} made it`,
+      success_count: DOWNLOAD_COMPLETED_COUNT(runId),
+      error_count: DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT(runId),
+      dl_wrong_size_count: `${DOWNLOAD_FAILED_COUNT(runId)}
+      ${DOWNLOAD_FAILED_COUNT(runId) > 0 ? "Google Drive Quota may have been filled.Typically takes 24 Hours to reset." : ""}`,
       "error": `downloadFromGoogleDriveToProfile:Error (${fileDumpFolder}) ${JSON.stringify(err)}`
     }
     await updateEntryForGDriveUploadHistory(gDriveDownloadTaskId, err,

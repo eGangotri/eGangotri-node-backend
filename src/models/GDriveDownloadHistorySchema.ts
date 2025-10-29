@@ -32,6 +32,7 @@ export interface IGDriveDownload extends Document {
     createdAt: Date;
     updatedAt: Date;
     runId: string;
+    commonRunId: string;
     msg: string;
     googleDriveLink: string;
     profileNameOrAbsPath: string;
@@ -59,6 +60,7 @@ const GDriveDownloadHistorySchema: Schema = new Schema(
     {
         googleDriveLink: { type: String, required: true },
         runId: { type: String, required: true },
+        commonRunId: { type: String, required: true },
         profileNameOrAbsPath: { type: String, required: true },
         fileDumpFolder: { type: String, required: true },
         gDriveRootFolder: { type: String, required: false },

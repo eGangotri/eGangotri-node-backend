@@ -7,6 +7,9 @@ import { getGDriveContentsAsJson } from "../cliBased/googleapi/GoogleDriveApiRea
 import { sleep } from "openai/core";
 import { randomUUID } from "crypto";
 import { recordGDriveCpRenameHistory } from "./gdriveCpRenameHistoryService";
+import { IPdfTitleRenamingViaAITracker } from "models/pdfTitleRenamingTrackerViaAI";
+import path from "path";
+import * as fs from "fs";
 
 export type RenameCPSByLinkResponse = {
     status?: string,
@@ -69,7 +72,7 @@ export const renameCPSByLink = async (googleDriveLink: string,
             response.push(renameResult);
             successCount++;
             await recordGDriveCpRenameHistory({ commonRunId, runId, success: true, googleDriveLink: googleDriveDataItem.googleDriveLink, fileId: renameResult.fileId, oldName: renameResult.oldName, newName: renameResult.newName });
-            
+
         }
         catch (err) {
             console.log(`Error renaming file ${googleDriveDataItem.googleDriveLink}: ${err}`);
@@ -95,3 +98,33 @@ export const renameCPSByLink = async (googleDriveLink: string,
 }
 
 
+export const renameOriginalItemsBasedOnMetadata = async (pdfTitleRenamedItems: IPdfTitleRenamingViaAITracker[]) => {
+    const errors = []
+    const results = await Promise.all(
+        pdfTitleRenamedItems.map(async (item, index) => {
+            try {
+                const dir = path.dirname(item.originalFilePath);
+                const ext = path.extname(item.originalFilePath);
+                const newName = String((item.extractedMetadata + ext) || item.fileName);
+                const targetPath = path.join(dir, newName).trim();
+                console.log(`Renaming ${index + 1}/${pdfTitleRenamedItems.length}: ${item.originalFilePath} to ${targetPath}`);
+                await fs.promises.rename(item.originalFilePath, targetPath);
+                return true;
+            } catch (err: any) {
+                console.error(`Failed to process ${item.originalFilePath}: ${err?.message || String(err)}`);
+                errors.push({
+                    filePath: item.originalFilePath,
+                    error: err?.message || String(err)
+                })
+                return false;
+            }
+        })
+    );
+    const successCount = results.filter(Boolean).length;
+    const failureCount = results.length - successCount;
+    return {
+        successCount,
+        failureCount,
+        errors
+    }
+}

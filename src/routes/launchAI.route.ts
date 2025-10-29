@@ -9,6 +9,7 @@ import { randomUUID } from 'crypto';
 import { processWithGoogleAI } from '../cliBased/ai/renaming-workflow/googleAiService';
 import { formatFilename } from '../cliBased/ai/renaming-workflow/utils';
 import * as fs from 'fs';
+import { renameOriginalItemsBasedOnMetadata } from '../services/aiServices';
 
 export const launchAIRoute = express.Router();
 const DISCARD_FOLDER_POST_AI_PROCESSING = "_discard";
@@ -120,8 +121,8 @@ launchAIRoute.post('/aiRenamer', async (req: any, resp: any) => {
             _successCount: `${_successCount} (${summary.successCount})`,
             _failedCount: `${_failedCount} (${summary.failedCount})`,
             _errorCount: `${_errorCount} (${summary.errorCount})`,
-       
-    }
+
+        }
         resp.status(200).send({
             "status": "success",
             response: {
@@ -165,8 +166,8 @@ launchAIRoute.post('/aiRenamer/:runId', async (req: Request, res: Response) => {
         let successes = 0;
         let failures = 0;
         const details: Array<{ originalFilePath: string; newFilePath?: string; error?: string }> = [];
-        console.log(`Failed Items Count: ${ failedItems.length } ${ JSON.stringify(failedItems)
-    }`);
+        console.log(`Failed Items Count: ${failedItems.length} ${JSON.stringify(failedItems)
+            }`);
         for (const item of failedItems) {
             try {
                 const result = await processWithGoogleAI(item.reducedFilePath);
@@ -177,7 +178,7 @@ launchAIRoute.post('/aiRenamer/:runId', async (req: Request, res: Response) => {
                         : path.dirname(item.originalFilePath);
 
                     const newFilePath = path.join(targetDir, formatted);
-                    console.log(`Renaming ${ item.originalFilePath } to ${ newFilePath } `)
+                    console.log(`Renaming ${item.originalFilePath} to ${newFilePath} `)
 
                     // ensure targetDir exists if using outputFolder
                     if (targetDir !== path.dirname(item.originalFilePath) && !fs.existsSync(targetDir)) {
@@ -192,11 +193,11 @@ launchAIRoute.post('/aiRenamer/:runId', async (req: Request, res: Response) => {
                         await PdfTitleRenamingViaAITracker.updateOne({ _id: (item as any)._id }, {
                             $set: {
                                 extractedMetadata: result.extractedMetadata,
-                                error: `File copy failed: ${ copyErr?.message || copyErr } `,
+                                error: `File copy failed: ${copyErr?.message || copyErr} `,
                             }
                         });
                         failures++;
-                        details.push({ originalFilePath: item.originalFilePath, error: `File copy failed: ${ copyErr?.message || copyErr } ` });
+                        details.push({ originalFilePath: item.originalFilePath, error: `File copy failed: ${copyErr?.message || copyErr} ` });
                         continue;
                     }
 
@@ -260,7 +261,7 @@ launchAIRoute.post('/aiRenamer/:runId', async (req: Request, res: Response) => {
             details,
         });
     } catch (error: any) {
-        console.error(`/ aiRenamer /:runId retry error: ${ error?.message || String(error) } `);
+        console.error(`/ aiRenamer /:runId retry error: ${error?.message || String(error)} `);
         return res.status(500).json({ status: 'failed', message: error?.message || String(error) });
     }
 });
@@ -286,7 +287,7 @@ launchAIRoute.get("/getAllTitleRenamedViaAIList", async (req: Request, res: expr
         }
         res.json(results)
     } catch (error) {
-        console.log(`/ pdfTitleRenamedItems error: ${ JSON.stringify(error.message) } `);
+        console.log(`/ pdfTitleRenamedItems error: ${JSON.stringify(error.message)} `);
         res.status(500).json({ message: "Error fetching pdfTitleRenamedItems", error })
     }
 });
@@ -321,7 +322,7 @@ launchAIRoute.get("/getAllTitleRenamedViaAIListGroupedByRunId", async (req: Requ
         };
         res.json(results);
     } catch (error: any) {
-        console.log(`/ pdfTitleRenamedItems error: ${ JSON.stringify(error.message) } `);
+        console.log(`/ pdfTitleRenamedItems error: ${JSON.stringify(error.message)} `);
         res.status(500).json({ message: "Error fetching pdfTitleRenamedItems grouped by runId", error });
     }
 });
@@ -332,42 +333,21 @@ launchAIRoute.post("/copyMetadataToOriginalFiles/:runId", async (req: Request, r
         const filter = { runId };
         const pdfTitleRenamedItems: IPdfTitleRenamingViaAITracker[] = await PdfTitleRenamingViaAITracker.find(filter)
             .sort({ createdAt: -1 });
-        const errors = []
-        const results = await Promise.all(
-            pdfTitleRenamedItems.map(async (item, index) => {
-                try {
-                    const dir = path.dirname(item.originalFilePath);
-                    const ext = path.extname(item.originalFilePath);
-                    const newName = String((item.extractedMetadata + ext) || item.fileName);
-                    const targetPath = path.join(dir, `${ newName } `);
-                    console.log(`Renaming ${ index + 1 }/${pdfTitleRenamedItems.length}: ${item.originalFilePath} to ${targetPath}`);
-await fs.promises.rename(item.originalFilePath, targetPath);
-return true;
-                } catch (err: any) {
-    console.error(`Failed to process ${item.originalFilePath}: ${err?.message || String(err)}`);
-    errors.push({
-        filePath: item.originalFilePath,
-        error: err?.message || String(err)
-    })
-    return false;
-}
-            })
-        );
+  
 
-const successCount = results.filter(Boolean).length;
-const failureCount = results.length - successCount;
+        const { successCount, failureCount, errors } = await renameOriginalItemsBasedOnMetadata(pdfTitleRenamedItems);
 
-res.json({
-    status: `Success: ${successCount}, Failure: ${failureCount} of ${pdfTitleRenamedItems.length}`,
-    runId,
-    successCount,
-    failureCount,
-    errors
-})
+        res.json({
+            status: `Success: ${successCount}, Failure: ${failureCount} of ${pdfTitleRenamedItems.length}`,
+            runId,
+            successCount,
+            failureCount,
+            errors
+        })
     } catch (error) {
-    console.log(`/pdfTitleRenamedItems error: ${JSON.stringify(error.message)}`);
-    res.status(500).json({ message: "Error fetching pdfTitleRenamedItems", error })
-}
+        console.log(`/pdfTitleRenamedItems error: ${JSON.stringify(error.message)}`);
+        res.status(500).json({ message: "Error fetching pdfTitleRenamedItems", error })
+    }
 })
 
 //
