@@ -11,7 +11,8 @@ export const insertEntryForGDriveUploadHistory =
    gDriveRootFolder: string,
    ignoreFolder: string,
    msg: string,
-   runId: string,commonRunId:string = "") => {
+   runId: string,
+   commonRunId:string = "") => {
   const insertInDB = await fetch(`${GDRIVE_DOWNLOAD_HISTORY_PATH}/createGDriveDownload`,
     {
       method: 'POST',

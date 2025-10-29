@@ -7,7 +7,7 @@ export const gDriveDownloadRoute = express.Router();
 
 gDriveDownloadRoute.post("/createGDriveDownload", async (req: Request, res: Response) => {
     try {
-        const { googleDriveLink, profileNameOrAbsPath, downloadType, files, fileDumpFolder, gDriveRootFolder, msg, runId } = req.body;
+        const { googleDriveLink, profileNameOrAbsPath, downloadType, files, fileDumpFolder, gDriveRootFolder, msg, runId, commonRunId } = req.body;
         const newGDriveDownload = new GDriveDownload({
             googleDriveLink,
             profileNameOrAbsPath,
@@ -16,7 +16,8 @@ gDriveDownloadRoute.post("/createGDriveDownload", async (req: Request, res: Resp
             fileDumpFolder,
             gDriveRootFolder,
             msg,
-            runId
+            runId,
+            commonRunId
         });
         await newGDriveDownload.save();
         console.log(`/createGDriveDownload created: ${JSON.stringify(newGDriveDownload)}`);
