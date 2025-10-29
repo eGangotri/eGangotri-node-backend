@@ -192,8 +192,21 @@ export async function updateChromeDriver() {
 
     console.log(`Extracting chromedriver.exe to ${resourcesDir}`);
     await extractChromedriverExe(tmpZip, exePath);
-    await fs.remove(tmpZip).catch(() => {});
+    await fs.remove(tmpZip).catch(() => { });
     console.log("chromedriver.exe installed successfully.")
+
+    const binMainDirPath = path.resolve(process.cwd(), '\bin\main');
+    const chromedriverBinMainPath = path.join(binMainDirPath,"chromedriver.exe");
+
+    if (await fs.pathExists(chromedriverBinMainPath)) {
+      const suffix = formatOldSuffix(new Date());
+      const binMainDirBackupPath = path.join(binMainDirPath, `chromedriver.exe.${suffix}`);
+      console.log(`Existing chromedriver.exe found. Renaming to ${binMainDirBackupPath}`);
+      await fs.move(chromedriverBinMainPath, binMainDirBackupPath, { overwrite: true });
+      console.log(`old bin/main chromedriver.exe moved to ${binMainDirBackupPath}`); 
+      await fs.copy(exePath, chromedriverBinMainPath, { overwrite: true });
+      console.log(`new chromedriver.exe copied to bin/main`);
+    }
 
     console.log("Running: gradle clean build --refresh-dependencies");
     const code = await runGradle(resourcesDir);
@@ -209,4 +222,4 @@ export async function updateChromeDriver() {
 }
 
 // Run if executed directly
-updateChromeDriver();
+//updateChromeDriverX();

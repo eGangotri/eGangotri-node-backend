@@ -6,7 +6,7 @@ import { getListOfUploadCycles, getUploadCycleById } from "../services/uploadCyc
 import { findMissedUploads } from "../services/GradleLauncherUtil";
 import { UploadCycleArchiveProfile } from "mirror/types";
 import { getServerNetworkInfo } from "../utils/networkUtils";
-import { updateChromeDriver } from "_adHoc/getWin64ChromedriverUrl";
+import { updateChromeDriver } from "../_adHoc/getWin64ChromedriverUrl";
 
 export const uploadCycleRoute = express.Router();
 
