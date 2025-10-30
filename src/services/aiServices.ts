@@ -48,7 +48,7 @@ export const renameCPSByLink = async (googleDriveLink: string,
     const errors = []
     for (let i = 0; i < googleDriveData.length; i++) {
         GDRIVE_CP_EXTRACTED_METADATA_RES.totalCount = googleDriveData.length;
-        GDRIVE_CP_EXTRACTED_METADATA_RES.processedCount = 0;
+        GDRIVE_CP_EXTRACTED_METADATA_RES.processedCount = i;
 
         const googleDriveDataItem = googleDriveData[i];
         try {
