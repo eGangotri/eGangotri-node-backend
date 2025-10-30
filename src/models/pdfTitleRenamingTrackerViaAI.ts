@@ -19,6 +19,7 @@ export interface IPdfTitleRenamingViaAITracker {
   extractedMetadata?: string;
   error?: string;
   newFilePath?: string;
+  msg?: string;
 
   // Mongoose timestamps
   createdAt?: Date;
@@ -49,6 +50,7 @@ const PdfTitleRenamingTrackerViaAISchema = new mongoose.Schema(
     extractedMetadata: { type: String, required: false },
     error: { type: String, required: false },
     newFilePath: { type: String, required: false },
+    msg: { type: String, required: false },
   },
   {
     collection: 'PDF_TITLE_RENAMING_VIA_AI_TRACKER',
