@@ -130,7 +130,8 @@ launchAIGDriveRoute.get('/gDriveRenamingHistoryGroupedByRunId', async (req: any,
                         $sum: { $cond: [{ $eq: ["$success", false] }, 1, 0] }
                     },
                     firstCreatedAt: { $first: "$createdAt" },
-                    lastCreatedAt: { $last: "$createdAt" }
+                    lastCreatedAt: { $last: "$createdAt" },
+                    googleDriveLink: { $first: "$googleDriveLink" }
                 }
             },
             { $sort: { lastCreatedAt: -1 } },
@@ -144,7 +145,8 @@ launchAIGDriveRoute.get('/gDriveRenamingHistoryGroupedByRunId', async (req: any,
                     successCount: 1,
                     failureCount: 1,
                     totalCount: 1,
-                    createdAt: "$firstCreatedAt"
+                    createdAt: "$firstCreatedAt",
+                    googleDriveLink: 1
                 }
             }
         ];
@@ -160,6 +162,7 @@ launchAIGDriveRoute.get('/gDriveRenamingHistoryGroupedByRunId', async (req: any,
                 failureCount: number;
                 totalCount: number;
                 createdAt: Date;
+                googleDriveLink: string;
             }>,
             currentPage: page,
             totalPages: Math.ceil(totalDistinctRunIds / limit),
