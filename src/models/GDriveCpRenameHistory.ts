@@ -6,6 +6,7 @@ export interface IGDriveCpRenameHistory {
   success: boolean;
   error?: string;
   googleDriveLink: string;
+  mainGDriveLink: string;
   fileId?: string;
   oldName?: string;
   newName?: string;
@@ -23,6 +24,7 @@ const GDriveCpRenameHistorySchema = new mongoose.Schema(
     success: { type: Boolean, required: true },
     error: { type: String, required: false },
     googleDriveLink: { type: String, required: true, index: true },
+    mainGDriveLink: { type: String, required: true, index: true },
     fileId: { type: String, required: false, index: true },
     oldName: { type: String, required: false },
     newName: { type: String, required: false },

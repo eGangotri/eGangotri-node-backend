@@ -9,6 +9,7 @@ export type GDriveCpRenameHistoryInput = {
   oldName?: string;
   newName?: string;
   error?: string;
+  mainGDriveLink: string;
 };
 
 export async function recordGDriveCpRenameHistory(input: GDriveCpRenameHistoryInput): Promise<void> {

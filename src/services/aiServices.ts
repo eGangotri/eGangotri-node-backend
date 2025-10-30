@@ -60,24 +60,24 @@ export const renameCPSByLink = async (googleDriveLink: string,
             if (renameResult.newName === renameResult.oldName) {
                 console.log(`File ${renameResult.oldName} not renamed as it is same as old name`);
                 failureCount++;
-                await recordGDriveCpRenameHistory({ commonRunId, runId, success: false, error: "Same as old name", googleDriveLink: googleDriveDataItem.googleDriveLink, fileId: renameResult.fileId, oldName: renameResult.oldName });
+                await recordGDriveCpRenameHistory({ commonRunId, runId, success: false, error: "Same as old name", googleDriveLink: googleDriveDataItem.googleDriveLink, fileId: renameResult.fileId, oldName: renameResult.oldName, mainGDriveLink: googleDriveLink });
                 continue;
             }
             else if (renameResult.newName?.trim().length === 0) {
                 console.log(`No New Name for ${renameResult.oldName}`);
                 failureCount++;
-                await recordGDriveCpRenameHistory({ commonRunId, runId, success: false, error: "No New Name", googleDriveLink: googleDriveDataItem.googleDriveLink, fileId: renameResult.fileId, oldName: renameResult.oldName });
+                await recordGDriveCpRenameHistory({ commonRunId, runId, success: false, error: "No New Name", googleDriveLink: googleDriveDataItem.googleDriveLink, fileId: renameResult.fileId, oldName: renameResult.oldName, mainGDriveLink: googleDriveLink });
                 continue;
             }
             response.push(renameResult);
             successCount++;
-            await recordGDriveCpRenameHistory({ commonRunId, runId, success: true, googleDriveLink: googleDriveDataItem.googleDriveLink, fileId: renameResult.fileId, oldName: renameResult.oldName, newName: renameResult.newName });
+            await recordGDriveCpRenameHistory({ commonRunId, runId, success: true, googleDriveLink: googleDriveDataItem.googleDriveLink, fileId: renameResult.fileId, oldName: renameResult.oldName, newName: renameResult.newName, mainGDriveLink: googleDriveLink });
 
         }
         catch (err) {
             console.log(`Error renaming file ${googleDriveDataItem.googleDriveLink}: ${err}`);
             failureCount++;
-            await recordGDriveCpRenameHistory({ commonRunId, runId, success: false, error: String(err), googleDriveLink: googleDriveDataItem.googleDriveLink });
+            await recordGDriveCpRenameHistory({ commonRunId, runId, success: false, error: String(err), googleDriveLink: googleDriveDataItem.googleDriveLink, mainGDriveLink: googleDriveLink });
             errors.push(`Error renaming file ${googleDriveDataItem.googleDriveLink}: ${err}`);
             continue;
         }
