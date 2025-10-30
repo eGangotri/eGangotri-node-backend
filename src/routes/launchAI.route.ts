@@ -187,7 +187,17 @@ launchAIRoute.post('/aiRenamer/:runId', async (req: Request, res: Response) => {
 
                     // copy the original file to the new location
                     try {
-                        fs.copyFileSync(item.originalFilePath, newFilePath);
+                        if(newFilePath?.trim().length > 0){
+                            fs.copyFileSync(item.originalFilePath, newFilePath);
+                             await PdfTitleRenamingViaAITracker.updateOne({ _id: (item as any)._id }, {
+                            $set: {
+                                extractedMetadata: result.extractedMetadata,
+                                newFilePath,
+                                msg: `Renamed ${item.originalFilePath} to ${newFilePath}`,
+                            }
+                        });
+                        }
+                        else throw new Error("newFilePath is empty");
                     } catch (copyErr: any) {
                         // If copy fails, mark as failure for this item
                         await PdfTitleRenamingViaAITracker.updateOne({ _id: (item as any)._id }, {
