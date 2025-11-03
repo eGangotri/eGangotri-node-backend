@@ -59,16 +59,16 @@ const convertDatatoJson = (googleDriveFileData: Array<GoogleApiData>) => {
   return jsonArray
 }
 
-const compositeTitleFormula = (idx:number) =>{
+const compositeTitleFormula = (idx: number) => {
   const formula = `=D${idx} & " " & E${idx} & IF(J${idx} <> "", " by " & F${idx},  "") & " " & G${idx} & " " & H${idx} & " " & I${idx} & " " & K${idx} & " " & L${idx} & " " & M${idx} & IF(J${idx} <> "", " - " & J${idx}, "")`
-//=D2 & " " & E2 & IF(J2 <> "", " by " & F2,  "") & " " & G2 & " " & H2 & " " & I2 & " " & K2 & " " & L2 & " " & M2 & IF(J2 <> "", " - " & J2, "")
-  return idx && idx > 1 ? formula :""
+  //=D2 & " " & E2 & IF(J2 <> "", " by " & F2,  "") & " " & G2 & " " & H2 & " " & I2 & " " & K2 & " " & L2 & " " & M2 & IF(J2 <> "", " - " & J2, "")
+  return idx && idx > 1 ? formula : ""
 }
 
-const origNameFormula = (idx:number) =>{
+const origNameFormula = (idx: number) => {
   const formula = `=REGEXREPLACE(B${idx}, "_\\d+(\\.[a-zA-Z]+)$", "$1")`
   //=REGEXREPLACE(B2, "_\d+(\.[a-zA-Z]+)$", "$1")
-  return idx && idx > 1 ? formula :""
+  return idx && idx > 1 ? formula : ""
 
 }
 const convertFileRenamerV2DatatoJson = (googleDriveFileData: Array<GoogleApiData>) => {
@@ -89,8 +89,8 @@ const convertFileRenamerV2DatatoJson = (googleDriveFileData: Array<GoogleApiData
       "Edition/Statement": "",
       "Place of Publication": "",
       "Year of Publication": "",
-      "Composite Title": compositeTitleFormula(idx+1),
-      "Orig Name": origNameFormula(idx+1),
+      "Composite Title": compositeTitleFormula(idx + 1),
+      "Orig Name": origNameFormula(idx + 1),
       "Folder Name": dataRow.parents,
       "Thumbnail": dataRow.thumbnailLink,
     })
@@ -152,13 +152,13 @@ export const jsonToExcelWithFormula = (jsonArray: any[], xlsxFileNameWithPath: s
   const workbook = xlsx.utils.book_new();
 
   // Convert JSON to worksheet
-  const worksheet:xlsx.WorkSheet = xlsx.utils.json_to_sheet(jsonArray);
+  const worksheet: xlsx.WorkSheet = xlsx.utils.json_to_sheet(jsonArray);
   jsonArray.forEach((row, index) => {
     if (index === 0) return;
     else {
       const oneBasedIndex = index + 1;
       console.log(`oneBasedIndex ${oneBasedIndex}`)
-   //   worksheet.getCell('O2').value = { formula: 'B2+C2' };
+      //   worksheet.getCell('O2').value = { formula: 'B2+C2' };
       // worksheet.getCell(`O${oneBasedIndex}`).value = {
       //   formula: `D${oneBasedIndex} & " " & E${oneBasedIndex} & IF(J${oneBasedIndex} <> "", " by " & F${oneBasedIndex},  "") & " " & G${oneBasedIndex} & " " & H${oneBasedIndex} & " " & I${oneBasedIndex} & " " & K${oneBasedIndex} & " " & L${oneBasedIndex} & " " & M${oneBasedIndex} & IF(J${oneBasedIndex} <> "", " - " & J${oneBasedIndex}, "")`
       // };
@@ -261,8 +261,12 @@ export const excelToJsonFor2RowAsHeader = (filePath: string, sheetName: string):
 export const excelToJson = (excelName: string, sheetName: string = SHEET_NAME) => {
   const workbook = XLSX.readFile(excelName);
   const sheet = workbook.Sheets[sheetName] || workbook.Sheets[workbook.SheetNames[0]];
-  const jsonData: any[] = XLSX.utils.sheet_to_json(sheet);
-  console.log(`Converted ${excelName} to Json with Data Length ${jsonData.length}(figure may include empty rows)`);
+  // defval ensures empty cells are included, so all header columns are present on each row
+  const jsonData: any[] = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+  const cols = Object.keys(jsonData[0])
+  const colCount = cols.length;
+  console.log(`cols: ${cols}`)
+  console.log(`excelToJson:Converted ${excelName} to Json with Col Count ${colCount} and Data Length ${jsonData.length}(figure may include empty rows)`);
   return jsonData
 }
 
@@ -321,7 +325,7 @@ export function addFolderMetadataSheet(excelPath: string): { success: boolean; m
     for (const key of keys) {
       const sizeInKB = agg[key].sumG;
       const inGB = formatMemForHeapSizeInKB(sizeInKB)
-      aoa.push([key, agg[key].count, agg[key].sumD, inGB,sizeInKB]);
+      aoa.push([key, agg[key].count, agg[key].sumD, inGB, sizeInKB]);
     }
 
     // Add an empty row followed by totals
@@ -332,7 +336,7 @@ export function addFolderMetadataSheet(excelPath: string): { success: boolean; m
     const totalSizeFormatted = formatMemForHeapSizeInKB(totalSizeInKB);
     aoa.push(['Totals', totalPdfCount, totalPageCount, totalSizeFormatted, totalSizeInKB]);
 
-    
+
     const metadataWs = xlsx.utils.aoa_to_sheet(aoa);
     metadataWs['!cols'] = autoFitColumnsForAoa(aoa, { min: 10, max: 80, pad: 2 });
     const metadataSheetName = 'Metadata';

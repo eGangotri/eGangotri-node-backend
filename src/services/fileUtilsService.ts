@@ -31,7 +31,8 @@ export const renameFilesViaExcel = async (excelPath: string, folderOrProfile: st
 
     try {
         const excelData: GDriveExcelHeadersFileRenamerV2[] = excelToJson(excelPath).filter((x: GDriveExcelHeadersFileRenamerV2) => {
-            return isNumber(x["S.No"])
+            const firstKey = Object.keys(x)[0];
+            return isNumber((x as any)[firstKey])
         })
         //
         const folder = isValidPath(folderOrProfile) ? folderOrProfile : getFolderInSrcRootForProfile(folderOrProfile)
@@ -58,6 +59,55 @@ export const renameFilesViaExcel = async (excelPath: string, folderOrProfile: st
     return renameReport;
 }
 
+export const renameFilesViaExcelUsingSpecifiedColumns = async (excelPath: string, 
+    folderOrProfile: string, col1: number, col2: number) => {
+    let renameReport: RenameReportType = {
+        errorList: [],
+        success: [],
+        totalInExcel: 0,
+        totalInFolder: 0
+    }
+
+    try {
+        const excelData: any[] = excelToAoa(excelPath).filter((x: any) => {
+            const firstKey = Object.keys(x)[0];
+            return isNumber(x[firstKey])
+        })
+        //
+        const folder = isValidPath(folderOrProfile) ? folderOrProfile : getFolderInSrcRootForProfile(folderOrProfile)
+        const localFileStats = await getAllPDFFiles(folder);
+        console.log(`excelData: ${excelData?.length} `);
+        renameReport.totalInExcel = excelData?.length || 0
+        renameReport.totalInFolder = localFileStats?.length || 0
+
+        for (let excelRow of excelData) {
+            const excelRowKeys = Object.keys(excelRow)
+            console.log(`excelRowKeys: ${excelRowKeys}`)
+            if(col1 < 0 || col2 < 0 || col1-1 >= excelRowKeys.length || col2-1 >= excelRowKeys.length) {
+                renameReport.errorList.push(`Invalid columns ${col1}, ${col2}. Total Col. Count: ${excelRowKeys.length}`)
+                continue
+            }
+            const oldFileNameKey = excelRowKeys[col1-1];
+            const newFileNameKey = excelRowKeys[col2-1];
+
+            let _newFileName = sanitizeFileName(excelRow[newFileNameKey]);
+            const origName = excelRow[oldFileNameKey]?.trim()
+            console.log(`_newFileName: ${_newFileName} origName: ${origName}`);
+            if ((_newFileName?.length > 0 && origName?.length > 0) && (!_newFileName.startsWith("=") && !origName.startsWith("="))) {
+                await renameFileViaFormula(origName, _newFileName, localFileStats, renameReport)
+            }
+            else {
+                renameReport.errorList.push(`No File in Local for origName ${origName} renameable to ${_newFileName}.`)
+            }
+        }
+    }
+    catch (err: any) {
+        console.log('Error', err);
+        return err;
+    }
+    return renameReport;
+}
+
 export const renameFileViaFormula = async (origName: string,
     newName: string,
     localFileStats: FileStats[],
@@ -71,7 +121,11 @@ export const renameFileViaFormula = async (origName: string,
         }
         return fileStat.fileName === origName
     });
-    await _renameFileInFolder(_fileInFolder, newName, renameReport)
+    if(!_fileInFolder) {
+        renameReport.errorList.push(`renameFileViaFormula: No File in Local for origName ${origName} renameable to ${newName}.`)
+        return
+    }
+    //await _renameFileInFolder(_fileInFolder, newName, renameReport)
 }
 
 export const renameFileViaReadingColumns = (excelData: GDriveExcelHeadersFileRenamerV2,

@@ -1,12 +1,12 @@
 import express from 'express';
 import * as fs from 'fs';
 import { findTopNLongestFileNames } from '../utils/utils';
-import { findInvalidFilePaths, getDuplicatesOrUniquesBySize, isValidPath,moveDuplicatesOrDisjointSetBySize } from '../utils/FileUtils';
+import { findInvalidFilePaths, getDuplicatesOrUniquesBySize, isValidPath, moveDuplicatesOrDisjointSetBySize } from '../utils/FileUtils';
 import { renameAllNonAsciiInFolder } from '../files/renameNonAsciiFiles';
 import { callAksharamukha, DEFAULT_TARGET_SCRIPT_ROMAN_COLLOQUIAL } from '../aksharamukha/convert';
 import { convertJpgsToPdfInAllSubFolders } from '../imgToPdf/jpgToPdf';
 import { multipleTextScriptConversion } from '../services/fileService';
-import { renameFilesViaExcel } from '../services/fileUtilsService';
+import { renameFilesViaExcel, renameFilesViaExcelUsingSpecifiedColumns } from '../services/fileUtilsService';
 import { moveFileInListToDest, moveFilesInArray, moveFileSrcToDest } from '../services/yarnService';
 import { FileMoveTracker } from '../models/FileMoveTracker';
 import { getAllPdfsInFoldersRecursive } from '../imgToPdf/utils/Utils';
@@ -314,6 +314,55 @@ fileUtilsRoute.post('/renameFilesViaExcel', async (req: any, resp: any) => {
 
         console.log(`excelPath: ${excelPath} folderOrProfile: ${folderOrProfile}`);
         const res = await renameFilesViaExcel(excelPath, folderOrProfile);
+        console.error(`${JSON.stringify(res.errorList)}`)
+        const ignoredCount = res?.totalInFolder - res?.totalInExcel
+        const warning = ((res?.totalInFolder > 0) && res.success?.length === 0)
+        resp.status(200).send({
+            response: {
+                totalInFolder: `Total Files that were in Folder(s): ` + res?.totalInFolder,
+                totalInExcel: `Total Files that were in Excel: ` + res?.totalInExcel,
+                msg: `Files renamed via Excel: ` + res.success?.length,
+                ignored: `Files that were ignored due to no data: ${ignoredCount}`,
+                errorList: `File rename-errors in Excel: ` + res.errorList?.length,
+                warning: warning ? "check Col. N&O. for un-interpreted formulas in Excel" : "",
+                errors: res.errorList
+            }
+        });
+    }
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})
+
+fileUtilsRoute.post('/renameFilesViaExcelUsingSpecifiedColumns', async (req: any, resp: any) => {
+    try {
+        const excelPath = req.body.excelPath;
+        const folderOrProfile = req.body.folderOrProfile;
+        const columns = req.body.columns;
+
+        console.log(`excelPath: ${excelPath} folderOrProfile: ${folderOrProfile} columns: ${columns}`);
+        const [col1, col2] = columns.split("-").map((x: string) => parseInt(x));
+        console.log(`col1: ${col1} col2: ${col2}`);
+        if (!excelPath || !folderOrProfile || !columns) {
+            return resp.status(400).send({
+                response: {
+                    success: false,
+                    message: "excelPath, folderOrProfile and columns are required"
+                }
+            });
+        }
+
+        if(isNaN(col1) || isNaN(col2)) {
+            return resp.status(400).send({
+                response: {
+                    success: false,
+                    message: "columns must be numbers separated by -"
+                }
+            });
+        }
+
+        const res = await renameFilesViaExcelUsingSpecifiedColumns(excelPath, folderOrProfile, col1, col2);
         console.error(`${JSON.stringify(res.errorList)}`)
         const ignoredCount = res?.totalInFolder - res?.totalInExcel
         const warning = ((res?.totalInFolder > 0) && res.success?.length === 0)

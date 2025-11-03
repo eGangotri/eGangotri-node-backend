@@ -8,12 +8,12 @@ dotenv.config();
 export const PDF_METADATA_EXTRACTION_PROMPT = `The exercise below is to save a pdf with recognizable metadata mostly English, Sanskrit and other languages that use Brahmi based scripts
  and sometimes Urdu.
 
-The output should be in plain ASCII characters without exception.
-
-No diacritics should be ever used.
+The output should be only ASCII letters (A-Z, a-z) and numbers (0-9) without exception. 
+No Comma, colon, slashes , diacritics etc should be used.
 
 Conventional English spellings of words in Sanskrit and other languages should be used.
 
+Dont use Jy for ज्ञ use Gy instead.
 
 Print the followwing details in Title Case
 
