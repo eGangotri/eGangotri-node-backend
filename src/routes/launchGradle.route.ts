@@ -14,10 +14,13 @@ import { checkIfEmpty } from '../utils/FileUtils';
 import { timeInfo } from '../mirror/FrontEndBackendCommonCode';
 import { runCr2ToJpgInLoop } from '../services/pythonRestService';
 import { isPDFCorrupted } from '../utils/pdfValidator';
-import { getAllPdfsInFoldersRecursive } from '../imgToPdf/utils/Utils';
+import { getAllPdfsInFoldersRecursive, mkDirIfDoesntExists } from '../imgToPdf/utils/Utils';
 import { extractValue } from './utils';
+import path from 'path';
+import * as fsPromise from 'fs/promises';
 
 export const launchGradleRoute = express.Router();
+export const ISOLATED_FOLDER = "isolated";
 
 launchGradleRoute.get('/launchUploader', async (req: any, resp: any) => {
     try {
@@ -302,6 +305,58 @@ launchGradleRoute.get('/reuploadMissedViaUploadCycleId', async (req: any, resp: 
     }
 })
 
+//
+launchGradleRoute.get('/isolateMissingViaUploadCycleId', async (req: any, resp: any) => {
+    try {
+        const uploadCycleId = req.query.uploadCycleId
+        console.log(`reuploadMissedViaUploadCycleId ${uploadCycleId}`)
+        const uploadCycleByCycleId = await UploadCycle.findOne({
+            uploadCycleId: uploadCycleId
+        });
+        const _missedForUploadCycleId: UploadCycleArchiveProfile[] = await findMissedUploads(uploadCycleId);
+        let isolationStatus = []
+        let errors = []
+        for (let i = 0; i < _missedForUploadCycleId.length; i++) {
+            const archiveProfile = _missedForUploadCycleId[i].archiveProfile;
+            const missedAbsPaths = _missedForUploadCycleId[i].absolutePaths;
+            const _archivePath = getFolderInSrcRootForProfile(archiveProfile);
+            const _isolatedPath = `${_archivePath}_${ISOLATED_FOLDER}`
+            await mkDirIfDoesntExists(_isolatedPath);
+
+            for (let j = 0; j < missedAbsPaths.length; j++) {
+                try {
+                    const missedAbsPath = missedAbsPaths[j];
+                    isolationStatus.push(`Isolating ${missedAbsPath} to ${_isolatedPath}\n`)
+                    console.log(isolationStatus);
+                    await fsPromise.rename(missedAbsPath, path.join(_isolatedPath, path.basename(missedAbsPath)));
+                } catch (err) {
+                    console.log(err)
+                    errors.push(err)
+                }
+            }
+        }
+        resp.status(200).send({
+            response: {
+                success: true,
+                res: {
+                    isolationStatus,
+                    errors
+                }
+            }
+        });
+
+    }
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send({
+            response: {
+                success: false,
+
+                err
+            }
+        });
+    }
+})
 const reuploadFailedLogic = async (uploadCycleId: string) => {
     const _itemsUsheredData = await itemsUsheredVerficationAndDBFlagUpdate(uploadCycleId);
 
