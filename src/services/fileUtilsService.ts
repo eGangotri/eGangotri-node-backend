@@ -125,7 +125,7 @@ export const renameFileViaFormula = async (origName: string,
         renameReport.errorList.push(`renameFileViaFormula: No File in Local for origName ${origName} renameable to ${newName}.`)
         return
     }
-    //await _renameFileInFolder(_fileInFolder, newName, renameReport)
+    await _renameFileInFolder(_fileInFolder, newName, renameReport)
 }
 
 export const renameFileViaReadingColumns = (excelData: GDriveExcelHeadersFileRenamerV2,
