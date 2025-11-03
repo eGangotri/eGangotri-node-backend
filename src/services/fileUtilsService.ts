@@ -69,7 +69,7 @@ export const renameFilesViaExcelUsingSpecifiedColumns = async (excelPath: string
     }
 
     try {
-        const excelData: any[] = excelToAoa(excelPath).filter((x: any) => {
+        const excelData: any[] = excelToJson(excelPath).filter((x: any) => {
             const firstKey = Object.keys(x)[0];
             return isNumber(x[firstKey])
         })
