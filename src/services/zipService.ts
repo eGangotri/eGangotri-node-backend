@@ -72,7 +72,7 @@ function unzipFiles(filePath: string, outputDir: string): Promise<void> {
                 try {
                     // Sanitize and normalize path
                     const normalizedFileName = entry.fileName.split('/').join(path.sep);
-                    const sanitizedFileName = sanitizeFileName(normalizedFileName);
+                    const sanitizedFileName = sanitizeFileNameAndAppendPdfExt(normalizedFileName);
                     const outputPath = path.join(sanitizedOutputDir, sanitizedFileName);
 
                     // Create directories recursively
@@ -151,7 +151,7 @@ function unzipFiles(filePath: string, outputDir: string): Promise<void> {
 }
 
 import { promisify } from 'util';
-import { sanitizeFileName } from './fileUtilsService';
+import { sanitizeFileNameAndAppendPdfExt } from './fileUtilsService';
 
 const openZip = promisify(yauzl.open);
 

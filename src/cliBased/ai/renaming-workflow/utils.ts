@@ -3,6 +3,7 @@ import { BatchPair, PdfPair } from "./types";
 import * as fs from 'fs';
 import axios from 'axios';
 import { GDRIVE_CP_EXTRACTED_METADATA_RES } from "../../../routes/utils";
+import { sanitizeFileName } from "../../../services/fileUtilsService";
 
 
 export function buildPairedPdfs(allPdfs: string[], allReducedPdfs: string[]): PdfPair[] {
@@ -124,7 +125,7 @@ export const processFileForAIRenaming = async (base64EncodedFile: string,
 
         let extractedMetadata: string;
         if (typeof text === 'string' && text.trim().length > 0) {
-            extractedMetadata = text.trim();
+            extractedMetadata = sanitizeFileName(text)
 
         } else {
             // If no text, include diagnostics: finishReason, configured maxOutputTokens, and usage metadata

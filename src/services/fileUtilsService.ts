@@ -42,7 +42,7 @@ export const renameFilesViaExcel = async (excelPath: string, folderOrProfile: st
         renameReport.totalInFolder = localFileStats?.length || 0
 
         for (let excelRow of excelData) {
-            let _newFileName = sanitizeFileName(excelRow["Composite Title"]);
+            let _newFileName = sanitizeFileNameAndAppendPdfExt(excelRow["Composite Title"]);
             const origName = excelRow["Orig Name"]?.trim()
             if ((_newFileName?.length > 0 && origName?.length > 0) && (!_newFileName.startsWith("=") && !origName.startsWith("="))) {
                 await renameFileViaFormula(origName, _newFileName, localFileStats, renameReport)
@@ -59,7 +59,7 @@ export const renameFilesViaExcel = async (excelPath: string, folderOrProfile: st
     return renameReport;
 }
 
-export const renameFilesViaExcelUsingSpecifiedColumns = async (excelPath: string, 
+export const renameFilesViaExcelUsingSpecifiedColumns = async (excelPath: string,
     folderOrProfile: string, col1: number, col2: number) => {
     let renameReport: RenameReportType = {
         errorList: [],
@@ -83,14 +83,14 @@ export const renameFilesViaExcelUsingSpecifiedColumns = async (excelPath: string
         for (let excelRow of excelData) {
             const excelRowKeys = Object.keys(excelRow)
             console.log(`excelRowKeys: ${excelRowKeys}`)
-            if(col1 < 0 || col2 < 0 || col1-1 >= excelRowKeys.length || col2-1 >= excelRowKeys.length) {
+            if (col1 < 0 || col2 < 0 || col1 - 1 >= excelRowKeys.length || col2 - 1 >= excelRowKeys.length) {
                 renameReport.errorList.push(`Invalid columns ${col1}, ${col2}. Total Col. Count: ${excelRowKeys.length}`)
                 continue
             }
-            const oldFileNameKey = excelRowKeys[col1-1];
-            const newFileNameKey = excelRowKeys[col2-1];
+            const oldFileNameKey = excelRowKeys[col1 - 1];
+            const newFileNameKey = excelRowKeys[col2 - 1];
 
-            let _newFileName = sanitizeFileName(excelRow[newFileNameKey]);
+            let _newFileName = sanitizeFileNameAndAppendPdfExt(excelRow[newFileNameKey]);
             const origName = excelRow[oldFileNameKey]?.trim()
             console.log(`_newFileName: ${_newFileName} origName: ${origName}`);
             if ((_newFileName?.length > 0 && origName?.length > 0) && (!_newFileName.startsWith("=") && !origName.startsWith("="))) {
@@ -121,7 +121,7 @@ export const renameFileViaFormula = async (origName: string,
         }
         return fileStat.fileName === origName
     });
-    if(!_fileInFolder) {
+    if (!_fileInFolder) {
         renameReport.errorList.push(`renameFileViaFormula: No File in Local for origName ${origName} renameable to ${newName}.`)
         return
     }
@@ -168,14 +168,18 @@ const createNewFileName = (excelData: GDriveExcelHeadersFileRenamerV2): string =
     ${removeExtraneousChars(excelData["Commentator/ Translator/Editor"])} ${removeExtraneousChars(excelData["Language(s)"])} ${removeExtraneousChars(excelData["Subject/ Descriptor"])}\
     ${removeExtraneousChars(excelData["Edition/Statement"])} ${removeExtraneousChars(excelData["Place of Publication"])}\
      ${removeExtraneousChars(excelData["Year of Publication"])} - ${removeExtraneousChars(excelData["Publisher"])}`;
-    return sanitizeFileName(newFileName);
+    return sanitizeFileNameAndAppendPdfExt(newFileName);
+}
+
+export const sanitizeFileNameAndAppendPdfExt = (_fileName: any) => {
+    return `${sanitizeFileName(_fileName)}.pdf`;
 }
 
 export const sanitizeFileName = (_fileName: any) => {
     const _removeExtraneousChars = removeExtraneousChars(_fileName);
     const removeTrailingDash = _removeExtraneousChars?.endsWith("-") ? _removeExtraneousChars?.slice(0, -1)?.trim() : _removeExtraneousChars.trim();
     const removeExtraSpaces = removeTrailingDash.split(/\s+/).join(' ');
-    return `${removeExtraSpaces}.pdf`;
+    return removeExtraSpaces;
 }
 
 //remove colon etc not allowed in a File
@@ -195,13 +199,13 @@ export const _renameFileInFolder = async (_fileInFolder: FileStats, newFileName:
         try {
             const parentDir = path.dirname(absPath);
             const newPath = path.join(parentDir, newFileName);
-            if(!newPath.endsWith(".pdf")){
+            if (!newPath.endsWith(".pdf")) {
                 throw new Error(`${newPath} doesnt end with .pdf`);
             }
-            if(newPath.length < 8){
+            if (newPath.length < 8) {
                 throw new Error(`${newPath} length is too short`);
             }
-            if(checkFolderExistsSync(newPath)){
+            if (checkFolderExistsSync(newPath)) {
                 throw new Error(`${newPath} already exists`);
             }
             await fsPromise.rename(absPath, newPath);
