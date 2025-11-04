@@ -20,7 +20,7 @@ const NEW_HEADERS = [
   'Author/Commentator',
   'Language(s)',
   'Script',
-  'Subject/ Descriptor',
+  'Subject/ Notes',
   'Result',
 ];
 
