@@ -5,6 +5,7 @@ import { isValidDriveId } from './Utils';
 import { PDF_TYPE } from './_utils/constants';
 import { extractGoogleDriveId } from '../../mirror/GoogleDriveUtilsCommonCode';
 import { getFolderName } from './_utils/GoogleDriveUtil';
+import { ExcelWriteResult } from 'cliBased/excel/ExcelUtils';
 
 // Create a new Google Drive instance
 const drive = getGoogleDriveInstance();
@@ -32,7 +33,7 @@ async function procOrigGoogleDrive(driveLinkOrFolderID: string,
   ignoreFolder = "", 
   pdfRenamerXlV2 = false, 
   type = PDF_TYPE, 
-  rowCounterController = "") {
+  rowCounterController = ""): Promise<ExcelWriteResult | null> {
   if (pdfRenamerXlV2) {
     const res = await listFolderContentsAndGenerateExcelV2ForPdfRenamer(driveLinkOrFolderID, drive,
       `${EXPORT_ROOT_FOLDER}_googleDriveExcels`,
@@ -53,7 +54,7 @@ async function procOrigGoogleDrive(driveLinkOrFolderID: string,
 
 async function procReducedPdfGoogleDrive(driveLinkOrFolderID: string,
   folderName: string, ignoreFolder = "", pdfRenamerXlV2 = false
-  , type = PDF_TYPE, rowCounterController = "") {
+  , type = PDF_TYPE, rowCounterController = ""): Promise<ExcelWriteResult | null> {
   if (pdfRenamerXlV2) {
     const res = await listFolderContentsAndGenerateExcelV2ForPdfRenamer(driveLinkOrFolderID, drive,
       `${EXPORT_ROOT_FOLDER}_catReducedDrivePdfExcels`, folderName, ignoreFolder, type, rowCounterController);
@@ -72,13 +73,14 @@ export const generateGoogleDriveListingExcel = async (driveLinkOrFolderID: strin
   ignoreFolder = "",
   pdfRenamerXlV2 = false,
   type = PDF_TYPE,
-  rowCounterController = "") => {
+  rowCounterController = ""): Promise<ExcelWriteResult | null> => {
     console.log(`generateGoogleDriveListingExcel:driveLinkOrFolderID ${driveLinkOrFolderID} ${type}`)
   //check if driveLinkOrFolderID is a valid google link
   if (!isValidDriveId(driveLinkOrFolderID)) {
     return {
       msg: `Invalid Google Drive Link/folderId ${driveLinkOrFolderID}`,
-      success: false
+      success: false,
+      xlsxFileNameWithPath: ""
     }
   }
   try {
@@ -87,15 +89,14 @@ export const generateGoogleDriveListingExcel = async (driveLinkOrFolderID: strin
         await procReducedPdfGoogleDrive(driveLinkOrFolderID, folderName, ignoreFolder, pdfRenamerXlV2, type, rowCounterController) :
         await procOrigGoogleDrive(driveLinkOrFolderID, folderName, ignoreFolder, pdfRenamerXlV2, type, rowCounterController);
     console.log(`generateGoogleDriveListingExcel ${JSON.stringify(_result)}`)
-    return {
-      ..._result,
-    };
+    return _result;
   }
   catch (err) {
     console.log('Error', err);
     return {
       msg: `Error ${err}`,
-      success: false
+      success: false,
+      xlsxFileNameWithPath: ""
     }
   }
 }

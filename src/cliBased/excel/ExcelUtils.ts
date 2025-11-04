@@ -8,17 +8,112 @@ import * as XLSX from "xlsx";
 import { formatMem, formatMemForHeapSizeInKB } from '../../imgToPdf/utils/Utils';
 import { autoFitColumnsForAoa } from './SheetUtils';
 
-const setHeadersForExcel = () => {
-  const headerArray = [
-    "S.No", "Title in Google Drive", "Link to File Location",
-    "Title	in English", "Title in Original Script ( Devanagari etc )",
-    "Sub-Title", "Author",
-    "Commentator/ Translator/Editor", "Language(s)", "Script", "Subject/ Descriptor", "Publisher", "Edition",
-    "Statement", "Place of Publication", "Year of Publication", "No. of Pages", "ISBN", "Remarks",
-    "Size with Units", "Size in Bytes", "Folder Name"
-  ]
+export type ExcelWriteResult = {
+  success?: boolean;
+  success2?: boolean;
+  msg?: string; msg2?: string; xlsxFileNameWithPath?: string
 }
 
+const NEW_HEADERS = [
+  'Link to File Location',
+  'Title in English ( No Diacritics )',
+  'Author/Commentator',
+  'Language(s)',
+  'Script',
+  'Subject/ Descriptor',
+  'Result',
+];
+
+export function createManuExcelVersion(sourceExcelPath: string): ExcelWriteResult {
+  try {
+    const wb = xlsx.readFile(sourceExcelPath);
+    const firstSheetName = wb.SheetNames[0];
+    const ws = wb.Sheets[firstSheetName];
+
+    const rows: any[][] = xlsx.utils.sheet_to_json(ws, { header: 1, defval: "" });
+    if (!rows || rows.length === 0) {
+      return { success: false, success2: false, msg: 'No rows found', xlsxFileNameWithPath: '' };
+    }
+
+    const startRemoveIdx = 3; // 0-based index for column D
+    const endRemoveIdx = 22;  // 0-based index for column W
+
+    const outRows: any[][] = [];
+    for (let r = 0; r < rows.length; r++) {
+      const row = Array.isArray(rows[r]) ? [...rows[r]] : [];
+
+      // Remove columns D..W if present
+      if (row.length > startRemoveIdx) {
+        const deleteCount = Math.max(0, Math.min(endRemoveIdx, row.length - 1) - startRemoveIdx + 1);
+        if (deleteCount > 0) row.splice(startRemoveIdx, deleteCount);
+      }
+
+      if (r === 0) {
+        // Header row: enforce new headers for C..I
+        // Ensure columns A,B exist
+        if (row.length < 2) {
+          while (row.length < 2) row.push('');
+        }
+        // Set C to 'Link to File Location'
+        if (row.length >= 3) row[2] = NEW_HEADERS[0]; else row[2] = NEW_HEADERS[0];
+        // Insert remaining headers after C
+        row.splice(3, 0, ...NEW_HEADERS.slice(1));
+      } else {
+        // Data rows: preserve A,B,C (C should already be link column), insert blanks for new D..I
+        if (row.length < 3) {
+          while (row.length < 3) row.push('');
+        }
+        row.splice(3, 0, ...Array(NEW_HEADERS.length - 1).fill(''));
+      }
+
+      outRows.push(row);
+    }
+
+    const newWs = xlsx.utils.aoa_to_sheet(outRows);
+    const newWb = xlsx.utils.book_new();
+    xlsx.utils.book_append_sheet(newWb, newWs, firstSheetName);
+    xlsx.writeFile(newWb, sourceExcelPath);
+    return { success2: true, msg2: `created Manuscript Version ${sourceExcelPath}` };
+  } catch (err: any) {
+    return { success2: false, msg2: err?.message || 'Failed to create manu-version excel' };
+  }
+}
+
+export function createMimimalExcelVersion(sourceExcelPath: string): ExcelWriteResult {
+  try {
+    const wb = xlsx.readFile(sourceExcelPath);
+    const firstSheetName = wb.SheetNames[0];
+    const ws = wb.Sheets[firstSheetName];
+
+    const rows: any[][] = xlsx.utils.sheet_to_json(ws, { header: 1, defval: "" });
+    if (!rows || rows.length === 0) {
+      return { success: false, success2: false, msg: 'No rows found', msg2: 'No rows found', xlsxFileNameWithPath: '' };
+    }
+
+    const startRemoveIdx = 3; // 0-based index for column D
+    const endRemoveIdx = 22;  // 0-based index for column W
+
+    const outRows: any[][] = [];
+    for (let r = 0; r < rows.length; r++) {
+      const row = Array.isArray(rows[r]) ? [...rows[r]] : [];
+
+      // Remove columns D..W if present
+      if (row.length > startRemoveIdx) {
+        const deleteCount = Math.max(0, Math.min(endRemoveIdx, row.length - 1) - startRemoveIdx + 1);
+        if (deleteCount > 0) row.splice(startRemoveIdx, deleteCount);
+      }
+      outRows.push(row);
+    }
+
+    const newWs = xlsx.utils.aoa_to_sheet(outRows);
+    const newWb = xlsx.utils.book_new();
+    xlsx.utils.book_append_sheet(newWb, newWs, firstSheetName);
+    xlsx.writeFile(newWb, sourceExcelPath);
+    return { success2: true, msg2: `created Minimal Version ${sourceExcelPath}` };
+  } catch (err: any) {
+    return { success2: false, msg2: err?.message || 'Failed to create minimal version' };
+  }
+}
 
 const convertDatatoJson = (googleDriveFileData: Array<GoogleApiData>) => {
   const jsonArray: GDriveExcelHeaders[] = []
@@ -100,30 +195,30 @@ const convertFileRenamerV2DatatoJson = (googleDriveFileData: Array<GoogleApiData
 }
 
 
-export const jsonDataToXslx = async (googleDriveFileData: Array<GoogleApiData>, xlsxFilePath: string) => {
+export const jsonDataToXslx = async (googleDriveFileData: Array<GoogleApiData>, xlsxFilePath: string): Promise<ExcelWriteResult | null> => {
   try {
     const jsonArray: GDriveExcelHeaders[] = convertDatatoJson(googleDriveFileData);
-    jsonToExcel(jsonArray, xlsxFilePath)
-
-    console.log(`Excel File Written to ${xlsxFilePath}!`);
+    const result = jsonToExcel(jsonArray, xlsxFilePath)
+    return result
   } catch (error) {
     console.error('An error occurred:', error);
+    return null
   }
 }
 
-export const jsonDataToXslxFileRenamerV2 = async (googleDriveFileData: Array<GoogleApiData>, xlsxFilePath: string) => {
+export const jsonDataToXslxFileRenamerV2 = async (googleDriveFileData: Array<GoogleApiData>, xlsxFilePath: string): Promise<ExcelWriteResult | null> => {
   try {
     const jsonArray: GDriveExcelHeadersFileRenamerV2[] = convertFileRenamerV2DatatoJson(googleDriveFileData);
-    jsonToExcel(jsonArray, xlsxFilePath)
-
-    console.log(`Excel File Written to ${xlsxFilePath}!`);
+    const result = jsonToExcel(jsonArray, xlsxFilePath)
+    return result
   } catch (error) {
     console.error('An error occurred:', error);
+    return null
   }
 }
 
 
-export const jsonToExcel = (jsonArray: any[], xlsxFileNameWithPath: string) => {
+export const jsonToExcel = (jsonArray: any[], xlsxFileNameWithPath: string): ExcelWriteResult => {
 
   // Create a new workbook
   const workbook = xlsx.utils.book_new();
@@ -146,7 +241,7 @@ export const jsonToExcel = (jsonArray: any[], xlsxFileNameWithPath: string) => {
 
 
 
-export const jsonToExcelWithFormula = (jsonArray: any[], xlsxFileNameWithPath: string) => {
+export const jsonToExcelWithFormula = (jsonArray: any[], xlsxFileNameWithPath: string): ExcelWriteResult => {
 
   // Create a new workbook
   const workbook = xlsx.utils.book_new();

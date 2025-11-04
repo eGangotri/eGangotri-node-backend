@@ -22,6 +22,7 @@ import { extractGoogleDriveId } from '../mirror/GoogleDriveUtilsCommonCode';
 import { createFolderIfNotExistsAsync } from '../utils/FileUtils';
 import { GoogleApiDataWithLocalData } from '../cliBased/googleapi/types';
 import { randomUUID } from 'crypto';
+import { createManuExcelVersion, createMimimalExcelVersion } from '../cliBased/excel/ExcelUtils';
 
 export const gDriveRoute = express.Router();
 const drive = getGoogleDriveInstance();
@@ -149,6 +150,8 @@ gDriveRoute.post('/getGoogleDriveListingAsExcel', async (req: any, resp: any) =>
         const ignoreFolder = req?.body?.ignoreFolder
         const allNotJustPdfs = req?.body?.allNotJustPdfs || false;
         const pdfRenamerXlV2 = req?.body?.pdfRenamerXlV2 || false;
+        const minimalVersion = req?.body?.minimalVersion || false;
+        const manuVersion = req?.body?.manuVersion || false;
 
         console.log(`getGoogleDriveListingAsExcel 
             googleDriveLink:
@@ -187,6 +190,19 @@ gDriveRoute.post('/getGoogleDriveListingAsExcel', async (req: any, resp: any) =>
                         pdfRenamerXlV2,
                         allNotJustPdfs === true ? "" : PDF_TYPE,
                         rowCounterController);
+                    if (listingResult.success && (manuVersion || minimalVersion)) {
+                        const excelName = listingResult.xlsxFileNameWithPath;
+                        if (manuVersion) {
+                            const manuVersionResult = createManuExcelVersion(excelName);
+                            listingResult.success2 = manuVersionResult.success2;
+                            listingResult.msg2 = manuVersionResult.msg2;
+                        }
+                        else if (minimalVersion) {
+                            const minimalVersionResult = createMimimalExcelVersion(excelName);
+                            listingResult.success2 = minimalVersionResult.success2;
+                            listingResult.msg2 = minimalVersionResult.msg2;
+                        }
+                    }
                     _resps.push(listingResult);
                 }
                 const endTime = Date.now();

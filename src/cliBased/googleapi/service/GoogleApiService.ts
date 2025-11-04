@@ -1,5 +1,5 @@
 import { drive_v3 } from 'googleapis';
-import { jsonDataToXslx, jsonDataToXslxFileRenamerV2 } from '../../excel/ExcelUtils';
+import { ExcelWriteResult, jsonDataToXslx, jsonDataToXslxFileRenamerV2 } from '../../excel/ExcelUtils';
 import { sizeInfo } from '../../../mirror/FrontEndBackendCommonCode';
 import { FOLDER_MIME_TYPE, PDF_TYPE } from '../_utils/constants';
 import { GoogleApiData } from '../types';
@@ -63,7 +63,7 @@ export async function listFolderContentsAndGenerateCSVAndExcel(_folderIdOrUrl: s
     exportDestFolder: string,
     umbrellaFolder: string = "",
     ignoreFolder = "",
-    type = PDF_TYPE, rowCounterController = "") {
+    type = PDF_TYPE, rowCounterController = ""): Promise<ExcelWriteResult | null> {
     const gDriveFolderId = extractGoogleDriveId(_folderIdOrUrl)
     await FileUtils.createFolderIfNotExistsAsync(exportDestFolder);
 
@@ -77,17 +77,15 @@ export async function listFolderContentsAndGenerateCSVAndExcel(_folderIdOrUrl: s
     console.log(`googleDriveFileData ${googleDriveFileData.length} `);
     if (!_.isEmpty(googleDriveFileData)) {
         const excelName = `${fileNameWithPath}.xlsx`;
-        await jsonDataToXslx(googleDriveFileData, excelName);
-        return {
-            msg: `Excel file created at ${excelName}`,
-            excelName
-        };
+        const result = await jsonDataToXslx(googleDriveFileData, excelName);
+        return result;
     }
     else {
         console.log("No Data retrieved. No File will be created");
         return {
             success: false,
             msg: `No Data retrieved.`,
+            xlsxFileNameWithPath: ""
         }
     }
 }
@@ -98,7 +96,7 @@ export async function listFolderContentsAndGenerateExcelV2ForPdfRenamer(_folderI
     umbrellaFolder: string = "",
     ignoreFolder = "",
     type = PDF_TYPE,
-    rowCounterController = "") {
+    rowCounterController = ""):Promise<ExcelWriteResult | null> {
     const folderId = extractGoogleDriveId(_folderIdOrUrl)
     await FileUtils.createFolderIfNotExistsAsync(exportDestFolder);
 
@@ -111,17 +109,15 @@ export async function listFolderContentsAndGenerateExcelV2ForPdfRenamer(_folderI
     console.log(`googleDriveFileData ${googleDriveFileData.length} `);
     if (!_.isEmpty(googleDriveFileData)) {
         const excelName = `${fileNameWithPath}.xlsx`;
-        await jsonDataToXslxFileRenamerV2(googleDriveFileData, excelName);
-        return {
-            msg: `Excel file created at ${excelName}`,
-            excelName
-        };
+        const result = await jsonDataToXslxFileRenamerV2(googleDriveFileData, excelName);
+        return result
     }
     else {
         console.log("No Data retrieved. No File will be created");
         return {
             success: false,
             msg: `No Data retrieved.`,
+            xlsxFileNameWithPath: ""
         }
     }
 }
