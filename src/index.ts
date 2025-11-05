@@ -47,8 +47,12 @@ egangotri.use(express.urlencoded({limit: BODY_PARSER_LIMIT, extended: true}));
 
 egangotri.use((req: any, res: any, next: any) => {
   res.append("Access-Control-Allow-Origin", ["*"]);
-  res.append("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE");
-  res.append("Access-Control-Allow-Headers", "Content-Type");
+  res.append("Access-Control-Allow-Methods", "GET,PUT,POST,PATCH,OPTIONS");
+  res.append("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  // Short-circuit preflight requests
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(204);
+  }
   next();
 });
 

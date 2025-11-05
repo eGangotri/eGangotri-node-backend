@@ -6,6 +6,9 @@ const schema = new mongoose.Schema(
         libraries: {
             type: [String], required: true
         },
+        isDeleted: { type: Boolean, default: false },
+        deletedAt: { type: Date },
+        deletedBy: { type: String },
     }, {
     collection: 'ScanningCenter',
     timestamps: true
