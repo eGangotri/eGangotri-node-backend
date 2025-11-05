@@ -1,6 +1,6 @@
 import * as express from 'express';
 import { DEFAULT_PDF_PAGE_EXTRACTION_COUNT } from '../cliBased/pdf/extractFirstAndLastNPages';
-import { runPythonCopyPdfInLoop, runPthonPdfExtractionInLoop, executePythonPostCall, MergePdfsResponseData } from '../services/pythonRestService';
+import { runPythonCopyPdfInLoop, runPthonPdfExtractionInLoop, executePythonPostCall, MergePdfsResponseData, PythonPostCallResult } from '../services/pythonRestService';
 import { IMG_TYPE_ANY } from '../mirror/constants';
 import { PythonExtractionResult } from 'services/types';
 import * as path from 'path';
@@ -10,6 +10,7 @@ import { randomUUID } from 'crypto';
 import { anyPdfCorruptedQuick } from '../services/pdfValidationService';
 import { saveMergeMultiplePdfTracker, getCommonRuns, getByCommonRun } from '../services/mergeMultiplePdfTrackerService';
 import { random } from 'lodash';
+import { ConvertData, ConvertResultItem } from './types';
 
 export const pythonRoute = express.Router();
 
@@ -177,7 +178,9 @@ pythonRoute.post('/convert-img-folder-to-pdf', async (req: any, resp: any) => {
         const dest_folder = req?.body?.dest_folder;
         const img_type = req?.body?.img_type;
 
-        if (!src_folder || !dest_folder) {
+        const srcFolders = src_folder.includes(",") ? src_folder.split(",").map((link: string) => link.trim()) : [src_folder.trim()];
+        const destRootFolders = dest_folder.includes(",") ? dest_folder.split(",").map((link: string) => link.trim()) : [dest_folder.trim()];
+        if (!srcFolders || !dest_folder) {
             resp.status(400).send({
                 response: {
                     "status": "failed",
@@ -187,18 +190,44 @@ pythonRoute.post('/convert-img-folder-to-pdf', async (req: any, resp: any) => {
             });
             return;
         }
-        console.log(`convert-img-folder-to-pdf src_folder ${src_folder} dest_folder ${dest_folder} img_type ${img_type}`);
-        const _resp = await executePythonPostCall({
-            "src_folder": src_folder,
-            "dest_folder": dest_folder,
-            img_type: img_type
-        }, 'convert-img-folder-to-pdf');
 
+        if (srcFolders.length !== destRootFolders.length && destRootFolders.length !== 1) {
+            resp.status(400).send({
+                response: {
+                    "status": "failed",
+                    "success": false,
+                    "msg": "Src Folder and Dest Folder Count Mismatch"
+                }
+            });
+            return;
+        }
+        console.log(`convert-img-folder-to-pdf  ${srcFolders.length} src_folders for img_type ${img_type}`);
+        const result: PythonPostCallResult<ConvertData>[] = []
+        const commonRunId = randomUUID();
+        for (let i = 0; i < srcFolders.length; i++) {
+            const dest: string = destRootFolders.length === 1 ? destRootFolders[0] : destRootFolders[i]
+            console.log(`convert-img-folder-to-pdf src_folders ${srcFolders[i]} dest_root_folder 
+                ${dest} img_type ${img_type}`);
+            const _resp: PythonPostCallResult<ConvertData> = await executePythonPostCall({
+                "src_folder": srcFolders[i],
+                "dest_folder": dest,
+                "img_type": img_type,
+                "commonRunId": commonRunId,
+            }, 'convert-img-folder-to-pdf');
+
+            result.push(_resp);
+        }
+
+        const stats = result.filter((x: PythonPostCallResult<ConvertData>) => x.status === true).length;
+        console.log(`combinedResults convert-img-folder-to-pdf: ${stats} of ${result.length} processed successfully`);
         resp.status(200).send({
-            response: _resp
+            response: {
+                status: stats === result.length,
+                _cumulativeMsg: `${stats} of ${result.length} processed successfully`,
+                result,
+            }
         });
     }
-
     catch (err: any) {
         console.log('Error', err);
         resp.status(400).send(err);
@@ -363,7 +392,7 @@ pythonRoute.post('/mergeMutliplePdfs', async (req: any, resp: any) => {
                     first_pdf_path,
                     second_pdf_path,
                     ...(third_pdf_path ? { third_pdf_path } : {}),
-                    operationResult: {status: false, message: "Corrupted PDFs", results},
+                    operationResult: { status: false, message: "Corrupted PDFs", results },
                     moveResults: [],
                 });
 

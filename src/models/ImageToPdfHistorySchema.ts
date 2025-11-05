@@ -43,6 +43,7 @@ interface ISummary {
 export interface IImageToPdfHistory extends Document {
     total_folders: number;
     total_folders_including_empty: number;
+    commonRunId: string;
     folders_detail: IFolderInfo[];
     summary: ISummary;
     memory_stats: IMemoryStats;
@@ -71,6 +72,7 @@ const COLL_NAME = 'Image_To_Pdf_History';
 const ImageToPdfHistorySchema = new Schema<IImageToPdfHistory>({
     total_folders: { type: Number, default: 0 },
     total_folders_including_empty: { type: Number, default: 0 },
+    commonRunId: { type: String, required: true },
     folders_detail: [FolderInfoSchema],
     summary: new Schema<ISummary>({
         folders_with_images: { type: Number, default: 0 },
