@@ -3,7 +3,7 @@ import { BatchPair, PdfPair } from "./types";
 import * as fs from 'fs';
 import axios from 'axios';
 import { GDRIVE_CP_EXTRACTED_METADATA_RES } from "../../../routes/utils";
-import { limitCountAndSanitizeFileNameWithoutExt, limitStringToCharCount, sanitizeFileName } from "../../../services/fileUtilsService";
+import { limitCountAndSanitizeFileNameWithoutExt } from "../../../services/fileUtilsService";
 import path from "path";
 
 

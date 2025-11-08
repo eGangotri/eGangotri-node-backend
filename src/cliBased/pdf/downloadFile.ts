@@ -9,7 +9,7 @@ import { getGoogleDriveInstance } from '../googleapi/service/CreateGoogleDrive';
 import * as path from 'path';
 import { updateEntryForGDriveUploadHistory, _updateEmbeddedFileByFileName } from '../../services/GdriveDownloadRecordService';
 import { DownloadHistoryStatus } from '../../utils/constants';
-import { limitCountAndSanitizeFileNameWithoutExt, limitStringToCharCount, sanitizeFileName } from '../../services/fileUtilsService';
+import { limitCountAndSanitizeFileNameWithoutExt } from '../../services/fileUtilsService';
 
 const drive = getGoogleDriveInstance();
 const MAX_FILENAME_LENGTH = 220;

@@ -8,6 +8,7 @@ import { FileStats } from "../imgToPdf/utils/types";
 import { GDriveExcelHeadersFileRenamerV2 } from "../cliBased/googleapi/types";
 import { isNumber } from "../mirror/utils";
 import { checkFolderExistsSync } from "../utils/FileUtils";
+import { MAX_FILE_NAME_LENGTH } from '../cliBased/googleapi/_utils/constants';
 
 interface RenameReportType {
     errorList: string[],
@@ -182,7 +183,7 @@ export const sanitizeFileName = (_fileName: any) => {
     return removeExtraSpaces;
 }
 
-export const limitStringToCharCount = (str: string, maxLength: number) => {
+export const limitFileNameToCharCount = (str: string, maxLength: number) => {
     if (str.length > maxLength) {
         return str.substring(0, maxLength);
     }
@@ -190,10 +191,10 @@ export const limitStringToCharCount = (str: string, maxLength: number) => {
 }
 
 
-export const limitCountAndSanitizeFileNameWithoutExt = (fileName: string, maxLength: number) => {
+export const limitCountAndSanitizeFileNameWithoutExt = (fileName: string, maxLength: number = MAX_FILE_NAME_LENGTH) => {
     const ext = path.extname(fileName);
     const removeExt = ext ? fileName.slice(0, -ext.length) : fileName;
-    const newName = limitStringToCharCount(sanitizeFileName(removeExt), maxLength);
+    const newName = limitFileNameToCharCount(sanitizeFileName(removeExt), maxLength);
     return `${newName}${ext}`;
 }
 
