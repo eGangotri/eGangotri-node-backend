@@ -11,7 +11,8 @@ import { autoFitColumnsForAoa } from './SheetUtils';
 export type ExcelWriteResult = {
   success?: boolean;
   success2?: boolean;
-  msg?: string; msg2?: string; xlsxFileNameWithPath?: string
+  msg?: string; msg2?: string;
+  xlsxFileNameWithPath?: string
 }
 
 const NEW_HEADERS = [

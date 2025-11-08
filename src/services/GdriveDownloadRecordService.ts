@@ -50,8 +50,8 @@ export const updateEntryForGDriveUploadHistory = async (gDriveDownloadTaskId: st
    status: DownloadHistoryStatus,
     quickStatus: QuickStatus = {}) => {
   const params = { msg, status };
-  if (quickStatus && quickStatus?.status?.length > 0) {
-    params['quickStatus'] += quickStatus;
+  if (quickStatus?.status?.length) {
+    params['quickStatus'] = quickStatus;
   }
   console.log(`params ${params} quickStatus${JSON.stringify(quickStatus)}`);
   let success = false;

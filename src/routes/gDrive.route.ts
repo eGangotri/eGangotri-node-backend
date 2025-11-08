@@ -22,7 +22,7 @@ import { extractGoogleDriveId } from '../mirror/GoogleDriveUtilsCommonCode';
 import { createFolderIfNotExistsAsync } from '../utils/FileUtils';
 import { GoogleApiDataWithLocalData } from '../cliBased/googleapi/types';
 import { randomUUID } from 'crypto';
-import { createManuExcelVersion, createMimimalExcelVersion } from '../cliBased/excel/ExcelUtils';
+import { createManuExcelVersion, createMimimalExcelVersion, ExcelWriteResult } from '../cliBased/excel/ExcelUtils';
 
 export const gDriveRoute = express.Router();
 const drive = getGoogleDriveInstance();
@@ -183,7 +183,7 @@ gDriveRoute.post('/getGoogleDriveListingAsExcel', async (req: any, resp: any) =>
                 for (let i = 0; i < _links.length; i++) {
                     const rowCounterController = Math.random().toString(36).substring(7);
                     console.log(`getGoogleDriveListingAsExcel:loop ${_links[i]} ${_folders[i]} (${allNotJustPdfs}) ${rowCounterController}`)
-                    const listingResult = await generateGoogleDriveListingExcel(_links[i],
+                    const listingResult:ExcelWriteResult | null = await generateGoogleDriveListingExcel(_links[i],
                         _folders[i],
                         reduced,
                         ignoreFolder,

@@ -48,7 +48,7 @@ gDriveDownloadRoute.post("/updateGDriveDownload/:id", async (req: Request, res: 
                 gDriveDownload.msg = msg + "," + gDriveDownload.msg;
             }
             if(quickStatus !== undefined) {
-                gDriveDownload.quickStatus += quickStatus;
+                gDriveDownload.quickStatus = quickStatus;
             }
             const updatedGDriveDownload = await gDriveDownload.save();
             console.log(`updateGDriveDownload:updatedGDriveDownload/${id}: ${JSON.stringify(updatedGDriveDownload)}`);
