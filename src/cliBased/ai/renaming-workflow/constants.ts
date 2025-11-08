@@ -4,6 +4,7 @@ import { AI_RENAMING_WORKFLOW_CONFIG } from './types';
 // Load environment variables
 dotenv.config();
 
+export const PDF_METADATA_EXTRACTION_PROMPT_CHAR_LIMIT = 170;
 // Google AI Studio prompt for metadata extraction
 export const PDF_METADATA_EXTRACTION_PROMPT = `The exercise below is to save a pdf with recognizable metadata mostly English, Sanskrit and other languages that use Brahmi based scripts
  and sometimes Urdu.
@@ -79,7 +80,7 @@ Example
 
 Rati Rahasya Edited by Mike Magee Sanskrit 1982 - Venkateshwar Press
 
-Keep Count of generated text under 170 characters
+Oputput generated shount not exceed ${PDF_METADATA_EXTRACTION_PROMPT_CHAR_LIMIT} characters including spaces
 
 If the original title in Hindi is like this for example:
 
@@ -137,8 +138,8 @@ If the publisher has address info such Penguin India drop the portion that will 
 
 ignore the pdf-header and pdf-footers which if provided is merely ascribing the custodians or scanning agencies which is irrelevant to our metadata extraction of the book`;
 
-
-export const SIMPLE_TITLE_AUTHOR_PROMPT = `
+export const SIMPLE_TITLE_AUTHOR_GDRIVE_CP_RENAME_PROMPT_CHAR_LIMIT = 40
+export const SIMPLE_TITLE_AUTHOR_GDRIVE_CP_RENAME_PROMPT = `
 This is an exercise to extract the title and author of the Cover Page of a book saved as a one page pdf/jpeg/png file.
 
 If the Image is not a cover-page of  book or manuscript but a stack of books then return NIL.
@@ -169,7 +170,7 @@ But use Acronyms or short forms so AAS or KSTS but KVM for Kavyamala.
 If no Series is there then do smae for Publisher. If No Publisher then Press but with acronyms 
 So Nirnaya Sagar Press is NSP, Naval Kishore Press is NKP, Motilal Banarsidas is MLBD.
 
-Keep results under 40 characters.
+Output generated shount not exceed ${SIMPLE_TITLE_AUTHOR_GDRIVE_CP_RENAME_PROMPT_CHAR_LIMIT} characters including spaces
 
 If no author, title, publisher or series is found then return the First Prominent Line written
 `

@@ -182,6 +182,21 @@ export const sanitizeFileName = (_fileName: any) => {
     return removeExtraSpaces;
 }
 
+export const limitStringToCharCount = (str: string, maxLength: number) => {
+    if (str.length > maxLength) {
+        return str.substring(0, maxLength);
+    }
+    return str;
+}
+
+
+export const limitCountAndSanitizeFileNameWithoutExt = (fileName: string, maxLength: number) => {
+    const ext = path.extname(fileName);
+    const removeExt = ext ? fileName.slice(0, -ext.length) : fileName;
+    const newName = limitStringToCharCount(sanitizeFileName(removeExt), maxLength);
+    return `${newName}${ext}`;
+}
+
 //remove colon etc not allowed in a File
 const removeExtraneousChars = (fileNameFrag: any) => {
     const sanitized = fileNameFrag?.toString()?.trim()?.replace(/[\\/:*?"<>|]/g, "") || "";

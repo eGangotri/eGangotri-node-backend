@@ -1,9 +1,10 @@
-import { AI_ENDPOINT, AI_MAX_OUTPUT_TOKENS, GOOGLE_AI_API_KEY, INLINE_MAX_FILE_SIZE_MB, PDF_METADATA_EXTRACTION_PROMPT, sleep } from "./constants";
+import { AI_ENDPOINT, AI_MAX_OUTPUT_TOKENS, GOOGLE_AI_API_KEY, INLINE_MAX_FILE_SIZE_MB, PDF_METADATA_EXTRACTION_PROMPT_CHAR_LIMIT, sleep } from "./constants";
 import { BatchPair, PdfPair } from "./types";
 import * as fs from 'fs';
 import axios from 'axios';
 import { GDRIVE_CP_EXTRACTED_METADATA_RES } from "../../../routes/utils";
-import { sanitizeFileName } from "../../../services/fileUtilsService";
+import { limitCountAndSanitizeFileNameWithoutExt, limitStringToCharCount, sanitizeFileName } from "../../../services/fileUtilsService";
+import path from "path";
 
 
 export function buildPairedPdfs(allPdfs: string[], allReducedPdfs: string[]): PdfPair[] {
@@ -99,8 +100,8 @@ export const processLocalFileForAIRenaming = async (filePath: string, mimeType: 
 }
 
 export const processFileForAIRenaming = async (base64EncodedFile: string,
-     mimeType: string,
-      prompt: string,
+    mimeType: string,
+    prompt: string,
     retryCount: number = 0,
     initialDelay: number = 1000): Promise<{ extractedMetadata: string, error: string }> => {
 
@@ -125,8 +126,7 @@ export const processFileForAIRenaming = async (base64EncodedFile: string,
 
         let extractedMetadata: string;
         if (typeof text === 'string' && text.trim().length > 0) {
-            extractedMetadata = sanitizeFileName(text)
-
+            extractedMetadata = limitCountAndSanitizeFileNameWithoutExt(text, PDF_METADATA_EXTRACTION_PROMPT_CHAR_LIMIT);
         } else {
             // If no text, include diagnostics: finishReason, configured maxOutputTokens, and usage metadata
             const diagnostic = finishReason ? `No text returned. finishReason=${finishReason}` : 'No text returned.';

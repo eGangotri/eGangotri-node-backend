@@ -4,8 +4,9 @@ import { getGoogleDriveInstance } from '../../googleapi/service/CreateGoogleDriv
 import { extractGoogleDriveId } from '../../../mirror/GoogleDriveUtilsCommonCode';
 import { ALLOWED_MIME_TYPES_FOR_RENAMING } from '../../googleapi/_utils/constants';
 import { convertBufferToBasicEncodedString, processFileForAIRenaming } from './utils';
-import { SIMPLE_TITLE_AUTHOR_PROMPT } from './constants';
+import { SIMPLE_TITLE_AUTHOR_GDRIVE_CP_RENAME_PROMPT, SIMPLE_TITLE_AUTHOR_GDRIVE_CP_RENAME_PROMPT_CHAR_LIMIT } from './constants';
 import { GDRIVE_CP_EXTRACTED_METADATA_RES } from '../../../routes/utils';
+import { limitCountAndSanitizeFileNameWithoutExt } from '../../../services/fileUtilsService';
 
 export async function renameDriveFileByLink(
   driveLinkOrId: string,
@@ -43,15 +44,16 @@ export async function renameDriveFileByLink(
   }
 
   GDRIVE_CP_EXTRACTED_METADATA_RES.processedCount++;
-  const { extractedMetadata, error } = await processFileForAIRenaming(base64EncodedFile, mime, SIMPLE_TITLE_AUTHOR_PROMPT);
+  let { extractedMetadata, error } = await processFileForAIRenaming(base64EncodedFile, mime, SIMPLE_TITLE_AUTHOR_GDRIVE_CP_RENAME_PROMPT);
   if (error || extractedMetadata === 'NIL') {
     console.log(`Failed to process file ${oldName}: ${error}`);
     return { fileId, oldName, newName: oldName };
   }
 
   const ext = path.extname(extractedMetadata) || '';
-
   if (extractedMetadata.length - ext.length > 3) {
+    extractedMetadata = limitCountAndSanitizeFileNameWithoutExt(extractedMetadata, SIMPLE_TITLE_AUTHOR_GDRIVE_CP_RENAME_PROMPT_CHAR_LIMIT);
+    console.log(`Gdrive CP renamed to ${oldName} to ${extractedMetadata}`);
     await drive.files.update({
       fileId,
       requestBody: { name: extractedMetadata },

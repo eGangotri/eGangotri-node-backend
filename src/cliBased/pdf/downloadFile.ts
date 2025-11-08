@@ -9,9 +9,10 @@ import { getGoogleDriveInstance } from '../googleapi/service/CreateGoogleDrive';
 import * as path from 'path';
 import { updateEntryForGDriveUploadHistory, _updateEmbeddedFileByFileName } from '../../services/GdriveDownloadRecordService';
 import { DownloadHistoryStatus } from '../../utils/constants';
+import { limitCountAndSanitizeFileNameWithoutExt, limitStringToCharCount, sanitizeFileName } from '../../services/fileUtilsService';
 
 const drive = getGoogleDriveInstance();
-
+const MAX_FILENAME_LENGTH = 220;
 export const downloadFileFromGoogleDrive = async (driveLinkOrFolderId: string,
     destPath: string,
     fileName: string = "",
@@ -89,7 +90,7 @@ export const downloadGDriveFileUsingGDriveApi = async (
     fileSizeRaw: string = "0",
     gDriveDownloadTaskId: string = "",
     runIdWithIndex: string = ""
-): Promise<{ status: string; success: boolean; destPath: string , error?: string}> => {
+): Promise<{ status: string; success: boolean; destPath: string, error?: string }> => {
     const fileId = extractGoogleDriveId(driveLinkOrFileID);
     console.log(`downloadGDriveFileUsingGDriveApi ${driveLinkOrFileID} ${fileId} to ${destPath}`);
 
@@ -103,12 +104,27 @@ export const downloadGDriveFileUsingGDriveApi = async (
         const fileMetadata = await drive.files.get({ fileId, fields: 'name,mimeType' });
         const mimeType = fileMetadata.data.mimeType;
         fileName = fileName || fileMetadata.data.name;
+        if (fileName.length > MAX_FILENAME_LENGTH) {
+            console.log(`fileName length is ${fileName.length}, and now will be reduced to ${MAX_FILENAME_LENGTH}.`);
+            fileName = limitCountAndSanitizeFileNameWithoutExt(fileName, MAX_FILENAME_LENGTH);
+        }
         const filePath = path.join(destPath, fileName);
 
-        await updateEntryForGDriveUploadHistory(gDriveDownloadTaskId,
-             `started d/l of ${fileName}`, 
-             DownloadHistoryStatus.Queued);
+        const res = await updateEntryForGDriveUploadHistory(gDriveDownloadTaskId,
+            `started d/l of ${fileName}`,
+            DownloadHistoryStatus.Queued);
 
+        if (!res.success) {
+            incrementDownloadFailed(runIdWithIndex);
+            await _updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, DownloadHistoryStatus.Failed, `failed d/l of ${fileName}`, destPath);
+
+            return {
+                status: `Failed to update entry for ${fileName}`,
+                success: false,
+                error: res.error,
+                destPath
+            };
+        }
         const dest = fs.createWriteStream(filePath);
 
         const exportMimeMap = {
@@ -154,12 +170,8 @@ export const downloadGDriveFileUsingGDriveApi = async (
             await _updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, DownloadHistoryStatus.Completed, `completed d/l of ${fileName}`, destPath);
             return { status: `Downloaded ${fileName} to ${destPath}`, success: true, destPath };
         } else {
-            console.log(`downloadGDriveFileUsingGDriveApi else-1`)
             incrementDownloadFailed(runIdWithIndex);
-            console.log(`downloadGDriveFileUsingGDriveApi else-2`)
-
             await _updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, DownloadHistoryStatus.Failed, `failed d/l of ${fileName}`, destPath);
-            console.log(`downloadGDriveFileUsingGDriveApi else-3`);
             return {
                 status: `File Consistency Check Failed for download ${fileName} to ${destPath}`,
                 success: false,
@@ -173,11 +185,13 @@ export const downloadGDriveFileUsingGDriveApi = async (
             incrementDownloadInError(runIdWithIndex);
         }
         await _updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, DownloadHistoryStatus.Failed, `${errorContext}: ${error.message}`, destPath);
-        return { status: `${errorContext}: ${error.message}`,
-                 success: false,
-                 error: `${errorContext}: ${error.message}`,
-                 destPath };
-    }   
+        return {
+            status: `${errorContext}: ${error.message}`,
+            success: false,
+            error: `${errorContext}: ${error.message}`,
+            destPath
+        };
+    }
 };
 
 //pnpm run downloadPdf
