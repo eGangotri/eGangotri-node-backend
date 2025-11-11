@@ -130,6 +130,7 @@ yarnRoute.post('/qaToDestFileMover', async (req: any, resp: any) => {
             });
             return;
         }
+        const srcPath = isValidPath(qaPath) ? qaPath : getFolderInSrcRootForProfile(qaPath) 
         const destPath = isValidPath(dest) ? dest : getFolderInSrcRootForProfile(dest)
         const allDestPdfs = await getAllPDFFiles(destPath);
         if (allDestPdfs.length > 0 && !override) {
@@ -143,9 +144,9 @@ yarnRoute.post('/qaToDestFileMover', async (req: any, resp: any) => {
             return;
         }
 
-        const paths: string[] = qaPath.includes(",")
-            ? qaPath.split(",").map((p: string) => p.trim()).filter(Boolean)
-            : [qaPath.trim()];
+        const paths: string[] = srcPath.includes(",")
+            ? srcPath.split(",").map((p: string) => p.trim()).filter(Boolean)
+            : [srcPath.trim()];
 
         console.log(`qaToDestFileMover paths ${paths}`)
         const results: any[] = [];
