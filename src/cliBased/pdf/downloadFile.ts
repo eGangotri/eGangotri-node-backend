@@ -13,6 +13,31 @@ import { limitCountAndSanitizeFileNameWithoutExt } from '../../services/fileUtil
 
 const drive = getGoogleDriveInstance();
 const MAX_FILENAME_LENGTH = 220;
+
+// Ensures the filename is unique within the given directory by appending " (n)" before the extension.
+const ensureUniqueFileNameAsync = async (dir: string, originalName: string): Promise<string> => {
+    const ext = path.extname(originalName);
+    const base = path.basename(originalName, ext);
+    let candidate = originalName;
+    let counter = 1;
+    // Loop until a filename does not exist
+    // Uses async access to avoid blocking the event loop
+    while (true) {
+        try {
+            await fs.promises.access(path.join(dir, candidate));
+            // exists -> create next candidate
+            candidate = `${base} (${counter})${ext}`;
+            counter++;
+        } catch (e: any) {
+            if (e && e.code === 'ENOENT') {
+                // does not exist -> good to use
+                return candidate;
+            }
+            // Unexpected error -> rethrow
+            throw e;
+        }
+    }
+};
 export const downloadFileFromGoogleDrive = async (driveLinkOrFolderId: string,
     destPath: string,
     fileName: string = "",
@@ -33,14 +58,12 @@ export const downloadFileFromUrl = async (
     fileSizeRaw = "0", downloadCounterController = "") => {
     console.log(`downloadFileFromUrl ${downloadUrl} to ${fileDumpFolder}`)
 
+    fileName = await ensureUniqueFileNameAsync(fileDumpFolder, fileName);
+
     const dl = new DownloaderHelper(downloadUrl, fileDumpFolder, { fileName: fileName });//
     let _result: { success?: boolean, status?: string, error?: string } = {};
     try {
         await new Promise((resolve, reject) => {
-            dl.on('error', (err) => {
-                dl.stop();
-                reject(err);
-            });
             dl.on('end', async () => {
                 const index = `(${DOWNLOAD_COMPLETED_COUNT(downloadCounterController) + 1}${dataLength > 0 ? "/" + dataLength : ""})`;
                 console.log(`${index}. Downloaded ${fileName}`);
@@ -56,6 +79,7 @@ export const downloadFileFromUrl = async (
             });
 
             dl.on('error', (err) => {
+                dl.stop();
                 incrementDownloadInError(downloadCounterController);
                 if (err.code === 'ECONNRESET') {
                     console.error('Connection reset by peer');
@@ -108,6 +132,8 @@ export const downloadGDriveFileUsingGDriveApi = async (
             console.log(`fileName length is ${fileName.length}, and now will be reduced to ${MAX_FILENAME_LENGTH}.`);
             fileName = limitCountAndSanitizeFileNameWithoutExt(fileName, MAX_FILENAME_LENGTH);
         }
+        // Ensure uniqueness for Google Drive downloads as well
+        fileName = await ensureUniqueFileNameAsync(destPath, fileName);
         const filePath = path.join(destPath, fileName);
 
         const res = await updateEntryForGDriveUploadHistory(gDriveDownloadTaskId,

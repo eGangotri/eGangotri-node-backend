@@ -25,7 +25,7 @@ launchAIGDriveRoute.post('/renameGDriveCPs', async (req: any, resp: any) => {
             });
         }
 
-        const links = googleDriveLink.includes(",") ? googleDriveLink.split(",").map((link: string) => link.trim()) : [googleDriveLink.trim()];
+        const links = (googleDriveLink.includes(",") ? googleDriveLink.split(",").map((link: string) => link.trim()) : [googleDriveLink.trim()]).filter(Boolean);
         const megaResult: RenameCPSByLinkResponse[] = []
         const commonRunId: string = randomUUID()
         for (const link of links) {

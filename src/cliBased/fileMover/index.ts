@@ -7,8 +7,40 @@ import { launchWinExplorer } from "./util";
 import { checkFolderExistsSync, isFileInUse } from "../../utils/FileUtils";
 import { isPDFCorrupted } from "../../utils/pdfValidator";
 
+// Ensures a unique filename in a directory by appending " (n)" before the extension.
+const ensureUniqueFileNameAsync = async (dir: string, originalName: string): Promise<string> => {
+    const ext = path.extname(originalName);
+    const base = path.basename(originalName, ext);
+    let candidate = originalName;
+    let counter = 1;
+    while (true) {
+        try {
+            await fsPromise.access(path.join(dir, candidate));
+            candidate = `${base} (${counter})${ext}`;
+            counter++;
+        } catch (e: any) {
+            if (e && e.code === 'ENOENT') {
+                return candidate;
+            }
+            throw e;
+        }
+    }
+};
+
+const moveWithExdevFallback = async (src: string, dest: string) => {
+    try {
+        await fsPromise.rename(src, dest);
+    } catch (err: any) {
+        if (err && err.code === 'EXDEV') {
+            await fsPromise.copyFile(src, dest);
+            await fsPromise.unlink(src);
+        } else {
+            throw err;
+        }
+    }
+};
+
 export const moveAFile = async (sourceFileAbsPath: string, targetDir: string, fileName: string, pdfOnly = true) => {
-    const targetFile = path.join(targetDir, fileName);
     const result = { fileCollisionsResolvedByRename: "", renamedWithoutCollision: "", error: "", targetFile: "" };
 
     if (!pdfOnly || (pdfOnly && fileName.endsWith('.pdf'))) {
@@ -22,38 +54,15 @@ export const moveAFile = async (sourceFileAbsPath: string, targetDir: string, fi
                 }
             }
 
-            if (!checkFolderExistsSync(targetFile)) {
-                await fsPromise.rename(sourceFileAbsPath, targetFile);
-
-                // Verify if the file move was successful
-                if (checkFolderExistsSync(targetFile)) {
-                    result.renamedWithoutCollision = `${fileName}`;
-                    result.targetFile = targetFile;
-                } else {
-                    result.error = `Failed to move file ${sourceFileAbsPath} to ${targetFile}: File not found at destination after move`;
-                    console.error(result.error);
-                }
+            const uniqueName = await ensureUniqueFileNameAsync(targetDir, fileName);
+            const targetFileAbs = path.join(targetDir, uniqueName);
+            await moveWithExdevFallback(sourceFileAbsPath, targetFileAbs);
+            if (uniqueName === fileName) {
+                result.renamedWithoutCollision = `${fileName}`;
             } else {
-                const extension = path.extname(targetFile); // .pdf with .
-                const newName = `${targetFile.replace(`${extension}`, `_1${extension}`)}`;
-                console.log(`File (${extension}) already exists in target dir ${targetFile}. Renaming to ${newName}`);
-                if (!checkFolderExistsSync(newName)) {
-                    await fsPromise.rename(sourceFileAbsPath, newName);
-
-                    // Verify if the renamed file move was successful
-                    if (checkFolderExistsSync(newName)) {
-                        result.fileCollisionsResolvedByRename = `${fileName}`;
-                        result.targetFile = newName;
-                        console.log(`File already exists in target dir ${targetFile}. Successfully renamed to ${newName}`);
-                    } else {
-                        result.error = `Failed to move file ${sourceFileAbsPath} to ${newName}: File not found at destination after move`;
-                        console.error(result.error);
-                    }
-                } else {
-                    console.error(`File already exists in target dir ${targetFile}. Renaming to ${newName} failed`);
-                    result.error = `File already exists in target dir ${targetFile}. Renaming to ${newName} failed`;
-                }
+                result.fileCollisionsResolvedByRename = `${fileName}`;
             }
+            result.targetFile = targetFileAbs;
         } catch (err) {
             result.error = `Error moving file ${sourceFileAbsPath}: ${err.message}`;
             console.error(`Error moving file ${sourceFileAbsPath}: ${err.message}`);
