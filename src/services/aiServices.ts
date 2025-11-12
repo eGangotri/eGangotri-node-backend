@@ -10,6 +10,10 @@ import { recordGDriveCpRenameHistory } from "./gdriveCpRenameHistoryService";
 import { IPdfTitleRenamingViaAITracker } from "models/pdfTitleRenamingTrackerViaAI";
 import path from "path";
 import * as fs from "fs";
+import { PdfTitleRenamingViaAITracker } from "models/pdfTitleRenamingTrackerViaAI";
+import { PdfTitleAndFileRenamingTrackerViaAI } from "models/pdfTitleAndFileRenamingTrackerViaAI";
+import { processWithGoogleAI } from "../cliBased/ai/renaming-workflow/googleAiService";
+import { formatFilename } from "../cliBased/ai/renaming-workflow/utils";
 
 export type RenameCPSByLinkResponse = {
     status?: string,
@@ -127,4 +131,127 @@ export const renameOriginalItemsBasedOnMetadata = async (pdfTitleRenamedItems: I
         failureCount,
         errors
     }
+}
+
+export const retryAiRenamerByRunId = async (runId: string) => {
+    if (!runId) {
+        throw new Error("runId is required");
+    }
+
+    const failedFilter: any = {
+        runId,
+        $or: [
+            { error: { $exists: true, $nin: [null, ""] } },
+            { extractedMetadata: { $in: [null, "", "NIL"] } },
+        ],
+    };
+
+    const failedItems: IPdfTitleRenamingViaAITracker[] = await PdfTitleRenamingViaAITracker.find(failedFilter).sort({ createdAt: 1 });
+
+    if (!failedItems || failedItems.length === 0) {
+        return { status: "success", message: "No failed items found for this runId", runId, retried: 0, successes: 0, failures: 0, details: [] as Array<{ originalFilePath: string; newFilePath?: string; error?: string }> };
+    }
+
+    let successes = 0;
+    let failures = 0;
+    const details: Array<{ originalFilePath: string; newFilePath?: string; error?: string }> = [];
+    console.log(`Failed Items Count: ${failedItems.length} ${JSON.stringify(failedItems)}`);
+    for (const item of failedItems) {
+        try {
+            const result = await processWithGoogleAI(item.reducedFilePath);
+            if (result?.extractedMetadata && !result?.error) {
+                const formattedFileName = formatFilename(result.extractedMetadata);
+                const targetDir = item.outputFolder && item.outputFolder.trim().length > 0
+                    ? item.outputFolder
+                    : path.dirname(item.originalFilePath);
+
+                const newFilePath = path.join(targetDir, formattedFileName);
+                try {
+                    if (formattedFileName?.trim().length > 0) {
+                        console.log(`Renaming ${item.originalFilePath} to ${newFilePath} `)
+
+                        if (targetDir !== path.dirname(item.originalFilePath) && !fs.existsSync(targetDir)) {
+                            fs.mkdirSync(targetDir, { recursive: true });
+                        }
+                        fs.copyFileSync(item.originalFilePath, newFilePath);
+                        await PdfTitleRenamingViaAITracker.updateOne({ _id: (item as any)._id }, {
+                            $set: {
+                                extractedMetadata: result.extractedMetadata,
+                                newFilePath,
+                                msg: `Renamed ${item.originalFilePath} to ${newFilePath}`,
+                            }
+                        });
+                    } else {
+                        console.log(`newFilePath is empty for ${item.originalFilePath}`);
+                        throw new Error("newFilePath is empty");
+                    }
+                } catch (copyErr: any) {
+                    console.log(`File copy failed: ${copyErr?.message || copyErr} `);
+                    await PdfTitleRenamingViaAITracker.updateOne({ _id: (item as any)._id }, {
+                        $set: {
+                            extractedMetadata: result.extractedMetadata,
+                            error: `File copy failed: ${copyErr?.message || copyErr} `,
+                        }
+                    });
+                    failures++;
+                    details.push({ originalFilePath: item.originalFilePath, error: `File copy failed: ${copyErr?.message || copyErr} ` });
+                    continue;
+                }
+
+                await PdfTitleRenamingViaAITracker.updateOne({ _id: (item as any)._id }, {
+                    $set: {
+                        extractedMetadata: result.extractedMetadata,
+                        error: undefined,
+                        newFilePath,
+                    }
+                });
+                successes++;
+                details.push({ originalFilePath: item.originalFilePath, newFilePath });
+            } else {
+                await PdfTitleRenamingViaAITracker.updateOne({ _id: (item as any)._id }, {
+                    $set: {
+                        extractedMetadata: result?.extractedMetadata || '',
+                        error: result?.error || 'Unknown error after retry',
+                    }
+                });
+                failures++;
+                details.push({ originalFilePath: item.originalFilePath, error: result?.error || 'Unknown error after retry' });
+            }
+        } catch (err: any) {
+            await PdfTitleRenamingViaAITracker.updateOne({ _id: (item as any)._id }, {
+                $set: {
+                    error: err?.message || String(err),
+                }
+            });
+            failures++;
+            details.push({ originalFilePath: item.originalFilePath, error: err?.message || String(err) });
+        }
+    }
+
+    try {
+        const allForRun = await PdfTitleRenamingViaAITracker.find({ runId });
+        const processedCount = allForRun.length;
+        const successCount = allForRun.filter(d => (d as any).extractedMetadata && !(d as any).error).length;
+        const failedCount = processedCount - successCount;
+
+        await PdfTitleAndFileRenamingTrackerViaAI.updateOne({ runId }, {
+            $set: {
+                processedCount,
+                successCount,
+                failedCount,
+                success: failedCount === 0,
+            }
+        });
+    } catch (aggErr) {
+        console.error('Failed to update AI summary tracker after retry:', aggErr);
+    }
+
+    return {
+        status: 'success',
+        runId,
+        retried: failedItems.length,
+        successes,
+        failures,
+        details,
+    };
 }
