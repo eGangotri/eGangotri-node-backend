@@ -233,19 +233,25 @@ export type PythonPostCallResult<TData = ExtractionOperationData> = {
     error?: unknown;
 };
 
+export interface PythonPostOptions {
+    timeoutMs?: number;
+    skipPreflight?: boolean;
+}
+
 export const executePythonPostCall = async <TData = ExtractionOperationData>(
     body: Record<string, unknown>,
-    resource: string
+    resource: string,
+    opts?: PythonPostOptions
 ): Promise<PythonPostCallResult<TData>> => {
     try {
-        const serverStatus = await checkPythonServer();
-        if (serverStatus.status) {
-            const _res = await pythonPostCallInternal<TData>(body, resource);
-            return _res
+        if (!opts?.skipPreflight) {
+            const serverStatus = await checkPythonServer();
+            if (!serverStatus.status) {
+                return serverStatus;
+            }
         }
-        else {
-            return serverStatus
-        }
+        const _res = await pythonPostCallInternal<TData>(body, resource, opts);
+        return _res;
     } catch (error) {
         console.log('Error executePythonPostCall:', error);
         return {
@@ -255,41 +261,53 @@ export const executePythonPostCall = async <TData = ExtractionOperationData>(
     }
 };
 
-export const pythonPostCallInternal = async <TData = ExtractionOperationData>(body: Record<string, unknown>, resource: string): Promise<PythonPostCallResult<TData>> => {
+export const pythonPostCallInternal = async <TData = ExtractionOperationData>(body: Record<string, unknown>, resource: string, opts?: PythonPostOptions): Promise<PythonPostCallResult<TData>> => {
     console.log(`python call ${resource} ${JSON.stringify(body, null, 2)}`)
-    const response = await fetch(`${PYTHON_SERVER_URL}/${resource}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(body)
-    });
-    if (response?.ok) {
-        const data = await response.json() as TData;
-        console.log(`data ${JSON.stringify(data, null, 2)}`)
-        return {
-            status: true,
-            message: 'Success',
-            data
-        };
-    }
-    else {
-       try{
-        const errorData = await response.json();
-        console.error(`Error ${response.status} from ${resource}:`, JSON.stringify(errorData, null, 2));
+    const controller = typeof AbortController !== 'undefined' && opts?.timeoutMs ? new AbortController() : undefined;
+    const timer = controller && opts?.timeoutMs ? setTimeout(() => controller.abort(), opts.timeoutMs) : undefined;
+    try {
+        const response = await fetch(`${PYTHON_SERVER_URL}/${resource}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(body),
+            ...(controller ? { signal: controller.signal } : {}),
+        });
+        if (response?.ok) {
+            const data = await response.json() as TData;
+            console.log(`data ${JSON.stringify(data, null, 2)}`)
+            return {
+                status: true,
+                message: 'Success',
+                data
+            };
+        }
+        try {
+            const errorData = await response.json();
+            console.error(`Error ${response.status} from ${resource}:`, JSON.stringify(errorData, null, 2));
+            return {
+                status: false,
+                message: `Error ${response.status} from ${resource}: ${JSON.stringify(errorData)}`,
+                error: errorData
+            };
+        } catch (e) {
+            const text = await response.text().catch(() => '');
+            console.error(`Error ${response.status} from ${resource}: ${text}`);
+            return {
+                status: false,
+                message: `Error ${response.status} from ${resource}: ${text}`,
+                error: text
+            };
+        }
+    } catch (error) {
+        console.error('Network error in pythonPostCallInternal:', error);
         return {
             status: false,
-            message: `Error ${response.status} from ${resource}:`,
-            error: errorData
-        };
-       }
-       catch (error) {
-        console.error('Error pythonPostCallInternal:', error);
-        return {
-            status: false,
-            message: JSON.stringify(error, null, 2),
+            message: `Network error calling ${resource}: ${String((error as any)?.message || error)}`,
             error
-        };  
-       }
+        };
+    } finally {
+        if (timer) clearTimeout(timer);
     }
 }   

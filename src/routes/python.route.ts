@@ -290,7 +290,7 @@ pythonRoute.post('/mergePdfs', async (req: any, resp: any) => {
             "first_pdf_path": first_pdf_path,
             "second_pdf_path": second_pdf_path,
             "third_pdf_path": third_pdf_path
-        }, 'mergePdfs');
+        }, 'mergePdfs', { timeoutMs: 60 * 60 * 1000, skipPreflight: true });
 
         resp.status(200).send({
             response: _resp
@@ -400,7 +400,7 @@ pythonRoute.post('/mergeMutliplePdfs', async (req: any, resp: any) => {
             }
 
             console.log(`Merging ${first_pdf_path} and ${second_pdf_path} ${third_pdf_path.length > 0 ? `and ${third_pdf_path}` : ""} `)
-            const _resp = await executePythonPostCall<MergePdfsResponseData>(pdfPathsAsBody, 'mergePdfs');
+            const _resp = await executePythonPostCall<MergePdfsResponseData>(pdfPathsAsBody, 'mergePdfs', { timeoutMs: 60 * 60 * 1000, skipPreflight: true });
             console.log(`Merged ${first_pdf_path} and ${second_pdf_path} ${third_pdf_path.length > 0 ? `and ${third_pdf_path}` : ""} `)
             // Move results array to record where originals were moved
             const moveResults: Array<{ sourcePath: string; movedToPath: string }> = [];

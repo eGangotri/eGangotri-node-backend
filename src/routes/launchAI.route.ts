@@ -8,6 +8,7 @@ import { IPdfTitleRenamingViaAITracker, PdfTitleRenamingViaAITracker } from '../
 import { randomUUID } from 'crypto';
 import * as fs from 'fs';
 import { renameOriginalItemsBasedOnMetadata, retryAiRenamerByRunId } from '../services/aiServices';
+import { getFolderInSrcRootForProfile } from '../archiveUpload/ArchiveProfileUtils';
 
 export const launchAIRoute = express.Router();
 const DISCARD_FOLDER_POST_AI_PROCESSING = "_discard";
@@ -220,7 +221,7 @@ launchAIRoute.post("/copyMetadataToOriginalFiles/:runId", async (req: Request, r
         const filter = { runId };
         const pdfTitleRenamedItems: IPdfTitleRenamingViaAITracker[] = await PdfTitleRenamingViaAITracker.find(filter)
             .sort({ createdAt: -1 });
-  
+
 
         const { successCount, failureCount, errors } = await renameOriginalItemsBasedOnMetadata(pdfTitleRenamedItems);
 
@@ -241,6 +242,7 @@ launchAIRoute.post("/copyMetadataToOriginalFiles/:runId", async (req: Request, r
 launchAIRoute.post("/cleanupRedRenamerFilers/:runId", async (req: Request, res: express.Response) => {
     try {
         const runId = req.params.runId;
+        const profile = req.body.profile || "";
         const filter = { runId };
         const pdfTitleRenamedItems: IPdfTitleRenamingViaAITracker[] = await PdfTitleRenamingViaAITracker.find(filter)
 
@@ -255,13 +257,15 @@ launchAIRoute.post("/cleanupRedRenamerFilers/:runId", async (req: Request, res: 
 
         const parent = path.dirname(srcFolder);
         const discardFolder = path.join(parent, DISCARD_FOLDER_POST_AI_PROCESSING)
+        const destForRedFolder = profile.length > 0 ? getFolderInSrcRootForProfile(profile) : discardFolder;
 
         await fs.promises.mkdir(discardFolder, { recursive: true });
 
-        await fs.promises.rename(reducedFolder, path.join(discardFolder, path.basename(reducedFolder)));
+        await fs.promises.rename(reducedFolder, path.join(destForRedFolder, path.basename(reducedFolder)));
         await fs.promises.rename(outputFolder, path.join(discardFolder, path.basename(outputFolder)));
 
-        const msg = `Folders ${reducedFolder} and ${outputFolder} moved to ${discardFolder}`;
+        const msg = `Folders ${reducedFolder} moved to ${destForRedFolder} \n 
+         ${outputFolder} moved to ${discardFolder}`;
         res.json({
             msg,
             runId,

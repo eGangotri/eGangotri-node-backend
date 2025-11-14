@@ -132,8 +132,6 @@ export const downloadGDriveFileUsingGDriveApi = async (
             console.log(`fileName length is ${fileName.length}, and now will be reduced to ${MAX_FILENAME_LENGTH}.`);
             fileName = limitCountAndSanitizeFileNameWithoutExt(fileName, MAX_FILENAME_LENGTH);
         }
-        // Ensure uniqueness for Google Drive downloads as well
-        fileName = await ensureUniqueFileNameAsync(destPath, fileName);
         const filePath = path.join(destPath, fileName);
 
         const res = await updateEntryForGDriveUploadHistory(gDriveDownloadTaskId,
