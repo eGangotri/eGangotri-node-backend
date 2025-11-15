@@ -18,6 +18,8 @@ export async function listFolderContentsAsArrayOfData(itemId: string,
     fileType = PDF_TYPE,
     rowCounterController = "") {
 
+    console.log(`listFolderContentsAsArrayOfData: umbrellaFolder: ${umbrellaFolder} ignoreFolder ${ignoreFolder}
+        fileType: ${fileType} rowCounterController ${rowCounterController}`)
     // First check if the itemId is a folder or a file
     const fileMetadata = await drive.files.get({
         fileId: itemId,
