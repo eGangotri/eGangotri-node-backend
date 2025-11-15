@@ -9,6 +9,7 @@ import { getListOfItemsQueued } from "./itemsQueuedService";
 import { getListOfUploadCycles } from "./uploadCycleService";
 import { ellipsis } from "../mirror/utils";
 import { IItemsQueued } from "models/itemsQueued";
+import { Types } from "mongoose";
 
 export async function getListOfItemsUshered(queryOptions: ItemsListOptionsType) {
   try {
@@ -67,7 +68,7 @@ export const itemsUsheredVerficationAndDBFlagUpdate = async (uploadCycleIdForVer
   const promises =
     _itemsUsheredFilter.map((item, index) =>
       checkUrlValidityForUploadItems({
-        id: item._id,
+        id: new Types.ObjectId(item._id as any),
         archiveId: `${item.archiveItemId}`,
         isValid: true,
         title: item.title

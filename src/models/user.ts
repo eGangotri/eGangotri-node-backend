@@ -15,4 +15,4 @@ const schema = new mongoose.Schema<LoginUser>(
   }
 );
 
-export const User = mongoose.model<LoginUsersDocument>("User", schema);
+export const User: mongoose.Model<LoginUser> = mongoose.model<LoginUser>("User", schema);

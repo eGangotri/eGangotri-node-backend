@@ -8,7 +8,7 @@ import { ArchiveUploadExcelProps } from "../archiveDotOrg/archive.types";
 import _ from "lodash";
 import path from 'path';
 import { ArchiveLinkData } from "../archiveDotOrg/types";
-
+import { Types } from "mongoose";
 
 export const validateDateRange = (dateRange: string) => {
     const parsedDateRange: [number, number] = [0, 0]
@@ -87,7 +87,7 @@ export const getSuccessfullyUploadedItemsForUploadCycleId = async (pathOrUploadC
     const total = itemsUshered.length
     for (const item of itemsUshered) {
         const res = await checkUrlValidityForUploadItems({
-            id: item._id,
+            id: new Types.ObjectId(item._id as any),
             archiveId: `${item.archiveItemId}`,
             isValid: true,
             title: item.title

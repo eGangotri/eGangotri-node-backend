@@ -152,7 +152,8 @@ export async function connectToMongo(_args: string[] = []) {
       });
     } catch (err) {
       console.error("Failed to connect to MongoDB:", err);
-      // Don't throw here to prevent app crash, but log the error
+      // Rethrow so callers can decide whether to start the server
+      throw err;
     }
   } else {
     console.error(`No MongoDB URL provided`);

@@ -6,11 +6,7 @@ export type LoginUser = {
   role: string,
 }
 
-export interface LoginUsersDocument extends mongoose.Document {
-  username: string,
-  password: string,
-  role: string,
-}
+export type LoginUsersDocument = mongoose.HydratedDocument<LoginUser>;
 
 export type UserListOptionsType = {
   username?: string;

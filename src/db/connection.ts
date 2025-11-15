@@ -15,8 +15,8 @@ export const mongoDbUrlWithDbName = (dbName: string) => {
         GLOBAL_DB_NAME = CONFS.MONGO_DB_NAME || ""
     }
 
-    const _protocol = CONFS.MONGO_DB_PROTOCOL || "mongodb+srv://";
-    const _suffix = CONFS.MONGO_DB_SUFFIXES || "?retryWrites=true&w=majority";
+    const _protocol = CONFS.MONGO_DB_PROTOCOL || "mongodb://";
+    const _suffix = CONFS.MONGO_DB_SUFFIXES || "?retryWrites=true&directConnection=true";
     
     // Handle local MongoDB connection (no auth required)
     if (!CONFS.MONGO_ATLAS_USER && !CONFS.MONGO_ATLAS_PWD) {
@@ -31,8 +31,6 @@ export const mongoDbUrlWithDbName = (dbName: string) => {
     return connectionString;
 }
 export const MONGO_OPTIONS = {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
     // Extreme timeout settings for high latency VPN connections
     maxPoolSize: 20, // Further reduced to optimize connection management
     minPoolSize: 3,  // Reduced to minimize idle connections
@@ -50,8 +48,6 @@ export const MONGO_OPTIONS = {
     waitQueueTimeoutMS: 300000, // 5 minutes to wait for a connection from the pool
     // Read preference settings
     readPreference: 'nearest', // Prefer nearest server to reduce latency
-    readConcern: { level: 'available' }, // Accept potentially stale data for faster reads
     // Write concern settings
-    w: 1, // Only require acknowledgment from primary
-    j: false, // Don't require journal commit for faster writes
+    writeConcern: { w: 1, journal: false },
 };
