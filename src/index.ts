@@ -36,8 +36,8 @@ import { launchAIGDriveRoute } from "./routes/launchAI.gdrive.route";
 import { folderUtilsRoute } from "./routes/folderUtils.route";
 
 const egangotri = express();
-const hostname = "localhost";
-const port = process.env.PORT || 8000;
+const hostname = process.env.NODE_BACKEND_SERVER
+const port = process.env.NODE_SERVER_PORT || 8000;
 const args = process.argv.slice(2);
 console.log("Command-line arguments:", ellipsis(args?.join(",")));
 const BODY_PARSER_LIMIT = '100mb';
