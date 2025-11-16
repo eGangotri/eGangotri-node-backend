@@ -96,11 +96,23 @@ egangotri.use("/dailyCatWorkReport", dailyCatWorkReportRoute);
 egangotri.use("/dailyQAWorkReport", dailyQAWorkReportRoute);
 egangotri.use("/gDriveDownloadRoute", gDriveDownloadRoute);
 
-egangotri.listen(port,'0.0.0.0', async () => {
-  console.log(`Server - deployed ${deployDate} - running at http://${hostname}:${port}/`, new Date());
-});
-connectToMongo(args).then(() => {
-  console.log(`Server - connected to DB, ${new Date()}`);
-})
+// egangotri.listen(port,'0.0.0.0', async () => {
+//   console.log(`Server - deployed ${deployDate} - running at http://${hostname}:${port}/`, new Date());
+// });
+// connectToMongo(args).then(() => {
+//   console.log(`Server - connected to DB, ${new Date()}`);
+// })
 
-
+async function start() {
+  try {
+    await connectToMongo(args);
+    console.log(`Server - connected to DB, ${new Date()}`);
+    egangotri.listen(port, '0.0.0.0', async () => {
+      console.log(`Server - deployed ${deployDate} - running at http://${hostname}:${port}/`, new Date());
+    });
+  } catch (err) {
+    console.error('Failed to start server due to DB connection error:', err);
+    process.exit(1);
+  }
+}
+start();
