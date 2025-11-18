@@ -3,7 +3,7 @@ import * as fsPromise from 'fs/promises';
 import { getFolderInSrcRootForProfile } from "../archiveUpload/ArchiveProfileUtils";
 import { excelToJson } from "../cliBased/excel/ExcelUtils";
 import { getAllPDFFiles } from "../utils/FileStatsUtils";
-import { isValidPath } from "../utils/FileUtils";
+import { isValidPath, getPathOrSrcRootForProfile } from "../utils/FileUtils";
 import { FileStats } from "../imgToPdf/utils/types";
 import { GDriveExcelHeadersFileRenamerV2 } from "../cliBased/googleapi/types";
 import { isNumber } from "../mirror/utils";
@@ -36,7 +36,7 @@ export const renameFilesViaExcel = async (excelPath: string, folderOrProfile: st
             return isNumber((x as any)[firstKey])
         })
         //
-        const folder = isValidPath(folderOrProfile) ? folderOrProfile : getFolderInSrcRootForProfile(folderOrProfile)
+        const folder = getPathOrSrcRootForProfile(folderOrProfile)
         const localFileStats = await getAllPDFFiles(folder);
         console.log(`excelData: ${excelData?.length} `);
         renameReport.totalInExcel = excelData?.length || 0
@@ -75,7 +75,7 @@ export const renameFilesViaExcelUsingSpecifiedColumns = async (excelPath: string
             return isNumber(x[firstKey])
         })
         //
-        const folder = isValidPath(folderOrProfile) ? folderOrProfile : getFolderInSrcRootForProfile(folderOrProfile)
+        const folder = getPathOrSrcRootForProfile(folderOrProfile)
         const localFileStats = await getAllPDFFiles(folder);
         console.log(`excelData: ${excelData?.length} `);
         renameReport.totalInExcel = excelData?.length || 0

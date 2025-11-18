@@ -10,7 +10,7 @@ import { genLinksAndFolders, validateGenGDriveLinks } from '../services/yarnList
 import { generateGoogleDriveListingExcel, getFolderNameFromGDrive } from '../cliBased/googleapi/GoogleDriveApiReadAndExport';
 import { formatTime } from '../imgToPdf/utils/Utils';
 import { convertGDriveExcelToLinkData, downloadGDriveData } from '../services/GDriveItemService';
-import { findInvalidFilePaths, isValidPath } from '../utils/FileUtils';
+import { findInvalidFilePaths, isValidPath, getPathOrSrcRootForProfile } from '../utils/FileUtils';
 import { ComparisonResult, GDRIVE_DEFAULT_IGNORE_FOLDER, verifyGDriveLocalIntegirtyPerLink, verifyGDriveLocalIntegrity } from '../services/GDriveService';
 import * as FileConstUtils from '../utils/constants';
 import { verifyUnzipSuccessInDirectory } from '../services/zipService';
@@ -82,7 +82,7 @@ gDriveRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
             });
         }
 
-        const profilesAsFolders = profiles.map((p: string) => isValidPath(p) ? p : getFolderInSrcRootForProfile(p));
+        const profilesAsFolders = profiles.map((p: string) => getPathOrSrcRootForProfile(p));
         const invalidPAths = await findInvalidFilePaths(profilesAsFolders);
         if (invalidPAths.length > 0) {
             console.log(`:downloadFromGoogleDrive:invalidPAths: ${invalidPAths}`);
@@ -110,7 +110,7 @@ gDriveRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
 
         const rootFolders = await Promise.all(links.map(async (link: string) => await getFolderNameFromGDrive(link) || ""));
         const foldersWithRoot = profiles.map((folder: string, index: number) => {
-            const fileDumpFolder = isValidPath(folder) ? folder : getFolderInSrcRootForProfile(folder);
+            const fileDumpFolder = getPathOrSrcRootForProfile(folder);
             return path.join(fileDumpFolder, rootFolders[index]);
         });
 
@@ -303,7 +303,7 @@ gDriveRoute.post('/verifyLocalDownloadSameAsGDrive', async (req: any, resp: any)
             const _profile = req?.body?.profile || "";
             fileType = req?.body?.downloadType || PDF_TYPE;
             ignoreFolder = req?.body?.ignoreFolder || GDRIVE_DEFAULT_IGNORE_FOLDER;
-            folderOrProfile = isValidPath(_profile) ? _profile : getFolderInSrcRootForProfile(_profile)
+            folderOrProfile = getPathOrSrcRootForProfile(_profile)
             console.log(`verifyLocalDownloadSameAsGDrive:folderOrProfile: ${folderOrProfile}`)
         }
 
@@ -331,7 +331,7 @@ gDriveRoute.post('/verifyLocalDownloadSameAsGDrive', async (req: any, resp: any)
             }
             const rootFolders = await Promise.all(_linksGen._links.map(async (link) => await getFolderNameFromGDrive(link) || ""));
             const foldersWithRoot = _linksGen._folders.map((folder, index) => {
-                const fileDumpFolder = isValidPath(folder) ? folder : getFolderInSrcRootForProfile(folder);
+                const fileDumpFolder = getPathOrSrcRootForProfile(folder);
                 return path.join(fileDumpFolder, rootFolders[index]);
             });
 
@@ -430,7 +430,7 @@ gDriveRoute.post('/redownloadFromGDrive', async (req: any, resp: any) => {
 
         const rootFolders2 = await Promise.all(_linksGen._links.map(async (link) => await getFolderNameFromGDrive(link) || ""));
         const foldersWithRoot2 = _linksGen._folders.map((folder, index) => {
-            const fileDumpFolder = isValidPath(folder) ? folder : getFolderInSrcRootForProfile(folder);
+            const fileDumpFolder = getPathOrSrcRootForProfile(folder);
             console.log(`:redownloadFromGDrive:loop ${index + 1} ${_linksGen._links[index]} ${folder} ${fileDumpFolder} ${ignoreFolder} ${fileType}`);
             return path.join(fileDumpFolder, rootFolders2[index]);
         });

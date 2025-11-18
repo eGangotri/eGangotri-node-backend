@@ -37,6 +37,7 @@ async function getNewToken(oAuth2Client: OAuth2Client): Promise<void> {
     const code = await getCodeFromUser();
 
     const tokenResponse = await oAuth2Client.getToken(code);
+    console.log(`tokenResponse: ${JSON.stringify(tokenResponse)}`);
     oAuth2Client.setCredentials(tokenResponse.tokens);
     await fsPromise.writeFile(TOKEN_PATH, JSON.stringify(tokenResponse.tokens));
     console.log('Token stored to', TOKEN_PATH);
@@ -94,7 +95,7 @@ const updateDotEnvRefreshToken = async () => {
 export const refreshGdriveToken = async () => {
     try {
         console.log(`getRefreshTokens: ${new Date()}`);
-        console.log(`Warning. You must have your Root GMAIL Acct accessible in the system you are running this from: ${new Date()}`);
+        console.log(`Warning. You must have your Root GMAIL Acct (***foundation@gmail.com) accessible in the system you are running this from: ${new Date()}`);
         const auth = await authorize();
         await updateDotEnvRefreshToken();
 
@@ -103,4 +104,4 @@ export const refreshGdriveToken = async () => {
     }
 }
 
-//refreshGdriveToken().catch(console.error);
+refreshGdriveToken().catch(console.error);

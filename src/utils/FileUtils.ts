@@ -8,6 +8,7 @@ import { FileStats } from "imgToPdf/utils/types";
 import { getAllFileListingWithFileSizeStats } from './FileStatsUtils';
 
 import * as Mirror from "../mirror/FrontEndBackendCommonCode"
+import { getFolderInSrcRootForProfile } from 'archiveUpload/ArchiveProfileUtils';
 
 interface FileInfo {
     size: string;
@@ -336,9 +337,9 @@ export const moveDuplicatesOrDisjointSetBySize = async (folder1: string, folder2
         // For disjoint, we want files in folder2 that don't exist in folder1
         // For duplicates, we want files in folder2 that have duplicates in folder1
         const itemsToMove = findDisjoint ? _forMoving.disjointSet : _forMoving.duplicates;
-        
+
         console.log(`Moving ${itemsToMove.length} items from folder1 only (${findDisjoint ? "disjoint" : "duplicates"})`)
-        
+
         itemsToMove.forEach((x: FileInfo) => {
             const absPath = x.absPath;
             const fileDir = path.dirname(absPath);
@@ -370,7 +371,7 @@ export const moveDuplicatesOrDisjointSetBySize = async (folder1: string, folder2
                 console.log(`Error moving file ${absPath} to ${destPath} ${e}`);
             }
         });
-        
+
         console.log(`Moved ${_itemsMoved.length} ${findDisjoint ? "disjoint" : "duplicates"} 
             from folder1 to _tmp. Left folder2 intact.`);
         return {
@@ -442,3 +443,7 @@ export const isFileInUse = async (file: string): Promise<boolean> => {
         return true;
     }
 };
+
+export const getPathOrSrcRootForProfile = (pathOrProfile: string) => {
+    return isValidPath(pathOrProfile) ? pathOrProfile?.trim() : getFolderInSrcRootForProfile(pathOrProfile?.trim())
+}

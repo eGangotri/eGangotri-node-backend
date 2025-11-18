@@ -1,7 +1,7 @@
 import express from 'express';
 import * as fs from 'fs';
 import { findTopNLongestFileNames } from '../utils/utils';
-import { findInvalidFilePaths, getDuplicatesOrUniquesBySize, isValidPath, moveDuplicatesOrDisjointSetBySize } from '../utils/FileUtils';
+import { findInvalidFilePaths, getDuplicatesOrUniquesBySize, isValidPath, moveDuplicatesOrDisjointSetBySize, getPathOrSrcRootForProfile } from '../utils/FileUtils';
 import { renameAllNonAsciiInFolder } from '../files/renameNonAsciiFiles';
 import { callAksharamukha, DEFAULT_TARGET_SCRIPT_ROMAN_COLLOQUIAL } from '../aksharamukha/convert';
 import { convertJpgsToPdfInAllSubFolders } from '../imgToPdf/jpgToPdf';
@@ -401,7 +401,7 @@ fileUtilsRoute.post('/corruptPdfCheck', async (req: any, resp: any) => {
             folderOrProfile.split(",").map((p: string) => p.trim()) :
             [folderOrProfile.trim()];
 
-        const profilesAsFolders = _profiles.map((p: string) => isValidPath(p) ? p : getFolderInSrcRootForProfile(p));
+        const profilesAsFolders = _profiles.map((p: string) => getPathOrSrcRootForProfile(p));
         console.log(`:corruptPdfCheck:profilesAsFolders: ${profilesAsFolders} folderOrProfile   ${folderOrProfile}`);
         const invalidPAths = await findInvalidFilePaths(profilesAsFolders);
         if (invalidPAths.length > 0) {

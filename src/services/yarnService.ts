@@ -1,4 +1,4 @@
-import { isValidPath } from "../utils/FileUtils";
+import { isValidPath, getPathOrSrcRootForProfile } from "../utils/FileUtils";
 import { moveAFile, moveFilesAndFlatten } from "../cliBased/fileMover";
 import { getFolderInDestRootForProfile, getFolderInSrcRootForProfile } from "../archiveUpload/ArchiveProfileUtils";
 import * as fsPromise from 'fs/promises';
@@ -88,7 +88,7 @@ export const moveFileInListToDest = async (profileData: {
     const errorAbsPathList: string[] = []
     const filesAbsPathMoved = [];
 
-    const destPath = isValidPath(destFolderOrProfile) ? destFolderOrProfile : getFolderInSrcRootForProfile(destFolderOrProfile)
+    const destPath = getPathOrSrcRootForProfile(destFolderOrProfile)
     for (let absPathOfFileToMove of profileData.absolutePaths) {
         try {
             console.log(`moveFileInListToDest
@@ -138,7 +138,7 @@ export const moveFileSrcToDest = async (srcPath: string,
     destFolderOrProfile: string,
     flatten: boolean = true,
     ignorePaths = []) => {
-    const destPath = isValidPath(destFolderOrProfile) ? destFolderOrProfile : getFolderInSrcRootForProfile(destFolderOrProfile)
+    const destPath = getPathOrSrcRootForProfile(destFolderOrProfile)
     try {
         console.log(`moveFileSrcToDest srcPath ${srcPath} -> ${destFolderOrProfile} destPath ${destPath}  flatten ${flatten}`)
         let _report

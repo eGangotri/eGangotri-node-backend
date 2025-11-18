@@ -8,7 +8,7 @@ import { markUploadCycleAsMovedToFreeze } from '../services/uploadCycleService';
 import { unzipAllFilesInDirectory, verifyUnzipSuccessInDirectory } from '../services/zipService';
 import { FileMoveTracker } from '../models/FileMoveTracker';
 import { GDRIVE_DEFAULT_IGNORE_FOLDER } from '../services/GDriveService';
-import { isValidPath } from '../utils/FileUtils';
+import { isValidPath, getPathOrSrcRootForProfile } from '../utils/FileUtils';
 import { getAllPDFFiles } from '../utils/FileStatsUtils';
 
 export const yarnRoute = express.Router();
@@ -130,9 +130,23 @@ yarnRoute.post('/qaToDestFileMover', async (req: any, resp: any) => {
             });
             return;
         }
-        const srcPath = isValidPath(qaPath) ? qaPath : getFolderInSrcRootForProfile(qaPath) 
-        const destPath = isValidPath(dest) ? dest : getFolderInSrcRootForProfile(dest)
+        const paths: string[] = qaPath.includes(",")
+            ? qaPath.split(",").map((p: string) => getPathOrSrcRootForProfile(p)).filter(Boolean)
+            : [getPathOrSrcRootForProfile(qaPath)];
+
+        const destPath = getPathOrSrcRootForProfile(dest)
         const allDestPdfs = await getAllPDFFiles(destPath);
+        if (paths.length === 0) {
+            resp.status(400).send({
+                response: {
+                    "status": "failed",
+                    "success": false,
+                    "message": "Pls. provide valid Src Items"
+                }
+            });
+            return;
+        }
+
         if (allDestPdfs.length > 0 && !override) {
             resp.status(400).send({
                 response: {
@@ -143,10 +157,6 @@ yarnRoute.post('/qaToDestFileMover', async (req: any, resp: any) => {
             });
             return;
         }
-
-        const paths: string[] = srcPath.includes(",")
-            ? srcPath.split(",").map((p: string) => p.trim()).filter(Boolean)
-            : [srcPath.trim()];
 
         console.log(`qaToDestFileMover paths ${paths}`)
         const results: any[] = [];

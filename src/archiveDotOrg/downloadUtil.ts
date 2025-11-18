@@ -1,8 +1,7 @@
 import { downloadFileFromUrl } from "../cliBased/pdf/downloadFile";
 import { DOWNLOAD_COMPLETED_COUNT, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT } from "../cliBased/pdf/utils";
-import { getFolderInSrcRootForProfile } from "../archiveUpload/ArchiveProfileUtils";
 import { ArchiveLinkData } from "./types";
-import { isValidPath } from "../utils/FileUtils";
+import { getPathOrSrcRootForProfile } from "../utils/FileUtils";
 import { checkFolderExistsSync, createFolderIfNotExistsAsync } from "../utils/FileUtils";
 import { DOUBLE_HASH_SEPARATOR } from "./utils";
 
@@ -10,7 +9,7 @@ import { DOUBLE_HASH_SEPARATOR } from "./utils";
 export const downloadPdfFromArchiveToProfile = async (pdfLinks: ArchiveLinkData[], 
   profileOrPath: string, downloadArchiveCounterController = "") => {
 
-  const pdfDumpFolder = isValidPath(profileOrPath) ? profileOrPath : getFolderInSrcRootForProfile(profileOrPath);
+  const pdfDumpFolder = getPathOrSrcRootForProfile(profileOrPath);
   console.log(`downloadPdfFromArchiveToProfile:pdfDumpFolder ${pdfDumpFolder}`);
   if (!checkFolderExistsSync(pdfDumpFolder)) {
     console.log(`No corresponding folder ${pdfDumpFolder} to profile  ${profileOrPath} exists`)

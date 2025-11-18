@@ -44,30 +44,29 @@ const getFoldersCorrespondingToProfile = (root: string): Map<string, string> => 
 export const LOCAL_FOLDERS_PROPERTIES_FILE_FOR_SRC: Map<string, string> = getFoldersCorrespondingToProfile(SRC_ROOT);
 export const LOCAL_FOLDERS_PROPERTIES_FILE_FOR_DEST: Map<string, string> = getFoldersCorrespondingToProfile(DEST_ROOT);
 
+export const getFolderFromProfile = (profile: string, properties: Map<string, string>) => {
+    const key = profile?.trim();
+    if (key && key.length > 0 && properties.has(key)) {
+        return properties.get(key);
+    }
+    return "";
+}
+
 export const getFolderInSrcRootForProfile = (profile: string) => {
-    if (profile && profile.length > 0 && LOCAL_FOLDERS_PROPERTIES_FILE_FOR_SRC.has(profile)) {
-        return LOCAL_FOLDERS_PROPERTIES_FILE_FOR_SRC.get(profile)
-    }
-    else {
-        ""
-    }
+    return getFolderFromProfile(profile, LOCAL_FOLDERS_PROPERTIES_FILE_FOR_SRC);
 }
 
 export const getFolderInDestRootForProfile = (profile: string) => {
-    if (profile && profile.length > 0 && LOCAL_FOLDERS_PROPERTIES_FILE_FOR_DEST.has(profile)) {
-        return LOCAL_FOLDERS_PROPERTIES_FILE_FOR_DEST.get(profile)
-    }
-    else {
-        ""
-    }
+    return getFolderFromProfile(profile, LOCAL_FOLDERS_PROPERTIES_FILE_FOR_DEST);
 }
 
 //create this
 export const HEADER_FOOTER_PROPERTIES_FILE: Map<string, string> = getFoldersCorrespondingToProfile(SRC_ROOT);
 
 export const getHeaderAndFooterTextForProfile = (profile: string) => {
-    const yes = (profile && profile.length > 0 && HEADER_FOOTER_PROPERTIES_FILE.has(profile))
-    return yes ? HEADER_FOOTER_PROPERTIES_FILE.get(profile) : "";
+    const key = profile?.trim();
+    const yes = (key && key.length > 0 && HEADER_FOOTER_PROPERTIES_FILE.has(key))
+    return yes ? HEADER_FOOTER_PROPERTIES_FILE.get(key) : "";
 }
 
 const getArchiveMetadataProperties = () => {

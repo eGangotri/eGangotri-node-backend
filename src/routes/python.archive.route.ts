@@ -6,7 +6,7 @@ import { getAllPdfsInFolders } from '../imgToPdf/utils/Utils';
 import { itemsUsheredVerficationAndDBFlagUpdate } from '../services/itemsUsheredService';
 import { executePythonPostCall } from '../services/pythonRestService';
 import { getLatestUploadCycle } from '../services/uploadCycleService';
-import { checkIfEmpty, isValidPath } from '../utils/FileUtils';
+import { checkIfEmpty, isValidPath, getPathOrSrcRootForProfile } from '../utils/FileUtils';
 import { isPDFCorrupted } from '../utils/pdfValidator';
 
 export const pythonArchiveRoute = express.Router();
@@ -14,7 +14,7 @@ export const pythonArchiveRoute = express.Router();
 pythonArchiveRoute.post('/bulk-upload-pdfs', async (req: any, resp: any) => {
     try {
         const profiles = req?.body?.profiles;
-        const profilesAsFolders = profiles.map((p: string) => isValidPath(p) ? p : getFolderInSrcRootForProfile(p));
+        const profilesAsFolders = profiles.map((p: string) => getPathOrSrcRootForProfile(p));
 
         if (!profiles || profiles.length === 0 || profilesAsFolders.some((p: string) => !isValidArchiveProfile(p))) {
             resp.status(400).send({

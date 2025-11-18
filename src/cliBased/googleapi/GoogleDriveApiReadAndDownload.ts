@@ -8,7 +8,7 @@ import { DOWNLOAD_COMPLETED_COUNT, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT, DOWNLOAD_FA
 import { insertEntryForGDriveUploadHistory, updateEntryForGDriveUploadHistory } from '../../services/GdriveDownloadRecordService';
 import { getAllPdfsInFolders, getDirectoriesWithFullPath } from '../../imgToPdf/utils/Utils';
 import { addHeaderAndFooterToPDF } from '../../pdfHeaderFooter';
-import { isValidPath } from "../../utils/FileUtils";
+import { isValidPath, getPathOrSrcRootForProfile } from "../../utils/FileUtils";
 import { extractGoogleDriveId } from '../../mirror/GoogleDriveUtilsCommonCode';
 import { PDF_TYPE, FOLDER_MIME_TYPE } from './_utils/constants';
 import { DownloadHistoryStatus } from '../../utils/constants';
@@ -171,7 +171,7 @@ export const downloadFromGoogleDriveToProfile = async (driveLinkOrFolderId: stri
   runId = "",
   commonRunId = "",
   gDriveDownloadTaskId: string = "") => {
-  const fileDumpFolder = isValidPath(profileOrPath) ? profileOrPath : getFolderInSrcRootForProfile(profileOrPath);
+  const fileDumpFolder = getPathOrSrcRootForProfile(profileOrPath);
   console.log(`downloadFromGoogleDriveToProfile:fileDumpFolder ${fileDumpFolder}`)
   try {
     if (await checkFolderExistsAsync(fileDumpFolder)) {
