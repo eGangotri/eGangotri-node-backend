@@ -3,7 +3,7 @@ import archiver from 'archiver';
 import * as path from 'path';
 import { getAllZipFiles } from '../utils/FileStatsUtils';
 import * as yauzl from 'yauzl';
-import { checkFolderExistsAsync, createFolderIfNotExistsAsync } from '../utils/FileUtils';
+import { checkFolderExistsAsynchronous, createFolderIfNotExistsAsync } from '../utils/FileUtils';
 
 const UNZIP_FOLDER = path.sep + "-unzipped";
 
@@ -284,7 +284,7 @@ export async function verifyUnzipSuccessInDirectory(pathToZipFiles: string,
                 console.log(`Base output directory: ${baseOutputDir}`);
                 
                 // First check if the base output directory exists
-                if (!(await checkFolderExistsAsync(baseOutputDir))) {
+                if (!(await checkFolderExistsAsynchronous(baseOutputDir))) {
                     const err = `No corresponding base output directory found for ${zipFile.absPath} at ${baseOutputDir}`;
                     console.log(err);
                     currentZipErrors.push(err);

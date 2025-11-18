@@ -32,6 +32,19 @@ interface FileSizeComparisonResult {
     [key: string]: any; // For the dynamic CSV properties
 }
 
+
+export const checkFolderExistsSync = (folderPath: string): boolean => {
+    try {
+        fs.accessSync(folderPath);
+        return true; // Folder exists
+    } catch (err) {
+        if (err.code === 'ENOENT') {
+            return false; // Folder does not exist
+        }
+        throw err; // Re-throw other errors (e.g., permission issues)
+    }
+}
+
 export const isValidDirectory = async (dirPath: string): Promise<boolean> => {
     try {
         const stats = await fsPromise.stat(dirPath);
@@ -88,7 +101,7 @@ export const isValidPath = (filePath: string): boolean => {
     }
 };
 
-export const checkFolderExistsAsync = async (folderPath: string): Promise<boolean> => {
+export const checkFolderExistsAsynchronous = async (folderPath: string): Promise<boolean> => {
     try {
         const stats = await fsPromise.stat(folderPath);
         console.log(`***stats: ${stats.isDirectory()}`)
@@ -103,17 +116,7 @@ export const checkFolderExistsAsync = async (folderPath: string): Promise<boolea
     }
 };
 
-export const checkFolderExistsSync = (folderPath: string): boolean => {
-    try {
-        fs.accessSync(folderPath);
-        return true; // Folder exists
-    } catch (err) {
-        if (err.code === 'ENOENT') {
-            return false; // Folder does not exist
-        }
-        throw err; // Re-throw other errors (e.g., permission issues)
-    }
-};
+
 export function removeFolderWithContents(folder: string) {
     fs.rm(folder, { recursive: true, force: true }, (err) => {
         if (err) {

@@ -12,7 +12,7 @@ import { isValidPath, getPathOrSrcRootForProfile } from "../../utils/FileUtils";
 import { extractGoogleDriveId } from '../../mirror/GoogleDriveUtilsCommonCode';
 import { PDF_TYPE, FOLDER_MIME_TYPE } from './_utils/constants';
 import { DownloadHistoryStatus } from '../../utils/constants';
-import { checkFolderExistsAsync, createFolderIfNotExistsAsync } from '../../utils/FileUtils';
+import { checkFolderExistsAsynchronous, createFolderIfNotExistsAsync } from '../../utils/FileUtils';
 import { getFolderNameFromGDrive } from './GoogleDriveApiReadAndExport';
 
 export const MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE: number = Number(process.env.MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE || 200);
@@ -130,7 +130,7 @@ export const addHeaderFooterToPDFsInProfile = async (profile: string) => {
   const pdfDumpFolder = getFolderInSrcRootForProfile(profile)
   console.log(`addHeaderFooterToPDFsInProfile:pdfDumpFolder ${pdfDumpFolder}`)
   try {
-    if (await checkFolderExistsAsync(pdfDumpFolder)) {
+    if (await checkFolderExistsAsynchronous(pdfDumpFolder)) {
       const _folders = (await getDirectoriesWithFullPath(pdfDumpFolder)).filter(
         (dir: any) => !dir.match(/ignore/)
       );
@@ -174,7 +174,7 @@ export const downloadFromGoogleDriveToProfile = async (driveLinkOrFolderId: stri
   const fileDumpFolder = getPathOrSrcRootForProfile(profileOrPath);
   console.log(`downloadFromGoogleDriveToProfile:fileDumpFolder ${fileDumpFolder}`)
   try {
-    if (await checkFolderExistsAsync(fileDumpFolder)) {
+    if (await checkFolderExistsAsynchronous(fileDumpFolder)) {
       const gDriveRootFolder = await getFolderNameFromGDrive(driveLinkOrFolderId) || "";
       console.log(`downloadFromGoogleDriveToProfile:gDriveRootFolder ${gDriveRootFolder}`)
 
