@@ -8,7 +8,7 @@ import { FileStats } from "imgToPdf/utils/types";
 import { getAllFileListingWithFileSizeStats } from './FileStatsUtils';
 
 import * as Mirror from "../mirror/FrontEndBackendCommonCode"
-import { getFolderInSrcRootForProfile } from 'archiveUpload/ArchiveProfileUtils';
+import { getFolderInSrcRootForProfile } from '../archiveUpload/ArchiveProfileUtils';
 
 interface FileInfo {
     size: string;
