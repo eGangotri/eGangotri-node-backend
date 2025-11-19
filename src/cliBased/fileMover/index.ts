@@ -135,11 +135,12 @@ export async function moveFilesAndFlatten(sourceDir: string, targetDir: string, 
         }
     }
 
-    const msg = `All ${_count} files moved from Source dir ${sourceDir} to target dir ${targetDir}`;
-    console.log(msg);
 
     const allSrcPdfsAfter: FileStats[] = await getAllPDFFiles(sourceDir);
     const allDestPdfsAfter: FileStats[] = await getAllPDFFiles(targetDir);
+    
+    const msg = `${(allDestPdfsAfter?.length - allDestPdfs?.length)} of ${_count}files moved from Source dir ${sourceDir} to target dir ${targetDir}`;
+    console.log(msg);
     await launchWinExplorer(targetDir);
     await launchWinExplorer(sourceDir);
 

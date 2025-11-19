@@ -48,7 +48,7 @@ export const runPthonPdfExtractionInLoop = async (
         let input_folder = _srcFolders[i];
         let destRootFolder = destRootFolders[i];
         try {
-            console.log(`runPthonPdfExtractionInLoop srcFolder ${input_folder} destRootFolder ${destRootFolder} `);
+            console.log(`(${i+1}/${_srcFolders.length}). runPthonPdfExtractionInLoop srcFolder ${input_folder} destRootFolder ${destRootFolder} `);
             const pdfsToReduceCount = await countPDFsInFolder(input_folder, ["reduced"]);
             if (isValidDirectory(destRootFolder)) {
                 await createFolderIfNotExistsAsync(destRootFolder);
@@ -61,7 +61,7 @@ export const runPthonPdfExtractionInLoop = async (
                 "nLastPages": nLastPages,
                 "reducePdfSizeAlso": reducePdfSizeAlso
             }
-            console.log(`runPthonPdfExtractionInLoop payload: ${JSON.stringify(_payload)}`);
+            console.log(`(${i+1}/${_srcFolders.length})runPthonPdfExtractionInLoop payload: ${JSON.stringify(_payload)}`);
 
             const _resp = await executePythonPostCall(
                 _payload, 'extractFromPdf');
