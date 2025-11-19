@@ -4,7 +4,7 @@ import { FileStats } from "imgToPdf/utils/types";
 import * as path from 'path';
 import * as fsPromise from 'fs/promises';
 import { launchWinExplorer } from "./util";
-import { checkFolderExistsSync, isFileInUse } from "../../utils/FileUtils";
+import { isFileInUse } from "../../utils/FileUtils";
 import { isPDFCorrupted } from "../../utils/pdfValidator";
 
 // Ensures a unique filename in a directory by appending " (n)" before the extension.

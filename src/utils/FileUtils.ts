@@ -33,18 +33,6 @@ interface FileSizeComparisonResult {
 }
 
 
-export const checkFolderExistsSync = (folderPath: string): boolean => {
-    try {
-        fs.accessSync(folderPath);
-        return true; // Folder exists
-    } catch (err) {
-        if (err.code === 'ENOENT') {
-            return false; // Folder does not exist
-        }
-        throw err; // Re-throw other errors (e.g., permission issues)
-    }
-}
-
 export const isValidDirectory = async (dirPath: string): Promise<boolean> => {
     try {
         const stats = await fsPromise.stat(dirPath);

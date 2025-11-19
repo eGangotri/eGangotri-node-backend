@@ -1,7 +1,14 @@
 import * as fs from 'fs';
 import path from 'path'
-import { ARCHIVE_METADATA_PROPERTIES_FILES, DEST_ROOT, LOCAL_FOLDERS_PROPERTIES_FILE, LOCAL_FOLDERS_PROPERTIES_FILES, SRC_ROOT } from './constants';
-import { checkFolderExistsSync } from '../utils/FileUtils';
+import {
+    ARCHIVE_METADATA_PROPERTIES_FILES,
+    DEST_ROOT,
+    LOCAL_FOLDERS_PROPERTIES_FILES,
+    SRC_ROOT
+} from './constants';
+import { checkFolderExistsSync } from '../utils/FolderUtils';
+
+
 
 
 const getFoldersCorrespondingToProfile = (root: string): Map<string, string> => {

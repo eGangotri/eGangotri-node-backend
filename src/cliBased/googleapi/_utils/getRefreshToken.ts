@@ -5,7 +5,7 @@ import * as fsPromise from 'fs/promises';
 import * as path from 'path';
 
 import { SCOPES, TOKEN_PATH, _credentials } from './credentials_googleapi';
-import { checkFolderExistsSync } from '../../../utils/FileUtils';
+import { checkFolderExistsSync } from '../../../utils/FolderUtils';
 
 // Set up OAuth2 credentials
 const REFRESH_TOKEN_V2_CREDENTIALS = {
@@ -104,4 +104,4 @@ export const refreshGdriveToken = async () => {
     }
 }
 
-refreshGdriveToken().catch(console.error);
+//refreshGdriveToken().catch(console.error);

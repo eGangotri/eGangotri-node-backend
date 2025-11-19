@@ -7,7 +7,7 @@ import { isValidPath, getPathOrSrcRootForProfile } from "../utils/FileUtils";
 import { FileStats } from "../imgToPdf/utils/types";
 import { GDriveExcelHeadersFileRenamerV2 } from "../cliBased/googleapi/types";
 import { isNumber } from "../mirror/utils";
-import { checkFolderExistsSync } from "../utils/FileUtils";
+import { checkFolderExistsSync } from "../utils/FolderUtils";
 import { MAX_FILE_NAME_LENGTH } from '../cliBased/googleapi/_utils/constants';
 
 interface RenameReportType {

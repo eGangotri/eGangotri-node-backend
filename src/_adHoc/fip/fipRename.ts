@@ -4,7 +4,7 @@ import { excelToJson, jsonToExcel } from "../../cliBased/excel/ExcelUtils";
 import { DD_MM_YYYY_HH_MMFORMAT } from "../../utils/constants";
 import * as fs from "fs";
 import { FipExcelOne } from "./utils";
-import { checkFolderExistsSync } from "../../utils/FileUtils";
+import { checkFolderExistsSync } from "../../utils/FolderUtils";
 
 const base = "D:\\FIP\\_IFP\\_IFP"
 /**
