@@ -1,5 +1,6 @@
 import express from 'express';
-import * as fs from 'fs';
+import * as path from 'path';
+import * as fsPromise from 'fs/promises';
 import { findTopNLongestFileNames } from '../utils/utils';
 import { findInvalidFilePaths, getDuplicatesOrUniquesBySize, isValidPath, moveDuplicatesOrDisjointSetBySize, getPathOrSrcRootForProfile } from '../utils/FileUtils';
 import { renameAllNonAsciiInFolder } from '../files/renameNonAsciiFiles';
@@ -7,13 +8,15 @@ import { callAksharamukha, DEFAULT_TARGET_SCRIPT_ROMAN_COLLOQUIAL } from '../aks
 import { convertJpgsToPdfInAllSubFolders } from '../imgToPdf/jpgToPdf';
 import { multipleTextScriptConversion } from '../services/fileService';
 import { renameFilesViaExcel, renameFilesViaExcelUsingSpecifiedColumns } from '../services/fileUtilsService';
-import { moveFileInListToDest, moveFilesInArray, moveFileSrcToDest } from '../services/yarnService';
+import { moveFileInListToDest, moveFilesInArray } from '../services/yarnService';
 import { FileMoveTracker } from '../models/FileMoveTracker';
-import { getAllPdfsInFoldersRecursive } from '../imgToPdf/utils/Utils';
 import { isPDFCorrupted } from '../utils/pdfValidator';
-import { getFolderInSrcRootForProfile } from '../archiveUpload/ArchiveProfileUtils';
+import { getAllPdfsInFoldersRecursive, mkDirIfDoesntExists } from '../imgToPdf/utils/Utils';
 
 export const fileUtilsRoute = express.Router();
+export const ISOLATED_FOLDER = "isolated";
+
+
 fileUtilsRoute.get('/file-move-list', async (req, res) => {
     console.log(`GET /file-move-list`);
     try {
@@ -353,7 +356,7 @@ fileUtilsRoute.post('/renameFilesViaExcelUsingSpecifiedColumns', async (req: any
             });
         }
 
-        if(isNaN(col1) || isNaN(col2)) {
+        if (isNaN(col1) || isNaN(col2)) {
             return resp.status(400).send({
                 response: {
                     success: false,
@@ -388,6 +391,7 @@ fileUtilsRoute.post('/corruptPdfCheck', async (req: any, resp: any) => {
     try {
         const folderOrProfile = req.body.folderOrProfile || "";
         const deepCheck = req.body.deepCheck || false;
+        const isolateCorrupted = req.body.isolateCorrupted || false;
         if (!folderOrProfile || folderOrProfile === "") {
             return resp.status(400).send({
                 response: {
@@ -434,13 +438,34 @@ fileUtilsRoute.post('/corruptPdfCheck', async (req: any, resp: any) => {
         const isCorrupted = corruptionCheckRes.filter(result => !result.isValid)
         console.log(`Corruption Check Done. isCorrupted ${isCorrupted.length}`)
         if (isCorrupted.length > 0) {
+            let isolationMsg = ""
+            if (isolateCorrupted) {
+                const isolatedCorrupted = isCorrupted.map(x => x.filePath)
+              try{
+                  for (let pdf of isolatedCorrupted) {
+                    const pdfName = path.basename(pdf)
+                    const pdfPath = path.dirname(pdf)
+                    const _isolatedPath = path.join(pdfPath, ISOLATED_FOLDER)
+                    const newPath = path.join(_isolatedPath, pdfName)
+                    await mkDirIfDoesntExists(_isolatedPath);
+                    console.log(`Isolating Corrupted PDF: ${pdf} to ${newPath}`)
+                    await fsPromise.rename(pdf, newPath);
+                }
+                isolationMsg = `Isolated Corrupted PDFs: ${isolatedCorrupted.length}`
+              }
+              catch(err){
+                console.log(`Error isolating corrupted PDFs: ${err}`)
+                isolationMsg = `Error isolating corrupted PDFs: ${err}`
+              }
+            }
             resp.status(400).send({
                 response: {
                     success: false,
                     message: `Cannot proceed.\r\nFollowing (${isCorrupted.length}) PDFs are corrupted: 
                     isCorrupted: ${JSON.stringify(isCorrupted.map(x => x.error).join(", "))}
                     \r\n${isCorrupted.map(x => x.filePath).join(", ")}
-                    \r\nDeep Check: ${deepCheck}`
+                    \r\nDeep Check: ${deepCheck}
+                    \r\n${isolationMsg}`
                 }
             });
             return;

@@ -241,7 +241,7 @@ export interface PythonPostOptions {
 export const executePythonPostCall = async <TData = ExtractionOperationData>(
     body: Record<string, unknown>,
     resource: string,
-    opts?: PythonPostOptions
+    opts: PythonPostOptions = { timeoutMs: 60 * 60 * 1000, skipPreflight: true }
 ): Promise<PythonPostCallResult<TData>> => {
     try {
         if (!opts?.skipPreflight) {

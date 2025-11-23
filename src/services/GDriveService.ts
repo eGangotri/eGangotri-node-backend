@@ -234,7 +234,7 @@ export const compareGDriveLocalJson = (
 
         else {
             console.log(`❌ Size mismatch for  ${localItemTentativeLocation}`);
-            console.log(`  Google Drive size: ${gDriveSize} bytes`);
+            console.log(`Google Drive size: ${gDriveSize} bytes !== Local Size ${localItem.rawSize}`);
             failedMsgs.push(
                 `File size mismatch: ${normalizedFileName} ` +
                 `(Expected at: ${path.dirname(localItemTentativeLocation)}, ` +

@@ -3,7 +3,7 @@ import { ExcelWriteResult, jsonDataToXslx, jsonDataToXslxFileRenamerV2 } from '.
 import { sizeInfo } from '../../../mirror/FrontEndBackendCommonCode';
 import { FOLDER_MIME_TYPE, PDF_TYPE } from '../_utils/constants';
 import { GoogleApiData } from '../types';
-import { createFileNameWithPathForExport, getFolderName, getFolderPathRelativeToRootFolder } from '../_utils/GoogleDriveUtil';
+import { createFileNameWithPathForExport, getFolderPathRelativeToRootFolder } from '../_utils/GoogleDriveUtil';
 import * as _ from 'lodash';
 import { ellipsis } from '../../../mirror/utils';
 import * as FileUtils from '../../../utils/FileUtils';
