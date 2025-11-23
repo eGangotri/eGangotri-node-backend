@@ -83,7 +83,7 @@ async function dwnldAllFilesFromGDrive(driveLinkOrFolderID: string,
   const googleDriveData = await listFolderContentsAsArrayOfData(fileId,
     drive,
     folderName,
-    ignoreFolder, fileType);
+    ignoreFolder, fileType,runId);
   console.log(`googleDriveData(${googleDriveData.length}): ${JSON.stringify(googleDriveData)}`);
   const dataLength = googleDriveData.length;
   const maxLimit = MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE;

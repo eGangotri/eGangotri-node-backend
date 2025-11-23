@@ -165,7 +165,7 @@ export async function listFolderContents(folderId: string,
         } while (pageToken);
 
 
-        console.log(`Reading folder (${idFolderNameMap?.get(folderId)} containing items:(FILES+FOLDER Count): ${files?.length}`)
+        console.log(`Reading folder: (${idFolderNameMap?.get(folderId)} containing items:(FILES+FOLDER Count): ${files?.length}`)
         if (files && files.length) {
             for (const file of files) {
                 try {

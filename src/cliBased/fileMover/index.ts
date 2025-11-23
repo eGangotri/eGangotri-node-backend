@@ -49,7 +49,7 @@ export const moveAFile = async (sourceFileAbsPath: string, targetDir: string, fi
                 const corruptionCheck = await isPDFCorrupted(sourceFileAbsPath)
                 if (!corruptionCheck.isValid) {
                     result.error = `Corrupted or Non-Existent PDF ${sourceFileAbsPath}`;
-                    console.error(result.error);
+                    console.error("Corrupted or Non-Existent PDF: error " + result.error);
                     return result;
                 }
             }

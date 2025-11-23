@@ -6,6 +6,7 @@ import { PDF_TYPE } from './_utils/constants';
 import { extractGoogleDriveId } from '../../mirror/GoogleDriveUtilsCommonCode';
 import { getFolderName } from './_utils/GoogleDriveUtil';
 import { ExcelWriteResult } from 'cliBased/excel/ExcelUtils';
+import { randomUUID } from 'crypto';
 
 // Create a new Google Drive instance
 const drive = getGoogleDriveInstance();
@@ -19,12 +20,13 @@ export const getFolderNameFromGDrive = async (driveLinkOrFolderID: string) => {
 export async function getGDriveContentsAsJson(driveLinkOrFolderID: string,
   umbrellaFolder: string = "",
   ignoreFolder = "",
-  fileType = PDF_TYPE) {
+  fileType = PDF_TYPE,
+  runId = "") {
 
   const folderId = extractGoogleDriveId(driveLinkOrFolderID)
   console.log(`folderId: ${folderId}`)
   const _data = await listFolderContentsAsArrayOfData(folderId, drive, umbrellaFolder,
-    ignoreFolder, fileType);
+    ignoreFolder, fileType, runId);
   return _data;
 }
 

@@ -29,7 +29,7 @@ export const renameCPSByLink = async (googleDriveLink: string,
     commonRunId: string
 ): Promise<RenameCPSByLinkResponse> => {
     const googleDriveData = await getGDriveContentsAsJson(googleDriveLink,
-        "", ignoreFolder, ALL_TYPE);
+        "", ignoreFolder, ALL_TYPE, commonRunId);
     let totalFileCount = 0;
 
     if (googleDriveData.length > MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE) {

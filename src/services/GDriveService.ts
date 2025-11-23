@@ -7,6 +7,7 @@ import { getAllFileStats, getSingleFileStats } from '../utils/FileStatsUtils';
 import { PDF_EXT, ZIP_TYPE_EXT } from '../imgToPdf/utils/constants';
 import { FileStats } from '../imgToPdf/utils/types';
 import * as fsPromise from 'fs/promises';
+import { randomUUID } from 'crypto';
 
 export const GDRIVE_DEFAULT_IGNORE_FOLDER = "proc";
 
@@ -20,7 +21,7 @@ export const verifyGDriveLocalIntegirtyPerLink = async (gDriveLink:string,
         console.log(`File extensions to look for: ${fileType === PDF_TYPE ? [PDF_EXT] : (fileType === ZIP_TYPE ? ZIP_TYPE_EXT : [])}`);
         console.log(`Ignore folder: ${ignoreFolder}`);
 
-        const gDriveStats: GoogleApiDataWithLocalData[] = await getGDriveContentsAsJson(gDriveLink, "", ignoreFolder, fileType);
+        const gDriveStats: GoogleApiDataWithLocalData[] = await getGDriveContentsAsJson(gDriveLink, "", ignoreFolder, fileType,randomUUID());
         console.log(`gDriveStats ${gDriveStats.length}`);
 
         let localStats: FileStats[] = [];

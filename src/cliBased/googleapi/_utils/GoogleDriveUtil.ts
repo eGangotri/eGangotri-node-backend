@@ -56,7 +56,7 @@ export const getWebContentLink = async (folderId: string, drive: drive_v3.Drive)
  * @returns 
  */
 export async function getFolderPathRelativeToRootFolder(folderId: string, drive: drive_v3.Drive): Promise<string> {
-    console.log(`getFolderPathRelativeToRootFolder ${folderId}`)
+    console.log(`getFolderPathRelativeToRootFolder: ${folderId}`)
     try {
         const response = await drive.files.get({
             fileId: folderId,
@@ -65,7 +65,7 @@ export async function getFolderPathRelativeToRootFolder(folderId: string, drive:
 
         const folder = response.data;
         const folderName = folder.name || "";
-        console.log("getFolderPathRelativeToRootFolder:folderName " + folderName)
+        console.log(`getFolderPathRelativeToRootFolder:folderName: ${folderName}`)
         if (folder.parents && folder.parents.length > 0) {
             // If the folder has a parent, recursively get its path
             const parentPath = await getFolderPathRelativeToRootFolder(folder.parents[0], drive);

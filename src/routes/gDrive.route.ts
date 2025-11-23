@@ -57,7 +57,7 @@ gDriveRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
         let totalFileCount = 0;
         for (const link of links) {
             const fileId = extractGoogleDriveId(link);
-            const googleDriveData = await listFolderContentsAsArrayOfData(fileId, drive, "", ignoreFolder, fileType);
+            const googleDriveData = await listFolderContentsAsArrayOfData(fileId, drive, "", ignoreFolder, fileType, randomUUID());
             if (googleDriveData.length > MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE) {
                 console.log(`:downloadFromGoogleDrive:googleDriveData.length > MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE: ${googleDriveData.length} > ${MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE}`)
                 return resp.status(400).send({
