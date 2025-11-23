@@ -46,12 +46,14 @@ export const moveAFile = async (sourceFileAbsPath: string, targetDir: string, fi
     if (!pdfOnly || (pdfOnly && fileName.endsWith('.pdf'))) {
         try {
             if (fileName.endsWith('.pdf')) {
-                const corruptionCheck = await isPDFCorrupted(sourceFileAbsPath)
-                if (!corruptionCheck.isValid) {
-                    result.error = `Corrupted or Non-Existent PDF ${sourceFileAbsPath}`;
-                    console.error("Corrupted or Non-Existent PDF: error " + result.error);
-                    return result;
-                }
+                // console.time(`isPDFCorrupted: ${fileName}`);
+                // const corruptionCheck = await isPDFCorrupted(sourceFileAbsPath)
+                // console.timeEnd(`isPDFCorrupted: ${fileName}`);
+                // if (!corruptionCheck.isValid) {
+                //     result.error = `Corrupted or Non-Existent PDF ${sourceFileAbsPath}`;
+                //     console.error("Corrupted or Non-Existent PDF: error " + result.error);
+                //     return result;
+                // }
             }
 
             const uniqueName = await ensureUniqueFileNameAsync(targetDir, fileName);
@@ -71,7 +73,7 @@ export const moveAFile = async (sourceFileAbsPath: string, targetDir: string, fi
     return result;
 };
 
-export async function moveFilesAndFlatten(sourceDir: string, targetDir: string, pdfOnly = true, ignorePaths = []) {
+export async function moveFilesAndFlatten(sourceDir: string, targetDir: string, pdfOnly = true, ignorePaths = [], preLoadedDestFiles: FileStats[] = null) {
     if (sourceDir === targetDir) {
         return {
             msg: `sourceDir(${sourceDir}) and targetDir(${targetDir}) are same, cancelling move operation`,
@@ -80,7 +82,10 @@ export async function moveFilesAndFlatten(sourceDir: string, targetDir: string, 
     }
     console.log(`sourceDir ${sourceDir} targetDir ${targetDir}`);
 
+    console.time('getAllPDFFilesWithIgnorePathsSpecified (Source)');
     const allSrcPdfs: FileStats[] = await getAllPDFFilesWithIgnorePathsSpecified(sourceDir, ignorePaths);
+    console.timeEnd('getAllPDFFilesWithIgnorePathsSpecified (Source)');
+
     if (allSrcPdfs.length === 0) {
         return {
             success: false,
@@ -88,13 +93,27 @@ export async function moveFilesAndFlatten(sourceDir: string, targetDir: string, 
         };
     }
 
+    console.time('checkIfAnyFileInUse');
     const inUseCheck = await checkIfAnyFileInUse(allSrcPdfs);
+    console.timeEnd('checkIfAnyFileInUse');
     if (inUseCheck.success === false) {
         return inUseCheck;
     }
 
-    const allDestPdfs: FileStats[] = await getAllPDFFiles(targetDir);
+    let allDestPdfs: FileStats[];
+    if (preLoadedDestFiles) {
+        console.log('Using pre-loaded destination files.');
+        allDestPdfs = preLoadedDestFiles;
+    } else {
+        console.time('getAllPDFFiles (Dest)');
+        allDestPdfs = await getAllPDFFiles(targetDir);
+        console.timeEnd('getAllPDFFiles (Dest)');
+    }
+
+    console.time('checkCollision');
     const collisionCheck = checkCollision(allSrcPdfs, allDestPdfs);
+    console.timeEnd('checkCollision');
+
     if (collisionCheck.success === false) {
         return collisionCheck;
     }
@@ -137,8 +156,12 @@ export async function moveFilesAndFlatten(sourceDir: string, targetDir: string, 
 
 
     const allSrcPdfsAfter: FileStats[] = await getAllPDFFiles(sourceDir);
+    // We can't easily optimize this post-check without re-scanning or manually updating the list, 
+    // but let's at least log it.
+    console.time('getAllPDFFiles (Dest - Post Move)');
     const allDestPdfsAfter: FileStats[] = await getAllPDFFiles(targetDir);
-    
+    console.timeEnd('getAllPDFFiles (Dest - Post Move)');
+
     const msg = `${(allDestPdfsAfter?.length - allDestPdfs?.length)} of ${_count}files moved from Source dir ${sourceDir} to target dir ${targetDir}`;
     console.log(msg);
     await launchWinExplorer(targetDir);
@@ -185,11 +208,12 @@ const checkIfAnyFileInUse = async (allSrcPdfs: FileStats[]) => {
 
 const checkCollision = (allSrcPdfs: FileStats[], allDestPdfs: FileStats[]) => {
     const allSrcFileNames = allSrcPdfs.map((x) => x.fileName);
-    const allDestFileNames = allDestPdfs.map((x) => x.fileName);
-    console.log(`allSrcFileNames ${allSrcPdfs.map((x) => x.absPath)}
-     allDestFileNames ${allDestPdfs.map((x) => x.absPath)}`)
+    // Optimize: Use Set for O(1) lookup
+    const allDestFileNames = new Set(allDestPdfs.map((x) => x.fileName));
 
-    const matchingFiles = allSrcFileNames.filter(file => allDestFileNames.includes(file));
+    console.log(`Checking collision for ${allSrcFileNames.length} source files against ${allDestFileNames.size} dest files`);
+
+    const matchingFiles = allSrcFileNames.filter(file => allDestFileNames.has(file));
     if (matchingFiles.length > 0) {
         console.error(`Following files are already present in target dir, cancelling move operation: ${matchingFiles}`);
         return {

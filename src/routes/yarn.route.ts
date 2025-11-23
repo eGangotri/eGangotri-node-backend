@@ -135,7 +135,9 @@ yarnRoute.post('/qaToDestFileMover', async (req: any, resp: any) => {
             : [getPathOrSrcRootForProfile(qaPath)];
 
         const destPath = getPathOrSrcRootForProfile(dest)
+        console.time('getAllPDFFiles (Route)');
         const allDestPdfs = await getAllPDFFiles(destPath);
+        console.timeEnd('getAllPDFFiles (Route)');
         if (paths.length === 0) {
             resp.status(400).send({
                 response: {
@@ -162,7 +164,7 @@ yarnRoute.post('/qaToDestFileMover', async (req: any, resp: any) => {
         const results: any[] = [];
         for (const srcPath of paths) {
             console.log(`qaToDestFileMover srcPath  ${srcPath} to ${destPath}`)
-            const listingResult = await moveFileSrcToDest(srcPath, destPath, flatten, ignorePaths);
+            const listingResult = await moveFileSrcToDest(srcPath, destPath, flatten, ignorePaths, allDestPdfs);
             results.push(listingResult);
         }
 

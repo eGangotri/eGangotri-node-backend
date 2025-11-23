@@ -55,7 +55,7 @@ export const moveItemsInListOfProfileToFreeze = async (uploadCycleId: string) =>
 
     for (let archiveProfile of archiveProfiles) {
         const destPath = getFolderInDestRootForProfile(archiveProfile.archiveProfile.trim());
-      
+
         await createFolderIfNotExistsAsync(destPath)
         if (isValidPath(destPath)) {
             const _moveResponse = await moveFileInListToDest(archiveProfile, destPath);
@@ -137,17 +137,18 @@ export const moveFileInListToDest = async (profileData: {
 export const moveFileSrcToDest = async (srcPath: string,
     destFolderOrProfile: string,
     flatten: boolean = true,
-    ignorePaths = []) => {
+    ignorePaths = [],
+    allDestPdfs: any[] = null) => {
     const destPath = getPathOrSrcRootForProfile(destFolderOrProfile)
     try {
         console.log(`moveFileSrcToDest srcPath ${srcPath} -> ${destFolderOrProfile} destPath ${destPath}  flatten ${flatten}`)
         let _report
         if (flatten) {
-            _report = await moveFilesAndFlatten(srcPath, destPath, true, ignorePaths);
+            _report = await moveFilesAndFlatten(srcPath, destPath, true, ignorePaths, allDestPdfs);
         }
         else {
             //get this ready
-            _report = await moveFilesAndFlatten(srcPath, destPath, true, ignorePaths);
+            _report = await moveFilesAndFlatten(srcPath, destPath, true, ignorePaths, allDestPdfs);
         }
         const tracker = new FileMoveTracker({
             src: srcPath,
