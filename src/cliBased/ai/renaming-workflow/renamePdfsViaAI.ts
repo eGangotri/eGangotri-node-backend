@@ -11,6 +11,7 @@ import { PdfTitleRenamingViaAITracker } from '../../../models/pdfTitleRenamingTr
 import { isPDFCorrupted } from '../../../utils/pdfValidator';
 import { AI_RENAMING_WORKFLOW_CONFIG, BatchPair, Config, MetadataResult, RenamingResult } from './types';
 import { AI_BATCH_SIZE, AI_DELAY_BETWEEN_BATCHES_MS, AI_DELAY_BETWEEN_CALLS_MS, PDF_VALIDATE_TIMEOUT_MS, sleep } from './constants';
+import { isValidWindowsFileName } from '../../../utils/FileUtils';
 
 /**
  * Sleep for a specified number of milliseconds
@@ -91,15 +92,16 @@ async function processPdfBatch(pdfs: string[], config: Config): Promise<Metadata
 async function renamePdfUsingMetadata(result: MetadataResult,
     config: Config,
     outputFolder: string): Promise<{ newFilePath: string; error?: string; }> {
-    if (!result.extractedMetadata) {
-        console.log(`Skipping rename for ${result.fileName} - no metadata extracted`);
+    const extractedMetadata = result?.extractedMetadata?.trim();
+    if (!extractedMetadata || !isValidWindowsFileName(extractedMetadata)) {
+        console.log(`Skipping rename for ${result.fileName} - no metadata extracted(${extractedMetadata})`);
         return {
-            newFilePath: "error",
+            newFilePath: "",
             error: 'No metadata extracted'
         }
     }
 
-    const formattedFilename = formatFilename(result.extractedMetadata);
+    const formattedFilename = formatFilename(extractedMetadata);
     const pdfParentDir = path.dirname(result.originalFilePath);
     const relativePath = path.relative(config.inputFolder, pdfParentDir);
 

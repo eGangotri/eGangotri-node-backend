@@ -11,7 +11,7 @@ import * as xlsx from 'xlsx';
  */
 
 // Configuration
-const EXCEL_FILE_PATH = 'F:\\Treasures83\\_data\\nonIKS\\vajra\\Asha Catalog Matched with Local Files_processed.xlsx';
+const EXCEL_FILE_PATH = 'F:\\Treasures83\\_data\\nonIKS\\vajra\\Tmp Catalog Matched with Local Files_processed.xlsx';
 const DESTINATION_PATH = 'F:\\playground\\tmp';
 const SHEET_NAME = 'Sheet2'; // Assuming the second sheet is named 'Sheet2'
 

@@ -40,6 +40,16 @@ export function getDownloadCounters(requestId: string) {
     return downloadCounters[requestId];
 }
 
+export function resetDownloadCounters(requestId: string) {
+    if (downloadCounters[requestId]) {
+        downloadCounters[requestId] = {
+            completed: 0,
+            inError: 0,
+            failed: 0
+        };
+    }
+}
+
 export const checkFileSizeConsistency = async (pdfDumpFolder: string,
     fileName: string, fileSizeRaw: string, downloadCounterController = ""
 ) => {

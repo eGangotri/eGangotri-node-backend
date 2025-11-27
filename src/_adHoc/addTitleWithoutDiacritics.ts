@@ -4,7 +4,7 @@ import fs from 'fs';
 import { aksharamukhaIastToRomanColloquial } from '../aksharamukha/convert';
 
 async function addTitleWithoutDiacritics() {
-    const inputPath = "C:\\Users\\cheta\\OneDrive\\Documents\\Asa Kuthi\\0-Asha-Archives-Catalogs\\updated_parsed_catalog.csv";
+    const inputPath = "C:\\Users\\cheta\\OneDrive\\Documents\\Asa Kuthi\\0-Tmp-Archives-Catalogs\\updated_parsed_catalog.csv";
     const records = parse(fs.readFileSync(inputPath), {
         columns: true,
         skip_empty_lines: true

@@ -438,3 +438,12 @@ export const isFileInUse = async (file: string): Promise<boolean> => {
 export const getPathOrSrcRootForProfile = (pathOrProfile: string) => {
     return isValidPath(pathOrProfile) ? pathOrProfile?.trim() : getFolderInSrcRootForProfile(pathOrProfile?.trim())
 }
+
+export const isValidWindowsFileName = (fileName: string): boolean => {
+    // Check for invalid characters: < > : " / \ | ? * and control chars
+    const invalidChars = /[<>:"/\\|?*\x00-\x1F]/;
+    // Also check for reserved names like CON, PRN, AUX, NUL, COM1-9, LPT1-9
+    const reservedNames = /^(con|prn|aux|nul|com[0-9]|lpt[0-9])$/i;
+
+    return !invalidChars.test(fileName) && !reservedNames.test(fileName);
+};

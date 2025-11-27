@@ -3,7 +3,7 @@ import { randomUUID } from 'crypto';
 import { exec } from 'child_process';
 import * as path from 'path';
 import { downloadFromGoogleDriveToProfile, MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE } from '../cliBased/googleapi/GoogleDriveApiReadAndDownload';
-import { DOWNLOAD_COMPLETED_COUNT, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT } from '../cliBased/pdf/utils';
+import { DOWNLOAD_COMPLETED_COUNT, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT, resetDownloadCounters } from '../cliBased/pdf/utils';
 import { listFolderContentsAsArrayOfData } from '../cliBased/googleapi/service/GoogleApiService';
 import { getGoogleDriveInstance } from '../cliBased/googleapi/service/CreateGoogleDrive';
 
@@ -444,6 +444,7 @@ gDriveRoute.post('/redownloadFromGDrive', async (req: any, resp: any) => {
             });
 
             const gDriveDownloadId = _gDriveDownload?.id;
+            resetDownloadCounters(_gDriveDownload?.runId || "")
             const downloadPromises = failedGDriveData.map(async (gDriveData: GoogleApiDataWithLocalData, index: number) => {
                 console.log(`:redownloadFromGDrive:loop ${index + 1} ${gDriveData.googleDriveLink} 
                          ${ignoreFolder} ${fileType} ${gDriveDownloadId}`);
@@ -456,8 +457,6 @@ gDriveRoute.post('/redownloadFromGDrive', async (req: any, resp: any) => {
                     _gDriveDownload?.runId || "", _gDriveDownload?.commonRunId || "",
                     gDriveDownloadId);
             });
-
-
             // Wait for all downloads to complete
             const results = await Promise.all(downloadPromises);
 
