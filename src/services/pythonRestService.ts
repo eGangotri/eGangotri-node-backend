@@ -128,6 +128,22 @@ export const runPthonPdfExtractionInLoop = async (
                 }
                 console.log('result', result);
                 combinedResults.push(result);
+                // Update per-item history with detailed result
+                try {
+                    const errorsCount = (result as any)?.data?.errors ?? 0;
+                    await PdfPageExtractionPerItemHistory.updateOne(
+                        { runId },
+                        {
+                            $set: {
+                                logs: (result as any)?.data,
+                                success: errorsCount === 0,
+                                errorMsg: errorsCount > 0 ? result.message : '',
+                            }
+                        }
+                    );
+                } catch (updateErr) {
+                    console.error('Error updating PdfPageExtractionPerItemHistory with result:', updateErr);
+                }
             }
             else {
                 combinedResults.push({
@@ -137,6 +153,20 @@ export const runPthonPdfExtractionInLoop = async (
                     _srcFolder: input_folder,
                     destRoot: destRootFolder,
                 });
+                try {
+                    await PdfPageExtractionPerItemHistory.updateOne(
+                        { runId },
+                        {
+                            $set: {
+                                logs: `Exception ${input_folder}`,
+                                success: false,
+                                errorMsg: _resp?.message,
+                            }
+                        }
+                    );
+                } catch (updateErr) {
+                    console.error('Error updating PdfPageExtractionPerItemHistory with result:', updateErr);
+                }
                 continue;
             }
         }
