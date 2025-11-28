@@ -64,6 +64,8 @@ export const runPthonPdfExtractionInLoop = async (
             "lastNPages": nLastPages,
             "reducePdfSizeAlso": reducePdfSizeAlso,
             "commonRunId": commonRunId,
+            "srcFolderCount": srcFolderCount,
+            "success": false,
         });
         await logEntry.save();
         console.log(`Saved PdfPageExtractionHistory for commonRunId: ${commonRunId} `);
@@ -180,6 +182,21 @@ export const runPthonPdfExtractionInLoop = async (
                 destRoot: destRootFolder,
             });
         }
+    }
+    // update PdfPageExtractionHistory
+    const successCount = combinedResults.filter((result) => result.success).length;
+    try {
+        await PdfPageExtractionHistory.updateOne(
+            { commonRunId },
+            {
+                $set: {
+                    success: successCount === srcFolderCount,
+                    status: `${successCount}/${srcFolderCount}/${srcFolderCount-successCount}`,
+                }
+            }
+        );
+    } catch (updateErr) {
+        console.error('Error updating PdfPageExtractionHistory with result:', updateErr);
     }
     return combinedResults;
 }

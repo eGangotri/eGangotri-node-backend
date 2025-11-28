@@ -6,6 +6,8 @@ export interface IPdfPageExtractionHistory extends Document {
     firstNPages: number;
     lastNPages: number;
     reducePdfSizeAlso: boolean;
+    srcFolderCount: number;
+    success: boolean;
     commonRunId: string;
     status:string;
     createdAt: Date;
@@ -19,6 +21,8 @@ const PdfPageExtractionHistory: Schema = new Schema({
     firstNPages: { type: Number, required: true },
     lastNPages: { type: Number, required: true },
     reducePdfSizeAlso: { type: Boolean, required: true },
+    srcFolderCount: { type: Number, required: true },
+    success: { type: Boolean, required: true },
     commonRunId: { type: String, required: true },
     createdAt: { type: Date, default: Date.now },
     status: { type: String, required: false },
