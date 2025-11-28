@@ -107,6 +107,8 @@ export const downloadFileFromUrl = async (
     return _result;
 }
 
+import pRetry from 'p-retry';
+
 export const downloadGDriveFileUsingGDriveApi = async (
     driveLinkOrFileID: string,
     destPath: string,
@@ -125,83 +127,82 @@ export const downloadGDriveFileUsingGDriveApi = async (
     }
 
     try {
-        const fileMetadata = await drive.files.get({ fileId, fields: 'name,mimeType' });
-        const mimeType = fileMetadata.data.mimeType;
-        fileName = fileName || fileMetadata.data.name;
-        if (fileName.length > MAX_FILENAME_LENGTH) {
-            console.log(`fileName length is ${fileName.length}, and now will be reduced to ${MAX_FILENAME_LENGTH}.`);
-            fileName = limitCountAndSanitizeFileNameWithoutExt(fileName, MAX_FILENAME_LENGTH);
-        }
-        const filePath = path.join(destPath, fileName);
+        return await pRetry(async () => {
+            const fileMetadata = await drive.files.get({ fileId, fields: 'name,mimeType' });
+            const mimeType = fileMetadata.data.mimeType;
+            fileName = fileName || fileMetadata.data.name;
+            if (fileName.length > MAX_FILENAME_LENGTH) {
+                console.log(`fileName length is ${fileName.length}, and now will be reduced to ${MAX_FILENAME_LENGTH}.`);
+                fileName = limitCountAndSanitizeFileNameWithoutExt(fileName, MAX_FILENAME_LENGTH);
+            }
+            const filePath = path.join(destPath, fileName);
 
-        const res = await updateEntryForGDriveUploadHistory(gDriveDownloadTaskId,
-            `started d/l of ${fileName}`,
-            DownloadHistoryStatus.Queued);
+            const res = await updateEntryForGDriveUploadHistory(gDriveDownloadTaskId,
+                `started d/l of ${fileName}`,
+                DownloadHistoryStatus.Queued);
 
-        if (!res.success) {
-            incrementDownloadFailed(runIdWithIndex);
-            await _updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, DownloadHistoryStatus.Failed, `failed d/l of ${fileName}`, destPath);
+            if (!res.success) {
+                // If DB update fails, we might not want to retry the whole download, but let's throw to be safe or handle it.
+                // For now, let's treat it as a failure that triggers retry if transient.
+                throw new Error(`Failed to update entry for ${fileName}: ${res.error}`);
+            }
+            const dest = fs.createWriteStream(filePath);
 
-            return {
-                status: `Failed to update entry for ${fileName}`,
-                success: false,
-                error: res.error,
-                destPath
+            const exportMimeMap = {
+                'application/vnd.google-apps.document': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'application/vnd.google-apps.spreadsheet': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'application/vnd.google-apps.presentation': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
             };
-        }
-        const dest = fs.createWriteStream(filePath);
 
-        const exportMimeMap = {
-            'application/vnd.google-apps.document': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            'application/vnd.google-apps.spreadsheet': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'application/vnd.google-apps.presentation': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-        };
+            const exportMimeType = exportMimeMap[mimeType];
+            let response;
 
-        const exportMimeType = exportMimeMap[mimeType];
-        let response;
+            if (exportMimeType) {
+                response = await drive.files.export({ fileId, mimeType: exportMimeType }, { responseType: 'stream' });
+            } else if (!mimeType.startsWith('application/vnd.google-apps.')) {
+                response = await drive.files.get({ fileId, alt: 'media' }, { responseType: 'stream' });
+            } else {
+                throw new Error(`Unsupported Google-native MIME type: ${mimeType}`);
+            }
 
-        if (exportMimeType) {
-            response = await drive.files.export({ fileId, mimeType: exportMimeType }, { responseType: 'stream' });
-        } else if (!mimeType.startsWith('application/vnd.google-apps.')) {
-            response = await drive.files.get({ fileId, alt: 'media' }, { responseType: 'stream' });
-        } else {
-            throw { success: false, error: `Unsupported Google-native MIME type: ${mimeType}` };
-        }
+            response.data.pipe(dest);
 
-        response.data.pipe(dest);
-
-        await new Promise((resolve, reject) => {
-            response.data.on('error', (error) => {
-                dest.destroy();
-                reject(error);
+            await new Promise((resolve, reject) => {
+                response.data.on('error', (error) => {
+                    dest.destroy();
+                    reject(error);
+                });
+                dest.on('finish', () => {
+                    dest.close();
+                    resolve(null);
+                });
+                dest.on('error', (error) => {
+                    dest.destroy();
+                    reject(error);
+                });
             });
-            dest.on('finish', () => {
-                dest.close();
-                resolve(null);
-            });
-            dest.on('error', (error) => {
-                dest.destroy();
-                reject(error);
-            });
+
+            console.log(`Download complete for "${fileName}"`);
+            const fileConsistency = await checkFileSizeConsistency(destPath, fileName, fileSizeRaw, runIdWithIndex);
+            const result = fileSizeRaw ? fileConsistency : { success: true };
+
+            if (result?.success) {
+                incrementDownloadCompleted(runIdWithIndex);
+                await _updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, DownloadHistoryStatus.Completed, `completed d/l of ${fileName}`, destPath);
+                return { status: `Downloaded ${fileName} to ${destPath}`, success: true, destPath };
+            } else {
+                // Throw error to trigger retry
+                throw new Error(`File Consistency Check Failed for download ${fileName} to ${destPath}`);
+            }
+        }, {
+            retries: 3,
+            onFailedAttempt: async (error) => {
+                console.log(`Attempt ${error.attemptNumber} failed. There are ${error.retriesLeft} retries left. Error: ${error.message}`);
+                // Optional: Update DB to show retry status?
+                // For now, just log.
+            }
         });
 
-        console.log(`Download complete for "${fileName}"`);
-        const fileConsistency = await checkFileSizeConsistency(destPath, fileName, fileSizeRaw, runIdWithIndex);
-        const result = fileSizeRaw ? fileConsistency : { success: true };
-
-        if (result?.success) {
-            incrementDownloadCompleted(runIdWithIndex);
-            await _updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, DownloadHistoryStatus.Completed, `completed d/l of ${fileName}`, destPath);
-            return { status: `Downloaded ${fileName} to ${destPath}`, success: true, destPath };
-        } else {
-            incrementDownloadFailed(runIdWithIndex);
-            await _updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, DownloadHistoryStatus.Failed, `failed d/l of ${fileName}`, destPath);
-            return {
-                status: `File Consistency Check Failed for download ${fileName} to ${destPath}`,
-                success: false,
-                destPath
-            };
-        }
     } catch (error) {
         const errorContext = `Error during (${JSON.stringify(error)}) d/l for ${fileName}`;
         console.error(`${errorContext}:`, error.message);

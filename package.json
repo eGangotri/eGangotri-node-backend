@@ -98,6 +98,8 @@
     "node-downloader-helper": "^2.1.9",
     "openai": "^4.85.2",
     "opossum": "^8.4.0",
+    "p-limit": "^2.3.0",
+    "p-retry": "^4.6.2",
     "pdf-lib": "^1.17.1",
     "pdf-parse": "^1.1.1",
     "pdfjs-dist": "^4.10.38",

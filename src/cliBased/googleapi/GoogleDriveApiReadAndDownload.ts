@@ -15,6 +15,8 @@ import { DownloadHistoryStatus } from '../../utils/constants';
 import { checkFolderExistsAsynchronous, createFolderIfNotExistsAsync } from '../../utils/FileUtils';
 import { getFolderNameFromGDrive } from './GoogleDriveApiReadAndExport';
 
+import pLimit from 'p-limit';
+
 export const MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE: number = Number(process.env.MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE || 200);
 // Create a new Google Drive instance
 const drive = getGoogleDriveInstance();
@@ -83,7 +85,7 @@ async function dwnldAllFilesFromGDrive(driveLinkOrFolderID: string,
   const googleDriveData = await listFolderContentsAsArrayOfData(fileId,
     drive,
     folderName,
-    ignoreFolder, fileType,runId);
+    ignoreFolder, fileType, runId);
   console.log(`googleDriveData(${googleDriveData.length}): ${JSON.stringify(googleDriveData)}`);
   const dataLength = googleDriveData.length;
   const maxLimit = MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE;
@@ -104,14 +106,18 @@ async function dwnldAllFilesFromGDrive(driveLinkOrFolderID: string,
     `Started download with ${googleDriveData.length} items`,
     DownloadHistoryStatus.InProgress);
 
-  const promises = googleDriveData.map(async (_data) => {
-    console.log(`googleDriveData.map(_data: ${JSON.stringify(_data)}}`);
-    const fileDumpWithPathAppended = fileDumpFolder + path.sep + _data.parents;
-    console.log(`fileDumpWithPathAppended: ${fileDumpWithPathAppended}`);
-    await createFolderIfNotExistsAsync(fileDumpWithPathAppended);
+  const limit = pLimit(10); // Limit to 10 concurrent downloads
 
-    return downloadFileFromGoogleDrive(_data.googleDriveLink,
-      fileDumpWithPathAppended, _data.fileName, _data?.fileSizeRaw, gDriveDownloadTaskId, runId)
+  const promises = googleDriveData.map((_data) => {
+    return limit(async () => {
+      console.log(`googleDriveData.map(_data: ${JSON.stringify(_data)}}`);
+      const fileDumpWithPathAppended = fileDumpFolder + path.sep + _data.parents;
+      console.log(`fileDumpWithPathAppended: ${fileDumpWithPathAppended}`);
+      await createFolderIfNotExistsAsync(fileDumpWithPathAppended);
+
+      return downloadFileFromGoogleDrive(_data.googleDriveLink,
+        fileDumpWithPathAppended, _data.fileName, _data?.fileSizeRaw, gDriveDownloadTaskId, runId)
+    });
   });
   const results = await Promise.all(promises);
   const resultsAsString = results.map((result: any) => JSON.stringify(result)).join(",");
@@ -181,7 +187,7 @@ export const downloadFromGoogleDriveToProfile = async (driveLinkOrFolderId: stri
       if (gDriveDownloadTaskId === "") {
         gDriveDownloadTaskId = await insertEntryForGDriveUploadHistory(driveLinkOrFolderId, profileOrPath,
           fileType, fileDumpFolder,
-          gDriveRootFolder, ignoreFolder, `Initiated Downloading ${driveLinkOrFolderId} /${gDriveRootFolder}`, runId,commonRunId);
+          gDriveRootFolder, ignoreFolder, `Initiated Downloading ${driveLinkOrFolderId} /${gDriveRootFolder}`, runId, commonRunId);
       }
       const _results = await dwnldAllFilesFromGDrive(driveLinkOrFolderId, "",
         fileDumpFolder, ignoreFolder, fileType, gDriveDownloadTaskId, runId);
