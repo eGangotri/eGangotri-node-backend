@@ -1,6 +1,6 @@
 import * as express from 'express';
-import PdfPageExtractionHistory, { IPdfPageExtractionHistory } from 'models/PdfPageExtractionHistory';
-import PdfPageExtractionPerItemHistory, { IPdfPageExtractionPerItemHistory } from 'models/PdfPageExtractionPerItemHistory';
+import PdfPageExtractionHistory, { IPdfPageExtractionHistory } from '../models/PdfPageExtractionHistory';
+import PdfPageExtractionPerItemHistory, { IPdfPageExtractionPerItemHistory } from '../models/PdfPageExtractionPerItemHistory';
 
 export const pdfRoute = express.Router();
 
