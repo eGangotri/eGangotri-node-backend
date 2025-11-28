@@ -41,13 +41,15 @@ export function getDownloadCounters(requestId: string) {
 }
 
 export function resetDownloadCounters(requestId: string) {
-    if (downloadCounters[requestId]) {
-        downloadCounters[requestId] = {
-            completed: 0,
-            inError: 0,
-            failed: 0
-        };
-    }
+
+    const counters = getDownloadCounters(requestId);
+    console.log(`before resetDownloadCounters(${requestId}): ${JSON.stringify(counters)}`);
+    if (counters) {
+        counters.completed = 0;
+        counters.inError = 0;
+        counters.failed = 0;
+    };
+    console.log(`after resetDownloadCounters(${requestId}): ${JSON.stringify(counters)}`);
 }
 
 export const checkFileSizeConsistency = async (pdfDumpFolder: string,
@@ -91,17 +93,17 @@ export const checkFileSizeConsistency = async (pdfDumpFolder: string,
 
 
 
-    //{"scanResult":"OK","disposition":"SCAN_CLEAN","fileName":"Anang Rito Dwanda.pdf","sizeBytes":827924,"downloadUrl":"https:\/\/drive.usercontent.google.com\/download?id=17OsRNBJC4OSPZ8EAqtxIYu_mWQkpSP96&export=download&authuser=0&confirm=t&uuid=3e023e6b-413f-43f8-8c0e-4feccac88c33&at=APZUnTWJITyGBCb64CIGROZM-l95:1692979966504"}
-    //{"scanResult":"WARNING","disposition":"TOO_LARGE","fileName":"file 7.pdf","sizeBytes":203470209,"downloadUrl":"https:\/\/drive.usercontent.google.com\/download?id=1M0Xk75dlVz6GHaXaKEsp3uwr-RBG0-eJ&export=download&authuser=0&confirm=t&uuid=30a6908a-9c30-444b-8f7b-c16177c13ff3&at=APZUnTWvp6RZVPKbr8DCrOp1lR-m:1692980267429"}
-    const getFileDetailsFromGoogleUrl = async (driveLinkOrFolderId: string) => {
-        const driveId = extractGoogleDriveId(driveLinkOrFolderId)
-        const postUrl = `https://drive.usercontent.google.com/uc?id=${driveId}&authuser=0&export=download`
-        const response: Response = await fetch(postUrl, {
-            method: "POST",
-        })
+//{"scanResult":"OK","disposition":"SCAN_CLEAN","fileName":"Anang Rito Dwanda.pdf","sizeBytes":827924,"downloadUrl":"https:\/\/drive.usercontent.google.com\/download?id=17OsRNBJC4OSPZ8EAqtxIYu_mWQkpSP96&export=download&authuser=0&confirm=t&uuid=3e023e6b-413f-43f8-8c0e-4feccac88c33&at=APZUnTWJITyGBCb64CIGROZM-l95:1692979966504"}
+//{"scanResult":"WARNING","disposition":"TOO_LARGE","fileName":"file 7.pdf","sizeBytes":203470209,"downloadUrl":"https:\/\/drive.usercontent.google.com\/download?id=1M0Xk75dlVz6GHaXaKEsp3uwr-RBG0-eJ&export=download&authuser=0&confirm=t&uuid=30a6908a-9c30-444b-8f7b-c16177c13ff3&at=APZUnTWvp6RZVPKbr8DCrOp1lR-m:1692980267429"}
+const getFileDetailsFromGoogleUrl = async (driveLinkOrFolderId: string) => {
+    const driveId = extractGoogleDriveId(driveLinkOrFolderId)
+    const postUrl = `https://drive.usercontent.google.com/uc?id=${driveId}&authuser=0&export=download`
+    const response: Response = await fetch(postUrl, {
+        method: "POST",
+    })
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        console.log(`HTTP error! Status: ${response.status}`);
+    if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
     }
+    console.log(`HTTP error! Status: ${response.status}`);
+}

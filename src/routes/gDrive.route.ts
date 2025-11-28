@@ -414,7 +414,9 @@ gDriveRoute.post('/redownloadFromGDrive', async (req: any, resp: any) => {
             });
         }
 
+        console.log(`:redownloadFromGDrive:googleDriveLink: ${googleDriveLink} folderOrProfile: ${folderOrProfile}`)
         const _linksGen = genLinksAndFolders(googleDriveLink, folderOrProfile)
+        console.log(`_linksGen: ${JSON.stringify(_linksGen)}`)
         if (_linksGen.error) {
             resp.status(400).send({
                 response: {
@@ -426,15 +428,15 @@ gDriveRoute.post('/redownloadFromGDrive', async (req: any, resp: any) => {
             return;
         }
 
-        const rootFolders2 = await Promise.all(_linksGen._links.map(async (link) => await getFolderNameFromGDrive(link) || ""));
+        const _rootFolders = await Promise.all(_linksGen._links.map(async (link) => await getFolderNameFromGDrive(link) || ""));
         const foldersWithRoot2 = _linksGen._folders.map((folder, index) => {
             const fileDumpFolder = getPathOrSrcRootForProfile(folder);
             console.log(`:redownloadFromGDrive:loop ${index + 1} ${_linksGen._links[index]} ${folder} ${fileDumpFolder} ${ignoreFolder} ${fileType}`);
-            return path.join(fileDumpFolder, rootFolders2[index]);
+            return path.join(fileDumpFolder, _rootFolders[index]);
         });
 
         const _results = await verifyGDriveLocalIntegrity(_linksGen._links, foldersWithRoot2, ignoreFolder, fileType);
-        console.log(`verifyLocalDownloadSameAsGDrive:foldersWithRoot: ${foldersWithRoot2}  ${rootFolders2}`);
+        console.log(`verifyLocalDownloadSameAsGDrive:foldersWithRoot: ${foldersWithRoot2}  ${_rootFolders}`);
         const resultResponse = _results.response;
         const comparisonResult: ComparisonResult[] = resultResponse.comparisonResult;
         const success = comparisonResult.every(r => r.success);
@@ -459,7 +461,7 @@ gDriveRoute.post('/redownloadFromGDrive', async (req: any, resp: any) => {
             });
             // Wait for all downloads to complete
             const results = await Promise.all(downloadPromises);
-
+            console.log(`results ${JSON.stringify(results)}`);
             const resultsSummary = results.map((res: any, index: number) => {
                 return `(${index + 1}). Succ: ${res.success_count} Err: ${res.error_count} Wrong Size: ${res.dl_wrong_size_count}`;
             });
