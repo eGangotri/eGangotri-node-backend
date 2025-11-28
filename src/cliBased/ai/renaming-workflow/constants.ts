@@ -142,7 +142,7 @@ export const SIMPLE_TITLE_AUTHOR_GDRIVE_CP_RENAME_PROMPT_CHAR_LIMIT = 40
 export const SIMPLE_TITLE_AUTHOR_GDRIVE_CP_RENAME_PROMPT = `
 This is an exercise to extract the title and author of the Cover Page of a book saved as a one page pdf/jpeg/png file.
 
-If the Image is not a cover-page of  book or manuscript but a stack of books then return NIL.
+If the Image is not a cover-page of book or manuscript but a stack of books then return NIL.
 
 Output must be limited to ASCII letters (A-Z, a-z), spaces, and the hyphen (-). Do not use any other symbols or diacritics.
 
@@ -167,7 +167,7 @@ then add it also - including the Series nummber - after Author and hyphen.
 
 But use Acronyms or short forms so AAS or KSTS but KVM for Kavyamala.
 
-If no Series is there then do smae for Publisher. If No Publisher then Press but with acronyms 
+If no Series is there then do same for Publisher. If No Publisher then Press but with acronyms 
 So Nirnaya Sagar Press is NSP, Naval Kishore Press is NKP, Motilal Banarsidas is MLBD.
 
 Output generated shount not exceed ${SIMPLE_TITLE_AUTHOR_GDRIVE_CP_RENAME_PROMPT_CHAR_LIMIT} characters including spaces

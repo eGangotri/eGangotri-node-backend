@@ -3,6 +3,8 @@ import { PYTHON_SERVER_URL } from "../db/connection";
 import { countPDFsInFolder, createFolderIfNotExistsAsync, isValidDirectory } from "../utils/FileUtils";
 import path from 'path';
 import { ExtractionErrorResult, ExtractionSuccessResult, PythonExtractionResult } from "./types";
+import { randomUUID } from "crypto";
+import PdfExtractionLog from "../models/PdfExtractionLog";
 
 // Default data payload for extraction/copy operations used across the codebase
 export interface ExtractionOperationData {
@@ -10,6 +12,9 @@ export interface ExtractionOperationData {
     output_folder: string;
     nFirstPages: number;
     nLastPages: number;
+    reducePdfSizeAlso: boolean;
+    commonRunId?: string;
+    runId?: string;
 }
 
 // Strongly typed structures for the merge-PDFs response payload
@@ -43,25 +48,49 @@ export const runPthonPdfExtractionInLoop = async (
     nLastPages: number,
     reducePdfSizeAlso = true
 ): Promise<PythonExtractionResult[]> => {
+
     const combinedResults: PythonExtractionResult[] = [];
+    const commonRunId = randomUUID();
+
     for (let i = 0; i < _srcFolders.length; i++) {
         let input_folder = _srcFolders[i];
         let destRootFolder = destRootFolders[i];
+        const runId = randomUUID();
         try {
-            console.log(`(${i+1}/${_srcFolders.length}). runPthonPdfExtractionInLoop srcFolder ${input_folder} destRootFolder ${destRootFolder} `);
+            console.log(`(${i + 1}/${_srcFolders.length}). runPthonPdfExtractionInLoop srcFolder ${input_folder} destRootFolder ${destRootFolder} `);
             const pdfsToReduceCount = await countPDFsInFolder(input_folder, ["reduced"]);
             if (isValidDirectory(destRootFolder)) {
                 await createFolderIfNotExistsAsync(destRootFolder);
             }
 
-            const _payload = {
+            const _payload: ExtractionOperationData = {
                 "input_folder": input_folder,
                 "output_folder": destRootFolder,
                 "nFirstPages": nFirstPages,
                 "nLastPages": nLastPages,
-                "reducePdfSizeAlso": reducePdfSizeAlso
+                "reducePdfSizeAlso": reducePdfSizeAlso,
+                "commonRunId": commonRunId,
+                "runId": runId,
             }
-            console.log(`(${i+1}/${_srcFolders.length})runPthonPdfExtractionInLoop payload: ${JSON.stringify(_payload)}`);
+
+            console.log(`(${i + 1}/${_srcFolders.length})runPthonPdfExtractionInLoop payload: ${JSON.stringify(_payload)}`);
+
+            try {
+                const logEntry = new PdfExtractionLog({
+                    _srcFolder: input_folder,
+                    _destRootFolder: destRootFolder,
+                    nFirstPages,
+                    nLastPages,
+                    reducePdfSizeAlso,
+                    commonRunId,
+                    runId
+                });
+                await logEntry.save();
+                console.log(`Saved PdfExtractionLog for commonRunId: ${commonRunId} and runId: ${runId}`);
+            } catch (logErr) {
+                console.error('Error saving PdfExtractionLog:', logErr);
+                // Non-blocking error, continue execution
+            }
 
             const _resp = await executePythonPostCall(
                 _payload, 'extractFromPdf');
@@ -239,7 +268,7 @@ export interface PythonPostOptions {
 }
 
 export const executePythonPostCall = async <TData = ExtractionOperationData>(
-    body: Record<string, unknown>,
+    body: any,
     resource: string,
     opts: PythonPostOptions = { timeoutMs: 60 * 60 * 1000, skipPreflight: true }
 ): Promise<PythonPostCallResult<TData>> => {
@@ -261,7 +290,7 @@ export const executePythonPostCall = async <TData = ExtractionOperationData>(
     }
 };
 
-export const pythonPostCallInternal = async <TData = ExtractionOperationData>(body: Record<string, unknown>, resource: string, opts?: PythonPostOptions): Promise<PythonPostCallResult<TData>> => {
+export const pythonPostCallInternal = async <TData = ExtractionOperationData>(body: any, resource: string, opts?: PythonPostOptions): Promise<PythonPostCallResult<TData>> => {
     console.log(`python call ${resource} ${JSON.stringify(body, null, 2)}`)
     const controller = typeof AbortController !== 'undefined' && opts?.timeoutMs ? new AbortController() : undefined;
     const timer = controller && opts?.timeoutMs ? setTimeout(() => controller.abort(), opts.timeoutMs) : undefined;
