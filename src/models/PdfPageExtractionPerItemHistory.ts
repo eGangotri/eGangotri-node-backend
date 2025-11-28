@@ -7,7 +7,10 @@ export interface IPdfPageExtractionPerItemHistory extends Document {
     lastNPages: number;
     reducePdfSizeAlso: boolean;
     commonRunId: string;
+    runId: string;
     createdAt: Date;
+    success?:boolean;
+    errorMsg?: string
 }
 
 const TABLE_NAME = "PdfPageExtractionPerItemHistory";
@@ -20,7 +23,9 @@ const PdfPageExtractionHistory: Schema = new Schema({
     reducePdfSizeAlso: { type: Boolean, required: true },
     commonRunId: { type: String, required: true },
     runId: { type: String, required: true },
-    createdAt: { type: Date, default: Date.now }
+    createdAt: { type: Date, default: Date.now },
+    success: { type: Boolean, required: false },
+    errorMsg: { type: String, required: false },
 }, { collection: TABLE_NAME });
 
 export default mongoose.model<IPdfPageExtractionPerItemHistory>(TABLE_NAME, PdfPageExtractionHistory);
