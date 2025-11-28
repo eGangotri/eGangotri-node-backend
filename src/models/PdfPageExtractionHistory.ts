@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
-export interface IPdfExtractionLog extends Document {
+export interface IPdfPageExtractionHistory extends Document {
     _srcFolder: string[];
     _destRootFolder: string[];
     firstNPages: number;
@@ -10,7 +10,9 @@ export interface IPdfExtractionLog extends Document {
     createdAt: Date;
 }
 
-const PdfExtractionLogSchema: Schema = new Schema({
+const TABLE_NAME = "PdfPageExtractionHistory";
+
+const PdfPageExtractionHistory: Schema = new Schema({
     _srcFolder: { type: String, required: true },
     _destRootFolder: { type: String, required: true },
     firstNPages: { type: Number, required: true },
@@ -19,6 +21,6 @@ const PdfExtractionLogSchema: Schema = new Schema({
     commonRunId: { type: String, required: true },
     runId: { type: String, required: true },
     createdAt: { type: Date, default: Date.now }
-}, { collection: 'PdfExtractionLog' });
+}, { collection: TABLE_NAME });
 
-export default mongoose.model<IPdfExtractionLog>('PdfExtractionLog', PdfExtractionLogSchema);
+export default mongoose.model<IPdfPageExtractionHistory>(TABLE_NAME, PdfPageExtractionHistory);

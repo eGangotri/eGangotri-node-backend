@@ -4,7 +4,7 @@ import { countPDFsInFolder, createFolderIfNotExistsAsync, isValidDirectory } fro
 import path from 'path';
 import { ExtractionErrorResult, ExtractionSuccessResult, PythonExtractionResult } from "./types";
 import { randomUUID } from "crypto";
-import PdfExtractionLog from "../models/PdfExtractionLog";
+import PdfPageExtractionPerItemHistory from "../models/PdfPageExtractionPerItemHistory";
 
 // Default data payload for extraction/copy operations used across the codebase
 export interface ExtractionOperationData {
@@ -51,8 +51,12 @@ export const runPthonPdfExtractionInLoop = async (
 
     const combinedResults: PythonExtractionResult[] = [];
     const commonRunId = randomUUID();
-
-    for (let i = 0; i < _srcFolders.length; i++) {
+    const srcFolderCount = _srcFolders.length;
+    const destFolderCount = destRootFolders.length;
+    if (srcFolderCount !== destFolderCount) {
+        throw new Error("Source and destination folder counts must match");
+    }
+    for (let i = 0; i < srcFolderCount; i++) {
         let input_folder = _srcFolders[i];
         let destRootFolder = destRootFolders[i];
         const runId = randomUUID();
@@ -76,20 +80,20 @@ export const runPthonPdfExtractionInLoop = async (
             console.log(`(${i + 1}/${_srcFolders.length})runPthonPdfExtractionInLoop payload: ${JSON.stringify(_payload)}`);
 
             try {
-                const logEntry = new PdfExtractionLog({
+                const logEntry = new PdfPageExtractionPerItemHistory({
                     _srcFolder: input_folder,
                     _destRootFolder: destRootFolder,
-                    nFirstPages,
-                    nLastPages,
-                    reducePdfSizeAlso,
-                    commonRunId,
-                    runId
+                    "firstNPages": nFirstPages,
+                    "lastNPages": nLastPages,
+                    "reducePdfSizeAlso": reducePdfSizeAlso,
+                    "commonRunId": commonRunId,
+                    "runId": runId
                 });
                 await logEntry.save();
-                console.log(`Saved PdfExtractionLog for commonRunId: ${commonRunId} and runId: ${runId}`);
+                console.log(`Saved PdfPageExtractionHistory for commonRunId: ${commonRunId} and runId: ${runId}`);
             } catch (logErr) {
-                console.error('Error saving PdfExtractionLog:', logErr);
-                // Non-blocking error, continue execution
+                console.error('Error saving PdfPageExtractionHistory:', logErr);
+                continue
             }
 
             const _resp = await executePythonPostCall(

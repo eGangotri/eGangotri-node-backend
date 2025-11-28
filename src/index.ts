@@ -34,6 +34,7 @@ import { pythonArchiveRoute } from "./routes/python.archive.route";
 import { imgToPdfRoute } from "./routes/imgToPdf.route";
 import { launchAIGDriveRoute } from "./routes/launchAI.gdrive.route";
 import { folderUtilsRoute } from "./routes/folderUtils.route";
+import { pdfRoute } from "./routes/pdf.route";
 
 const egangotri = express();
 const hostname = process.env.NODE_BACKEND_SERVER
@@ -95,6 +96,7 @@ egangotri.use("/dailyWorkReport", dailyWorkReportRoute);
 egangotri.use("/dailyCatWorkReport", dailyCatWorkReportRoute);
 egangotri.use("/dailyQAWorkReport", dailyQAWorkReportRoute);
 egangotri.use("/gDriveDownloadRoute", gDriveDownloadRoute);
+egangotri.use("/pdf", pdfRoute);
 
 async function start() {
   try {
