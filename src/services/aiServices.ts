@@ -111,6 +111,14 @@ export const renameOriginalItemsBasedOnMetadata = async (pdfTitleRenamedItems: I
                 const newName = String((item.extractedMetadata + ext) || item.fileName);
                 const targetPath = path.join(dir, newName).trim();
                 console.log(`Renaming ${index + 1}/${pdfTitleRenamedItems.length}: ${item.originalFilePath} to ${targetPath}`);
+                if (newName?.trim().length === 0) {
+                    console.log(`No New Name for ${item.originalFilePath}`);
+                    errors.push({
+                        filePath: item.originalFilePath,
+                        error: `No New Name for ${item.originalFilePath}`
+                    })
+                    return false;
+                }
                 await fs.promises.rename(item.originalFilePath, targetPath);
                 return true;
             } catch (err: any) {
