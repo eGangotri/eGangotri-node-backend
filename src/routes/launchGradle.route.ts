@@ -383,13 +383,6 @@ launchGradleRoute.get('/isolateUploadFailedViaUploadCycleId', async (req: any, r
 })
 
 const isolateFiles = async (_uploadFailedForUploadCycleId: UploadCycleArchiveProfile[]) => {
-
-    if (true) {
-        return {
-            isolationStatus: [],
-            errors: []
-        }
-    }
     let isolationStatus = []
     let errors = []
     for (let i = 0; i < _uploadFailedForUploadCycleId.length; i++) {
