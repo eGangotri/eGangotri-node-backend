@@ -307,7 +307,6 @@ launchAIRoute.get("/getAllTitleRenamedViaAIList/:runId", async (req: Request, re
 })
     ;
 
-//ai/getAllTitlePdfRenamedViaAIList
 launchAIRoute.get("/getAllTitlePdfRenamedViaAIList", async (req: Request, res: express.Response) => {
     try {
         const page = Number.parseInt(req.query.page as string) || 1

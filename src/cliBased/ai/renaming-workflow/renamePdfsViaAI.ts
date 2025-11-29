@@ -387,7 +387,7 @@ export async function aiRenameTitleUsingReducedFolder(inputFolder: string,
         }
 
         else {
-            // Persist failure summary in DB
+            // Persist failure summary in DB, including any renamingResults we do have
             try {
                 await PdfTitleAndFileRenamingTrackerViaAI.create({
                     commonRunId,
@@ -397,13 +397,13 @@ export async function aiRenameTitleUsingReducedFolder(inputFolder: string,
                     failedCount: processedCount - successCount,
                     success: false,
                     metaDataAggregated: mappedResults.map(m => m.meta),
+                    renamingResults,
                     error: "Metadata aggregation failed",
                     pairedBatches,
                 });
             } catch (dbErr) {
                 console.error('Failed saving PdfTitleAndFileRenamingTrackerViaAI (failure):', dbErr);
             }
-
             return {
                 commonRunId,
                 runId,
@@ -412,7 +412,7 @@ export async function aiRenameTitleUsingReducedFolder(inputFolder: string,
                 successCount,
                 failedCount: processedCount - successCount,
                 metaDataAggregated: mappedResults.map(m => m.meta),
-                renamingResults: [],
+                renamingResults,
                 error: "Metadata aggregation failed",
                 pairedBatches,
             }
