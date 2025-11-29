@@ -5,7 +5,7 @@ import { launchUploader, launchUploaderViaAbsPath, launchUploaderViaExcelV1, lau
 import { ArchiveProfileAndTitle, UploadCycleArchiveProfile } from '../mirror/types';
 import { isValidPath } from '../utils/FileUtils';
 import { getFolderInDestRootForProfile, getFolderInSrcRootForProfile } from '../archiveUpload/ArchiveProfileUtils';
-import { ItemsUshered } from '../models/itemsUshered';
+import { IItemsUshered, ItemsUshered } from '../models/itemsUshered';
 import { UploadCycle } from '../models/uploadCycle';
 import { excelToJson, addFolderMetadataSheet } from '../cliBased/excel/ExcelUtils';
 import { ArchiveUploadExcelProps } from '../archiveDotOrg/archive.types';
@@ -314,27 +314,8 @@ launchGradleRoute.get('/isolateMissingViaUploadCycleId', async (req: any, resp: 
             uploadCycleId: uploadCycleId
         });
         const _missedForUploadCycleId: UploadCycleArchiveProfile[] = await findMissedUploads(uploadCycleId);
-        let isolationStatus = []
-        let errors = []
-        for (let i = 0; i < _missedForUploadCycleId.length; i++) {
-            const archiveProfile = _missedForUploadCycleId[i].archiveProfile;
-            const missedAbsPaths = _missedForUploadCycleId[i].absolutePaths;
-            const _archivePath = getFolderInSrcRootForProfile(archiveProfile);
-            const _isolatedPath = `${_archivePath}_${ISOLATED_FOLDER}`
-            await mkDirIfDoesntExists(_isolatedPath);
-
-            for (let j = 0; j < missedAbsPaths.length; j++) {
-                try {
-                    const missedAbsPath = missedAbsPaths[j];
-                    isolationStatus.push(`Isolating ${missedAbsPath} to ${_isolatedPath}\n`)
-                    console.log(isolationStatus);
-                    await fsPromise.rename(missedAbsPath, path.join(_isolatedPath, path.basename(missedAbsPath)));
-                } catch (err) {
-                    console.log(err)
-                    errors.push(err)
-                }
-            }
-        }
+        console.log(`_missedForUploadCycleId ${JSON.stringify(_missedForUploadCycleId)}`)
+        const { isolationStatus, errors } = await isolateFiles(_missedForUploadCycleId);
         resp.status(200).send({
             response: {
                 success: true,
@@ -357,6 +338,85 @@ launchGradleRoute.get('/isolateMissingViaUploadCycleId', async (req: any, resp: 
         });
     }
 })
+
+
+launchGradleRoute.get('/isolateUploadFailedViaUploadCycleId', async (req: any, resp: any) => {
+    try {
+        const uploadCycleId = req.query.uploadCycleId
+        console.log(`reuploadMissedViaUploadCycleId ${uploadCycleId}`)
+        const uploadCycleByCycleId = await UploadCycle.findOne({
+            uploadCycleId: uploadCycleId
+        });
+        const uploadCyclesByCycleId: IItemsUshered[] = await ItemsUshered.find({ uploadCycleId });
+
+        const _failedForUploadCycleId: UploadCycleArchiveProfile[] =
+            uploadCyclesByCycleId
+                .filter(x => x?.uploadFlag !== true)
+                .map(item => ({
+                    archiveProfile: item.archiveProfile,
+                    absolutePaths: [item.localPath],
+                }));
+        console.log(`_failedForUploadCycleId ${JSON.stringify(_failedForUploadCycleId)}`)
+
+        const { isolationStatus, errors } = await isolateFiles(_failedForUploadCycleId);
+        resp.status(200).send({
+            response: {
+                success: true,
+                res: {
+                    isolationStatus,
+                    errors
+                }
+            }
+        });
+
+    }
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send({
+            response: {
+                success: false,
+
+                err
+            }
+        });
+    }
+})
+
+const isolateFiles = async (_uploadFailedForUploadCycleId: UploadCycleArchiveProfile[]) => {
+
+    if (true) {
+        return {
+            isolationStatus: [],
+            errors: []
+        }
+    }
+    let isolationStatus = []
+    let errors = []
+    for (let i = 0; i < _uploadFailedForUploadCycleId.length; i++) {
+        const archiveProfile = _uploadFailedForUploadCycleId[i].archiveProfile;
+        const absPAths = _uploadFailedForUploadCycleId[i].absolutePaths;
+        const _archivePath = getFolderInSrcRootForProfile(archiveProfile);
+        const _isolatedPath = `${_archivePath}_${ISOLATED_FOLDER}`
+        await mkDirIfDoesntExists(_isolatedPath);
+
+        for (let j = 0; j < absPAths.length; j++) {
+            try {
+                const absPAth = absPAths[j];
+                isolationStatus.push(`Isolating ${absPAth} to ${_isolatedPath}\n`)
+                console.log(isolationStatus);
+                await fsPromise.rename(absPAth, path.join(_isolatedPath, path.basename(absPAth)));
+            } catch (err) {
+                console.log(err)
+                errors.push(err)
+            }
+        }
+    }
+    return {
+        isolationStatus,
+        errors
+    }
+}
+
 const reuploadFailedLogic = async (uploadCycleId: string) => {
     const _itemsUsheredData = await itemsUsheredVerficationAndDBFlagUpdate(uploadCycleId);
 
