@@ -309,7 +309,7 @@ launchGradleRoute.get('/reuploadMissedViaUploadCycleId', async (req: any, resp: 
 launchGradleRoute.get('/isolateMissingViaUploadCycleId', async (req: any, resp: any) => {
     try {
         const uploadCycleId = req.query.uploadCycleId
-        console.log(`reuploadMissedViaUploadCycleId ${uploadCycleId}`)
+        console.log(`isolateMissingViaUploadCycleId ${uploadCycleId}`)
         const uploadCycleByCycleId = await UploadCycle.findOne({
             uploadCycleId: uploadCycleId
         });
@@ -343,7 +343,7 @@ launchGradleRoute.get('/isolateMissingViaUploadCycleId', async (req: any, resp: 
 launchGradleRoute.get('/isolateUploadFailedViaUploadCycleId', async (req: any, resp: any) => {
     try {
         const uploadCycleId = req.query.uploadCycleId
-        console.log(`reuploadMissedViaUploadCycleId ${uploadCycleId}`)
+        console.log(`isolateUploadFailedViaUploadCycleId ${uploadCycleId}`)
         const uploadCycleByCycleId = await UploadCycle.findOne({
             uploadCycleId: uploadCycleId
         });
