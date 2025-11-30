@@ -4,6 +4,7 @@ import { exec } from 'child_process';
 import * as path from 'path';
 import { downloadFromGoogleDriveToProfile, MAX_GOOGLE_DRIVE_ITEM_PROCESSABLE } from '../cliBased/googleapi/GoogleDriveApiReadAndDownload';
 import { DOWNLOAD_COMPLETED_COUNT, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT, resetDownloadCounters } from '../cliBased/pdf/utils';
+
 import { listFolderContentsAsArrayOfData } from '../cliBased/googleapi/service/GoogleApiService';
 import { getGoogleDriveInstance } from '../cliBased/googleapi/service/CreateGoogleDrive';
 
@@ -14,14 +15,13 @@ import { generateGoogleDriveListingExcel, getFolderNameFromGDrive } from '../cli
 import { formatTime } from '../imgToPdf/utils/Utils';
 import { convertGDriveExcelToLinkData, downloadGDriveData } from '../services/GDriveItemService';
 import { findInvalidFilePaths, isValidPath, getPathOrSrcRootForProfile } from '../utils/FileUtils';
-import { ComparisonResult, GDRIVE_DEFAULT_IGNORE_FOLDER, verifyGDriveLocalIntegirtyPerLink, verifyGDriveLocalIntegrity } from '../services/GDriveService';
+import { GDRIVE_DEFAULT_IGNORE_FOLDER, verifyGDriveLocalIntegirtyPerLink, verifyGDriveLocalIntegrity } from '../services/GDriveService';
 import { verifyUnzipSuccessInDirectory } from '../services/zipService';
 import { markVerifiedForGDriveDownload } from '../services/gDriveDownloadService';
 import GDriveDownload from '../models/GDriveDownloadHistorySchema';
 import { extractGoogleDriveId } from '../mirror/GoogleDriveUtilsCommonCode';
-import { createFolderIfNotExistsAsync } from '../utils/FileUtils';
-import { GoogleApiDataWithLocalData } from '../cliBased/googleapi/types';
 import { createManuExcelVersion, createMimimalExcelVersion, ExcelWriteResult } from '../cliBased/excel/ExcelUtils';
+import { redownloadFromGDriveService, RedownloadHttpError, verifyLocalDownloadSameAsGDriveService } from '../services/GDriveDownloadVerifyService';
 
 export const gDriveRoute = express.Router();
 const drive = getGoogleDriveInstance();
@@ -287,216 +287,107 @@ gDriveRoute.post('/verifyLocalDownloadSameAsGDrive', async (req: any, resp: any)
     try {
         const id = req?.body?.id || "";
         const verifyBySizeOnly = req?.body?.verifyBySizeOnly || false;
-        let googleDriveLink: string, folderOrProfile: string, fileType: string, ignoreFolder: string;
-        if (id && id !== "") {
-            const _gDriveDownload = await GDriveDownload.findById(id);
-            googleDriveLink = _gDriveDownload?.googleDriveLink;
-            folderOrProfile = _gDriveDownload?.fileDumpFolder;
-            fileType = _gDriveDownload?.downloadType;
-            ignoreFolder = _gDriveDownload?.ignoreFolder || GDRIVE_DEFAULT_IGNORE_FOLDER;
+        const googleDriveLink = req?.body?.googleDriveLink;
+        const profile = req?.body?.profile;
+        const downloadType = req?.body?.downloadType;
+        const ignoreFolder = req?.body?.ignoreFolder;
 
-        }
-        else {
-            googleDriveLink = req?.body?.googleDriveLink;
-            const _profile = req?.body?.profile || "";
-            fileType = req?.body?.downloadType || PDF_TYPE;
-            ignoreFolder = req?.body?.ignoreFolder || GDRIVE_DEFAULT_IGNORE_FOLDER;
-            folderOrProfile = getPathOrSrcRootForProfile(_profile)
-            console.log(`verifyLocalDownloadSameAsGDrive:folderOrProfile: ${folderOrProfile}`)
-        }
+        const result = await verifyLocalDownloadSameAsGDriveService({
+            id,
+            googleDriveLink,
+            profile,
+            downloadType,
+            ignoreFolder,
+            verifyBySizeOnly,
+        });
 
-        if (!googleDriveLink || !folderOrProfile) {
-            return resp.status(400).send({
-                response: {
-                    "status": "failed",
-                    "success": false,
-                    "msg": `Invalid Google Drive Link (${googleDriveLink}) or Folder/Profile (${folderOrProfile}). Pls. provide valid values`
-                }
-            });
-        }
-
-        const startTime = Date.now();
-        if (id && id !== "") {
-            const _linksGen = genLinksAndFolders(googleDriveLink, folderOrProfile)
-            if (_linksGen.error) {
-                resp.status(400).send({
-                    response: {
-                        "status": "failed",
-                        "success": false,
-                        "message": _linksGen.message
-                    }
-                });
-            }
-            const rootFolders = await Promise.all(_linksGen._links.map(async (link) => await getFolderNameFromGDrive(link) || ""));
-            const foldersWithRoot = _linksGen._folders.map((folder, index) => {
-                const fileDumpFolder = getPathOrSrcRootForProfile(folder);
-                return path.join(fileDumpFolder, rootFolders[index]);
-            });
-
-            console.log(`verifyLocalDownloadSameAsGDrive:foldersWithRoot: ${foldersWithRoot}  ${rootFolders}`);
-            const _results = await verifyGDriveLocalIntegrity(_linksGen._links, foldersWithRoot, ignoreFolder, fileType, verifyBySizeOnly);
-            const endTime = Date.now();
-            const timeTaken = endTime - startTime;
-            const success = _results.response.comparisonResult.every(r => r.success);
-            await markVerifiedForGDriveDownload(id, success);
-            if (fileType === ZIP_TYPE) {
-                // Get the unzip verification results
-                const unzipResults = await Promise.all(foldersWithRoot.map(async (folder) => {
-                    const result = await verifyUnzipSuccessInDirectory(folder, "", ignoreFolder);
-                    return {
-                        success,
-                        folder,
-                        ...result
-                    };
-                }));
-
-                // Add unzip verification results to the response
-                const response = {
-                    success,
-                    ..._results,
-                    timeTaken: timeInfo(timeTaken),
-                    unzipVerification: {
-                        totalSuccessCount: unzipResults.reduce((sum, r) => sum + r.success_count, 0),
-                        totalErrorCount: unzipResults.reduce((sum, r) => sum + r.error_count, 0),
-                        resultsByFolder: unzipResults.map(result => ({
-                            folder: result.folder,
-                            successCount: result.success_count,
-                            errorCount: result.error_count,
-                            unzipFolder: result.unzipFolder,
-                            zipFilesFailed: result.zipFilesFailed
-                        }))
-                    }
-                };
-                resp.status(200).send(response);
-
-            }
-
-            else {
-                resp.status(200).send({
-                    ..._results,
-                    timeTaken: timeInfo(timeTaken)
-                });
-            }
-        }
-        else {
-            const _results = await verifyGDriveLocalIntegirtyPerLink(googleDriveLink, folderOrProfile, ignoreFolder, fileType, verifyBySizeOnly);
-            const endTime = Date.now();
-            const timeTaken = endTime - startTime;
-            resp.status(200).send({
-                ..._results,
-                timeTaken: timeInfo(timeTaken)
-            });
-        }
+        resp.status(result.statusCode).send(result.body);
     }
     catch (err: any) {
-        console.log('Error', err);
-        resp.status(400).send(err);
+        if (err instanceof RedownloadHttpError) {
+            resp.status(err.statusCode).send(err.body);
+        } else {
+            console.log('Error', err);
+            resp.status(400).send(err);
+        }
+    }
+})
+
+gDriveRoute.post('/verifyLocalDownloadSameAsGDriveMulti', async (req: any, resp: any) => {
+    console.log(`verifyLocalDownloadSameAsGDrive ${JSON.stringify(req.body)}`)
+    try {
+        const selectedIds = req?.body?.selectedIds;
+
+        if (!selectedIds || selectedIds.length === 0) {
+            return resp.status(400).json({ status: 'failed', message: 'atleast one selectedId is required' });
+        }
+        const results = []
+        for (const selectedId of selectedIds) {
+            try {
+                const result = await verifyLocalDownloadSameAsGDriveService({ id: selectedId });
+                results.push(result.body);
+            }
+            catch (error: any) {
+                console.error(`/ aiRenamer /:runId retry error: ${error?.message || String(error)} `);
+                results.push({ status: 'failed', message: error?.message || String(error) });
+            }
+        }
+        return resp.status(200).json(results);
+    } catch (error: any) {
+        console.error(`/ aiRenamer /:runId retry error: ${error?.message || String(error)} `);
+        return resp.status(500).json({ status: 'failed', message: error?.message || String(error) });
     }
 })
 
 gDriveRoute.post('/redownloadFromGDrive', async (req: any, resp: any) => {
     const startTime = Date.now();
     try {
-        const id = req?.body?.id || "";
-        const _gDriveDownload = await GDriveDownload.findById(id);
-        const googleDriveLink = _gDriveDownload?.googleDriveLink;
-        const folderOrProfile = _gDriveDownload?.fileDumpFolder;
-        const fileType = _gDriveDownload?.downloadType;
-        const ignoreFolder = _gDriveDownload?.ignoreFolder || GDRIVE_DEFAULT_IGNORE_FOLDER;
+        const id = req?.body?.id || '';
 
-        if (!_gDriveDownload) {
-            return resp.status(400).send({
-                response: {
-                    "status": "failed",
-                    "success": false,
-                    "msg": `Invalid Id(${id}). Pls. provide valid values`
-                }
-            });
-        }
+        const result = await redownloadFromGDriveService({ id });
 
-        console.log(`:redownloadFromGDrive:googleDriveLink: ${googleDriveLink} folderOrProfile: ${folderOrProfile}`)
-        const _linksGen = genLinksAndFolders(googleDriveLink, folderOrProfile)
-        console.log(`_linksGen: ${JSON.stringify(_linksGen)}`)
-        if (_linksGen.error) {
-            resp.status(400).send({
-                response: {
-                    "status": "failed",
-                    "success": false,
-                    "message": _linksGen.message
-                }
-            });
-            return;
-        }
+        const endTime = Date.now();
+        const timeTaken = endTime - startTime;
+        console.log(`Time taken to download for /redownloadFromGDrive: ${timeInfo(timeTaken)}`);
 
-        const _rootFolders = await Promise.all(_linksGen._links.map(async (link) => await getFolderNameFromGDrive(link) || ""));
-        const foldersWithRoot2 = _linksGen._folders.map((folder, index) => {
-            const fileDumpFolder = getPathOrSrcRootForProfile(folder);
-            console.log(`:redownloadFromGDrive:loop ${index + 1} ${_linksGen._links[index]} ${folder} ${fileDumpFolder} ${ignoreFolder} ${fileType}`);
-            return path.join(fileDumpFolder, _rootFolders[index]);
-        });
-
-        const _results = await verifyGDriveLocalIntegrity(_linksGen._links, foldersWithRoot2, ignoreFolder, fileType);
-        console.log(`verifyLocalDownloadSameAsGDrive:foldersWithRoot: ${foldersWithRoot2}  ${_rootFolders}`);
-        const resultResponse = _results.response;
-        const comparisonResult: ComparisonResult[] = resultResponse.comparisonResult;
-        const success = comparisonResult.every(r => r.success);
-        if (!success) {
-            const failedGDriveData: GoogleApiDataWithLocalData[] = resultResponse.googleDriveFileStats.flatMap((gDriveData: GoogleApiDataWithLocalData[]) => {
-                return [...gDriveData.filter((file) => !file.success)];
-            });
-
-            const gDriveDownloadId = _gDriveDownload?.id;
-            resetDownloadCounters(_gDriveDownload?.runId || "")
-            const downloadPromises = failedGDriveData.map(async (gDriveData: GoogleApiDataWithLocalData, index: number) => {
-                console.log(`:redownloadFromGDrive:loop ${index + 1} ${gDriveData.googleDriveLink} 
-                         ${ignoreFolder} ${fileType} ${gDriveDownloadId}`);
-                const _folder = path.dirname(gDriveData.localAbsPath);
-                await createFolderIfNotExistsAsync(_folder);
-                return downloadFromGoogleDriveToProfile(gDriveData.googleDriveLink,
-                    _folder,
-                    ignoreFolder,
-                    fileType,
-                    _gDriveDownload?.runId || "", _gDriveDownload?.commonRunId || "",
-                    gDriveDownloadId);
-            });
-            // Wait for all downloads to complete
-            const results = await Promise.all(downloadPromises);
-            console.log(`results ${JSON.stringify(results)}`);
-            const resultsSummary = results.map((res: any, index: number) => {
-                return `(${index + 1}). Succ: ${res.success_count} Err: ${res.error_count} Wrong Size: ${res.dl_wrong_size_count}`;
-            });
-
-            const endTime = Date.now();
-            const timeTaken = endTime - startTime;
-            console.log(`Time taken to download for /redownloadFromGDrive: ${timeInfo(timeTaken)}`);
-
-            resp.status(200).send({
-                msg: `${failedGDriveData.length} links attempted-download to ${foldersWithRoot2.length} profiles`,
-                timeTaken: timeInfo(timeTaken),
-                resultsSummary,
-                response: results,
-                failedItems: failedGDriveData,
-
-            });
-        }
-        else {
-            const endTime = Date.now();
-            const timeTaken = endTime - startTime;
-            resp.status(200).send({
-                msg: `No failed items to download`,
-                failedItems: [],
-                timeTaken: timeInfo(timeTaken),
-                resultsSummary: [],
-                response: []
-            });
-        }
-
+        resp.status(result.statusCode).send(result.body);
     }
     catch (err: any) {
-        console.log('Error', err);
-        resp.status(400).send(err);
+        if (err instanceof RedownloadHttpError) {
+            resp.status(err.statusCode).send(err.body);
+        } else {
+            console.log('Error', err);
+            resp.status(400).send(err);
+        }
     }
 })
+
+gDriveRoute.post('/redownloadFromGDriveMulti', async (req: any, resp: any) => {
+
+    try {
+        const selectedIds = req?.body?.selectedIds;
+
+        if (!selectedIds || selectedIds.length === 0) {
+            return resp.status(400).json({ status: 'failed', message: 'atleast one selectedId is required' });
+        }
+        const results = []
+        for (const selectedId of selectedIds) {
+            try {
+                const result = await redownloadFromGDriveService({ id: selectedId });
+                results.push(result.body);
+            }
+            catch (error: any) {
+                console.error(`/ aiRenamer /:runId retry error: ${error?.message || String(error)} `);
+                results.push({ status: 'failed', message: error?.message || String(error) });
+            }
+        }
+        return resp.status(200).json(results);
+    } catch (error: any) {
+        console.error(`/ redownloadFromGDriveMulti error: ${error?.message || String(error)} `);
+        return resp.status(500).json({ status: 'failed', message: error?.message || String(error) });
+    }
+});
+
 
 gDriveRoute.get("/getRefreshToken", async (req: any, resp: any) => {
     try {

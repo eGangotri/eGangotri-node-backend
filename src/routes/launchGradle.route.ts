@@ -462,7 +462,7 @@ launchGradleRoute.post('/reuploadFailedMulti', async (req: any, resp: any) => {
     try {
         const uploadCycleIds = req.body.uploadCycleIds
         if (!uploadCycleIds || uploadCycleIds.length === 0) {
-            return resp.status(400).json({ status: 'failed', message: 'atleast one uploadCycleIds is required' });
+            return resp.status(400).json({ status: 'failed', message: 'atleast one uploadCycleId is required' });
         }
         const results = []
         for (const uploadCycleId of uploadCycleIds) {
