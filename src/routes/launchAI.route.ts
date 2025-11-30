@@ -154,6 +154,29 @@ launchAIRoute.post('/aiRenamer/:runId', async (req: Request, res: Response) => {
     }
 });
 
+launchAIRoute.post('/aiRenamerRedo', async (req: Request, res: Response) => {
+    try {
+        const selectedRunIds = req.body.selectedRunIds;
+        if (!selectedRunIds || selectedRunIds.length === 0) {
+            return res.status(400).json({ status: 'failed', message: 'selectedRunIds is required' });
+        }
+        const results = []
+        for (const runId of selectedRunIds) {
+            try{
+            const result = await retryAiRenamerByRunId(runId);
+            results.push(result);
+            }
+            catch (error: any) {
+                console.error(`/ aiRenamer /:runId retry error: ${error?.message || String(error)} `);
+                results.push({ status: 'failed', message: error?.message || String(error) });
+            }
+        }
+        return res.status(200).json(results);
+    } catch (error: any) {
+        console.error(`/ aiRenamer /:runId retry error: ${error?.message || String(error)} `);
+        return res.status(500).json({ status: 'failed', message: error?.message || String(error) });
+    }
+});
 // ai/getAllTitleRenamedViaAIList
 launchAIRoute.get("/getAllTitleRenamedViaAIList", async (req: Request, res: express.Response) => {
     try {
