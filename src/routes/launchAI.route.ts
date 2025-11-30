@@ -162,9 +162,9 @@ launchAIRoute.post('/aiRenamerRedo', async (req: Request, res: Response) => {
         }
         const results = []
         for (const runId of selectedRunIds) {
-            try{
-            const result = await retryAiRenamerByRunId(runId);
-            results.push(result);
+            try {
+                const result = await retryAiRenamerByRunId(runId);
+                results.push(result);
             }
             catch (error: any) {
                 console.error(`/ aiRenamer /:runId retry error: ${error?.message || String(error)} `);
