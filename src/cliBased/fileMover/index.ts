@@ -162,7 +162,7 @@ export async function moveFilesAndFlatten(sourceDir: string, targetDir: string, 
     const allDestPdfsAfter: FileStats[] = await getAllPDFFiles(targetDir);
     console.timeEnd('getAllPDFFiles (Dest - Post Move)');
 
-    const msg = `${(allDestPdfsAfter?.length - allDestPdfs?.length)} of ${_count}files moved from Source dir ${sourceDir} to target dir ${targetDir}`;
+    const msg = `${(allDestPdfsAfter?.length - allDestPdfs?.length)} of ${_count} files moved from Source dir ${sourceDir} to target dir ${targetDir}`;
     console.log(msg);
     await launchWinExplorer(targetDir);
     await launchWinExplorer(sourceDir);
