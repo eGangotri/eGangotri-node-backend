@@ -1,7 +1,7 @@
 import * as express from 'express';
 import path from 'path';
 import * as fsPromise from 'fs/promises';
-import { launchUploader, launchUploaderViaAbsPath, launchUploaderViaExcelV1, launchUploaderViaExcelV3, launchUploaderViaExcelV3Multi, launchUploaderViaJson, loginToArchive, makeGradleCall, moveToFreeze, reuploadMissed, snap2htmlCmdCall } from '../services/gradleLauncherService';
+import { launchUploader, launchUploaderViaAbsPath, launchUploaderViaExcelV1, launchUploaderViaExcelV3, launchUploaderViaExcelV3Multi, launchUploaderViaJson, loginToArchive, makeGradleCall, moveToFreeze, reuploadFailedLogic, reuploadMissed, snap2htmlCmdCall } from '../services/gradleLauncherService';
 import { ArchiveProfileAndTitle, UploadCycleArchiveProfile } from '../mirror/types';
 import { isValidPath } from '../utils/FileUtils';
 import { getFolderInDestRootForProfile, getFolderInSrcRootForProfile } from '../archiveUpload/ArchiveProfileUtils';
@@ -10,7 +10,6 @@ import { UploadCycle } from '../models/uploadCycle';
 import { excelToJson, addFolderMetadataSheet } from '../cliBased/excel/ExcelUtils';
 import { ArchiveUploadExcelProps } from '../archiveDotOrg/archive.types';
 import { createExcelV1FileForUpload, createExcelV3FileForUpload, createJsonFileForUpload, findMissedUploads } from '../services/GradleLauncherUtil';
-import { itemsUsheredVerficationAndDBFlagUpdate } from '../services/itemsUsheredService';
 import { getLatestUploadCycle } from '../services/uploadCycleService';
 import { checkIfEmpty } from '../utils/FileUtils';
 import { timeInfo } from '../mirror/FrontEndBackendCommonCode';
@@ -18,6 +17,7 @@ import { runCr2ToJpgInLoop } from '../services/pythonRestService';
 import { isPDFCorrupted } from '../utils/pdfValidator';
 import { getAllPdfsInFoldersRecursive, mkDirIfDoesntExists } from '../imgToPdf/utils/Utils';
 import { extractValue } from './utils';
+import { itemsUsheredVerficationAndDBFlagUpdate } from '../services/itemsUsheredService';
 
 export const launchGradleRoute = express.Router();
 export const ISOLATED_FOLDER = "isolated";
@@ -410,34 +410,8 @@ const isolateFiles = async (_uploadFailedForUploadCycleId: UploadCycleArchivePro
     }
 }
 
-const reuploadFailedLogic = async (uploadCycleId: string) => {
-    const _itemsUsheredData = await itemsUsheredVerficationAndDBFlagUpdate(uploadCycleId);
 
-    console.log(`reuploadFailedLogic check for ${uploadCycleId}`)
-    const uploadCyclesByCycleId = await ItemsUshered.find({
-        uploadCycleId: uploadCycleId
-    });
-    //to account for nulls
-    const _failedForUploacCycleId = uploadCyclesByCycleId.filter(x => x?.uploadFlag !== true)
-    if (_failedForUploacCycleId.length > 0) {
-        const jsonFileName = await createJsonFileForUpload(uploadCycleId,
-            _failedForUploacCycleId,
-            `${_failedForUploacCycleId.length}-of-${uploadCyclesByCycleId.length}`)
 
-        const res = await launchUploaderViaJson(jsonFileName)
-        return {
-            res,
-            failedItemsAttemptedReupload: _itemsUsheredData.failureCount
-        }
-    }
-    else {
-        console.log(`No Failed upload found for Upload Cycle Id: ${uploadCycleId}`);
-        return {
-            noFailedUploads: true,
-            failureCount: 0
-        }
-    }
-}
 launchGradleRoute.get('/reuploadFailed', async (req: any, resp: any) => {
     try {
         const uploadCycleId = req.query.uploadCycleId
@@ -484,6 +458,39 @@ launchGradleRoute.get('/reuploadFailed', async (req: any, resp: any) => {
 })
 
 
+launchGradleRoute.post('/reuploadFailedMulti', async (req: any, resp: any) => {
+    try {
+        const uploadCycleIds = req.query.uploadCycleIds
+        if (!uploadCycleIds || uploadCycleIds.length === 0) {
+            return resp.status(400).json({ status: 'failed', message: 'atleast one uploadCycleIds is required' });
+        }
+        const results = []
+        for (const uploadCycleId of uploadCycleIds) {
+            try {
+                const result = await reuploadFailedLogic(uploadCycleId);
+                if (result.noFailedUploads === true) {
+                    results.push({
+                        success: true,
+                        noFailedUploads: true,
+                        msg: `No Failed upload found for Upload Cycle Id: ${uploadCycleId}`,
+                        ...result
+                    });
+                }
+                else {
+                    results.push(result);
+                }
+            }
+            catch (error: any) {
+                console.error(`/ aiRenamer /:runId retry error: ${error?.message || String(error)} `);
+                results.push({ status: 'failed', message: error?.message || String(error) });
+            }
+        }
+        return resp.status(200).json(results);
+    } catch (error: any) {
+        console.error(`/ reuploadFailedMulti /:runId retry error: ${error?.message || String(error)} `);
+        return resp.status(500).json({ status: 'failed', message: error?.message || String(error) });
+    }
+});
 
 launchGradleRoute.get('/launchUploaderViaAbsPath', async (req: any, resp: any) => {
     try {

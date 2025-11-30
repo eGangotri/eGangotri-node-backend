@@ -4,6 +4,9 @@ import { WORKING_DIR } from '../common';
 import { ArchiveProfileAndTitle } from '../mirror/types';
 import path from 'path';
 import { stripQuotes } from '../excelToMongo/Util';
+import { itemsUsheredVerficationAndDBFlagUpdate } from '../services/itemsUsheredService';
+import { createJsonFileForUpload } from '../services/GradleLauncherUtil';
+import { ItemsUshered } from '../models/itemsUshered';
 
 
 /*
@@ -11,6 +14,34 @@ gradle uploadToArchiveSelective --args="your_arg1 your_arg2"
 */
 
 
+export const reuploadFailedLogic = async (uploadCycleId: string) => {
+    const _itemsUsheredData = await itemsUsheredVerficationAndDBFlagUpdate(uploadCycleId);
+
+    console.log(`reuploadFailedLogic check for ${uploadCycleId}`)
+    const uploadCyclesByCycleId = await ItemsUshered.find({
+        uploadCycleId: uploadCycleId
+    });
+    //to account for nulls
+    const _failedForUploacCycleId = uploadCyclesByCycleId.filter(x => x?.uploadFlag !== true)
+    if (_failedForUploacCycleId.length > 0) {
+        const jsonFileName = await createJsonFileForUpload(uploadCycleId,
+            _failedForUploacCycleId,
+            `${_failedForUploacCycleId.length}-of-${uploadCyclesByCycleId.length}`)
+
+        const res = await launchUploaderViaJson(jsonFileName)
+        return {
+            res,
+            failedItemsAttemptedReupload: _itemsUsheredData.failureCount
+        }
+    }
+    else {
+        console.log(`No Failed upload found for Upload Cycle Id: ${uploadCycleId}`);
+        return {
+            noFailedUploads: true,
+            failureCount: 0
+        }
+    }
+}
 
 const gradleCommandFormat = (args: string, gradleCommand: string) => {
     const cmd = `gradle ${gradleCommand} --args="${args}"`
@@ -44,19 +75,19 @@ const generateGradleCommandForChar = (args: string, gradleCommand: string, char:
 export function launchUploader(args: any, optionalParams: string = ""): Promise<Record<string, any>> {
     console.log(`launchUploader ${args} ${optionalParams}`);
     //export function launchUploader(args: any, optionalParams:object = { [key: string]: any} = {}): Promise<string> {
-    let _cmd =generateGradleCommandForCSV(`${args}`, "uploadToArchive");
-   // _cmd + = ", ${optionalParams.replace(/,/g, "")""
-   if(optionalParams?.trim() != ""){
-    optionalParams = " '" + optionalParams + "'"
-    _cmd = _cmd.replace(/"$/, optionalParams + "\"")
-   }
-   console.log(`_cmd with optionalParams: ${_cmd}`);
+    let _cmd = generateGradleCommandForCSV(`${args}`, "uploadToArchive");
+    // _cmd + = ", ${optionalParams.replace(/,/g, "")""
+    if (optionalParams?.trim() != "") {
+        optionalParams = " '" + optionalParams + "'"
+        _cmd = _cmd.replace(/"$/, optionalParams + "\"")
+    }
+    console.log(`_cmd with optionalParams: ${_cmd}`);
 
-    return  makeGradleCall(_cmd)
+    return makeGradleCall(_cmd)
 }
 
 export function launchUploaderViaExcelV1Old(profile: string, excelPath: string, uploadCycleId: string): Promise<Record<string, any>> {
-    
+
     const gradleArgsAsJSON = `{'profile': '${profile}','excelPath':'${excelPath}','uploadCycleId': '${uploadCycleId}'}`
     return makeGradleCall(
         `gradle uploadToArchiveViaExcelV1WithFourCols -PjsonArgs="${gradleArgsAsJSON}"`)
@@ -65,7 +96,7 @@ export function launchUploaderViaExcelV1Old(profile: string, excelPath: string, 
 export function launchUploaderViaExcelV1(profile: string, excelPath: string, uploadCycleId: string): Promise<Record<string, any>> {
     // Escape backslashes in the path
     const escapedExcelPath = excelPath.replace(/\\/g, '\\\\');
-    
+
     const gradleArgsAsJSON = `{'profile': '${profile}','excelPath':'${escapedExcelPath}','range': '${uploadCycleId}'}`;
     return makeGradleCall(
         `gradle uploadToArchiveViaExcelV1WithFourCols -PjsonArgs="${gradleArgsAsJSON}"`);
@@ -135,7 +166,7 @@ const COMMAND_PROMO_MAX_BUFFER_SIZE = 1024 * 1024 * 1024;
 
 const execAsync = promisify(exec); // Promisify the exec function for async/await usage
 
-export async function makeGradleCall(_cmd: string): Promise<Record<string, any>> {   
+export async function makeGradleCall(_cmd: string): Promise<Record<string, any>> {
     console.log(`makeGradleCall ${_cmd}`);
     let stdout: string;
     let stderr: string;
