@@ -1,6 +1,7 @@
 import * as mongoose from 'mongoose';
 
 export interface IPdfTitleAndFileRenamingTrackerViaAI {
+  commonRunId: string;
   runId: string;
   processedCount: number;
   successCount: number;

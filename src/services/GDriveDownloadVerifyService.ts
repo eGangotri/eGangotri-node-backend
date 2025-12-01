@@ -1,4 +1,5 @@
 import * as path from 'path';
+import mongoose from 'mongoose';
 
 import { downloadFromGoogleDriveToProfile } from '../cliBased/googleapi/GoogleDriveApiReadAndDownload';
 import { timeInfo } from '../mirror/FrontEndBackendCommonCode';
@@ -8,7 +9,7 @@ import { getPathOrSrcRootForProfile } from '../utils/FileUtils';
 import { GDRIVE_DEFAULT_IGNORE_FOLDER, verifyGDriveLocalIntegirtyPerLink, verifyGDriveLocalIntegrity, ComparisonResult } from './GDriveService';
 import { resetDownloadCounters } from '../cliBased/pdf/utils';
 import { createFolderIfNotExistsAsync } from '../utils/FileUtils';
-import GDriveDownload from '../models/GDriveDownloadHistorySchema';
+import GDriveDownload, { IGDriveDownload } from '../models/GDriveDownloadHistory';
 import { GoogleApiDataWithLocalData } from '../cliBased/googleapi/types';
 import { PDF_TYPE, ZIP_TYPE } from '../cliBased/googleapi/_utils/constants';
 import { verifyUnzipSuccessInDirectory } from './zipService';
@@ -38,11 +39,11 @@ export async function redownloadFromGDriveService(params: {
     const ignoreFolder = _gDriveDownload?.ignoreFolder || GDRIVE_DEFAULT_IGNORE_FOLDER;
 
     if (!_gDriveDownload) {
-        throw new RedownloadHttpError(400, {
+        throw new RedownloadHttpError(404, {
             response: {
                 status: 'failed',
                 success: false,
-                msg: `Invalid Id(${id}). Pls. provide valid values`,
+                msg: `GDrive download record not found for id: ${id}`,
             },
         });
     }
@@ -84,7 +85,7 @@ export async function redownloadFromGDriveService(params: {
                 },
             );
 
-        const gDriveDownloadId = _gDriveDownload.id;
+        const gDriveDownloadId = _gDriveDownload._id.toString();
         resetDownloadCounters(_gDriveDownload.runId || '');
         const downloadPromises = failedGDriveData.map(
             async (gDriveData: GoogleApiDataWithLocalData) => {
@@ -104,9 +105,8 @@ export async function redownloadFromGDriveService(params: {
 
         const results = await Promise.all(downloadPromises);
         const resultsSummary = results.map((res: any, index: number) => {
-            return `(${index + 1}). Succ: ${res.success_count} Err: ${
-                res.error_count
-            } Wrong Size: ${res.dl_wrong_size_count}`;
+            return `(${index + 1}). Succ: ${res.success_count} Err: ${res.error_count
+                } Wrong Size: ${res.dl_wrong_size_count}`;
         });
 
         const endTime = Date.now();
@@ -159,13 +159,28 @@ export async function verifyLocalDownloadSameAsGDriveService(params: {
     let folderOrProfile: string | undefined;
     let fileType: string = downloadType || PDF_TYPE;
     let ignoreFolder = inputIgnoreFolder || GDRIVE_DEFAULT_IGNORE_FOLDER;
-
+    
+    console.log(`verifyLocalDownloadSameAsGDrive {"id":"${id}"}`);
+    
     if (id && id !== '') {
+        console.log(`verifyLocalDownloadSameAsGDrive:id ${id}`);
+        
         const gDriveDownload = await GDriveDownload.findById(id);
-        googleDriveLink = gDriveDownload?.googleDriveLink;
-        folderOrProfile = gDriveDownload?.fileDumpFolder;
-        fileType = gDriveDownload?.downloadType || fileType;
-        ignoreFolder = gDriveDownload?.ignoreFolder || ignoreFolder;
+        
+        if (!gDriveDownload) {
+            throw new RedownloadHttpError(404, {
+                response: {
+                    status: 'failed',
+                    success: false,
+                    msg: `GDrive download record not found for id: ${id}`,
+                },
+            });
+        }
+        
+        googleDriveLink = gDriveDownload.googleDriveLink;
+        folderOrProfile = gDriveDownload.fileDumpFolder;
+        fileType = gDriveDownload.downloadType || fileType;
+        ignoreFolder = gDriveDownload.ignoreFolder || ignoreFolder;
     } else {
         googleDriveLink = inputGoogleDriveLink;
         const _profile = profile || '';

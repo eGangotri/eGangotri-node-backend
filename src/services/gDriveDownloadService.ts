@@ -1,4 +1,4 @@
-import GDriveDownload from "../models/GDriveDownloadHistorySchema";
+import GDriveDownload from "../models/GDriveDownloadHistory";
 
 export const markVerifiedForGDriveDownload = async (id: string, success: boolean) => {
     const gDriveDownload = await GDriveDownload.findById(id);

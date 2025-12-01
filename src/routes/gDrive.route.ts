@@ -18,7 +18,7 @@ import { findInvalidFilePaths, isValidPath, getPathOrSrcRootForProfile } from '.
 import { GDRIVE_DEFAULT_IGNORE_FOLDER, verifyGDriveLocalIntegirtyPerLink, verifyGDriveLocalIntegrity } from '../services/GDriveService';
 import { verifyUnzipSuccessInDirectory } from '../services/zipService';
 import { markVerifiedForGDriveDownload } from '../services/gDriveDownloadService';
-import GDriveDownload from '../models/GDriveDownloadHistorySchema';
+import GDriveDownload from '../models/GDriveDownloadHistory';
 import { extractGoogleDriveId } from '../mirror/GoogleDriveUtilsCommonCode';
 import { createManuExcelVersion, createMimimalExcelVersion, ExcelWriteResult } from '../cliBased/excel/ExcelUtils';
 import { redownloadFromGDriveService, RedownloadHttpError, verifyLocalDownloadSameAsGDriveService } from '../services/GDriveDownloadVerifyService';
@@ -291,7 +291,6 @@ gDriveRoute.post('/verifyLocalDownloadSameAsGDrive', async (req: any, resp: any)
         const profile = req?.body?.profile;
         const downloadType = req?.body?.downloadType;
         const ignoreFolder = req?.body?.ignoreFolder;
-
         const result = await verifyLocalDownloadSameAsGDriveService({
             id,
             googleDriveLink,
@@ -301,6 +300,7 @@ gDriveRoute.post('/verifyLocalDownloadSameAsGDrive', async (req: any, resp: any)
             verifyBySizeOnly,
         });
 
+        console.log(`verifyLocalDownloadSameAsGDrive result: ${JSON.stringify(result)}`);
         resp.status(result.statusCode).send(result.body);
     }
     catch (err: any) {
@@ -328,13 +328,13 @@ gDriveRoute.post('/verifyLocalDownloadSameAsGDriveMulti', async (req: any, resp:
                 results.push(result.body);
             }
             catch (error: any) {
-                console.error(`/ aiRenamer /:runId retry error: ${error?.message || String(error)} `);
+                console.error(`verifyLocalDownloadSameAsGDriveMulti:selectedId ${selectedId} error: ${error?.message || String(error)} `);
                 results.push({ status: 'failed', message: error?.message || String(error) });
             }
         }
         return resp.status(200).json(results);
     } catch (error: any) {
-        console.error(`/ aiRenamer /:runId retry error: ${error?.message || String(error)} `);
+        console.error(`-verifyLocalDownloadSameAsGDriveMulti ${req?.body?.selectedIds} error: ${error?.message || String(error)} `);
         return resp.status(500).json({ status: 'failed', message: error?.message || String(error) });
     }
 })

@@ -1,6 +1,6 @@
 const express = require("express");
 import { Request, Response } from 'express';
-import GDriveDownload, { IGDriveDownload } from '../models/GDriveDownloadHistorySchema';
+import GDriveDownload, { IGDriveDownload } from '../models/GDriveDownloadHistory';
 import { refreshGdriveToken } from '../cliBased/googleapi/_utils/getRefreshToken';
 
 export const gDriveDownloadRoute = express.Router();
@@ -17,7 +17,8 @@ gDriveDownloadRoute.post("/createGDriveDownload", async (req: Request, res: Resp
             gDriveRootFolder,
             msg,
             runId,
-            commonRunId
+            commonRunId,
+            totalCount: 0
         });
         await newGDriveDownload.save();
         console.log(`/createGDriveDownload created: ${JSON.stringify(newGDriveDownload)}`);

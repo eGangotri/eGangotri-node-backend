@@ -5,7 +5,7 @@ import { getGoogleDriveInstance } from './service/CreateGoogleDrive';
 import { downloadFileFromGoogleDrive } from '../pdf/downloadFile';
 import { getFolderInSrcRootForProfile } from '../../archiveUpload/ArchiveProfileUtils';
 import { DOWNLOAD_COMPLETED_COUNT, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT, DOWNLOAD_FAILED_COUNT } from '../../cliBased/pdf/utils';
-import { insertEntryForGDriveUploadHistory, updateEntryForGDriveUploadHistory } from '../../services/GdriveDownloadRecordService';
+import { insertEntryForGDriveUploadHistory, updateEntryForGDriveUploadHistory, updateTotalFileCountForGDriveUploadHistory } from '../../services/GdriveDownloadRecordService';
 import { getAllPdfsInFolders, getDirectoriesWithFullPath } from '../../imgToPdf/utils/Utils';
 import { addHeaderAndFooterToPDF } from '../../pdfHeaderFooter';
 import { isValidPath, getPathOrSrcRootForProfile } from "../../utils/FileUtils";
@@ -51,7 +51,7 @@ async function dwnldAllFilesFromGDrive(driveLinkOrFolderID: string,
 
       await updateEntryForGDriveUploadHistory(gDriveDownloadTaskId,
         `Started download of single file: ${fileData.fileName}`,
-        DownloadHistoryStatus.InProgress);
+        DownloadHistoryStatus.InProgress, {}, 1);
 
       const result = await downloadFileFromGoogleDrive(
         fileData.googleDriveLink,
@@ -94,17 +94,18 @@ async function dwnldAllFilesFromGDrive(driveLinkOrFolderID: string,
     const msg = `restriction to ${maxLimit} items only for now. Link has ${googleDriveData.length} items Cannot continue`
 
     await updateEntryForGDriveUploadHistory(gDriveDownloadTaskId,
-      msg, DownloadHistoryStatus.Failed, { totalPdfsToDownload: googleDriveData.length });
+      msg, DownloadHistoryStatus.Failed, 
+      { totalPdfsToDownload: googleDriveData.length }, googleDriveData.length);
     return {
       totalPdfsToDownload: googleDriveData.length,
       success: false,
       msg
     }
   }
-
+  await updateTotalFileCountForGDriveUploadHistory(gDriveDownloadTaskId, googleDriveData.length);
   await updateEntryForGDriveUploadHistory(gDriveDownloadTaskId,
     `Started download with ${googleDriveData.length} items`,
-    DownloadHistoryStatus.InProgress);
+    DownloadHistoryStatus.InProgress,{}, googleDriveData.length);
 
   const limit = pLimit(10); // Limit to 10 concurrent downloads
 

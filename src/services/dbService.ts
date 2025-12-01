@@ -113,6 +113,14 @@ export async function connectToMongo(_args: string[] = []) {
 
       // Apply mongoose global settings before connecting
       mongoose.set('strictQuery', false);
+      
+      // Mongoose 8.x: Enable automatic ObjectId casting from strings
+      // This restores the Mongoose 7.x behavior where findById(stringId) works automatically
+      mongoose.Schema.Types.String.cast(false);
+      
+      // Alternative: Set at connection level
+      mongoose.set('toJSON', { virtuals: true });
+      mongoose.set('toObject', { virtuals: true });
 
       // Only enable debug in development environment
       const isDebug = process.env.NODE_ENV !== 'production';

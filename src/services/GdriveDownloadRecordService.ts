@@ -1,58 +1,84 @@
-import { QuickStatus } from '../models/GDriveDownloadHistorySchema';
+import mongoose from 'mongoose';
+import GDriveDownload, { QuickStatus } from '../models/GDriveDownloadHistory';
 import { GLOBAL_SERVER_NAME } from '../db/connection';
 import { DownloadHistoryStatus } from '../utils/constants';
 
 const GDRIVE_DOWNLOAD_HISTORY_PATH = `${GLOBAL_SERVER_NAME}/gDriveDownloadRoute`;
 
 export const insertEntryForGDriveUploadHistory =
- async (driveLinkOrFolderId: string,
-  profileOrPath: string, fileType: string,
-   fileDumpFolder: string, 
-   gDriveRootFolder: string,
-   ignoreFolder: string,
-   msg: string,
-   runId: string,
-   commonRunId:string = "") => {
-  const insertInDB = await fetch(`${GDRIVE_DOWNLOAD_HISTORY_PATH}/createGDriveDownload`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        googleDriveLink: driveLinkOrFolderId,
-        profileNameOrAbsPath: profileOrPath,
-        downloadType: fileType,
-        fileDumpFolder,
-        msg,
-        gDriveRootFolder,
-        ignoreFolder,
-        files: [],
-        runId,
-        commonRunId
-      })
+  async (driveLinkOrFolderId: string,
+    profileOrPath: string, fileType: string,
+    fileDumpFolder: string,
+    gDriveRootFolder: string,
+    ignoreFolder: string,
+    msg: string,
+    runId: string,
+    commonRunId: string = "") => {
+    const insertInDB = await fetch(`${GDRIVE_DOWNLOAD_HISTORY_PATH}/createGDriveDownload`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          googleDriveLink: driveLinkOrFolderId,
+          profileNameOrAbsPath: profileOrPath,
+          downloadType: fileType,
+          fileDumpFolder,
+          msg,
+          gDriveRootFolder,
+          ignoreFolder,
+          files: [],
+          runId,
+          commonRunId
+        })
+      }
+    )
+    if (!insertInDB.ok) {
+      console.log(`Failed to create GDriveDownload:`, fileDumpFolder);
+      return "0";
     }
-  )
-  if (!insertInDB.ok) {
-    console.log(`Failed to create GDriveDownload:`, fileDumpFolder);
-    return "0";
+    else {
+      const responseData = await insertInDB.json();
+      const gDriveDownloadTaskId = responseData._id;
+      console.log(`gDriveDownloadTaskId: ${JSON.stringify(gDriveDownloadTaskId)}`);
+      return gDriveDownloadTaskId;
+    }
   }
-  else {
-    const responseData = await insertInDB.json();
-    const gDriveDownloadTaskId = responseData._id;
-    console.log(`gDriveDownloadTaskId: ${JSON.stringify(gDriveDownloadTaskId)}`);
-    return gDriveDownloadTaskId;
+
+export const updateTotalFileCountForGDriveUploadHistory =
+  async (gDriveDownloadTaskId: string, totalCount: number) => {
+    try {
+      const gDriveDownload = await GDriveDownload.findById(gDriveDownloadTaskId);
+    if (!gDriveDownload) {
+      console.log(`updateTotalFileCountForGDriveUploadHistory/${gDriveDownloadTaskId}:GDriveDownload not found`);
+      return;
+    }
+    else {
+      gDriveDownload.totalCount = totalCount;
+      await gDriveDownload.save();
+      console.log(`updateTotalFileCountForGDriveUploadHistory: Updated totalCount to ${totalCount} for ${gDriveDownloadTaskId}`);
+    }
+    }
+    catch(e){
+      console.error(`updateTotalFileCountForGDriveUploadHistory/${gDriveDownloadTaskId}: ${JSON.stringify(e)}`);
+    }
   }
-}
 
 export const updateEntryForGDriveUploadHistory = async (gDriveDownloadTaskId: string,
   msg: string,
-   status: DownloadHistoryStatus,
-    quickStatus: QuickStatus = {}) => {
+  status: DownloadHistoryStatus,
+  quickStatus: QuickStatus = {},
+  totalCount: number = -1) => {
+
   const params = { msg, status };
   if (quickStatus?.status?.length) {
     params['quickStatus'] = quickStatus;
   }
+  if(totalCount >= 0){
+    params['totalCount'] = totalCount;
+  }
+
   console.log(`params ${params} quickStatus${JSON.stringify(quickStatus)}`);
   let success = false;
   let error = "";
@@ -87,9 +113,9 @@ export const updateEntryForGDriveUploadHistory = async (gDriveDownloadTaskId: st
 };
 
 export const _updateEmbeddedFileByFileName = async (gDriveDownloadTaskId: string,
-  fileName: string, 
-  status: string, 
-  msg: string, 
+  fileName: string,
+  status: string,
+  msg: string,
   filePath: string = "") => {
   const params = setParams(msg, status, fileName, filePath);
   console.log(`_updateEmbeddedFileByFileName/1/with 

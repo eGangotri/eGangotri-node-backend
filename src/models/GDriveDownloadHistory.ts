@@ -31,6 +31,7 @@ export interface IGDriveDownload extends Document {
     status: DownloadHistoryStatus;
     createdAt: Date;
     updatedAt: Date;
+    totalCount: number;
     runId: string;
     commonRunId: string;
     msg: string;
@@ -56,9 +57,11 @@ const QuickStatusSchema: Schema = new Schema(
     { _id: false }
 );
 
+const COLLECTION_NAME = 'GDriveDownloadHistory'
 const GDriveDownloadHistorySchema: Schema = new Schema(
     {
         googleDriveLink: { type: String, required: true },
+        totalCount: { type: Number, required: false, default: 0 },
         runId: { type: String, required: true },
         commonRunId: { type: String, required: true },
         profileNameOrAbsPath: { type: String, required: true },
@@ -74,7 +77,7 @@ const GDriveDownloadHistorySchema: Schema = new Schema(
     },
     {
         timestamps: true,
-        collection: 'GDriveDownloadHistory',
+        collection: COLLECTION_NAME,
         // Add indexes for frequently queried fields
         indexes: [
             { googleDriveLink: 1 },
@@ -90,6 +93,6 @@ const GDriveDownloadHistorySchema: Schema = new Schema(
     }
 );
 
-const GDriveDownload = mongoose.model<IGDriveDownload>('GDriveDownloadHistory', GDriveDownloadHistorySchema);
+const GDriveDownload = mongoose.model<IGDriveDownload>(COLLECTION_NAME, GDriveDownloadHistorySchema);
 
 export default GDriveDownload;
