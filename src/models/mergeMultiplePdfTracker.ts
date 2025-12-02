@@ -34,7 +34,6 @@ export interface IMergeMultiplePdfTracker {
   first_pdf_path: string;
   second_pdf_path: string;
   third_pdf_path?: string;
-
   // Result returned by merge operation
   operationResult: IMergeOperationResult;
 
@@ -51,7 +50,7 @@ export interface IMergeMultiplePdfTracker {
 
 export type MergeMultiplePdfTrackerDocument = IMergeMultiplePdfTracker & mongoose.Document;
 export type MergeMultiplePdfTrackerModel = mongoose.Model<MergeMultiplePdfTrackerDocument>;
-
+const COLLECTION_NAME = "MERGE_MULTIPLE_PDF_TRACKER";
 const MergeMultiplePdfTrackerSchema = new mongoose.Schema(
   {
     commonRunId: { type: String, required: true, index: true },
@@ -119,13 +118,13 @@ const MergeMultiplePdfTrackerSchema = new mongoose.Schema(
     },
   },
   {
-    collection: 'MERGE_MULTIPLE_PDF_TRACKER',
+    collection: COLLECTION_NAME,
     timestamps: true,
   }
 );
 
 export const MergeMultiplePdfTracker: MergeMultiplePdfTrackerModel =
   mongoose.model<MergeMultiplePdfTrackerDocument>(
-    'MERGE_MULTIPLE_PDF_TRACKER',
+    COLLECTION_NAME,
     MergeMultiplePdfTrackerSchema
   );

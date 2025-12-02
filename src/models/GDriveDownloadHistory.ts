@@ -14,7 +14,8 @@ export interface QuickStatus {
     error_count?: number|string;
     dl_wrong_size_count?: string;
     totalPdfsToDownload?: number|string;
-    error?:string
+    error?:string;
+    attemptDate?: Date;
 }
 
 const CompositeDocumentSchema: Schema = new Schema(
@@ -42,7 +43,7 @@ export interface IGDriveDownload extends Document {
     downloadType: string;
     ignoreFolder: string;
     files: ICompositeDocument[];
-    quickStatus: QuickStatus;
+    quickStatus: QuickStatus[];  
     verify: boolean;    
 }
 
@@ -53,6 +54,7 @@ const QuickStatusSchema: Schema = new Schema(
         dl_wrong_size_count: { type: Number, required: true },
         error_count: { type: Number, required: true },
         totalPdfsToDownload: { type: Number, required: true },
+        attemptDate: { type: Date, required: false, default: Date.now },
     },
     { _id: false }
 );
@@ -72,7 +74,7 @@ const GDriveDownloadHistorySchema: Schema = new Schema(
         ignoreFolder: { type: String, required: false },
         downloadType: { type: String, required: true },
         files: { type: [CompositeDocumentSchema], required: true },
-        quickStatus: { type: QuickStatusSchema, required: false },
+        quickStatus: { type: [QuickStatusSchema], required: false, default: [] },  
         verify: { type: Boolean, required: false },
     },
     {

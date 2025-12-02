@@ -9,8 +9,7 @@ import * as mongoose from 'mongoose';
 import { randomUUID } from 'crypto';
 import { anyPdfCorruptedQuick } from '../services/pdfValidationService';
 import { saveMergeMultiplePdfTracker, getCommonRuns, getByCommonRun } from '../services/mergeMultiplePdfTrackerService';
-import { random } from 'lodash';
-import { ConvertData, ConvertResultItem } from './types';
+import { ConvertData  } from './types';
 
 export const pythonRoute = express.Router();
 
@@ -117,7 +116,7 @@ pythonRoute.get('/merge-multiple-pdf-tracker/common-runs', async (_req: any, res
 pythonRoute.get('/merge-multiple-pdf-tracker/by-common-run/:commonRunId', async (req: any, resp: any) => {
     try {
         const { commonRunId } = req.params;
-        if (!commonRunId || !mongoose.Types.ObjectId.isValid(commonRunId)) {
+        if (!commonRunId) {
             resp.status(400).send({
                 response: {
                     status: 'failed',
@@ -127,8 +126,7 @@ pythonRoute.get('/merge-multiple-pdf-tracker/by-common-run/:commonRunId', async 
             });
             return;
         }
-        const _id = new mongoose.Types.ObjectId(commonRunId);
-        const docs = await getByCommonRun(_id);
+        const docs = await getByCommonRun(commonRunId);
         resp.status(200).send({ response: docs });
     } catch (err: any) {
         console.log('Error', err);
@@ -355,7 +353,7 @@ pythonRoute.post('/mergeMutliplePdfs', async (req: any, resp: any) => {
             return;
         }
         const allResponses = []
-        const commonRunId = new mongoose.Types.ObjectId();
+        const commonRunId = randomUUID();
         const pdfPathsToMergeCount = pdfPaths.length;
         let pdfPathsProcessedCount = 0;
         for (let pdfPath of pdfPaths) {

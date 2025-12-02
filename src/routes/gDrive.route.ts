@@ -332,7 +332,41 @@ gDriveRoute.post('/verifyLocalDownloadSameAsGDriveMulti', async (req: any, resp:
                 results.push({ status: 'failed', message: error?.message || String(error) });
             }
         }
-        return resp.status(200).json(results);
+
+        // Calculate aggregate statistics
+        const totalVerifications = results.reduce((sum, result) => {
+            return sum + (result.comparisonResult?.length || 0);
+        }, 0);
+        
+        const failedVerifications = results.reduce((sum, result) => {
+            if (!result.comparisonResult) return sum;
+            return sum + result.comparisonResult.filter((cr: any) => !cr.success).length;
+        }, 0);
+
+        // Create summary array
+        const resultsSummary = [];
+        
+        // Add aggregate summary as first item
+        resultsSummary.push(
+            `${failedVerifications} out of ${totalVerifications} Verification(s) failed`
+        );
+
+        // Add individual verification results
+        results.forEach((result, resultIndex) => {
+            if (result.comparisonResult) {
+                result.comparisonResult.forEach((comparisonResult: any, compIndex: number) => {
+                    const verificationStatus = comparisonResult.success ? 'Passed' : 'Failed';
+                    const successCount = comparisonResult.successMsgsCount || 0;
+                    const errorCount = comparisonResult.failedCount || 0;
+                    
+                    resultsSummary.push(
+                        `Verification: ${verificationStatus}, Succ: ${successCount} Error: ${errorCount}`
+                    );
+                });
+            }
+        });
+
+        return resp.status(200).json({ results, resultsSummary });
     } catch (error: any) {
         console.error(`-verifyLocalDownloadSameAsGDriveMulti ${req?.body?.selectedIds} error: ${error?.message || String(error)} `);
         return resp.status(500).json({ status: 'failed', message: error?.message || String(error) });

@@ -49,7 +49,16 @@ gDriveDownloadRoute.post("/updateGDriveDownload/:id", async (req: Request, res: 
                 gDriveDownload.msg = msg + "," + gDriveDownload.msg;
             }
             if(quickStatus !== undefined) {
-                gDriveDownload.quickStatus = quickStatus;
+                // Add attemptDate if not present
+                if (!quickStatus.attemptDate) {
+                    quickStatus.attemptDate = new Date();
+                }
+                // Push to array instead of replacing
+                if (!gDriveDownload.quickStatus) {
+                    gDriveDownload.quickStatus = [];
+                }
+                gDriveDownload.quickStatus.push(quickStatus);
+                console.log(`updateGDriveDownload: Added attempt #${gDriveDownload.quickStatus.length}`);
             }
             const updatedGDriveDownload = await gDriveDownload.save();
             console.log(`updateGDriveDownload:updatedGDriveDownload/${id}: ${JSON.stringify(updatedGDriveDownload)}`);
