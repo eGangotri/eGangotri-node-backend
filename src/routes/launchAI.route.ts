@@ -212,11 +212,29 @@ launchAIRoute.get("/getAllTitleRenamedViaAIListGroupedByRunId", async (req: Requ
 
         // Aggregate to group by runId and count documents per run
         const pipeline = [
-            { $group: { _id: "$runId", commonRunId: { $first: "$commonRunId" }, count: { $sum: 1 }, maxCreatedAt: { $max: "$createdAt" }, minCreatedAt: { $min: "$createdAt" } } },
+            { 
+                $group: { 
+                    _id: "$runId",
+                    commonRunId: { $first: "$commonRunId" }, 
+                    count: { $sum: 1 }, 
+                    maxCreatedAt: { $max: "$createdAt" }, 
+                    minCreatedAt: { $min: "$createdAt" },
+                    srcFolder: { $first: "$srcFolder" }
+                }
+            },
             { $sort: { maxCreatedAt: -1 } },
             { $skip: skip },
             { $limit: limit },
-            { $project: { _id: 1, runId: "$_id", commonRunId: 1, count: 1, createdAt: "$minCreatedAt" } },
+            {
+                $project: {
+                    _id: 1,
+                    runId: "$_id",
+                    commonRunId: 1,
+                    count: 1,
+                    createdAt: "$minCreatedAt",
+                    srcFolder: 1
+                }
+            },
         ];
 
         const grouped = await (PdfTitleRenamingViaAITracker as any).aggregate(pipeline);
@@ -224,9 +242,11 @@ launchAIRoute.get("/getAllTitleRenamedViaAIListGroupedByRunId", async (req: Requ
         const results = {
             data: grouped as Array<{
                 _id: string;
-                runId: string; count: number;
-                createdAt: Date,
-                commonRunId: string
+                runId: string;
+                count: number;
+                createdAt: Date;
+                commonRunId: string;
+                srcFolder: string;
             }>,
             currentPage: page,
             totalPages: Math.ceil(totalDistinctRunIds / limit),
