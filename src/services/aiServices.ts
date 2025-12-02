@@ -13,6 +13,7 @@ import { PdfTitleRenamingViaAITracker, IPdfTitleRenamingViaAITracker } from "../
 import { PdfTitleAndFileRenamingTrackerViaAI } from "../models/pdfTitleAndFileRenamingTrackerViaAI";
 import { processWithGoogleAI } from "../cliBased/ai/renaming-workflow/googleAiService";
 import { formatFilename } from "../cliBased/ai/renaming-workflow/utils";
+import { _renameFileByAbsPath } from "./fileUtilsService";
 
 export type RenameCPSByLinkResponse = {
     status?: string,
@@ -103,34 +104,52 @@ export const renameCPSByLink = async (googleDriveLink: string,
 
 export const renameOriginalItemsBasedOnMetadata = async (pdfTitleRenamedItems: IPdfTitleRenamingViaAITracker[]) => {
     const errors = []
-    const results = await Promise.all(
-        pdfTitleRenamedItems.map(async (item, index) => {
-            try {
-                const dir = path.dirname(item.originalFilePath);
-                const ext = path.extname(item.originalFilePath);
-                const newName = String((item.extractedMetadata + ext) || item.fileName);
-                const targetPath = path.join(dir, newName).trim();
-                console.log(`Renaming ${index + 1}/${pdfTitleRenamedItems.length}: ${item.originalFilePath} to ${targetPath}`);
-                if (newName?.trim().length === 0) {
-                    console.log(`No New Name for ${item.originalFilePath}`);
-                    errors.push({
-                        filePath: item.originalFilePath,
-                        error: `No New Name for ${item.originalFilePath}`
-                    })
-                    return false;
-                }
-                await fs.promises.rename(item.originalFilePath, targetPath);
-                return true;
-            } catch (err: any) {
-                console.error(`Failed to process ${item.originalFilePath}: ${err?.message || String(err)}`);
+    const results: boolean[] = []
+    for (let index = 0; index < pdfTitleRenamedItems.length; index++) {
+        const item = pdfTitleRenamedItems[index]
+        try {
+            const dir = path.dirname(item.originalFilePath);
+            const ext = path.extname(item.originalFilePath);
+            const newNameWithoutExt = String(item.extractedMetadata);
+            const baseName = String(newNameWithoutExt);
+            if (newNameWithoutExt?.trim().length === 0) {
+                console.log(`No New Name for ${item.originalFilePath}`);
                 errors.push({
                     filePath: item.originalFilePath,
-                    error: err?.message || String(err)
+                    error: `No New Name for ${item.originalFilePath}`
                 })
-                return false;
+                results.push(false);
+                continue;
             }
-        })
-    );
+            // Precompute a non-colliding target path
+            let counter = 0;
+            const baseTarget = path.join(dir, `${baseName}${ext}`).trim();
+            let targetPath = baseTarget;
+            while (fs.existsSync(targetPath) && counter < 10) {
+                counter += 1;
+                targetPath = path.join(dir, `${baseName}_${counter}${ext}`).trim();
+            }
+            console.log(`Renaming ${index + 1}/${pdfTitleRenamedItems.length}: ${item.originalFilePath} to ${targetPath}`);
+            try {
+                await fs.promises.rename(item.originalFilePath, targetPath);
+                results.push(true);
+            } catch (e: any) {
+                console.error(`Failed to process ${item.originalFilePath}: ${e?.message || String(e)}`);
+                errors.push({
+                    filePath: item.originalFilePath,
+                    error: e?.message || String(e)
+                })
+                results.push(false);
+            }
+        } catch (err: any) {
+            console.error(`Failed to process ${item.originalFilePath}: ${err?.message || String(err)}`);
+            errors.push({
+                filePath: item.originalFilePath,
+                error: err?.message || String(err)
+            })
+            results.push(false);
+        }
+    }
     const successCount = results.filter(Boolean).length;
     const failureCount = results.length - successCount;
     return {

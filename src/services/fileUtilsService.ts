@@ -204,40 +204,61 @@ const removeExtraneousChars = (fileNameFrag: any) => {
     return sanitized?.trim();
 }
 
-export const _renameFileInFolder = async (_fileInFolder: FileStats, newFileName: string, renameReport: RenameReportType) => {
+/**
+ * Renames a file by its absolute path, checking for duplicates before renaming
+ * @param absPath - Absolute path of the file to rename
+ * @param newFileName - New file name (not full path, just the name)
+ * @param renameReport - Report object to track success/errors
+ */
+export const _renameFileByAbsPath = async (absPath: string, newFileName: string,
+    renameReport: RenameReportType = {
+        success: [], errorList: [],
+        totalInExcel: 0,
+        totalInFolder: 0
+    }) => {
+    if (!absPath) {
+        renameReport.errorList.push(`No absolute path provided for renaming to ${newFileName}.`)
+        return
+    }
+    console.log(`_renameFileByAbsPath: ${absPath} -> ${newFileName}`);
+    
+    if (!checkFolderExistsSync(absPath)) {
+        renameReport.errorList.push(`Doesn't exist ${absPath}.`)
+        return
+    }
+
+    try {
+        const parentDir = path.dirname(absPath);
+        const newPath = path.join(parentDir, newFileName);
+        if (!newPath.endsWith(".pdf")) {
+            throw new Error(`${newPath} doesnt end with .pdf`);
+        }
+        if (newPath.length < 8) {
+            throw new Error(`${newPath} length is too short`);
+        }
+        if (checkFolderExistsSync(newPath)) {
+            throw new Error(`${newPath} already exists`);
+        }
+        await fsPromise.rename(absPath, newPath);
+        console.log(`File renamed to ${newFileName}`)
+        renameReport.success.push(`File ${absPath} renamed to ${newFileName}`)
+    }
+    catch (e) {
+        console.log(`Error renaming file ${absPath} to ${newFileName} ${e}`)
+        renameReport.errorList.push(`Error renaming file ${absPath} to ${newFileName} ${e}`)
+    }
+}
+
+export const _renameFileInFolder = async (_fileInFolder: FileStats, newFileName: string,
+     renameReport: RenameReportType) => {
     if (!_fileInFolder) {
         renameReport.errorList.push(`No File in Local renameable to ${newFileName}.`)
         return
     }
     console.log(`_fileInFolder: ${JSON.stringify(_fileInFolder?.absPath)} `);
     const absPath = _fileInFolder?.absPath
-    if (checkFolderExistsSync(absPath)) {
-        try {
-            const parentDir = path.dirname(absPath);
-            const newPath = path.join(parentDir, newFileName);
-            if (!newPath.endsWith(".pdf")) {
-                throw new Error(`${newPath} doesnt end with .pdf`);
-            }
-            if (newPath.length < 8) {
-                throw new Error(`${newPath} length is too short`);
-            }
-            if (checkFolderExistsSync(newPath)) {
-                throw new Error(`${newPath} already exists`);
-            }
-            await fsPromise.rename(absPath, newPath);
-            console.log(`File renamed to ${newFileName}`)
-            renameReport.success.push(`File ${absPath} renamed to ${newFileName}`)
-        }
-        catch (e) {
-            console.log(`Error renaming file ${absPath} to ${newFileName} ${e}`)
-            renameReport.errorList.push(`Error renaming file ${absPath} to ${newFileName} ${e}`)
-        }
-    }
-    else {
-        renameReport.errorList.push(`Doestnt exist ${absPath}.`)
-    }
+    await _renameFileByAbsPath(absPath, newFileName, renameReport)
 }
-
 
 const getOrigName = (_titleInGoogleDrive: string) => {
     const extension = _titleInGoogleDrive.match(/\.[^/.]+$/)?.[0] || '';
