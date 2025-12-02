@@ -288,7 +288,7 @@ pythonRoute.post('/mergePdfs', async (req: any, resp: any) => {
             "first_pdf_path": first_pdf_path,
             "second_pdf_path": second_pdf_path,
             "third_pdf_path": third_pdf_path
-        }, 'mergePdfs', { timeoutMs: 60 * 60 * 1000, skipPreflight: true });
+        }, 'mergePdfs', { timeoutMs: 4*60 * 60 * 1000, skipPreflight: true });
 
         resp.status(200).send({
             response: _resp
