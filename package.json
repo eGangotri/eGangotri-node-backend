@@ -56,7 +56,8 @@
     "rename-pdfs-via-ai": "ts-node ./src/cliBased/ai/renaming-workflow/renamePdfsViaAI.ts",
     "rename-gdrive-img-files": "ts-node ./src/cliBased/ai/renaming-workflow/renameGDRiveImgFiles.ts",
     "get-refresh-token": "ts-node ./src/cliBased/googleapi/_utils/getRefreshToken.ts",
-    "get-win64-chromedriver": "ts-node ./src/_adHoc/getWin64ChromedriverUrl.ts"
+    "get-win64-chromedriver": "ts-node ./src/_adHoc/getWin64ChromedriverUrl.ts",
+    "archive-login": "ts-node ./src/_adHoc/archiveLogin.ts"
   },
   "repository": {
     "type": "git",
@@ -106,6 +107,8 @@
     "pdfkit": "^0.13.0",
     "pnpm": "^10.22.0",
     "puppeteer": "^22.15.0",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
     "sharp": "^0.33.5",
     "uuid": "^8.3.2",
     "winston": "^3.17.0",

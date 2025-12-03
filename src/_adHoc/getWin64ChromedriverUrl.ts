@@ -159,23 +159,37 @@ async function runGradle(resourcesDir: string): Promise<number> {
 }
 
 export async function updateChromeDriver() {
+  let url = ""
+  let gradleUpdateResult = ""
   try {
     const resourcesDir = parseResourcesDir();
     if (!(await fs.pathExists(resourcesDir))) {
-      console.error(`Resources path does not exist: ${resourcesDir}. Exiting gracefully.`);
-      return; // graceful exit
+      gradleUpdateResult = `Resources path does not exist: ${resourcesDir}. Exiting gracefully.`
+      console.error(gradleUpdateResult);
+      return {
+        url,
+        gradleUpdateResult
+      }
     }
 
-    const url = await findWin64ChromedriverUrl();
+    url = await findWin64ChromedriverUrl();
     if (!url) {
-      console.error("No chromedriver download found for platform win64.");
-      process.exit(1);
+      gradleUpdateResult = "No chromedriver download found for platform win64."
+      console.error(gradleUpdateResult);
+      return {
+        url,
+        gradleUpdateResult
+      }
     }
 
     // Confirm it ends with win64/chromedriver-win64.zip
     if (!url.endsWith("win64/chromedriver-win64.zip")) {
-      console.error(`Refusing to download: URL does not end with win64/chromedriver-win64.zip -> ${url}`);
-      process.exit(1);
+      gradleUpdateResult = `Refusing to download: URL does not end with win64/chromedriver-win64.zip -> ${url}`;
+      console.error(gradleUpdateResult);
+      return {
+        url,
+        gradleUpdateResult
+      }
     }
 
     console.log(`Downloading: ${url}`);
@@ -196,14 +210,14 @@ export async function updateChromeDriver() {
     console.log("chromedriver.exe installed successfully.")
 
     const binMainDirPath = path.resolve(process.cwd(), '\bin\main');
-    const chromedriverBinMainPath = path.join(binMainDirPath,"chromedriver.exe");
+    const chromedriverBinMainPath = path.join(binMainDirPath, "chromedriver.exe");
 
     if (await fs.pathExists(chromedriverBinMainPath)) {
       const suffix = formatOldSuffix(new Date());
       const binMainDirBackupPath = path.join(binMainDirPath, `chromedriver.exe.${suffix}`);
       console.log(`Existing chromedriver.exe found. Renaming to ${binMainDirBackupPath}`);
       await fs.move(chromedriverBinMainPath, binMainDirBackupPath, { overwrite: true });
-      console.log(`old bin/main chromedriver.exe moved to ${binMainDirBackupPath}`); 
+      console.log(`old bin/main chromedriver.exe moved to ${binMainDirBackupPath}`);
       await fs.copy(exePath, chromedriverBinMainPath, { overwrite: true });
       console.log(`new chromedriver.exe copied to bin/main`);
     }
@@ -211,13 +225,20 @@ export async function updateChromeDriver() {
     console.log("Running: gradle clean build --refresh-dependencies");
     const code = await runGradle(resourcesDir);
     if (code !== 0) {
-      console.error(`Gradle build failed with exit code ${code}`);
-      process.exit(code);
+      gradleUpdateResult = `Gradle build failed with exit code ${code}`
+      console.error(gradleUpdateResult);
     }
-    console.log("Gradle build completed successfully.");
+    gradleUpdateResult = "Gradle build completed successfully."
+    console.log(gradleUpdateResult);
+
   } catch (err: any) {
-    console.error(`Error: ${err?.message || String(err)}`);
-    process.exit(3);
+    gradleUpdateResult = `Error: ${err?.message || String(err)}`
+    console.error(gradleUpdateResult);
+
+  }
+  return {
+    url: url,
+    gradleUpdateResult: gradleUpdateResult
   }
 }
 
