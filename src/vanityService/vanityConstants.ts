@@ -174,6 +174,12 @@ export const getProfileVanityInfo = (profile: string, folder: string) => {
     return [vanityIntro, imgFile, fontSize, singlePage, pdfSuffix, nthPageToUseAsDimensions]
 }
 
+const ANISH = {
+    text: [text_Anish],
+    imgFile: "anish_bhatta.jpg",
+    pdfSuffix: " - Anish Bhatta Collection",
+    nthPageToUseAsDimensions: 2
+}
 //must match Profile Name
 export const profileVanityTextMap = {
     "PZ": {
@@ -182,10 +188,10 @@ export const profileVanityTextMap = {
         pdfSuffix: " - Mohd Ashraf Peerzada Collection",
     },
     "ANISH_MANU": {
-        text: [text_Anish],
-        imgFile: "anish_bhatta.jpg",
-        pdfSuffix: " - Anish Bhatta Collection",
-        nthPageToUseAsDimensions:2
+        ...ANISH
+    },
+    "ANISH_BOOKS": {
+        ...ANISH
     },
     "CHAMBAL": {
         text: [text_chambal],
