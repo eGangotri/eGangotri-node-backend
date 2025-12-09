@@ -38,7 +38,8 @@ export const moveOrignalToSeparateFolder = async (pdfToVanitize: string, finalDu
 
 const createIntroPageWithImage = async (imagePath: string, pdfToVanitize: string,
     text: string[], fontSize: number,
-    singlePage: boolean = false) => {
+    singlePage: boolean = false, nthPageToUseAsDimensions = 1) => {
+
     var imageFolderPath = path.dirname(pdfToVanitize);
     var _introPath = `${imageFolderPath}\\${_intros_dont}`;
     await mkDirIfDoesntExists(_introPath);
@@ -48,9 +49,10 @@ const createIntroPageWithImage = async (imagePath: string, pdfToVanitize: string
 
     const doc: PDFKit.PDFDocument = await prepareDocument(_introPath, introPDfName);
     console.log(`imageFolderPath ${imageFolderPath} 
-                pdfToVanitize ${pdfToVanitize} `)
+                pdfToVanitize ${pdfToVanitize},
+                nthPageToUseAsDimensions: ${nthPageToUseAsDimensions} `)
 
-    const [width, height] = await PdfLibUtils.getPdfFirstPageDimensionsUsingPdfLib(pdfToVanitize);
+    const [width, height] = await PdfLibUtils.getPdfNthPageDimensionsUsingPdfLib(pdfToVanitize, nthPageToUseAsDimensions);
     if (singlePage) {
         await addImageToIntroPageAsWholePage(doc, imagePath, width, height)
         addTextToIntroPdf(doc, text.join("\n\n"), width, height, fontSize, singlePage)
@@ -170,17 +172,18 @@ const vanitizePdfForProfile = async (profile: string, suffix: string = "") => {
         const _pdfs = await getAllPdfsInFolders([folder]);
         const intros: string[] = []
         console.log(`vanitizePdfForProfile `);
-        const [vanityIntro, imgFile, fontSize, singlePage, pdfSuffix] = getProfileVanityInfo(profile, folder);
-        console.log(`vanitizePdfForProfile ${folder}, ${_pdfs.length} fontSize:${fontSize} imgFile:${imgFile} singlePage: ${singlePage}`);
+        const [vanityIntro, imgFile, fontSize, singlePage, pdfSuffix, nthPageToUseAsDimensions] = getProfileVanityInfo(profile, folder);
+        console.log(`vanitizePdfForProfile ${folder}, ${_pdfs.length} fontSize:${fontSize} imgFile:${imgFile}
+            nthPageToUseAsDimensions: ${nthPageToUseAsDimensions} singlePage: ${singlePage}`);
 
         for (let i = 0; i < _pdfs.length; i++) {
-            console.log(`creating vanity for: ${_pdfs[i]}`, await PdfLibUtils.getPdfFirstPageDimensionsUsingPdfLib(_pdfs[i]))
+            console.log(`creating vanity for: ${_pdfs[i]}`, await PdfLibUtils.getPdfNthPageDimensionsUsingPdfLib(_pdfs[i], nthPageToUseAsDimensions))
             intros.push(await createIntroPageWithImage(imgFile, _pdfs[i],
-                vanityIntro.map((text: string) => formatIntroText(text)), fontSize, singlePage));
+                vanityIntro.map((text: string) => formatIntroText(text)), fontSize, singlePage, nthPageToUseAsDimensions));
         }
 
         for (let i = 0; i < _pdfs.length; i++) {
-            console.log(`creating vanity for: ${_pdfs[i]}`, await PdfLibUtils.getPdfFirstPageDimensionsUsingPdfLib(_pdfs[i]))
+            console.log(`creating vanity for: ${_pdfs[i]}`, await PdfLibUtils.getPdfNthPageDimensionsUsingPdfLib(_pdfs[i], nthPageToUseAsDimensions))
             await mergeVanityPdf(intros[i], _pdfs[i], `${folder}\\${_vanitized}`, suffix, pdfSuffix)
             moveOrignalToSeparateFolder(_pdfs[i], `${folder}\\${_orig_dont}`)
         }

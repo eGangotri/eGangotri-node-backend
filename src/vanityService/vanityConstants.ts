@@ -5,6 +5,18 @@ export const MAX_IMG_HEIGHT = 700;
 export const DEFAULT_FONT_SIZE = 12
 
 
+const text_Anish = `This PDF you are browsing is in a series of several scanned manuscripts containing 
+the collection of Anish Bhatta, Changu Narayan, Bhaktapur<br>
+CV:<br>
+<br>
+https://www.facebook.com/anish.bhatta.733<br>
+Studied Tourism at Kathmandu Academy of Tourism and Hospitality<br>
+Descendant Pashupati Nath Temple Priests.
+<br>
+Collectors and Art/Literature  Lovers can contact him if they wish through his facebook page<br><br>
+Scanning and upload by eGangotri Trust. Funding by M.I.D.F, New Delhi.<br>`
+
+
 const text_Peerzada = `This PDF you are browsing is in a series of several scanned documents containing 
 the collection of Peerzada Muhammad Ashraf Sahib. b 1958<br>
 CV:<br>
@@ -102,9 +114,9 @@ Works<br>
 Sahitya Academy Awardee for Mahakavya on Gulabrao Maharaj. <br>
 
 Translated the Marathi Jnaneshwari in 9000 Sanskrit shlokas.<br>
-` 
-const text_hyd2 =
 `
+const text_hyd2 =
+    `
 Honours<br>
 Honorary D.Litt by National Sanskrit University, Tirupati AP. for his unique contribution in Indian Philosophy.<br>
 -Vachaspati<br>
@@ -124,7 +136,7 @@ Honorary D.Litt by National Sanskrit University, Tirupati AP. for his unique con
 and many other.<br>`
 
 const text_hyd3 =
-`
+    `
 Foreign Travel<br> 
 The Netherlands, Canada for  World Sanskrit Conference 2018.<br> 
 Indian embassy, Nepal 2023<br> <br> 
@@ -148,7 +160,7 @@ export const formatIntroText = (_text: string) => _text.replace(/\n/g, '').repla
 
 export const getProfileVanityInfo = (profile: string, folder: string) => {
     let _tmpProfile = profile;
-    let vanityIntro:string[] = profileVanityTextMap[`${_tmpProfile}`]?.text || [];
+    let vanityIntro: string[] = profileVanityTextMap[`${_tmpProfile}`]?.text || [];
     if (vanityIntro.length === 0) {
         _tmpProfile = profile.split("-")[0]
         vanityIntro = profileVanityTextMap[`${_tmpProfile}`]?.text || "";
@@ -158,14 +170,22 @@ export const getProfileVanityInfo = (profile: string, folder: string) => {
     const fontSize = profileVanityTextMap[`${_tmpProfile}`]?.fontSize || DEFAULT_FONT_SIZE;
     const singlePage = profileVanityTextMap[`${_tmpProfile}`]?.singlePage || false;
     const pdfSuffix = profileVanityTextMap[`${_tmpProfile}`]?.pdfSuffix || "";
-    return [vanityIntro, imgFile, fontSize, singlePage,pdfSuffix]
+    const nthPageToUseAsDimensions = profileVanityTextMap[`${_tmpProfile}`]?.nthPageToUseAsDimensions || 1;
+    return [vanityIntro, imgFile, fontSize, singlePage, pdfSuffix, nthPageToUseAsDimensions]
 }
 
+//must match Profile Name
 export const profileVanityTextMap = {
     "PZ": {
         text: [text_Peerzada],
         imgFile: "peerzada_forVanity.jpg",
         pdfSuffix: " - Mohd Ashraf Peerzada Collection",
+    },
+    "ANISH_MANU": {
+        text: [text_Anish],
+        imgFile: "anish_bhatta.jpg",
+        pdfSuffix: " - Anish Bhatta Collection",
+        nthPageToUseAsDimensions:2
     },
     "CHAMBAL": {
         text: [text_chambal],

@@ -24,11 +24,28 @@ export async function getPdfPageCountUsingPdfLib(pdfPath: string) {
 }
 
 export async function getPdfFirstPageDimensionsUsingPdfLib(pdfPath: string) {
+    return getPdfNthPageDimensionsUsingPdfLib(pdfPath, 1);
+}
+
+export async function getPdfNthPageDimensionsUsingPdfLib(pdfPath: string, nthPage = 1) {
     const fileSize = await getFileSizeAsync(pdfPath);
     if (fileSize <= PDF_SIZE_LIMITATIONS) {
         const _file = await fsPromise.readFile(pdfPath);
         const pdfDoc = await PDFDocument.load(_file, { ignoreEncryption: true });
-        return [pdfDoc.getPages()[0].getWidth(), pdfDoc.getPages()[0].getHeight()]
+        const page = nthPage - 1;
+        let width = 0
+        let height = 0
+        try {
+            width = pdfDoc.getPages()[page].getWidth()
+            height = pdfDoc.getPages()[page].getHeight()
+        }
+        catch (err) {
+            console.log(`getPdfNthPageDimensionsUsingPdfLib:err ${err}`);
+            width = pdfDoc.getPages()[0].getWidth()
+            height = pdfDoc.getPages()[0].getHeight()
+        }
+
+        return [width, height]
     }
     else return [];
 }
