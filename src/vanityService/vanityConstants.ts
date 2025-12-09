@@ -187,7 +187,7 @@ export const profileVanityTextMap = {
         imgFile: "peerzada_forVanity.jpg",
         pdfSuffix: " - Mohd Ashraf Peerzada Collection",
     },
-    "ANISH_MANU": {
+    "ANISH_MANUS": {
         ...ANISH
     },
     "ANISH_BOOKS": {
