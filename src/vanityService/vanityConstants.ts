@@ -212,9 +212,8 @@ const ANISH = {
     imgFile: "..\\anish_bhatta.jpg",
     pdfSuffix: " - Anish Bhatta Collection",
     nthPageToUseAsDimensions: 2,
-   // fontSize: 8,
-
 }
+
 //must match Profile Name
 export const profileVanityTextMap = {
     "PZ": {
