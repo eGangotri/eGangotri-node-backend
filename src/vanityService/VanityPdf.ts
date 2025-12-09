@@ -4,9 +4,8 @@ import * as fsPromise from 'fs/promises';
 import { getAllPdfsInFolders, mkDirIfDoesntExists } from "../imgToPdf/utils/Utils";
 import { prepareDocument } from "../imgToPdf/utils/PdfUtils";
 const path = require('path');
-import { DEFAULT_FONT_SIZE, MAX_IMG_HEIGHT, MAX_IMG_WIDTH, formatIntroText, getImageDimensions, getProfileVanityInfo, profileVanityTextMap } from "./vanityConstants";
+import { A4_HEIGHT,  formatIntroText, getImageDimensions, getProfileVanityInfo, profileVanityTextMap } from "./vanityConstants";
 import { getFolderInSrcRootForProfile } from "../archiveUpload/ArchiveProfileUtils";
-import { font } from "pdfkit";
 
 
 /**
@@ -22,6 +21,7 @@ import { font } from "pdfkit";
 const _intros_dont = "_intros_dont"
 const _orig_dont = "_orig_dont"
 const _vanitized = "_vanitized"
+const useA4Height = true
 
 export const moveOrignalToSeparateFolder = async (pdfToVanitize: string, finalDumpGround: string) => {
     try {
@@ -47,7 +47,8 @@ const createIntroPageWithImage = async (imagePath: string, pdfToVanitize: string
     const pdfToVanitizeNameWithoutExt = path.parse(pdfToVanitize).name.trim()
     const introPDfName = pdfToVanitizeNameWithoutExt.split(" ").join("-") + "-intro.pdf";
 
-    const [width, height] = await PdfLibUtils.getPdfNthPageDimensionsUsingPdfLib(pdfToVanitize, nthPageToUseAsDimensions);
+    const [width, pdfHeight] = await PdfLibUtils.getPdfNthPageDimensionsUsingPdfLib(pdfToVanitize, nthPageToUseAsDimensions);
+    const height = useA4Height ? A4_HEIGHT : pdfHeight;
     const doc: PDFKit.PDFDocument = await prepareDocument(_introPath, introPDfName, { size: [width, height] });
     console.log(`imageFolderPath ${imageFolderPath} 
                 pdfToVanitize ${pdfToVanitize},
@@ -175,7 +176,7 @@ const vanitizePdfForProfile = async (profile: string, suffix: string = "") => {
         console.log(`vanitizePdfForProfile `);
         const [vanityIntro, imgFile, fontSize, singlePage, pdfSuffix, nthPageToUseAsDimensions] = getProfileVanityInfo(profile, folder);
         console.log(`vanitizePdfForProfile ${folder}, ${_pdfs.length} fontSize:${fontSize} imgFile:${imgFile}
-            nthPageToUseAsDimensions: ${nthPageToUseAsDimensions} singlePage: ${singlePage}`);
+            nthPageToUseAsDimensions: ${nthPageToUseAsDimensions} singlePage: ${singlePage} useA4Height: ${useA4Height}`);
 
         for (let i = 0; i < _pdfs.length; i++) {
             console.log(`creating vanity for: ${_pdfs[i]}`, await PdfLibUtils.getPdfNthPageDimensionsUsingPdfLib(_pdfs[i], nthPageToUseAsDimensions))

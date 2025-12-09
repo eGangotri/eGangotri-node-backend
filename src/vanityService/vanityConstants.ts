@@ -3,9 +3,10 @@ import sharp from 'sharp';
 export const MAX_IMG_WIDTH = 700;
 export const MAX_IMG_HEIGHT = 700;
 export const DEFAULT_FONT_SIZE = 12
+export const A4_HEIGHT = 841.89 // A4 height in points (297mm)
 
 
-const text_Anish = `This PDF you are browsing is in a series of several scanned manuscripts containing 
+const TEXT_ANISH = `This PDF you are browsing is in a series of several scanned manuscripts containing 
 the collection of Anish Bhatta, Changu Narayan, Bhaktapur<br><br>
 CV:<br>
 Anish Prasad Bhatta (b. 1990)<br>
@@ -49,7 +50,7 @@ Facebook: https://www.facebook.com/anish.bhatta.733<br>
 Scanning and upload by eGangotri Trust. Funding by M.I.D.F, New Delhi.`
 
 
-const text_Peerzada = `This PDF you are browsing is in a series of several scanned documents containing 
+const TEXT_PEERZADA = `This PDF you are browsing is in a series of several scanned documents containing 
 the collection of Peerzada Muhammad Ashraf Sahib. b 1958<br>
 CV:<br>
 Residence: Towheed Abad Bemina, Srinagar<br>
@@ -69,7 +70,7 @@ Besides manuscripts, he also has many rare paintings (60+).<br>
 Collectors and Art/Literature  Lovers can contact him if they wish through his facebook page<br><br>
 Scanning and upload by eGangotri Trust.<br>`
 
-const text3_SGhulati = `This PDF you are browsing is in a series of several scanned documents containing 
+const TEXT_SHAIL_GHULATI = `This PDF you are browsing is in a series of several scanned documents containing 
  the personal colleciton of Shailendra Ghulati ji from Jammu.<br>
  CV:<br>
  Shailendra Gulhati who is a Shaivite author of 6 books, used to learn finer aspects of Kashmir Shaiv Darsana from 
@@ -81,7 +82,7 @@ https://www.facebook.com/shailgulhatishivapage<br>
 Whilst his books are available on Amazon.<br>
 Scanning and upload by eGangotri Trust.<br>`
 
-const text2_Mohtra = `This PDF you are browsing is in a series of several scanned documents containing 
+const TEXT2_MOHTRA = `This PDF you are browsing is in a series of several scanned documents containing 
 the collation of all research material of Prof. Kul Bhushan Mohtra ji.Mohtra ji is currently the State 
 Incharge Library and Documentation Department, J&K BJP Headquarters, Nanaji 
 Deshmukh Library..This material was gathered while he was working on his multiple books on J&K History.
@@ -99,7 +100,7 @@ A Compendium of Icons of Jammu & Kashmir & our Inspiration (English)<br>
 Jammu Kashmir ki Sangarsh Gatha (Hindi)<br><br><br>
 Scanning and upload by eGangotri Trust.<br>`
 
-const text_chambal = `This PDF you are browsing is in a series of several scanned documents from 
+const TEXT_CHAMBAL = `This PDF you are browsing is in a series of several scanned documents from 
 the Chambal Archives Collection in Etawah, UP<br>
 The Archive was collected over a lifetime through the efforts of Shri Krishna Porwal ji (b. 27 July 1951) s/o Shri Jamuna Prasad, Hindi Poet. Archivist and Knowledge Aficianado<br>
 The Archives contains around 80,000 books including old newspapers and pre-Independence Journals predominantly in Hindi and Urdu.<br>
@@ -109,7 +110,7 @@ Chambal Archives also has old cameras, typewriters, TVs, VCR/VCPs, Video Cassett
 Collectors and Art/Literature  Lovers can contact him if they wish through his facebook page<br><br><br><br><br><br>
 Scanning and uploading by eGangotri Digital Preservation Trust and Sarayu Trust Foundation.<br>`
 
-const text_csds = `This PDF you are browsing now is in a series of several scanned documents by the Centre for the Study of Developing Societies (CSDS), Delhi<br>
+const TEXT_CSDS = `This PDF you are browsing now is in a series of several scanned documents by the Centre for the Study of Developing Societies (CSDS), Delhi<br>
 CSDS gratefully acknowledges the enterprise of the following savants/institutions in making the digitzation possible:<br>
 Historian, Writer and Editor Priyamvad of Kanpur for the Hindi periodicals (Bhavishya, Chand, Madhuri)<br>
 Mr. Fuwad Khwaja for the Urdu weekly newspaper Sadaqat, edited by his grandfather and father.<br>
@@ -119,12 +120,12 @@ ICAS-MP and India Habitat Centre for facilitating exhibitions.<br>
 Digital Upload by eGangotri Digital Preservation Trust.<br>
 `
 
-const text_csds2 = `The collection was obtained from Kanpur and has been uploaded by the Centre for the Study of Developing Societies (CSDS), Delhi.<br>
+const TEXT_CSDS2 = `The collection was obtained from Kanpur and has been uploaded by the Centre for the Study of Developing Societies (CSDS), Delhi.<br>
 We are grateful to historian, writer and editor, Priyamvad for the Hindi periodicals (Bhavishya, Chand, Madhuri) and to Mr. Fuwad Khwaja for the Urdu weekly newspaper Sadaqat, edited by his grandfather and father. To historian Shahid Amin for enabling the donation.<br>
 Thanks are also due to the British Library’s Endangered Archives Programme (1435) for funding the project that involved rescue, scan, sharing and metadata creation. We also thank ICAS-MP and India Habitat Centre for facilitating exhibitions.<br>
 `
 
-const text_hyd = `This PDF you are browsing now is in a series of several scanned rare books and manuscripts from Sanskrit Academy, Hyderabad.<br>
+const TEXT_HYD = `This PDF you are browsing now is in a series of several scanned rare books and manuscripts from Sanskrit Academy, Hyderabad.<br>
 
 Address:<br>
 Manikeshwar Nagar Kaman,<br>
@@ -147,7 +148,7 @@ Sahitya Academy Awardee for Mahakavya on Gulabrao Maharaj. <br>
 
 Translated the Marathi Jnaneshwari in 9000 Sanskrit shlokas.<br>
 `
-const text_hyd2 =
+const TEX_HYD2 =
     `
 Honours<br>
 Honorary D.Litt by National Sanskrit University, Tirupati AP. for his unique contribution in Indian Philosophy.<br>
@@ -167,7 +168,7 @@ Honorary D.Litt by National Sanskrit University, Tirupati AP. for his unique con
 - Sribhashyam national award<br>  
 and many other.<br>`
 
-const text_hyd3 =
+const TEXT_HYD3 =
     `
 Foreign Travel<br> 
 The Netherlands, Canada for  World Sanskrit Conference 2018.<br> 
@@ -207,17 +208,17 @@ export const getProfileVanityInfo = (profile: string, folder: string) => {
 }
 
 const ANISH = {
-    text: [text_Anish],
+    text: [TEXT_ANISH],
     imgFile: "anish_bhatta.jpg",
     pdfSuffix: " - Anish Bhatta Collection",
     nthPageToUseAsDimensions: 2,
-    fontSize: 8,
+   // fontSize: 8,
 
 }
 //must match Profile Name
 export const profileVanityTextMap = {
     "PZ": {
-        text: [text_Peerzada],
+        text: [TEXT_PEERZADA],
         imgFile: "peerzada_forVanity.jpg",
         pdfSuffix: " - Mohd Ashraf Peerzada Collection",
     },
@@ -228,37 +229,37 @@ export const profileVanityTextMap = {
         ...ANISH
     },
     "CHAMBAL": {
-        text: [text_chambal],
+        text: [TEXT_CHAMBAL],
         imgFile: "KrishnaPorwal_forVanity.jpeg",
         //seems the image dimensions forces the font size to behave differently in the generated pdf
         fontSize: 14,
     },
     "SR": {
-        text: [text_csds],
+        text: [TEXT_CSDS],
         imgFile: "..\\csdsBL.jpeg",
         fontSize: 14,
         singlePage: true
     },
     "TMP": {
-        text: [text_csds],
+        text: [TEXT_CSDS],
         imgFile: "..\\csdsBL.jpeg",
         fontSize: 14,
         singlePage: true
     },
     "TMP2": {
-        text: [text_csds2],
+        text: [TEXT_CSDS2],
         imgFile: "..\\csdsBL.jpeg",
         fontSize: 14,
         singlePage: true
     },
     "SKT_HYD": {
-        text: [text_hyd, text_hyd2, text_hyd3],
+        text: [TEXT_HYD, TEX_HYD2, TEXT_HYD3],
         imgFile: "sktAcad.jpeg",
         fontSize: 9,
         singlePage: false
     },
     "SKT_HYD_MANU": {
-        text: [text_hyd, text_hyd2, text_hyd3],
+        text: [TEXT_HYD, TEX_HYD2, TEXT_HYD3],
         imgFile: "..\\sktAcad.jpeg",
         fontSize: 9,
         singlePage: false
