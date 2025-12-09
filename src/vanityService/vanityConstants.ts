@@ -209,7 +209,7 @@ export const getProfileVanityInfo = (profile: string, folder: string) => {
 
 const ANISH = {
     text: [TEXT_ANISH],
-    imgFile: "anish_bhatta.jpg",
+    imgFile: "..\\anish_bhatta.jpg",
     pdfSuffix: " - Anish Bhatta Collection",
     nthPageToUseAsDimensions: 2,
    // fontSize: 8,
