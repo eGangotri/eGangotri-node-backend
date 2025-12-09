@@ -59,9 +59,11 @@ function unzipFiles(filePath: string, outputDir: string): Promise<void> {
             }
 
             // Enable Windows long path support
-            const longPathPrefix = process.platform === 'win32' ? '\\?\\' : '';
+            const longPathPrefix = process.platform === 'win32' ? '\\\\?\\' : '';
             const sanitizedOutputDir = longPathPrefix + path.resolve(outputDir);
-
+            console.log(`sanitizedOutputDir: ${sanitizedOutputDir}`);
+            console.log(`outputDir: ${outputDir}`);
+            console.log(`longPathPrefix: ${longPathPrefix}`);
             // Create root output directory first
             await fs.promises.mkdir(sanitizedOutputDir, { recursive: true });
 
@@ -72,9 +74,14 @@ function unzipFiles(filePath: string, outputDir: string): Promise<void> {
                 try {
                     // Sanitize and normalize path
                     const normalizedFileName = entry.fileName.split('/').join(path.sep);
-                    const sanitizedFileName = sanitizeFileNameAndAppendPdfExt(normalizedFileName);
-                    const outputPath = path.join(sanitizedOutputDir, sanitizedFileName);
-
+                    //to be discarded
+                    const sanitizedFileName = sanitizeFileName(normalizedFileName);
+                    //const outputPath = path.join(sanitizedOutputDir, sanitizedFileName);
+                   
+                    const outputPath = path.join(sanitizedOutputDir, normalizedFileName);
+                    console.log(`   normalizedFileName: ${normalizedFileName}
+                      sanitizedFileName: ${sanitizedFileName}
+                    outputPath: ${outputPath}`);
                     // Create directories recursively
                     const dirPath = path.dirname(outputPath);
                     try {
@@ -98,12 +105,7 @@ function unzipFiles(filePath: string, outputDir: string): Promise<void> {
                             return reject(err);
                         }
 
-                        // Use extended-length path for Windows
-                        const winSafeOutputPath = process.platform === 'win32'
-                            ? '\\?\\' + path.resolve(outputPath)
-                            : outputPath;
-
-                        const writeStream = fs.createWriteStream(winSafeOutputPath);
+                        const writeStream = fs.createWriteStream(outputPath);
                         writeStreams.add(writeStream);
 
                         writeStream.on("finish", () => {
@@ -117,7 +119,7 @@ function unzipFiles(filePath: string, outputDir: string): Promise<void> {
                             console.error(`Error writing file ${normalizedFileName}: ${err}`);
                             writeStreams.forEach(stream => {
                                 stream.destroy();
-                                fs.unlink(outputPath, () => {});
+                                fs.unlink(outputPath, () => { });
                             });
                             reject(err);
                         });
@@ -151,7 +153,7 @@ function unzipFiles(filePath: string, outputDir: string): Promise<void> {
 }
 
 import { promisify } from 'util';
-import { sanitizeFileNameAndAppendPdfExt } from './fileUtilsService';
+import { sanitizeFileName, sanitizeFileNameAndAppendPdfExt } from './fileUtilsService';
 
 const openZip = promisify(yauzl.open);
 
@@ -195,6 +197,7 @@ export async function unzipAllFilesInDirectory(pathToZipFiles: string,
             try {
                 const outputDir = path.join(_unzipHere, path.basename(zipFile.absPath, '.zip'));
                 console.log(`checking ${zipFile.absPath} for ${outputDir}`)
+                console.log(`_unzipHere: ${_unzipHere}`)
                 await createFolderIfNotExistsAsync(outputDir)
                 console.log(`${++idx}). unzipping ${zipFile.absPath} to ${outputDir} `)
                 await unzipFiles(zipFile.absPath, outputDir);
@@ -282,7 +285,7 @@ export async function verifyUnzipSuccessInDirectory(pathToZipFiles: string,
                 const baseOutputDir = path.join(_unzipHere, path.basename(zipFile.absPath, '.zip'));
                 console.log(`\nChecking ${zipFile.absPath}`);
                 console.log(`Base output directory: ${baseOutputDir}`);
-                
+
                 // First check if the base output directory exists
                 if (!(await checkFolderExistsAsynchronous(baseOutputDir))) {
                     const err = `No corresponding base output directory found for ${zipFile.absPath} at ${baseOutputDir}`;
@@ -294,7 +297,7 @@ export async function verifyUnzipSuccessInDirectory(pathToZipFiles: string,
                 }
 
                 // Get list of files and sizes in zip (including nested paths)
-                const zipEntries = new Map<string, {size: number; path: string}>();
+                const zipEntries = new Map<string, { size: number; path: string }>();
                 const zip = await openZip(zipFile.absPath);
                 await new Promise<void>((resolve, reject) => {
                     zip.on('entry', (entry) => {
@@ -312,9 +315,9 @@ export async function verifyUnzipSuccessInDirectory(pathToZipFiles: string,
                 });
 
                 // Get list of files and sizes in output directory (recursive)
-                const unzippedFiles = new Map<string, {size: number; path: string}>();
+                const unzippedFiles = new Map<string, { size: number; path: string }>();
                 const baseForRelative = baseOutputDir + path.sep;
-                
+
                 async function scanDirectory(dir: string) {
                     const files = await fs.promises.readdir(dir);
                     for (const file of files) {
