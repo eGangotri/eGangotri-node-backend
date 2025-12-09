@@ -6,15 +6,47 @@ export const DEFAULT_FONT_SIZE = 12
 
 
 const text_Anish = `This PDF you are browsing is in a series of several scanned manuscripts containing 
-the collection of Anish Bhatta, Changu Narayan, Bhaktapur<br>
+the collection of Anish Bhatta, Changu Narayan, Bhaktapur<br><br>
 CV:<br>
-<br>
-https://www.facebook.com/anish.bhatta.733<br>
-Studied Tourism at Kathmandu Academy of Tourism and Hospitality<br>
-Descendant Pashupati Nath Temple Priests.
-<br>
-Collectors and Art/Literature  Lovers can contact him if they wish through his facebook page<br><br>
-Scanning and upload by eGangotri Trust. Funding by M.I.D.F, New Delhi.<br>`
+Anish Prasad Bhatta (b. 1990)<br>
+Base:<br>
+Changunarayan Municipality Ward 4<br>
+Nepal<br><br>
+
+Educational Qualifications:<br>
+Bachelors in Travel&Tourism<br>
+Degree in History, Culture and Archeology<br><br>
+
+Achievements<br>
+Manuscript Conservation and Collection<br>
+Research in Dailekh archeological research center<br>
+Worked in German Embassy<br>
+Served in the field of tourism as a Tour guide<br>
+Archeological Study in Lumbini excavation<br><br>
+
+Hobbies/Interests<br>
+Study of Peleography and its conservation as well as translation<br>
+Reading Books<br>
+Antique Collection<br><br>
+
+
+Family Background<br>
+Father's name - Laxman Prasad Bhatta<br>
+Age - 70<br>
+Retired Police Inspector<br><br>
+
+Mother's name - Sarita Bhatta<br>
+Age - 59<br>
+Self Employed<br>
+Studied Ayurvedical Science<br><br>
+
+10th Generation Descendant Shiva Narayan Bhatta - priest of Pashupati Nath Temple in NS-811<br><br>
+
+Contact Information<br>
+Mobile: +9779849696161<br>
+Email Id: bhattaanish152e@gmail.com<br>
+Facebook: https://www.facebook.com/anish.bhatta.733<br>
+Scanning and upload by eGangotri Trust. Funding by M.I.D.F, New Delhi.`
 
 
 const text_Peerzada = `This PDF you are browsing is in a series of several scanned documents containing 
@@ -156,7 +188,7 @@ export const getImageDimensions = async (imagePath: string): Promise<{ width: nu
     return { width: metadata.width, height: metadata.height };
 };
 
-export const formatIntroText = (_text: string) => _text.replace(/\n/g, '').replace(/<br>/g, '\n\n');
+export const formatIntroText = (_text: string) => _text.replace(/\n/g, '').replace(/<br>/g, '\n');
 
 export const getProfileVanityInfo = (profile: string, folder: string) => {
     let _tmpProfile = profile;
@@ -178,7 +210,9 @@ const ANISH = {
     text: [text_Anish],
     imgFile: "anish_bhatta.jpg",
     pdfSuffix: " - Anish Bhatta Collection",
-    nthPageToUseAsDimensions: 2
+    nthPageToUseAsDimensions: 2,
+    fontSize: 8,
+
 }
 //must match Profile Name
 export const profileVanityTextMap = {
