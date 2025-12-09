@@ -36,8 +36,14 @@ export async function getPdfNthPageDimensionsUsingPdfLib(pdfPath: string, nthPag
         let width = 0
         let height = 0
         try {
-            width = pdfDoc.getPages()[page].getWidth()
-            height = pdfDoc.getPages()[page].getHeight()
+            const pageObj = pdfDoc.getPages()[page];
+            const rotation = pageObj.getRotation().angle;
+            width = pageObj.getWidth();
+            height = pageObj.getHeight();
+
+            if (rotation === 90 || rotation === 270) {
+                [width, height] = [height, width];
+            }
         }
         catch (err) {
             console.log(`getPdfNthPageDimensionsUsingPdfLib:err ${err}`);
