@@ -47,12 +47,13 @@ const createIntroPageWithImage = async (imagePath: string, pdfToVanitize: string
     const pdfToVanitizeNameWithoutExt = path.parse(pdfToVanitize).name.trim()
     const introPDfName = pdfToVanitizeNameWithoutExt.split(" ").join("-") + "-intro.pdf";
 
-    const doc: PDFKit.PDFDocument = await prepareDocument(_introPath, introPDfName);
+    const [width, height] = await PdfLibUtils.getPdfNthPageDimensionsUsingPdfLib(pdfToVanitize, nthPageToUseAsDimensions);
+    const doc: PDFKit.PDFDocument = await prepareDocument(_introPath, introPDfName, { size: [width, height] });
     console.log(`imageFolderPath ${imageFolderPath} 
                 pdfToVanitize ${pdfToVanitize},
                 nthPageToUseAsDimensions: ${nthPageToUseAsDimensions} `)
 
-    const [width, height] = await PdfLibUtils.getPdfNthPageDimensionsUsingPdfLib(pdfToVanitize, nthPageToUseAsDimensions);
+
     if (singlePage) {
         await addImageToIntroPageAsWholePage(doc, imagePath, width, height)
         addTextToIntroPdf(doc, text.join("\n\n"), width, height, fontSize, singlePage)
