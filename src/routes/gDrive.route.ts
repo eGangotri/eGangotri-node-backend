@@ -21,7 +21,7 @@ import { markVerifiedForGDriveDownload } from '../services/gDriveDownloadService
 import GDriveDownload from '../models/GDriveDownloadHistory';
 import { extractGoogleDriveId } from '../mirror/GoogleDriveUtilsCommonCode';
 import { createManuExcelVersion, createMimimalExcelVersion, ExcelWriteResult } from '../cliBased/excel/ExcelUtils';
-import { redownloadFromGDriveService, RedownloadHttpError, verifyLocalDownloadSameAsGDriveService, aggregateVerificationResults } from '../services/GDriveDownloadVerifyService';
+import { redownloadFromGDriveService, RedownloadHttpError, verifyLocalDownloadSameAsGDriveService, aggregateVerificationResults, aggregateRedwnldResults } from '../services/GDriveDownloadVerifyService';
 
 export const gDriveRoute = express.Router();
 const drive = getGoogleDriveInstance();
@@ -381,11 +381,15 @@ gDriveRoute.post('/redownloadFromGDriveMulti', async (req: any, resp: any) => {
                 results.push(result.body);
             }
             catch (error: any) {
-                console.error(`/ aiRenamer /:runId retry error: ${error?.message || String(error)} `);
+                console.error(`/ redownloadFromGDriveMulti /:runId retry error: ${error?.message || String(error)} `);
                 results.push({ status: 'failed', message: error?.message || String(error) });
             }
         }
-        return resp.status(200).json(results);
+        const resultsSummary = aggregateRedwnldResults(results);
+        return resp.status(200).json({
+            ...resultsSummary,
+            results
+        });
     } catch (error: any) {
         console.error(`/ redownloadFromGDriveMulti error: ${error?.message || String(error)} `);
         return resp.status(500).json({ status: 'failed', message: error?.message || String(error) });

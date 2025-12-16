@@ -104,11 +104,6 @@ export async function redownloadFromGDriveService(params: {
         );
 
         const results = await Promise.all(downloadPromises);
-        // const resultsSummary = results.map((res: any, index: number) => {
-        //     return `(${index + 1}). Succ: ${res.success_count} Err: ${res.error_count
-        //         } Wrong Size: ${res.dl_wrong_size_count}`;
-        // });
-
         const endTime = Date.now();
         const timeTaken = endTime - startTime;
 
@@ -117,7 +112,6 @@ export async function redownloadFromGDriveService(params: {
             body: {
                 msg: `${failedGDriveData.length} links attempted-download to ${foldersWithRoot2.length} profiles`,
                 timeTaken: timeInfo(timeTaken),
-                // resultsSummary,
                 response: results,
                 failedItems: failedGDriveData,
             },
@@ -132,7 +126,6 @@ export async function redownloadFromGDriveService(params: {
             msg: 'No failed items to download',
             failedItems: [],
             timeTaken: timeInfo(timeTaken),
-            resultsSummary: [],
             response: [],
         },
     };
@@ -304,6 +297,80 @@ export async function verifyLocalDownloadSameAsGDriveService(params: {
     };
 }
 
+/**
+ * 
+ * @param results [
+  {
+    "msg": "2 links attempted-download to 1 profiles",
+    "timeTaken": "12.5s",
+    "response": [
+      {
+        "success_count": 1,
+        "error_count": 0,
+        "dl_wrong_size_count": 0,
+        "gDriveDownloadTaskId": "task-uuid-1"
+      },
+      {
+        "success_count": 0,
+        "error_count": 1,
+        "dl_wrong_size_count": 0,
+        "gDriveDownloadTaskId": "task-uuid-2"
+      }
+    ],
+    "failedItems": [
+      {
+        "id": "file-id-1",
+        "name": "document1.pdf",
+        "mimeType": "application/pdf",
+        "googleDriveLink": "https://drive.google.com/...",
+        "localAbsPath": "/path/to/document1.pdf",
+        "success": false
+      },
+      {
+        "id": "file-id-2",
+        "name": "document2.pdf",
+        "mimeType": "application/pdf",
+        "googleDriveLink": "https://drive.google.com/...",
+        "localAbsPath": "/path/to/document2.pdf",
+        "success": false
+      }
+    ]
+  },
+  {
+    "msg": "No failed items to download",
+    "failedItems": [],
+    "timeTaken": "0.5s",
+    "resultsSummary": [],
+    "response": []
+  }
+]
+ * @returns 
+ */
+export function aggregateRedwnldResults(results: any[]) {
+    const successCountPerResponse = results.map(result => {
+        if (Array.isArray(result.response)) {
+            return result.response.reduce((acc: number, item: any) => acc + (item.success_count || 0), 0);
+        }
+        return 0;
+    });
+
+    const totalSuccessCount = successCountPerResponse.reduce((acc: number, item: number) => acc + item, 0);
+    const errorCountPerResponse = results.map(result => {
+        if (Array.isArray(result.response)) {
+            return result.response.reduce((acc: number, item: any) => acc + (item.error_count || 0), 0);
+        }
+        return 0;
+    });
+
+    const totalErrorCount = errorCountPerResponse.reduce((acc: number, item: number) => acc + item, 0);
+
+    return {
+        successCountPerResponse: successCountPerResponse.join('+ '),
+        errorCountPerResponse: errorCountPerResponse.join('+ '),
+        totalSuccessCount,
+        totalErrorCount,
+    };
+}
 export function aggregateVerificationResults(results: any[]) {
 
 
