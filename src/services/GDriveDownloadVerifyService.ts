@@ -104,10 +104,10 @@ export async function redownloadFromGDriveService(params: {
         );
 
         const results = await Promise.all(downloadPromises);
-        const resultsSummary = results.map((res: any, index: number) => {
-            return `(${index + 1}). Succ: ${res.success_count} Err: ${res.error_count
-                } Wrong Size: ${res.dl_wrong_size_count}`;
-        });
+        // const resultsSummary = results.map((res: any, index: number) => {
+        //     return `(${index + 1}). Succ: ${res.success_count} Err: ${res.error_count
+        //         } Wrong Size: ${res.dl_wrong_size_count}`;
+        // });
 
         const endTime = Date.now();
         const timeTaken = endTime - startTime;
@@ -117,7 +117,7 @@ export async function redownloadFromGDriveService(params: {
             body: {
                 msg: `${failedGDriveData.length} links attempted-download to ${foldersWithRoot2.length} profiles`,
                 timeTaken: timeInfo(timeTaken),
-                resultsSummary,
+                // resultsSummary,
                 response: results,
                 failedItems: failedGDriveData,
             },
@@ -159,14 +159,14 @@ export async function verifyLocalDownloadSameAsGDriveService(params: {
     let folderOrProfile: string | undefined;
     let fileType: string = downloadType || PDF_TYPE;
     let ignoreFolder = inputIgnoreFolder || GDRIVE_DEFAULT_IGNORE_FOLDER;
-    
+
     console.log(`verifyLocalDownloadSameAsGDrive {"id":"${id}"}`);
-    
+
     if (id && id !== '') {
         console.log(`verifyLocalDownloadSameAsGDrive:id ${id}`);
-        
+
         const gDriveDownload = await GDriveDownload.findById(id);
-        
+
         if (!gDriveDownload) {
             throw new RedownloadHttpError(404, {
                 response: {
@@ -176,7 +176,7 @@ export async function verifyLocalDownloadSameAsGDriveService(params: {
                 },
             });
         }
-        
+
         googleDriveLink = gDriveDownload.googleDriveLink;
         folderOrProfile = gDriveDownload.fileDumpFolder;
         fileType = gDriveDownload.downloadType || fileType;
@@ -301,5 +301,83 @@ export async function verifyLocalDownloadSameAsGDriveService(params: {
             ...results,
             timeTaken: timeInfo(timeTaken),
         },
+    };
+}
+
+export function aggregateVerificationResults(results: any[]) {
+
+
+    // Calculate aggregate statistics
+    const totalVerifications = results.reduce((sum, result) => {
+        return sum + (result.response.comparisonResult?.length || 0);
+    }, 0);
+
+    const totalSuccessAsString = []
+    const totalSuccessCounts = results.reduce((sum, result) => {
+        const compRes = result.response.comparisonResult;
+        let val = 0;
+        if (Array.isArray(compRes)) {
+            val = compRes.reduce((acc: number, item: any) => acc + (item.successMsgsCount || 0), 0);
+        } else {
+            val = (compRes?.successMsgsCount || 0);
+        }
+        totalSuccessAsString.push(`${val}`)
+        return sum + val;
+    }, 0);
+
+    const totalErrorAsStringCounts = []
+    const totalErrorCounts = results.reduce((sum, result) => {
+        const compRes = result.response.comparisonResult;
+        let val = 0;
+        if (Array.isArray(compRes)) {
+            val = compRes.reduce((acc: number, item: any) => acc + (item.failedCount || 0), 0);
+        } else {
+            val = (compRes?.failedCount || 0);
+        }
+        totalErrorAsStringCounts.push(`${val}`)
+        return sum + val;
+    }, 0);
+
+
+    const failedVerifications = results.reduce((sum, result) => {
+        if (!result.response.comparisonResult) return sum;
+        return sum + result.response.comparisonResult.filter((cr: any) => !cr.success).length;
+    }, 0);
+
+    // Create summary array
+    const resultsSummary = [];
+
+    // Add aggregate summary as first item
+    resultsSummary.push(
+        `${failedVerifications} out of ${totalVerifications} Verification(s) failed`
+    );
+
+    // Add individual verification results
+    results.forEach((result, resultIndex) => {
+        const compRes = result.response.comparisonResult
+        if (compRes?.length) {
+            compRes.forEach((comparisonResult: any, compIndex: number) => {
+                const verificationStatus = comparisonResult.success ? 'Passed' : 'Failed';
+                const successCount = comparisonResult.successMsgsCount || 0;
+                const errorCount = comparisonResult.failedCount || 0;
+
+                resultsSummary.push(
+                    `Verification: ${verificationStatus}, Succ: ${successCount} Error: ${errorCount}`
+                );
+            });
+        }
+    });
+
+    return {
+        quickSummary: {
+            "Total Verifications": totalVerifications,
+            "Failed Verifications": failedVerifications,
+            "Successful Verifications": totalVerifications - failedVerifications,
+            "Successes/Row": totalSuccessAsString.join('+ '),
+            "All Row Successes Count": totalSuccessCounts,
+            "Failures/Row": totalErrorAsStringCounts.join('+ '),
+            "All Row Failures Count": totalErrorCounts,
+            "Results Summary": resultsSummary,
+        }
     };
 }
