@@ -157,9 +157,7 @@ export async function verifyLocalDownloadSameAsGDriveService(params: {
 
     if (id && id !== '') {
         console.log(`verifyLocalDownloadSameAsGDrive:id ${id}`);
-
         const gDriveDownload = await GDriveDownload.findById(id);
-
         if (!gDriveDownload) {
             throw new RedownloadHttpError(404, {
                 response: {
@@ -169,7 +167,6 @@ export async function verifyLocalDownloadSameAsGDriveService(params: {
                 },
             });
         }
-
         googleDriveLink = gDriveDownload.googleDriveLink;
         folderOrProfile = gDriveDownload.fileDumpFolder;
         fileType = gDriveDownload.downloadType || fileType;

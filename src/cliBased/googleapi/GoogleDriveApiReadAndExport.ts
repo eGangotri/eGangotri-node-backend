@@ -1,5 +1,6 @@
 import { _credentials } from './_utils/credentials_googleapi';
 import { listFolderContentsAndGenerateCSVAndExcel, listFolderContentsAndGenerateExcelV2ForPdfRenamer, listFolderContentsAsArrayOfData } from './service/GoogleApiService';
+import { getGDriveLinkType as _getGDriveLinkType } from './_utils/GoogleDriveUtil';
 import { getGoogleDriveInstance } from './service/CreateGoogleDrive';
 import { isValidDriveId } from './Utils';
 import { PDF_TYPE } from './_utils/constants';
@@ -31,25 +32,25 @@ export async function getGDriveContentsAsJson(driveLinkOrFolderID: string,
 }
 
 async function procOrigGoogleDrive(driveLinkOrFolderID: string,
-   folderName: string,
-  ignoreFolder = "", 
-  pdfRenamerXlV2 = false, 
-  type = PDF_TYPE, 
+  folderName: string,
+  ignoreFolder = "",
+  pdfRenamerXlV2 = false,
+  type = PDF_TYPE,
   rowCounterController = ""): Promise<ExcelWriteResult | null> {
   if (pdfRenamerXlV2) {
     const res = await listFolderContentsAndGenerateExcelV2ForPdfRenamer(driveLinkOrFolderID, drive,
       `${EXPORT_ROOT_FOLDER}_googleDriveExcels`,
-      folderName, ignoreFolder, type,rowCounterController);
+      folderName, ignoreFolder, type, rowCounterController);
     return res;
   }
   else {
-    const res = await listFolderContentsAndGenerateCSVAndExcel(driveLinkOrFolderID, 
+    const res = await listFolderContentsAndGenerateCSVAndExcel(driveLinkOrFolderID,
       drive,
       `${EXPORT_ROOT_FOLDER}_googleDriveExcels`,
-      folderName, 
+      folderName,
       ignoreFolder,
-       type,
-       rowCounterController);
+      type,
+      rowCounterController);
     return res;
   }
 }
@@ -76,7 +77,7 @@ export const generateGoogleDriveListingExcel = async (driveLinkOrFolderID: strin
   pdfRenamerXlV2 = false,
   type = PDF_TYPE,
   rowCounterController = ""): Promise<ExcelWriteResult | null> => {
-    console.log(`generateGoogleDriveListingExcel:driveLinkOrFolderID ${driveLinkOrFolderID} ${type}`)
+  console.log(`generateGoogleDriveListingExcel:driveLinkOrFolderID ${driveLinkOrFolderID} ${type}`)
   //check if driveLinkOrFolderID is a valid google link
   if (!isValidDriveId(driveLinkOrFolderID)) {
     return {

@@ -44,18 +44,18 @@ export async function listFolderContentsAsArrayOfData(itemId: string,
         await listFolderContents(itemId, drive, umbrellaFolder,
             googleDriveFileData, idFolderNameMap, rootFolderName,
             ignoreFolder, fileType, rowCounterController);
-    } else  {
+    } else {
         // Handle single file case
         const file = await drive.files.get({
             fileId: itemId,
             fields: 'id, name, mimeType, size, parents, webViewLink, thumbnailLink, createdTime',
             supportsAllDrives: true
         });
-        
+
         if (file.data) {
             addFileMetadataToArray(file.data, file.data.parents?.[0] || '', googleDriveFileData, idFolderNameMap, rowCounterController);
         }
-    } 
+    }
 
     return googleDriveFileData
 }
@@ -72,7 +72,7 @@ export async function listFolderContentsAndGenerateCSVAndExcel(_folderIdOrUrl: s
     const googleDriveFileData: Array<GoogleApiData> = await listFolderContentsAsArrayOfData(gDriveFolderId,
         drive, umbrellaFolder, ignoreFolder, type, rowCounterController)
     const fileNameWithPath = await createFileNameWithPathForExport(gDriveFolderId,
-         umbrellaFolder, exportDestFolder, FileConstUtils.getRowCounter(rowCounterController)[1]);
+        umbrellaFolder, exportDestFolder, FileConstUtils.getRowCounter(rowCounterController)[1]);
     FileConstUtils.incrementRowCounter(rowCounterController);
 
     // Convert data to XLSX
@@ -98,7 +98,7 @@ export async function listFolderContentsAndGenerateExcelV2ForPdfRenamer(_folderI
     umbrellaFolder: string = "",
     ignoreFolder = "",
     type = PDF_TYPE,
-    rowCounterController = ""):Promise<ExcelWriteResult | null> {
+    rowCounterController = ""): Promise<ExcelWriteResult | null> {
     const folderId = extractGoogleDriveId(_folderIdOrUrl)
     await FileUtils.createFolderIfNotExistsAsync(exportDestFolder);
 
@@ -224,5 +224,25 @@ export const addFileMetadataToArray = (file: drive_v3.Schema$File,
         });
 
         console.log(`${FileConstUtils.getRowCounter(rowCounterController)[0]}/${FileConstUtils.getRowCounter(rowCounterController)[1]}). ${ellipsis(fileName, 40)} `);
+    }
+}
+
+export async function getGDriveLinkType(itemId: string, drive: drive_v3.Drive): Promise<'file' | 'folder' | 'unknown'> {
+    try {
+        const fileMetadata = await drive.files.get({
+            fileId: itemId,
+            fields: 'mimeType',
+            supportsAllDrives: true
+        });
+
+        if (fileMetadata.data?.mimeType === FOLDER_MIME_TYPE) {
+            return 'folder';
+        } else if (fileMetadata.data?.mimeType) {
+            return 'file';
+        }
+        return 'unknown';
+    } catch (error) {
+        console.error('Error checking link type:', error);
+        return 'unknown';
     }
 }

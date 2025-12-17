@@ -3,6 +3,8 @@ import moment from 'moment';
 import { DD_MM_YYYY_HH_MMFORMAT } from '../../../utils/utils';
 import * as path from "path";
 import { createFolderIfNotExistsAsync } from '../../../utils/FileUtils';
+import { FOLDER_MIME_TYPE } from './constants';
+import { extractGoogleDriveId } from 'mirror/GoogleDriveUtilsCommonCode';
 
 export async function createFileNameWithPathForExport(folderId: string,
     _umbrellaFolder: string,
@@ -79,5 +81,27 @@ export async function getFolderPathRelativeToRootFolder(folderId: string, drive:
         throw new Error(`getFolderPathRelativeToRootFolder:Error getting folder path: 
             is ${folderId} has View Privileges by your gmail account?
             ${error}`);
+    }
+}
+
+
+export async function getGDriveLinkType(driveLinkOrFolderID: string, drive: drive_v3.Drive): Promise<'file' | 'folder' | 'unknown'> {
+     const itemId = extractGoogleDriveId(driveLinkOrFolderID)
+    try {
+        const fileMetadata = await drive.files.get({
+            fileId: itemId,
+            fields: 'mimeType',
+            supportsAllDrives: true
+        });
+
+        if (fileMetadata.data?.mimeType === FOLDER_MIME_TYPE) {
+            return 'folder';
+        } else if (fileMetadata.data?.mimeType) {
+            return 'file';
+        }
+        return 'unknown';
+    } catch (error) {
+        console.error('Error checking link type:', error);
+        return 'unknown';
     }
 }
