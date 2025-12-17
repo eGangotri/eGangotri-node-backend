@@ -212,14 +212,16 @@ launchAIRoute.get("/getAllTitleRenamedViaAIListGroupedByRunId", async (req: Requ
 
         // Aggregate to group by runId and count documents per run
         const pipeline = [
-            { 
-                $group: { 
+            {
+                $group: {
                     _id: "$runId",
-                    commonRunId: { $first: "$commonRunId" }, 
-                    count: { $sum: 1 }, 
-                    maxCreatedAt: { $max: "$createdAt" }, 
+                    commonRunId: { $first: "$commonRunId" },
+                    count: { $sum: 1 },
+                    maxCreatedAt: { $max: "$createdAt" },
                     minCreatedAt: { $min: "$createdAt" },
-                    srcFolder: { $first: "$srcFolder" }
+                    srcFolder: { $first: "$srcFolder" },
+                    applyButtonClicked: { $first: "$applyButtonClicked" },
+                    cleanupButtonClicked: { $first: "$cleanupButtonClicked" }
                 }
             },
             { $sort: { maxCreatedAt: -1 } },
@@ -232,7 +234,9 @@ launchAIRoute.get("/getAllTitleRenamedViaAIListGroupedByRunId", async (req: Requ
                     commonRunId: 1,
                     count: 1,
                     createdAt: "$minCreatedAt",
-                    srcFolder: 1
+                    srcFolder: 1,
+                    applyButtonClicked: 1,
+                    cleanupButtonClicked: 1,
                 }
             },
         ];
@@ -247,6 +251,8 @@ launchAIRoute.get("/getAllTitleRenamedViaAIListGroupedByRunId", async (req: Requ
                 createdAt: Date;
                 commonRunId: string;
                 srcFolder: string;
+                applyButtonClicked: boolean;
+                cleanupButtonClicked: boolean;
             }>,
             currentPage: page,
             totalPages: Math.ceil(totalDistinctRunIds / limit),
@@ -268,6 +274,7 @@ launchAIRoute.post("/copyMetadataToOriginalFiles/:runId", async (req: Request, r
 
 
         const { successCount, failureCount, errors } = await renameOriginalItemsBasedOnMetadata(pdfTitleRenamedItems);
+        await PdfTitleRenamingViaAITracker.updateMany(filter, { $set: { applyButtonClicked: true } });
 
         res.json({
             status: `Success: ${successCount}, Failure: ${failureCount} of ${pdfTitleRenamedItems.length}`,
@@ -310,6 +317,8 @@ launchAIRoute.post("/cleanupRedRenamerFilers/:runId", async (req: Request, res: 
 
         const msg = `Folders ${reducedFolder} moved to ${destForRedFolder} \n 
          ${outputFolder} moved to ${discardFolder}`;
+        await PdfTitleRenamingViaAITracker.updateMany(filter, { $set: { cleanupButtonClicked: true } });
+
         res.json({
             msg,
             runId,

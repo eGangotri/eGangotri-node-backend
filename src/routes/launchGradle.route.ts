@@ -553,27 +553,36 @@ launchGradleRoute.get('/bookTitles', async (req: any, resp: any) => {
         const pdfsOnly = req.query.pdfsOnly
 
         const profileOrPaths = argFirst.includes(",") ? argFirst.split(",").map((link: string) => link.trim()) : [argFirst.trim()];
-        console.log(`profileOrPaths ${profileOrPaths}`);
+        console.log(`profileOrPaths: ${profileOrPaths}`);
+        const responseArray = []
+        for (let i = 0; i < profileOrPaths.length; i++) {
+            const profileOrPath = profileOrPaths[i]
+            const pdfDumpFolder = isValidPath(profileOrPath) ? profileOrPath : getFolderInDestRootForProfile(profileOrPath)
+            console.log(`bookTitles: ${pdfDumpFolder}`)
+            const _cmd = `gradle bookTitles --args="paths='${pdfDumpFolder}', pdfsOnly=${pdfsOnly}"`
+            console.log(`_cmd ${_cmd}`)
 
-        const pdfDumpFolders = isValidPath(profileOrPaths[0]) ? profileOrPaths :
-            profileOrPaths.map((_profileOrPath: string) => {
-                return getFolderInDestRootForProfile(_profileOrPath)
-            });
+            const res = await makeGradleCall(_cmd)
+            const excelPath = extractValue(res?.stdout, /CSV to Excel :\s*([^\s]+\.xlsx)\b/)?.trim();
+            console.log(`excelPath ${excelPath}}`)
 
-        console.log(`bookTitles ${pdfDumpFolders}`)
-        const _cmd = `gradle bookTitles --args="paths='${pdfDumpFolders.join(",")}', pdfsOnly=${pdfsOnly}"`
-        console.log(`_cmd ${_cmd}`)
-
-        const res = await makeGradleCall(_cmd)
-        const excelPath = extractValue(res?.stdout, /CSV to Excel :\s*([^\s]+\.xlsx)\b/)?.trim();
-        console.log(`excelPath ${excelPath}}`)
-
-        if (excelPath?.endsWith(".xlsx")) {
-            const metaRes = addFolderMetadataSheet(excelPath);
-            console.log(`addFolderMetadataSheet: ${JSON.stringify(metaRes)}`)
+            if (excelPath?.endsWith(".xlsx")) {
+                const metaRes = addFolderMetadataSheet(excelPath);
+                console.log(`addFolderMetadataSheet: ${JSON.stringify(metaRes)}`)
+            }
+            responseArray.push({
+                msg: `Item ${i + 1} of ${profileOrPaths.length}: Book titles for ${profileOrPath} performed`,
+                excelPath,
+                pdfDumpFolder,
+                pdfsOnly,
+                profileOrPath,
+                res
+            })
         }
+
+        console.log(`responseArray ${JSON.stringify(responseArray)}`)
         resp.status(200).send({
-            response: res
+            response: responseArray
         });
     }
     catch (err: any) {

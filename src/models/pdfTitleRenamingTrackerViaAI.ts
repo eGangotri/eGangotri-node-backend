@@ -24,11 +24,15 @@ export interface IPdfTitleRenamingViaAITracker {
   // Mongoose timestamps
   createdAt?: Date;
   updatedAt?: Date;
+
+  applyButtonClicked?: boolean;
+  cleanupButtonClicked?: boolean;
 }
 
 export type PdfTitleRenamingViaAITrackerDocument = IPdfTitleRenamingViaAITracker & mongoose.Document;
 export type PdfTitleRenamingViaAITrackerModel = mongoose.Model<PdfTitleRenamingViaAITrackerDocument>;
 
+const SCHEMA_NAME = 'PDF_TITLE_RENAMING_VIA_AI_TRACKER';
 const PdfTitleRenamingTrackerViaAISchema = new mongoose.Schema(
   {
     commonRunId: { type: String, required: true, index: true },
@@ -51,15 +55,19 @@ const PdfTitleRenamingTrackerViaAISchema = new mongoose.Schema(
     error: { type: String, required: false },
     newFilePath: { type: String, required: false },
     msg: { type: String, required: false },
+
+    // Buttons
+    applyButtonClicked: { type: Boolean, required: false, default: false },
+    cleanupButtonClicked: { type: Boolean, required: false, default: false },
   },
   {
-    collection: 'PDF_TITLE_RENAMING_VIA_AI_TRACKER',
+    collection: SCHEMA_NAME,
     timestamps: true,
   }
 );
 
 export const PdfTitleRenamingViaAITracker: PdfTitleRenamingViaAITrackerModel =
   mongoose.model<PdfTitleRenamingViaAITrackerDocument>(
-    'PDF_TITLE_RENAMING_VIA_AI_TRACKER',
+    SCHEMA_NAME,
     PdfTitleRenamingTrackerViaAISchema
   );
