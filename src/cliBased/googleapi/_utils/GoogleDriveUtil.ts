@@ -4,7 +4,7 @@ import { DD_MM_YYYY_HH_MMFORMAT } from '../../../utils/utils';
 import * as path from "path";
 import { createFolderIfNotExistsAsync } from '../../../utils/FileUtils';
 import { FOLDER_MIME_TYPE } from './constants';
-import { extractGoogleDriveId } from 'mirror/GoogleDriveUtilsCommonCode';
+import { extractGoogleDriveId } from '../../../mirror/GoogleDriveUtilsCommonCode';
 
 export async function createFileNameWithPathForExport(folderId: string,
     _umbrellaFolder: string,
