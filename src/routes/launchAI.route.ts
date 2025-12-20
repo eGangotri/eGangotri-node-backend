@@ -8,7 +8,7 @@ import { IPdfTitleRenamingViaAITracker, PdfTitleRenamingViaAITracker } from '../
 import { randomUUID } from 'crypto';
 import * as fs from 'fs';
 import { renameOriginalItemsBasedOnMetadata, retryAiRenamerByRunId } from '../services/aiServices';
-import { getFolderInSrcRootForProfile } from '../archiveUpload/ArchiveProfileUtils';
+import { resolveProfilePathWithPercentages } from '../utils/launchAIUtils';
 
 export const launchAIRoute = express.Router();
 const DISCARD_FOLDER_POST_AI_PROCESSING = "_discard";
@@ -293,7 +293,8 @@ launchAIRoute.post("/copyMetadataToOriginalFiles/:runId", async (req: Request, r
 launchAIRoute.post("/cleanupRedRenamerFilers/:runId", async (req: Request, res: express.Response) => {
     try {
         const runId = req.params.runId;
-        const profile = req.body.profile || "";
+        const profile = resolveProfilePathWithPercentages(req.body.profile || "");
+
         const filter = { runId };
         const pdfTitleRenamedItems: IPdfTitleRenamingViaAITracker[] = await PdfTitleRenamingViaAITracker.find(filter)
 
@@ -308,8 +309,11 @@ launchAIRoute.post("/cleanupRedRenamerFilers/:runId", async (req: Request, res: 
 
         const parent = path.dirname(srcFolder);
         const discardFolder = path.join(parent, DISCARD_FOLDER_POST_AI_PROCESSING)
-        const destForRedFolder = profile.length > 0 ? getFolderInSrcRootForProfile(profile) : discardFolder;
-
+        const destForRedFolder = profile.length > 0 ? profile : discardFolder;
+        console.log(`
+            resolvedprofile: ${profile}
+            discardFolder: ${discardFolder}
+            destForRedFolder: ${destForRedFolder}`);
         await fs.promises.mkdir(discardFolder, { recursive: true });
 
         await fs.promises.rename(reducedFolder, path.join(destForRedFolder, path.basename(reducedFolder)));
