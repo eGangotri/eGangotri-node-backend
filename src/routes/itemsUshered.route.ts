@@ -48,6 +48,7 @@ itemsUsheredRoute.post('/add', async (req: any, resp: any) => {
     }
 })
 
+
 /**
  * 	
  */
@@ -78,6 +79,27 @@ itemsUsheredRoute.post('/verifyUploadStatus', async (req: any, resp: any) => {
     }
 })
 
+itemsUsheredRoute.post('/verifyUploadMulti', async (req: any, resp: any) => {
+    try {
+        const uploadCycleIds = req.body.uploadCycleIds;
+        console.log(`verifyUploadMulti/uploadCycleIds ${uploadCycleIds}`)
+        const results = [];
+        if (uploadCycleIds) {
+            for (const uploadCycleId of uploadCycleIds) {
+                //get all Items_Ushered for uploadCycleIds
+                const result = await itemsUsheredVerficationAndDBFlagUpdate(uploadCycleId);
+                results.push(result);
+            }
+            resp.status(200).send({
+                response: results
+            });
+        }
+    }
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})
 
 itemsUsheredRoute.get('/list', async (req: Request, resp: Response) => {
     try {
