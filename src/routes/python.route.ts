@@ -72,7 +72,7 @@ pythonRoute.post('/getFirstAndLastNPages', async (req: any, resp: any) => {
         const combinedResults: PythonExtractionResult[] = await runPthonPdfExtractionInLoop(_srcFolders,
             _destRootFolders, firstNPages, lastNPages, reducePdfSizeAlso);
 
-        if (combinedResults) {
+        if (combinedResults && combinedResults.length > 0) {
             const stats = combinedResults.filter((extractResult: PythonExtractionResult) => extractResult.success === true).length;
             console.log(`combinedResults extractFirstN: ${stats} of ${combinedResults.length} processed successfully`);
             resp.status(200).send({
