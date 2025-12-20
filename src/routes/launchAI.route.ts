@@ -68,14 +68,6 @@ launchAIRoute.post('/aiRenamer', async (req: any, resp: any) => {
 
         const _aggregatedResults = aggregateRenamingResults(_renamingResults);
         const aggregatedSummary = generateRenamingSummary(_aggregatedResults, _renamingResults);
-        // const msg = {
-        //     title: `${srcFoldersList.length} folders processed in ${_renamingResults.length} operations`,
-        //     overallSuccess,
-        //     _processedCount: `${_processedCount} (${summary.processedCount} )`,
-        //     _successCount: `${_successCount} (${summary.successCount})`,
-        //     _failedCount: `${_failedCount} (${summary.failedCount})`,
-        //     _errorCount: `${_errorCount} (${summary.errorCount})`,
-        // }
         resp.status(200).send({
             "status": "success",
             response: {
@@ -271,12 +263,13 @@ launchAIRoute.post("/cleanupRedRenamerFilers/:runId", async (req: Request, res: 
         await fs.promises.rename(reducedFolder, path.join(destForRedFolder, path.basename(reducedFolder)));
         await fs.promises.rename(outputFolder, path.join(discardFolder, path.basename(outputFolder)));
 
-        const msg = `Folders ${reducedFolder} moved to ${destForRedFolder} \n 
-         ${outputFolder} moved to ${discardFolder}`;
+        const msg = `Folders ${reducedFolder} moved to ${destForRedFolder}`;
+        const msg2 = `Folders ${outputFolder} moved to ${discardFolder}`;
         await PdfTitleRenamingViaAITracker.updateMany(filter, { $set: { cleanupButtonClicked: true } });
 
         res.json({
             msg,
+            msg2,
             runId,
         })
     } catch (error) {
