@@ -1,9 +1,11 @@
 import { getFolderInSrcRootForProfile } from "../archiveUpload/ArchiveProfileUtils";
 import { getPathOrSrcRootForProfile } from "./FileUtils";
 import * as path from "path";
+import * as fs from 'fs';
 
 
 export const RENAMER_SUFFIX = "-renamer"
+export const DISCARD_FOLDER_POST_AI_PROCESSING = "_discard";
 /**
  * Resolves a profile path that may contain a pattern like %NAGITHA%\c\d
  * Converts %VARIABLE% to the actual folder path using getFolderInSrcRootForProfile
@@ -126,4 +128,40 @@ export const generateRenamingSummary = (aggregatedResults: any[], renamingResult
         "summary": summary,
         "results": renamingResults,
     }
+}
+
+/**
+ * Performs folder cleanup by moving reduced and output folders to their respective destinations.
+ * @param srcFolder - The source folder path
+ * @param reducedFolder - The reduced folder path
+ * @param outputFolder - The output folder path
+ * @param profile - The profile string to resolve
+ * @returns Object with messages about the moved folders
+ */
+export const performFolderCleanup = async (
+    srcFolder: string,
+    reducedFolder: string,
+    outputFolder: string,
+    profile: string
+) => {
+    const resolvedFolder = resolveProfilePathWithPercentages(profile);
+    const parent = path.dirname(srcFolder);
+    const discardFolder = path.join(parent, DISCARD_FOLDER_POST_AI_PROCESSING)
+    const destForRedFolder = resolvedFolder.length > 0 ? resolvedFolder : discardFolder;
+
+    console.log(`
+            resolvedprofile: ${resolvedFolder}
+            discardFolder: ${discardFolder}
+            destForRedFolder: ${destForRedFolder}`);
+
+    await fs.promises.mkdir(discardFolder, { recursive: true });
+    await fs.promises.mkdir(destForRedFolder, { recursive: true });
+
+    await fs.promises.rename(reducedFolder, path.join(destForRedFolder, path.basename(reducedFolder)));
+    await fs.promises.rename(outputFolder, path.join(discardFolder, path.basename(outputFolder)));
+
+    return {
+        msg: `Folders ${reducedFolder} moved to ${destForRedFolder}`,
+        msg2: `Folders ${outputFolder} moved to ${discardFolder}`
+    };
 }

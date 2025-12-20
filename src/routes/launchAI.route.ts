@@ -8,10 +8,9 @@ import { IPdfTitleRenamingViaAITracker, PdfTitleRenamingViaAITracker } from '../
 import { randomUUID } from 'crypto';
 import * as fs from 'fs';
 import { renameOriginalItemsBasedOnMetadata, retryAiRenamerByRunId } from '../services/aiServices';
-import { RENAMER_SUFFIX, resolveProfilePathWithPercentages, processOutputSuffixes, aggregateRenamingResults, generateRenamingSummary } from '../utils/launchAIUtils';
+import { RENAMER_SUFFIX, resolveProfilePathWithPercentages, processOutputSuffixes, aggregateRenamingResults, generateRenamingSummary, performFolderCleanup } from '../utils/launchAIUtils';
 
 export const launchAIRoute = express.Router();
-const DISCARD_FOLDER_POST_AI_PROCESSING = "_discard";
 //ai/aiRenamer
 launchAIRoute.post('/aiRenamer', async (req: any, resp: any) => {
     try {
@@ -215,11 +214,8 @@ launchAIRoute.post("/copyMetadataToOriginalFiles/:runId", async (req: Request, r
         const filter = { runId };
         const pdfTitleRenamedItems: IPdfTitleRenamingViaAITracker[] = await PdfTitleRenamingViaAITracker.find(filter)
             .sort({ createdAt: -1 });
-
-
         const { successCount, failureCount, errors } = await renameOriginalItemsBasedOnMetadata(pdfTitleRenamedItems);
         await PdfTitleRenamingViaAITracker.updateMany(filter, { $set: { applyButtonClicked: true } });
-
         res.json({
             status: `Success: ${successCount}, Failure: ${failureCount} of ${pdfTitleRenamedItems.length}`,
             runId,
@@ -233,11 +229,39 @@ launchAIRoute.post("/copyMetadataToOriginalFiles/:runId", async (req: Request, r
     }
 })
 
+
+launchAIRoute.post("/copyMetadataToOriginalFilesMulti", async (req: Request, res: express.Response) => {
+    try {
+        const runIds = req?.body?.runIds;
+        if (!runIds || runIds.length === 0) {
+            return res.status(400).json({ status: 'failed', message: 'atleast one runId is required' });
+        }
+        const results = []
+        for (const runId of runIds) {
+            const filter = { runId };
+            const pdfTitleRenamedItems: IPdfTitleRenamingViaAITracker[] = await PdfTitleRenamingViaAITracker.find(filter)
+                .sort({ createdAt: -1 });
+            const { successCount, failureCount, errors } = await renameOriginalItemsBasedOnMetadata(pdfTitleRenamedItems);
+            await PdfTitleRenamingViaAITracker.updateMany(filter, { $set: { applyButtonClicked: true } });
+            results.push({
+                status: `Success: ${successCount}, Failure: ${failureCount} of ${pdfTitleRenamedItems.length}`,
+                runId,
+                successCount,
+                failureCount,
+                errors
+            })
+        }
+        res.json(results)
+    } catch (error) {
+        console.log(`/pdfTitleRenamedItems error: ${JSON.stringify(error.message)}`);
+        res.status(500).json({ message: "Error fetching pdfTitleRenamedItems", error })
+    }
+})
 //
 launchAIRoute.post("/cleanupRedRenamerFilers/:runId", async (req: Request, res: express.Response) => {
     try {
         const runId = req.params.runId;
-        const resolvedFolder = resolveProfilePathWithPercentages(req.body.profile || "");
+        const profile = req.body.profile || "";
 
         const filter = { runId };
         const pdfTitleRenamedItems: IPdfTitleRenamingViaAITracker[] = await PdfTitleRenamingViaAITracker.find(filter)
@@ -246,31 +270,13 @@ launchAIRoute.post("/cleanupRedRenamerFilers/:runId", async (req: Request, res: 
             return res.status(404).json({ message: "No pdfTitleRenamedItems found for runId: " + runId })
         }
 
-        const firstItem = pdfTitleRenamedItems[0];
-        const srcFolder = firstItem.srcFolder;
-        const reducedFolder = firstItem.reducedFolder;
-        const outputFolder = firstItem.outputFolder;
+        const { srcFolder, reducedFolder, outputFolder } = pdfTitleRenamedItems[0];
+        const cleanupResults = await performFolderCleanup(srcFolder, reducedFolder, outputFolder, profile);
 
-        const parent = path.dirname(srcFolder);
-        const discardFolder = path.join(parent, DISCARD_FOLDER_POST_AI_PROCESSING)
-        const destForRedFolder = resolvedFolder.length > 0 ? resolvedFolder : discardFolder;
-        console.log(`
-            resolvedprofile: ${resolvedFolder}
-            discardFolder: ${discardFolder}
-            destForRedFolder: ${destForRedFolder}`);
-        await fs.promises.mkdir(discardFolder, { recursive: true });
-        await fs.promises.mkdir(destForRedFolder, { recursive: true });
-
-        await fs.promises.rename(reducedFolder, path.join(destForRedFolder, path.basename(reducedFolder)));
-        await fs.promises.rename(outputFolder, path.join(discardFolder, path.basename(outputFolder)));
-
-        const msg = `Folders ${reducedFolder} moved to ${destForRedFolder}`;
-        const msg2 = `Folders ${outputFolder} moved to ${discardFolder}`;
         await PdfTitleRenamingViaAITracker.updateMany(filter, { $set: { cleanupButtonClicked: true } });
 
         res.json({
-            msg,
-            msg2,
+            ...cleanupResults,
             runId,
         })
     } catch (error) {
@@ -280,6 +286,30 @@ launchAIRoute.post("/cleanupRedRenamerFilers/:runId", async (req: Request, res: 
 })
 
 
+
+launchAIRoute.post("/cleanupRedRenamerFilersMulti", async (req: Request, res: express.Response) => {
+    try {
+        const runIds = req.body.runIds || [];
+        const profile = req.body.profile || "";
+        const finalResults = [];
+
+        for (const runId of runIds) {
+            const filter = { runId };
+            const pdfTitleRenamedItems: IPdfTitleRenamingViaAITracker[] = await PdfTitleRenamingViaAITracker.find(filter)
+
+            if (pdfTitleRenamedItems.length > 0) {
+                const { srcFolder, reducedFolder, outputFolder } = pdfTitleRenamedItems[0];
+                const cleanupResults = await performFolderCleanup(srcFolder, reducedFolder, outputFolder, profile);
+                await PdfTitleRenamingViaAITracker.updateMany(filter, { $set: { cleanupButtonClicked: true } });
+                finalResults.push({ ...cleanupResults, runId });
+            }
+        }
+        res.json(finalResults);
+    } catch (error) {
+        console.log(`/cleanupRedRenamerFilersMulti error: ${JSON.stringify(error.message)}`);
+        res.status(500).json({ message: "Error in cleanupRedRenamerFilersMulti", error })
+    }
+})
 
 // ai/getAllTitleRenamedViaAIList by runId
 launchAIRoute.get("/getAllTitleRenamedViaAIList/:runId", async (req: Request, res: express.Response) => {
