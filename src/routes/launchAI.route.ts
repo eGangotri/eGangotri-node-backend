@@ -8,7 +8,7 @@ import { IPdfTitleRenamingViaAITracker, PdfTitleRenamingViaAITracker } from '../
 import { randomUUID } from 'crypto';
 import * as fs from 'fs';
 import { renameOriginalItemsBasedOnMetadata, retryAiRenamerByRunId } from '../services/aiServices';
-import { resolveProfilePathWithPercentages } from '../utils/launchAIUtils';
+import { RENAMER_SUFFIX, resolveProfilePathWithPercentages, processOutputSuffixes, aggregateRenamingResults, generateRenamingSummary } from '../utils/launchAIUtils';
 
 export const launchAIRoute = express.Router();
 const DISCARD_FOLDER_POST_AI_PROCESSING = "_discard";
@@ -29,14 +29,10 @@ launchAIRoute.post('/aiRenamer', async (req: any, resp: any) => {
         }
 
 
-        let outputSuffixes = req?.body?.outputSuffix
+        let outputSuffixes = req?.body?.outputSuffix || RENAMER_SUFFIX;
 
         const srcFoldersList = srcFolders.split(",");
         const reducedFoldersList = reducedFolders.split(",");
-        if (!outputSuffixes) {
-            outputSuffixes = "-renamer";
-        }
-
 
         if (srcFoldersList.length !== reducedFoldersList.length) {
             return resp.status(400).send({
@@ -50,30 +46,16 @@ launchAIRoute.post('/aiRenamer', async (req: any, resp: any) => {
         console.log(`outputSuffixes: ${outputSuffixes}`);
 
         let outputSuffixesList: string[] = [];
-        if (!outputSuffixes) {
-            console.log("No output suffix provided, using default: -renamer");
-            reducedFoldersList.forEach((folder: string) => {
-                outputSuffixesList.push(`${path.basename(folder)}-renamer`);
-            });
-        }
-
-        else {
-            outputSuffixesList = outputSuffixes.split(",").map((suffix: string) => suffix.trim());
-            console.log(`outputSiffixList(${outputSuffixesList.length}): ${outputSuffixesList}`)
-            if (srcFoldersList.length !== outputSuffixesList.length) {
-                // If a single suffix is provided, apply it to all src folders
-                if (outputSuffixesList.length === 1) {
-                    outputSuffixesList = Array(srcFoldersList.length).fill(outputSuffixesList[0]);
-                } else {
-                    return resp.status(400).send({
-                        "status": "failed",
-                        response: {
-                            "success": false,
-                            "msg": "OutputSuffixes Count doesnt match Src Folder Count"
-                        }
-                    });
+        try {
+            outputSuffixesList = processOutputSuffixes(outputSuffixes, reducedFoldersList, srcFoldersList.length);
+        } catch (error: any) {
+            return resp.status(400).send({
+                "status": "failed",
+                response: {
+                    "success": false,
+                    "msg": error.message
                 }
-            }
+            });
         }
 
         const _renamingResults = [];
@@ -84,51 +66,21 @@ launchAIRoute.post('/aiRenamer', async (req: any, resp: any) => {
             _renamingResults.push(_result);
         }
 
-        const _aggregatedResults = _renamingResults.map((result: any) => ({
-            runId: result.runId,
-            success: result.success,
-            processedCount: result.processedCount,
-            successCount: result.successCount,
-            failedCount: result.failedCount,
-            errorCount: result.errorCount ?? 0,
-            metaDataAggregated: result.metaDataAggregated,
-            renamingResults: result.renamingResults,
-            error: result.error,
-        }));
-
-        const summary = _aggregatedResults.reduce(
-            (acc: { runs: number; processedCount: number; successCount: number; failedCount: number; errorCount: number }, cur: any) => {
-                acc.runs += 1;
-                acc.processedCount += Number(cur.processedCount || 0);
-                acc.successCount += Number(cur.successCount || 0);
-                acc.failedCount += Number(cur.failedCount || 0);
-                acc.errorCount += Number(cur.errorCount || 0);
-                return acc;
-            },
-            { runs: 0, processedCount: 0, successCount: 0, failedCount: 0, errorCount: 0 }
-        );
-        const _processedCount = _renamingResults.map((result: any) => result.processedCount).join(",");
-        const _successCount = _renamingResults.map((result: any) => result.successCount).join(",");
-        const _failedCount = _renamingResults.map((result: any) => result.failedCount).join(",");
-        const _errorCount = _renamingResults.map((result: any) => result.errorCount).join(",");
-
-        const overallSuccess = summary.failedCount === 0 && _aggregatedResults.every((r: any) => r.success === true);
-        const msg = {
-            title: `${srcFoldersList.length} folders processed in ${_renamingResults.length} operations`,
-            overallSuccess,
-            _processedCount: `${_processedCount} (${summary.processedCount} )`,
-            _successCount: `${_successCount} (${summary.successCount})`,
-            _failedCount: `${_failedCount} (${summary.failedCount})`,
-            _errorCount: `${_errorCount} (${summary.errorCount})`,
-
-        }
+        const _aggregatedResults = aggregateRenamingResults(_renamingResults);
+        const aggregatedSummary = generateRenamingSummary(_aggregatedResults, _renamingResults);
+        // const msg = {
+        //     title: `${srcFoldersList.length} folders processed in ${_renamingResults.length} operations`,
+        //     overallSuccess,
+        //     _processedCount: `${_processedCount} (${summary.processedCount} )`,
+        //     _successCount: `${_successCount} (${summary.successCount})`,
+        //     _failedCount: `${_failedCount} (${summary.failedCount})`,
+        //     _errorCount: `${_errorCount} (${summary.errorCount})`,
+        // }
         resp.status(200).send({
             "status": "success",
             response: {
-                "aggregatedSummary": msg,
-                "aggregatedResults": _aggregatedResults,
-                "summary": summary,
-                "results": _renamingResults,
+                title: `${srcFoldersList.length} folders processed in ${_renamingResults.length} operations`,
+                ...aggregatedSummary
             }
         });
     }
