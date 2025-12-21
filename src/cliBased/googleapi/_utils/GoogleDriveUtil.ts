@@ -18,6 +18,7 @@ export async function createFileNameWithPathForExport(folderId: string,
 }
 
 export const getDriveFileDetails = async (folderId: string, drive: drive_v3.Drive) => {
+    if (!folderId) return undefined;
     const res = await drive.files
         .get({ fileId: folderId })
         .catch((err) => console.log(err.errors));
@@ -58,6 +59,7 @@ export const getWebContentLink = async (folderId: string, drive: drive_v3.Drive)
  * @returns 
  */
 export async function getFolderPathRelativeToRootFolder(folderId: string, drive: drive_v3.Drive): Promise<string> {
+    if (!folderId) throw new Error("getFolderPathRelativeToRootFolder: folderId is required");
     console.log(`getFolderPathRelativeToRootFolder: ${folderId}`)
     try {
         const response = await drive.files.get({
@@ -86,7 +88,8 @@ export async function getFolderPathRelativeToRootFolder(folderId: string, drive:
 
 
 export async function getGDriveLinkType(driveLinkOrFolderID: string, drive: drive_v3.Drive): Promise<'file' | 'folder' | 'unknown'> {
-     const itemId = extractGoogleDriveId(driveLinkOrFolderID)
+    const itemId = extractGoogleDriveId(driveLinkOrFolderID)
+    if (!itemId) return 'unknown';
     try {
         const fileMetadata = await drive.files.get({
             fileId: itemId,

@@ -21,6 +21,10 @@ export async function listFolderContentsAsArrayOfData(itemId: string,
     console.log(`listFolderContentsAsArrayOfData: umbrellaFolder: ${umbrellaFolder} ignoreFolder ${ignoreFolder}
         fileType: ${fileType} rowCounterController ${rowCounterController}`)
     // First check if the itemId is a folder or a file
+    if (!itemId) {
+        console.log('listFolderContentsAsArrayOfData: itemId is empty. Returning empty array.');
+        return [];
+    }
     const fileMetadata = await drive.files.get({
         fileId: itemId,
         fields: 'mimeType,name',
@@ -228,6 +232,7 @@ export const addFileMetadataToArray = (file: drive_v3.Schema$File,
 }
 
 export async function getGDriveLinkType(itemId: string, drive: drive_v3.Drive): Promise<'file' | 'folder' | 'unknown'> {
+    if (!itemId) return 'unknown';
     try {
         const fileMetadata = await drive.files.get({
             fileId: itemId,

@@ -31,6 +31,15 @@ async function dwnldAllFilesFromGDrive(driveLinkOrFolderID: string,
   const fileId = extractGoogleDriveId(driveLinkOrFolderID)
   console.log(`fileId: ${fileId}`)
 
+  if (!fileId) {
+    console.log(`dwnldAllFilesFromGDrive: fileId is empty for link ${driveLinkOrFolderID}`);
+    return {
+      totalPdfsToDownload: 0,
+      results: [],
+      msg: "Invalid Google Drive Link"
+    };
+  }
+
   // First check if it's a file
   try {
     const file = await drive.files.get({
@@ -94,7 +103,7 @@ async function dwnldAllFilesFromGDrive(driveLinkOrFolderID: string,
     const msg = `restriction to ${maxLimit} items only for now. Link has ${googleDriveData.length} items Cannot continue`
 
     await updateEntryForGDriveUploadHistory(gDriveDownloadTaskId,
-      msg, DownloadHistoryStatus.Failed, 
+      msg, DownloadHistoryStatus.Failed,
       { totalPdfsToDownload: googleDriveData.length }, googleDriveData.length);
     return {
       totalPdfsToDownload: googleDriveData.length,
@@ -105,7 +114,7 @@ async function dwnldAllFilesFromGDrive(driveLinkOrFolderID: string,
   await updateTotalFileCountForGDriveUploadHistory(gDriveDownloadTaskId, googleDriveData.length);
   await updateEntryForGDriveUploadHistory(gDriveDownloadTaskId,
     `Started download with ${googleDriveData.length} items`,
-    DownloadHistoryStatus.InProgress,{}, googleDriveData.length);
+    DownloadHistoryStatus.InProgress, {}, googleDriveData.length);
 
   const limit = pLimit(10); // Limit to 10 concurrent downloads
 
