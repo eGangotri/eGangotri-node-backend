@@ -32,9 +32,9 @@ gDriveDownloadRoute.post("/createGDriveDownload", async (req: Request, res: Resp
 // Update the main schema of an existing GDriveDownload entry
 gDriveDownloadRoute.post("/updateGDriveDownload/:id", async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { status, msg , quickStatus} = req.body;
+    const { status, msg, quickStatus } = req.body;
     try {
-        console.log(`updateGDriveDownload:params: ${id} ${status} ${msg} ${quickStatus||'quickStatus-NA'}`);
+        console.log(`updateGDriveDownload:params: ${id} ${status} ${msg} ${quickStatus || 'quickStatus-NA'}`);
         const gDriveDownload = await GDriveDownload.findById(id);
         if (!gDriveDownload) {
             console.log(`updateGDriveDownload/${id}:GDriveDownload not found`);
@@ -48,7 +48,7 @@ gDriveDownloadRoute.post("/updateGDriveDownload/:id", async (req: Request, res: 
             if (msg !== undefined) {
                 gDriveDownload.msg = msg + "," + gDriveDownload.msg;
             }
-            if(quickStatus !== undefined) {
+            if (quickStatus !== undefined) {
                 // Add attemptDate if not present
                 if (!quickStatus.attemptDate) {
                     quickStatus.attemptDate = new Date();
@@ -79,7 +79,7 @@ gDriveDownloadRoute.post("/updateGDriveDownload/:id", async (req: Request, res: 
 // Update the main schema of an existing GDriveDownload entry
 gDriveDownloadRoute.post("/markVerificationGDriveDownload/:id", async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { verify} = req.body;
+    const { verify } = req.body;
     try {
         console.log(`markVerificationGDriveDownload:params: ${id} ${verify}`);
         const gDriveDownload = await GDriveDownload.findById(id);
@@ -92,7 +92,7 @@ gDriveDownloadRoute.post("/markVerificationGDriveDownload/:id", async (req: Requ
             if (verify !== undefined) {
                 gDriveDownload.verify = verify;
             }
-           
+
             const updatedGDriveDownload = await gDriveDownload.save();
             console.log(`markVerificationGDriveDownload:updatedGDriveDownload/${id}: ${JSON.stringify(updatedGDriveDownload)}`);
             if (!updatedGDriveDownload) {
@@ -114,7 +114,7 @@ gDriveDownloadRoute.post("/updateEmbeddedFileByFileNameV2/:id", async (req: Requ
     const { fileName, status, msg, filePath } = req.body;
     try {
         console.log(`updateEmbeddedFileByFileName/1/${id}: ${fileName} ${filePath} ${id} ${status} ${msg}`);
-        
+
         // Find the document first to check if the file exists
         const gDriveDownload = await GDriveDownload.findById(id);
         if (!gDriveDownload) {
@@ -122,11 +122,11 @@ gDriveDownloadRoute.post("/updateEmbeddedFileByFileNameV2/:id", async (req: Requ
             res.status(404).json({ error: 'GDriveDownload not found' });
             return;
         }
-        
+
         // Check if the file exists in the files array
         const fileExists = gDriveDownload.files.some(file => file.fileName === fileName);
         let updateResult;
-        
+
         if (!fileExists) {
             // If file doesn't exist, push a new file to the files array
             const updateData: any = {};
@@ -134,14 +134,14 @@ gDriveDownloadRoute.post("/updateEmbeddedFileByFileNameV2/:id", async (req: Requ
             if (msg !== undefined) updateData.msg = msg;
             if (fileName !== undefined) updateData.fileName = fileName;
             if (filePath !== undefined) updateData.filePath = filePath;
-            
+
             // Use findOneAndUpdate with $push to add the new file atomically
             updateResult = await GDriveDownload.findOneAndUpdate(
                 { _id: id },
                 { $push: { files: updateData } },
                 { new: true, runValidators: true }
             );
-            
+
             if (updateResult) {
                 console.log(`updateEmbeddedFileByFileName/3/${id}: file not found, added ${fileName}`);
                 res.status(200).json(updateResult);
@@ -154,15 +154,15 @@ gDriveDownloadRoute.post("/updateEmbeddedFileByFileNameV2/:id", async (req: Requ
             // Use findOneAndUpdate with $set to update the file atomically
             updateResult = await GDriveDownload.findOneAndUpdate(
                 { _id: id, "files.fileName": fileName },
-                { 
-                    $set: { 
+                {
+                    $set: {
                         "files.$.status": status !== undefined ? status : gDriveDownload.files.find(f => f.fileName === fileName)?.status,
                         "files.$.msg": msg !== undefined ? msg : gDriveDownload.files.find(f => f.fileName === fileName)?.msg
-                    } 
+                    }
                 },
                 { new: true, runValidators: true }
             );
-            
+
             if (updateResult) {
                 console.log(`updateEmbeddedFileByFileName/4/${id}: file updated ${fileName}`);
                 res.status(200).json(updateResult);
@@ -184,7 +184,7 @@ gDriveDownloadRoute.get("/getGDriveDownloads", async (req: Request, res: Respons
         const limit = Number.parseInt(req.query.limit as string) || 20
         const skip = (page - 1) * limit
 
-        const gdriveDownloads: IGDriveDownload[] = await GDriveDownload.find()
+        const gdriveDownloads: IGDriveDownload[] = await GDriveDownload.find({ deleted: { $ne: true } })
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit);
@@ -212,4 +212,4 @@ gDriveDownloadRoute.get("/refreshToken", async (req: Request, res: Response) => 
         res.status(500).json({ error: error.message });
     }
 });
- 
+

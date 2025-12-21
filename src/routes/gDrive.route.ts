@@ -17,7 +17,7 @@ import { convertGDriveExcelToLinkData, downloadGDriveData } from '../services/GD
 import { findInvalidFilePaths, isValidPath, getPathOrSrcRootForProfile } from '../utils/FileUtils';
 import { GDRIVE_DEFAULT_IGNORE_FOLDER, verifyGDriveLocalIntegirtyPerLink, verifyGDriveLocalIntegrity } from '../services/GDriveService';
 import { verifyUnzipSuccessInDirectory } from '../services/zipService';
-import { markVerifiedForGDriveDownload } from '../services/gDriveDownloadService';
+import { markVerifiedForGDriveDownload, softDeleteGDriveDownload } from '../services/gDriveDownloadService';
 import GDriveDownload from '../models/GDriveDownloadHistory';
 import { extractGoogleDriveId } from '../mirror/GoogleDriveUtilsCommonCode';
 import { createManuExcelVersion, createMimimalExcelVersion, ExcelWriteResult } from '../cliBased/excel/ExcelUtils';
@@ -411,5 +411,23 @@ gDriveRoute.get("/getRefreshToken", async (req: any, resp: any) => {
     catch (err: any) {
         console.log('Error', err);
         resp.status(400).send(err);
+    }
+})
+
+
+
+gDriveRoute.post('/softDeleteGDriveDownload', async (req: any, resp: any) => {
+
+    try {
+        const runId = req?.body?.runId;
+
+        if (!runId) {
+            return resp.status(400).json({ status: 'failed', message: 'atleast one selectedId is required' });
+        }
+        const result = await softDeleteGDriveDownload(runId);
+        return resp.status(200).json({ status: result, message: `${runId} GDriveDownload deleted ${result ? 'successfully' : 'unsuccessfully'}` });
+    } catch (error: any) {
+        console.error(`/ softDeleteGDriveDownload error: ${error?.message || String(error)} `);
+        return resp.status(500).json({ status: 'failed', message: error?.message || String(error) });
     }
 })

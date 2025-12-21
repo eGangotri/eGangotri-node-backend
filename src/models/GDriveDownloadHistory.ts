@@ -45,6 +45,7 @@ export interface IGDriveDownload extends Document {
     files: ICompositeDocument[];
     quickStatus: QuickStatus[];  
     verify: boolean;    
+    deleted: boolean;
 }
 
 const QuickStatusSchema: Schema = new Schema(
@@ -76,6 +77,7 @@ const GDriveDownloadHistorySchema: Schema = new Schema(
         files: { type: [CompositeDocumentSchema], required: true },
         quickStatus: { type: [QuickStatusSchema], required: false, default: [] },  
         verify: { type: Boolean, required: false },
+        deleted: { type: Boolean, required: false, default: false },
     },
     {
         timestamps: true,
