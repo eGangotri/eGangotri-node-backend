@@ -14,7 +14,7 @@ import { genLinksAndFolders, validateGenGDriveLinks } from '../services/yarnList
 import { generateGoogleDriveListingExcel, getFolderNameFromGDrive } from '../cliBased/googleapi/GoogleDriveApiReadAndExport';
 import { formatTime } from '../imgToPdf/utils/Utils';
 import { convertGDriveExcelToLinkData, downloadGDriveData } from '../services/GDriveItemService';
-import { findInvalidFilePaths, isValidPath, getPathOrSrcRootForProfile } from '../utils/FileUtils';
+import { findInvalidFilePaths, isValidPath, getPathOrSrcRootForProfile, resolveProfilePathWithPercentages } from '../utils/FileUtils';
 import { GDRIVE_DEFAULT_IGNORE_FOLDER, verifyGDriveLocalIntegirtyPerLink, verifyGDriveLocalIntegrity } from '../services/GDriveService';
 import { verifyUnzipSuccessInDirectory } from '../services/zipService';
 import { markVerifiedForGDriveDownload, softDeleteGDriveDownload } from '../services/gDriveDownloadService';
@@ -80,7 +80,7 @@ gDriveRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
             });
         }
 
-        const profilesAsFolders = profiles.map((p: string) => getPathOrSrcRootForProfile(p));
+        const profilesAsFolders = profiles.map((p: string) => resolveProfilePathWithPercentages(p));
         const invalidPAths = await findInvalidFilePaths(profilesAsFolders);
         if (invalidPAths.length > 0) {
             console.log(`:downloadFromGoogleDrive:invalidPAths: ${invalidPAths}`);

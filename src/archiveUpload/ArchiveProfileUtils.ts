@@ -8,9 +8,6 @@ import {
 } from './constants';
 import { checkFolderExistsSync } from '../utils/FolderUtils';
 
-
-
-
 const getFoldersCorrespondingToProfile = (root: string): Map<string, string> => {
     const properties = new Map<string, string>();
     for (const file of LOCAL_FOLDERS_PROPERTIES_FILES) {

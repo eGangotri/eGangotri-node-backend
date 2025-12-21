@@ -8,7 +8,7 @@ import { IPdfTitleRenamingViaAITracker, PdfTitleRenamingViaAITracker } from '../
 import { randomUUID } from 'crypto';
 import * as fs from 'fs';
 import { renameOriginalItemsBasedOnMetadata, retryAiRenamerByRunId } from '../services/aiServices';
-import { RENAMER_SUFFIX, resolveProfilePathWithPercentages, processOutputSuffixes, aggregateRenamingResults, generateRenamingSummary, performFolderCleanup } from '../utils/launchAIUtils';
+import { RENAMER_SUFFIX, processOutputSuffixes, aggregateRenamingResults, generateRenamingSummary, performFolderCleanup } from '../utils/launchAIUtils';
 
 export const launchAIRoute = express.Router();
 //ai/aiRenamer
