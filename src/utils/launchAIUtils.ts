@@ -1,5 +1,6 @@
 import * as path from "path";
 import * as fs from 'fs';
+import * as fsExtra from 'fs-extra';
 import { resolveProfilePathWithPercentages } from "./FileUtils";
 
 
@@ -132,8 +133,8 @@ export const performFolderCleanup = async (
     await fs.promises.mkdir(discardFolder, { recursive: true });
     await fs.promises.mkdir(destForRedFolder, { recursive: true });
 
-    await fs.promises.rename(reducedFolder, path.join(destForRedFolder, path.basename(reducedFolder)));
-    await fs.promises.rename(outputFolder, path.join(discardFolder, path.basename(outputFolder)));
+    await fsExtra.move(reducedFolder, path.join(destForRedFolder, path.basename(reducedFolder)), { overwrite: true });
+    await fsExtra.move(outputFolder, path.join(discardFolder, path.basename(outputFolder)), { overwrite: true });
 
     return {
         msg: `Folders ${reducedFolder} moved to ${destForRedFolder}`,
