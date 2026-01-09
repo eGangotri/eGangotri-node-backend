@@ -7,16 +7,23 @@ import { checkFolderExistsSync } from "../utils/FolderUtils";
 import { DOUBLE_HASH_SEPARATOR } from "./utils";
 
 
-export const downloadPdfFromArchiveToProfile = async (pdfLinks: ArchiveLinkData[], 
+export const downloadPdfFromArchiveToProfile = async (pdfLinks: ArchiveLinkData[],
   profileOrPath: string, downloadArchiveCounterController = "") => {
 
   const pdfDumpFolder = getPathOrSrcRootForProfile(profileOrPath);
-  console.log(`downloadPdfFromArchiveToProfile:pdfDumpFolder ${pdfDumpFolder}`);
+  console.log(`downloadPdfFromArchiveToProfile:pdfDumpFolder ${pdfDumpFolder} pdfLinks ${JSON.stringify(pdfLinks)}`);
   if (!checkFolderExistsSync(pdfDumpFolder)) {
     console.log(`No corresponding folder ${pdfDumpFolder} to profile  ${profileOrPath} exists`)
     return {
       "success": false,
       msg: `No corresponding folder to profile (${profileOrPath}) exists`
+    }
+  }
+  if(pdfLinks?.length === 0) {
+    console.log(`No pdfs to download for profile ${profileOrPath}`)
+    return {
+      "success": false,
+      msg: `No pdfs to download for profile (${profileOrPath})`
     }
   }
 
@@ -28,7 +35,7 @@ export const downloadPdfFromArchiveToProfile = async (pdfLinks: ArchiveLinkData[
 
   try {
     const _results = await downloadArchivePdfs(pdfLinks,
-      folderWithProfileName,downloadArchiveCounterController);
+      folderWithProfileName, downloadArchiveCounterController);
 
     console.log(`Success count: ${DOWNLOAD_COMPLETED_COUNT(downloadArchiveCounterController)}`);
     console.log(`Error count: ${DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT(downloadArchiveCounterController)}`);
@@ -44,21 +51,23 @@ export const downloadPdfFromArchiveToProfile = async (pdfLinks: ArchiveLinkData[
   catch (err) {
     console.log(`Error ${err}`)
     return {
-      "status": "failed" + err
+      status: "failed" + err,
+      err
     }
   }
 }
 
 //this should be redundant after downloadArchiveItems starts working
-const downloadArchivePdfs = async (linkData: ArchiveLinkData[], pdfDumpFolder: string, downloadArchiveCounterController:string ="") => {
-  const promises = linkData.map(pdfLink => {
+const downloadArchivePdfs = async (linkData: ArchiveLinkData[], pdfDumpFolder: string, downloadArchiveCounterController: string = "") => {
+  const results = [];
+  for (const pdfLink of linkData) {
     console.log(`_data: ${JSON.stringify(pdfLink)}}`);
     console.log(`pdfDumpFolder: ${pdfDumpFolder}`);
-    return downloadFileFromUrl(pdfDumpFolder,
-      pdfLink.pdfDownloadUrl, pdfLink.originalTitle + ".pdf", linkData.length,"",downloadArchiveCounterController)
-  });
+    const res = await downloadFileFromUrl(pdfDumpFolder,
+      pdfLink.pdfDownloadUrl, pdfLink.originalTitle + ".pdf", linkData.length, "", downloadArchiveCounterController);
+    results.push(res);
+  }
 
-  const results = await Promise.all(promises);
   return {
     totalPdfsToDownload: linkData.length,
     results
@@ -95,26 +104,29 @@ export const adjustLinkedDataForMultipleItems = async (linkData: ArchiveLinkData
 
   return linkDataWithMultiItems;
 }
-export const downloadArchiveItems = async (_linkData: ArchiveLinkData[], 
+export const downloadArchiveItems = async (_linkData: ArchiveLinkData[],
   pdfDumpFolder: string, downloadArchiveCounterController = "") => {
 
   const _linkDataWithMultiItems = await adjustLinkedDataForMultipleItems(_linkData, pdfDumpFolder);
+  const results = [];
 
-  const promises = _linkDataWithMultiItems.map(pdfLink => {
+  for (const pdfLink of _linkDataWithMultiItems) {
     try {
       console.log(`downloadArchiveItems:_data: ${JSON.stringify(pdfLink)}}`);
       console.log(`downloadArchiveItems:pdfDumpFolder: ${pdfDumpFolder}`);
-      return downloadFileFromUrl(pdfLink.pdfDumpFolder, pdfLink.pdfDownloadUrl, 
-        pdfLink.name, _linkDataWithMultiItems.length, "",downloadArchiveCounterController);
+      const res = await downloadFileFromUrl(pdfLink.pdfDumpFolder, pdfLink.pdfDownloadUrl,
+        pdfLink.name, _linkDataWithMultiItems.length, "", downloadArchiveCounterController);
+      results.push(res);
     } catch (error) {
       console.error(`Error downloading file: ${pdfLink.name}`, error);
-      return null; // Return null or any other value to indicate failure
+      results.push({
+        name: pdfLink.name,
+        success: false,
+        error: error.message || error
+      });
     }
+  }
 
-  });
-
-  const results = await Promise.all(promises);
- 
   return {
     totalPdfsToDownload: _linkDataWithMultiItems.length,
     results

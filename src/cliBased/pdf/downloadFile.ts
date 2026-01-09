@@ -57,7 +57,15 @@ export const downloadFileFromUrl = async (
     dataLength: number,
     fileSizeRaw = "0", downloadCounterController = "") => {
     console.log(`downloadFileFromUrl ${downloadUrl} to ${fileDumpFolder}`)
-
+    console.log(`all params: 
+       fileDumpFolder: ${fileDumpFolder} 
+       downloadUrl: ${downloadUrl}
+       fileName: ${fileName}
+       dataLength: ${dataLength}
+       fileSizeRaw: ${fileSizeRaw}
+       downloadCounterController: ${downloadCounterController}
+       
+       `)
     fileName = await ensureUniqueFileNameAsync(fileDumpFolder, fileName);
 
     const dl = new DownloaderHelper(downloadUrl, fileDumpFolder, { fileName: fileName });//
@@ -85,10 +93,11 @@ export const downloadFileFromUrl = async (
                     console.error('Connection reset by peer');
                 }
                 console.log(`Download Failed ${fileName}` + JSON.stringify(err.message));
-                reject(_result = {
+                _result = {
                     success: false,
                     "error": `Failed download of ${fileName} to ${fileDumpFolder} with ${err.message}`
-                });
+                };
+                resolve(_result);
             });
 
             dl.start();
@@ -101,7 +110,6 @@ export const downloadFileFromUrl = async (
             "error": `Failed download try/catch for ${fileName} to ${fileDumpFolder} with ${JSON.stringify(_result)}`
         };
         console.error(`downloadFileFromUrl result set to ${JSON.stringify(_result)}`);
-
     }
     console.log(`downloadFileFromUrl _result ${JSON.stringify(_result)}`);
     return _result;

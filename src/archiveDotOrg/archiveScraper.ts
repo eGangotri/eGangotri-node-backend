@@ -242,7 +242,7 @@ export const scrapeArchiveOrgProfiles = async (archiveUrlsOrAcctNamesAsCSV: stri
                 archiveAcctName: _archiveAcctName,
                 error: `${e}: ${e.message}`,
             });
-        }
+     ``   }
     }
     console.log(`_status ${JSON.stringify(_status)}`)
     const numFailures = _status.filter(item => item.success === false).length;

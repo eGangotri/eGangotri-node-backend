@@ -75,8 +75,6 @@ launchArchiveYarnRoute.post('/downloadArchivePdfs', async (req: any, resp: any) 
         const profileOrPath = req?.body?.profile;
         const dateRange = req?.body?.dateRange;//dateRange:"2024/04/01-2024/04/31"
 
-
-
         if (!archiveLink || !profileOrPath) {
             return resp.status(400).send({
                 response: {
@@ -92,6 +90,7 @@ launchArchiveYarnRoute.post('/downloadArchivePdfs', async (req: any, resp: any) 
 
         const scrapedLinks: ArchiveDataRetrievalStatus[] = _archiveScrappedData.scrapedMetadata
         const results = []
+        console.log(`scrapedLinks ${JSON.stringify(scrapedLinks?.length)}`)
         for (const entry of scrapedLinks) {
             if (entry.success == false) {
                 results.push({
@@ -104,8 +103,20 @@ launchArchiveYarnRoute.post('/downloadArchivePdfs', async (req: any, resp: any) 
                 continue;
             }
             const downloadArchiveCounterController = Math.random().toString(36).substring(7);
-            const res = await downloadPdfFromArchiveToProfile(entry.archiveReport.linkData, pdfDumpFolder, downloadArchiveCounterController);
-            results.push(res);
+            try {
+                console.log(`downloadPdfFromArchiveToProfile: ${entry.archiveReport.linkData} profileOrPath ${profileOrPath}`)
+                const res = await downloadPdfFromArchiveToProfile(entry.archiveReport.linkData, profileOrPath, downloadArchiveCounterController);
+                results.push(res);
+            }
+            catch (err) {
+                console.log(`Error ${err}`)
+                results.push({
+                    "status": "failed",
+                    "error": err,
+                    "success": false,
+                    msg: `Failed for ${entry.archiveAcctName}`,
+                });
+            }
         }
 
         const endTime = Date.now();
