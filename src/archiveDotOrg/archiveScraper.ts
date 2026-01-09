@@ -18,7 +18,7 @@ const callGenericArchiveApi = async (username: string,
     try {
         const _url =
             `https://archive.org/services/search/beta/page_production/?user_query=&page_type=account_details&page_target=@${username}&page_elements=[%22uploads%22]&hits_per_page=${hitsPerPage}&page=${pageIndex}&sort=${SORT_ORDER}&aggregations=false&client_url=https://archive.org/details/@${username}`;
-        console.log(`callGenericArchiveApi:${username}(${pageIndex}) ${username}
+        console.log(`callGenericArchiveApi:${username} PageIndex: ${pageIndex} ${username}
         ${_url}`);
         const response = await fetch(_url);
         const data = await response.json();
