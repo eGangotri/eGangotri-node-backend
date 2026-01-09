@@ -12,6 +12,7 @@ import { DD_MM_YYYY_HH_MMFORMAT } from '../utils/constants';
 import { generateEAPBLMetadataForProfile } from '../eap_bl';
 import { formatTime } from '../imgToPdf/utils/Utils';
 import { DOWNLOAD_COMPLETED_COUNT, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT } from '../cliBased/pdf/utils';
+import { getPathOrSrcRootForProfile } from '../utils/FileUtils';
 
 export const launchArchiveYarnRoute = express.Router();
 
@@ -85,6 +86,8 @@ launchArchiveYarnRoute.post('/downloadArchivePdfs', async (req: any, resp: any) 
                 }
             });
         }
+        const pdfDumpFolder = getPathOrSrcRootForProfile(profileOrPath);
+
         const _archiveScrappedData: ArchiveDataRetrievalMsg = await scrapeArchiveOrgProfiles(archiveLink, dateRange, true);
 
         const scrapedLinks: ArchiveDataRetrievalStatus[] = _archiveScrappedData.scrapedMetadata
@@ -101,7 +104,7 @@ launchArchiveYarnRoute.post('/downloadArchivePdfs', async (req: any, resp: any) 
                 continue;
             }
             const downloadArchiveCounterController = Math.random().toString(36).substring(7);
-            const res = await downloadPdfFromArchiveToProfile(entry.archiveReport.linkData, profileOrPath, downloadArchiveCounterController);
+            const res = await downloadPdfFromArchiveToProfile(entry.archiveReport.linkData, pdfDumpFolder, downloadArchiveCounterController);
             results.push(res);
         }
 
@@ -312,7 +315,7 @@ launchArchiveYarnRoute.post('/downloadArchiveItemsViaExcel', async (req: any, re
         }
         const _linkData = convertArchiveExcelToLinkData(excelPath);
         const downloadArchiveCounterController = Math.random().toString(36).substring(7);
-        const _results = await downloadArchiveItems(_linkData, profileOrPath,downloadArchiveCounterController);
+        const _results = await downloadArchiveItems(_linkData, profileOrPath, downloadArchiveCounterController);
 
         console.log(`Success count: ${DOWNLOAD_COMPLETED_COUNT(downloadArchiveCounterController)}`);
         console.log(`Error count: ${DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT(downloadArchiveCounterController)}`);
