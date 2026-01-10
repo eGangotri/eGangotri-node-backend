@@ -5,10 +5,11 @@ import { getPathOrSrcRootForProfile } from "../utils/FileUtils";
 import { createFolderIfNotExistsAsync } from "../utils/FileUtils";
 import { checkFolderExistsSync } from "../utils/FolderUtils";
 import { DOUBLE_HASH_SEPARATOR } from "./utils";
+import { createArchiveDownloadItem } from "../services/ArchiveDownloadMonitorService";
 
 
 export const downloadPdfFromArchiveToProfile = async (pdfLinks: ArchiveLinkData[],
-  profileOrPath: string, downloadArchiveCounterController = "") => {
+  profileOrPath: string, downloadArchiveCounterController = "", runId: string = "", commonRunId: string = "") => {
 
   const pdfDumpFolder = getPathOrSrcRootForProfile(profileOrPath);
   console.log(`downloadPdfFromArchiveToProfile:pdfDumpFolder ${pdfDumpFolder} pdfLinks ${JSON.stringify(pdfLinks)}`);
@@ -19,7 +20,7 @@ export const downloadPdfFromArchiveToProfile = async (pdfLinks: ArchiveLinkData[
       msg: `No corresponding folder to profile (${profileOrPath}) exists`
     }
   }
-  if(pdfLinks?.length === 0) {
+  if (pdfLinks?.length === 0) {
     console.log(`No pdfs to download for profile ${profileOrPath}`)
     return {
       "success": false,
@@ -35,7 +36,7 @@ export const downloadPdfFromArchiveToProfile = async (pdfLinks: ArchiveLinkData[
 
   try {
     const _results = await downloadArchivePdfs(pdfLinks,
-      folderWithProfileName, downloadArchiveCounterController);
+      folderWithProfileName, downloadArchiveCounterController, runId, commonRunId);
 
     console.log(`Success count: ${DOWNLOAD_COMPLETED_COUNT(downloadArchiveCounterController)}`);
     console.log(`Error count: ${DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT(downloadArchiveCounterController)}`);
@@ -58,13 +59,22 @@ export const downloadPdfFromArchiveToProfile = async (pdfLinks: ArchiveLinkData[
 }
 
 //this should be redundant after downloadArchiveItems starts working
-const downloadArchivePdfs = async (linkData: ArchiveLinkData[], pdfDumpFolder: string, downloadArchiveCounterController: string = "") => {
+const downloadArchivePdfs = async (linkData: ArchiveLinkData[], pdfDumpFolder: string, downloadArchiveCounterController: string = "", runId: string = "", commonRunId: string = "") => {
   const results = [];
   for (const pdfLink of linkData) {
+    if (runId) {
+      await createArchiveDownloadItem({
+        runId,
+        commonRunId,
+        archiveUrl: pdfLink.pdfDownloadUrl,
+        fileName: pdfLink.originalTitle + ".pdf",
+        status: 'queued'
+      });
+    }
     console.log(`_data: ${JSON.stringify(pdfLink)}}`);
     console.log(`pdfDumpFolder: ${pdfDumpFolder}`);
     const res = await downloadFileFromUrl(pdfDumpFolder,
-      pdfLink.pdfDownloadUrl, pdfLink.originalTitle + ".pdf", linkData.length, "", downloadArchiveCounterController);
+      pdfLink.pdfDownloadUrl, pdfLink.originalTitle + ".pdf", linkData.length, (pdfLink.pdfSize || pdfLink.item_size)?.toString() || "", downloadArchiveCounterController, runId, commonRunId);
     results.push(res);
   }
 
@@ -105,17 +115,26 @@ export const adjustLinkedDataForMultipleItems = async (linkData: ArchiveLinkData
   return linkDataWithMultiItems;
 }
 export const downloadArchiveItems = async (_linkData: ArchiveLinkData[],
-  pdfDumpFolder: string, downloadArchiveCounterController = "") => {
+  pdfDumpFolder: string, downloadArchiveCounterController = "", runId: string = "", commonRunId: string = "") => {
 
   const _linkDataWithMultiItems = await adjustLinkedDataForMultipleItems(_linkData, pdfDumpFolder);
   const results = [];
 
   for (const pdfLink of _linkDataWithMultiItems) {
+    if (runId) {
+      await createArchiveDownloadItem({
+        runId,
+        commonRunId,
+        archiveUrl: pdfLink.pdfDownloadUrl,
+        fileName: pdfLink.name,
+        status: 'queued'
+      });
+    }
     try {
       console.log(`downloadArchiveItems:_data: ${JSON.stringify(pdfLink)}}`);
       console.log(`downloadArchiveItems:pdfDumpFolder: ${pdfDumpFolder}`);
       const res = await downloadFileFromUrl(pdfLink.pdfDumpFolder, pdfLink.pdfDownloadUrl,
-        pdfLink.name, _linkDataWithMultiItems.length, "", downloadArchiveCounterController);
+        pdfLink.name, _linkDataWithMultiItems.length, (pdfLink.pdfSize || pdfLink.item_size)?.toString() || "", downloadArchiveCounterController, runId, commonRunId);
       results.push(res);
     } catch (error) {
       console.error(`Error downloading file: ${pdfLink.name}`, error);

@@ -10,6 +10,7 @@ import * as path from 'path';
 import { updateEntryForGDriveUploadHistory, _updateEmbeddedFileByFileName } from '../../services/GdriveDownloadRecordService';
 import { DownloadHistoryStatus } from '../../utils/constants';
 import { limitCountAndSanitizeFileNameWithoutExt } from '../../services/fileUtilsService';
+import { updateArchiveDownloadItemStatus } from '../../services/ArchiveDownloadMonitorService';
 
 const drive = getGoogleDriveInstance();
 const MAX_FILENAME_LENGTH = 220;
@@ -55,7 +56,8 @@ export const downloadFileFromUrl = async (
     downloadUrl: string,
     fileName: string,
     dataLength: number,
-    fileSizeRaw = "0", downloadCounterController = "") => {
+    fileSizeRaw = "0", downloadCounterController = "",
+    runId: string = "", commonRunId: string = "") => {
     console.log(`downloadFileFromUrl ${downloadUrl} to ${fileDumpFolder}`)
     console.log(`all params: 
        fileDumpFolder: ${fileDumpFolder} 
@@ -82,11 +84,14 @@ export const downloadFileFromUrl = async (
                         "status": `Downloaded ${fileName} to ${fileDumpFolder}`,
                         success: true
                     };
+                    if (runId) {
+                        await updateArchiveDownloadItemStatus(runId, downloadUrl, fileName, 'success', undefined, `Downloaded successfully`, path.join(fileDumpFolder, fileName));
+                    }
                 }
                 resolve(_result);
             });
 
-            dl.on('error', (err) => {
+            dl.on('error', async (err) => {
                 dl.stop();
                 incrementDownloadInError(downloadCounterController);
                 if (err.code === 'ECONNRESET') {
@@ -97,6 +102,9 @@ export const downloadFileFromUrl = async (
                     success: false,
                     "error": `Failed download of ${fileName} to ${fileDumpFolder} with ${err.message}`
                 };
+                if (runId) {
+                    await updateArchiveDownloadItemStatus(runId, downloadUrl, fileName, 'failed', err.message, `Download failed: ${err.message}`, path.join(fileDumpFolder, fileName));
+                }
                 resolve(_result);
             });
 

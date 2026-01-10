@@ -55,8 +55,11 @@ export function resetDownloadCounters(requestId: string) {
 export const checkFileSizeConsistency = async (pdfDumpFolder: string,
     fileName: string, fileSizeRaw: string, downloadCounterController = ""
 ) => {
-    if (fileSizeRaw !== "0") {
+    if (fileSizeRaw && fileSizeRaw !== "0") {
         const fileSizeRawAsInt = parseInt(fileSizeRaw);
+        if (isNaN(fileSizeRawAsInt)) {
+            return { success: true, status: `Downloaded ${fileName} to ${pdfDumpFolder} (Size check skipped)` };
+        }
         let fileSizeOfDwnldFile = 0;
         try {
             fileSizeOfDwnldFile = await getFileSizeAsync(`${pdfDumpFolder}\\${fileName}`);

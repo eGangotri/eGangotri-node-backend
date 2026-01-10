@@ -13,6 +13,11 @@ import { generateEAPBLMetadataForProfile } from '../eap_bl';
 import { formatTime } from '../imgToPdf/utils/Utils';
 import { DOWNLOAD_COMPLETED_COUNT, DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT } from '../cliBased/pdf/utils';
 import { getPathOrSrcRootForProfile } from '../utils/FileUtils';
+import { randomUUID } from 'crypto';
+import { createArchiveDownloadRequest, updateArchiveDownloadRequestStatus, getArchiveDownloadRequests, getArchiveDownloadItemsByRunId } from '../services/ArchiveDownloadMonitorService';
+import { ArchiveDownloadRequest } from '../models/ArchiveDownloadRequest';
+import { ArchiveDownloadItem } from '../models/ArchiveDownloadItem';
+import { downloadFileFromUrl } from '../cliBased/pdf/downloadFile';
 
 export const launchArchiveYarnRoute = express.Router();
 
@@ -122,10 +127,21 @@ launchArchiveYarnRoute.post('/downloadArchivePdfs', async (req: any, resp: any) 
                 continue;
             }
             const downloadArchiveCounterController = Math.random().toString(36).substring(7);
+            const commonRunId = randomUUID();
+            const runId = randomUUID();
+
+            await createArchiveDownloadRequest({
+                runId,
+                commonRunId,
+                archiveUrl: archiveLink,
+                profileOrAbsPath: profileOrPath
+            });
+
             try {
                 console.log(`downloadPdfFromArchiveToProfile: ${entry.archiveReport.linkData} profileOrPath ${profileOrPath}`)
-                const res = await downloadPdfFromArchiveToProfile(entry.archiveReport.linkData, profileOrPath, downloadArchiveCounterController);
+                const res = await downloadPdfFromArchiveToProfile(entry.archiveReport.linkData, profileOrPath, downloadArchiveCounterController, runId, commonRunId);
                 results.push(res);
+                await updateArchiveDownloadRequestStatus(runId, 'success', `Processed ${entry.archiveAcctName}`);
             }
             catch (err) {
                 console.log(`Error ${err}`)
@@ -135,6 +151,7 @@ launchArchiveYarnRoute.post('/downloadArchivePdfs', async (req: any, resp: any) 
                     "success": false,
                     msg: `Failed for ${entry.archiveAcctName}`,
                 });
+                await updateArchiveDownloadRequestStatus(runId, 'failed', `Error: ${err.message || err}`);
             }
         }
 
@@ -345,7 +362,18 @@ launchArchiveYarnRoute.post('/downloadArchiveItemsViaExcel', async (req: any, re
         }
         const _linkData = convertArchiveExcelToLinkData(excelPath);
         const downloadArchiveCounterController = Math.random().toString(36).substring(7);
-        const _results = await downloadArchiveItems(_linkData, profileOrPath, downloadArchiveCounterController);
+        const commonRunId = randomUUID();
+        const runId = randomUUID();
+
+        await createArchiveDownloadRequest({
+            runId,
+            commonRunId,
+            excelPath,
+            profileOrAbsPath: profileOrPath,
+            totalItems: _linkData.length
+        });
+
+        const _results = await downloadArchiveItems(_linkData, profileOrPath, downloadArchiveCounterController, runId, commonRunId);
 
         console.log(`Success count: ${DOWNLOAD_COMPLETED_COUNT(downloadArchiveCounterController)}`);
         console.log(`Error count: ${DOWNLOAD_DOWNLOAD_IN_ERROR_COUNT(downloadArchiveCounterController)}`);
@@ -360,9 +388,14 @@ launchArchiveYarnRoute.post('/downloadArchiveItemsViaExcel', async (req: any, re
         const endTime = Date.now();
         const timeTaken = endTime - startTime;
         console.log(`Time taken to download archiveItems from Excel: ${formatTime(timeTaken)}`);
+
+        await updateArchiveDownloadRequestStatus(runId, 'success', `Processed ${_linkData.length} items from excel`);
+
         resp.status(200).send({
             timeTaken: formatTime(timeTaken),
-            response: _resp
+            response: _resp,
+            runId,
+            commonRunId
         });
     }
 
@@ -399,3 +432,86 @@ launchArchiveYarnRoute.post('/generateEapExcelV1', async (req: any, resp: any) =
         resp.status(400).send(err);
     }
 })
+launchArchiveYarnRoute.get("/getAllArchiveDownloadRequests", async (req: any, res: any) => {
+    try {
+        const page = Number.parseInt(req.query.page as string) || 1;
+        const limit = Number.parseInt(req.query.limit as string) || 20;
+        const results = await getArchiveDownloadRequests(page, limit);
+        res.json(results);
+    } catch (error: any) {
+        res.status(500).json({ message: "Error fetching Archive download requests", error: error.message });
+    }
+});
+
+launchArchiveYarnRoute.get("/getArchiveDownloadItemsByRunId/:runId", async (req: any, res: any) => {
+    try {
+        const runId = req.params.runId;
+        const results = await getArchiveDownloadItemsByRunId(runId);
+        res.json(results);
+    } catch (error: any) {
+        res.status(500).json({ message: "Error fetching Archive download items", error: error.message });
+    }
+});
+
+launchArchiveYarnRoute.post("/retryArchiveDownloadByRunId/:runId", async (req: any, res: any) => {
+    try {
+        const runId = req.params.runId;
+        const requestDoc = await ArchiveDownloadRequest.findOne({ runId });
+        if (!requestDoc) {
+            return res.status(404).json({ message: "Download request not found" });
+        }
+
+        const failedItems = await ArchiveDownloadItem.find({ runId, status: 'failed' });
+        if (failedItems.length === 0) {
+            return res.status(200).json({ message: "No failed items to retry" });
+        }
+
+        const downloadArchiveCounterController = randomUUID();
+        const results = [];
+
+        // Update request status to in-progress
+        await updateArchiveDownloadRequestStatus(runId, 'retrying', `Retrying ${failedItems.length} failed items`);
+
+        for (const item of failedItems) {
+            console.log(`Retrying download for ${item.fileName}`);
+            const res = await downloadFileFromUrl(path.dirname(item.filePath || requestDoc.profileOrAbsPath), item.archiveUrl, item.fileName, failedItems.length, "0", downloadArchiveCounterController, runId, requestDoc.commonRunId);
+            results.push(res);
+        }
+
+        await updateArchiveDownloadRequestStatus(runId, 'success', `Retry completed for ${failedItems.length} items`);
+
+        res.status(200).json({
+            message: `Retry initiated for ${failedItems.length} items`,
+            results
+        });
+    } catch (error: any) {
+        res.status(500).json({ message: "Error retrying Archive download", error: error.message });
+    }
+});
+
+launchArchiveYarnRoute.post('/softDeleteArchiveDownload', async (req: any, resp: any) => {
+    try {
+        const runId = req?.body?.runId;
+        if (!runId) {
+            return resp.status(400).json({ status: 'failed', message: 'runId is required' });
+        }
+        const archiveDownload = await ArchiveDownloadRequest.findOneAndUpdate({ runId }, { deleted: true }, { new: true });
+        return resp.status(200).json({ status: !!archiveDownload, message: `${runId} ArchiveDownload deleted ${archiveDownload ? 'successfully' : 'unsuccessfully'}` });
+    } catch (error: any) {
+        console.error(`/ softDeleteArchiveDownload error: ${error?.message || String(error)} `);
+        return resp.status(500).json({ status: 'failed', message: error?.message || String(error) });
+    }
+});
+
+launchArchiveYarnRoute.post('/markVerifiedArchiveDownload', async (req: any, resp: any) => {
+    try {
+        const { id, verify } = req.body;
+        if (!id) {
+            return resp.status(400).json({ status: 'failed', message: 'id is required' });
+        }
+        const archiveDownload = await ArchiveDownloadRequest.findByIdAndUpdate(id, { verify }, { new: true });
+        return resp.status(200).json({ status: !!archiveDownload, message: `${id} ArchiveDownload verification updated to ${verify}` });
+    } catch (error: any) {
+        return resp.status(500).json({ status: 'failed', message: error?.message || String(error) });
+    }
+});

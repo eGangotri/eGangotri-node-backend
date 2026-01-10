@@ -124,7 +124,7 @@ export const extractPdfMetaData = async (identifier: string) => {
     });
 
     const _filesWithoutCertainformats = metadata.files.filter((file: any) => {
-        return file.source === "original" && file.format !== "Metadata" && file.format !=="Item Tile"
+        return file.source === "original" && file.format !== "Metadata" && file.format !== "Item Tile"
     });
 
     const allNames = []
@@ -136,6 +136,7 @@ export const extractPdfMetaData = async (identifier: string) => {
 
     return {
         pdfName: (pdfRow && pdfRow.length > 0) ? pdfRow[0]?.name : "",
+        pdfSize: (pdfRow && pdfRow.length > 0) ? pdfRow[0]?.size : "0",
         pdfPageCount: (zippedFile && zippedFile.length > 0) ? zippedFile[0]?.filecount : 0,
         allNames,
         allFormats
@@ -152,6 +153,7 @@ export const extractLinkedData = async (_hitsHits: HitsEntity[],
         FETCH_ACRHIVE_METADATA_COUNTER.increment();
         const identifier = hit.fields.identifier;
         let archiveItemName = ""
+        let pdfSize = 0
         let pageCount = 0
         let allNames = []
         let allFormats = []
@@ -161,6 +163,7 @@ export const extractLinkedData = async (_hitsHits: HitsEntity[],
             try {
                 const pdfMetaData = await extractPdfMetaData(identifier);
                 archiveItemName = pdfMetaData?.pdfName || "";
+                pdfSize = parseInt(pdfMetaData?.pdfSize || "0");
                 pageCount = pdfMetaData?.pdfPageCount || 0;
                 allNames = pdfMetaData?.allNames || [];
                 allFormats = pdfMetaData?.allFormats || [];
@@ -208,7 +211,8 @@ export const extractLinkedData = async (_hitsHits: HitsEntity[],
             allFormats,
             limitedFields,
             originalTitle,
-            archiveItemName
+            archiveItemName,
+            pdfSize
         );
         _linkData.push(archiveLinkData)
     }
@@ -225,7 +229,8 @@ function createArchiveLinkData(
     allFormats: string[],
     limitedFields: boolean,
     originalTitle?: string,
-    archiveItemName?: string
+    archiveItemName?: string,
+    pdfSize?: number
 ): ArchiveLinkData {
     const obj: ArchiveLinkData = {
         link: `${ARCHIVE_DOT_ORG_DETAILS_PREFIX}${identifier}`,
@@ -240,6 +245,7 @@ function createArchiveLinkData(
         mediatype: hit.fields.mediatype,
         item_size: hit.fields.item_size,
         item_size_formatted: sizeInfo(hit.fields.item_size),
+        pdfSize,
         email,
         pdfPageCount: pageCount,
         downloads: hit?.fields?.downloads?.toString() || "0",
