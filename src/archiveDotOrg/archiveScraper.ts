@@ -12,6 +12,9 @@ const callGenericArchiveApi = async (username: string,
     ascOrder: boolean = false,
     hitsPerPage: number = DEFAULT_HITS_PER_PAGE): Promise<Hits> => {
     const SORT_ORDER = ascOrder === true ? "publicdate:asc" : "publicdate:desc";
+    if (!hitsPerPage || isNaN(hitsPerPage) || hitsPerPage <= 0) {
+        hitsPerPage = DEFAULT_HITS_PER_PAGE;
+    }
     if (hitsPerPage > DEFAULT_HITS_PER_PAGE) {
         hitsPerPage = DEFAULT_HITS_PER_PAGE;
     }
@@ -86,7 +89,7 @@ const fetchArchiveMetadata = async (username: string,
                 _hitsHits?.length: ${_hitsHits?.length}
                  _OldmaxItemsCounter: ${_OldmaxItemsCounter}`);
 
-                 //after I printed this. the count of 100 only for default desc order was fixed
+            //after I printed this. the count of 100 only for default desc order was fixed
             console.log(`_hitsHits:
                 ${JSON.stringify(_hitsHits)}
             `);
@@ -242,7 +245,8 @@ export const scrapeArchiveOrgProfiles = async (archiveUrlsOrAcctNamesAsCSV: stri
                 archiveAcctName: _archiveAcctName,
                 error: `${e}: ${e.message}`,
             });
-     ``   }
+            ``
+        }
     }
     console.log(`_status ${JSON.stringify(_status)}`)
     const numFailures = _status.filter(item => item.success === false).length;

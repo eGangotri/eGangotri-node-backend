@@ -23,7 +23,26 @@ launchArchiveYarnRoute.post('/getArchiveListing', async (req: any, resp: any) =>
         const limitedFields = (req?.body?.limitedFields == true) || false;
         const dateRange = req?.body?.dateRange || ""; //dateRange:"2024/04/01-2024/04/31"
         const ascOrder = req?.body?.ascOrder || false;
-        const maxItems = req?.body?.maxItems || MAX_ITEMS_RETRIEVABLE_IN_ARCHIVE_ORG;
+        const maxItemsInput = req?.body?.maxItems;
+        let maxItems = MAX_ITEMS_RETRIEVABLE_IN_ARCHIVE_ORG;
+
+        if (maxItemsInput) {
+            if (typeof maxItemsInput === 'number') {
+                maxItems = maxItemsInput;
+            } else if (typeof maxItemsInput === 'string') {
+                // Handle "1-50" or similar formats by taking the last number if range, or just parsing int
+                // If "1-50", we probably want 50. If "50", we want 50.
+                // Let's try to extract the last number in the string which is usually the max
+                const matches = maxItemsInput.match(/(\d+)/g);
+                if (matches && matches.length > 0) {
+                    // If range "1-50", matches is ["1", "50"]. We take the largest or the last?
+                    // Usually "1-50" means items 1 to 50. So count is 50.
+                    // If "50", matches is ["50"].
+                    // Let's take the last one as it's likely the upper bound.
+                    maxItems = parseInt(matches[matches.length - 1]);
+                }
+            }
+        }
         let parsedDateRange: [number, number] = [0, 0]
 
         console.log(`getArchiveListing params ${JSON.stringify(req.body)}`)
