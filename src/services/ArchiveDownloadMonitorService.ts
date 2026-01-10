@@ -60,15 +60,35 @@ export const getArchiveDownloadItemsByRunId = async (runId: string) => {
 export const getArchiveDownloadRequests = async (page: number = 1, limit: number = 20) => {
     const skip = (page - 1) * limit;
     const filter = { deleted: { $ne: true } };
-    const data = await ArchiveDownloadRequest.find(filter)
+    const requests = await ArchiveDownloadRequest.find(filter)
         .sort({ createdAt: -1 })
         .skip(skip)
-        .limit(limit);
+        .limit(limit)
+        .lean();
+
+    const requestsWithCounts = await Promise.all(requests.map(async (req) => {
+        const itemRunId = req.runId;
+
+        // Using countDocuments instead of aggregate for better reliability
+        const [total, success, failed, queued] = await Promise.all([
+            ArchiveDownloadItem.countDocuments({ runId: itemRunId }),
+            ArchiveDownloadItem.countDocuments({ runId: itemRunId, status: 'success' }),
+            ArchiveDownloadItem.countDocuments({ runId: itemRunId, status: 'failed' }),
+            ArchiveDownloadItem.countDocuments({ runId: itemRunId, status: 'queued' })
+        ]);
+
+        const itemCounts = { total, success, failed, queued };
+        console.log(`Mapping runId ${itemRunId} with counts: ${JSON.stringify(itemCounts)}`);
+
+        return Object.assign({}, req, { itemCounts });
+    }));
+
     const total = await ArchiveDownloadRequest.countDocuments(filter);
     return {
-        data,
+        data: requestsWithCounts,
         currentPage: page,
         totalPages: Math.ceil(total / limit),
-        totalItems: total
+        totalItems: total,
+        monitorVersion: '1.2'
     };
 };
