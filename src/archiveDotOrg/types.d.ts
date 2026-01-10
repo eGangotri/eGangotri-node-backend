@@ -24,6 +24,7 @@ export interface ArchiveExcelHeaderType {
 export interface ArchiveScrapReport {
   linkData: ArchiveLinkData[];
   stats: string;
+  error ?: string;
 }
 export interface ArchiveLinkData {
   link: string;

@@ -61,80 +61,87 @@ const fetchArchiveMetadata = async (username: string,
     dateRange: [number, number] = [0, 0],
     limitedFields = false,
     ascOrder = false,
-    maxItems: number = MAX_ITEMS_RETRIEVABLE_IN_ARCHIVE_ORG): Promise<ArchiveScrapReport> => {
+    maxItemsOrRange: number | [number, number] = MAX_ITEMS_RETRIEVABLE_IN_ARCHIVE_ORG): Promise<ArchiveScrapReport> => {
 
     username = username.startsWith('@') ? username.slice(1) : username;
     FETCH_ACRHIVE_METADATA_COUNTER.reset();
-    console.log(`fetchArchiveMetadata: ${username} ${dateRange} ${maxItems}`);
 
-    if (maxItems != MAX_ITEMS_RETRIEVABLE_IN_ARCHIVE_ORG) {
-        console.log(`maxItems is Custom data: ${username} ${dateRange} ${maxItems}`);
+    let start = 1;
+    let end = MAX_ITEMS_RETRIEVABLE_IN_ARCHIVE_ORG + 1;
+
+    if (Array.isArray(maxItemsOrRange)) {
+        start = maxItemsOrRange[0];
+        end = maxItemsOrRange[1];
+    } else {
+        end = maxItemsOrRange + 1;
     }
-    let maxItemsCounter = maxItems > MAX_ITEMS_RETRIEVABLE_IN_ARCHIVE_ORG ? MAX_ITEMS_RETRIEVABLE_IN_ARCHIVE_ORG : maxItems;;
+
+    if (start < 1) start = 1;
+
+    console.log(`fetchArchiveMetadata: ${username} ${dateRange} Range: [${start}, ${end})`);
 
     try {
-        const _OldmaxItemsCounter = maxItemsCounter
-        let _hits: Hits = await callGenericArchiveApi(username, 1, dateRange[0], dateRange[1], ascOrder, maxItemsCounter);
-        maxItemsCounter -= DEFAULT_HITS_PER_PAGE;
-        let hitsTotal = _hits?.total;
-        const _linkData: ArchiveLinkData[] = [];
+        const startPageIndex = Math.floor((start - 1) / DEFAULT_HITS_PER_PAGE) + 1;
+        let currentPageIndex = startPageIndex;
+        let _hits: Hits = await callGenericArchiveApi(username, currentPageIndex, dateRange[0], dateRange[1], ascOrder, DEFAULT_HITS_PER_PAGE);
+        let hitsTotal = _hits?.total || 0;
+        const _allCollectedHits: HitsEntity[] = [];
 
         if (hitsTotal > 0) {
             FETCH_ACRHIVE_METADATA_COUNTER.hitsTotal = hitsTotal;
-            let _hitsHits = _hits.hits;
-            let email = '';
-            console.log(`fetchArchiveMetadata-try: ${maxItems} 
-                hitsTotal: ${hitsTotal} 
-                maxItemsCounter: ${maxItemsCounter}
-                _hitsHits?.length: ${_hitsHits?.length}
-                 _OldmaxItemsCounter: ${_OldmaxItemsCounter}`);
 
-            //after I printed this. the count of 100 only for default desc order was fixed
-            console.log(`_hitsHits:
-                ${JSON.stringify(_hitsHits)}
-            `);
-
-            if (_hitsHits?.length > 0) {
-                email = await extractEmail(_hitsHits[0].fields.identifier);
-                const extractedData = await extractLinkedDataAndSpecificFieldsFromAPI(_hitsHits, email, username, limitedFields);
-                _linkData.push(...extractedData);
+            // Adjust end based on hitsTotal
+            const actualEnd = Math.min(end, hitsTotal + 1);
+            if (start > hitsTotal) {
+                return { linkData: [], stats: `Start index ${start} exceeds total items ${hitsTotal}` };
             }
 
-            //beyond the 1st 1000
-            for (let i = 1; i < Math.ceil(hitsTotal / DEFAULT_HITS_PER_PAGE); i++) {
-                console.log(`maxItemsCounter ${maxItemsCounter}`)
-                if (maxItemsCounter > 0) {
-                    _hits = await callGenericArchiveApi(username, (i + 1), dateRange[0], dateRange[1], ascOrder, maxItemsCounter);
+            const startIndex = start - 1;
+            const endIndex = actualEnd - 1;
+            const endPageIndex = Math.floor((endIndex - 1) / DEFAULT_HITS_PER_PAGE) + 1;
 
-                    _hitsHits = _hits.hits;
-                    if (_hitsHits?.length > 0) {
-                        if (email.length === 0) {
-                            email = await extractEmail(_hitsHits[0].fields.identifier);
-                        }
-                        const extractedData = await extractLinkedDataAndSpecificFieldsFromAPI(_hitsHits, email, username, limitedFields);
-                        _linkData.push(...extractedData);
-                    }
-                }
-                else {
+            _allCollectedHits.push(...(_hits.hits || []));
+
+            // Fetch subsequent pages if needed
+            while (currentPageIndex < endPageIndex && (currentPageIndex * DEFAULT_HITS_PER_PAGE) < hitsTotal) {
+                currentPageIndex++;
+                const nextHits = await callGenericArchiveApi(username, currentPageIndex, dateRange[0], dateRange[1], ascOrder, DEFAULT_HITS_PER_PAGE);
+                if (nextHits?.hits?.length > 0) {
+                    _allCollectedHits.push(...nextHits.hits);
+                } else {
                     break;
                 }
-                maxItemsCounter -= DEFAULT_HITS_PER_PAGE;
+            }
+
+            // Slice to exact range
+            const offsetInFirstPage = startIndex - (startPageIndex - 1) * DEFAULT_HITS_PER_PAGE;
+            const countToTake = actualEnd - start;
+            const finalHits = _allCollectedHits.slice(offsetInFirstPage, offsetInFirstPage + countToTake);
+
+            if (finalHits.length === 0) {
+                return { linkData: [], stats: "No items found in specified range" };
+            }
+
+            const email = await extractEmail(finalHits[0].fields.identifier);
+            const _linkData = await extractLinkedDataAndSpecificFieldsFromAPI(finalHits, email, username, limitedFields);
+
+            console.log(`Equality:
+             _linkData ${_linkData.length}
+             FETCH_ACRHIVE_METADATA_COUNTER ${FETCH_ACRHIVE_METADATA_COUNTER.value}
+             hitsTotal: ${hitsTotal}`);
+
+            return {
+                linkData: _linkData,
+                stats: `Total Gen: () === ItemsInArchive(${FETCH_ACRHIVE_METADATA_COUNTER.hitsTotal})
+                === ItemsCounter(${FETCH_ACRHIVE_METADATA_COUNTER.value}) `
             }
         }
-        console.log(`Equality:
-         _linkData ${JSON.stringify(_linkData.length)}
-         FETCH_ACRHIVE_METADATA_COUNTER ${FETCH_ACRHIVE_METADATA_COUNTER.value}
-         hitsTotal: ${hitsTotal}`);
-        return {
-            linkData: _linkData,
-            stats: `Total Gen: () === ItemsInArchive(${FETCH_ACRHIVE_METADATA_COUNTER.hitsTotal})
-            === ItemsCounter(${FETCH_ACRHIVE_METADATA_COUNTER.value}) `
-        }
+        return { linkData: [], stats: "No items found" };
     }
     catch (err) {
         console.log(`Error in fetchArchiveMetadata ${err.message}`);
-        //throw err;
-    };
+        return { linkData: [], error: err, stats: "Error in fetchArchiveMetadata" };
+    }
 }
 
 const checkValidArchiveUrlAndUpdateStatus = async (archiveIdentifier: string, _status: {}[]) => {
@@ -191,7 +198,7 @@ export const scrapeArchiveOrgProfiles = async (archiveUrlsOrAcctNamesAsCSV: stri
     onlyLinks: boolean = false,
     limitedFields: boolean = false,
     ascOrder: boolean = false,
-    maxItems: number = MAX_ITEMS_RETRIEVABLE_IN_ARCHIVE_ORG
+    maxItemsOrRange: number | [number, number] = MAX_ITEMS_RETRIEVABLE_IN_ARCHIVE_ORG
 ): Promise<ArchiveDataRetrievalMsg> => {
     const archiveUrlsOrAcctNames = archiveUrlsOrAcctNamesAsCSV.includes(",") ? archiveUrlsOrAcctNamesAsCSV.split(",").map((link: string) => link.trim().replace(/['"]/g, "")) : [archiveUrlsOrAcctNamesAsCSV.trim().replace(/['"]/g, "")];
 
@@ -205,7 +212,7 @@ export const scrapeArchiveOrgProfiles = async (archiveUrlsOrAcctNamesAsCSV: stri
                 continue;
             }
 
-            const archiveReport: ArchiveScrapReport = await fetchArchiveMetadata(_archiveAcctName, dateRange, limitedFields, ascOrder, maxItems);
+            const archiveReport: ArchiveScrapReport = await fetchArchiveMetadata(_archiveAcctName, dateRange, limitedFields, ascOrder, maxItemsOrRange);
             console.log(`Equality _linkData ${JSON.stringify(archiveReport.linkData.length)} === ${FETCH_ACRHIVE_METADATA_COUNTER.value}`);
             if (onlyLinks) {
                 _status.push({
