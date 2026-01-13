@@ -102,7 +102,7 @@ export const renameCPSByLink = async (googleDriveLink: string,
 }
 
 
-export const renameOriginalItemsBasedOnMetadata = async (pdfTitleRenamedItems: IPdfTitleRenamingViaAITracker[]) => {
+export const renameOriginalItemsBasedOnMetadata = async (pdfTitleRenamedItems: IPdfTitleRenamingViaAITracker[], keepPrefix: boolean = false) => {
     const errors = []
     const results: boolean[] = []
     for (let index = 0; index < pdfTitleRenamedItems.length; index++) {
@@ -111,7 +111,15 @@ export const renameOriginalItemsBasedOnMetadata = async (pdfTitleRenamedItems: I
             const dir = path.dirname(item.originalFilePath);
             const ext = path.extname(item.originalFilePath);
             const newNameWithoutExt = String(item.extractedMetadata);
-            const baseName = String(newNameWithoutExt);
+            const originalFileName = path.basename(item.originalFilePath, ext);
+
+            let baseName = String(newNameWithoutExt);
+
+            if (keepPrefix) {
+                baseName = `${originalFileName} - ${baseName}`;
+            }
+
+            baseName = formatFilename(baseName);
             if (newNameWithoutExt?.trim().length === 0) {
                 console.log(`No New Name for ${item.originalFilePath}`);
                 errors.push({
@@ -132,6 +140,12 @@ export const renameOriginalItemsBasedOnMetadata = async (pdfTitleRenamedItems: I
             console.log(`Renaming ${index + 1}/${pdfTitleRenamedItems.length}: ${item.originalFilePath} to ${targetPath}`);
             try {
                 await fs.promises.rename(item.originalFilePath, targetPath);
+                await PdfTitleRenamingViaAITracker.updateOne({ _id: (item as any)._id }, {
+                    $set: {
+                        newFilePath: targetPath,
+                        msg: `Renamed from original location to ${targetPath}`
+                    }
+                });
                 results.push(true);
             } catch (e: any) {
                 console.error(`Failed to process ${item.originalFilePath}: ${e?.message || String(e)}`);
@@ -280,4 +294,85 @@ export const retryAiRenamerByRunId = async (runId: string) => {
         failures,
         details,
     };
+}
+
+export const reverseMetadataFromOriginalFiles = async (pdfTitleRenamedItems: IPdfTitleRenamingViaAITracker[]) => {
+    const errors = []
+    const results: boolean[] = []
+    for (let index = 0; index < pdfTitleRenamedItems.length; index++) {
+        const item = pdfTitleRenamedItems[index]
+        try {
+            // Priority 1: Check if newFilePath exists and is correct
+            let currentPath = item.newFilePath;
+
+            if (!currentPath || !fs.existsSync(currentPath)) {
+                // Priority 2: If original path already exists, we might be done
+                if (fs.existsSync(item.originalFilePath)) {
+                    console.log(`File already at original path: ${item.originalFilePath}`);
+                    await PdfTitleRenamingViaAITracker.updateOne({ _id: (item as any)._id }, {
+                        $set: {
+                            newFilePath: undefined,
+                            applyButtonClicked: false,
+                            msg: "File was already at original path"
+                        }
+                    });
+                    results.push(true);
+                    continue;
+                }
+
+                // Priority 3: Try to guess the path if newFilePath was never stored
+                const dir = path.dirname(item.originalFilePath);
+                const ext = path.extname(item.originalFilePath);
+                const guessedPath = path.join(dir, `${item.extractedMetadata}${ext}`).trim();
+
+                if (fs.existsSync(guessedPath)) {
+                    currentPath = guessedPath;
+                }
+            }
+
+            if (!currentPath || !fs.existsSync(currentPath)) {
+                console.warn(`Could not find renamed file for ${item.originalFilePath}`);
+                errors.push({
+                    filePath: item.originalFilePath,
+                    error: "Could not find current file to reverse"
+                });
+                results.push(false);
+                continue;
+            }
+
+            console.log(`Reversing ${index + 1}/${pdfTitleRenamedItems.length}: ${currentPath} back to ${item.originalFilePath}`);
+            try {
+                await fs.promises.rename(currentPath, item.originalFilePath);
+                await PdfTitleRenamingViaAITracker.updateOne({ _id: (item as any)._id }, {
+                    $set: {
+                        newFilePath: undefined,
+                        applyButtonClicked: false,
+                        msg: `Reversed rename: ${currentPath} -> ${item.originalFilePath}`
+                    }
+                });
+                results.push(true);
+            } catch (e: any) {
+                console.error(`Failed to reverse rename for ${currentPath}: ${e?.message || String(e)}`);
+                errors.push({
+                    filePath: currentPath,
+                    error: e?.message || String(e)
+                });
+                results.push(false);
+            }
+        } catch (err: any) {
+            console.error(`Unexpected error in reversal for ${item.originalFilePath}: ${err?.message || String(err)}`);
+            errors.push({
+                filePath: item.originalFilePath,
+                error: err?.message || String(err)
+            });
+            results.push(false);
+        }
+    }
+    const successCount = results.filter(Boolean).length;
+    const failureCount = results.length - successCount;
+    return {
+        successCount,
+        failureCount,
+        errors
+    }
 }

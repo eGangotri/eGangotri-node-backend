@@ -7,7 +7,7 @@ import { IPdfTitleAndFileRenamingTrackerViaAI, PdfTitleAndFileRenamingTrackerVia
 import { IPdfTitleRenamingViaAITracker, PdfTitleRenamingViaAITracker } from '../models/pdfTitleRenamingTrackerViaAI';
 import { randomUUID } from 'crypto';
 import * as fs from 'fs';
-import { renameOriginalItemsBasedOnMetadata, retryAiRenamerByRunId } from '../services/aiServices';
+import { renameOriginalItemsBasedOnMetadata, retryAiRenamerByRunId, reverseMetadataFromOriginalFiles } from '../services/aiServices';
 import { RENAMER_SUFFIX, processOutputSuffixes, aggregateRenamingResults, generateRenamingSummary, performFolderCleanup } from '../utils/launchAIUtils';
 
 export const launchAIRoute = express.Router();
@@ -211,10 +211,11 @@ launchAIRoute.get("/getAllTitleRenamedViaAIListGroupedByRunId", async (req: Requ
 launchAIRoute.post("/copyMetadataToOriginalFiles/:runId", async (req: Request, res: express.Response) => {
     try {
         const runId = req.params.runId;
+        const keepPrefix = req?.body?.keepPrefix === true;
         const filter = { runId };
         const pdfTitleRenamedItems: IPdfTitleRenamingViaAITracker[] = await PdfTitleRenamingViaAITracker.find(filter)
             .sort({ createdAt: -1 });
-        const { successCount, failureCount, errors } = await renameOriginalItemsBasedOnMetadata(pdfTitleRenamedItems);
+        const { successCount, failureCount, errors } = await renameOriginalItemsBasedOnMetadata(pdfTitleRenamedItems, keepPrefix);
         await PdfTitleRenamingViaAITracker.updateMany(filter, { $set: { applyButtonClicked: true } });
         res.json({
             status: `Success: ${successCount}, Failure: ${failureCount} of ${pdfTitleRenamedItems.length}`,
@@ -233,6 +234,7 @@ launchAIRoute.post("/copyMetadataToOriginalFiles/:runId", async (req: Request, r
 launchAIRoute.post("/copyMetadataToOriginalFilesMulti", async (req: Request, res: express.Response) => {
     try {
         const runIds = req?.body?.runIds;
+        const keepPrefix = req?.body?.keepPrefix === true;
         if (!runIds || runIds.length === 0) {
             return res.status(400).json({ status: 'failed', message: 'atleast one runId is required' });
         }
@@ -241,7 +243,7 @@ launchAIRoute.post("/copyMetadataToOriginalFilesMulti", async (req: Request, res
             const filter = { runId };
             const pdfTitleRenamedItems: IPdfTitleRenamingViaAITracker[] = await PdfTitleRenamingViaAITracker.find(filter)
                 .sort({ createdAt: -1 });
-            const { successCount, failureCount, errors } = await renameOriginalItemsBasedOnMetadata(pdfTitleRenamedItems);
+            const { successCount, failureCount, errors } = await renameOriginalItemsBasedOnMetadata(pdfTitleRenamedItems, keepPrefix);
             await PdfTitleRenamingViaAITracker.updateMany(filter, { $set: { applyButtonClicked: true } });
             results.push({
                 status: `Success: ${successCount}, Failure: ${failureCount} of ${pdfTitleRenamedItems.length}`,
@@ -258,6 +260,53 @@ launchAIRoute.post("/copyMetadataToOriginalFilesMulti", async (req: Request, res
     }
 })
 //
+launchAIRoute.post("/reverseMetadataFromOriginalFiles/:runId", async (req: Request, res: express.Response) => {
+    try {
+        const runId = req.params.runId;
+        const filter = { runId };
+        const pdfTitleRenamedItems: IPdfTitleRenamingViaAITracker[] = await PdfTitleRenamingViaAITracker.find(filter)
+            .sort({ createdAt: -1 });
+        const { successCount, failureCount, errors } = await reverseMetadataFromOriginalFiles(pdfTitleRenamedItems);
+        res.json({
+            status: `Success: ${successCount}, Failure: ${failureCount} of ${pdfTitleRenamedItems.length}`,
+            runId,
+            successCount,
+            failureCount,
+            errors
+        })
+    } catch (error: any) {
+        console.log(`/reverseMetadataFromOriginalFiles error: ${JSON.stringify(error?.message)}`);
+        res.status(500).json({ message: "Error reversing metadata renaming", error })
+    }
+})
+
+launchAIRoute.post("/reverseMetadataFromOriginalFilesMulti", async (req: Request, res: express.Response) => {
+    try {
+        const runIds = req?.body?.runIds;
+        if (!runIds || runIds.length === 0) {
+            return res.status(400).json({ status: 'failed', message: 'atleast one runId is required' });
+        }
+        const results = []
+        for (const runId of runIds) {
+            const filter = { runId };
+            const pdfTitleRenamedItems: IPdfTitleRenamingViaAITracker[] = await PdfTitleRenamingViaAITracker.find(filter)
+                .sort({ createdAt: -1 });
+            const { successCount, failureCount, errors } = await reverseMetadataFromOriginalFiles(pdfTitleRenamedItems);
+            results.push({
+                status: `Success: ${successCount}, Failure: ${failureCount} of ${pdfTitleRenamedItems.length}`,
+                runId,
+                successCount,
+                failureCount,
+                errors
+            })
+        }
+        res.json(results)
+    } catch (error: any) {
+        console.log(`/reverseMetadataFromOriginalFilesMulti error: ${JSON.stringify(error?.message)}`);
+        res.status(500).json({ message: "Error reversing metadata renaming", error })
+    }
+})
+
 launchAIRoute.post("/cleanupRedRenamerFilers/:runId", async (req: Request, res: express.Response) => {
     try {
         const runId = req.params.runId;
