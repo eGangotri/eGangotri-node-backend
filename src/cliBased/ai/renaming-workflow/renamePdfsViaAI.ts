@@ -6,7 +6,7 @@ import { randomUUID } from 'crypto';
 import { getAllPdfsInFoldersRecursive, chunk, formatTime } from "../../../imgToPdf/utils/Utils";
 import { processWithGoogleAI } from './googleAiService';
 import { buildPairedBatches, formatFilename } from './utils';
-import { PdfTitleAndFileRenamingTrackerViaAI } from '../../../models/pdfTitleAndFileRenamingTrackerViaAI';
+import { IPdfTitleAndFileRenamingTrackerViaAI, PdfTitleAndFileRenamingTrackerViaAI } from '../../../models/pdfTitleAndFileRenamingTrackerViaAI';
 import { PdfTitleRenamingViaAITracker } from '../../../models/pdfTitleRenamingTrackerViaAI';
 import { isPDFCorrupted } from '../../../utils/pdfValidator';
 import { AI_RENAMING_WORKFLOW_CONFIG, BatchPair, Config, MetadataResult, RenamingResult } from './types';
@@ -364,11 +364,12 @@ export async function aiRenameTitleUsingReducedFolder(inputFolder: string,
             console.log(`Successfully renamed: ${renamedCount}`);
             console.log(`Failed to rename: ${processedCount - renamedCount}`);
 
-            const _res = {
+            const _res: IPdfTitleAndFileRenamingTrackerViaAI = {
                 timeTakenToProcessAllBatches,
                 timeTakenToApplyRenames,
                 commonRunId,
                 runId,
+                srcFolder: inputFolder,
                 processedCount,
                 successCount,
                 failedCount: processedCount - successCount,
@@ -376,7 +377,7 @@ export async function aiRenameTitleUsingReducedFolder(inputFolder: string,
                 success: true,
                 renamingResults,
                 pairedBatches,
-            }
+            } as any;
             // Persist success summary in DB
             try {
                 await PdfTitleAndFileRenamingTrackerViaAI.create(_res);
@@ -392,6 +393,7 @@ export async function aiRenameTitleUsingReducedFolder(inputFolder: string,
                 await PdfTitleAndFileRenamingTrackerViaAI.create({
                     commonRunId,
                     runId,
+                    srcFolder: inputFolder,
                     processedCount,
                     successCount,
                     failedCount: processedCount - successCount,
@@ -407,6 +409,7 @@ export async function aiRenameTitleUsingReducedFolder(inputFolder: string,
             return {
                 commonRunId,
                 runId,
+                srcFolder: inputFolder,
                 success: false,
                 processedCount,
                 successCount,
@@ -422,6 +425,7 @@ export async function aiRenameTitleUsingReducedFolder(inputFolder: string,
         return {
             processedCount,
             successCount,
+            srcFolder: inputFolder,
             failedCount: processedCount - successCount,
             error: 'Error in main process:' + error,
             success: false,

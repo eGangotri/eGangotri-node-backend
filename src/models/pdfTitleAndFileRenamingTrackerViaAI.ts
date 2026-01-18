@@ -3,6 +3,7 @@ import * as mongoose from 'mongoose';
 export interface IPdfTitleAndFileRenamingTrackerViaAI {
   commonRunId: string;
   runId: string;
+  srcFolder?: string;
   processedCount: number;
   successCount: number;
   failedCount: number;
@@ -31,6 +32,7 @@ const PdfAiRenamingTrackerSchema = new mongoose.Schema(
   {
     commonRunId: { type: String, required: true, index: true },
     runId: { type: String, required: true, index: true },
+    srcFolder: { type: String, required: false },
     processedCount: { type: Number, required: true },
     successCount: { type: Number, required: true },
     failedCount: { type: Number, required: true },
