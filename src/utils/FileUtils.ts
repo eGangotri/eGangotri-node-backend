@@ -385,7 +385,7 @@ export const moveDuplicatesOrDisjointSetBySize = async (folder1: string, folder2
 
 const disjointSetByFileSize = (metadata: FileStats[], metadata2: FileStats[]) => {
     const disjointSet: FileInfo[] = [];
-    console.log(`metadata ${JSON.stringify(metadata[0].size)} metadata2 ${JSON.stringify(metadata2[0].size)}`)
+    console.log(`metadata ${JSON.stringify(metadata[0]?.size)} metadata2 ${JSON.stringify(metadata2[0]?.size)}`)
     metadata.forEach((file: FileStats) => {
         const match = metadata2.find((file2: FileStats) => {
             if (file.rawSize === file2.rawSize && file.absPath !== file2.absPath) {
@@ -410,7 +410,7 @@ const disjointSetByFileSize = (metadata: FileStats[], metadata2: FileStats[]) =>
 
 const duplicateBySizeCheck = (metadata: FileStats[], metadata2: FileStats[]) => {
     const duplicates: FileInfo[] = [];
-    console.log(`metadata ${JSON.stringify(metadata[0].size)} metadata2 ${JSON.stringify(metadata2[0].size)}`)
+    console.log(`metadata ${JSON.stringify(metadata[0]?.size)} metadata2 ${JSON.stringify(metadata2[0]?.size)}`)
     metadata.forEach((file: FileStats) => {
         const match = metadata2.find((file2: FileStats) => {
             if (file.rawSize === file2.rawSize && file.absPath !== file2.absPath) {
