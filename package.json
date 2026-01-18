@@ -9,6 +9,8 @@
     "start": "cross-env  pnpm run build && node ./dist/index.js",
     "test": "pnpm test",
     "upload_db": "cross-env NODE_OPTIONS=--max-old-space-size=8192 ts-node ./src/index.ts forUpload",
+    "// note": "pnpm up runs pnpm upload_db   if alias up='pnpm run upload_db' then just up",
+    "up": "pnpm run upload_db",
     "web-scrap": "ts-node ./src/downloadLinks.ts",
     "flatfile-to-mongo": "ts-node ./src/tasks/flatfile-to-mongo.ts \"C:/Users/X/eGangotri\"",
     "validateListOfArchiveUrlsAsValid": "ts-node ./src/validateListOfArchiveUrlsAsValid/index.ts",
