@@ -9,7 +9,7 @@ import * as mongoose from 'mongoose';
 import { randomUUID } from 'crypto';
 import { anyPdfCorruptedQuick } from '../services/pdfValidationService';
 import { saveMergeMultiplePdfTracker, getCommonRuns, getByCommonRun } from '../services/mergeMultiplePdfTrackerService';
-import { ConvertData  } from './types';
+import { ConvertData } from './types';
 
 export const pythonRoute = express.Router();
 
@@ -72,11 +72,24 @@ pythonRoute.post('/getFirstAndLastNPages', async (req: any, resp: any) => {
         const combinedResults: PythonExtractionResult[] = await runPthonPdfExtractionInLoop(_srcFolders,
             _destRootFolders, firstNPages, lastNPages, reducePdfSizeAlso);
 
+        const resultsAtAGlance = combinedResults.reduce((acc, curr: any) => {
+            const data = curr?.data;
+            const success = curr?.success;
+            if (data) {
+                acc.totals += (data.totalFiles || 0);
+                acc.processed += (data.processedFiles || 0);
+                acc.errors += (data.errors || 0);
+            }
+            acc.success += (success || false);
+            return acc;
+        }, { totals: 0, processed: 0, errors: 0, success: false });
+
         if (combinedResults && combinedResults.length > 0) {
             const stats = combinedResults.filter((extractResult: PythonExtractionResult) => extractResult.success === true).length;
             console.log(`combinedResults extractFirstN: ${stats} of ${combinedResults.length} processed successfully`);
             resp.status(200).send({
                 response: {
+                    resultsAtAGlance,
                     successes: stats === combinedResults.length,
                     _cumulativeMsg: `${stats} of ${combinedResults.length} processed successfully`,
                     combinedResults,
@@ -153,13 +166,27 @@ pythonRoute.post('/copyAllPdfs', async (req: any, resp: any) => {
             return;
         }
         const combinedResults = await runPythonCopyPdfInLoop(_srcFolders, destRootFolder);
+
+        const resultsAtAGlance = combinedResults.reduce((acc, curr: any) => {
+            const data = curr?.data;
+            const success = curr?.success;
+            if (data) {
+                acc.totals += (data.totalFiles || 0);
+                acc.processed += (data.processedFiles || 0);
+                acc.errors += (data.errors || 0);
+            }
+            acc.success += (success || false);
+            return acc;
+        }, { totals: 0, processed: 0, errors: 0, success: false });
+
         const stats = combinedResults.filter((x: { success: boolean }) => x.success === true).length;
         console.log(`combinedResults copyAllPdfs: ${stats} of ${combinedResults.length} processed successfully`);
         resp.status(200).send({
             response: {
+                resultsAtAGlance,
                 successes: stats === combinedResults.length,
                 _cumulativeMsg: `${stats} of ${combinedResults.length} processed successfully`,
-                ...combinedResults,
+                combinedResults,
             }
         });
     }
@@ -288,7 +315,7 @@ pythonRoute.post('/mergePdfs', async (req: any, resp: any) => {
             "first_pdf_path": first_pdf_path,
             "second_pdf_path": second_pdf_path,
             "third_pdf_path": third_pdf_path
-        }, 'mergePdfs', { timeoutMs: 4*60 * 60 * 1000, skipPreflight: true });
+        }, 'mergePdfs', { timeoutMs: 4 * 60 * 60 * 1000, skipPreflight: true });
 
         resp.status(200).send({
             response: _resp
