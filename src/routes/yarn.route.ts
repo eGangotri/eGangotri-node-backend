@@ -171,8 +171,17 @@ yarnRoute.post('/qaToDestFileMover', async (req: any, resp: any) => {
         const successCount = results.filter((res: any) => !!res?.success).length;
         const failureCount = results.length - successCount;
 
+        const resultsAtAGlance = results.reduce((acc: any, curr: any) => {
+            acc.successes += `${curr.success ? 1 : 0}+`;
+            acc.totals += `${curr.total || curr.srcPdfsBefore || 0}+`;
+            acc.filesMoved += `${curr.fileMoved?.length || 0}+`;
+            acc.errors += `${curr.errorList?.length || 0}+`;
+            return acc;
+        }, emptyResultsAtAGlance(results.length));
+
         resp.status(200).send({
             response: {
+                resultsAtAGlance,
                 total: results.length,
                 successCount,
                 failureCount,
@@ -202,7 +211,27 @@ yarnRoute.post('/yarnMoveProfilesToFreeze', async (req: any, resp: any) => {
             });
         }
         const _response = await moveProfilesToFreeze(profileAsCSV, flatten, ignorePaths);
-        resp.status(200).send(_response);
+        const resultsAtAGlance = (_response.response as any[]).reduce((acc: any, curr: any) => {
+            acc.successes += `${curr.success ? 1 : 0} +`;
+            acc.totals += `${curr.total || 0} +`;
+            acc.filesMoved += `${curr.fileMoved?.length || 0} +`;
+            acc.errors += `${curr.errorList?.length || 0} +`;
+            return acc;
+        }, emptyResultsAtAGlance(_response.response.length));
+
+        const total = (_response.response as any[]).length;
+        const successCount = (_response.response as any[]).filter((res: any) => !!res?.success).length;
+        const failureCount = total - successCount;
+
+        resp.status(200).send({
+            response: {
+                resultsAtAGlance,
+                total,
+                successCount,
+                failureCount,
+                results: _response.response
+            }
+        });
     }
 
     catch (err: any) {
@@ -237,8 +266,26 @@ yarnRoute.post('/yarnMoveFilesInListToFreeze', async (req: any, resp: any) => {
             });
             await tracker.save()
         }
+        const resultsAtAGlance = _response.reduce((acc: any, curr: any) => {
+            acc.successes += `${curr.success ? 1 : 0}+`;
+            acc.totals += `${curr.total || 0}+`;
+            acc.filesMoved += `${curr.fileMoved?.length || 0}+`;
+            acc.errors += `${curr.errorList?.length || 0}+`;
+            return acc;
+        }, emptyResultsAtAGlance(_response.length));
+
+        const total = _response.length;
+        const successCount = _response.filter((res: any) => !!res?.success).length;
+        const failureCount = total - successCount;
+
         resp.status(200).send({
-            response: _response
+            response: {
+                resultsAtAGlance,
+                total,
+                successCount,
+                failureCount,
+                results: _response
+            }
         });
     }
 
@@ -337,3 +384,12 @@ yarnRoute.post('/compareDirectories', async (req: any, resp: any) => {
         });
     }
 })
+
+const emptyResultsAtAGlance = (respLenth = 1) => {
+    return {
+        successes: `${"0".repeat(respLenth)}`,
+        totals: `${"0".repeat(respLenth)}`,
+        filesMoved: `${"0".repeat(respLenth)}`,
+        errors: `${"0".repeat(respLenth)}`
+    }
+}
