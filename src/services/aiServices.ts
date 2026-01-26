@@ -131,11 +131,12 @@ export const renameOriginalItemsBasedOnMetadata = async (pdfTitleRenamedItems: I
             }
             // Precompute a non-colliding target path
             let counter = 0;
-            const baseTarget = path.join(dir, `${baseName}${ext}`).trim();
+            const targetBaseNameProper = baseName.toLowerCase().endsWith(ext.toLowerCase()) ? baseName.slice(0, -ext.length) : baseName;
+            const baseTarget = path.join(dir, `${targetBaseNameProper}${ext}`).trim();
             let targetPath = baseTarget;
             while (fs.existsSync(targetPath) && counter < 10) {
                 counter += 1;
-                targetPath = path.join(dir, `${baseName}_${counter}${ext}`).trim();
+                targetPath = path.join(dir, `${targetBaseNameProper}_${counter}${ext}`).trim();
             }
             console.log(`Renaming ${index + 1}/${pdfTitleRenamedItems.length}: ${item.originalFilePath} to ${targetPath}`);
             try {
@@ -200,7 +201,10 @@ export const retryAiRenamerByRunId = async (runId: string) => {
         try {
             const result = await processWithGoogleAI(item.reducedFilePath);
             if (result?.extractedMetadata && !result?.error) {
-                const formattedFileName = formatFilename(result.extractedMetadata);
+                const ext = path.extname(item.originalFilePath);
+                const base = formatFilename(result.extractedMetadata);
+                const targetBaseNameProper = base.toLowerCase().endsWith(ext.toLowerCase()) ? base.slice(0, -ext.length) : base;
+                const formattedFileName = `${targetBaseNameProper}${ext}`;
                 const targetDir = item.outputFolder && item.outputFolder.trim().length > 0
                     ? item.outputFolder
                     : path.dirname(item.originalFilePath);

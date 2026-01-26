@@ -101,7 +101,10 @@ async function renamePdfUsingMetadata(result: MetadataResult,
         }
     }
 
-    const formattedFilename = formatFilename(extractedMetadata);
+    const ext = path.extname(result.originalFilePath);
+    const base = formatFilename(extractedMetadata);
+    const targetBaseNameProper = base.toLowerCase().endsWith(ext.toLowerCase()) ? base.slice(0, -ext.length) : base;
+    const formattedFilename = `${targetBaseNameProper}${ext}`;
     const pdfParentDir = path.dirname(result.originalFilePath);
     const relativePath = path.relative(config.inputFolder, pdfParentDir);
 

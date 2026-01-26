@@ -47,7 +47,7 @@ export function formatFilename(metadata: string): string {
         cleanName = cleanName.substring(0, 197) + '...';
     }
 
-    return cleanName + '.pdf';
+    return cleanName;
 }
 
 export function convertLocalFileToBasicEncodedString(filePath: string): string {
