@@ -110,6 +110,7 @@ export const processFileForAIRenaming = async (base64EncodedFile: string,
 
     try {
         // Make the API request to Google AI Studio
+        console.log(`processFileForAIRenaming:AI_ENDPOINT to ${AI_ENDPOINT} ...`);
         const response = await axios.post(AI_ENDPOINT, requestPayload, {
             headers: {
                 'Content-Type': 'application/json',
@@ -118,7 +119,7 @@ export const processFileForAIRenaming = async (base64EncodedFile: string,
             maxBodyLength: Infinity,
             maxContentLength: Infinity
         });
-        // Extract the generated text from the Google API response format (Gemini 1.5/2.0/2.5 compatible)
+        // Extract the generated text from the Google API response format (Gemini 1.5/2.0/2.5/3.0 compatible)
         const { text, finishReason } = extractTextFromCandidates(response.data);
         const usage = response.data?.usageMetadata || {};
         const promptTokenCount = usage?.promptTokenCount;
@@ -143,11 +144,10 @@ export const processFileForAIRenaming = async (base64EncodedFile: string,
         };
     }
     catch (error) {
-        console.error('Full error data:', JSON.stringify((error as any)?.response?.data, null, 2));
+        console.error('processFileForAIRenaming: Full error data:', JSON.stringify((error as any)?.response?.data, null, 2));
         // Handle specific error types with more informative messages
         let errorMessage = '';
         console.error(`try/catch: ${error?.message}  ${error?.response?.status}`);
-        console.error('Full error data:', JSON.stringify((error as any)?.response?.data, null, 2));
         if (axios.isAxiosError(error)) {
             const statusCode = error.response?.status;
 
