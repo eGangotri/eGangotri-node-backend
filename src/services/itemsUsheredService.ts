@@ -20,7 +20,7 @@ export async function getListOfItemsUshered(queryOptions: ItemsListOptionsType) 
     // Skip the count operation entirely to avoid timeouts
     // This is a performance optimization - we won't know the total count
     // but the query will be much faster
-    
+
     // Apply projection to only retrieve fields we need
     // This reduces the amount of data transferred
     const projection = {
@@ -31,7 +31,9 @@ export async function getListOfItemsUshered(queryOptions: ItemsListOptionsType) 
       uploadCycleId: 1,
       uploadFlag: 1,
       datetimeUploadStarted: 1,
-      createdAt: 1
+      createdAt: 1,
+      uploadLink: 1,
+      localPath: 1
     };
 
     // Use a smaller batch size and increase server timeout
@@ -74,7 +76,7 @@ export const itemsUsheredVerficationAndDBFlagUpdate = async (uploadCycleIdForVer
         title: item.title
       }, index, total)
     );
-    
+
   const results: SelectedUploadItem[] = await Promise.all(promises);
 
   await bulkUpdateUploadedFlag(results);
