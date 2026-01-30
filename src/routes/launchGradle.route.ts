@@ -692,6 +692,23 @@ launchGradleRoute.get('/launchUploaderViaExcelV3', async (req: any, resp: any) =
     }
 })
 
+launchGradleRoute.post('/stopGradle', async (req: any, resp: any) => {
+    try {
+        console.log('Stopping Gradle Daemon...');
+        const res = await makeGradleCall('gradle --stop');
+        resp.status(200).send({
+            message: 'Gradle stop command executed',
+            response: res
+        });
+    } catch (err: any) {
+        console.log('Error stopping Gradle', err);
+        resp.status(500).send({
+            message: 'Error stopping Gradle',
+            error: err.message
+        });
+    }
+});
+
 launchGradleRoute.post('/imgFilesToPdfGradleVersion', async (req: any, resp: any) => {
     const startTime = Date.now();
     try {
