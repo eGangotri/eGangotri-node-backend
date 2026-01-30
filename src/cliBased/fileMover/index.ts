@@ -6,6 +6,7 @@ import * as fsPromise from 'fs/promises';
 import { launchWinExplorer } from "./util";
 import { isFileInUse } from "../../utils/FileUtils";
 import { isPDFCorrupted } from "../../utils/pdfValidator";
+import pLimit from "p-limit";
 
 // Ensures a unique filename in a directory by appending " (n)" before the extension.
 const ensureUniqueFileNameAsync = async (dir: string, originalName: string): Promise<string> => {
@@ -45,17 +46,6 @@ export const moveAFile = async (sourceFileAbsPath: string, targetDir: string, fi
 
     if (!pdfOnly || (pdfOnly && fileName.endsWith('.pdf'))) {
         try {
-            if (fileName.endsWith('.pdf')) {
-                // console.time(`isPDFCorrupted: ${fileName}`);
-                // const corruptionCheck = await isPDFCorrupted(sourceFileAbsPath)
-                // console.timeEnd(`isPDFCorrupted: ${fileName}`);
-                // if (!corruptionCheck.isValid) {
-                //     result.error = `Corrupted or Non-Existent PDF ${sourceFileAbsPath}`;
-                //     console.error("Corrupted or Non-Existent PDF: error " + result.error);
-                //     return result;
-                // }
-            }
-
             const uniqueName = await ensureUniqueFileNameAsync(targetDir, fileName);
             const targetFileAbs = path.join(targetDir, uniqueName);
             await moveWithExdevFallback(sourceFileAbsPath, targetFileAbs);
@@ -82,9 +72,9 @@ export async function moveFilesAndFlatten(sourceDir: string, targetDir: string, 
     }
     console.log(`sourceDir ${sourceDir} targetDir ${targetDir}`);
 
-    console.time('getAllPDFFilesWithIgnorePathsSpecified (Source)');
+    console.time('getAllSrcPdfs');
     const allSrcPdfs: FileStats[] = await getAllPDFFilesWithIgnorePathsSpecified(sourceDir, ignorePaths);
-    console.timeEnd('getAllPDFFilesWithIgnorePathsSpecified (Source)');
+    console.timeEnd('getAllSrcPdfs');
 
     if (allSrcPdfs.length === 0) {
         return {
@@ -125,60 +115,53 @@ export async function moveFilesAndFlatten(sourceDir: string, targetDir: string, 
     const filesMovedNewAbsPath = [];
     const errorList = [];
 
-    const dirs = [sourceDir];
-    while (dirs.length > 0) {
-        const currentDir = dirs.pop();
-        const files = await fsPromise.readdir(currentDir, { withFileTypes: true });
+    const limit = pLimit(10); // Concurrency limit
 
-        for (let file of files) {
-            const sourceFile = path.join(currentDir, file.name);
+    console.time('moveFilesParallel');
+    const movePromises = allSrcPdfs.map(fileStat => limit(async () => {
+        const sourceFile = fileStat.absPath;
+        const fileName = fileStat.fileName;
 
-            if (file.isDirectory()) {
-                dirs.push(sourceFile);
-            } else if (ignorePaths && ignorePaths.some((item: string) => sourceFile.includes(item))) {
-                console.log(`:Ignoring ${sourceFile} due to ${ignorePaths}:`);
-                continue;
-            } else {
-                filesMoved.push(`${file.name}`);
-                filesAbsPathMoved.push(sourceFile);
-                const moveAFileRes = await moveAFile(sourceFile, targetDir, file.name, pdfOnly);
+        const moveAFileRes = await moveAFile(sourceFile, targetDir, fileName, pdfOnly);
 
-                if (moveAFileRes.renamedWithoutCollision) {
-                    filesMovedNewAbsPath.push(moveAFileRes.targetFile);
-                } else if (moveAFileRes.error) {
-                    errorList.push(moveAFileRes.error);
-                } else if (moveAFileRes.fileCollisionsResolvedByRename) {
-                    fileCollisionsResolvedByRename.push(moveAFileRes.fileCollisionsResolvedByRename);
-                }
-            }
+        if (moveAFileRes.renamedWithoutCollision) {
+            filesMoved.push(fileName);
+            filesAbsPathMoved.push(sourceFile);
+            filesMovedNewAbsPath.push(moveAFileRes.targetFile);
+        } else if (moveAFileRes.fileCollisionsResolvedByRename) {
+            filesMoved.push(fileName);
+            filesAbsPathMoved.push(sourceFile);
+            fileCollisionsResolvedByRename.push(moveAFileRes.fileCollisionsResolvedByRename);
+            filesMovedNewAbsPath.push(moveAFileRes.targetFile);
+        } else if (moveAFileRes.error) {
+            errorList.push(moveAFileRes.error);
         }
-    }
+    }));
 
+    await Promise.all(movePromises);
+    console.timeEnd('moveFilesParallel');
 
-    const allSrcPdfsAfter: FileStats[] = await getAllPDFFiles(sourceDir);
-    // We can't easily optimize this post-check without re-scanning or manually updating the list, 
-    // but let's at least log it.
-    console.time('getAllPDFFiles (Dest - Post Move)');
-    const allDestPdfsAfter: FileStats[] = await getAllPDFFiles(targetDir);
-    console.timeEnd('getAllPDFFiles (Dest - Post Move)');
-
-    const msg = `${(allDestPdfsAfter?.length - allDestPdfs?.length)} of ${_count} files moved from Source dir ${sourceDir} to target dir ${targetDir}`;
+    const successfulMoves = filesMoved.length;
+    const msg = `${successfulMoves} of ${_count} files moved from Source dir ${sourceDir} to target dir ${targetDir}`;
     console.log(msg);
-    await launchWinExplorer(targetDir);
-    await launchWinExplorer(sourceDir);
+
+    // Optional: Only launch explorer if explicitly requested or in certain conditions
+    // For now keeping it but we could make it optional to speed up response
+    // await launchWinExplorer(targetDir);
+    // await launchWinExplorer(sourceDir);
 
     return {
-        success: (allSrcPdfsAfter?.length === 0 && ((allDestPdfsAfter?.length - allDestPdfs?.length) === _count)),
+        success: errorList.length === 0 && successfulMoves === _count,
         msg,
         srcPdfsBefore: _count,
-        srcPdfsAfter: allSrcPdfsAfter?.length,
+        srcPdfsAfter: _count - successfulMoves,
         destFilesBefore: allDestPdfs?.length,
-        destFilesAfter: allDestPdfsAfter?.length,
+        destFilesAfter: allDestPdfs?.length + successfulMoves,
         fileCollisionsResolvedByRename,
         filesMoved,
         filesAbsPathMoved,
         filesMovedNewAbsPath,
-        errors: errorList
+        errorList: errorList
     };
 }
 
@@ -226,3 +209,4 @@ const checkCollision = (allSrcPdfs: FileStats[], allDestPdfs: FileStats[]) => {
         success: true
     }
 }
+

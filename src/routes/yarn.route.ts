@@ -10,6 +10,7 @@ import { FileMoveTracker } from '../models/FileMoveTracker';
 import { GDRIVE_DEFAULT_IGNORE_FOLDER } from '../services/GDriveService';
 import { isValidPath, getPathOrSrcRootForProfile } from '../utils/FileUtils';
 import { getAllPDFFiles } from '../utils/FileStatsUtils';
+import * as fsPromise from 'fs/promises';
 
 export const yarnRoute = express.Router();
 
@@ -112,6 +113,7 @@ yarnRoute.post('/verifyUnzipAllFolders', async (req: any, resp: any) => {
 
 yarnRoute.post('/qaToDestFileMover', async (req: any, resp: any) => {
     console.log(`qaToDestFileMover ${JSON.stringify(req.body)} `)
+    const startTime = Date.now();
     try {
         const qaPath = req?.body?.qaPath;
         const dest = req?.body?.dest || "";
@@ -134,10 +136,6 @@ yarnRoute.post('/qaToDestFileMover', async (req: any, resp: any) => {
             ? qaPath.split(",").map((p: string) => getPathOrSrcRootForProfile(p)).filter(Boolean)
             : [getPathOrSrcRootForProfile(qaPath)];
 
-        const destPath = getPathOrSrcRootForProfile(dest)
-        console.time('getAllPDFFiles (Route)');
-        const allDestPdfs = await getAllPDFFiles(destPath);
-        console.timeEnd('getAllPDFFiles (Route)');
         if (paths.length === 0) {
             resp.status(400).send({
                 response: {
@@ -149,37 +147,72 @@ yarnRoute.post('/qaToDestFileMover', async (req: any, resp: any) => {
             return;
         }
 
-        if (allDestPdfs.length > 0 && !override) {
-            resp.status(400).send({
-                response: {
-                    "status": "failed",
-                    "success": false,
-                    "message": `Destination folder ${destPath} is not empty with ${allDestPdfs.length} files`
+        const destPath = getPathOrSrcRootForProfile(dest)
+
+        // Fast check if destination is not empty and override is false
+        if (!override) {
+            try {
+                const destEntries = await fsPromise.readdir(destPath);
+                if (destEntries.length > 0) {
+                    resp.status(400).send({
+                        response: {
+                            "status": "failed",
+                            "success": false,
+                            "message": `Destination folder ${destPath} is not empty. Use override to proceed.`
+                        }
+                    });
+                    return;
                 }
-            });
-            return;
+            } catch (e) {
+                // If directory doesn't exist, it's fine, moveFileSrcToDest will handle it
+            }
         }
 
+        let allDestPdfs = null;
+        // Only scan destination if it's small or we really need it. 
+        // For large destinations, we might want to skip this pre-load.
+        // But moveFilesAndFlatten currently uses it for collision checking.
+        // Let's scan it once here to avoid multiple scans in the loop.
+        console.time('getAllPDFFiles (Route)');
+        allDestPdfs = await getAllPDFFiles(destPath);
+        console.timeEnd('getAllPDFFiles (Route)');
+
         console.log(`qaToDestFileMover paths ${paths}`)
+
+        // Process source paths sequentially to avoid potential race conditions on the same destination
+        // but remember moveFilesAndFlatten itself is now parallelized.
         const results: any[] = [];
         for (const srcPath of paths) {
             console.log(`qaToDestFileMover srcPath  ${srcPath} to ${destPath}`)
             const listingResult = await moveFileSrcToDest(srcPath, destPath, flatten, ignorePaths, allDestPdfs);
             results.push(listingResult);
+            // Update allDestPdfs with newly moved files if we want to be super accurate, 
+            // but for performance we might skip or just append.
         }
 
         const successCount = results.filter((res: any) => !!res?.success).length;
         const failureCount = results.length - successCount;
 
-        const resultsAtAGlance = results.reduce((acc: any, curr: any) => {
-            acc.successes += `${curr.success ? 1 : 0}+`;
-            acc.totals += `${curr.total || curr.srcPdfsBefore || 0}+`;
-            acc.filesMoved += `${curr.fileMoved?.length || 0}+`;
-            acc.errors += `${curr.errorList?.length || 0}+`;
+        const glanceRaw = results.reduce((acc: any, curr: any) => {
+            acc.successes.push(curr.success ? 1 : 0);
+            acc.totals.push(curr.total || curr.srcPdfsBefore || 0);
+            acc.filesMoved.push(curr.filesMoved?.length || 0);
+            acc.errors.push(curr.errorList?.length || 0);
             return acc;
-        }, emptyResultsAtAGlance(results.length));
+        }, emptyResultsAtAGlance());
+
+        const resultsAtAGlance = {
+            successes: formatGlance(glanceRaw.successes),
+            totals: formatGlance(glanceRaw.totals),
+            filesMoved: formatGlance(glanceRaw.filesMoved),
+            errors: formatGlance(glanceRaw.errors)
+        };
+
+        const timeTaken = Date.now() - startTime;
+        console.log(`Time taken for qaToDestFileMover: ${timeInfo(timeTaken)}`);
 
         resp.status(200).send({
+            timeTaken: timeInfo(timeTaken),
             response: {
                 resultsAtAGlance,
                 total: results.length,
@@ -194,6 +227,7 @@ yarnRoute.post('/qaToDestFileMover', async (req: any, resp: any) => {
         resp.status(400).send(err);
     }
 })
+
 
 yarnRoute.post('/yarnMoveProfilesToFreeze', async (req: any, resp: any) => {
     console.log(`moveProfilesToFreeze ${JSON.stringify(req.body)} `)
@@ -211,13 +245,20 @@ yarnRoute.post('/yarnMoveProfilesToFreeze', async (req: any, resp: any) => {
             });
         }
         const _response = await moveProfilesToFreeze(profileAsCSV, flatten, ignorePaths);
-        const resultsAtAGlance = (_response.response as any[]).reduce((acc: any, curr: any) => {
-            acc.successes += `${curr.success ? 1 : 0} +`;
-            acc.totals += `${curr.total || 0} +`;
-            acc.filesMoved += `${curr.fileMoved?.length || 0} +`;
-            acc.errors += `${curr.errorList?.length || 0} +`;
+        const glanceRaw = (_response.response as any[]).reduce((acc: any, curr: any) => {
+            acc.successes.push(curr.success ? 1 : 0);
+            acc.totals.push(curr.total || curr.srcPdfsBefore || 0);
+            acc.filesMoved.push(curr.filesMoved?.length || 0);
+            acc.errors.push(curr.errorList?.length || 0);
             return acc;
-        }, emptyResultsAtAGlance(_response.response.length));
+        }, emptyResultsAtAGlance());
+
+        const resultsAtAGlance = {
+            successes: formatGlance(glanceRaw.successes),
+            totals: formatGlance(glanceRaw.totals),
+            filesMoved: formatGlance(glanceRaw.filesMoved),
+            errors: formatGlance(glanceRaw.errors)
+        };
 
         const total = (_response.response as any[]).length;
         const successCount = (_response.response as any[]).filter((res: any) => !!res?.success).length;
@@ -266,13 +307,20 @@ yarnRoute.post('/yarnMoveFilesInListToFreeze', async (req: any, resp: any) => {
             });
             await tracker.save()
         }
-        const resultsAtAGlance = _response.reduce((acc: any, curr: any) => {
-            acc.successes += `${curr.success ? 1 : 0}+`;
-            acc.totals += `${curr.total || 0}+`;
-            acc.filesMoved += `${curr.fileMoved?.length || 0}+`;
-            acc.errors += `${curr.errorList?.length || 0}+`;
+        const glanceRaw = _response.reduce((acc: any, curr: any) => {
+            acc.successes.push(curr.success ? 1 : 0);
+            acc.totals.push(curr.total || curr.srcPdfsBefore || 0);
+            acc.filesMoved.push(curr.filesMoved?.length || 0);
+            acc.errors.push(curr.errorList?.length || 0);
             return acc;
-        }, emptyResultsAtAGlance(_response.length));
+        }, emptyResultsAtAGlance());
+
+        const resultsAtAGlance = {
+            successes: formatGlance(glanceRaw.successes),
+            totals: formatGlance(glanceRaw.totals),
+            filesMoved: formatGlance(glanceRaw.filesMoved),
+            errors: formatGlance(glanceRaw.errors)
+        };
 
         const total = _response.length;
         const successCount = _response.filter((res: any) => !!res?.success).length;
@@ -385,11 +433,16 @@ yarnRoute.post('/compareDirectories', async (req: any, resp: any) => {
     }
 })
 
-const emptyResultsAtAGlance = (respLenth = 1) => {
+const emptyResultsAtAGlance = () => {
     return {
-        successes: `${"0".repeat(respLenth)}`,
-        totals: `${"0".repeat(respLenth)}`,
-        filesMoved: `${"0".repeat(respLenth)}`,
-        errors: `${"0".repeat(respLenth)}`
+        successes: [],
+        totals: [],
+        filesMoved: [],
+        errors: []
     }
+}
+
+const formatGlance = (vals: number[]) => {
+    const sum = vals.reduce((a, b) => a + b, 0);
+    return `${vals.join('+')}=${sum}`;
 }

@@ -121,7 +121,7 @@ export const moveFileInListToDest = async (profileData: {
         \n${errorList.length} file(s) had errors while moving`,
         errorList,
         errorAbsPathList,
-        fileMoved: _renamedWithoutCollision,
+        filesMoved: _renamedWithoutCollision,
         filesAbsPathMoved: filesAbsPathMoved,
         fileCollisionsResolvedByRename: _fileCollisionsResolvedByRename,
         src: profileData.archiveProfilePath,

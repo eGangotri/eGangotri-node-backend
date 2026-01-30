@@ -22,10 +22,12 @@ export interface GetAllFileStatsOptions {
     includeFolders?: boolean;
 }
 
+import pLimit from 'p-limit';
+
 export async function getSingleFileStats(filePath: string, withLogs = false): Promise<FileStats[]> {
     const _path = path.parse(filePath);
     const rawSize = await Mirror.getFileSizeAsync(filePath) || 0;
-    
+
     const fileStat: FileStats = {
         rowCounter: 0,
         absPath: filePath,
@@ -43,6 +45,7 @@ export async function getSingleFileStats(filePath: string, withLogs = false): Pr
     return [fileStat];
 }
 
+
 export async function getAllFileStats({
     directoryPath,
     filterExt = [],
@@ -56,10 +59,19 @@ export async function getAllFileStats({
     const queue = [directoryPath];
     let _files: FileStats[] = [];
     let counter = 0;
+    const limit = pLimit(20); // Limit parallel stat calls
 
     while (queue.length > 0) {
         const currentDir = queue.shift();
-        const dirContent = await fsPromise.readdir(currentDir, { withFileTypes: true });
+        let dirContent;
+        try {
+            dirContent = await fsPromise.readdir(currentDir, { withFileTypes: true });
+        } catch (err) {
+            console.error(`Error reading directory ${currentDir}: ${err.message}`);
+            continue;
+        }
+
+        const filePromises = [];
 
         for (const dirent of dirContent) {
             const fullPath = path.join(currentDir, dirent.name);
@@ -68,7 +80,6 @@ export async function getAllFileStats({
                 console.log(`Ignoring ${fullPath} due to ${ignorePaths}`);
                 continue;
             }
-            // console.log(`not Ignoring ${fullPath} due to ${ignorePaths}`);
 
             if (dirent.isDirectory()) {
                 if (includeFolders) {
@@ -87,29 +98,42 @@ export async function getAllFileStats({
                     (filterExt.every((item: string) => ext.toLowerCase() !== item))) {
                     continue;
                 }
-                const _path = path.parse(fullPath);
-                const rawSize = await Mirror.getFileSizeAsync(fullPath) || 0;
 
-                let fileStat: FileStats = {
+                // Push a promise to get stats later
+                filePromises.push(limit(async () => {
+                    const _path = path.parse(fullPath);
+                    const rawSize = await Mirror.getFileSizeAsync(fullPath).catch(() => 0) || 0;
+
+                    return {
+                        absPath: fullPath,
+                        folder: _path.dir,
+                        fileName: _path.base,
+                        ext,
+                        rawSize,
+                        size: Mirror.sizeInfo(rawSize),
+                    };
+                }));
+            }
+        }
+
+        if (filePromises.length > 0) {
+            const results = await Promise.all(filePromises);
+            for (const res of results) {
+                const fileStat: FileStats = {
                     rowCounter: counter++,
-                    absPath: fullPath,
-                    folder: _path.dir,
-                    fileName: _path.base,
-                    ext,
-                    rawSize,
-                    size: Mirror.sizeInfo(rawSize),
-                }
-
+                    ...res
+                };
                 if (withLogs) {
-                    console.log(`${FileConstUtils.getRowCounter(rowCounterController)[0]}/${FileConstUtils.getRowCounter(rowCounterController)[1]}). ${JSON.stringify(ellipsis(fileStat.fileName, 40))} ${Mirror.sizeInfo(rawSize)}`);
+                    console.log(`${FileConstUtils.getRowCounter(rowCounterController)[0]}/${FileConstUtils.getRowCounter(rowCounterController)[1]}). ${JSON.stringify(ellipsis(fileStat.fileName, 40))} ${Mirror.sizeInfo(fileStat.rawSize)}`);
                 }
-                _files.push(fileStat)
+                _files.push(fileStat);
             }
         }
     }
 
     return _files;
 }
+
 
 /**
  * 
@@ -152,7 +176,7 @@ export async function getAllPDFFilesWithIgnorePathsSpecified(directoryPath: stri
 }
 
 //expensive operation
-export async function getAllPDFFilesWithMedata(directoryPath: string, 
+export async function getAllPDFFilesWithMedata(directoryPath: string,
     withLogs: boolean = true, rowCounterController = ""): Promise<FileStats[]> {
     const filestatsOptions =
     {
@@ -191,8 +215,8 @@ export async function getAllFileListingWithFileSizeStats(directoryPath: string):
         })
 }
 
-export async function getAllFoldersWithPdfCount(directoryPath: string): 
-Promise<Record<string, FileStats[]>> {
+export async function getAllFoldersWithPdfCount(directoryPath: string):
+    Promise<Record<string, FileStats[]>> {
     const stats = await getAllFileStats(
         {
             directoryPath,
@@ -231,9 +255,9 @@ export async function getAllFileListingWithStats(directoryPath: string): Promise
 }
 
 // hack to make things faster
-export async function getStatsMetadataIndependently(withoutStats: FileStats[], 
+export async function getStatsMetadataIndependently(withoutStats: FileStats[],
     filestatsOptions: FileStatsOptions,
-    rowCounterController=""): Promise<FileStats[]> {
+    rowCounterController = ""): Promise<FileStats[]> {
     let START_TIME = Number(Date.now())
     const promises = withoutStats.map((fileStat: FileStats) => {
         let updatedFileStat = { ...fileStat };
