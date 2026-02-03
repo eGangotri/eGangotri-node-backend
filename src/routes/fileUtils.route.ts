@@ -12,6 +12,7 @@ import { moveFileInListToDest, moveFilesInArray } from '../services/yarnService'
 import { FileMoveTracker } from '../models/FileMoveTracker';
 import { isPDFCorrupted } from '../utils/pdfValidator';
 import { getAllPdfsInFoldersRecursive, mkDirIfDoesntExists } from '../imgToPdf/utils/Utils';
+import { runHeaderFooterRemovalInLoop } from '../services/pythonRestService';
 
 export const fileUtilsRoute = express.Router();
 export const ISOLATED_FOLDER = "isolated";
@@ -441,22 +442,22 @@ fileUtilsRoute.post('/corruptPdfCheck', async (req: any, resp: any) => {
             let isolationMsg = ""
             if (isolateCorrupted) {
                 const isolatedCorrupted = isCorrupted.map(x => x.filePath)
-              try{
-                  for (let pdf of isolatedCorrupted) {
-                    const pdfName = path.basename(pdf)
-                    const pdfPath = path.dirname(pdf)
-                    const _isolatedPath = path.join(pdfPath, ISOLATED_FOLDER)
-                    const newPath = path.join(_isolatedPath, pdfName)
-                    await mkDirIfDoesntExists(_isolatedPath);
-                    console.log(`Isolating Corrupted PDF: ${pdf} to ${newPath}`)
-                    await fsPromise.rename(pdf, newPath);
+                try {
+                    for (let pdf of isolatedCorrupted) {
+                        const pdfName = path.basename(pdf)
+                        const pdfPath = path.dirname(pdf)
+                        const _isolatedPath = path.join(pdfPath, ISOLATED_FOLDER)
+                        const newPath = path.join(_isolatedPath, pdfName)
+                        await mkDirIfDoesntExists(_isolatedPath);
+                        console.log(`Isolating Corrupted PDF: ${pdf} to ${newPath}`)
+                        await fsPromise.rename(pdf, newPath);
+                    }
+                    isolationMsg = `Isolated Corrupted PDFs: ${isolatedCorrupted.length}`
                 }
-                isolationMsg = `Isolated Corrupted PDFs: ${isolatedCorrupted.length}`
-              }
-              catch(err){
-                console.log(`Error isolating corrupted PDFs: ${err}`)
-                isolationMsg = `Error isolating corrupted PDFs: ${err}`
-              }
+                catch (err) {
+                    console.log(`Error isolating corrupted PDFs: ${err}`)
+                    isolationMsg = `Error isolating corrupted PDFs: ${err}`
+                }
             }
             resp.status(400).send({
                 response: {
@@ -483,4 +484,57 @@ fileUtilsRoute.post('/corruptPdfCheck', async (req: any, resp: any) => {
         console.log('Error', err);
         resp.status(400).send({ response: err });
     }
+})
+
+fileUtilsRoute.post('/removeHeaderFooter', async (req: any, resp: any) => {
+
+    try {
+        const folderOrProfile = req.body.folderOrProfile || "";
+        const overrideNonEmpty = req.body.overrideNonEmpty || false;
+        if (!folderOrProfile || folderOrProfile === "") {
+            return resp.status(400).send({
+                response: {
+                    success: false,
+                    message: "folderOrProfile is mandatory"
+                }
+            });
+        }
+
+
+        const _profiles = folderOrProfile.includes(",") ?
+            folderOrProfile.split(",").map((p: string) => p.trim()) :
+            [folderOrProfile.trim()];
+
+        const profilesAsFolders = _profiles.map((p: string) => getPathOrSrcRootForProfile(p));
+        const destination = req.body.destination || profilesAsFolders[0];
+
+        // Fast check if destination is not empty and override is false
+        if (!overrideNonEmpty) {
+            try {
+                const destEntries = await fsPromise.readdir(destination);
+                if (destEntries.length > 0) {
+                    resp.status(400).send({
+                        response: {
+                            "status": "failed",
+                            "success": false,
+                            "message": `Destination folder ${destination} is not empty. Use override to proceed.`
+                        }
+                    });
+                    return;
+                }
+            } catch (e) {
+                console.log(`removeHeaderFooter: ${e}`)
+            }
+        }
+
+        const headerFooterRemovalResp = await runHeaderFooterRemovalInLoop(profilesAsFolders, destination);
+        resp.status(200).send({
+            response: headerFooterRemovalResp
+        });
+    }
+    catch (error: any) {
+        console.log('Error', error);
+        resp.status(400).send({ response: error });
+    }
+
 })

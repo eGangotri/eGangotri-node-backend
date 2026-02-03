@@ -191,7 +191,7 @@ export const runPthonPdfExtractionInLoop = async (
             {
                 $set: {
                     success: successCount === srcFolderCount,
-                    status: `${successCount}/${srcFolderCount}/${srcFolderCount-successCount}`,
+                    status: `${successCount}/${srcFolderCount}/${srcFolderCount - successCount}`,
                 }
             }
         );
@@ -303,6 +303,47 @@ export const runCr2ToJpgInLoop = async (_srcFolders: string[],
     }
     return combinedResults;
 }
+
+export const runHeaderFooterRemovalInLoop = async (_srcFolders: string[],
+    commonDest: string) => {
+    const combinedResults = [];
+    for (let srcFolder of _srcFolders) {
+        try {
+            console.log(`runHeaderFooterRemovalInLoop srcFolder ${srcFolder} `);
+            await createFolderIfNotExistsAsync(commonDest);
+            console.log(`Folder created: ${commonDest}`);
+            console.log(`runHeaderFooterRemovalInLoop srcFolder ${srcFolder} commonDest ${commonDest}`);
+            const _resp = await executePythonPostCall({
+                "input_folder": srcFolder,
+                "output_folder": commonDest,
+            }, 'bulkRemoveAcrobatHeaderFooter');
+
+            console.log(`runPthonCopyPdfInLoop
+                 srcFolder ${srcFolder} specificDest ${commonDest} 
+                 _resp ${JSON.stringify(_resp)}`);
+
+            const result = {
+                srcFolder,
+                commonDest,
+                ..._resp,
+            }
+            console.log('result', result);
+            combinedResults.push(result);
+        }
+        catch (err) {
+            console.log('Error runPthonCopyPdfInLoop:', err);
+            combinedResults.push({
+                err,
+                msg: `Exception ${srcFolder}`,
+                success: false,
+                _srcFolder: srcFolder,
+                destRoot: commonDest,
+            });
+        }
+    }
+    return combinedResults;
+}
+
 const checkPythonServer = async (): Promise<{ status: boolean, message: string }> => {
     // Check if the server is running
     const serverCheckResponse = await fetch(PYTHON_SERVER_URL);

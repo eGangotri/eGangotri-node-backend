@@ -164,7 +164,7 @@ yarnRoute.post('/qaToDestFileMover', async (req: any, resp: any) => {
                     return;
                 }
             } catch (e) {
-                // If directory doesn't exist, it's fine, moveFileSrcToDest will handle it
+                console.log(`qaToDestFileMover: ${e}`)
             }
         }
 
