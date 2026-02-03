@@ -368,10 +368,19 @@ export const runHeaderFooterRemovalInLoop = async (_srcFolders: string[],
 
             // Update per-item history
             try {
+                const pythonDetails = (_resp.data as any)?.processing_details || [];
+                const mappedResults = pythonDetails.map((pd: any) => ({
+                    srcPdf: path.join(srcFolder, pd.file),
+                    destPdf: path.join(commonDest, pd.file),
+                    success: pd.status === 'success',
+                    errorMsg: pd.error || '',
+                }));
+
                 await AcrobatHeaderFooterRemovalPerItemHistory.updateOne(
                     { runId },
                     {
                         $set: {
+                            results: mappedResults,
                             logs: _resp.data || _resp.message,
                             success: _resp.status,
                             errorMsg: _resp.status ? '' : _resp.message,

@@ -14,6 +14,8 @@ import { isPDFCorrupted } from '../utils/pdfValidator';
 import { getAllPdfsInFoldersRecursive, mkDirIfDoesntExists } from '../imgToPdf/utils/Utils';
 import { runHeaderFooterRemovalInLoop } from '../services/pythonRestService';
 import { randomUUID } from 'crypto';
+import AcrobatHeaderFooterRemovalHistory from '../models/AcrobatHeaderFooterRemovalHistory';
+import AcrobatHeaderFooterRemovalPerItemHistory from '../models/AcrobatHeaderFooterRemovalPerItemHistory';
 
 export const fileUtilsRoute = express.Router();
 export const ISOLATED_FOLDER = "isolated";
@@ -538,3 +540,77 @@ fileUtilsRoute.post('/removeHeaderFooter', async (req: any, resp: any) => {
     }
 
 })
+
+fileUtilsRoute.get('/header-footer-removal-report', async (req, res) => {
+    console.log(`GET /header-footer-removal-report`);
+    try {
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
+        const skip = (page - 1) * limit;
+
+        const totalCount = await AcrobatHeaderFooterRemovalHistory.countDocuments();
+        const history = await AcrobatHeaderFooterRemovalHistory.find()
+            .skip(skip)
+            .limit(limit)
+            .sort({ createdAt: -1 });
+
+        res.json({
+            data: history,
+            currentPage: page,
+            totalPages: Math.ceil(totalCount / limit),
+            totalCount,
+        });
+    } catch (error) {
+        console.error('Error fetching header footer removal history:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+fileUtilsRoute.get('/header-footer-removal-item-details', async (req, res) => {
+    const runId = (req.query.runId || req.query.commonRunId) as string;
+    console.log(`GET /header-footer-removal-item-details runId: ${runId}`);
+    try {
+        if (!runId) {
+            return res.status(400).json({ error: 'runId is required' });
+        }
+
+        // Search both commonRunId (batch) and runId (individual item)
+        const details = await AcrobatHeaderFooterRemovalPerItemHistory.find({
+            $or: [{ commonRunId: runId }, { runId: runId }]
+        }).sort({ createdAt: 1 });
+
+        res.json({
+            data: details,
+            totalCount: details.length
+        });
+    } catch (error) {
+        console.error('Error fetching header footer removal item details:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+fileUtilsRoute.get('/header-footer-removal-item-report', async (req, res) => {
+    console.log(`GET /header-footer-removal-item-report`);
+    try {
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
+        const skip = (page - 1) * limit;
+
+        const totalCount = await AcrobatHeaderFooterRemovalPerItemHistory.countDocuments();
+        const history = await AcrobatHeaderFooterRemovalPerItemHistory.find()
+            .skip(skip)
+            .limit(limit)
+            .sort({ createdAt: -1 });
+
+        res.json({
+            data: history,
+            currentPage: page,
+            totalPages: Math.ceil(totalCount / limit),
+            totalCount,
+        });
+    } catch (error) {
+        console.error('Error fetching header footer removal item report:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
