@@ -13,6 +13,7 @@ import { FileMoveTracker } from '../models/FileMoveTracker';
 import { isPDFCorrupted } from '../utils/pdfValidator';
 import { getAllPdfsInFoldersRecursive, mkDirIfDoesntExists } from '../imgToPdf/utils/Utils';
 import { runHeaderFooterRemovalInLoop } from '../services/pythonRestService';
+import { randomUUID } from 'crypto';
 
 export const fileUtilsRoute = express.Router();
 export const ISOLATED_FOLDER = "isolated";
@@ -527,10 +528,9 @@ fileUtilsRoute.post('/removeHeaderFooter', async (req: any, resp: any) => {
             }
         }
 
-        const headerFooterRemovalResp = await runHeaderFooterRemovalInLoop(profilesAsFolders, destination);
-        resp.status(200).send({
-            response: headerFooterRemovalResp
-        });
+        const commonRunId = randomUUID()
+        const headerFooterRemovalResp = await runHeaderFooterRemovalInLoop(profilesAsFolders, destination, commonRunId);
+        resp.status(200).send(headerFooterRemovalResp);
     }
     catch (error: any) {
         console.log('Error', error);

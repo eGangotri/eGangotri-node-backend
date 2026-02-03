@@ -5,6 +5,8 @@ import { PythonExtractionResult } from "./types";
 import { randomUUID } from "crypto";
 import PdfPageExtractionPerItemHistory from "../models/PdfPageExtractionPerItemHistory";
 import PdfPageExtractionHistory from "../models/PdfPageExtractionHistory";
+import AcrobatHeaderFooterRemovalHistory from "../models/AcrobatHeaderFooterRemovalHistory";
+import AcrobatHeaderFooterRemovalPerItemHistory from "../models/AcrobatHeaderFooterRemovalPerItemHistory";
 
 // Default data payload for extraction/copy operations used across the codebase
 export interface ExtractionOperationData {
@@ -305,33 +307,83 @@ export const runCr2ToJpgInLoop = async (_srcFolders: string[],
 }
 
 export const runHeaderFooterRemovalInLoop = async (_srcFolders: string[],
-    commonDest: string) => {
+    commonDest: string,
+    commonRunId: string) => {
     const combinedResults = [];
+    const srcFolderCount = _srcFolders.length;
+
+    try {
+        const logEntry = new AcrobatHeaderFooterRemovalHistory({
+            "_srcFolders": _srcFolders,
+            "commonDest": commonDest,
+            "srcFolderCount": srcFolderCount,
+            "commonRunId": commonRunId,
+            "success": false,
+        });
+        await logEntry.save();
+        console.log(`Saved AcrobatHeaderFooterRemovalHistory for commonRunId: ${commonRunId} `);
+    } catch (logErr) {
+        console.error('Error saving AcrobatHeaderFooterRemovalHistory:', logErr);
+    }
+
     for (let srcFolder of _srcFolders) {
+        const runId = randomUUID();
         try {
             console.log(`runHeaderFooterRemovalInLoop srcFolder ${srcFolder} `);
             await createFolderIfNotExistsAsync(commonDest);
             console.log(`Folder created: ${commonDest}`);
+
+            try {
+                const logEntry = new AcrobatHeaderFooterRemovalPerItemHistory({
+                    _srcFolder: srcFolder,
+                    _destFolder: commonDest,
+                    "commonRunId": commonRunId,
+                    "runId": runId
+                });
+                await logEntry.save();
+            } catch (logErr) {
+                console.error('Error saving AcrobatHeaderFooterRemovalPerItemHistory:', logErr);
+            }
+
             console.log(`runHeaderFooterRemovalInLoop srcFolder ${srcFolder} commonDest ${commonDest}`);
             const _resp = await executePythonPostCall({
                 "input_folder": srcFolder,
                 "output_folder": commonDest,
+                "commonRunId": commonRunId,
+                "runId": runId,
             }, 'bulkRemoveAcrobatHeaderFooter');
 
-            console.log(`runPthonCopyPdfInLoop
-                 srcFolder ${srcFolder} specificDest ${commonDest} 
+            console.log(`runHeaderFooterRemovalInLoop response
+                 srcFolder ${srcFolder} commonDest ${commonDest} 
                  _resp ${JSON.stringify(_resp)}`);
 
             const result = {
                 srcFolder,
                 commonDest,
+                success: _resp.status,
                 ..._resp,
             }
             console.log('result', result);
             combinedResults.push(result);
+
+            // Update per-item history
+            try {
+                await AcrobatHeaderFooterRemovalPerItemHistory.updateOne(
+                    { runId },
+                    {
+                        $set: {
+                            logs: _resp.data || _resp.message,
+                            success: _resp.status,
+                            errorMsg: _resp.status ? '' : _resp.message,
+                        }
+                    }
+                );
+            } catch (updateErr) {
+                console.error('Error updating AcrobatHeaderFooterRemovalPerItemHistory:', updateErr);
+            }
         }
         catch (err) {
-            console.log('Error runPthonCopyPdfInLoop:', err);
+            console.log('Error runHeaderFooterRemovalInLoop:', err);
             combinedResults.push({
                 err,
                 msg: `Exception ${srcFolder}`,
@@ -339,8 +391,38 @@ export const runHeaderFooterRemovalInLoop = async (_srcFolders: string[],
                 _srcFolder: srcFolder,
                 destRoot: commonDest,
             });
+            try {
+                await AcrobatHeaderFooterRemovalPerItemHistory.updateOne(
+                    { runId },
+                    {
+                        $set: {
+                            success: false,
+                            errorMsg: String(err),
+                        }
+                    }
+                );
+            } catch (updateErr) {
+                console.error('Error updating AcrobatHeaderFooterRemovalPerItemHistory on exception:', updateErr);
+            }
         }
     }
+
+    // update overall history
+    const successCount = combinedResults.filter((result) => result.success).length;
+    try {
+        await AcrobatHeaderFooterRemovalHistory.updateOne(
+            { commonRunId },
+            {
+                $set: {
+                    success: successCount === srcFolderCount,
+                    status: `${successCount}/${srcFolderCount}/${srcFolderCount - successCount}`,
+                }
+            }
+        );
+    } catch (updateErr) {
+        console.error('Error updating AcrobatHeaderFooterRemovalHistory summary:', updateErr);
+    }
+
     return combinedResults;
 }
 
