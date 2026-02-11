@@ -304,7 +304,7 @@ export async function aiRenameTitleUsingReducedFolder(inputFolder: string,
             delayBetweenBatchesMs: Number.isFinite(AI_DELAY_BETWEEN_BATCHES_MS) && AI_DELAY_BETWEEN_BATCHES_MS >= 0 ? AI_DELAY_BETWEEN_BATCHES_MS : AI_RENAMING_WORKFLOW_CONFIG.delayBetweenBatchesMs,
         }
 
-        const outputFolder = path.join(path.dirname(inputFolder), outputSuffix);
+        const outputFolder = path.join(path.dirname(reducedFolder), outputSuffix);
 
         console.log(`output folder: ${outputFolder}`);
         console.log(`Creating output folder: ${outputFolder}`);

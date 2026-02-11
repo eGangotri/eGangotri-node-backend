@@ -483,3 +483,31 @@ pythonRoute.post('/mergeMutliplePdfs', async (req: any, resp: any) => {
         resp.status(400).send(err);
     }
 })
+
+pythonRoute.post('/bulkRemoveAcrobatHeaderFooter', async (req: any, resp: any) => {
+    try {
+        const { input_folder, output_folder } = req.body;
+        if (!input_folder || !output_folder) {
+            return resp.status(400).send({
+                response: {
+                    success: false,
+                    msg: "input_folder and output_folder are required"
+                }
+            });
+        }
+        console.log(`bulkRemoveAcrobatHeaderFooter input: ${input_folder} output: ${output_folder}`);
+        const _resp = await executePythonPostCall({
+            input_folder,
+            output_folder,
+            ...req.body
+        }, 'bulkRemoveAcrobatHeaderFooter');
+
+        resp.status(200).send({
+            response: _resp
+        });
+    }
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+});
