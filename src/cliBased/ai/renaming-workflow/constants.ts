@@ -150,9 +150,11 @@ The output should be in Title Case.
 
 The output should be in one line.
 
-The output should be in English only.
+The output should be in the English script only.
 
 The output should be in the format: Title - Author - Language - Series OR Publisher
+
+For Non-English language books the Title should capture the original Title in the English Script no translation
 
 The Language or Script should be in 2 Alphabet ISO 639-1 format.
 
