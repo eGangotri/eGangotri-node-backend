@@ -314,27 +314,60 @@ export async function aiRenameTitleUsingReducedFolder(inputFolder: string,
         console.log(`Input folders:`, config.inputFolder);
 
         // Get all PDF files from input folders
-        const allPdfs = await getAllPdfsInFoldersRecursive([config.inputFolder]);
-        const allReducedPdfs = await getAllPdfsInFoldersRecursive([config.reducedFolder]);
+        const allPdfsRaw = await getAllPdfsInFoldersRecursive([config.inputFolder]);
+        const allReducedPdfsRaw = await getAllPdfsInFoldersRecursive([config.reducedFolder]);
 
-        console.log(`Found ${allPdfs.length} PDFs to process`);
-        console.log(`Found ${allReducedPdfs.length} PDFs to process`);
+        console.log(`Found ${allPdfsRaw.length} original PDFs`);
+        console.log(`Found ${allReducedPdfsRaw.length} reduced PDFs`);
+
+        // Sort both lists by relative path to ensure consistent pairing
+        const sortPdfs = (pdfs: string[], baseFolder: string) => {
+            return pdfs.sort((a, b) => {
+                const relA = path.relative(baseFolder, a);
+                const relB = path.relative(baseFolder, b);
+                return relA.localeCompare(relB, undefined, { numeric: true, sensitivity: 'base' });
+            });
+        };
+
+        const allPdfs = sortPdfs(allPdfsRaw, config.inputFolder);
+        const allReducedPdfs = sortPdfs(allReducedPdfsRaw, config.reducedFolder);
+
+        if (allPdfs.length !== allReducedPdfs.length) {
+            const errorMsg = `Mismatched file counts! Originals: ${allPdfs.length}, Reduced: ${allReducedPdfs.length}`;
+            console.error(errorMsg);
+            return {
+                processedCount,
+                successCount,
+                failedCount: 0,
+                errorCount: 1,
+                pairedBatches: [],
+                error: errorMsg,
+                success: false
+            }
+        }
+
+        // Validate pairing (basenames should match)
+        for (let i = 0; i < allPdfs.length; i++) {
+            const relOrg = path.relative(config.inputFolder, allPdfs[i]);
+            const relRed = path.relative(config.reducedFolder, allReducedPdfs[i]);
+            if (relOrg !== relRed) {
+                const errorMsg = `Pairing mismatch at index ${i}: \nOrg: ${relOrg}\nRed: ${relRed}`;
+                console.error(errorMsg);
+                return {
+                    processedCount,
+                    successCount,
+                    failedCount: 0,
+                    errorCount: 1,
+                    pairedBatches: [],
+                    error: errorMsg,
+                    success: false
+                }
+            }
+        }
 
         // Process PDFs in batches
         const batches = chunk(allPdfs, config.batchSize);
         const batchesReduced = chunk(allReducedPdfs, config.batchSize);
-
-        if (batches.length !== batchesReduced.length) {
-            return {
-                processedCount,
-                successCount,
-                failedCount: processedCount - successCount,
-                errorCount,
-                pairedBatches: [],
-                error: `Batch arrays must be the same length. batches=${batches.length}, batchesReduced=${batchesReduced.length}`,
-                success: false
-            }
-        }
 
         const pairedBatches: BatchPair[] = buildPairedBatches(batches, batchesReduced);
 
