@@ -346,24 +346,24 @@ export async function aiRenameTitleUsingReducedFolder(inputFolder: string,
             }
         }
 
-        // Validate pairing (basenames should match)
-        for (let i = 0; i < allPdfs.length; i++) {
-            const relOrg = path.relative(config.inputFolder, allPdfs[i]);
-            const relRed = path.relative(config.reducedFolder, allReducedPdfs[i]);
-            if (relOrg !== relRed) {
-                const errorMsg = `Pairing mismatch at index ${i}: \nOrg: ${relOrg}\nRed: ${relRed}`;
-                console.error(errorMsg);
-                return {
-                    processedCount,
-                    successCount,
-                    failedCount: 0,
-                    errorCount: 1,
-                    pairedBatches: [],
-                    error: errorMsg,
-                    success: false
-                }
-            }
-        }
+        // // Validate pairing (basenames should match)
+        // for (let i = 0; i < allPdfs.length; i++) {
+        //     const relOrg = path.relative(config.inputFolder, allPdfs[i]);
+        //     const relRed = path.relative(config.reducedFolder, allReducedPdfs[i]);
+        //     if (relOrg !== relRed) {
+        //         const errorMsg = `Pairing mismatch at index ${i}: \nOrg: ${relOrg}\nRed: ${relRed}`;
+        //         console.error(errorMsg);
+        //         return {
+        //             processedCount,
+        //             successCount,
+        //             failedCount: 0,
+        //             errorCount: 1,
+        //             pairedBatches: [],
+        //             error: errorMsg,
+        //             success: false
+        //         }
+        //     }
+        // }
 
         // Process PDFs in batches
         const batches = chunk(allPdfs, config.batchSize);
