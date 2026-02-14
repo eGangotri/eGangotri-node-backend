@@ -232,3 +232,21 @@ JSON Response:
 	"responseId": "unvYaMmxM7XY2roPlMqRsQ4"
 }
 
+## 3. Facing AI Rename Long Waits like single batches per 20 min.s
+Remember:
+ Paid: 2,000 RPM (Requests Per Minute).
+ Free Tier: 15 RPM
+ if you see unusual delay like 20 min.s/batch
+ check for unpaid bills
+ 20 min. delay is Caused by quota usage locks which in free tier is exhausted easily.
+
+Recommended Settings
+AI_DELAY_BETWEEN_CALLS_MS=500
+AI_DELAY_BETWEEN_BATCHES_MS=2000
+
+Batch size can be increased if internet is good
+AI_BATCH_SIZE=10
+
+
+
+
