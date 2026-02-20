@@ -164,7 +164,7 @@ export const downloadGDriveFileUsingGDriveApi = async (
                 // For now, let's treat it as a failure that triggers retry if transient.
                 throw new Error(`Failed to update entry for ${fileName}: ${res.error}`);
             }
-            const dest = fs.createWriteStream(filePath);
+
 
             const exportMimeMap = {
                 'application/vnd.google-apps.document': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -182,6 +182,8 @@ export const downloadGDriveFileUsingGDriveApi = async (
             } else {
                 throw new Error(`Unsupported Google-native MIME type: ${mimeType}`);
             }
+
+            const dest = fs.createWriteStream(filePath);
 
             response.data.pipe(dest);
 
