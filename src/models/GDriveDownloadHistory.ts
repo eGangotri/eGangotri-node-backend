@@ -4,17 +4,19 @@ import { DownloadHistoryStatus } from '../utils/constants';
 export interface ICompositeDocument {
     fileName: string;
     filePath: string;
+    googleDriveLink?: string;
+    googleDrivePath?: string;
     status: DownloadHistoryStatus;
     msg: string;
 }
 
 export interface QuickStatus {
     status?: string;
-    success_count?: number|string;
-    error_count?: number|string;
+    success_count?: number | string;
+    error_count?: number | string;
     dl_wrong_size_count?: string;
-    totalPdfsToDownload?: number|string;
-    error?:string;
+    totalPdfsToDownload?: number | string;
+    error?: string;
     attemptDate?: Date;
 }
 
@@ -22,6 +24,8 @@ const CompositeDocumentSchema: Schema = new Schema(
     {
         fileName: { type: String, required: true },
         filePath: { type: String, required: false },
+        googleDriveLink: { type: String, required: false },
+        googleDrivePath: { type: String, required: false },
         status: { type: String, enum: Object.values(DownloadHistoryStatus), required: true },
         msg: { type: String, required: false },
     },
@@ -43,8 +47,8 @@ export interface IGDriveDownload extends Document {
     downloadType: string;
     ignoreFolder: string;
     files: ICompositeDocument[];
-    quickStatus: QuickStatus[];  
-    verify: boolean;    
+    quickStatus: QuickStatus[];
+    verify: boolean;
     deleted: boolean;
 }
 
@@ -75,7 +79,7 @@ const GDriveDownloadHistorySchema: Schema = new Schema(
         ignoreFolder: { type: String, required: false },
         downloadType: { type: String, required: true },
         files: { type: [CompositeDocumentSchema], required: true },
-        quickStatus: { type: [QuickStatusSchema], required: false, default: [] },  
+        quickStatus: { type: [QuickStatusSchema], required: false, default: [] },
         verify: { type: Boolean, required: false },
         deleted: { type: Boolean, required: false, default: false },
     },

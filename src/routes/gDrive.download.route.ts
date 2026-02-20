@@ -111,7 +111,7 @@ gDriveDownloadRoute.post("/markVerificationGDriveDownload/:id", async (req: Requ
 // Update an embedded object in the files array of an existing GDriveDownload entry by fileName
 gDriveDownloadRoute.post("/updateEmbeddedFileByFileNameV2/:id", async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { fileName, status, msg, filePath } = req.body;
+    const { fileName, status, msg, filePath, googleDriveLink, googleDrivePath } = req.body;
     try {
         console.log(`updateEmbeddedFileByFileName/1/${id}: ${fileName} ${filePath} ${id} ${status} ${msg}`);
 
@@ -134,6 +134,8 @@ gDriveDownloadRoute.post("/updateEmbeddedFileByFileNameV2/:id", async (req: Requ
             if (msg !== undefined) updateData.msg = msg;
             if (fileName !== undefined) updateData.fileName = fileName;
             if (filePath !== undefined) updateData.filePath = filePath;
+            if (googleDriveLink !== undefined) updateData.googleDriveLink = googleDriveLink;
+            if (googleDrivePath !== undefined) updateData.googleDrivePath = googleDrivePath;
 
             // Use findOneAndUpdate with $push to add the new file atomically
             updateResult = await GDriveDownload.findOneAndUpdate(

@@ -44,10 +44,11 @@ export const downloadFileFromGoogleDrive = async (driveLinkOrFolderId: string,
     fileName: string = "",
     fileSizeRaw = "0",
     gDriveDownloadTaskId: string = "",
-    runIdWithIndex = "") => {
+    runIdWithIndex = "",
+    googleDrivePath: string = "") => {
     console.log(`downloadFileFromGoogleDrive ${driveLinkOrFolderId}`)
     const result = await downloadGDriveFileUsingGDriveApi(driveLinkOrFolderId, destPath,
-        fileName, fileSizeRaw, gDriveDownloadTaskId, runIdWithIndex);
+        fileName, fileSizeRaw, gDriveDownloadTaskId, runIdWithIndex, googleDrivePath);
     return result;
 }
 
@@ -131,7 +132,8 @@ export const downloadGDriveFileUsingGDriveApi = async (
     fileName: string = "",
     fileSizeRaw: string = "0",
     gDriveDownloadTaskId: string = "",
-    runIdWithIndex: string = ""
+    runIdWithIndex: string = "",
+    googleDrivePath: string = ""
 ): Promise<{ status: string; success: boolean; destPath: string, error?: string }> => {
     const fileId = extractGoogleDriveId(driveLinkOrFileID);
     console.log(`downloadGDriveFileUsingGDriveApi ${driveLinkOrFileID} ${fileId} to ${destPath}`);
@@ -204,7 +206,7 @@ export const downloadGDriveFileUsingGDriveApi = async (
 
             if (result?.success) {
                 incrementDownloadCompleted(runIdWithIndex);
-                await _updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, DownloadHistoryStatus.Completed, `completed d/l of ${fileName}`, destPath);
+                await _updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, DownloadHistoryStatus.Completed, `completed d/l of ${fileName}`, destPath, driveLinkOrFileID, googleDrivePath);
                 return { status: `Downloaded ${fileName} to ${destPath}`, success: true, destPath };
             } else {
                 // Throw error to trigger retry
@@ -225,7 +227,7 @@ export const downloadGDriveFileUsingGDriveApi = async (
         if (runIdWithIndex) {
             incrementDownloadInError(runIdWithIndex);
         }
-        await _updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, DownloadHistoryStatus.Failed, `${errorContext}: ${error.message}`, destPath);
+        await _updateEmbeddedFileByFileName(gDriveDownloadTaskId, fileName, DownloadHistoryStatus.Failed, `${errorContext}: ${error.message}`, destPath, driveLinkOrFileID, googleDrivePath);
         return {
             status: `${errorContext}: ${error.message}`,
             success: false,

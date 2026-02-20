@@ -22,7 +22,7 @@ launchAIRoute.post('/aiRenamer', async (req: any, resp: any) => {
                 "status": "failed",
                 response: {
                     "success": false,
-                    "msg": "Pls. provide both Soruce Folder and Reduced Folder Path."
+                    "msg": "Pls. provide both Source Folder and Reduced Folder Path."
                 }
             });
         }
@@ -38,7 +38,7 @@ launchAIRoute.post('/aiRenamer', async (req: any, resp: any) => {
                 "status": "failed",
                 response: {
                     "success": false,
-                    "msg": "Pls. provide both Soruce Folder and Reduced Folder Path."
+                    "msg": "Pls. provide both Source Folder and Reduced Folder Path."
                 }
             });
         }

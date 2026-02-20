@@ -50,17 +50,17 @@ export const updateTotalFileCountForGDriveUploadHistory =
   async (gDriveDownloadTaskId: string, totalCount: number) => {
     try {
       const gDriveDownload = await GDriveDownload.findById(gDriveDownloadTaskId);
-    if (!gDriveDownload) {
-      console.log(`updateTotalFileCountForGDriveUploadHistory/${gDriveDownloadTaskId}:GDriveDownload not found`);
-      return;
+      if (!gDriveDownload) {
+        console.log(`updateTotalFileCountForGDriveUploadHistory/${gDriveDownloadTaskId}:GDriveDownload not found`);
+        return;
+      }
+      else {
+        gDriveDownload.totalCount = totalCount;
+        await gDriveDownload.save();
+        console.log(`updateTotalFileCountForGDriveUploadHistory: Updated totalCount to ${totalCount} for ${gDriveDownloadTaskId}`);
+      }
     }
-    else {
-      gDriveDownload.totalCount = totalCount;
-      await gDriveDownload.save();
-      console.log(`updateTotalFileCountForGDriveUploadHistory: Updated totalCount to ${totalCount} for ${gDriveDownloadTaskId}`);
-    }
-    }
-    catch(e){
+    catch (e) {
       console.error(`updateTotalFileCountForGDriveUploadHistory/${gDriveDownloadTaskId}: ${JSON.stringify(e)}`);
     }
   }
@@ -75,7 +75,7 @@ export const updateEntryForGDriveUploadHistory = async (gDriveDownloadTaskId: st
   if (quickStatus?.status?.length) {
     params['quickStatus'] = quickStatus;
   }
-  if(totalCount >= 0){
+  if (totalCount >= 0) {
     params['totalCount'] = totalCount;
   }
 
@@ -116,8 +116,10 @@ export const _updateEmbeddedFileByFileName = async (gDriveDownloadTaskId: string
   fileName: string,
   status: string,
   msg: string,
-  filePath: string = "") => {
-  const params = setParams(msg, status, fileName, filePath);
+  filePath: string = "",
+  googleDriveLink: string = "",
+  googleDrivePath: string = "") => {
+  const params = setParams(msg, status, fileName, filePath, googleDriveLink, googleDrivePath);
   console.log(`_updateEmbeddedFileByFileName/1/with 
     ${JSON.stringify(params)}`);
   try {
@@ -144,7 +146,7 @@ export const _updateEmbeddedFileByFileName = async (gDriveDownloadTaskId: string
   }
 }
 
-const setParams = (msg: string, status: string, fileName: string, filePath: string) => {
+const setParams = (msg: string, status: string, fileName: string, filePath: string, googleDriveLink: string = "", googleDrivePath: string = "") => {
   const params = {
     msg,
     status
@@ -155,5 +157,11 @@ const setParams = (msg: string, status: string, fileName: string, filePath: stri
   if (filePath) {
     params['filePath'] = filePath;
   }
+  if (googleDriveLink) {
+    params['googleDriveLink'] = googleDriveLink;
+  }
+  if (googleDrivePath) {
+    params['googleDrivePath'] = googleDrivePath;
+  }
   return params;
-} 
+}

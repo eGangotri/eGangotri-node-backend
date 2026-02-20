@@ -68,7 +68,8 @@ async function dwnldAllFilesFromGDrive(driveLinkOrFolderID: string,
         fileData.fileName,
         fileData.fileSizeRaw,
         gDriveDownloadTaskId,
-        runId
+        runId,
+        ""
       );
 
       const resultAsString = JSON.stringify(result);
@@ -126,7 +127,7 @@ async function dwnldAllFilesFromGDrive(driveLinkOrFolderID: string,
       await createFolderIfNotExistsAsync(fileDumpWithPathAppended);
 
       return downloadFileFromGoogleDrive(_data.googleDriveLink,
-        fileDumpWithPathAppended, _data.fileName, _data?.fileSizeRaw, gDriveDownloadTaskId, runId)
+        fileDumpWithPathAppended, _data.fileName, _data?.fileSizeRaw, gDriveDownloadTaskId, runId, _data.parents)
     });
   });
   const results = await Promise.all(promises);
