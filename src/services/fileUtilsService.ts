@@ -221,7 +221,7 @@ export const _renameFileByAbsPath = async (absPath: string, newFileName: string,
         return
     }
     console.log(`_renameFileByAbsPath: ${absPath} -> ${newFileName}`);
-    
+
     if (!checkFolderExistsSync(absPath)) {
         renameReport.errorList.push(`Doesn't exist ${absPath}.`)
         return
@@ -250,7 +250,7 @@ export const _renameFileByAbsPath = async (absPath: string, newFileName: string,
 }
 
 export const _renameFileInFolder = async (_fileInFolder: FileStats, newFileName: string,
-     renameReport: RenameReportType) => {
+    renameReport: RenameReportType) => {
     if (!_fileInFolder) {
         renameReport.errorList.push(`No File in Local renameable to ${newFileName}.`)
         return
@@ -266,3 +266,92 @@ const getOrigName = (_titleInGoogleDrive: string) => {
     const slicedName = nameWithoutExtension.slice(0, -5);
     return slicedName + extension;
 }
+
+export interface FolderValidationReport {
+    rootPath: string;
+    mismatches: Array<{
+        path: string;
+        folderName: string;
+        expectedCount: number;
+        actualSum: number;
+        subFolders: Array<{ name: string; count: number; found: boolean }>;
+    }>;
+    missingNumericComponents: string[];
+    errors: Array<{ path: string; message: string }>;
+}
+
+/**
+ * Validates that each folder's number (in brackets) matches the sum of its immediate subfolders' numbers.
+ * Traverses recursively starting from the provided rootPath.
+ * @param rootPath The directory to start the validation from.
+ */
+export const validateFolderNumbersSum = async (rootPath: string): Promise<FolderValidationReport> => {
+    console.log(`Starting folder count validation for: ${rootPath}`);
+    const report: FolderValidationReport = {
+        rootPath,
+        mismatches: [],
+        missingNumericComponents: [],
+        errors: []
+    };
+    await _validateFolderRecursive(rootPath, report, true);
+    console.log(`Finished folder count validation.`);
+    return report;
+};
+
+const _validateFolderRecursive = async (folderPath: string, report: FolderValidationReport, isRoot: boolean = false) => {
+    try {
+        const folderName = path.basename(folderPath);
+        const { count: expectedCount, found: hasExpectedCount } = extractCountFromNameWithFlag(folderName);
+
+        // Subfolders (non-root) should have a numeric component
+        if (!isRoot && !hasExpectedCount) {
+             report.missingNumericComponents.push(folderPath);
+             console.log(`[WARNING] Folder missing numeric component: ${folderPath}`);
+        }
+
+        const entries = await fsPromise.readdir(folderPath, { withFileTypes: true });
+        const subFolders = entries.filter(e => e.isDirectory());
+
+        if (subFolders.length > 0) {
+            let actualSum = 0;
+            const subFolderCounts: { name: string, count: number, found: boolean }[] = [];
+
+            for (const sub of subFolders) {
+                const { count: subCount, found: subFound } = extractCountFromNameWithFlag(sub.name);
+                actualSum += subCount;
+                subFolderCounts.push({ name: sub.name, count: subCount, found: subFound });
+            }
+
+            // If root has no number, we ignore the mismatch check for the root itself, 
+            // but we still process its subfolders.
+            if (hasExpectedCount || !isRoot) {
+                if (expectedCount !== actualSum) {
+                    report.mismatches.push({
+                        path: folderPath,
+                        folderName,
+                        expectedCount,
+                        actualSum,
+                        subFolders: subFolderCounts
+                    });
+                    console.log(`[MISMATCH] ${folderPath} (Expected: ${expectedCount}, Actual: ${actualSum})`);
+                }
+            }
+
+            // Recurse into subfolders
+            for (const sub of subFolders) {
+                await _validateFolderRecursive(path.join(folderPath, sub.name), report, false);
+            }
+        }
+    } catch (error: any) {
+        report.errors.push({ path: folderPath, message: error.message });
+        console.error(`Error processing folder ${folderPath}: ${error.message}`);
+    }
+};
+
+/**
+ * Extracts the first number found within numeric parentheses. e.g. "Some Folder (10)" -> 10
+ */
+const extractCountFromNameWithFlag = (name: string): { count: number, found: boolean } => {
+    const match = name.match(/\((\d+)\)/);
+    return match ? { count: parseInt(match[1], 10), found: true } : { count: 0, found: false };
+};

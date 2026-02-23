@@ -7,7 +7,7 @@ import { renameAllNonAsciiInFolder } from '../files/renameNonAsciiFiles';
 import { callAksharamukha, DEFAULT_TARGET_SCRIPT_ROMAN_COLLOQUIAL } from '../aksharamukha/convert';
 import { convertJpgsToPdfInAllSubFolders } from '../imgToPdf/jpgToPdf';
 import { multipleTextScriptConversion } from '../services/fileService';
-import { renameFilesViaExcel, renameFilesViaExcelUsingSpecifiedColumns } from '../services/fileUtilsService';
+import { renameFilesViaExcel, renameFilesViaExcelUsingSpecifiedColumns, validateFolderNumbersSum } from '../services/fileUtilsService';
 import { moveFileInListToDest, moveFilesInArray } from '../services/yarnService';
 import { FileMoveTracker } from '../models/FileMoveTracker';
 import { isPDFCorrupted } from '../utils/pdfValidator';
@@ -124,6 +124,22 @@ fileUtilsRoute.post('/findByFileSize', async (req: any, resp: any) => {
     }
 })
 
+fileUtilsRoute.post('/checkIntegrity', async (req: any, resp: any) => {
+    try {
+        const folder = req.body.folder;
+        const result = await validateFolderNumbersSum(folder);
+        resp.status(200).send({
+            response: {
+                ...result,
+                "message": "Integrity check completed"
+            }
+        });
+    }
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})
 
 fileUtilsRoute.post('/moveFilesAsCSVOfAbsPaths', async (req: any, resp: any) => {
     console.log(`moveFilesAsCSVOfAbsPaths ${JSON.stringify(req.body)} `)
