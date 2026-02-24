@@ -1,15 +1,15 @@
 const express = require("express");
 
-import {itemsQueuedRoute} from "./routes/itemsQueued.route";
-import {itemsUsheredRoute} from "./routes/itemsUshered.route";
-import {launchGradleRoute} from "./routes/launchGradle.route";
-import {dailyWorkReportRoute} from "./routes/dailyWorkReport.route";
-import {dailyCatWorkReportRoute} from "./routes/dailyCatWorkReport.route";
-import {uploadCycleRoute} from "./routes/uploadCycle.route";
+import { itemsQueuedRoute } from "./routes/itemsQueued.route";
+import { itemsUsheredRoute } from "./routes/itemsUshered.route";
+import { launchGradleRoute } from "./routes/launchGradle.route";
+import { dailyWorkReportRoute } from "./routes/dailyWorkReport.route";
+import { dailyCatWorkReportRoute } from "./routes/dailyCatWorkReport.route";
+import { uploadCycleRoute } from "./routes/uploadCycle.route";
 import { yarnRoute } from "./routes/yarn.route";
 
-import {userRoute} from "./routes/userRoute.route";
-import {connectToMongo} from "./services/dbService";
+import { userRoute } from "./routes/userRoute.route";
+import { connectToMongo } from "./services/dbService";
 
 import { GLOBAL_DB_NAME } from './db/connection';
 import { dailyQAWorkReportRoute } from "./routes/dailyQAWorkReport.route";
@@ -43,8 +43,8 @@ const args = process.argv.slice(2);
 console.log("Command-line arguments:", ellipsis(args?.join(",")));
 const BODY_PARSER_LIMIT = '100mb';
 
-egangotri.use(express.json({limit: BODY_PARSER_LIMIT}));
-egangotri.use(express.urlencoded({limit: BODY_PARSER_LIMIT, extended: true}));
+egangotri.use(express.json({ limit: BODY_PARSER_LIMIT }));
+egangotri.use(express.urlencoded({ limit: BODY_PARSER_LIMIT, extended: true }));
 
 egangotri.use((req: any, res: any, next: any) => {
   res.append("Access-Control-Allow-Origin", ["*"]);
@@ -102,9 +102,10 @@ async function start() {
   try {
     await connectToMongo(args);
     console.log(`Server - connected to DB, ${new Date()}`);
-    egangotri.listen(port, '0.0.0.0', async () => {
+    const server = egangotri.listen(port, '0.0.0.0', async () => {
       console.log(`Server - deployed ${deployDate} - running at http://${hostname}:${port}/`, new Date());
     });
+    server.timeout = 4 * 60 * 60 * 1000; // 4 hours
   } catch (err) {
     console.error('Failed to start server due to DB connection error:', err);
     process.exit(1);

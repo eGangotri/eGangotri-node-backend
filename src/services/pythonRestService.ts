@@ -1,4 +1,5 @@
 import { PYTHON_SERVER_URL } from "../db/connection";
+import axios from 'axios';
 import { countPDFsInFolder, createFolderIfNotExistsAsync, isValidDirectory } from "../utils/FileUtils";
 import path from 'path';
 import { PythonExtractionResult } from "./types";
@@ -436,21 +437,21 @@ export const runHeaderFooterRemovalInLoop = async (_srcFolders: string[],
 }
 
 const checkPythonServer = async (): Promise<{ status: boolean, message: string }> => {
-    // Check if the server is running
-    const serverCheckResponse = await fetch(PYTHON_SERVER_URL);
-    if (serverCheckResponse?.ok) {
-        console.log('Python server is running');
-        return {
-            status: true,
-            message: 'Python server is running'
+    try {
+        const response = await axios.get(PYTHON_SERVER_URL, { timeout: 5000 });
+        if (response.status === 200) {
+            console.log('Python server is running');
+            return {
+                status: true,
+                message: 'Python server is running'
+            }
         }
-    }
-    else {
+    } catch (e) {
         console.log('Python server is not running');
-        return {
-            status: false,
-            message: 'Python server is not running'
-        }
+    }
+    return {
+        status: false,
+        message: 'Python server is not running'
     }
 };
 
@@ -469,7 +470,7 @@ export interface PythonPostOptions {
 export const executePythonPostCall = async <TData = ExtractionOperationData>(
     body: any,
     resource: string,
-    opts: PythonPostOptions = { timeoutMs: 60 * 60 * 1000, skipPreflight: true }
+    opts: PythonPostOptions = { timeoutMs: 4 * 60 * 60 * 1000, skipPreflight: true }
 ): Promise<PythonPostCallResult<TData>> => {
     try {
         if (!opts?.skipPreflight) {
@@ -491,19 +492,20 @@ export const executePythonPostCall = async <TData = ExtractionOperationData>(
 
 export const pythonPostCallInternal = async <TData = ExtractionOperationData>(body: any, resource: string, opts?: PythonPostOptions): Promise<PythonPostCallResult<TData>> => {
     console.log(`python call ${resource} ${JSON.stringify(body, null, 2)}`)
-    const controller = typeof AbortController !== 'undefined' && opts?.timeoutMs ? new AbortController() : undefined;
-    const timer = controller && opts?.timeoutMs ? setTimeout(() => controller.abort(), opts.timeoutMs) : undefined;
+    const timeout = opts?.timeoutMs || 4 * 60 * 60 * 1000;
+
     try {
-        const response = await fetch(`${PYTHON_SERVER_URL}/${resource}`, {
-            method: 'POST',
+        const response = await axios.post(`${PYTHON_SERVER_URL}/${resource}`, body, {
+            timeout: timeout,
+            maxContentLength: Infinity,
+            maxBodyLength: Infinity,
             headers: {
                 'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(body),
-            ...(controller ? { signal: controller.signal } : {}),
+            }
         });
-        if (response?.ok) {
-            const data = await response.json() as TData;
+
+        if (response.status >= 200 && response.status < 300) {
+            const data = response.data as TData;
             console.log(`data ${JSON.stringify(data, null, 2)}`)
             return {
                 status: true,
@@ -511,31 +513,34 @@ export const pythonPostCallInternal = async <TData = ExtractionOperationData>(bo
                 data
             };
         }
-        try {
-            const errorData = await response.json();
-            console.error(`Error ${response.status} from ${resource}:`, JSON.stringify(errorData, null, 2));
-            return {
-                status: false,
-                message: `Error ${response.status} from ${resource}: ${JSON.stringify(errorData)}`,
-                error: errorData
-            };
-        } catch (e) {
-            const text = await response.text().catch(() => '');
-            console.error(`Error ${response.status} from ${resource}: ${text}`);
-            return {
-                status: false,
-                message: `Error ${response.status} from ${resource}: ${text}`,
-                error: text
-            };
-        }
-    } catch (error) {
-        console.error('Network error in pythonPostCallInternal:', error);
+
         return {
             status: false,
-            message: `Network error calling ${resource}: ${String((error as any)?.message || error)}`,
+            message: `Error ${response.status} from ${resource}`,
+            error: response.data
+        };
+    } catch (error: any) {
+        if (axios.isAxiosError(error)) {
+            const status = error.response?.status;
+            const errorData = error.response?.data;
+            const message = error.code === 'ECONNABORTED'
+                ? `Timeout calling ${resource} after ${timeout}ms`
+                : `Axios error calling ${resource}: ${error.message}`;
+
+            console.error(`Axios Error ${status || ''} from ${resource}:`, errorData || error.message);
+            return {
+                status: false,
+                message,
+                error: errorData || error.message
+            };
+        }
+
+        console.error('Unexpected error in pythonPostCallInternal:', error);
+        return {
+            status: false,
+            message: `Unexpected error calling ${resource}: ${String(error?.message || error)}`,
             error
         };
-    } finally {
-        if (timer) clearTimeout(timer);
     }
-}   
+}
+
