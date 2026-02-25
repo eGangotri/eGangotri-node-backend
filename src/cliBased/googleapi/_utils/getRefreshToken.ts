@@ -101,6 +101,11 @@ export const refreshGdriveToken = async () => {
 
     } catch (err) {
         console.error('Failed to process token.json or update .env', err);
+        console.log(`check if 
+            mongo is running
+            sc query MongoDB
+            if not then from Administrative cmd
+            net start MongoDB`)
     }
 }
 
