@@ -6,7 +6,189 @@ dotenv.config();
 
 export const PDF_METADATA_EXTRACTION_PROMPT_CHAR_LIMIT = 170;
 // Google AI Studio prompt for metadata extraction
-export const PDF_METADATA_EXTRACTION_PROMPT = `The exercise below is to save a pdf with recognizable metadata mostly English, Sanskrit and other languages that use Brahmi based scripts
+export const PDF_METADATA_EXTRACTION_PROMPT = `The exercise below is to save a pdf with recognizable metadata mostly English, Sanskrit and other languages that use Brahmi based scripts and sometimes Urdu.
+
+The output should be only ASCII letters (A-Z, a-z) and numbers (0-9) without exception. 
+No Comma, colon, slashes , diacritics etc should be used.
+
+Conventional English spellings of words in Sanskrit and other languages should be used.
+Dont use Jy for ञ use Gy instead.
+
+--- VISUAL ANALYSIS INSTRUCTIONS ---
+1. MATERIAL & FORMAT ANALYSIS:
+   - Analyze if the image is a Standard Print Book, Lithograph, or Manuscript.
+   - If Manuscript, identify the material:
+     A. "Palm Leaf Manuscript" (Long, narrow strips, horizontal grain, string holes).
+     B. "Birch Bark Manuscript" (Flaky, layered bark texture, brownish).
+     C. "Paper Manuscript" (Handwritten on standard paper).
+   - If Printed Book:
+     A. Check if it is a "Journal" (Look for Vol, Issue, No, Month, or multiple articles).
+     B. Check if it is "Pothi" format (Horizontal loose-leaf).
+     C. Check if it is "Lithograph" (Early printing resembling handwriting).
+
+2. ILLUSTRATION ANALYSIS:
+   - If the document contains even a single painting, miniature, diagram, or distinct geometric Yantra, add "Illustrated" to the Subject field.
+
+3. SCRIPT ANALYSIS:
+   - Identify the primary script.
+   - If a secondary script is present and constitutes more than 5% of the text (e.g., distinct Tika in a different script, or alternating verses), note both scripts.
+
+------------------------------------
+
+Print the following details in Title Case:
+
+Title SubTitle Commentary Commentator Author Editor Translator Language Subject Publication City Year - Publisher in One Line in English only. 
+
+The Hyphen will separate the main text from the Publisher.
+
+If any entry is not visible then just leave it blank. 
+If author/title is not known then instead print Unknown.
+
+--- FIELD FILLING RULES ---
+
+1. SUBJECT FIELD:
+   - Include the broad topic (e.g. Vedanta).
+   - MANDATORY: If it is a manuscript, include the material type identified above (e.g., "Palm Leaf Manuscript", "Birch Bark Manuscript", "Paper Manuscript").
+   - If it is a printed Pothi, add "Pothi".
+   - If it is a printed Lithograph, add "Lithograph".
+   - If it is a Periodical/Magazine, add "Journal".
+   - If visual analysis found art, add "Illustrated".
+   
+   Example Subject Output: "Vedanta Palm Leaf Manuscript Illustrated" or "Ayurveda Journal"
+
+2. LANGUAGE FIELD:
+   - If Language is Sanskrit but script is not Devanagari, add the Script name (e.g. "Sanskrit in Telugu Script").
+   - If MULTIPLE scripts are used (>5% mix), mention both (e.g., "Sanskrit in Devanagari and Sharada Scripts").
+
+3. TITLE/AUTHOR/PUBLISHER LOGIC:
+   - SubTitle is optional only if exists.
+   - Commentary/Commentator (Tika/Tikakar) is optional. If exists, include it.
+   - Editor/Translator: If different from Author, include them.
+   - If book is completely in English, no need to mention language.
+
+   - HYPHEN RULE:
+     - The Hyphen is strictly for the Publisher or Series.
+     - If there is a Publisher, make it the last entry.
+     - If there is NO Publisher, make the Author the last entry preceded by hyphen.
+     - If NO Publisher and NO Author (common in manuscripts), use "Unknown" as the last entry preceded by hyphen.
+     
+   Format Examples:
+   - Print: Title Language Year - Publisher
+   - Manuscript: Title Language Subject Year - Author
+   - No Info: Title Language Subject Year - Unknown
+
+   - If there is a publisher AND title AND author, the title and author should be separated by " By ".
+
+4. MISSING PAGES:
+   - If book seems to miss pages in the beginning (e.g. starts abruptly) or end, add "Missing Pages" before the year or city.
+
+5. CLEANUP:
+   - Output should not exceed ${PDF_METADATA_EXTRACTION_PROMPT_CHAR_LIMIT} characters.
+   - Transliterate Hindi/Sanskrit titles to English (e.g., Kalidas Ka Adhunik...). Do not translate meanings.
+   - Use conventional English spellings (Ram, Shiva).
+   - If Institutional publisher has English and Indian names, use English.
+   - No quotes, no colons.
+   - If words are conjoined (Shishupalavadha), separate them (Shishupala Vadha).But do not violate convention. So Ashtadhyayi stays not Astha Ashyayi.
+   - Ignore pdf-header/footers.
+   - If publisher has address (Penguin India), drop the country/city part from the name.
+
+`;
+
+export const PDF_METADATA_EXTRACTION_PROMPT_OLD2 = `The exercise below is to save a pdf with recognizable metadata mostly English, Sanskrit and other languages that use Brahmi based scripts and sometimes Urdu.
+
+The output should be only ASCII letters (A-Z, a-z) and numbers (0-9) without exception. 
+No Comma, colon, slashes , diacritics etc should be used.
+
+Conventional English spellings of words in Sanskrit and other languages should be used.
+Dont use Jy for ञ use Gy instead.
+
+--- VISUAL ANALYSIS INSTRUCTIONS ---
+1. First, visually analyze the image to determine if it is:
+   - A Standard Printed Book
+   - A Handwritten Manuscript (look for uneven strokes, scribal handwriting, lack of fonts)
+   - A Lithograph (early printing looking like handwriting)
+   - A Pothi (Horizontal loose-leaf format)
+
+2. If it is a Handwritten Manuscript:
+   - Add the word "Manuscript" to the Subject field.
+   - Look for the Title and Author in the first lines (Incipit) or the last lines (Colophon).
+   
+3. If it is a Printed Book but in Pothi format:
+   - Add "Pothi" to the Subject field.
+
+4. If book appears to be Lithograph:
+   - Add "Lithograph" to the Subject field.
+  
+------------------------------------
+
+Print the following details in Title Case:
+
+Title SubTitle Commentary Commentator Author Editor Translator Language Subject Publication City Year - Publisher in One Line in English only. 
+
+The Hyphen will separate the main text from the Publisher.
+
+If any entry is not visible then just leave it blank. 
+If author/title is not known then instead print Unknown.
+
+If the Subject can be broadly guessed like Vedanta, Aesthetics etc it can be included.
+IMPORTANT: If the image is handwritten, "Manuscript" MUST be included in the Subject words.
+
+Make sure to only write the metadata not things like Title: etc.
+
+SubTitle is optional only if exists.
+Commentary/Commentator also called Tika/Tikakar or Vyakhya/Vyakhyakar in Sanskrit is optional.
+If exists then should be included.
+
+Same for Editor Translator.
+
+If book is completely in English then no need to mention language.
+
+If there is no publisher then make the author the last entry preceeded by hyphen. 
+
+So :
+Title Language Year - Author (If print book with no publisher)
+
+If there is a publisher then make the publisher the last entry.
+If there is no publisher then replace it by something like Series.
+Example Kavyamala Series, Choukhamba Sanskrit Series...
+
+Only Author or Publisher or Series can be the last entry and should be preceeded by a hyphen.
+
+Never make title year etc the last entry.
+
+If there is a publisher and there is a title and author , the title and author should be separated by " By ".
+
+If Language is Sanskrit but script is not Devanagari then try to add the Script as well (e.g. Sanskrit in Tamil Script).
+
+If book seem to miss pages in the beginning or in the end add before the year or city or dash the text "Missing Pages". Remember that we will mostly supply the first 15 pages and last 7-10 pages so missing identifies missing from front (like book starting with a preface) or end (not having proper end pages)
+
+If Multiple languages exist such as Sanskrit Original with Translation then add all languages.
+
+If there is a Editor of the Text different from the Author add Editor info.
+
+If Publisher is not available then treat the Press as Publisher.
+
+Output generated should not exceed ${PDF_METADATA_EXTRACTION_PROMPT_CHAR_LIMIT} characters including spaces.
+
+If the original title is in Hindi/Sanskrit, transliterate it to English (e.g., Kalidas Ka Adhunik...).
+Dont translate title into English ever just transliteration.
+
+If any Institutional publisher has two names give preference to the English in the output.
+
+If there are multiple spellings possible in English, give preference to Conventional English spellings (Ram instead of Rama, Shiva instead of Siva).
+
+Dont use any quotes in the result.
+If this is a magazine then include Issue No., Volume No., year...
+
+If the words are in Sanskrit and they are conjoined like Shishupalavadha separate them to Shishupala Vadha.
+
+If the publisher has address info such Penguin India drop the portion that will describe the country.
+
+ignore the pdf-header and pdf-footers.`;
+
+
+
+export const PDF_METADATA_EXTRACTION_PROMPT_OLD = `The exercise below is to save a pdf with recognizable metadata mostly English, Sanskrit and other languages that use Brahmi based scripts
  and sometimes Urdu.
 
 The output should be only ASCII letters (A-Z, a-z) and numbers (0-9) without exception. 
@@ -168,20 +350,6 @@ Dont use any quotes in the the result , example if name is O'Donnell then remove
 
 If a Series is seen example Anand Ashram Series from Pune or Kashmir Series of Text and Studies from Srinagar
 then add it also - including the Series nummber - after Author and hyphen. 
-
-If the Text is a hand-written Manuscript not print then the Word Manuscript should precede the Language in output. If Language is unknown then add Manuscript before the Last dash(-).
-
-If the Text is a Litho print then add Litho before the Language in output.If Language is unknown then add Litho before the last dash(-).
-
-If the Text is printed not hand-written and in Pothi Format then add Pothi Format before the Language in output.If Language is unknown then add Pothi Format before the last dash(-).
-
-In case of two items like litho and Pothi Format need to be added then precedence order shall be Manuscript < Litho < Pothi Format 
-Example:
-Ashtadhyayi Devanagari Manuscript - Panini
-
-OR
-
-Garud Puran Marathi Translation Litho Pothi Format Marathi Pune 1878 - Prabhakar Press
 
 If no author, title, publisher or series is found then return the First Prominent Line written
 
