@@ -138,7 +138,7 @@ If the publisher has address info such Penguin India drop the portion that will 
 
 ignore the pdf-header and pdf-footers which if provided is merely ascribing the custodians or scanning agencies which is irrelevant to our metadata extraction of the book`;
 
-export const SIMPLE_TITLE_AUTHOR_GDRIVE_CP_RENAME_PROMPT_CHAR_LIMIT = 40
+export const SIMPLE_TITLE_AUTHOR_GDRIVE_CP_RENAME_PROMPT_CHAR_LIMIT = 50
 export const SIMPLE_TITLE_AUTHOR_GDRIVE_CP_RENAME_PROMPT = `
 This is an exercise to extract the title and author of the Cover Page of a book saved as a one page pdf/jpeg/png file.
 
@@ -154,6 +154,8 @@ The output should be in the English script only.
 
 The output should be in the format: Title - Author - Language - Series OR Publisher
 
+Author also implies Editor or Translator or Commentator.
+ 
 For Non-English language books the Title should capture the original Title in the English Script no translation
 
 The Language or Script should be in 2 Alphabet ISO 639-1 format.
@@ -167,14 +169,24 @@ Dont use any quotes in the the result , example if name is O'Donnell then remove
 If a Series is seen example Anand Ashram Series from Pune or Kashmir Series of Text and Studies from Srinagar
 then add it also - including the Series nummber - after Author and hyphen. 
 
-But use Acronyms or short forms so AAS or KSTS but KVM for Kavyamala.
+If the Text is a hand-written Manuscript not print then the Word Manuscript should precede the Language in output. If Language is unknown then add Manuscript before the Last dash(-).
 
-If no Series is there then do same for Publisher. If No Publisher then Press but with acronyms 
-So Nirnaya Sagar Press is NSP, Naval Kishore Press is NKP, Motilal Banarsidas is MLBD.
+If the Text is a Litho print then add Litho before the Language in output.If Language is unknown then add Litho before the last dash(-).
+
+If the Text is printed not hand-written and in Pothi Format then add Pothi Format before the Language in output.If Language is unknown then add Pothi Format before the last dash(-).
+
+In case of two items like litho and Pothi Format need to be added then precedence order shall be Manuscript < Litho < Pothi Format 
+Example:
+Ashtadhyayi Devanagari Manuscript - Panini
+
+OR
+
+Garud Puran Marathi Translation Litho Pothi Format Marathi Pune 1878 - Prabhakar Press
+
+If no author, title, publisher or series is found then return the First Prominent Line written
 
 Output generated shount not exceed ${SIMPLE_TITLE_AUTHOR_GDRIVE_CP_RENAME_PROMPT_CHAR_LIMIT} characters including spaces
 
-If no author, title, publisher or series is found then return the First Prominent Line written
 `
 
 /**
