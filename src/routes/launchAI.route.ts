@@ -11,7 +11,7 @@ import { renameOriginalItemsBasedOnMetadata, retryAiRenamerByRunId, reverseMetad
 import { RENAMER_SUFFIX, processOutputSuffixes, aggregateRenamingResults, generateRenamingSummary, performFolderCleanup } from '../utils/launchAIUtils';
 
 export const launchAIRoute = express.Router();
-const activeRequests = new Set();
+const activeAIRenamerRequests = new Set();
 
 //ai/aiRenamer
 launchAIRoute.post('/aiRenamer', async (req: any, resp: any) => {
@@ -30,7 +30,7 @@ launchAIRoute.post('/aiRenamer', async (req: any, resp: any) => {
         }
 
         // Check if there's an active request for this source folder
-        for (const activeSrcFolder of activeRequests) {
+        for (const activeSrcFolder of activeAIRenamerRequests) {
             if (srcFolders.includes(activeSrcFolder)) {
                 return resp.status(400).send({
                     "status": "failed",
@@ -43,7 +43,7 @@ launchAIRoute.post('/aiRenamer', async (req: any, resp: any) => {
         }
 
         // Add source folder to active requests
-        activeRequests.add(srcFolders);
+        activeAIRenamerRequests.add(srcFolders);
 
 
         let outputSuffixes = req?.body?.outputSuffix || RENAMER_SUFFIX;
@@ -99,7 +99,7 @@ launchAIRoute.post('/aiRenamer', async (req: any, resp: any) => {
     }
     finally {
         // Remove source folder from active requests
-        activeRequests.delete(srcFolders);
+        activeAIRenamerRequests.delete(srcFolders);
     }
 })
 

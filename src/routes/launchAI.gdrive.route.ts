@@ -5,27 +5,41 @@ import { renameCPSByLink, RenameCPSByLinkResponse } from '../services/aiServices
 import { GDriveCpRenameHistory, IGDriveCpRenameHistory } from '../models/GDriveCpRenameHistory';
 
 export const launchAIGDriveRoute = express.Router();
+const activeGDriveRequests = new Set();
 
 //ai/renameGDriveCPs
 launchAIGDriveRoute.post('/renameGDriveCPs', async (req: any, resp: any) => {
-    try {
-        const googleDriveLink = req?.body?.googleDriveLink;
-        const ignoreFolder = req?.body?.ignoreFolder || GDRIVE_DEFAULT_IGNORE_FOLDER;
-        console.log(`:downloadFromGoogleDrive:
+    const googleDriveLinks = req?.body?.googleDriveLink;
+    const ignoreFolder = req?.body?.ignoreFolder || GDRIVE_DEFAULT_IGNORE_FOLDER;
+    console.log(`:downloadFromGoogleDrive:
             googleDriveLink:
-             ${googleDriveLink} 
+             ${googleDriveLinks} 
             `)
 
-        if (!googleDriveLink) {
-            return resp.status(400).send({
-                response: {
+    if (!googleDriveLinks) {
+        return resp.status(400).send({
+            response: {
+                "status": "failed",
+                "message": "googleDriveLink and profile are mandatory"
+            }
+        });
+    }
+
+    const links = (googleDriveLinks.includes(",") ? googleDriveLinks.split(",").map((link: string) => link?.trim()) : [googleDriveLinks?.trim()]).filter(Boolean);
+    try {
+        // Check if there's an active request for this source folder
+        for (const activeGDriveLink of activeGDriveRequests) {
+            if (links.includes(activeGDriveLink)) {
+                return resp.status(400).send({
                     "status": "failed",
-                    "message": "googleDriveLink and profile are mandatory"
-                }
-            });
+                    "message": `GDrive link ${activeGDriveLink} is already being processed`
+                });
+            }
         }
 
-        const links = (googleDriveLink.includes(",") ? googleDriveLink.split(",").map((link: string) => link?.trim()) : [googleDriveLink?.trim()]).filter(Boolean);
+        // Add source folder to active requests
+        activeGDriveRequests.add(links);
+
         const megaResult: RenameCPSByLinkResponse[] = []
         const commonRunId: string = randomUUID()
         for (const link of links) {
@@ -55,6 +69,10 @@ launchAIGDriveRoute.post('/renameGDriveCPs', async (req: any, resp: any) => {
     catch (err: any) {
         console.log('Error', err);
         resp.status(400).send(err);
+    }
+    finally {
+        // Remove source folder from active requests
+        activeGDriveRequests.delete(links);
     }
 })
 
