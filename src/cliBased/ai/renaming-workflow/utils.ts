@@ -5,6 +5,7 @@ import axios from 'axios';
 import { GDRIVE_CP_EXTRACTED_METADATA_RES } from "../../../routes/utils";
 import { limitCountAndSanitizeFileNameWithoutExt } from "../../../services/fileUtilsService";
 import path from "path";
+import { CUSTOM_METADATA_EXTRACTION_PROMPT } from "routes/launchAI.route";
 
 
 export function buildPairedPdfs(allPdfs: string[], allReducedPdfs: string[]): PdfPair[] {
@@ -87,12 +88,11 @@ export function convertBufferToBasicEncodedString(
 }
 
 export const processLocalFileForAIRenaming = async (filePath: string, mimeType: string,
-    prompt: string,
     retryCount: number = 0,
     initialDelay: number = 1000): Promise<{ extractedMetadata: string, error: string }> => {
     console.log(`processLocalFileForAIRenaming ${filePath}...`);
     const base64EncodedFile = convertLocalFileToBasicEncodedString(filePath);
-    const _result = await processFileForAIRenaming(base64EncodedFile, mimeType, prompt, retryCount, initialDelay);
+    const _result = await processFileForAIRenaming(base64EncodedFile, mimeType, CUSTOM_METADATA_EXTRACTION_PROMPT, retryCount, initialDelay);
     if (_result.error) {
         return { extractedMetadata: '', error: _result.error + ': ' + filePath };
     }

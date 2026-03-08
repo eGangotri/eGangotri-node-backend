@@ -9,14 +9,20 @@ import { randomUUID } from 'crypto';
 import * as fs from 'fs';
 import { renameOriginalItemsBasedOnMetadata, retryAiRenamerByRunId, reverseMetadataFromOriginalFiles } from '../services/aiServices';
 import { RENAMER_SUFFIX, processOutputSuffixes, aggregateRenamingResults, generateRenamingSummary, performFolderCleanup } from '../utils/launchAIUtils';
+import { PDF_METADATA_EXTRACTION_PROMPT } from '../cliBased/ai/renaming-workflow/constants';
 
 export const launchAIRoute = express.Router();
 const activeAIRenamerRequests = new Set();
+export let CUSTOM_METADATA_EXTRACTION_PROMPT = PDF_METADATA_EXTRACTION_PROMPT;
 
 //ai/aiRenamer
 launchAIRoute.post('/aiRenamer', async (req: any, resp: any) => {
-        const srcFolders = req?.body?.srcFolder;
-        const reducedFolders = req?.body?.reducedFolder || "";
+    const srcFolders = req?.body?.srcFolder;
+    const reducedFolders = req?.body?.reducedFolder || "";
+    if (req?.body?.metadataExtractionPrompt && req?.body?.metadataExtractionPrompt.trim().length > 0) {
+        CUSTOM_METADATA_EXTRACTION_PROMPT = req?.body?.metadataExtractionPrompt;
+    }
+
     try {
 
         if (!reducedFolders && !srcFolders) {
@@ -94,7 +100,7 @@ launchAIRoute.post('/aiRenamer', async (req: any, resp: any) => {
         });
     }
     catch (err: any) {
-        console.log('Error', err);  
+        console.log('Error', err);
         resp.status(400).send(err);
     }
     finally {
@@ -434,3 +440,13 @@ launchAIRoute.get("/getAllTitlePdfRenamedViaAIList", async (req: Request, res: e
         res.status(500).json({ message: "Error fetching pdfTitlePdfRenamedItems", error })
     }
 });
+
+//ai/aiRenamer
+launchAIRoute.post('/getMetadataExtractionPrompt', async (req: any, resp: any) => {
+    resp.status(200).send({
+        "status": "success",
+        response: {
+            PDF_METADATA_EXTRACTION_PROMPT
+        }
+    });
+})
