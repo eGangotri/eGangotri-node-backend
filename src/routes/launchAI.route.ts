@@ -22,7 +22,6 @@ launchAIRoute.post('/aiRenamer', async (req: any, resp: any) => {
     if (req?.body?.metadataExtractionPrompt && req?.body?.metadataExtractionPrompt.trim().length > 0) {
         CUSTOM_METADATA_EXTRACTION_PROMPT = req?.body?.metadataExtractionPrompt;
     }
-
     try {
 
         if (!reducedFolders && !srcFolders) {

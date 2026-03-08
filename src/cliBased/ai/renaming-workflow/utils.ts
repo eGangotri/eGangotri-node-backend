@@ -5,7 +5,7 @@ import axios from 'axios';
 import { GDRIVE_CP_EXTRACTED_METADATA_RES } from "../../../routes/utils";
 import { limitCountAndSanitizeFileNameWithoutExt } from "../../../services/fileUtilsService";
 import path from "path";
-import { CUSTOM_METADATA_EXTRACTION_PROMPT } from "routes/launchAI.route";
+import { CUSTOM_METADATA_EXTRACTION_PROMPT } from "../../../routes/launchAI.route";
 
 
 export function buildPairedPdfs(allPdfs: string[], allReducedPdfs: string[]): PdfPair[] {
