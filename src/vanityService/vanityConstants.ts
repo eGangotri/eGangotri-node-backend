@@ -70,6 +70,32 @@ Besides manuscripts, he also has many rare paintings (60+).<br>
 Collectors and Art/Literature  Lovers can contact him if they wish through his facebook page<br><br>
 Scanning and upload by eGangotri Trust.<br>`
 
+const TEXT_JB = `This PDF you are browsing is in a series of several scanned documents containing 
+ the personal colleciton of Jagannath Bhattarai ji from Kathmandu, Nepal.<br><br>
+ CV:<br><br>
+ Jagannath Bhattarai<br>
+ Date of Birth: 31 December 1960<br>
+ Place of Birth: Kathmandu, Nepal<br>
+ Address: Nagarjun (Ramkot), Kathmandu<br><br>
+ Educational Qualifications<br>
+ Bachelor of Science (B.Sc.) – Major in Biology<br>
+ Master's Degree – Sociology & Anthropology<br>
+ Shastri (Ongoing) – Balmiki Vidyapeeth<br><br>
+ Professional Experience<br>
+ Government School Teacher (Madhyamik Pratham Shreni)<br>
+ Taught at Secondary Level (Madhyamik)<br>
+ Taught at Higher Secondary Level (Uchcha Madhyamik)<br>
+ Served as Head Teacher<br>
+ Led academic and administrative development<br>
+ Strengthened institutional performance and student outcomes<br><br>
+ Areas of Interest<br>
+ Sanskrit Vyakaran<br>
+ Spiritual & Philosophical Studies<br>
+ Educational Leadership<br><br>
+ Digitization by eGangotri Trust<br>
+ Funding by MIDF, New Delhi
+`
+
 const TEXT_SHAIL_GHULATI = `This PDF you are browsing is in a series of several scanned documents containing 
  the personal colleciton of Shailendra Ghulati ji from Jammu.<br>
  CV:<br>
@@ -220,6 +246,13 @@ export const profileVanityTextMap = {
         text: [TEXT_PEERZADA],
         imgFile: "peerzada_forVanity.jpg",
         pdfSuffix: " - Mohd Ashraf Peerzada Collection",
+    },
+    JB: {
+        text: [TEXT_JB],
+        imgFile: "jb.jpg",
+        pdfSuffix: " - Jagannath Bhattarai Collection",
+        fontSize: 16,
+
     },
     "ANISH_MANUS": {
         ...ANISH
