@@ -11,11 +11,13 @@ import { renameOriginalItemsBasedOnMetadata, retryAiRenamerByRunId, reverseMetad
 import { RENAMER_SUFFIX, processOutputSuffixes, aggregateRenamingResults, generateRenamingSummary, performFolderCleanup } from '../utils/launchAIUtils';
 
 export const launchAIRoute = express.Router();
+const activeRequests = new Set();
+
 //ai/aiRenamer
 launchAIRoute.post('/aiRenamer', async (req: any, resp: any) => {
-    try {
         const srcFolders = req?.body?.srcFolder;
         const reducedFolders = req?.body?.reducedFolder || "";
+    try {
 
         if (!reducedFolders && !srcFolders) {
             return resp.status(400).send({
@@ -26,6 +28,22 @@ launchAIRoute.post('/aiRenamer', async (req: any, resp: any) => {
                 }
             });
         }
+
+        // Check if there's an active request for this source folder
+        for (const activeSrcFolder of activeRequests) {
+            if (srcFolders.includes(activeSrcFolder)) {
+                return resp.status(400).send({
+                    "status": "failed",
+                    response: {
+                        "success": false,
+                        "msg": `Request for ${activeSrcFolder} is already in progress. Please wait for it to complete.`
+                    }
+                });
+            }
+        }
+
+        // Add source folder to active requests
+        activeRequests.add(srcFolders);
 
 
         let outputSuffixes = req?.body?.outputSuffix || RENAMER_SUFFIX;
@@ -75,10 +93,13 @@ launchAIRoute.post('/aiRenamer', async (req: any, resp: any) => {
             }
         });
     }
-
     catch (err: any) {
-        console.log('Error', err);
+        console.log('Error', err);  
         resp.status(400).send(err);
+    }
+    finally {
+        // Remove source folder from active requests
+        activeRequests.delete(srcFolders);
     }
 })
 
