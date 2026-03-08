@@ -53,7 +53,7 @@ If author/title is not known then instead print Unknown.
    - If it is a printed Lithograph, add "Lithograph".
    - If it is a Periodical/Magazine, add "Journal".
    - If visual analysis found art, add "Illustrated".
-   
+   - Manuscript overrides Pothi so if Manuscript is identified Pothi should not be used
    Example Subject Output: "Vedanta Palm Leaf Manuscript Illustrated" or "Ayurveda Journal"
 
 2. LANGUAGE FIELD:
