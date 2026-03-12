@@ -4,7 +4,7 @@
 
 import { getAllPDFFiles } from "../../../utils/FileStatsUtils";
 import * as path from 'path';
-import * as fsPromise from 'fs/promises';
+import * as fse from 'fs-extra';
 
 const MAX_FILE_NAME_PERMITTED = 165
 
@@ -15,7 +15,7 @@ let TOTAL_FILE_COUNT = 0;
 async function moveFile(sourcePath: string, destinationPath: string) {
     console.log(`moveFile \n${sourcePath} \n${destinationPath}`);
     try {
-        await fsPromise.rename(sourcePath, destinationPath);
+        await fse.move(sourcePath, destinationPath, { overwrite: true });
         console.log(`File ${destinationPath} moved successfully.`);
         console.log(`File ${destinationPath} moved successfully.`);
         MOVED_FILE_LIST.push(destinationPath)

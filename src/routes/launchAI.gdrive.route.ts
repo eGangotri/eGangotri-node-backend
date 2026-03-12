@@ -3,6 +3,7 @@ import { randomUUID } from 'crypto';
 import { GDRIVE_DEFAULT_IGNORE_FOLDER } from '../services/GDriveService';
 import { renameCPSByLink, RenameCPSByLinkResponse } from '../services/aiServices';
 import { GDriveCpRenameHistory, IGDriveCpRenameHistory } from '../models/GDriveCpRenameHistory';
+import { AIHaltManager } from '../utils/aiHaltManager';
 
 export const launchAIGDriveRoute = express.Router();
 const activeGDriveRequests = new Set();
@@ -73,6 +74,11 @@ launchAIGDriveRoute.post('/renameGDriveCPs', async (req: any, resp: any) => {
     finally {
         // Remove source folder from active requests
         activeGDriveRequests.delete(links);
+        if (Array.isArray(links)) {
+            for (const link of links) {
+                AIHaltManager.clearHalt({ gDriveLink: link });
+            }
+        }
     }
 })
 

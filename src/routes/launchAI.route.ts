@@ -10,6 +10,7 @@ import * as fs from 'fs';
 import { renameOriginalItemsBasedOnMetadata, retryAiRenamerByRunId, reverseMetadataFromOriginalFiles } from '../services/aiServices';
 import { RENAMER_SUFFIX, processOutputSuffixes, aggregateRenamingResults, generateRenamingSummary, performFolderCleanup } from '../utils/launchAIUtils';
 import { PDF_METADATA_EXTRACTION_PROMPT } from '../cliBased/ai/renaming-workflow/constants';
+import { AIHaltManager } from '../utils/aiHaltManager';
 
 export const launchAIRoute = express.Router();
 const activeAIRenamerRequests = new Set();
@@ -105,8 +106,38 @@ launchAIRoute.post('/aiRenamer', async (req: any, resp: any) => {
     finally {
         // Remove source folder from active requests
         activeAIRenamerRequests.delete(srcFolders);
+        // Also clear any folder-specific halt after it completes/fails
+        AIHaltManager.clearHalt({ srcFolder: srcFolders });
     }
 })
+
+launchAIRoute.post('/aiRenameHalt', async (req: Request, res: Response) => {
+    try {
+        const { commonRunId, runId, srcFolder, gDriveLink, all, clear } = req.body;
+
+        if (!commonRunId && !runId && !srcFolder && !gDriveLink && !all) {
+            return res.status(400).json({
+                status: 'failed',
+                message: 'Provide commonRunId, runId, srcFolder, gDriveLink or set all: true to halt/clear.'
+            });
+        }
+
+        if (clear) {
+            AIHaltManager.clearHalt({ commonRunId, runId, srcFolder, gDriveLink, all });
+        } else {
+            AIHaltManager.halt({ commonRunId, runId, srcFolder, gDriveLink, all });
+        }
+
+        return res.status(200).json({
+            status: 'success',
+            message: clear
+                ? (all ? 'All AI renaming process halts cleared' : 'Halt cleared for specified process')
+                : (all ? 'All AI renaming processes halted' : 'Halt signal sent to specified process')
+        });
+    } catch (error: any) {
+        return res.status(500).json({ status: 'failed', message: error.message });
+    }
+});
 
 // ai/aiRenamer retry failed by runId
 launchAIRoute.post('/aiRenamer/:runId', async (req: Request, res: Response) => {

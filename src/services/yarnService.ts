@@ -2,6 +2,7 @@ import { isValidPath, getPathOrSrcRootForProfile } from "../utils/FileUtils";
 import { moveAFile, moveFilesAndFlatten } from "../cliBased/fileMover";
 import { getFolderInDestRootForProfile, getFolderInSrcRootForProfile } from "../archiveUpload/ArchiveProfileUtils";
 import * as fsPromise from 'fs/promises';
+import * as fse from 'fs-extra';
 
 import { getAllFileListingWithStats, getAllPDFFiles, getAllPDFFilesWithMedata } from "../utils/FileStatsUtils";
 import { FileStats } from "../imgToPdf/utils/types";
@@ -192,7 +193,8 @@ export const moveFilesInArray = async (srcPaths: string[], destPaths: string[]) 
 
         try {
             await fsPromise.mkdir(path.dirname(destPath), { recursive: true });
-            await fsPromise.rename(srcPath, destPath);
+            // Use fs-extra move instead of rename as it handles cross-filesystem moves correctly (EXDEV)
+            await fse.move(srcPath, destPath, { overwrite: true });
             results.push({
                 success: true,
                 src: srcPath,

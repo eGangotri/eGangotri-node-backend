@@ -12,6 +12,7 @@ import { isPDFCorrupted } from '../../../utils/pdfValidator';
 import { AI_RENAMING_WORKFLOW_CONFIG, BatchPair, Config, MetadataResult, RenamingResult } from './types';
 import { AI_BATCH_SIZE, AI_DELAY_BETWEEN_BATCHES_MS, AI_DELAY_BETWEEN_CALLS_MS, PDF_VALIDATE_TIMEOUT_MS, sleep } from './constants';
 import { isValidWindowsFileName } from '../../../utils/FileUtils';
+import { AIHaltManager } from '../../../utils/aiHaltManager';
 
 /**
  * Sleep for a specified number of milliseconds
@@ -26,7 +27,7 @@ import { isValidWindowsFileName } from '../../../utils/FileUtils';
  * @param config - Configuration options
  * @returns Array of processing results
  */
-async function processPdfBatch(pdfs: string[], config: Config): Promise<MetadataResult[]> {
+async function processPdfBatch(pdfs: string[], config: Config, haltParams: { commonRunId?: string, runId?: string, srcFolder?: string }): Promise<MetadataResult[]> {
     console.log(`Processing batch of ${pdfs.length} PDFs...`);
 
     const results: MetadataResult[] = [];
@@ -41,6 +42,10 @@ async function processPdfBatch(pdfs: string[], config: Config): Promise<Metadata
             if (i > 0) {
                 // console.log(`Waiting ${delayBetweenCalls / 1000}s for next batch before next API call to avoid rate limits...`);
                 await sleep(delayBetweenCalls);
+            }
+
+            if (AIHaltManager.shouldHalt(haltParams)) {
+                throw new Error(`AI Renaming Halted for ${haltParams.srcFolder || 'current run'}`);
             }
 
             // Validate PDF quickly before sending to AI
@@ -208,13 +213,17 @@ async function persistPerItemDocs(
 async function applyRenamesFromMappedResults(
     mappedResults: Array<{ meta: MetadataResult; reducedFilePath: string }>,
     config: Config,
-    outputFolder: string
+    outputFolder: string,
+    haltParams: { commonRunId?: string, runId?: string, srcFolder?: string }
 ) {
     const _renamingResults: Array<RenamingResult> = [];
     let renamedCount = 0;
     const mappedResultLength = mappedResults.length;
     for (let i = 0; i < mappedResultLength; i++) {
         const item = mappedResults[i];
+        if (AIHaltManager.shouldHalt(haltParams)) {
+            throw new Error(`AI Renaming Halted during rename application for ${haltParams.srcFolder || 'current run'}`);
+        }
         const renamingResultPath = await renamePdfUsingMetadata(item.meta, config, outputFolder);
         const newFilePath = renamingResultPath.newFilePath ?? "N/A";
         if (renamingResultPath.error) {
@@ -259,8 +268,11 @@ async function processAllBatches(
 
     for (let i = 0; i < pairedBatches.length; i++) {
         const pairedBtch = pairedBatches[i];
+        if (AIHaltManager.shouldHalt({ commonRunId, runId, srcFolder: inputFolder })) {
+            throw new Error(`AI Renaming Halted for ${inputFolder}`);
+        }
         console.log(`Processing batch ${i + 1}/${pairedBatches.length}...`);
-        const results = await processPdfBatch(pairedBtch.reducedPdfs, config);
+        const results = await processPdfBatch(pairedBtch.reducedPdfs, config, { commonRunId, runId, srcFolder: inputFolder });
 
         mappedResults.push(...mapBatchResults(pairedBtch, results));
 
@@ -389,7 +401,7 @@ export async function aiRenameTitleUsingReducedFolder(inputFolder: string,
 
         const metadataAggregationNoError = mappedResults.every(m => !m.meta.error);
         const timeBeforeApplyRenames = Date.now();
-        const { _renamingResults, renamedCount, mappedResultLength } = await applyRenamesFromMappedResults(mappedResults, config, outputFolder);
+        const { _renamingResults, renamedCount, mappedResultLength } = await applyRenamesFromMappedResults(mappedResults, config, outputFolder, { commonRunId, runId, srcFolder: inputFolder });
         renamingResults = _renamingResults;
         const timeAfterApplyRenames = Date.now();
         const timeTakenToApplyRenames = timeAfterApplyRenames - timeBeforeApplyRenames;

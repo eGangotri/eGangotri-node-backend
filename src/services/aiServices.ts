@@ -14,6 +14,8 @@ import { PdfTitleAndFileRenamingTrackerViaAI } from "../models/pdfTitleAndFileRe
 import { processWithGoogleAI } from "../cliBased/ai/renaming-workflow/googleAiService";
 import { formatFilename } from "../cliBased/ai/renaming-workflow/utils";
 import { _renameFileByAbsPath } from "./fileUtilsService";
+import * as fse from 'fs-extra';
+import { AIHaltManager } from "../utils/aiHaltManager";
 
 export type RenameCPSByLinkResponse = {
     status?: string,
@@ -56,6 +58,9 @@ export const renameCPSByLink = async (googleDriveLink: string,
 
         const googleDriveDataItem = googleDriveData[i];
         try {
+            if (AIHaltManager.shouldHalt({ commonRunId, runId, gDriveLink: googleDriveLink })) {
+                throw new Error("AI Renaming Halted");
+            }
             if (i > 0) {
                 //console.log(`Waiting ${AI_DELAY_BETWEEN_CALLS_MS / 1000}s for next batch before next API call to avoid rate limits...`);
                 await sleep(AI_DELAY_BETWEEN_CALLS_MS);
@@ -140,7 +145,7 @@ export const renameOriginalItemsBasedOnMetadata = async (pdfTitleRenamedItems: I
             }
             console.log(`Renaming ${index + 1}/${pdfTitleRenamedItems.length}: ${item.originalFilePath} to ${targetPath}`);
             try {
-                await fs.promises.rename(item.originalFilePath, targetPath);
+                await fse.move(item.originalFilePath, targetPath, { overwrite: true });
                 await PdfTitleRenamingViaAITracker.updateOne({ _id: (item as any)._id }, {
                     $set: {
                         newFilePath: targetPath,
@@ -198,6 +203,9 @@ export const retryAiRenamerByRunId = async (runId: string) => {
     const details: Array<{ originalFilePath: string; newFilePath?: string; error?: string }> = [];
     console.log(`Failed Items Count: ${failedItems.length} ${JSON.stringify(failedItems)}`);
     for (const item of failedItems) {
+        if (AIHaltManager.shouldHalt({ runId })) {
+            throw new Error(`AI Renaming Halted for runId ${runId}`);
+        }
         try {
             const result = await processWithGoogleAI(item.reducedFilePath);
             if (result?.extractedMetadata && !result?.error) {
@@ -346,7 +354,7 @@ export const reverseMetadataFromOriginalFiles = async (pdfTitleRenamedItems: IPd
 
             console.log(`Reversing ${index + 1}/${pdfTitleRenamedItems.length}: ${currentPath} back to ${item.originalFilePath}`);
             try {
-                await fs.promises.rename(currentPath, item.originalFilePath);
+                await fse.move(currentPath, item.originalFilePath, { overwrite: true });
                 await PdfTitleRenamingViaAITracker.updateOne({ _id: (item as any)._id }, {
                     $set: {
                         newFilePath: undefined,
