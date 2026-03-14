@@ -42,47 +42,69 @@ export const genLinksAndFolders =
         const _folders = [];
         if (googleDriveLink.includes(",")) {
             const links = googleDriveLink.split(",").map((link: string) => {
-                return link.trim()
+                if (!link.trim().startsWith("http")) {
+                    return `https://drive.google.com/drive/u/0/folders/${link.trim()}`;
+                }
+                else {
+                    return link.trim()
+                }
             })
             _links.push(...links);
 
-            for (let i = 0; i < links.length; i++) {
-                _folders.push(`${folderName}-${i + 1}`);
+            if (folderName.includes(",")) {
+                const _flders = folderName.split(",").map((link: string) => {
+                    return folderName.trim()
+                })
+                _folders.push(..._flders);
+
+                if (links.length !== _folders.length) {
+                    return {
+                        error: `Links Length(${links.length}) not equal to folder length (${_folders.length})`,
+                        _links: [],
+                        _folders: [],
+                    }
+                }
+            }
+            else {
+
+                for (let i = 0; i < links.length; i++) {
+                    _folders.push(`${folderName}-${i + 1}`);
+                }
             }
         }
 
         else {
-            _links.push(googleDriveLink.trim());
+            _links.push(googleDriveLink.startsWith("http") ? googleDriveLink.trim() : `https://drive.google.com/drive/u/0/folders/${googleDriveLink.trim()}`);
             _folders.push(folderName.trim());
         }
 
         // Check if _links contains exclusively non-empty items
         const hasEmptyLinks = _links.some(link => !link || link.trim() === '');
-        
+
         // Check if all folders are valid
         const hasInvalidFolders = _folders.some(folder => !folder || folder.trim() === '');
-        
+
         // Check if links are valid Google Drive links
         const isValidGDriveLink = (link: string): boolean => {
-            return link && link.trim() !== '' && 
-                (link.includes('drive.google.com') || 
-                 link.includes('docs.google.com') || 
-                 link.startsWith('https://'));
+            return link && link.trim() !== '' &&
+                (link.includes('drive.google.com') ||
+                    link.includes('docs.google.com') ||
+                    link.startsWith('https://'));
         };
-        
+
         const hasInvalidLinks = _links.some(link => !isValidGDriveLink(link));
-        
+
         return {
             error: _links.length != _folders.length || hasEmptyLinks || hasInvalidFolders || hasInvalidLinks,
-            message: hasEmptyLinks 
-                ? "Links cannot be empty" 
-                : hasInvalidLinks 
-                ? "Invalid Google Drive links detected" 
-                : hasInvalidFolders 
-                ? "Invalid folder names detected" 
-                : _links.length != _folders.length 
-                ? "Number of links and folders don't match" 
-                : "",
+            message: hasEmptyLinks
+                ? "Links cannot be empty"
+                : hasInvalidLinks
+                    ? "Invalid Google Drive links detected"
+                    : hasInvalidFolders
+                        ? "Invalid folder names detected"
+                        : _links.length != _folders.length
+                            ? "Number of links and folders don't match"
+                            : "",
             _links,
             _folders
         }
