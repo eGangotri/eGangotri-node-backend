@@ -42,6 +42,7 @@
     "moveFilesToProfile": "ts-node ./src/cliBased/fileMover/index",
     "excelToMongoArchive": "ts-node ./src/excelToMongo/transferArchiveExcelToMongo",
     "excelToMongoGDrive": "ts-node ./src/excelToMongo/tranferGDriveExcelToMongo",
+    "excelFolderToMongoGDrive": "ts-node ./src/excelToMongo/uploadAllGDriveExcelsInFolder.ts",
     "aksharamukha": "ts-node ./src/aksharamukha/convert",
     "extractFIPDataFromExcel": "ts-node ./src/_adHoc/fip/extractFIPDataFromExcel",
     "combineFIPExcels": "ts-node ./src/_adHoc/fip/combineFIPExcels",

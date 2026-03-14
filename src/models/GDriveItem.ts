@@ -42,4 +42,7 @@ const schema = new mongoose.Schema(
 // Create a compound unique index on acct and identifier
 schema.index({ identifier: 1 }, { unique: true });
 
+// Add an index on titleGDrive so we can primarily search for this efficiently (Col.2)
+schema.index({ titleGDrive: 1 });
+
 export const GDriveItem = mongoose.model("GDriveItem", schema);
