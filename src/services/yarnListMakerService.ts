@@ -37,11 +37,11 @@ export const pickLatestExcelsAndCombineGDriveAndReducedPdfExcels = async (mainFi
 
 
 export const genLinksAndFolders =
-    (googleDriveLink: string, folderName: string) => {
+    (googleDriveLinks: string, folderNames: string) => {
         const _links = []
         const _folders = [];
-        if (googleDriveLink.includes(",")) {
-            const links = googleDriveLink.split(",").map((link: string) => {
+        if (googleDriveLinks.includes(",")) {
+            const links = googleDriveLinks.split(",").map((link: string) => {
                 if (!link.trim().startsWith("http")) {
                     return `https://drive.google.com/drive/u/0/folders/${link.trim()}`;
                 }
@@ -51,11 +51,11 @@ export const genLinksAndFolders =
             })
             _links.push(...links);
 
-            if (folderName.includes(",")) {
-                const _flders = folderName.split(",").map((link: string) => {
-                    return folderName.trim()
+            if (folderNames.includes(",")) {
+                const folders = folderNames.split(",").map((folder: string) => {
+                    return folder.trim()
                 })
-                _folders.push(..._flders);
+                _folders.push(...folders);
 
                 if (links.length !== _folders.length) {
                     return {
@@ -66,16 +66,15 @@ export const genLinksAndFolders =
                 }
             }
             else {
-
                 for (let i = 0; i < links.length; i++) {
-                    _folders.push(`${folderName}-${i + 1}`);
+                    _folders.push(`${folderNames}-${i + 1}`);
                 }
             }
         }
 
         else {
-            _links.push(googleDriveLink.startsWith("http") ? googleDriveLink.trim() : `https://drive.google.com/drive/u/0/folders/${googleDriveLink.trim()}`);
-            _folders.push(folderName.trim());
+            _links.push(googleDriveLinks.startsWith("http") ? googleDriveLinks.trim() : `https://drive.google.com/drive/u/0/folders/${googleDriveLinks.trim()}`);
+            _folders.push(folderNames.trim());
         }
 
         // Check if _links contains exclusively non-empty items

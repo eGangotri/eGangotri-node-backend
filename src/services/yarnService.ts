@@ -368,7 +368,7 @@ const createMetadataSummary = (totalFileCount: number, totalPageCount: number, t
 
 async function createFileName(pdfsOnly: boolean, fileCount: number, folderBase: string, ext: string) {
     const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT) + "_HOURS"
-    const fileName = `${folderBase}_MegaList_${pdfsOnly ? 'pdfs_only' : 'all_files'}-${fileCount}Items-${timeComponent}.${ext}`;
+    const fileName = `${folderBase}_MegaList_${pdfsOnly ? 'pdfs_only' : 'all_files'}-${fileCount}-Items-${timeComponent}.${ext}`;
     const filePath = `${_root}\\${folderBase}`;
     try {
         await fsPromise.access(filePath);
