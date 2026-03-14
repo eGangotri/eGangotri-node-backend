@@ -13,7 +13,7 @@ import { GDriveExcelData } from "../cliBased/googleapi/types";
 import { createFolderIfNotExistsAsync } from "../utils/FileUtils";
 
 export async function getListOfGDriveItems(queryOptions: GDriveItemListOptionsType) {
-  const { limit, mongoOptionsFilter } = setOptionsForGDriveListing(queryOptions)
+  const { limit, mongoOptionsFilter } =  setOptionsForGDriveListing(queryOptions)
   const items = await GDriveItem.find(mongoOptionsFilter)
     .sort({ createdAt: -1 })
     .limit(limit);

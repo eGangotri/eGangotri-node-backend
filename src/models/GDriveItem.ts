@@ -2,17 +2,17 @@ import * as mongoose from "mongoose";
 
 const schema = new mongoose.Schema(
     {
-        serialNo: { type: String, required: true },
+        serialNo: { type: mongoose.Schema.Types.Mixed, required: true },
         titleGDrive: { type: String, required: true },
         gDriveLink: { type: String, required: true },
-        truncFileLink: { type: String, required: true },
+        truncFileLink: { type: String, required: false },
         sizeWithUnits: { type: String, required: true },
         sizeInBytes: { type: String, required: true },
         folderName: { type: String, required: true },
         createdTime: { type: String, required: true },
         source: { type: String, required: true },
         identifier: { type: String, required: true },
-        identifierTruncFile: { type: String, required: true },
+        identifierTruncFile: { type: String, required: false },
         thumbnail: { type: String, required: false },
         titleOriginalScript: { type: String, required: false },
         textType: { type: String, required: false },
