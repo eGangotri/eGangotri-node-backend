@@ -4,37 +4,20 @@ import { GoogleDriveExcelHeaderToJSONMAPPING, printMongoTransactions, replaceExc
 import { GDriveItem } from '../models/GDriveItem';
 import path from 'path';
 import { getLatestExcelFile } from '../utils/utils';
+import { FOR_UPLOAD_CONFIG } from '../uploadToArchive/config';
 
-const transformExcelToJSON = async (pathToExcel: string, source: string) => {
+const transformGDriveExcelToJSON = async (pathToExcel: string) => {
     // Read the Excel file
     const workbook = readFile(pathToExcel);
     const sheetNameList = workbook.SheetNames;
     const data = utils.sheet_to_json(workbook.Sheets[sheetNameList[0]]);
-    const newData = replaceExcelHeadersWithJsonKeysForGDriveItem(data, GoogleDriveExcelHeaderToJSONMAPPING, source);
+    const newData = replaceExcelHeadersWithJsonKeysForGDriveItem(data, GoogleDriveExcelHeaderToJSONMAPPING);
     console.log(`transformExcelToJSON (${newData?.length}) items  ${JSON.stringify(newData[0])}`);
     return newData;
 }
 
 async function excelJsonToMongo(newData: {}[]) {
     const operations = newData.map((document, index) => {
-        // const expectedFields = ['serialNo', 'titleGDrive', 'gDriveLink',
-        // 'truncFileLink','sizeWithUnits','sizeInBytes','folderName','createdTime','source','identifier',
-        // 'identifierTruncFile'
-
-        // ]; // Replace with your actual field names
-
-        // Add your validation checks here. For example:
-        // const missingFields = expectedFields.filter(field => !(field in document));
-
-        // if (missingFields.length > 0) {
-        //     console.error(`Document at index ${index} is missing the following fields: ${missingFields.join(', ')}`);
-        //     console.error('Document:', JSON.stringify(document, null, 2));
-        //     return null;
-        // }
-        // if (!document['requiredField']) {
-        //     console.error(`Document at index ${index} is missing requiredField:`, JSON.stringify(document, null, 2));
-        //     return null;
-        // }
         return {
             insertOne: {
                 document
@@ -81,12 +64,12 @@ export async function gDriveExceltoMongo(directoryPathOrExcel: string) {
             gDriveExcel = latest.latestFilePath
         }
 
-        await connectToMongo(["forUpload"]);
+        await connectToMongo([FOR_UPLOAD_CONFIG]);
         if (path.extname(gDriveExcel) === '.xlsx') {
             const dirPath = path.dirname(gDriveExcel);
             const rootFolder = path.basename(dirPath);
             console.log(` processing ${rootFolder} for ${gDriveExcel}`);
-            const newData = await transformExcelToJSON(gDriveExcel, rootFolder)
+            const newData = await transformGDriveExcelToJSON(gDriveExcel)
             results = await excelJsonToMongo(newData);
             return {
                 ...results,
@@ -106,7 +89,7 @@ export async function gDriveExceltoMongo(directoryPathOrExcel: string) {
 
 export async function deleteRowsBySource(sources: string[]) {
     try {
-        await connectToMongo(["forUpload"]);
+        await connectToMongo([FOR_UPLOAD_CONFIG]);
         const result = await GDriveItem.deleteMany({ source: { $in: sources } });
         console.log(`${result?.deletedCount} document(s) were deleted.`);
         printMongoTransactions(result);

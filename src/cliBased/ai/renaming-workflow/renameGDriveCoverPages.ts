@@ -53,7 +53,9 @@ export async function renameDriveFileByLink(
   const ext = path.extname(extractedMetadata) || '';
   if (extractedMetadata.length - ext.length > 3) {
     extractedMetadata = limitCountAndSanitizeFileNameWithoutExt(extractedMetadata, SIMPLE_TITLE_AUTHOR_GDRIVE_CP_RENAME_PROMPT_CHAR_LIMIT);
-    console.log(`Gdrive CP renamed to ${oldName} to ${extractedMetadata}`);
+    console.log(`Gdrive CP renamed from 
+      "${oldName}" to 
+      "${extractedMetadata}"`);
     await drive.files.update({
       fileId,
       requestBody: { name: extractedMetadata },

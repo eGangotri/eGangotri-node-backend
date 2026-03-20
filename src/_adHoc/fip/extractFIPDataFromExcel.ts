@@ -3,8 +3,8 @@ import { aksharamukhaIastToRomanColloquial } from '../../aksharamukha/convert';
 import * as _ from 'lodash';
 import { jsonToExcel } from '../../cliBased/excel/ExcelUtils';
 
-const transformExcelToJSON = async (pathToExcel: string) => {
-    console.log(`transformExcelToJSON ${pathToExcel}`);
+const transformFIPExcelToJSON = async (pathToExcel: string) => {
+    console.log(`transformFIPExcelToJSON ${pathToExcel}`);
     // Read the Excel file
     const workbook = readFile(pathToExcel);
     const sheetNameList = workbook.SheetNames;
@@ -12,7 +12,7 @@ const transformExcelToJSON = async (pathToExcel: string) => {
     const nonEmptyData = data?.filter((x: FIPJSonTypes) => x?.serialNo != undefined && x?.serialNo != "");
     const newData = await sanitizeJson(nonEmptyData);
     console.log(`(${data?.length})NonEmpty[${nonEmptyData.length}] = ${newData?.length}`);
-    console.log(`transformExcelToJSON  items  ${JSON.stringify(newData[0])}`);
+    console.log(`transformFIPExcelToJSON  items  ${JSON.stringify(newData[0])}`);
     const _pathToGeneratedExcel = pathToExcel.replace(".xlsx", "-sanitized-2.xlsx");
     jsonToExcel(newData, _pathToGeneratedExcel)
     console.log(`Dumping Data to New Excel: ${_pathToGeneratedExcel}`);
@@ -73,4 +73,4 @@ async function sanitizeJson(data: FIPJSonTypes[]) {
 }
 
 //pnpm run extractFIPDataFromExcel 
-transformExcelToJSON("D:\\FIP\\_IFP\\_IFP\\IFP Handlist Unicode.xlsx");
+transformFIPExcelToJSON("D:\\FIP\\_IFP\\_IFP\\IFP Handlist Unicode.xlsx");

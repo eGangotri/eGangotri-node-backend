@@ -6,13 +6,14 @@ import * as fsPromise from 'fs/promises';
 import path from 'path';
 import os from "os";
 import { getCountArchiveItems } from '../services/archiveItemService';
+import { FOR_UPLOAD_CONFIG } from '../uploadToArchive/config';
 
-const transformExcelToJSON = async (pathToExcel: string, source: string) => {
+const transformArchiveExcelToJSON = async (pathToExcel: string) => {
     // Read the Excel file
     const workbook = readFile(pathToExcel);
     const sheetNameList = workbook.SheetNames;
     const data = utils.sheet_to_json(workbook.Sheets[sheetNameList[0]]);
-    const newData = replaceExcelHeadersWithJsonKeysForArchiveItem(data, ArchiveExcelHeaderToJSONMAPPING, source)
+    const newData = replaceExcelHeadersWithJsonKeysForArchiveItem(data, ArchiveExcelHeaderToJSONMAPPING)
     console.log(`started inserting newData (${newData?.length}) into mongo`);
     return newData;
 }
@@ -48,10 +49,10 @@ async function excelJsonToMongo(newData: {}[]) {
  * @returns 
  */
 export async function archiveExceltoMongo(directoryPathOrExcel: string, source: string = "") {
-    await connectToMongo(["forUpload"]);
+    await connectToMongo([FOR_UPLOAD_CONFIG]);
     try {
         if (directoryPathOrExcel.endsWith(".xlsx")) {
-            const newData = await transformExcelToJSON(directoryPathOrExcel, source);
+            const newData = await transformArchiveExcelToJSON(directoryPathOrExcel);
             await excelJsonToMongo(newData);
             const { count, acct } = await archiveExcelToMongoCheckReport(newData);
             return {
@@ -69,7 +70,7 @@ export async function archiveExceltoMongo(directoryPathOrExcel: string, source: 
                     excelCount++;
                     const filePath = path.join(directoryPathOrExcel, file)
                     console.log(` processing ${rootFolderAsSource} : ${path.join(directoryPathOrExcel, file)}`);
-                    const newData = await transformExcelToJSON(filePath, rootFolderAsSource)
+                    const newData = await transformArchiveExcelToJSON(filePath)
                     await excelJsonToMongo(newData);
                     resultMap.push(await archiveExcelToMongoCheckReport(newData));
                 }
@@ -105,7 +106,7 @@ async function archiveExcelToMongoCheckReport(newData: {}[]) {
 
 export async function deleteRowsByAccts(accts: string[]) {
     try {
-        connectToMongo(["forUpload"]).then(async () => {
+        connectToMongo([FOR_UPLOAD_CONFIG]).then(async () => {
             const result = await ArchiveItem.deleteMany({ acct: { $in: accts } });
             console.log(`${result?.deletedCount} document(s) were deleted.`);
             printMongoTransactions(result);

@@ -1,5 +1,6 @@
 import * as dotenv from 'dotenv' // see https://github.com/motdotla/dotenv#how-do-i-use-dotenv-with-import
 import * as _ from 'lodash';
+import { FOR_UPLOAD_CONFIG } from '../uploadToArchive/config';
 dotenv.config()
 const CONFS = process.env
 
@@ -8,7 +9,7 @@ export const GLOBAL_SERVER_NAME = `${CONFS.NODE_BACKEND_SERVER}:${CONFS.NODE_SER
 export const PYTHON_SERVER_URL = `${CONFS.PYTHON_BACKEND_SERVER}:${CONFS.PYTHON_SERVER_PORT}`;
 
 export const mongoDbUrlWithDbName = (dbName: string) => {
-    if (dbName === "forUpload") {
+    if (dbName === FOR_UPLOAD_CONFIG) {
         GLOBAL_DB_NAME = CONFS.MONGO_DB_NAME_FOR_UPLOAD || ""
     }
     else {

@@ -53,9 +53,11 @@ export const GoogleDriveExcelHeaderToJSONMAPPING = {
     "Created Time": 'createdTime',
 }
 
-const replaceExcelHeadersWithJsonKeys = (data: Object[], mapping: Object, source: string = "") => {
+const replaceExcelHeadersWithJsonKeys = (data: Object[], mapping: Object,
+    source: string = "") => {
     const jsonObj = data.map((row: Object) => {
         const newRow = {};
+        let _source = "";
         Object.keys(row).forEach((key) => {
             const dataRowKeyCorrespondingValue = row[key]
             const jsonHeader = mapping[key]
@@ -79,25 +81,30 @@ const replaceExcelHeadersWithJsonKeys = (data: Object[], mapping: Object, source
             if (jsonHeader === 'truncFileLink') {
                 newRow["identifierTruncFile"] = extractGoogleDriveId(dataRowKeyCorrespondingValue);
             }
+            if (jsonHeader === 'folderName') {
+                const firstElement = dataRowKeyCorrespondingValue?.split(/[\\/]/)[0];
+                newRow["source"] = firstElement;
+            }
+            if (jsonHeader === 'acct') {
+                _source = dataRowKeyCorrespondingValue;
+            }
         });
-        if (source.length > 0) {
-            newRow["source"] = source;
-        }
         return newRow;
     });
     return jsonObj
 }
 
-export const replaceExcelHeadersWithJsonKeysForArchiveItem = (data: Object[], mapping: Object, source: string) => {
-    const jsonObj = replaceExcelHeadersWithJsonKeys(data, mapping, source)
+export const replaceExcelHeadersWithJsonKeysForArchiveItem = (data: Object[],
+    mapping: Object) => {
+    const jsonObj = replaceExcelHeadersWithJsonKeys(data, mapping)
     return jsonObj.filter((row: Object) => {
         return row['serialNo'] !== "" || row['originalTitle'] !== "";
     });
 }
 
 
-export const replaceExcelHeadersWithJsonKeysForGDriveItem = (data: Object[], mapping: Object, source: string) => {
-    const jsonObj = replaceExcelHeadersWithJsonKeys(data, mapping, source)
+export const replaceExcelHeadersWithJsonKeysForGDriveItem = (data: Object[], mapping: Object) => {
+    const jsonObj = replaceExcelHeadersWithJsonKeys(data, mapping)
     return jsonObj.filter((row: Object) => {
         return row['serialNo'] !== "" || row['gDriveLink'] !== "";
     });

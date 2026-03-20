@@ -1,6 +1,5 @@
 import { UploadConfig } from './types';
 import dotenv from 'dotenv';
-import path from 'path';
 
 dotenv.config();
 
@@ -25,3 +24,6 @@ export const SELECTORS = {
 
 export const ARCHIVE_LOGIN_URL = 'https://archive.org/account/login';
 export const ARCHIVE_UPLOAD_URL = 'https://archive.org/upload/';
+
+//process.env.FOR_UPLOAD use something like above instead of hard-coding
+export const FOR_UPLOAD_CONFIG = "forUpload"
