@@ -95,7 +95,7 @@ const getPerSource = async (req: any, resp: any) => {
     }
 
     const source = req.params.value || "";
-    const searchTerm = req.params.searchTerm || "";
+    const searchTerm = req.query.searchTerm || req.body.searchTerm || "";
     let _options: GDriveItemListOptionsType = {
         // page, 
         limit,
@@ -116,7 +116,7 @@ const getPerSource = async (req: any, resp: any) => {
     }
     try {
         const _gDriveItemsList = await getListOfGDriveItems(_options);
-        console.log(`_resp(${JSON.stringify(_options)}): ${JSON.stringify(_gDriveItemsList?.length>0?_gDriveItemsList[0]:{})}`);
+        console.log(`_resp(${JSON.stringify(_options)}): ${JSON.stringify(_gDriveItemsList?.length > 0 ? _gDriveItemsList[0] : {})}`);
         if (!_gDriveItemsList || _gDriveItemsList.length === 0) {
             resp.status(200).send({
                 response: {
