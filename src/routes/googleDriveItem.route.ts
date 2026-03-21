@@ -85,9 +85,17 @@ googleDriveItemRoute.post('/getPerSource/', async (req: any, resp: any) => {
 })
 
 const getPerSource = async (req: any, resp: any) => {
-    console.log(`getPerSource:`, req.params.value);
-    const { page = 1, limit = 10, sortField = "createdTime", sortOrder = "asc" } = req.body;
+    console.log(`getPerSource: ${JSON.stringify(req.params)}`, req.params.value);
+    let { page = 1, limit = 10,
+        sortField = "createdTime",
+        sortOrder = "asc",
+    } = req.body;
+    if (limit > 5000) {
+        limit = 5000
+    }
+
     const source = req.params.value || "";
+    const searchTerm = req.params.searchTerm || "";
     let _options: GDriveItemListOptionsType = {
         // page, 
         limit,
@@ -97,12 +105,18 @@ const getPerSource = async (req: any, resp: any) => {
     if (source) {
         _options = {
             ..._options,
-            source: source
+            source
+        }
+    }
+    if (searchTerm) {
+        _options = {
+            ..._options,
+            searchTerm
         }
     }
     try {
         const _gDriveItemsList = await getListOfGDriveItems(_options);
-        console.log(`_resp: ${JSON.stringify(_gDriveItemsList[0])}`);
+        console.log(`_resp(${JSON.stringify(_options)}): ${JSON.stringify(_gDriveItemsList?.length>0?_gDriveItemsList[0]:{})}`);
         if (!_gDriveItemsList || _gDriveItemsList.length === 0) {
             resp.status(200).send({
                 response: {
@@ -123,6 +137,7 @@ const getPerSource = async (req: any, resp: any) => {
         resp.status(400).send(err);
     }
 }
+
 googleDriveItemRoute.get('/gdriveDBAggregatedBySource', async (req: any, resp: any) => {
     console.log(`gdriveDBAggregatedBySource:`);
 
