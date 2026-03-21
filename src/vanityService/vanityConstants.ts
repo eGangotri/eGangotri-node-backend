@@ -240,6 +240,12 @@ const ANISH = {
     nthPageToUseAsDimensions: 2,
 }
 
+const BHATTARAI = {
+    text: [TEXT_JB],
+    imgFile: "..\\jb.jpg",
+    fontSize: 16,
+}
+
 //must match Profile Name
 export const profileVanityTextMap = {
     "PZ": {
@@ -247,13 +253,14 @@ export const profileVanityTextMap = {
         imgFile: "peerzada_forVanity.jpg",
         pdfSuffix: " - Mohd Ashraf Peerzada Collection",
     },
-    JB: {
-        text: [TEXT_JB],
-        imgFile: "jb.jpg",
+    BHATTARAI: {
+        ...BHATTARAI,
         pdfSuffix: " - Jagannath Bhattarai Collection",
-        fontSize: 16,
-
     },
+    BHATTARAI_BOOKS: {
+        ...BHATTARAI,
+    },
+
     "ANISH_MANUS": {
         ...ANISH
     },

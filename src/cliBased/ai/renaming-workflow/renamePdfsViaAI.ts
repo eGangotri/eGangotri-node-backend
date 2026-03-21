@@ -224,6 +224,7 @@ async function applyRenamesFromMappedResults(
         if (AIHaltManager.shouldHalt(haltParams)) {
             throw new Error(`AI Renaming Halted during rename application for ${haltParams.srcFolder || 'current run'}`);
         }
+        console.log(`(${i + 1}/${mappedResultLength}). Applying rename for ${item.meta.fileName}`);
         const renamingResultPath = await renamePdfUsingMetadata(item.meta, config, outputFolder);
         const newFilePath = renamingResultPath.newFilePath ?? "N/A";
         if (renamingResultPath.error) {
@@ -296,6 +297,36 @@ async function processAllBatches(
     return { mappedResults, processedCount, successCount };
 }
 
+function getMismatchErrorMsg(allPdfs: string[], allReducedPdfs: string[], config: Config) {
+    const relPdfs = allPdfs.map(f => path.relative(config.inputFolder, f));
+    const relReducedPdfs = allReducedPdfs.map(f => path.relative(config.reducedFolder, f));
+    const missingInReduced = relPdfs.filter(orig => {
+        const baseOrig = orig.trim().toLowerCase().replace(/\.pdf$/i, '');
+        return !relReducedPdfs.some(red => red.trim().toLowerCase().startsWith(baseOrig));
+    });
+    const missingInOriginals = relReducedPdfs.filter(red => {
+        const lowerRed = red.trim().toLowerCase();
+        return !relPdfs.some(orig => {
+            const baseOrig = orig.trim().toLowerCase().replace(/\.pdf$/i, '');
+            return lowerRed.startsWith(baseOrig);
+        });
+    });
+
+    let missingLog = "";
+    if (missingInReduced.length > 0) {
+        missingLog += `\nMissing in Reduced folder (${missingInReduced.length}):\n` + missingInReduced.join("\n");
+    }
+    if (missingInOriginals.length > 0) {
+        missingLog += `\nMissing in Original folder (${missingInOriginals.length}):\n` + missingInOriginals.join("\n");
+    }
+
+    return {
+        errorMsg: `Mismatched file counts! Originals: ${allPdfs.length}, Reduced: ${allReducedPdfs.length}`,
+        missingLog
+    };
+}
+
+
 export async function aiRenameTitleUsingReducedFolder(inputFolder: string,
     reducedFolder: string,
     outputSuffix: string = "-renamer", commonRunId: string) {
@@ -345,37 +376,13 @@ export async function aiRenameTitleUsingReducedFolder(inputFolder: string,
         const allReducedPdfs = sortPdfs(allReducedPdfsRaw, config.reducedFolder);
 
         if (allPdfs.length !== allReducedPdfs.length) {
-            const errorMsg = `Mismatched file counts! Originals: ${allPdfs.length}, Reduced: ${allReducedPdfs.length}`;
-            console.error(errorMsg);
+            const errorMsg = getMismatchErrorMsg(allPdfs, allReducedPdfs, config);
+            console.error(JSON.stringify(errorMsg));
             return {
-                processedCount,
-                successCount,
-                failedCount: 0,
-                errorCount: 1,
-                pairedBatches: [],
-                error: errorMsg,
+                ...errorMsg,
                 success: false
             }
         }
-
-        // // Validate pairing (basenames should match)
-        // for (let i = 0; i < allPdfs.length; i++) {
-        //     const relOrg = path.relative(config.inputFolder, allPdfs[i]);
-        //     const relRed = path.relative(config.reducedFolder, allReducedPdfs[i]);
-        //     if (relOrg !== relRed) {
-        //         const errorMsg = `Pairing mismatch at index ${i}: \nOrg: ${relOrg}\nRed: ${relRed}`;
-        //         console.error(errorMsg);
-        //         return {
-        //             processedCount,
-        //             successCount,
-        //             failedCount: 0,
-        //             errorCount: 1,
-        //             pairedBatches: [],
-        //             error: errorMsg,
-        //             success: false
-        //         }
-        //     }
-        // }
 
         // Process PDFs in batches
         const batches = chunk(allPdfs, config.batchSize);
