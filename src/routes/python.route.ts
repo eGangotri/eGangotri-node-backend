@@ -10,8 +10,56 @@ import { randomUUID } from 'crypto';
 import { anyPdfCorruptedQuick } from '../services/pdfValidationService';
 import { saveMergeMultiplePdfTracker, getCommonRuns, getByCommonRun } from '../services/mergeMultiplePdfTrackerService';
 import { ConvertData } from './types';
+import { findFoldersWithTrailingSpaces } from '../utils/FileStatsUtils';
 
 export const pythonRoute = express.Router();
+
+async function validatePathsForTrailingSpaces(pathsToCheck: string[]): Promise<string[]> {
+    const offendingPaths = new Set<string>();
+    for (const p of pathsToCheck) {
+        if (!p) continue;
+
+        const normalized = path.normalize(p.trim());
+        const parts = normalized.split(path.sep);
+        let builtPath = '';
+        for (const part of parts) {
+            // Because split returns the exact string between separators, we can check for space at the end
+            // wait: if it's "C:", "C:/", split behaves like ["C:"].
+            // Windows path sep is '\'.
+            builtPath = builtPath ? builtPath + path.sep + part : part;
+            // A part could be "china "
+            if (part && part.endsWith(' ') && part.trim().length > 0) {
+                offendingPaths.add(builtPath);
+            }
+        }
+
+        try {
+            const stat = await fs.stat(normalized);
+            if (stat.isDirectory()) {
+                const subErrors = await findFoldersWithTrailingSpaces(normalized);
+                for (const err of subErrors) {
+                    offendingPaths.add(err);
+                }
+            }
+        } catch (e) {
+            // ignore
+        }
+    }
+    return Array.from(offendingPaths);
+}
+
+pythonRoute.post('/checkFoldersForTrailingSpaces', async (req: any, resp: any) => {
+    try {
+        const { folders } = req.body;
+        if (!folders || !Array.isArray(folders)) {
+            return resp.status(400).send({ response: { success: false, msg: "Please provide an array of folders" } });
+        }
+        const issues = await validatePathsForTrailingSpaces(folders);
+        resp.status(200).send({ response: { success: true, offendingPaths: issues } });
+    } catch (err: any) {
+        resp.status(400).send(err);
+    }
+});
 
 export interface MergePdfsBody {
     [key: string]: unknown;
@@ -58,6 +106,18 @@ pythonRoute.post('/getFirstAndLastNPages', async (req: any, resp: any) => {
         console.log(`getFirstAndLastNPages _folders(${_srcFolders.length}) ${_srcFolders} 
         ${_destRootFolders.length}  ${destRootFolderAsCSV}
         ${firstNPages}/${lastNPages}`)
+
+        const offendingPaths = await validatePathsForTrailingSpaces(_srcFolders);
+        if (offendingPaths.length > 0) {
+            return resp.status(400).send({
+                response: {
+                    status: "failed",
+                    success: false,
+                    msg: `Found folders with trailing spaces: ${offendingPaths.length}`,
+                    offendingPaths: offendingPaths.map((p: string) => "• " + p.trim() + "\n")
+                }
+            });
+        }
 
         if (!srcFoldersAsCSV || !destRootFolderAsCSV) {
             resp.status(400).send({
@@ -165,6 +225,19 @@ pythonRoute.post('/copyAllPdfs', async (req: any, resp: any) => {
             });
             return;
         }
+
+        const offendingPaths = await validatePathsForTrailingSpaces(_srcFolders);
+        if (offendingPaths.length > 0) {
+            return resp.status(400).send({
+                response: {
+                    status: "failed",
+                    success: false,
+                    msg: `Found folders with trailing spaces: ${offendingPaths.length}`,
+                    offendingPaths: offendingPaths.map((p: string) => "• " + p.trim() + "\n")
+                }
+            });
+        }
+
         const combinedResults = await runPythonCopyPdfInLoop(_srcFolders, destRootFolder);
 
         const resultsAtAGlance = combinedResults.reduce((acc, curr: any) => {
@@ -227,6 +300,19 @@ pythonRoute.post('/convert-img-folder-to-pdf', async (req: any, resp: any) => {
             return;
         }
         console.log(`convert-img-folder-to-pdf  ${srcFolders.length} src_folders for img_type ${img_type}`);
+
+        const offendingPaths = await validatePathsForTrailingSpaces(srcFolders);
+        if (offendingPaths.length > 0) {
+            return resp.status(400).send({
+                response: {
+                    status: "failed",
+                    success: false,
+                    msg: `Found folders with trailing spaces: ${offendingPaths.length}`,
+                    offendingPaths: offendingPaths.map((p: string) => "• " + p.trim() + "\n")
+                }
+            });
+        }
+
         const result: PythonPostCallResult<ConvertData>[] = []
         const commonRunId = randomUUID();
         for (let i = 0; i < srcFolders.length; i++) {
@@ -276,6 +362,19 @@ pythonRoute.post('/verfiyImgtoPdf', async (req: any, resp: any) => {
             return;
         }
         console.log(`verfiyImgtoPdf folder_path ${src_folder} img_type ${img_type}`);
+
+        const offendingPaths = await validatePathsForTrailingSpaces([src_folder]);
+        if (offendingPaths.length > 0) {
+            return resp.status(400).send({
+                response: {
+                    status: "failed",
+                    success: false,
+                    msg: `Found folders with trailing spaces: ${offendingPaths.length}`,
+                    offendingPaths: offendingPaths.map((p: string) => "• " + p.trim() + "\n")
+                }
+            });
+        }
+
         const _resp = await executePythonPostCall({
             "src_folder": src_folder,
             "dest_folder": dest_folder,
@@ -379,6 +478,28 @@ pythonRoute.post('/mergeMutliplePdfs', async (req: any, resp: any) => {
             });
             return;
         }
+
+        // Just check the root directories of all these pdfs to report early if there are folder space issues
+        // the pdf paths can be comma-separated like "path1,path2,path3"
+        const allPdfPathsSet = new Set<string>();
+        for (const p of pdfPaths) {
+            const arr = p.split(",");
+            arr.forEach((a: string) => allPdfPathsSet.add(a));
+        }
+        const parsedFolderPaths = Array.from(allPdfPathsSet).map(ap => path.dirname(ap));
+
+        const offendingPaths = await validatePathsForTrailingSpaces(parsedFolderPaths);
+        if (offendingPaths.length > 0) {
+            return resp.status(400).send({
+                response: {
+                    status: "failed",
+                    success: false,
+                    msg: `Found folders with trailing spaces: ${offendingPaths.length}`,
+                    offendingPaths: offendingPaths.map((p: string) => "• " + p.trim() + "\n")
+                }
+            });
+        }
+
         const allResponses = []
         const commonRunId = randomUUID();
         const pdfPathsToMergeCount = pdfPaths.length;
@@ -496,6 +617,19 @@ pythonRoute.post('/bulkRemoveAcrobatHeaderFooter', async (req: any, resp: any) =
             });
         }
         console.log(`bulkRemoveAcrobatHeaderFooter input: ${input_folder} output: ${output_folder}`);
+
+        const offendingPaths = await validatePathsForTrailingSpaces([input_folder]);
+        if (offendingPaths.length > 0) {
+            return resp.status(400).send({
+                response: {
+                    status: "failed",
+                    success: false,
+                    msg: `Found folders with trailing spaces: ${offendingPaths.length}`,
+                    offendingPaths: offendingPaths.map((p: string) => "• " + p.trim() + "\n")
+                }
+            });
+        }
+
         const _resp = await executePythonPostCall({
             input_folder,
             output_folder,

@@ -281,3 +281,23 @@ export async function getStatsMetadataIndependently(withoutStats: FileStats[],
     console.log(`Time Taken for  ${formatTime(END_TIME - START_TIME)}`);
     return withStats
 }
+
+export async function findFoldersWithTrailingSpaces(dir: string, result: string[] = []): Promise<string[]> {
+    try {
+        const dirents = await fsPromise.readdir(dir, { withFileTypes: true });
+        for (const dirent of dirents) {
+            if (dirent.isDirectory()) {
+                const fullPath = path.join(dir, dirent.name);
+                if (dirent.name.endsWith(' ')) {
+                    result.push(fullPath);
+                }
+                // Recursively check deeper folders even if current one has a trailing space
+                await findFoldersWithTrailingSpaces(fullPath, result);
+            }
+        }
+    } catch (err: any) {
+        console.error(`Error reading dir ${dir}:`, err.message);
+    }
+    return result;
+}
+

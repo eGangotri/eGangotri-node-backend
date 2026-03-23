@@ -312,17 +312,21 @@ function getMismatchErrorMsg(allPdfs: string[], allReducedPdfs: string[], config
         });
     });
 
-    let missingLog = "";
+    let missingLogOrig = "";
+    let missingLogReduced = "";
     if (missingInReduced.length > 0) {
-        missingLog += `\nMissing in Reduced folder (${missingInReduced.length}):\n` + missingInReduced.join("\n");
+        missingLogReduced = `\nMissing in Reduced folder (${missingInReduced.length}):\n` +
+            missingInReduced.map((p: string) => "• " + p.trim() + "\n").join("");
     }
     if (missingInOriginals.length > 0) {
-        missingLog += `\nMissing in Original folder (${missingInOriginals.length}):\n` + missingInOriginals.join("\n");
+        missingLogOrig = `\nMissing in Original folder (${missingInOriginals.length}):\n` +
+            missingInOriginals.map((p: string) => "• " + p.trim() + "\n").join("");
     }
 
     return {
         errorMsg: `Mismatched file counts! Originals: ${allPdfs.length}, Reduced: ${allReducedPdfs.length}`,
-        missingLog
+        missingLogOrig,
+        missingLogReduced
     };
 }
 
