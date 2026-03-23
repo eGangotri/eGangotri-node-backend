@@ -630,3 +630,27 @@ fileUtilsRoute.get('/header-footer-removal-item-report', async (req, res) => {
     }
 });
 
+fileUtilsRoute.post('/disposeFileMoveTracker', async (req: any, resp: any) => {
+    try {
+        const id = req?.body?.id;
+        if (!id) {
+            return resp.status(400).json({ status: 'failed', message: 'id is required' });
+        }
+
+        console.log(`disposeFileMoveTracker:params: ${id}`);
+        const tracker = await FileMoveTracker.findById(id);
+        if (!tracker) {
+            console.log(`disposeFileMoveTracker/${id}: Tracker not found`);
+            return resp.status(404).json({ error: 'Tracker not found' });
+        }
+
+        tracker.disposed = !tracker.disposed;
+        const updatedTracker = await tracker.save();
+        console.log(`disposeFileMoveTracker/${id}: successfully toggled disposed`);
+        return resp.status(200).json(updatedTracker);
+    } catch (error: any) {
+        console.error(`/disposeFileMoveTracker error: ${error?.message || String(error)} `);
+        return resp.status(500).json({ status: 'failed', message: error?.message || String(error) });
+    }
+});
+

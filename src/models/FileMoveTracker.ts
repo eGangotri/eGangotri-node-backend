@@ -18,6 +18,7 @@ const schema = new mongoose.Schema(
         filesAbsPathMoved: { type: [String], required: false },
         filesMovedNewAbsPath: { type: [String], required: false },
         reversed: { type: Boolean, required: false },
+        disposed: { type: Boolean, required: false, default: false },
     }, {
     collection: 'File_Move_Tracker',
     timestamps: true

@@ -480,3 +480,51 @@ launchAIRoute.post('/getMetadataExtractionPrompt', async (req: any, resp: any) =
         }
     });
 })
+
+launchAIRoute.post('/disposePdfTitleRenamingViaAITracker', async (req: any, resp: any) => {
+    try {
+        const id = req?.body?.id;
+        if (!id) {
+            return resp.status(400).json({ status: 'failed', message: 'id is required' });
+        }
+
+        console.log(`disposePdfTitleRenamingViaAITracker:params: ${id}`);
+        const tracker = await PdfTitleRenamingViaAITracker.findById(id);
+        if (!tracker) {
+            console.log(`disposePdfTitleRenamingViaAITracker/${id}: Tracker not found`);
+            return resp.status(404).json({ error: 'Tracker not found' });
+        }
+
+        tracker.disposed = !tracker.disposed;
+        const updatedTracker = await tracker.save();
+        console.log(`disposePdfTitleRenamingViaAITracker/${id}: successfully toggled disposed`);
+        return resp.status(200).json(updatedTracker);
+    } catch (error: any) {
+        console.error(`/disposePdfTitleRenamingViaAITracker error: ${error?.message || String(error)} `);
+        return resp.status(500).json({ status: 'failed', message: error?.message || String(error) });
+    }
+})
+
+launchAIRoute.post('/disposePdfTitleAndFileRenamingTrackerViaAI', async (req: any, resp: any) => {
+    try {
+        const id = req?.body?.id;
+        if (!id) {
+            return resp.status(400).json({ status: 'failed', message: 'id is required' });
+        }
+
+        console.log(`disposePdfTitleAndFileRenamingTrackerViaAI:params: ${id}`);
+        const tracker = await PdfTitleAndFileRenamingTrackerViaAI.findById(id);
+        if (!tracker) {
+            console.log(`disposePdfTitleAndFileRenamingTrackerViaAI/${id}: Tracker not found`);
+            return resp.status(404).json({ error: 'Tracker not found' });
+        }
+
+        tracker.disposed = !tracker.disposed;
+        const updatedTracker = await tracker.save();
+        console.log(`disposePdfTitleAndFileRenamingTrackerViaAI/${id}: successfully toggled disposed`);
+        return resp.status(200).json(updatedTracker);
+    } catch (error: any) {
+        console.error(`/disposePdfTitleAndFileRenamingTrackerViaAI error: ${error?.message || String(error)} `);
+        return resp.status(500).json({ status: 'failed', message: error?.message || String(error) });
+    }
+})

@@ -23,6 +23,8 @@ export interface IPdfTitleAndFileRenamingTrackerViaAI {
   // Mongoose timestamps
   createdAt?: Date;
   updatedAt?: Date;
+
+  disposed?: boolean;
 }
 
 export type PdfTitleAndFileRenamingTrackerViaAIDocument = IPdfTitleAndFileRenamingTrackerViaAI & mongoose.Document;
@@ -47,7 +49,8 @@ const PdfAiRenamingTrackerSchema = new mongoose.Schema(
 
     // Optional diagnostic fields
     metaDataAggregated: { type: Array, required: false },
-    error: { type: mongoose.Schema.Types.Mixed, required: false }
+    error: { type: mongoose.Schema.Types.Mixed, required: false },
+    disposed: { type: Boolean, required: false, default: false }
   },
   {
     collection: 'PDF_TITLE_AND_FILE_RENAMING_VIA_AI_TRACKER',

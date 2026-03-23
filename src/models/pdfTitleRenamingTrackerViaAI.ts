@@ -27,6 +27,7 @@ export interface IPdfTitleRenamingViaAITracker {
 
   applyButtonClicked?: boolean;
   cleanupButtonClicked?: boolean;
+  disposed?: boolean;
 }
 
 export type PdfTitleRenamingViaAITrackerDocument = IPdfTitleRenamingViaAITracker & mongoose.Document;
@@ -59,6 +60,7 @@ const PdfTitleRenamingTrackerViaAISchema = new mongoose.Schema(
     // Buttons
     applyButtonClicked: { type: Boolean, required: false, default: false },
     cleanupButtonClicked: { type: Boolean, required: false, default: false },
+    disposed: { type: Boolean, required: false, default: false },
   },
   {
     collection: SCHEMA_NAME,

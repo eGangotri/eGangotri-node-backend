@@ -3,7 +3,7 @@ import { Types } from "mongoose";
 export interface ArchiveProfileAndCount {
     archiveProfile: string;
     count: number;
-    uploadSuccessCount ?:number;
+    uploadSuccessCount?: number;
 }
 export interface UploadCycleArchiveProfile {
     archiveProfile?: string;
@@ -19,7 +19,7 @@ export interface ArchiveProfileAndTitle {
 
 export interface UploadCycleTypes {
     countIntended?: number;
-    archiveProfileAndCountIntended?: ArchiveProfileAndCount[]; 
+    archiveProfileAndCountIntended?: ArchiveProfileAndCount[];
 }
 
 export interface UploadCycleTableData {
@@ -27,18 +27,18 @@ export interface UploadCycleTableData {
     archiveProfileAndCount: ArchiveProfileAndCount[];
     datetimeUploadStarted: Date;
     totalCount: number;
-    mode ?: string;
+    mode?: string;
     archiveProfileAndCountForQueue?: ArchiveProfileAndCount[];
-    totalQueueCount?:number;
-    dateTimeQueueUploadStarted?:Date;
+    totalQueueCount?: number;
+    dateTimeQueueUploadStarted?: Date;
 
     countIntended?: number;
-    archiveProfileAndCountIntended?: ArchiveProfileAndCount[]; 
-    allUploadVerified?: boolean|null;
-    moveToFreeze ?: boolean;
+    archiveProfileAndCountIntended?: ArchiveProfileAndCount[];
+    allUploadVerified?: boolean | null;
+    moveToFreeze?: boolean;
     uploadCenter?: string;
+    disposed?: boolean;
 }
-
 
 export interface UploadCycleTableDataDictionary {
     uploadCycle: UploadCycleTableData;
@@ -49,8 +49,8 @@ export interface UploadCycleTableDataResponse {
 }
 
 export interface SelectedUploadItem {
-    id:Types.ObjectId;
-    archiveId:string;
+    id: Types.ObjectId;
+    archiveId: string;
     isValid?: boolean;
-    title?:string
+    title?: string
 }
