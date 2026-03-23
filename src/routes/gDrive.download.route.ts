@@ -192,6 +192,7 @@ gDriveDownloadRoute.get("/getGDriveDownloads", async (req: Request, res: Respons
             .limit(limit);
 
         const total = await GDriveDownload.countDocuments()
+        console.log(`gdriveDownloads ${JSON.stringify(gdriveDownloads)}`)
         const results = {
             data: gdriveDownloads,
             currentPage: page,

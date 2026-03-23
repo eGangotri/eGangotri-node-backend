@@ -431,3 +431,29 @@ gDriveRoute.post('/softDeleteGDriveDownload', async (req: any, resp: any) => {
         return resp.status(500).json({ status: 'failed', message: error?.message || String(error) });
     }
 })
+
+gDriveRoute.post('/disposeDriveDownload', async (req: any, resp: any) => {
+    try {
+        const id = req?.body?.id;
+
+        if (!id) {
+            return resp.status(400).json({ status: 'failed', message: 'id is required' });
+        }
+        
+        console.log(`disposeDriveDownload:params: ${id}`);
+        const gDriveDownload = await GDriveDownload.findById(id);
+        if (!gDriveDownload) {
+            console.log(`disposeDriveDownload/${id}:GDriveDownload not found`);
+            return resp.status(404).json({ error: 'GDriveDownload not found' });
+        }
+
+        gDriveDownload.disposed = !gDriveDownload.disposed;
+
+        const updatedGDriveDownload = await gDriveDownload.save();
+        console.log(`disposeDriveDownload:updatedGDriveDownload/${id}: successfully set disposed to true`);
+        return resp.status(200).json(updatedGDriveDownload);
+    } catch (error: any) {
+        console.error(`/disposeDriveDownload error: ${error?.message || String(error)} `);
+        return resp.status(500).json({ status: 'failed', message: error?.message || String(error) });
+    }
+})
