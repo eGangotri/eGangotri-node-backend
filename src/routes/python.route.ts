@@ -114,7 +114,7 @@ pythonRoute.post('/getFirstAndLastNPages', async (req: any, resp: any) => {
                     status: "failed",
                     success: false,
                     msg: `Found folders with trailing spaces: ${offendingPaths.length}`,
-                    offendingPaths: offendingPaths.map((p: string) => "• " + p.trim() + "\n")
+                    offendingPaths: offendingPaths.map((p: string) => `• '${p}'\n`)
                 }
             });
         }
@@ -233,7 +233,7 @@ pythonRoute.post('/copyAllPdfs', async (req: any, resp: any) => {
                     status: "failed",
                     success: false,
                     msg: `Found folders with trailing spaces: ${offendingPaths.length}`,
-                    offendingPaths: offendingPaths.map((p: string) => "• " + p.trim() + "\n")
+                    offendingPaths: offendingPaths.map((p: string) => `• '${p}'\n`)
                 }
             });
         }
@@ -308,7 +308,7 @@ pythonRoute.post('/convert-img-folder-to-pdf', async (req: any, resp: any) => {
                     status: "failed",
                     success: false,
                     msg: `Found folders with trailing spaces: ${offendingPaths.length}`,
-                    offendingPaths: offendingPaths.map((p: string) => "• " + p.trim() + "\n")
+                    offendingPaths: offendingPaths.map((p: string) => `• '${p}'\n`)
                 }
             });
         }
@@ -370,7 +370,7 @@ pythonRoute.post('/verfiyImgtoPdf', async (req: any, resp: any) => {
                     status: "failed",
                     success: false,
                     msg: `Found folders with trailing spaces: ${offendingPaths.length}`,
-                    offendingPaths: offendingPaths.map((p: string) => "• " + p.trim() + "\n")
+                    offendingPaths: offendingPaths.map((p: string) => `• '${p}'\n`)
                 }
             });
         }
@@ -495,7 +495,7 @@ pythonRoute.post('/mergeMutliplePdfs', async (req: any, resp: any) => {
                     status: "failed",
                     success: false,
                     msg: `Found folders with trailing spaces: ${offendingPaths.length}`,
-                    offendingPaths: offendingPaths.map((p: string) => "• " + p.trim() + "\n")
+                    offendingPaths: offendingPaths.map((p: string) => `• '${p}'\n`)
                 }
             });
         }
@@ -625,7 +625,7 @@ pythonRoute.post('/bulkRemoveAcrobatHeaderFooter', async (req: any, resp: any) =
                     status: "failed",
                     success: false,
                     msg: `Found folders with trailing spaces: ${offendingPaths.length}`,
-                    offendingPaths: offendingPaths.map((p: string) => "• " + p.trim() + "\n")
+                    offendingPaths: offendingPaths.map((p: string) => `• '${p}'\n`)
                 }
             });
         }
