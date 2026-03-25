@@ -27,9 +27,15 @@ async function validatePathsForTrailingSpaces(pathsToCheck: string[]): Promise<s
             // wait: if it's "C:", "C:/", split behaves like ["C:"].
             // Windows path sep is '\'.
             builtPath = builtPath ? builtPath + path.sep + part : part;
-            // A part could be "china "
             if (part && part.endsWith(' ') && part.trim().length > 0) {
-                offendingPaths.add(builtPath);
+                try {
+                    const items = await fs.readdir(builtPath);
+                    if (items.length > 0) {
+                        offendingPaths.add(builtPath);
+                    }
+                } catch (e) {
+                    offendingPaths.add(builtPath);
+                }
             }
         }
 
@@ -38,6 +44,13 @@ async function validatePathsForTrailingSpaces(pathsToCheck: string[]): Promise<s
             if (stat.isDirectory()) {
                 const subErrors = await findFoldersWithTrailingSpaces(normalized);
                 for (const err of subErrors) {
+                    if (!err || err.trim() === '') continue;
+                    try {
+                        const items = await fs.readdir(err);
+                        if (items.length === 0) continue;
+                    } catch (e) {
+                        // proceed to add if we can't read it
+                    }
                     offendingPaths.add(err);
                 }
             }
