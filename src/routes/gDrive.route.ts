@@ -439,7 +439,7 @@ gDriveRoute.post('/disposeDriveDownload', async (req: any, resp: any) => {
         if (!id) {
             return resp.status(400).json({ status: 'failed', message: 'id is required' });
         }
-        
+
         console.log(`disposeDriveDownload:params: ${id}`);
         const gDriveDownload = await GDriveDownload.findById(id);
         if (!gDriveDownload) {
