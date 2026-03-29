@@ -159,32 +159,48 @@ export const processFileForAIRenaming = async (base64EncodedFile: string,
                 console.error(errorMessage);
                 console.error('API 400 body:', JSON.stringify(error.response?.data, null, 2));
             } else if (statusCode === 429 || statusCode === 503) {
-                // Rate limit (429) or Service Unavailable (503) handling with exponential backoff
+                // Rate limit (429) or Service Unavailable (503) handling.
+                // Strategy: if the server asks us to wait more than AI_SKIP_THRESHOLD_MS (default 30s),
+                // SKIP this file immediately (return a RATE_LIMITED marker) so the rest of the
+                // pipeline can continue without a long stall. The caller (processAllBatches) will
+                // collect all RATE_LIMITED files and retry them together at the end.
+                const AI_SKIP_THRESHOLD_MS = Number(process.env.AI_SKIP_THRESHOLD_MS || 30_000);
+
+                const retryAfterHeader = (error.response?.headers?.['retry-after'] || error.response?.headers?.['Retry-After']) as string | undefined;
+                let serverDelayMs = 0;
+                if (retryAfterHeader) {
+                    const retrySec = parseInt(retryAfterHeader, 10);
+                    if (!Number.isNaN(retrySec) && retrySec > 0) {
+                        serverDelayMs = retrySec * 1000;
+                        console.warn(`[Retry-After] Google AI returned Retry-After: ${retrySec}s (${(retrySec / 60).toFixed(1)} min).`);
+                    }
+                }
+
+                // Exponential backoff for the short-wait path
+                const baseDelay = initialDelay * Math.pow(2, retryCount);
+                const jitter = Math.floor(Math.random() * baseDelay);
+                const candidateDelayMs = Math.max(serverDelayMs, jitter);
+
+                if (candidateDelayMs > AI_SKIP_THRESHOLD_MS) {
+                    // Delay is too long — skip this file now and let the caller retry later.
+                    const waitSec = Math.ceil(candidateDelayMs / 1000);
+                    console.warn(`[Rate Limit] Delay (${waitSec}s) exceeds skip threshold (${AI_SKIP_THRESHOLD_MS / 1000}s). Skipping file — will retry after remaining files finish.`);
+                    return {
+                        extractedMetadata: `RATE_LIMITED:${waitSec}`,
+                        error: `Rate limited — deferred retry needed (wait ${waitSec}s). Status: ${statusCode}`
+                    };
+                }
+
+                // Short wait — inline retry as before
                 const maxRetries = Number(process.env.AI_MAX_RETRIES || 5);
                 if (retryCount < maxRetries) {
-                    // Respect Retry-After header if present (seconds)
-                    const retryAfterHeader = (error.response?.headers?.['retry-after'] || error.response?.headers?.['Retry-After']) as string | undefined;
-                    let serverDelayMs = 0;
-                    if (retryAfterHeader) {
-                        const retrySec = parseInt(retryAfterHeader, 10);
-                        if (!Number.isNaN(retrySec) && retrySec > 0) {
-                            serverDelayMs = retrySec * 1000;
-                        }
-                    }
-                    // Exponential backoff with full jitter
-                    const baseDelay = initialDelay * Math.pow(2, retryCount);
-                    const jitter = Math.floor(Math.random() * baseDelay);
-                    const delayMs = Math.max(serverDelayMs, jitter);
-
                     const errorType = statusCode === 429 ? 'Rate limit exceeded (429)' : 'Service Unavailable (503)';
-                    console.warn(`${errorType}. Retrying in ${(delayMs / 1000).toFixed(2)} seconds... (Attempt ${retryCount + 1}/${maxRetries})`);
-                    await sleep(delayMs);
-
-                    // Retry the request with increased retry count and delay
+                    console.warn(`${errorType}. Retrying inline in ${(candidateDelayMs / 1000).toFixed(2)}s... (Attempt ${retryCount + 1}/${maxRetries})`);
+                    await sleep(candidateDelayMs);
                     return processFileForAIRenaming(base64EncodedFile, mimeType, prompt, retryCount + 1, initialDelay);
                 } else {
                     const errorType = statusCode === 429 ? 'Rate limit exceeded' : 'Service Unavailable';
-                    errorMessage = `${errorType}: ${statusCode === 429 ? 'Too many requests to the API' : 'Google AI service is temporarily unavailable'}. Tried ${maxRetries} times with backoff. Status code: ${statusCode}`;
+                    errorMessage = `${errorType}: Tried ${maxRetries} times. Status: ${statusCode}`;
                     console.error(errorMessage);
                 }
             } else if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT') {

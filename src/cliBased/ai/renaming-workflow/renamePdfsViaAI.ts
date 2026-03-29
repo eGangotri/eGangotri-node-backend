@@ -14,6 +14,16 @@ import { AI_BATCH_SIZE, AI_DELAY_BETWEEN_BATCHES_MS, AI_DELAY_BETWEEN_CALLS_MS, 
 import { isValidWindowsFileName } from '../../../utils/FileUtils';
 import { AIHaltManager } from '../../../utils/aiHaltManager';
 
+/** Returns true if the result was deferred due to rate limiting */
+const isRateLimited = (r: MetadataResult) =>
+    typeof r.extractedMetadata === 'string' && r.extractedMetadata.startsWith('RATE_LIMITED:');
+
+/** Extract the wait duration in ms from a RATE_LIMITED marker (e.g. 'RATE_LIMITED:1800' -> 1800000) */
+const getRateLimitWaitMs = (r: MetadataResult): number => {
+    const secs = parseInt((r.extractedMetadata || '').replace('RATE_LIMITED:', ''), 10);
+    return Number.isFinite(secs) && secs > 0 ? secs * 1000 : 30_000;
+};
+
 /**
  * Sleep for a specified number of milliseconds
  * @param ms - milliseconds to sleep
@@ -267,6 +277,9 @@ async function processAllBatches(
     let successCount = 0;
     const mappedResults: Array<{ meta: MetadataResult; reducedFilePath: string }> = [];
 
+    // Files that were skipped due to rate limiting — deferred for a single retry at the end
+    const rateLimitedItems: Array<{ originalFilePath: string; reducedFilePath: string; waitMs: number }> = [];
+
     for (let i = 0; i < pairedBatches.length; i++) {
         const pairedBtch = pairedBatches[i];
         if (AIHaltManager.shouldHalt({ commonRunId, runId, srcFolder: inputFolder })) {
@@ -275,24 +288,74 @@ async function processAllBatches(
         console.log(`Processing batch ${i + 1}/${pairedBatches.length}...`);
         const results = await processPdfBatch(pairedBtch.reducedPdfs, config, { commonRunId, runId, srcFolder: inputFolder });
 
-        mappedResults.push(...mapBatchResults(pairedBtch, results));
+        // Separate normal results from rate-limited ones
+        const normalResults: MetadataResult[] = [];
+        results.forEach((r, j) => {
+            if (isRateLimited(r)) {
+                rateLimitedItems.push({
+                    originalFilePath: pairedBtch.pdfs[j],
+                    reducedFilePath: pairedBtch.reducedPdfs[j],
+                    waitMs: getRateLimitWaitMs(r),
+                });
+                // Placeholder so indices stay aligned for persistPerItemDocs
+                normalResults.push({
+                    originalFilePath: pairedBtch.pdfs[j],
+                    fileName: path.basename(pairedBtch.pdfs[j]),
+                    extractedMetadata: '',
+                    error: `Rate limited — queued for deferred retry`,
+                });
+            } else {
+                normalResults.push(r);
+            }
+        });
+
+        mappedResults.push(...mapBatchResults(pairedBtch, normalResults));
 
         try {
-            await persistPerItemDocs(results, pairedBtch, i, commonRunId, runId, inputFolder, reducedFolder, outputFolder);
+            await persistPerItemDocs(normalResults, pairedBtch, i, commonRunId, runId, inputFolder, reducedFolder, outputFolder);
         } catch (perItemErr) {
             console.error('Failed inserting AI_PDF_RENAMING batch docs:', perItemErr);
         }
 
-        processedCount += results.length;
-        successCount += results.filter(r => !r.error && !!r.extractedMetadata).length;
+        processedCount += normalResults.length;
+        successCount += normalResults.filter(r => !r.error && !!r.extractedMetadata).length;
 
-        console.log(`Progress: ${processedCount}/${allPdfsLength} (${successCount} successfully extracted)`);
+        console.log(`Progress: ${processedCount}/${allPdfsLength} (${successCount} successfully extracted, ${rateLimitedItems.length} deferred)`);
 
         if (i < pairedBatches.length - 1 && config.delayBetweenBatchesMs) {
             console.log(`Waiting (per batch) ${config.delayBetweenBatchesMs / 1000}s in-btwn batch calls before processing next batch to avoid rate limits...`);
             await sleep(config.delayBetweenBatchesMs);
         }
     }
+
+    // ── Deferred retry pass ───────────────────────────────────────────────────
+    if (rateLimitedItems.length > 0) {
+        const maxWaitMs = Math.max(...rateLimitedItems.map(x => x.waitMs));
+        console.log(`\n[Deferred Retry] ${rateLimitedItems.length} file(s) were rate-limited during processing.`);
+        console.log(`[Deferred Retry] Waiting ${(maxWaitMs / 1000).toFixed(0)}s (longest cooldown) before retrying all skipped files...`);
+        await sleep(maxWaitMs);
+
+        console.log(`[Deferred Retry] Now retrying ${rateLimitedItems.length} previously rate-limited file(s)...`);
+        const deferredPdfs = rateLimitedItems.map(x => x.reducedFilePath);
+        const deferredOriginals = rateLimitedItems.map(x => x.originalFilePath);
+
+        const deferredPairedBatch: BatchPair = { index: -1, pdfs: deferredOriginals, reducedPdfs: deferredPdfs };
+        const deferredResults = await processPdfBatch(deferredPdfs, config, { commonRunId, runId, srcFolder: inputFolder });
+
+        mappedResults.push(...mapBatchResults(deferredPairedBatch, deferredResults));
+
+        try {
+            await persistPerItemDocs(deferredResults, deferredPairedBatch, -1, commonRunId, runId, inputFolder, reducedFolder, outputFolder);
+        } catch (perItemErr) {
+            console.error('[Deferred Retry] Failed inserting deferred batch docs:', perItemErr);
+        }
+
+        const deferredSuccess = deferredResults.filter(r => !r.error && !!r.extractedMetadata).length;
+        processedCount += deferredResults.length;
+        successCount += deferredSuccess;
+        console.log(`[Deferred Retry] Complete. ${deferredSuccess}/${deferredResults.length} succeeded.`);
+    }
+    // ─────────────────────────────────────────────────────────────────────────
 
     return { mappedResults, processedCount, successCount };
 }
