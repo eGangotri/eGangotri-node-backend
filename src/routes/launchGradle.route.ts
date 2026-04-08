@@ -410,6 +410,73 @@ const isolateFiles = async (_uploadFailedForUploadCycleId: UploadCycleArchivePro
     }
 }
 
+launchGradleRoute.get('/deIsolateByProfile', async (req: any, resp: any) => {
+    try {
+        const profile = req.query.profile
+        console.log(`deIsolateByProfile ${profile}`)
+
+        const { deIsolationStatus, errors } = await deIsolateFiles(profile);
+        resp.status(200).send({
+            response: {
+                success: true,
+                res: {
+                    deIsolationStatus,
+                    errors
+                }
+            }
+        });
+
+    }
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send({
+            response: {
+                success: false,
+
+                err
+            }
+        });
+    }
+})
+
+const deIsolateFiles = async (profile: string) => {
+    let deIsolationStatus = []
+    let errors = []
+    const _archivePath = getFolderInSrcRootForProfile(profile);
+    const _isolatedPath = `${_archivePath}_${ISOLATED_FOLDER}`
+
+    try {
+        const _filesInIsolatedPath = await fsPromise.readdir(_isolatedPath);
+        for (let j = 0; j < _filesInIsolatedPath.length; j++) {
+            try {
+                const fileName = _filesInIsolatedPath[j];
+                const isolatedFilePath = path.join(_isolatedPath, fileName);
+                const destPath = path.join(_archivePath, fileName);
+
+                const logMessage = `De-isolating ${isolatedFilePath} to ${destPath}`;
+                console.log(logMessage);
+                deIsolationStatus.push(`${logMessage}\n`);
+
+                await fsPromise.rename(isolatedFilePath, destPath);
+            } catch (err) {
+                console.log(err);
+                errors.push(err);
+            }
+        }
+    } catch (err: any) {
+        // Handle the case where the isolated folder simply doesn't exist
+        if (err.code === 'ENOENT') {
+            deIsolationStatus.push(`No isolated folder found at ${_isolatedPath}`);
+        } else {
+            errors.push(err);
+        }
+    }
+
+    return {
+        deIsolationStatus,
+        errors
+    }
+}
 
 
 launchGradleRoute.get('/reuploadFailed', async (req: any, resp: any) => {
