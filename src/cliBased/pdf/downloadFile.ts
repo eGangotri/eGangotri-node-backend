@@ -93,23 +93,42 @@ export const downloadFileFromUrl = async (
             });
 
             dl.on('error', async (err) => {
-                dl.stop();
-                incrementDownloadInError(downloadCounterController);
-                if (err.code === 'ECONNRESET') {
-                    console.error('Connection reset by peer');
+                try {
+                    try {
+                        dl.stop();
+                    } catch (e) { } // ignore stop errors
+
+                    incrementDownloadInError(downloadCounterController);
+                    if (err.code === 'ECONNRESET') {
+                        console.error('Connection reset by peer');
+                    }
+                    console.log(`Download Failed ${fileName} ` + err.message);
+                    _result = {
+                        success: false,
+                        error: `Failed download of ${fileName} to ${fileDumpFolder} with ${err.message}`
+                    };
+                    if (runId) {
+                        await updateArchiveDownloadItemStatus(runId, downloadUrl, fileName, 'failed', err.message, `Download failed: ${err.message}`, path.join(fileDumpFolder, fileName));
+                    }
+                } catch (e: any) {
+                    console.error("Unhandled error inside dl.on('error'): " + e.message);
+                } finally {
+                    resolve(_result);
                 }
-                console.log(`Download Failed ${fileName}` + JSON.stringify(err.message));
-                _result = {
-                    success: false,
-                    "error": `Failed download of ${fileName} to ${fileDumpFolder} with ${err.message}`
-                };
-                if (runId) {
-                    await updateArchiveDownloadItemStatus(runId, downloadUrl, fileName, 'failed', err.message, `Download failed: ${err.message}`, path.join(fileDumpFolder, fileName));
-                }
-                resolve(_result);
             });
 
-            dl.start();
+            dl.start().catch((err) => {
+                console.error("dl.start() rejected with error: " + err.message);
+                // If the start Promise rejects before emitting 'error', ensure we don't hang eternally.
+                // Resolving false result if not already resolved.
+                if (!_result.error) {
+                    _result = {
+                        success: false,
+                        error: `Failed to start download of ${fileName} to ${fileDumpFolder} with ${err.message}`
+                    };
+                    resolve(_result);
+                }
+            });
         });
     } catch (err) {
         console.error(`downloadFileFromUrl err  ${JSON.stringify(err)}`);
