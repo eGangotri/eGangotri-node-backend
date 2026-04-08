@@ -81,29 +81,41 @@ const fetchArchiveMetadata = async (username: string,
     console.log(`fetchArchiveMetadata: ${username} ${dateRange} Range: [${start}, ${end})`);
 
     try {
-        const startPageIndex = Math.floor((start - 1) / DEFAULT_HITS_PER_PAGE) + 1;
-        let currentPageIndex = startPageIndex;
+        let currentPageIndex = 1;
         let _hits: Hits = await callGenericArchiveApi(username, currentPageIndex, dateRange[0], dateRange[1], ascOrder, DEFAULT_HITS_PER_PAGE);
         let hitsTotal = _hits?.total || 0;
+        // Use the actual returned page size (Archive.org caps at 100 regardless of hits_per_page)
+        const actualPageSize = _hits?.returned || _hits?.hits?.length || DEFAULT_HITS_PER_PAGE;
+        console.log(`fetchArchiveMetadata: hitsTotal=${hitsTotal}, actualPageSize=${actualPageSize}`);
         const _allCollectedHits: HitsEntity[] = [];
 
         if (hitsTotal > 0) {
             FETCH_ACRHIVE_METADATA_COUNTER.hitsTotal = hitsTotal;
 
-            // Adjust end based on hitsTotal
+            // Adjust range bounds based on hitsTotal
             const actualEnd = Math.min(end, hitsTotal + 1);
             if (start > hitsTotal) {
                 return { linkData: [], stats: `Start index ${start} exceeds total items ${hitsTotal}` };
             }
 
             const startIndex = start - 1;
+            const startPageIndex = Math.floor(startIndex / actualPageSize) + 1;
             const endIndex = actualEnd - 1;
-            const endPageIndex = Math.floor((endIndex - 1) / DEFAULT_HITS_PER_PAGE) + 1;
+            const endPageIndex = Math.floor((endIndex - 1) / actualPageSize) + 1;
 
-            _allCollectedHits.push(...(_hits.hits || []));
+            // If the first page we fetched isn't the page we need, re-fetch the correct starting page
+            if (startPageIndex !== 1) {
+                currentPageIndex = startPageIndex;
+                const startPageHits = await callGenericArchiveApi(username, currentPageIndex, dateRange[0], dateRange[1], ascOrder, DEFAULT_HITS_PER_PAGE);
+                if (startPageHits?.hits?.length > 0) {
+                    _allCollectedHits.push(...startPageHits.hits);
+                }
+            } else {
+                _allCollectedHits.push(...(_hits.hits || []));
+            }
 
             // Fetch subsequent pages if needed
-            while (currentPageIndex < endPageIndex && (currentPageIndex * DEFAULT_HITS_PER_PAGE) < hitsTotal) {
+            while (currentPageIndex < endPageIndex) {
                 currentPageIndex++;
                 const nextHits = await callGenericArchiveApi(username, currentPageIndex, dateRange[0], dateRange[1], ascOrder, DEFAULT_HITS_PER_PAGE);
                 if (nextHits?.hits?.length > 0) {
@@ -114,7 +126,7 @@ const fetchArchiveMetadata = async (username: string,
             }
 
             // Slice to exact range
-            const offsetInFirstPage = startIndex - (startPageIndex - 1) * DEFAULT_HITS_PER_PAGE;
+            const offsetInFirstPage = startIndex - (startPageIndex - 1) * actualPageSize;
             const countToTake = actualEnd - start;
             const finalHits = _allCollectedHits.slice(offsetInFirstPage, offsetInFirstPage + countToTake);
 

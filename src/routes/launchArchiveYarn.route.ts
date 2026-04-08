@@ -28,7 +28,7 @@ launchArchiveYarnRoute.post('/getArchiveListing', async (req: any, resp: any) =>
         const limitedFields = (req?.body?.limitedFields == true) || false;
         const dateRange = req?.body?.dateRange || ""; //dateRange:"2024/04/01-2024/04/31"
         const ascOrder = req?.body?.ascOrder || false;
-        const maxItemsInput = req?.body?.maxItems;
+        const maxItemsInput = req?.body?.maxItems || MAX_ITEMS_RETRIEVABLE_IN_ARCHIVE_ORG;
         let maxItemsOrRange: number | [number, number] = MAX_ITEMS_RETRIEVABLE_IN_ARCHIVE_ORG;
 
         if (maxItemsInput) {
@@ -46,7 +46,7 @@ launchArchiveYarnRoute.post('/getArchiveListing', async (req: any, resp: any) =>
         }
         let parsedDateRange: [number, number] = [0, 0]
 
-        console.log(`getArchiveListing params ${JSON.stringify(req.body)}`)
+        console.log(`getArchiveListing params ${JSON.stringify(req.body)} ${maxItemsInput}`)
 
         if (dateRange) {
             const _validateDates = validateDateRange(dateRange);
