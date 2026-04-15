@@ -16,14 +16,14 @@ export const chromeRoute = express.Router();
  *                    Example: ?ports=9222,9223,9224
  *
  *   archiveOrgOnly   If "true", only inspect tabs whose URL begins with
- *                    https://archive.org. Defaults to false.
- *                    Example: ?archiveOrgOnly=true
+ *                    https://archive.org. Defaults to true.
+ *                    Example: ?archiveOrgOnly=false
  *
  *   dismissDialogs   How to handle any open JS dialog found in each tab:
- *                      "accept"  – click OK / Yes
+ *                      "accept"  – click OK / Yes (default)
  *                      "decline" – click Cancel / No
- *                      "none"    – detect only, do NOT interact (default)
- *                    Example: ?dismissDialogs=accept
+ *                      "none"    – detect only, do NOT interact
+ *                    Example: ?dismissDialogs=none
  *
  * Response shape: ChromeInspectionSummary (see chromeService.ts)
  */
@@ -36,13 +36,13 @@ chromeRoute.get('/inspectTabs', async (req: any, res: any) => {
             ? portsParam.split(',').map(p => parseInt(p.trim(), 10)).filter(n => !isNaN(n))
             : CHROME_DEBUG_PORTS;
 
-        const archiveOrgOnly = req.query.archiveOrgOnly === 'true';
+        const archiveOrgOnly = req.query.archiveOrgOnly !== 'false';
 
-        const dismissParam = (req.query.dismissDialogs as string || 'none').toLowerCase();
+        const dismissParam = (req.query.dismissDialogs as string || 'accept').toLowerCase();
         const dialogDismissMode: 'accept' | 'decline' | 'none' =
-            dismissParam === 'accept' ? 'accept'
-            : dismissParam === 'decline' ? 'decline'
-            : 'none';
+            dismissParam === 'none' ? 'none'
+                : dismissParam === 'decline' ? 'decline'
+                    : 'accept';
 
         console.log(
             `[chromeRoute] inspectTabs | ports=${ports} | archiveOrgOnly=${archiveOrgOnly} | dismissDialogs=${dialogDismissMode}`
