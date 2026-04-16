@@ -7,7 +7,7 @@ import CDP from 'chrome-remote-interface';
  *  Each instance must have been started with --remote-debugging-port=<port>.
  *  Add / remove ports here to match your Groovy launcher configuration.
  */
-export const CHROME_DEBUG_PORTS: number[] = [9222, 9223, 9224, 9225];
+export const CHROME_DEBUG_PORTS: number[] = [9222, 9223, 9224, 9225, 9226, 9227, 9228, 9229, 9230, 9231, 9232, 9233, 9234, 9235, 9236, 9237, 9238, 9239, 9240, 9241, 9242, 9243, 9244, 9245, 9246, 9247, 9248, 9249, 9250];
 
 const CDP_HOST = '127.0.0.1'; // use explicit IPv4 — on Windows, 'localhost' resolves to ::1 (IPv6) which Chrome CDP does not bind to
 const ARCHIVE_ORG_PREFIX = 'https://archive.org';
