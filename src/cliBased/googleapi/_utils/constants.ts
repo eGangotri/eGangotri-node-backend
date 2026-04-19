@@ -6,8 +6,10 @@ export const JPEG_MIME_TYPE = 'image/jpeg';
 export const JPG_MIME_TYPE = 'image/jpg';
 export const PNG_MIME_TYPE = 'image/png';
 export const GIF_MIME_TYPE = 'image/gif';
+export const HEIC_MIME_TYPE = 'image/heic';
+export const HEIF_MIME_TYPE = 'image/heif';
 
-export const ALLOWED_MIME_TYPES_FOR_RENAMING = [PDF_MIME_TYPE, JPEG_MIME_TYPE, JPG_MIME_TYPE, PNG_MIME_TYPE,GIF_MIME_TYPE];
+export const ALLOWED_MIME_TYPES_FOR_RENAMING = [PDF_MIME_TYPE, JPEG_MIME_TYPE, JPG_MIME_TYPE, PNG_MIME_TYPE,GIF_MIME_TYPE,HEIC_MIME_TYPE,HEIF_MIME_TYPE];
 
 export const ZIP_MIME_TYPE = 'application/zip';
 
