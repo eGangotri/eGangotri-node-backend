@@ -151,6 +151,7 @@ gDriveRoute.post('/getGoogleDriveListingAsExcel', async (req: any, resp: any) =>
         const pdfRenamerXlV2 = req?.body?.pdfRenamerXlV2 || false;
         const minimalVersion = req?.body?.minimalVersion || false;
         const manuVersion = req?.body?.manuVersion || false;
+        const includePdfPageCount = req?.body?.includePdfPageCount || false;
 
         console.log(`getGoogleDriveListingAsExcel 
             googleDriveLink:
@@ -188,16 +189,17 @@ gDriveRoute.post('/getGoogleDriveListingAsExcel', async (req: any, resp: any) =>
                         ignoreFolder,
                         pdfRenamerXlV2,
                         allNotJustPdfs === true ? "" : PDF_TYPE,
-                        rowCounterController);
+                        rowCounterController,
+                        includePdfPageCount);
                     if (listingResult.success && (manuVersion || minimalVersion)) {
                         const excelName = listingResult.xlsxFileNameWithPath;
                         if (manuVersion) {
-                            const manuVersionResult = createManuExcelVersion(excelName);
+                            const manuVersionResult = createManuExcelVersion(excelName, includePdfPageCount);
                             listingResult.success2 = manuVersionResult.success2;
                             listingResult.msg2 = manuVersionResult.msg2;
                         }
                         else if (minimalVersion) {
-                            const minimalVersionResult = createMimimalExcelVersion(excelName);
+                            const minimalVersionResult = createMimimalExcelVersion(excelName, includePdfPageCount);
                             listingResult.success2 = minimalVersionResult.success2;
                             listingResult.msg2 = minimalVersionResult.msg2;
                         }

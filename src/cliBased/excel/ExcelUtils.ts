@@ -25,7 +25,7 @@ const NEW_HEADERS = [
   'Result',
 ];
 
-export function createManuExcelVersion(sourceExcelPath: string): ExcelWriteResult {
+export function createManuExcelVersion(sourceExcelPath: string, includePdfPageCount = false): ExcelWriteResult {
   try {
     const wb = xlsx.readFile(sourceExcelPath);
     const firstSheetName = wb.SheetNames[0];
@@ -43,6 +43,11 @@ export function createManuExcelVersion(sourceExcelPath: string): ExcelWriteResul
     for (let r = 0; r < rows.length; r++) {
       const row = Array.isArray(rows[r]) ? [...rows[r]] : [];
 
+      let pageCountVal = "";
+      if (includePdfPageCount && row.length > 17) {
+        pageCountVal = row[17];
+      }
+
       // Remove columns D..W if present
       if (row.length > startRemoveIdx) {
         const deleteCount = Math.max(0, Math.min(endRemoveIdx, row.length - 1) - startRemoveIdx + 1);
@@ -57,14 +62,23 @@ export function createManuExcelVersion(sourceExcelPath: string): ExcelWriteResul
         }
         // Set C to 'Link to File Location'
         if (row.length >= 3) row[2] = NEW_HEADERS[0]; else row[2] = NEW_HEADERS[0];
+        
+        const headersToInsert = [...NEW_HEADERS.slice(1)];
+        if (includePdfPageCount) {
+          headersToInsert.push(pageCountVal || 'No. of Pages');
+        }
         // Insert remaining headers after C
-        row.splice(3, 0, ...NEW_HEADERS.slice(1));
+        row.splice(3, 0, ...headersToInsert);
       } else {
         // Data rows: preserve A,B,C (C should already be link column), insert blanks for new D..I
         if (row.length < 3) {
           while (row.length < 3) row.push('');
         }
-        row.splice(3, 0, ...Array(NEW_HEADERS.length - 1).fill(''));
+        const blanksToInsert = Array(NEW_HEADERS.length - 1).fill('');
+        if (includePdfPageCount) {
+          blanksToInsert.push(pageCountVal);
+        }
+        row.splice(3, 0, ...blanksToInsert);
       }
 
       outRows.push(row);
@@ -80,7 +94,7 @@ export function createManuExcelVersion(sourceExcelPath: string): ExcelWriteResul
   }
 }
 
-export function createMimimalExcelVersion(sourceExcelPath: string): ExcelWriteResult {
+export function createMimimalExcelVersion(sourceExcelPath: string, includePdfPageCount = false): ExcelWriteResult {
   try {
     const wb = xlsx.readFile(sourceExcelPath);
     const firstSheetName = wb.SheetNames[0];
@@ -98,10 +112,19 @@ export function createMimimalExcelVersion(sourceExcelPath: string): ExcelWriteRe
     for (let r = 0; r < rows.length; r++) {
       const row = Array.isArray(rows[r]) ? [...rows[r]] : [];
 
+      let pageCountVal = "";
+      if (includePdfPageCount && row.length > 17) {
+        pageCountVal = row[17];
+      }
+
       // Remove columns D..W if present
       if (row.length > startRemoveIdx) {
         const deleteCount = Math.max(0, Math.min(endRemoveIdx, row.length - 1) - startRemoveIdx + 1);
         if (deleteCount > 0) row.splice(startRemoveIdx, deleteCount);
+      }
+
+      if (includePdfPageCount) {
+        row.splice(startRemoveIdx, 0, r === 0 ? (pageCountVal || 'No. of Pages') : pageCountVal);
       }
       outRows.push(row);
     }
@@ -138,7 +161,7 @@ const convertDatatoJson = (googleDriveFileData: Array<GoogleApiData>) => {
       "Edition/Statement": "*",
       "Place of Publication": "*",
       "Year of Publication": "*",
-      "No. of Pages": "*",
+      "No. of Pages": dataRow.pageCount || "*",
       "ISBN": "*",
       "Remarks": "*",
       "Commentairies": "*",

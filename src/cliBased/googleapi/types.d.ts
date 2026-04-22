@@ -7,6 +7,8 @@ export interface GoogleApiData {
     parents: string,
     createdTime: string,
     thumbnailLink: string,
+    fileId?: string,
+    pageCount?: number | string,
 }
 
 export interface GoogleApiDataWithLocalData extends GoogleApiData {

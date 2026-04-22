@@ -1,5 +1,7 @@
 import { drive_v3 } from 'googleapis';
 import { ExcelWriteResult, jsonDataToXslx, jsonDataToXslxFileRenamerV2 } from '../../excel/ExcelUtils';
+import pLimit from 'p-limit';
+import { PDFDocument } from 'pdf-lib';
 import { sizeInfo } from '../../../mirror/FrontEndBackendCommonCode';
 import { FOLDER_MIME_TYPE, PDF_TYPE } from '../_utils/constants';
 import { GoogleApiData } from '../types';
@@ -16,10 +18,11 @@ export async function listFolderContentsAsArrayOfData(itemId: string,
     umbrellaFolder: string = "",
     ignoreFolder = "",
     fileType = PDF_TYPE,
-    rowCounterController = "") {
+    rowCounterController = "",
+    includePdfPageCount = false) {
 
     console.log(`listFolderContentsAsArrayOfData: umbrellaFolder: ${umbrellaFolder} ignoreFolder ${ignoreFolder}
-        fileType: ${fileType} rowCounterController ${rowCounterController}`)
+        fileType: ${fileType} rowCounterController ${rowCounterController} includePdfPageCount ${includePdfPageCount}`)
     // First check if the itemId is a folder or a file
     if (!itemId) {
         console.log('listFolderContentsAsArrayOfData: itemId is empty. Returning empty array.');
@@ -61,7 +64,33 @@ export async function listFolderContentsAsArrayOfData(itemId: string,
         }
     }
 
+    if (includePdfPageCount) {
+        await populatePageCountsFromGDrive(googleDriveFileData, drive);
+    }
     return googleDriveFileData
+}
+
+async function populatePageCountsFromGDrive(googleDriveFileData: GoogleApiData[], drive: drive_v3.Drive) {
+    const limit = pLimit(3);
+    await Promise.all(googleDriveFileData.map(dataRow => limit(async () => {
+        if (dataRow.googleDriveLink && dataRow.fileName.toLowerCase().endsWith('.pdf') && dataRow.fileId) {
+            try {
+                console.log(`Fetching PDF page count from GDrive for ${dataRow.fileName}...`);
+                const response = await drive.files.get({
+                    fileId: dataRow.fileId,
+                    alt: 'media'
+                }, { responseType: 'arraybuffer' });
+                if (response.data) {
+                    const pdfDoc = await PDFDocument.load(response.data as ArrayBuffer, { ignoreEncryption: true });
+                    dataRow.pageCount = pdfDoc.getPageCount();
+                    console.log(`Page count for ${dataRow.fileName} is ${dataRow.pageCount}`);
+                }
+            } catch (err: any) {
+                console.error(`Error fetching page count for ${dataRow.fileName}: ${err?.message || String(err)}`);
+                dataRow.pageCount = '*';
+            }
+        }
+    })));
 }
 
 export async function listFolderContentsAndGenerateCSVAndExcel(_folderIdOrUrl: string,
@@ -69,12 +98,12 @@ export async function listFolderContentsAndGenerateCSVAndExcel(_folderIdOrUrl: s
     exportDestFolder: string,
     umbrellaFolder: string = "",
     ignoreFolder = "",
-    type = PDF_TYPE, rowCounterController = ""): Promise<ExcelWriteResult | null> {
+    type = PDF_TYPE, rowCounterController = "", includePdfPageCount = false): Promise<ExcelWriteResult | null> {
     const gDriveFolderId = extractGoogleDriveId(_folderIdOrUrl)
     await FileUtils.createFolderIfNotExistsAsync(exportDestFolder);
 
     const googleDriveFileData: Array<GoogleApiData> = await listFolderContentsAsArrayOfData(gDriveFolderId,
-        drive, umbrellaFolder, ignoreFolder, type, rowCounterController)
+        drive, umbrellaFolder, ignoreFolder, type, rowCounterController, includePdfPageCount)
     const fileNameWithPath = await createFileNameWithPathForExport(gDriveFolderId,
         umbrellaFolder, exportDestFolder, FileConstUtils.getRowCounter(rowCounterController)[1]);
     FileConstUtils.incrementRowCounter(rowCounterController);
@@ -102,12 +131,13 @@ export async function listFolderContentsAndGenerateExcelV2ForPdfRenamer(_folderI
     umbrellaFolder: string = "",
     ignoreFolder = "",
     type = PDF_TYPE,
-    rowCounterController = ""): Promise<ExcelWriteResult | null> {
+    rowCounterController = "",
+    includePdfPageCount = false): Promise<ExcelWriteResult | null> {
     const folderId = extractGoogleDriveId(_folderIdOrUrl)
     await FileUtils.createFolderIfNotExistsAsync(exportDestFolder);
 
     const googleDriveFileData: Array<GoogleApiData> = await listFolderContentsAsArrayOfData(folderId,
-        drive, umbrellaFolder, ignoreFolder, type, rowCounterController)
+        drive, umbrellaFolder, ignoreFolder, type, rowCounterController, includePdfPageCount)
     const fileNameWithPath = await createFileNameWithPathForExport(folderId, umbrellaFolder, exportDestFolder,
         FileConstUtils.getRowCounter(rowCounterController)[1]);
     FileConstUtils.incrementRowCounter(rowCounterController);
@@ -225,6 +255,7 @@ export const addFileMetadataToArray = (file: drive_v3.Schema$File,
             parents: _parents,
             createdTime: createdTime,
             thumbnailLink: thumbnailLink,
+            fileId: file.id || undefined,
         });
 
         console.log(`${FileConstUtils.getRowCounter(rowCounterController)[0]}/${FileConstUtils.getRowCounter(rowCounterController)[1]}). ${ellipsis(fileName, 40)} `);

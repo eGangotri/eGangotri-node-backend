@@ -36,11 +36,12 @@ async function procOrigGoogleDrive(driveLinkOrFolderID: string,
   ignoreFolder = "",
   pdfRenamerXlV2 = false,
   type = PDF_TYPE,
-  rowCounterController = ""): Promise<ExcelWriteResult | null> {
+  rowCounterController = "",
+  includePdfPageCount = false): Promise<ExcelWriteResult | null> {
   if (pdfRenamerXlV2) {
     const res = await listFolderContentsAndGenerateExcelV2ForPdfRenamer(driveLinkOrFolderID, drive,
       `${EXPORT_ROOT_FOLDER}_googleDriveExcels`,
-      folderName, ignoreFolder, type, rowCounterController);
+      folderName, ignoreFolder, type, rowCounterController, includePdfPageCount);
     return res;
   }
   else {
@@ -50,22 +51,23 @@ async function procOrigGoogleDrive(driveLinkOrFolderID: string,
       folderName,
       ignoreFolder,
       type,
-      rowCounterController);
+      rowCounterController,
+      includePdfPageCount);
     return res;
   }
 }
 
 async function procReducedPdfGoogleDrive(driveLinkOrFolderID: string,
   folderName: string, ignoreFolder = "", pdfRenamerXlV2 = false
-  , type = PDF_TYPE, rowCounterController = ""): Promise<ExcelWriteResult | null> {
+  , type = PDF_TYPE, rowCounterController = "", includePdfPageCount = false): Promise<ExcelWriteResult | null> {
   if (pdfRenamerXlV2) {
     const res = await listFolderContentsAndGenerateExcelV2ForPdfRenamer(driveLinkOrFolderID, drive,
-      `${EXPORT_ROOT_FOLDER}_catReducedDrivePdfExcels`, folderName, ignoreFolder, type, rowCounterController);
+      `${EXPORT_ROOT_FOLDER}_catReducedDrivePdfExcels`, folderName, ignoreFolder, type, rowCounterController, includePdfPageCount);
     return res;
   }
   else {
     const res = await listFolderContentsAndGenerateCSVAndExcel(driveLinkOrFolderID, drive,
-      `${EXPORT_ROOT_FOLDER}_catReducedDrivePdfExcels`, folderName, ignoreFolder, type, rowCounterController);
+      `${EXPORT_ROOT_FOLDER}_catReducedDrivePdfExcels`, folderName, ignoreFolder, type, rowCounterController, includePdfPageCount);
     return res;
   }
 }
@@ -76,7 +78,8 @@ export const generateGoogleDriveListingExcel = async (driveLinkOrFolderID: strin
   ignoreFolder = "",
   pdfRenamerXlV2 = false,
   type = PDF_TYPE,
-  rowCounterController = ""): Promise<ExcelWriteResult | null> => {
+  rowCounterController = "",
+  includePdfPageCount = false): Promise<ExcelWriteResult | null> => {
   console.log(`generateGoogleDriveListingExcel:driveLinkOrFolderID ${driveLinkOrFolderID} ${type}`)
   //check if driveLinkOrFolderID is a valid google link
   if (!isValidDriveId(driveLinkOrFolderID)) {
@@ -89,8 +92,8 @@ export const generateGoogleDriveListingExcel = async (driveLinkOrFolderID: strin
   try {
     const _result =
       reduced ?
-        await procReducedPdfGoogleDrive(driveLinkOrFolderID, folderName, ignoreFolder, pdfRenamerXlV2, type, rowCounterController) :
-        await procOrigGoogleDrive(driveLinkOrFolderID, folderName, ignoreFolder, pdfRenamerXlV2, type, rowCounterController);
+        await procReducedPdfGoogleDrive(driveLinkOrFolderID, folderName, ignoreFolder, pdfRenamerXlV2, type, rowCounterController, includePdfPageCount) :
+        await procOrigGoogleDrive(driveLinkOrFolderID, folderName, ignoreFolder, pdfRenamerXlV2, type, rowCounterController, includePdfPageCount);
     console.log(`generateGoogleDriveListingExcel ${JSON.stringify(_result)}`)
     return _result;
   }
