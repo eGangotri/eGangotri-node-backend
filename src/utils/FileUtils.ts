@@ -431,6 +431,211 @@ const duplicateBySizeCheck = (metadata: FileStats[], metadata2: FileStats[]) => 
     return duplicates;
 }
 
+export const getDuplicatesOrUniquesByName =
+    async (folder: string, folder2: string, findDisjoint = false): Promise<FileSizeComparisonResult> => {
+        const metadata = await getAllFileListingWithFileSizeStats(folder);
+        const metadata2 = await getAllFileListingWithFileSizeStats(folder2);
+
+        if (findDisjoint) {
+            const disjointSet = disjointSetByFileName(metadata2, metadata)
+            const reverseDisjointSet = disjointSetByFileName(metadata, metadata2)
+            return {
+                msg: `${metadata.length} files in ${folder} 
+            and ${metadata2.length} files in ${folder2}
+            with ${disjointSet.length} uniques by name.`,
+
+                metadata1Length: metadata.length,
+                metadata2Length: metadata2.length,
+                diff1: metadata.length - disjointSet.length,
+                diff2: metadata2.length - reverseDisjointSet.length,
+                dupLength: disjointSet.length,
+                revDupLength: reverseDisjointSet.length,
+                disjointSet,
+                reverseDisjointSet,
+                [`"disjointSetASCSV"(${disjointSet?.length})`]: disjointSet.map((x: FileInfo) => x.absPath).join(","),
+                [`"reverseDisjointSetASCSV"(${reverseDisjointSet?.length})`]: reverseDisjointSet.map((x: FileInfo) => x.absPath).join(","),
+            }
+        }
+        else {
+            const duplicates = duplicateByNameCheck(metadata, metadata2)
+            const reverseDuplicates = duplicateByNameCheck(metadata2, metadata)
+            return {
+                msg: `${metadata.length} files in ${folder} and 
+            ${metadata2.length} files in ${folder2} 
+            with ${duplicates.length} duplicates by name.`,
+                metadata1Length: metadata.length,
+                metadata2Length: metadata2.length,
+                diff1: metadata.length - duplicates.length,
+                diff2: metadata2.length - reverseDuplicates.length,
+                dupLength: duplicates.length,
+                revDupLength: reverseDuplicates.length,
+                duplicates,
+                reverseDuplicates,
+                [`"duplicatesASCSV"(${duplicates?.length})`]: duplicates.map((x: FileInfo) => x.absPath).join(","),
+                [`"reverseDuplicatesASCSV"(${reverseDuplicates?.length})`]: reverseDuplicates.map((x: FileInfo) => x.absPath).join(","),
+            }
+        }
+    }
+
+export const moveDuplicatesOrDisjointSetByName = async (folder1: string, folder2: string, findDisjoint: boolean = false, tmpFolder: string = "_tmp") => {
+    const _forMoving = await getDuplicatesOrUniquesByName(folder1, folder2, findDisjoint);
+    const _itemsMoved: { absPath: string, destPath: string }[] = [];
+    const _items: FileInfo[] = []
+    if (folder1 === folder2) {
+        _items.push(...(findDisjoint ? _forMoving.disjointSet : _forMoving.duplicates));
+        // Track files by name to keep just one copy
+        const processedNames = new Set<string>();
+
+        _items.forEach((x: FileInfo) => {
+            const absPath = x.absPath;
+            const fileName = x.file;
+
+            // If we've already kept a file with this name, move this one to _tmp
+            if (processedNames.has(fileName)) {
+                const fileDir = path.dirname(absPath);
+                const tmpDir = path.join(fileDir, tmpFolder);
+
+                // Create _tmp directory if it doesn't exist
+                if (!fs.existsSync(tmpDir)) {
+                    fs.mkdirSync(tmpDir, { recursive: true });
+                }
+
+                let destPath = path.join(tmpDir, path.basename(absPath));
+                // Handle name collisions by adding a number suffix if file already exists
+                let counter = 1;
+                while (fs.existsSync(destPath)) {
+                    const ext = path.extname(absPath);
+                    const baseName = path.basename(absPath, ext);
+                    destPath = path.join(tmpDir, `${baseName}_${counter}${ext}`);
+                    counter++;
+                }
+                try {
+                    fs.renameSync(absPath, destPath);
+                    console.log(`Moving ${absPath} to ${destPath}`);
+                    _itemsMoved.push({
+                        absPath,
+                        destPath,
+                    });
+                }
+                catch (e) {
+                    console.log(`Error moving file ${absPath} to ${destPath} ${e}`);
+                }
+            } else {
+                // Keep this file (first occurrence of this name)
+                processedNames.add(fileName);
+                console.log(`Keeping ${absPath} as the first copy for name ${fileName}`);
+            }
+        });
+        console.log(`Kept ${processedNames.size} files (one per name) and moved ${_itemsMoved.length} ${findDisjoint ? "disjoint" : "duplicates"} to _tmp.`);
+        return {
+            moveMsg: _itemsMoved.length > 0 ?
+                `Kept ${processedNames.size} files (one per name) and moved ${_itemsMoved.length} ${findDisjoint ? "disjoint" : "duplicates"} to _tmp.` :
+                "No duplicates found, nothing moved",
+            _itemsMoved,
+            ..._forMoving,
+        }
+    }
+
+    else {
+        // For different folders, we only want to move duplicates from folder2
+        // For disjoint, we want files in folder2 that don't exist in folder1
+        // For duplicates, we want files in folder2 that have duplicates in folder1
+        const itemsToMove = findDisjoint ? _forMoving.disjointSet : _forMoving.duplicates;
+
+        console.log(`Moving ${itemsToMove.length} items from folder1 only (${findDisjoint ? "disjoint" : "duplicates"})`)
+
+        itemsToMove.forEach((x: FileInfo) => {
+            const absPath = x.absPath;
+            const fileDir = path.dirname(absPath);
+            const tmpDir = path.join(fileDir, tmpFolder);
+
+            // Create _tmp directory if it doesn't exist
+            if (!fs.existsSync(tmpDir)) {
+                fs.mkdirSync(tmpDir, { recursive: true });
+            }
+
+            let destPath = path.join(tmpDir, path.basename(absPath));
+            // Handle name collisions by adding a number suffix if file already exists
+            let counter = 1;
+            while (fs.existsSync(destPath)) {
+                const ext = path.extname(absPath);
+                const baseName = path.basename(absPath, ext);
+                destPath = path.join(tmpDir, `${baseName}_${counter}${ext}`);
+                counter++;
+            }
+            try {
+                fs.renameSync(absPath, destPath);
+                console.log(`Moving ${absPath} to ${destPath}`);
+                _itemsMoved.push({
+                    absPath,
+                    destPath,
+                });
+            }
+            catch (e) {
+                console.log(`Error moving file ${absPath} to ${destPath} ${e}`);
+            }
+        });
+
+        console.log(`Moved ${_itemsMoved.length} ${findDisjoint ? "disjoint" : "duplicates"} 
+            from folder1 to _tmp. Left folder2 intact.`);
+        return {
+            moveMsg: _itemsMoved.length > 0 ?
+                `Moved ${_itemsMoved.length} ${findDisjoint ? "disjoint" : "duplicates"} from folder1
+                 to _tmp. Left folder2 intact.` :
+                "No files found to move from folder1",
+            _itemsMoved,
+            ..._forMoving,
+        }
+    }
+}
+
+const disjointSetByFileName = (metadata: FileStats[], metadata2: FileStats[]) => {
+    const disjointSet: FileInfo[] = [];
+    console.log(`metadata ${metadata[0]?.fileName} metadata2 ${metadata2[0]?.fileName}`)
+    metadata.forEach((file: FileStats) => {
+        const match = metadata2.find((file2: FileStats) => {
+            if (file.fileName === file2.fileName && file.absPath !== file2.absPath) {
+                console.log(`fileName ${file.fileName} ${file2?.fileName}`);
+            }
+            return (file.fileName === file2.fileName && file.absPath !== file2.absPath);
+        });
+
+        // Check if match is undefined or null
+        if (!match) {
+            disjointSet.push({
+                size: Mirror.sizeInfo(file.rawSize),
+                absPath: file.absPath,
+                file: file.fileName,
+            });
+        }
+    });
+    console.log(`disjointSet ${JSON.stringify(disjointSet[0])} ${disjointSet.length}`)
+
+    return disjointSet;
+}
+
+const duplicateByNameCheck = (metadata: FileStats[], metadata2: FileStats[]) => {
+    const duplicates: FileInfo[] = [];
+    console.log(`metadata ${metadata[0]?.fileName} metadata2 ${metadata2[0]?.fileName}`)
+    metadata.forEach((file: FileStats) => {
+        const match = metadata2.find((file2: FileStats) => {
+            if (file.fileName === file2.fileName && file.absPath !== file2.absPath) {
+                console.log(`fileName ${file.fileName} ${file2?.fileName}`)
+            }
+            return (file.fileName === file2.fileName && file.absPath !== file2.absPath)
+        });
+        if (match?.fileName.length > 0) {
+            duplicates.push({
+                size: Mirror.sizeInfo(file.rawSize),
+                file: file.fileName,
+                file2: match?.fileName,
+                absPath: file.absPath,
+            });
+        }
+    });
+    return duplicates;
+}
+
 export const isFileInUse = async (file: string): Promise<boolean> => {
     try {
         const fd = await fsPromise.open(file, 'r+');

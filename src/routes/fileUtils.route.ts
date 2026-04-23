@@ -2,7 +2,7 @@ import express from 'express';
 import * as path from 'path';
 import * as fsPromise from 'fs/promises';
 import { findTopNLongestFileNames } from '../utils/utils';
-import { findInvalidFilePaths, getDuplicatesOrUniquesBySize, isValidPath, moveDuplicatesOrDisjointSetBySize, getPathOrSrcRootForProfile } from '../utils/FileUtils';
+import { findInvalidFilePaths, getDuplicatesOrUniquesBySize, isValidPath, moveDuplicatesOrDisjointSetBySize, getPathOrSrcRootForProfile, getDuplicatesOrUniquesByName, moveDuplicatesOrDisjointSetByName } from '../utils/FileUtils';
 import { renameAllNonAsciiInFolder } from '../files/renameNonAsciiFiles';
 import { callAksharamukha, DEFAULT_TARGET_SCRIPT_ROMAN_COLLOQUIAL } from '../aksharamukha/convert';
 import { convertJpgsToPdfInAllSubFolders } from '../imgToPdf/jpgToPdf';
@@ -113,6 +113,32 @@ fileUtilsRoute.post('/findByFileSize', async (req: any, resp: any) => {
         }
         else {
             const result = await getDuplicatesOrUniquesBySize(folder, folder2, findDisjoint);
+            resp.status(200).send({
+                response: result
+            });
+        }
+    }
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})
+
+fileUtilsRoute.post('/findByFileName', async (req: any, resp: any) => {
+    try {
+        const folder = req.body.folder1;
+        const folder2 = req.body.folder2;
+        const findDisjoint = req.body.findDisjoint || false;
+        const moveItems = req.body.moveItems || false;
+        console.log(`findByFileName -> folder: ${folder} folder2: ${folder2}`);
+        if (moveItems) {
+            const result = await moveDuplicatesOrDisjointSetByName(folder, folder2, findDisjoint);
+            resp.status(200).send({
+                response: result
+            });
+        }
+        else {
+            const result = await getDuplicatesOrUniquesByName(folder, folder2, findDisjoint);
             resp.status(200).send({
                 response: result
             });
