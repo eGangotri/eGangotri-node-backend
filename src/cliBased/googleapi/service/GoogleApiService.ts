@@ -72,23 +72,26 @@ export async function listFolderContentsAsArrayOfData(itemId: string,
 
 async function populatePageCountsFromGDrive(googleDriveFileData: GoogleApiData[], drive: drive_v3.Drive) {
     const limit = pLimit(3);
-    await Promise.all(googleDriveFileData.map(dataRow => limit(async () => {
-        if (dataRow.googleDriveLink && dataRow.fileName.toLowerCase().endsWith('.pdf') && dataRow.fileId) {
-            try {
-                console.log(`Fetching PDF page count from GDrive for ${dataRow.fileName}...`);
-                const response = await drive.files.get({
-                    fileId: dataRow.fileId,
-                    alt: 'media'
-                }, { responseType: 'arraybuffer' });
-                if (response.data) {
-                    const pdfDoc = await PDFDocument.load(response.data as ArrayBuffer, { ignoreEncryption: true });
-                    dataRow.pageCount = pdfDoc.getPageCount();
-                    console.log(`Page count for ${dataRow.fileName} is ${dataRow.pageCount}`);
-                }
-            } catch (err: any) {
-                console.error(`Error fetching page count for ${dataRow.fileName}: ${err?.message || String(err)}`);
-                dataRow.pageCount = '*';
+    const pdfFiles = googleDriveFileData.filter(dataRow => dataRow.googleDriveLink && dataRow.fileName.toLowerCase().endsWith('.pdf') && dataRow.fileId);
+    const totalPdfs = pdfFiles.length;
+    let processedCount = 0;
+
+    await Promise.all(pdfFiles.map(dataRow => limit(async () => {
+        try {
+            processedCount++;
+            console.log(`Fetching ${processedCount}/${totalPdfs} PDF page count from GDrive for ${dataRow.fileName}...`);
+            const response = await drive.files.get({
+                fileId: dataRow.fileId,
+                alt: 'media'
+            }, { responseType: 'arraybuffer' });
+            if (response.data) {
+                const pdfDoc = await PDFDocument.load(response.data as ArrayBuffer, { ignoreEncryption: true });
+                dataRow.pageCount = pdfDoc.getPageCount();
+                console.log(`Page count for ${dataRow.fileName} is ${dataRow.pageCount}`);
             }
+        } catch (err: any) {
+            console.error(`Error fetching page count for ${dataRow.fileName}: ${err?.message || String(err)}`);
+            dataRow.pageCount = '*';
         }
     })));
 }
