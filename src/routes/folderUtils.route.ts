@@ -71,18 +71,19 @@ folderUtilsRoute.get('/getArchiveProfileName', async (req: any, resp: any) => {
     }
 })
 
-folderUtilsRoute.get('/getAllArchiveEmails', async (req: any, resp: any) => {
-    try {
-        const emails = getAllArchiveEmails();
-        resp.status(200).send({
-            response: Object.fromEntries(emails)
-        });
-    }
-    catch (err: any) {
-        console.log('Error', err);
-        resp.status(400).send(err);
-    }
-})
+//critical information can be used
+// folderUtilsRoute.get('/getAllArchiveEmails', async (req: any, resp: any) => {
+//     try {
+//         const emails = getAllArchiveEmails();
+//         resp.status(200).send({
+//             response: Object.fromEntries(emails)
+//         });
+//     }
+//     catch (err: any) {
+//         console.log('Error', err);
+//         resp.status(400).send(err);
+//     }
+// })
 
 folderUtilsRoute.get('/getAllArchiveProfiles', async (req: any, resp: any) => {
     try {
