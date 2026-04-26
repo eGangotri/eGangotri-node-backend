@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import path from 'path'
 import {
+    ARCHIVE_LOGIN_PROPERTIES_FILES,
     ARCHIVE_METADATA_PROPERTIES_FILES,
     DEST_ROOT,
     LOCAL_FOLDERS_PROPERTIES_FILES,
@@ -110,4 +111,58 @@ export const getArchiveMetadataForProfile = (profile: string) => {
 
 export const isValidArchiveProfile = (profile: string) => {
     return LOCAL_FOLDERS_PROPERTIES_FILE_FOR_SRC.has(profile?.trim());
+}
+
+let ARCHIVE_EMAIL_AND_PROFILES = []
+
+export const getAllArchiveEmails = () => {
+    if (ARCHIVE_EMAIL_AND_PROFILES.length != 2) {
+        ARCHIVE_EMAIL_AND_PROFILES = getArchiveLoginProperties();
+    }
+    return ARCHIVE_EMAIL_AND_PROFILES[0];
+}
+export const getAllArchiveProfiles = () => {
+    if (ARCHIVE_EMAIL_AND_PROFILES.length != 2) {
+        ARCHIVE_EMAIL_AND_PROFILES = getArchiveLoginProperties();
+    }
+    return ARCHIVE_EMAIL_AND_PROFILES[1];
+}
+export const getArchiveProfileName = (profile: string) => {
+    return getAllArchiveProfiles().get(profile?.trim());
+}
+
+export const getArchiveProfileEmail = (profile: string) => {
+    return getAllArchiveEmails().get(profile?.trim());
+}
+
+export const getArchiveLoginProperties = () => {
+    const loginEmailProperties = new Map<string, string>();
+    const loginProfileProperties = new Map<string, string>();
+    for (const file of ARCHIVE_LOGIN_PROPERTIES_FILES) {
+        if (!checkFolderExistsSync(file)) {
+            console.log(`No Local Folder ${file} found`);
+            continue;
+        }
+        const data = fs.readFileSync(file, 'utf-8');
+        const lines = data.split(/\r?\n/);
+        lines.forEach((line) => {
+            const [key, value] = line.split('=');
+            if (value && value?.includes(",")) {
+                const values = value.split(",");
+                loginEmailProperties.set(key.trim(), values[0].trim());
+                const profileName = values[1]?.trim() || "";
+                loginProfileProperties.set(key.trim(), profileName.length === 0 || profileName === "*" ? "" : profileName);
+            }
+
+            else {
+                if (key?.trim() && value?.trim()) {
+                    loginEmailProperties.set(key.trim(), value.trim());
+                    loginProfileProperties.set(key.trim(), "");
+                }
+            }
+        });
+    }
+    console.log(`archive.login.properties (${loginEmailProperties.size}) 
+        loginProfileProerties: ${loginProfileProperties.size}`);
+    return [loginEmailProperties, loginProfileProperties];
 }

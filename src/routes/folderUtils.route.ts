@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import { getAllFileListingWithFileSizeStats, getAllFoldersWithPdfCount } from '../utils/FileStatsUtils';
 import { FileStats, FolderStats } from 'imgToPdf/utils/types';
 import { getNumericInBraces } from './utils';
+import { getAllArchiveEmails, getAllArchiveProfiles, getArchiveProfileEmail, getArchiveProfileName } from '../archiveUpload/ArchiveProfileUtils';
 
 export const folderUtilsRoute = express.Router();
 
@@ -29,6 +30,65 @@ folderUtilsRoute.get('/findFolderWithPdfCount', async (req: any, resp: any) => {
 
         resp.status(200).send({
             response: metaDataWithCount
+        });
+    }
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})
+
+
+folderUtilsRoute.get('/getArchiveProfileEmail', async (req: any, resp: any) => {
+    try {
+        const profile = req.query.profile;
+        console.log(`profile: ${profile}`);
+
+        const email = getArchiveProfileEmail(profile);
+        resp.status(200).send({
+            response: email
+        });
+    }
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})
+
+folderUtilsRoute.get('/getArchiveProfileName', async (req: any, resp: any) => {
+    try {
+        const profile = req.query.profile;
+        console.log(`profile: ${profile}`);
+
+        const profileName = getArchiveProfileName(profile);
+        resp.status(200).send({
+            response: profileName
+        });
+    }
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})
+
+folderUtilsRoute.get('/getAllArchiveEmails', async (req: any, resp: any) => {
+    try {
+        const emails = getAllArchiveEmails();
+        resp.status(200).send({
+            response: Object.fromEntries(emails)
+        });
+    }
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})
+
+folderUtilsRoute.get('/getAllArchiveProfiles', async (req: any, resp: any) => {
+    try {
+        const profiles = getAllArchiveProfiles();
+        resp.status(200).send({
+            response: Object.fromEntries(profiles)
         });
     }
     catch (err: any) {
