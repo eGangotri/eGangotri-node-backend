@@ -1,3 +1,10 @@
+### MONGO DB
+## Start Mongo manually use from CLI as Administrator the following command
+net start MongoDB
+## To stop
+net stop MongoDB
+
+
 We are using Mongo Atlas for DB Hosting.
 
 Use auto-login via gmail using e********trust@gmail.com
