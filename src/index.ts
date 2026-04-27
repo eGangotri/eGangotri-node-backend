@@ -105,7 +105,7 @@ async function start() {
     await connectToMongo(args);
     console.log(`Server - connected to DB, ${new Date()}`);
     const server = egangotri.listen(port, '0.0.0.0', async () => {
-      console.log(`Server - deployed ${deployDate} - running at http://${hostname}:${port}/`, new Date());
+      console.log(`Server - deployed ${deployDate} - running at ${hostname}:${port}/`, new Date());
     });
     server.timeout = 4 * 60 * 60 * 1000; // 4 hours
   } catch (err) {
