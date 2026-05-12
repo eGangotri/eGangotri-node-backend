@@ -60,7 +60,8 @@
     "rename-gdrive-img-files": "ts-node ./src/cliBased/ai/renaming-workflow/renameGDRiveImgFiles.ts",
     "get-refresh-token": "ts-node ./src/cliBased/googleapi/_utils/getRefreshToken.ts",
     "get-win64-chromedriver": "ts-node ./src/_adHoc/getWin64ChromedriverUrl.ts",
-    "archive-login": "ts-node ./src/_adHoc/archiveLogin.ts"
+    "archive-login": "ts-node ./src/_adHoc/archiveLogin.ts",
+    "fb-albums-scraper": "ts-node ./src/_adHoc/fb-albums-scraper.js"
   },
   "repository": {
     "type": "git",

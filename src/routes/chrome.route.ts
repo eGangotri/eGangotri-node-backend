@@ -3,6 +3,7 @@ import {
     CHROME_DEBUG_PORTS,
     inspectAllChromeTabs,
     scanAllPorts,
+    checkAndCloseValidArchiveTabs,
 } from '../services/chromeService';
 
 export const chromeRoute = express.Router();
@@ -92,6 +93,41 @@ chromeRoute.get('/scanPorts', async (req: any, res: any) => {
 
     } catch (err: any) {
         console.error('[chromeRoute] scanPorts error:', err);
+        return res.status(500).json({
+            response: { status: 'error', message: err?.message || String(err) }
+        });
+    }
+});
+
+/**
+ * GET /chrome/closeSuccessfullyUploaded
+ *
+ * Checks all archive.org URLs and closes tabs that pass checkArchiveUrlValidity.
+ * This is useful for closing tabs after successful uploads.
+ *
+ * Query params:
+ *   ports   Comma-separated list of debug ports to scan.
+ *           Defaults to the configured CHROME_DEBUG_PORTS list.
+ *           Example: ?ports=9222,9223,9224
+ *
+ * Response shape: Object with scan results and tab closure details
+ */
+chromeRoute.get('/closeSuccessfullyUploaded', async (req: any, res: any) => {
+    try {
+        // ── Parse query params ────────────────────────────────────────────
+        const portsParam = req.query.ports as string | undefined;
+        const ports: number[] = portsParam
+            ? portsParam.split(',').map(p => parseInt(p.trim(), 10)).filter(n => !isNaN(n))
+            : CHROME_DEBUG_PORTS;
+
+        console.log(`[chromeRoute] closeSuccessfullyUploaded | ports=${ports}`);
+
+        const result = await checkAndCloseValidArchiveTabs(ports);
+
+        return res.status(200).json({ response: result });
+
+    } catch (err: any) {
+        console.error('[chromeRoute] closeSuccessfullyUploaded error:', err);
         return res.status(500).json({
             response: { status: 'error', message: err?.message || String(err) }
         });

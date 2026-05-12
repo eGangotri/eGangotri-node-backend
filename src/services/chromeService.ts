@@ -1,5 +1,6 @@
 import axios from 'axios';
 import CDP from 'chrome-remote-interface';
+import { checkArchiveUrlValidity } from '../utils/utils';
 
 // ─── Configuration ────────────────────────────────────────────────────────────
 
@@ -166,6 +167,25 @@ async function detectAndHandleDomModal(
  *   'decline' – click Cancel / dismiss
  *   'none'    – detect only, do NOT interact
  */
+/**
+ * Close a specific Chrome tab via CDP
+ */
+export async function closeTab(tab: ChromeTab, port: number): Promise<{ success: boolean; error?: string }> {
+    try {
+        await axios({
+            method: 'POST',
+            url: `http://${CDP_HOST}:${port}/json/close/${tab.id}`,
+            timeout: 5000
+        });
+        return { success: true };
+    } catch (err: any) {
+        return { 
+            success: false, 
+            error: err?.message || String(err) 
+        };
+    }
+}
+
 export async function inspectTab(
     tab: ChromeTab,
     port: number,
@@ -360,5 +380,123 @@ export async function inspectAllChromeTabs(
         archiveOrgTabs: archiveOrgCount,
         results,
         portScanDetails,
+    };
+}
+
+/**
+ * Check all archive.org URLs and close tabs that pass checkArchiveUrlValidity
+ */
+export async function checkAndCloseValidArchiveTabs(
+    ports: number[] = CHROME_DEBUG_PORTS
+): Promise<{
+    scannedPorts: number[];
+    totalArchiveTabs: number;
+    validTabsClosed: number;
+    invalidTabsRemaining: number;
+    errors: string[];
+    details: Array<{
+        url: string;
+        tabId: string;
+        port: number;
+        isValid: boolean;
+        closed: boolean;
+        error?: string;
+    }>;
+}> {
+    const portScanDetails = await scanAllPorts(ports);
+    const errors: string[] = [];
+    const details: Array<{
+        url: string;
+        tabId: string;
+        port: number;
+        isValid: boolean;
+        closed: boolean;
+        error?: string;
+    }> = [];
+
+    // Collect all archive.org tabs across all reachable ports
+    const archiveTabs: Array<{ tab: ChromeTab; port: number }> = [];
+    for (const scan of portScanDetails) {
+        if (scan.reachable && scan.tabs) {
+            for (const tab of scan.tabs) {
+                if (tab.url.startsWith(ARCHIVE_ORG_PREFIX)) {
+                    archiveTabs.push({ tab, port: scan.port });
+                }
+            }
+        }
+    }
+
+    console.log(`Found ${archiveTabs.length} archive.org tabs to check`);
+
+    let validTabsClosed = 0;
+    let invalidTabsRemaining = 0;
+
+    // Check each tab and close if valid
+    for (let i = 0; i < archiveTabs.length; i++) {
+        const { tab, port } = archiveTabs[i];
+        
+        try {
+            console.log(`Checking tab ${i + 1}/${archiveTabs.length}: ${tab.url}`);
+            
+            // Check URL validity
+            const isValid = await checkArchiveUrlValidity(tab.url, i + 1, archiveTabs.length);
+            
+            if (isValid) {
+                console.log(`URL is valid, closing tab: ${tab.url}`);
+                const closeResult = await closeTab(tab, port);
+                
+                if (closeResult.success) {
+                    validTabsClosed++;
+                    details.push({
+                        url: tab.url,
+                        tabId: tab.id,
+                        port,
+                        isValid: true,
+                        closed: true
+                    });
+                } else {
+                    errors.push(`Failed to close valid tab ${tab.url}: ${closeResult.error}`);
+                    details.push({
+                        url: tab.url,
+                        tabId: tab.id,
+                        port,
+                        isValid: true,
+                        closed: false,
+                        error: closeResult.error
+                    });
+                }
+            } else {
+                console.log(`URL is not valid, keeping tab: ${tab.url}`);
+                invalidTabsRemaining++;
+                details.push({
+                    url: tab.url,
+                    tabId: tab.id,
+                    port,
+                    isValid: false,
+                    closed: false
+                });
+            }
+        } catch (err: any) {
+            const errorMsg = `Error checking tab ${tab.url}: ${err?.message || String(err)}`;
+            console.error(errorMsg);
+            errors.push(errorMsg);
+            details.push({
+                url: tab.url,
+                tabId: tab.id,
+                port,
+                isValid: false,
+                closed: false,
+                error: errorMsg
+            });
+        }
+    }
+
+    return {
+        scannedPorts: ports,
+        totalArchiveTabs: archiveTabs.length,
+        validTabsClosed,
+        invalidTabsRemaining,
+        errors,
+        details
     };
 }
