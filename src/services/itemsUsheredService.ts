@@ -60,8 +60,8 @@ export async function getListOfItemsUshered(queryOptions: ItemsListOptionsType) 
 
 export const itemsUsheredVerficationAndDBFlagUpdate = async (uploadCycleIdForVerification: string) => {
   //get all Items_Ushered for uploadCycleIdForVerification
-  const itemsUsheredByUploadCycle = await getListOfItemsUshered({
-    uploadCycleId: uploadCycleIdForVerification,
+  const itemsUsheredByUploadCycle = await ItemsUshered.find({
+    uploadCycleId: uploadCycleIdForVerification
   });
 
   const _itemsUsheredFilter = itemsUsheredByUploadCycle.filter(x => x?.uploadFlag === null || x?.uploadFlag === false || x?.uploadFlag === undefined)
@@ -121,7 +121,9 @@ export const selectedItemsVerficationAndDBFlagUpdate = async (uploadsForVerifica
 }
 
 export const updadeAllUplodVerfiedFlagInUploadCycle = async (uploadCycleId: string) => {
-  const itemsUshered = await getListOfItemsUshered({ uploadCycleId: uploadCycleId.toString() });
+   const itemsUshered = await ItemsUshered.find({
+    uploadCycleId: uploadCycleId.toString()
+  });
   const allTrue = itemsUshered.filter(x => x.uploadFlag === true).length === itemsUshered.length;
   console.log(`allTrue: ${allTrue} ${itemsUshered.length}`)
   try {

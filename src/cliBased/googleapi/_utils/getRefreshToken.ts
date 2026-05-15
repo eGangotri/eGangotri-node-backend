@@ -110,6 +110,5 @@ export const refreshGdriveToken = async () => {
 }
 
 console.log(`check if
-     refreshGdriveToken().catch(console.error) 
-is uncommented`);
+     refreshGdriveToken().catch(console.error) is uncommented`);
 //refreshGdriveToken().catch(console.error);
