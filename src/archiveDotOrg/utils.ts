@@ -7,12 +7,14 @@ import { DD_MM_YYYY_FORMAT } from '../utils/constants';
 import { FETCH_ACRHIVE_METADATA_COUNTER } from './archiveScraper';
 import * as path from 'path';
 import * as fsPromise from 'fs/promises';
+import pLimit from 'p-limit';
 
 export const DOUBLE_HASH_SEPARATOR = "##";
 export const ARCHIVE_EXCEL_PATH = `${os.homedir()}\\Downloads`;
 export const ARCHIVE_DOT_ORG_PREFIX = "https://archive.org";
 export const ARCHIVE_DOT_ORG_DETAILS_PREFIX = "https://archive.org/details/";
 export const ARCHIVE_DOT_ORG_DWONLOAD_PREFIX = "https://archive.org/download/";
+const ARCHIVE_METADATA_CONCURRENCY = 8;
 
 export const extractArchiveAcctName = (_urlOrIdentifier: string) => {
     if (_urlOrIdentifier?.includes('@')) {
@@ -109,21 +111,27 @@ const linkDataToExcelFormat = (links: ArchiveLinkData[], archiveExcelHeader: Arc
 
 export const extractEmail = async (identifier: string) => {
     const response = await fetch(`https://archive.org/metadata/${identifier}`)
+    if (!response.ok) {
+        throw new Error(`Archive metadata failed with ${response.status} ${response.statusText} for ${identifier}`);
+    }
     const _email = await response.json();
     return _email.metadata.uploader
 }
 
 export const extractPdfMetaData = async (identifier: string) => {
     const response = await fetch(`https://archive.org/metadata/${identifier}`)
+    if (!response.ok) {
+        throw new Error(`Archive metadata failed with ${response.status} ${response.statusText} for ${identifier}`);
+    }
     const metadata = await response.json();
-    const pdfRow = metadata.files.filter((file: { format: string, name: string }) => {
-        return file.format.endsWith("PDF") && file.name.endsWith(".pdf") && !file.name.includes("_text.pdf");
+    const pdfRow = (metadata.files || []).filter((file: { format: string, name: string }) => {
+        return file.format?.endsWith("PDF") && file.name?.endsWith(".pdf") && !file.name.includes("_text.pdf");
     });
-    const zippedFile = metadata.files.filter((file: any) => {
-        return file.format.startsWith("Single Page");
+    const zippedFile = (metadata.files || []).filter((file: any) => {
+        return file.format?.startsWith("Single Page");
     });
 
-    const _filesWithoutCertainformats = metadata.files.filter((file: any) => {
+    const _filesWithoutCertainformats = (metadata.files || []).filter((file: any) => {
         return file.source === "original" && file.format !== "Metadata" && file.format !== "Item Tile"
     });
 
@@ -147,9 +155,9 @@ export const extractLinkedData = async (_hitsHits: HitsEntity[],
     email: string,
     _archiveAcctName: string,
     limitedFields = false) => {
-    const _linkData: ArchiveLinkData[] = [];
+    const limit = pLimit(ARCHIVE_METADATA_CONCURRENCY);
     console.log(`extractLinkedData Extracting metadata for ${_hitsHits.length} items`);
-    for (const hit of _hitsHits) {
+    const _linkData = await Promise.all(_hitsHits.map(hit => limit(async () => {
         FETCH_ACRHIVE_METADATA_COUNTER.increment();
         const identifier = hit.fields.identifier;
         let archiveItemName = ""
@@ -214,8 +222,8 @@ export const extractLinkedData = async (_hitsHits: HitsEntity[],
             archiveItemName,
             pdfSize
         );
-        _linkData.push(archiveLinkData)
-    }
+        return archiveLinkData;
+    })));
     return _linkData
 }
 

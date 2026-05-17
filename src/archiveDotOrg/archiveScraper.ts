@@ -4,6 +4,100 @@ import * as _ from 'lodash';
 
 export const MAX_ITEMS_RETRIEVABLE_IN_ARCHIVE_ORG = 10000;
 export const DEFAULT_HITS_PER_PAGE = 1000;
+const ARCHIVE_SEARCH_FIELDS = [
+    "identifier",
+    "title",
+    "description",
+    "subject",
+    "creator",
+    "collection",
+    "mediatype",
+    "licenseurl",
+    "item_size",
+    "files_count",
+    "downloads",
+    "week",
+    "month",
+    "addeddate",
+    "publicdate",
+    "num_favorites"
+];
+
+const normalizeAdvancedSearchDoc = (doc: any): HitsEntity => {
+    return {
+        index: "archive",
+        service_backend: "archive",
+        hit_type: "item",
+        fields: {
+            identifier: doc.identifier,
+            title: doc.title || "",
+            description: Array.isArray(doc.description) ? doc.description.join(" ") : doc.description || "",
+            subject: Array.isArray(doc.subject) ? doc.subject : doc.subject ? [doc.subject] : [],
+            creator: Array.isArray(doc.creator) ? doc.creator : doc.creator ? [doc.creator] : [],
+            collection: Array.isArray(doc.collection) ? doc.collection : doc.collection ? [doc.collection] : [],
+            mediatype: doc.mediatype || "",
+            licenseurl: doc.licenseurl || "",
+            item_size: Number(doc.item_size || 0),
+            files_count: Number(doc.files_count || 0),
+            downloads: Number(doc.downloads || 0),
+            week: Number(doc.week || 0),
+            month: Number(doc.month || 0),
+            addeddate: doc.addeddate || "",
+            publicdate: doc.publicdate || "",
+            num_favorites: doc.num_favorites || null
+        }
+    };
+}
+
+const buildAdvancedSearchQuery = (username: string, startDate: number = 0, endDate: number = 0) => {
+    const queryParts = [`uploader:${username}`];
+    if (startDate > 0 && endDate > 0) {
+        queryParts.push(`publicdate:[${new Date(startDate).toISOString()} TO ${new Date(endDate).toISOString()}]`);
+    }
+    return queryParts.join(" AND ");
+}
+
+const callArchiveAdvancedSearchApi = async (username: string,
+    pageIndex = 1,
+    startDate: number = 0,
+    endDate: number = 0,
+    ascOrder: boolean = false,
+    rows: number = DEFAULT_HITS_PER_PAGE): Promise<Hits> => {
+    const SORT_ORDER = ascOrder === true ? "publicdate asc" : "publicdate desc";
+    if (!rows || isNaN(rows) || rows <= 0) {
+        rows = DEFAULT_HITS_PER_PAGE;
+    }
+    if (rows > DEFAULT_HITS_PER_PAGE) {
+        rows = DEFAULT_HITS_PER_PAGE;
+    }
+    try {
+        const params = new URLSearchParams();
+        params.append("q", buildAdvancedSearchQuery(username, startDate, endDate));
+        ARCHIVE_SEARCH_FIELDS.forEach(field => params.append("fl[]", field));
+        params.append("sort[]", SORT_ORDER);
+        params.append("rows", rows.toString());
+        params.append("page", pageIndex.toString());
+        params.append("output", "json");
+        const _url = `https://archive.org/advancedsearch.php?${params.toString()}`;
+        console.log(`callArchiveAdvancedSearchApi:${username} PageIndex: ${pageIndex} ${username}
+        ${_url}`);
+        const response = await fetch(_url);
+        if (!response.ok) {
+            throw new Error(`Archive advancedsearch failed with ${response.status} ${response.statusText}`);
+        }
+        const data = await response.json();
+        const docs = data?.response?.docs || [];
+        return {
+            total: data?.response?.numFound || 0,
+            returned: docs.length,
+            hits: docs.map(normalizeAdvancedSearchDoc)
+        };
+    }
+    catch (err) {
+        console.log(`Error in callArchiveAdvancedSearchApi ${err.message}`);
+        return callGenericArchiveApi(username, pageIndex, startDate, endDate, ascOrder, rows);
+    }
+};
 //https://archive.org/services/search/beta/page_production/?user_query=&page_type=account_details&page_target=@drnaithani&page_elements=[%22uploads%22]&hits_per_page=1000&page=1&sort=publicdate:desc&aggregations=false&client_url=https://archive.org/details/@drnaithani
 const callGenericArchiveApi = async (username: string,
     pageIndex = 1,
@@ -82,7 +176,7 @@ const fetchArchiveMetadata = async (username: string,
 
     try {
         let currentPageIndex = 1;
-        let _hits: Hits = await callGenericArchiveApi(username, currentPageIndex, dateRange[0], dateRange[1], ascOrder, DEFAULT_HITS_PER_PAGE);
+        let _hits: Hits = await callArchiveAdvancedSearchApi(username, currentPageIndex, dateRange[0], dateRange[1], ascOrder, DEFAULT_HITS_PER_PAGE);
         let hitsTotal = _hits?.total || 0;
         // Use the actual returned page size (Archive.org caps at 100 regardless of hits_per_page)
         const actualPageSize = _hits?.returned || _hits?.hits?.length || DEFAULT_HITS_PER_PAGE;
@@ -106,7 +200,7 @@ const fetchArchiveMetadata = async (username: string,
             // If the first page we fetched isn't the page we need, re-fetch the correct starting page
             if (startPageIndex !== 1) {
                 currentPageIndex = startPageIndex;
-                const startPageHits = await callGenericArchiveApi(username, currentPageIndex, dateRange[0], dateRange[1], ascOrder, DEFAULT_HITS_PER_PAGE);
+                const startPageHits = await callArchiveAdvancedSearchApi(username, currentPageIndex, dateRange[0], dateRange[1], ascOrder, DEFAULT_HITS_PER_PAGE);
                 if (startPageHits?.hits?.length > 0) {
                     _allCollectedHits.push(...startPageHits.hits);
                 }
@@ -117,7 +211,7 @@ const fetchArchiveMetadata = async (username: string,
             // Fetch subsequent pages if needed
             while (currentPageIndex < endPageIndex) {
                 currentPageIndex++;
-                const nextHits = await callGenericArchiveApi(username, currentPageIndex, dateRange[0], dateRange[1], ascOrder, DEFAULT_HITS_PER_PAGE);
+                const nextHits = await callArchiveAdvancedSearchApi(username, currentPageIndex, dateRange[0], dateRange[1], ascOrder, DEFAULT_HITS_PER_PAGE);
                 if (nextHits?.hits?.length > 0) {
                     _allCollectedHits.push(...nextHits.hits);
                 } else {
@@ -220,7 +314,7 @@ export const scrapeArchiveOrgProfiles = async (archiveUrlsOrAcctNamesAsCSV: stri
         const _archiveAcctName = extractArchiveAcctName(archiveUrlsOrAcctNames[i]);
         try {
             console.log(`Scraping Link # ${i + 1}. ${archiveUrlsOrAcctNames[i]}`)
-            if (!checkValidArchiveUrlAndUpdateStatus(_archiveAcctName, _status)) {
+            if (!(await checkValidArchiveUrlAndUpdateStatus(_archiveAcctName, _status))) {
                 continue;
             }
 
