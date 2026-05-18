@@ -46,10 +46,21 @@ const getFoldersCorrespondingToProfile = (root: string): Map<string, string> => 
     }
     return profileAndFolder;
 }
-export const LOCAL_FOLDERS_PROPERTIES_FILE_FOR_SRC: Map<string, string> = getFoldersCorrespondingToProfile(SRC_ROOT);
-export const LOCAL_FOLDERS_PROPERTIES_FILE_FOR_DEST: Map<string, string> = getFoldersCorrespondingToProfile(DEST_ROOT);
 
-export const getFolderFromProfile = (profile: string, properties: Map<string, string>) => {
+const getFolderCorrespondingToProfileWithDuplication = (root: string, isDest: boolean = false): Map<string, string> => {
+    const folders = getFoldersCorrespondingToProfile(root);
+    const foldersWithDuplication = new Map<string, string>(folders);
+    for (const [key, value] of folders.entries()) {
+        foldersWithDuplication.set(`${key}2`, isDest ? value : `${value}${isDest ? "" : "2"}`);
+    }
+    return foldersWithDuplication;
+}
+
+
+export const LOCAL_FOLDERS_PROPERTIES_FILE_FOR_SRC: Map<string, string> = getFolderCorrespondingToProfileWithDuplication(SRC_ROOT);
+export const LOCAL_FOLDERS_PROPERTIES_FILE_FOR_DEST: Map<string, string> = getFolderCorrespondingToProfileWithDuplication(DEST_ROOT, true);
+
+export const getFolderFromProfile = (profile: string, properties: Map<string, string>): string => {
     const key = profile?.trim();
     if (key && key.length > 0 && properties.has(key)) {
         return properties.get(key);
