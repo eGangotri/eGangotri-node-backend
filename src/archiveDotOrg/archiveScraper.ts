@@ -52,7 +52,9 @@ const normalizeAdvancedSearchDoc = (doc: any): HitsEntity => {
 const buildAdvancedSearchQuery = (username: string, startDate: number = 0, endDate: number = 0) => {
     const queryParts = [`uploader:${username}`];
     if (startDate > 0 && endDate > 0) {
-        queryParts.push(`publicdate:[${new Date(startDate).toISOString()} TO ${new Date(endDate).toISOString()}]`);
+        const startDateOnly = new Date(startDate).toISOString().slice(0, 10);
+        const endDateOnly = new Date(endDate).toISOString().slice(0, 10);
+        queryParts.push(`publicdate:[${startDateOnly} TO ${endDateOnly}]`);
     }
     return queryParts.join(" AND ");
 }
@@ -118,10 +120,13 @@ const callGenericArchiveApi = async (username: string,
         console.log(`callGenericArchiveApi:${username} PageIndex: ${pageIndex} ${username}
         ${_url}`);
         const response = await fetch(_url);
+        if (!response.ok) {
+            throw new Error(`Archive generic search failed with ${response.status} ${response.statusText}`);
+        }
         const data = await response.json();
-        const _hits: Hits = data?.response?.body?.page_elements?.uploads?.hits || {};
+        const _hits: Hits = data?.response?.body?.page_elements?.uploads?.hits || { total: 0, returned: 0, hits: [] };
         if (startDate > 0 && endDate > 0) {
-            const _filteredHits = _hits.hits.filter((item: HitsEntity) => {
+            const _filteredHits = (_hits.hits || []).filter((item: HitsEntity) => {
                 const _date = new Date(item?.fields?.publicdate).getTime();
                 return _date >= startDate && _date <= endDate;
             });
@@ -135,7 +140,7 @@ const callGenericArchiveApi = async (username: string,
     }
     catch (err) {
         console.log(`Error in callGenericArchiveApi ${err.message}`);
-        //throw err;
+        return { total: 0, returned: 0, hits: [] };
     }
 };
 

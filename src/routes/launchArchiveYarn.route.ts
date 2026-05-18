@@ -50,9 +50,9 @@ launchArchiveYarnRoute.post('/getArchiveListing', async (req: any, resp: any) =>
 
         if (dateRange) {
             const _validateDates = validateDateRange(dateRange);
-            console.log(`validateDateRange ${_validateDates}`)
+            console.log(`validateDateRange ${JSON.stringify(_validateDates)}`)
             if (dateRange && _validateDates.success) {
-                parsedDateRange = _validateDates.parsedDateRange;
+                parsedDateRange = _validateDates.parsedDateRange || [0, 0];
             }
             else {
                 return resp.status(400).send({
