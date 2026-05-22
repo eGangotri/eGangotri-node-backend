@@ -27,6 +27,20 @@ JSON Body
  */
 export const itemsUsheredRoute = express.Router()
 
+const getTotalFromVerificationStatus = (status: string) => {
+    const totalMatch = status?.match(/\((\d+)\)/);
+    return totalMatch ? parseInt(totalMatch[1]) : 0;
+}
+
+const getUploadStatusReportForRows = (results: any[]) => {
+    return results.map((result, index) => {
+        const failureCount = Number(result?.failureCount || 0);
+        const total = getTotalFromVerificationStatus(result?.status);
+        const successCount = result?.successCount === "ALL" ? total : Number(result?.successCount || 0);
+        return `Upload Status for Row ${index + 1}: ${successCount} Succ. ${failureCount} Failures/Total ${total}`;
+    });
+}
+
 itemsUsheredRoute.post('/add', async (req: any, resp: any) => {
 
     try {
@@ -91,6 +105,7 @@ itemsUsheredRoute.post('/verifyUploadMulti', async (req: any, resp: any) => {
                 results.push(result);
             }
             resp.status(200).send({
+                report: getUploadStatusReportForRows(results),
                 response: results
             });
         }
