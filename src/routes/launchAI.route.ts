@@ -489,16 +489,32 @@ launchAIRoute.post('/disposePdfTitleRenamingViaAITracker', async (req: any, resp
         }
 
         console.log(`disposePdfTitleRenamingViaAITracker:params: ${id}`);
-        const tracker = await PdfTitleRenamingViaAITracker.findById(id);
-        if (!tracker) {
-            console.log(`disposePdfTitleRenamingViaAITracker/${id}: Tracker not found`);
-            return resp.status(404).json({ error: 'Tracker not found' });
-        }
+        const isValidObjectId = /^[0-9a-fA-F]{24}$/.test(id);
+        if (isValidObjectId) {
+            const tracker = await PdfTitleRenamingViaAITracker.findById(id);
+            if (!tracker) {
+                console.log(`disposePdfTitleRenamingViaAITracker/${id}: Tracker not found`);
+                return resp.status(404).json({ error: 'Tracker not found' });
+            }
 
-        tracker.disposed = !tracker.disposed;
-        const updatedTracker = await tracker.save();
-        console.log(`disposePdfTitleRenamingViaAITracker/${id}: successfully toggled disposed`);
-        return resp.status(200).json(updatedTracker);
+            tracker.disposed = !tracker.disposed;
+            const updatedTracker = await tracker.save();
+            console.log(`disposePdfTitleRenamingViaAITracker/${id}: successfully toggled disposed`);
+            return resp.status(200).json(updatedTracker);
+        } else {
+            const trackers = await PdfTitleRenamingViaAITracker.find({ runId: id });
+            if (!trackers || trackers.length === 0) {
+                console.log(`disposePdfTitleRenamingViaAITracker/${id}: Tracker not found by runId`);
+                return resp.status(404).json({ error: 'Tracker not found' });
+            }
+
+            const nextDisposedVal = !trackers[0].disposed;
+            await PdfTitleRenamingViaAITracker.updateMany({ runId: id }, { $set: { disposed: nextDisposedVal } });
+            console.log(`disposePdfTitleRenamingViaAITracker/${id}: successfully toggled disposed for runId`);
+            const updatedDoc = trackers[0].toObject();
+            updatedDoc.disposed = nextDisposedVal;
+            return resp.status(200).json(updatedDoc);
+        }
     } catch (error: any) {
         console.error(`/disposePdfTitleRenamingViaAITracker error: ${error?.message || String(error)} `);
         return resp.status(500).json({ status: 'failed', message: error?.message || String(error) });
@@ -513,7 +529,14 @@ launchAIRoute.post('/disposePdfTitleAndFileRenamingTrackerViaAI', async (req: an
         }
 
         console.log(`disposePdfTitleAndFileRenamingTrackerViaAI:params: ${id}`);
-        const tracker = await PdfTitleAndFileRenamingTrackerViaAI.findById(id);
+        const isValidObjectId = /^[0-9a-fA-F]{24}$/.test(id);
+        let tracker;
+        if (isValidObjectId) {
+            tracker = await PdfTitleAndFileRenamingTrackerViaAI.findById(id);
+        } else {
+            tracker = await PdfTitleAndFileRenamingTrackerViaAI.findOne({ runId: id });
+        }
+
         if (!tracker) {
             console.log(`disposePdfTitleAndFileRenamingTrackerViaAI/${id}: Tracker not found`);
             return resp.status(404).json({ error: 'Tracker not found' });

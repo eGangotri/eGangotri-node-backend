@@ -165,7 +165,14 @@ uploadCycleRoute.post('/disposeUploadCycle', async (req: any, resp: any) => {
         }
 
         console.log(`disposeUploadCycle:params: ${id}`);
-        const tracker = await UploadCycle.findById(id);
+        const isValidObjectId = /^[0-9a-fA-F]{24}$/.test(id);
+        let tracker;
+        if (isValidObjectId) {
+            tracker = await UploadCycle.findById(id);
+        } else {
+            tracker = await UploadCycle.findOne({ uploadCycleId: id });
+        }
+
         if (!tracker) {
             console.log(`disposeUploadCycle/${id}: UploadCycle not found`);
             return resp.status(404).json({ error: 'UploadCycle not found' });

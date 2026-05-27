@@ -443,7 +443,14 @@ gDriveRoute.post('/disposeDriveDownload', async (req: any, resp: any) => {
         }
 
         console.log(`disposeDriveDownload:params: ${id}`);
-        const gDriveDownload = await GDriveDownload.findById(id);
+        const isValidObjectId = /^[0-9a-fA-F]{24}$/.test(id);
+        let gDriveDownload;
+        if (isValidObjectId) {
+            gDriveDownload = await GDriveDownload.findById(id);
+        } else {
+            gDriveDownload = await GDriveDownload.findOne({ runId: id });
+        }
+
         if (!gDriveDownload) {
             console.log(`disposeDriveDownload/${id}:GDriveDownload not found`);
             return resp.status(404).json({ error: 'GDriveDownload not found' });
