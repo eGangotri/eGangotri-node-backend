@@ -10,6 +10,9 @@ import { getListOfUploadCycles } from "./uploadCycleService";
 import { ellipsis } from "../mirror/utils";
 import { IItemsQueued } from "models/itemsQueued";
 import { Types } from "mongoose";
+import pLimit from "p-limit";
+
+const ARCHIVE_VERIFICATION_CONCURRENCY = 5;
 
 export async function getListOfItemsUshered(queryOptions: ItemsListOptionsType) {
   try {
@@ -67,14 +70,15 @@ export const itemsUsheredVerficationAndDBFlagUpdate = async (uploadCycleIdForVer
   const _itemsUsheredFilter = itemsUsheredByUploadCycle.filter(x => x?.uploadFlag === null || x?.uploadFlag === false || x?.uploadFlag === undefined)
   const total = itemsUsheredByUploadCycle.length;
   console.log(`_itemsUsheredFilter ${_itemsUsheredFilter.length} Total: ${total}`)
+  const limit = pLimit(ARCHIVE_VERIFICATION_CONCURRENCY);
   const promises =
     _itemsUsheredFilter.map((item, index) =>
-      checkUrlValidityForUploadItems({
+      limit(() => checkUrlValidityForUploadItems({
         id: new Types.ObjectId(item._id as any),
         archiveId: `${item.archiveItemId}`,
         isValid: true,
         title: item.title
-      }, index, total)
+      }, index, total))
     );
 
   const results: SelectedUploadItem[] = await Promise.all(promises);
@@ -98,9 +102,10 @@ export const itemsUsheredVerficationAndDBFlagUpdate = async (uploadCycleIdForVer
 
 export const selectedItemsVerficationAndDBFlagUpdate = async (uploadsForVerification: SelectedUploadItem[]) => {
   const total = uploadsForVerification.length;
+  const limit = pLimit(ARCHIVE_VERIFICATION_CONCURRENCY);
   const promises =
     uploadsForVerification.map((forVerification, index) =>
-      checkUrlValidityForUploadItems(forVerification, index, total)
+      limit(() => checkUrlValidityForUploadItems(forVerification, index, total))
     )
 
   const results: SelectedUploadItem[] = await Promise.all(promises);

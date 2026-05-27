@@ -12,6 +12,39 @@ interface ArchiveMetadataResponse {
   error?: string;
 }
 
+const ARCHIVE_METADATA_RETRY_COUNT = 3;
+const ARCHIVE_METADATA_TIMEOUT_MS = 30000;
+
+const fetchArchiveMetadata = async (identifier: string): Promise<ArchiveMetadataResponse | null> => {
+  const apiUrl = `https://archive.org/metadata/${encodeURIComponent(identifier)}`;
+
+  for (let attempt = 1; attempt <= ARCHIVE_METADATA_RETRY_COUNT; attempt++) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), ARCHIVE_METADATA_TIMEOUT_MS);
+
+      const response = await fetch(apiUrl, {
+        signal: controller.signal,
+        headers: {
+          'User-Agent': 'eGangotri Upload Verification Tool'
+        }
+      });
+
+      clearTimeout(timeoutId);
+
+      if (response.ok) {
+        return (await response.json()) as ArchiveMetadataResponse;
+      }
+
+      console.log(`Archive metadata check failed for ${identifier}, attempt ${attempt}/${ARCHIVE_METADATA_RETRY_COUNT}, status ${response.status} ${response.statusText}`);
+    } catch (error: any) {
+      console.log(`Archive metadata check failed for ${identifier}, attempt ${attempt}/${ARCHIVE_METADATA_RETRY_COUNT}, error ${error?.message || error}`);
+    }
+  }
+
+  return null;
+}
+
 /**
  * Validates an archive.org URL and verifies it contains a readable, non-empty PDF.
  * @param urlString The Archive.org item details URL
@@ -35,17 +68,10 @@ export async function validateArchivePdf(urlString: string): Promise<boolean> {
     const identifier = pathParts[1];
 
     // 3. Query the Archive.org Metadata API
-    const apiUrl = `https://archive.org/metadata/${identifier}`;
-    const response = await fetch(apiUrl);
-    
-    if (!response.ok) {
-      return false;
-    }
-
-    const data = (await response.json()) as ArchiveMetadataResponse;
+    const data = await fetchArchiveMetadata(identifier);
 
     // If the identifier doesn't exist, the API either returns an error or an empty object
-    if (data.error || !data.files || data.files.length === 0) {
+    if (!data || data.error || !data.files || data.files.length === 0) {
       return false;
     }
 
