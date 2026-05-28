@@ -149,6 +149,31 @@ yarnRoute.post('/qaToDestFileMover', async (req: any, resp: any) => {
 
         const destPath = getPathOrSrcRootForProfile(dest)
 
+        if (!destPath) {
+            resp.status(400).send({
+                response: {
+                    "status": "failed",
+                    "success": false,
+                    "message": `Non-existing profile provided for dest: '${dest}'`
+                }
+            });
+            return;
+        }
+
+        try {
+            await fsPromise.access(destPath);
+        } catch {
+            resp.status(400).send({
+                response: {
+                    "status": "failed",
+                    "success": false,
+                    "message": `Dest path does not exist on disk: '${destPath}'`
+                }
+            });
+            return;
+        }
+
+        //
         // Fast check if destination is not empty and override is false
         if (!override) {
             try {
