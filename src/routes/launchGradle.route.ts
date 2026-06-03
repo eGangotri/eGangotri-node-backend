@@ -618,6 +618,7 @@ launchGradleRoute.get('/bookTitles', async (req: any, resp: any) => {
     try {
         const argFirst = req.query.argFirst
         const pdfsOnly = req.query.pdfsOnly
+        const withAdditionalCopy = req.query.withAdditionalCopy
 
         const profileOrPaths = argFirst.includes(",") ? argFirst.split(",").map((link: string) => link.trim()) : [argFirst.trim()];
         console.log(`profileOrPaths: ${profileOrPaths}`);
@@ -626,7 +627,7 @@ launchGradleRoute.get('/bookTitles', async (req: any, resp: any) => {
             const profileOrPath = profileOrPaths[i]
             const pdfDumpFolder = isValidPath(profileOrPath) ? profileOrPath : getFolderInDestRootForProfile(profileOrPath)
             console.log(`bookTitles: ${pdfDumpFolder}`)
-            const _cmd = `gradle bookTitles --args="paths='${pdfDumpFolder}', pdfsOnly=${pdfsOnly}"`
+            const _cmd = `gradle bookTitles --args="paths='${pdfDumpFolder}', pdfsOnly=${pdfsOnly}, withAdditionalCopy=${withAdditionalCopy}"`
             console.log(`_cmd ${_cmd}`)
 
             const res = await makeGradleCall(_cmd)
@@ -636,6 +637,12 @@ launchGradleRoute.get('/bookTitles', async (req: any, resp: any) => {
             if (excelPath?.endsWith(".xlsx")) {
                 const metaRes = addFolderMetadataSheet(excelPath);
                 console.log(`addFolderMetadataSheet: ${JSON.stringify(metaRes)}`)
+                if (withAdditionalCopy === "true") {
+                    const excelFileNameWithExtension = path.basename(excelPath);
+                    const excelPath2 = path.join(pdfDumpFolder, excelFileNameWithExtension);
+                    const metaRes2 = addFolderMetadataSheet(excelPath2);
+                    console.log(`addFolderMetadataSheet-2: ${JSON.stringify(metaRes2)}`)
+                }
             }
             responseArray.push({
                 msg: `Item ${i + 1} of ${profileOrPaths.length}: Book titles for ${profileOrPath} performed`,
