@@ -13,7 +13,7 @@ import { GDriveExcelData } from "../cliBased/googleapi/types";
 import { createFolderIfNotExistsAsync } from "../utils/FileUtils";
 
 export async function getListOfGDriveItems(queryOptions: GDriveItemListOptionsType) {
-  const { limit, mongoOptionsFilter } =  setOptionsForGDriveListing(queryOptions)
+  const { limit, mongoOptionsFilter } = setOptionsForGDriveListing(queryOptions)
   const items = await GDriveItem.find(mongoOptionsFilter)
     .sort({ createdAt: -1 })
     .limit(limit);
@@ -68,7 +68,12 @@ export function setOptionsForGDriveListing(queryOptions: GDriveItemListOptionsTy
   return { limit, mongoOptionsFilter };
 }
 
-export const getDiffBetweenGDriveAndLocalFiles = (gDriveExcel: string, localExcel: string) => {
+type GDriveLocalDiffReport = {
+  [key: string]: any;
+}
+
+export const getDiffBetweenGDriveAndLocalFiles = (gDriveExcel: string,
+  localExcel: string, checkBySizeAlso = false) => {
   const gDriveExcelAsJSON = excelToJson(gDriveExcel)
   const localExcelAsJSONWithExtraneousData = excelToJson(localExcel)
 
@@ -102,9 +107,72 @@ export const getDiffBetweenGDriveAndLocalFiles = (gDriveExcel: string, localExce
   const diff = _.differenceWith(localExcelAsJSONTitles, gDriveJsonArrayTitles, myCustomComparator);
   console.log(`diff ${diff.length} ${diff[0]}`)
 
+  const normalizeSize = (value: any): number => {
+    if (value === null || value === undefined) return NaN;
+    if (typeof value === "number") return value;
+    return parseInt(`${value}`.replace(/,/g, "").trim(), 10);
+  }
+
+  const getLocalFileSize = (item: any): number => normalizeSize(
+    item.rawSize ||
+    item.fileSizeRaw ||
+    item["Size in Bytes"] ||
+    item["File Size in Bytes"] ||
+    item["Total File Size in Bytes"] ||
+    item["Total File Size in KB"]
+  );
+
+  const getGDriveFileSize = (item: any): number => normalizeSize(
+    item["Size in Bytes"] ||
+    item.sizeInBytes ||
+    item.fileSizeRaw ||
+    item.rawSize
+  );
+
+  const sizeMismatches = checkBySizeAlso ? localExcelAsJSON.filter((localItem) => {
+    if (diff.includes(localItem?.absPath)) return false;
+    const gDriveItem = gDriveExcelAsJSON.find((row) => localItem?.absPath?.includes((row[folderName] + path.sep + row[titleInGoogleDrive]) || ""));
+    if (!gDriveItem) return false;
+    const localFileSize = getLocalFileSize(localItem);
+    const gDriveFileSize = getGDriveFileSize(gDriveItem);
+    return !Number.isNaN(localFileSize) && !Number.isNaN(gDriveFileSize) && localFileSize !== gDriveFileSize;
+  }).map((localItem) => {
+    const gDriveItem = gDriveExcelAsJSON.find((row) => localItem?.absPath?.includes((row[folderName] + path.sep + row[titleInGoogleDrive]) || ""));
+    const localFileSize = getLocalFileSize(localItem);
+    const gDriveFileSize = getGDriveFileSize(gDriveItem);
+    return {
+      ...localItem,
+      gDriveFileSize,
+      localFileSize,
+      diffReason: `File size mismatch. Local: ${localFileSize}, GDrive: ${gDriveFileSize}`
+    }
+  }) : [];
+
+  console.log(`sizeMismatches ${sizeMismatches.length} ${JSON.stringify(sizeMismatches[0])}`)
+
+  const formatMismatchedItems = (items: any[]) => items.map((item, index) => {
+    return `#${index + 1}
+  rowCounter: ${item.rowCounter}
+  absPath: ${item.absPath}
+  folder: ${item.folder}
+  fileName: ${item.fileName}
+  ext: ${item.ext}
+  rawSize: ${item.rawSize}
+  size: ${item.size}
+  pageCount: ${item.pageCount}
+  gDriveFileSize: ${item.gDriveFileSize}
+  localFileSize: ${item.localFileSize}
+  diffReason: ${item.diffReason}`;
+  }).join("\n\n");
+
+  const formatNameMismatches = (items: any[]) => items.map((item, index) => {
+    return `#${index + 1}
+  ${item}`;
+  }).join("\n\n");
+
   const _forReupload = localExcelAsJSON.filter((item) => {
     return diff.includes(item?.absPath)
-  });
+  }).map((item) => ({ ...item, diffReason: "Missing in GDrive" })).concat(sizeMismatches);
 
   console.log(`_forReupload ${_forReupload.length} ${JSON.stringify(_forReupload[0])}`);
 
@@ -114,16 +182,33 @@ export const getDiffBetweenGDriveAndLocalFiles = (gDriveExcel: string, localExce
   const excelName = `${folder}GDrive-Integrity-Check-(${_forReupload.length})-${timeComponent}.xlsx`
   jsonToExcel(_forReupload, excelName)
 
-  return {
+  let report: GDriveLocalDiffReport = {
     diffUplodables: _forReupload.length,
     excelName,
     gDrivePath: gDriveExcel,
     localDrivePath: localExcel,
     localGDriveDiff: `Local has: ${localExcelAsJSON.length} items. GDrive has ${gDriveExcelAsJSON.length} items. Missing ${localExcelAsJSON.length - gDriveExcelAsJSON.length}`,
     excel: `G-Drive-Local Integrity Test Excel ${excelName} created for ${_forReupload.length} missing in G-Drive`,
-    msg: `${diff.length} items not found in Local`,
-    diff: diff.length > 100 ? "Showing first 100 only. " + diff.slice(0, 100) : diff,
   }
+
+  if (checkBySizeAlso) {
+    report = {
+      ...report,
+      checkBySizeAlso: "Was Opted",
+      "Message": `Name Mismatch: ${diff.length}
+                  Size Mismatch: ${sizeMismatches.length}`,
+      "Items Mismatched by Size": sizeMismatches.length > 100 ? "Showing first 100 only.\n\n" + formatMismatchedItems(sizeMismatches.slice(0, 100)) : formatMismatchedItems(sizeMismatches),
+      "Items Mismatched by Name": diff.length > 100 ? "Showing first 100 only.\n\n" + formatNameMismatches(diff.slice(0, 100)) : formatNameMismatches(diff),
+    }
+  }
+  else {
+    report = {
+      ...report,
+      "Message": `Name Mismatch: ${diff.length}`,
+      "Items Mismatched by Name": diff.length > 100 ? "Showing first 100 only.\n\n" + formatNameMismatches(diff.slice(0, 100)) : formatNameMismatches(diff),
+    }
+  }
+  return report
 }
 
 function convertToGDriveExcelLinkData(json: any): GDriveExcelData {

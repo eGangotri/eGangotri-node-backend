@@ -38,7 +38,8 @@ googleDriveItemRoute.post('/compareGDriveAndLocalExcel', async (req: any, resp: 
     try {
         const gDriveExcel = req.body.gDriveExcel;
         const localExcel = req.body.localExcel;
-        const _resp = getDiffBetweenGDriveAndLocalFiles(gDriveExcel, localExcel);
+        const checkBySizeAlso = req.body.checkBySizeAlso || false
+        const _resp = getDiffBetweenGDriveAndLocalFiles(gDriveExcel, localExcel, checkBySizeAlso);
         resp.status(200).send({
             response: _resp
         });
