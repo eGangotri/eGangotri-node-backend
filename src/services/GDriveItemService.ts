@@ -187,8 +187,9 @@ export const getDiffBetweenGDriveAndLocalFiles = (gDriveExcel: string,
     excelName,
     gDrivePath: gDriveExcel,
     localDrivePath: localExcel,
-    localGDriveDiff: `Local has: ${localExcelAsJSON.length} items. GDrive has ${gDriveExcelAsJSON.length} items. Missing ${localExcelAsJSON.length - gDriveExcelAsJSON.length}`,
-    excel: `G-Drive-Local Integrity Test Excel ${excelName} created for ${_forReupload.length} missing in G-Drive`,
+    localGDriveDiff: `Local has: ${localExcelAsJSON.length} items.
+                      GDrive has: ${gDriveExcelAsJSON.length} items.`,
+    excel: `G-Drive-Local Integrity Test Excel ${excelName} created for ${_forReupload.length} erroneous`,
   }
 
   if (checkBySizeAlso) {
