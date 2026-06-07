@@ -99,6 +99,88 @@ export const processLocalFileForAIRenaming = async (filePath: string, mimeType: 
     return _result;
 }
 
+const parseDurationToMs = (duration: any): number => {
+    if (!duration) return 0;
+    if (typeof duration === 'number') return duration * 1000;
+    const match = `${duration}`.match(/^(\d+(?:\.\d+)?)s$/);
+    return match ? Math.ceil(Number(match[1]) * 1000) : 0;
+}
+
+const getGoogleRetryDelayMs = (responseData: any): number => {
+    const details = responseData?.error?.details;
+    if (!Array.isArray(details)) return 0;
+    const retryInfo = details.find((detail: any) => `${detail?.["@type"] || ""}`.includes("RetryInfo"));
+    return parseDurationToMs(retryInfo?.retryDelay);
+}
+
+const getGoogleQuotaViolations = (responseData: any): string[] => {
+    const details = responseData?.error?.details;
+    if (!Array.isArray(details)) return [];
+    const quotaFailure = details.find((detail: any) => `${detail?.["@type"] || ""}`.includes("QuotaFailure"));
+    const violations = quotaFailure?.violations;
+    if (!Array.isArray(violations)) return [];
+    return violations.map((violation: any) => {
+        const subject = violation?.subject ? `subject=${violation.subject}` : "";
+        const description = violation?.description ? `description=${violation.description}` : "";
+        return [subject, description].filter(Boolean).join(", ");
+    }).filter(Boolean);
+}
+
+const classifyGoogleRateLimit = (responseData: any, retryDelayMs: number) => {
+    const errorPayloadText = JSON.stringify(responseData || {});
+    const message = `${responseData?.error?.message || ""} ${errorPayloadText}`.toLowerCase();
+    let classification = "UNKNOWN_RATE_LIMIT";
+    let likelyReset = retryDelayMs > 0 ? `Google requested retry after ${Math.ceil(retryDelayMs / 1000)} seconds.` : "No explicit reset time returned by Google.";
+    let recommendedAction = retryDelayMs > 0 ? "Wait for the returned retry delay before retrying." : "Wait 5-30 minutes, then retry. Check Google AI quota dashboard if it persists.";
+
+    if (message.includes("per day") || message.includes("requests per day") || message.includes("daily") || message.includes("generate_content_free_tier_requests")) {
+        classification = "LIKELY_DAILY_QUOTA_24H";
+        likelyReset = retryDelayMs > 0 ? likelyReset : "Likely daily/free-tier quota. It may reset in the next daily quota window, up to 24 hours.";
+        recommendedAction = "Wait for daily quota reset, enable billing/increase quota, or switch API key/project/model.";
+    } else if (message.includes("per minute") || message.includes("requests per minute") || message.includes("tokens per minute") || message.includes("generate_content_requests_per_minute") || message.includes("generate_content_tokens_per_minute")) {
+        classification = "LIKELY_PER_MINUTE_QUOTA";
+        likelyReset = retryDelayMs > 0 ? likelyReset : "Likely per-minute quota. Usually recovers gradually within 60-120 seconds.";
+        recommendedAction = "Slow down calls, reduce PDF size/tokens, and retry after 1-2 minutes.";
+    } else if (message.includes("per hour") || message.includes("hourly")) {
+        classification = "LIKELY_HOURLY_QUOTA";
+        likelyReset = retryDelayMs > 0 ? likelyReset : "Likely hourly quota. Retry later in the hourly quota window.";
+        recommendedAction = "Wait 30-60 minutes or increase quota.";
+    } else if (message.includes("token")) {
+        classification = "LIKELY_TOKEN_QUOTA";
+        likelyReset = retryDelayMs > 0 ? likelyReset : "Likely token quota. Reset depends on whether Google reports per-minute or per-day token quota.";
+        recommendedAction = "Use smaller/reduced PDFs, lower prompt size, lower output tokens, or wait for quota reset.";
+    } else if (retryDelayMs >= 12 * 60 * 60 * 1000) {
+        classification = "LIKELY_LONG_DAILY_COOLDOWN";
+        recommendedAction = "Treat as daily quota exhaustion. Retry after the requested cooldown.";
+    } else if (retryDelayMs >= 60 * 1000) {
+        classification = "EXPLICIT_COOLDOWN";
+        recommendedAction = "Retry after the requested cooldown.";
+    }
+
+    return { classification, likelyReset, recommendedAction };
+}
+
+const buildGoogleRateLimitDiagnostics = (statusCode: number, responseData: any, retryAfterHeader: string | undefined) => {
+    const retryAfterMs = retryAfterHeader && !Number.isNaN(parseInt(retryAfterHeader, 10)) ? parseInt(retryAfterHeader, 10) * 1000 : 0;
+    const retryInfoMs = getGoogleRetryDelayMs(responseData);
+    const retryDelayMs = Math.max(retryAfterMs, retryInfoMs);
+    const quotaViolations = getGoogleQuotaViolations(responseData);
+    const classification = classifyGoogleRateLimit(responseData, retryDelayMs);
+    const googleStatus = responseData?.error?.status || "";
+    const googleMessage = responseData?.error?.message || "";
+
+    return {
+        statusCode,
+        googleStatus,
+        googleMessage,
+        retryAfterHeader: retryAfterHeader || "",
+        retryInfoDelaySeconds: retryInfoMs ? Math.ceil(retryInfoMs / 1000) : 0,
+        effectiveRetryDelaySeconds: retryDelayMs ? Math.ceil(retryDelayMs / 1000) : 0,
+        quotaViolations,
+        ...classification,
+    };
+}
+
 export const processFileForAIRenaming = async (base64EncodedFile: string,
     mimeType: string,
     prompt: string,
@@ -144,7 +226,8 @@ export const processFileForAIRenaming = async (base64EncodedFile: string,
         };
     }
     catch (error) {
-        console.error('processFileForAIRenaming: Full error data:', JSON.stringify((error as any)?.response?.data, null, 2));
+        const responseData = (error as any)?.response?.data;
+        console.error(`processFileForAIRenaming: Full error data: ${JSON.stringify(responseData || {}, null, 2)}`);
         // Handle specific error types with more informative messages
         let errorMessage = '';
         console.error(`try/catch: ${error?.message}  ${error?.response?.status}`);
@@ -167,13 +250,13 @@ export const processFileForAIRenaming = async (base64EncodedFile: string,
                 const AI_SKIP_THRESHOLD_MS = Number(process.env.AI_SKIP_THRESHOLD_MS || 30_000);
 
                 const retryAfterHeader = (error.response?.headers?.['retry-after'] || error.response?.headers?.['Retry-After']) as string | undefined;
-                let serverDelayMs = 0;
-                if (retryAfterHeader) {
-                    const retrySec = parseInt(retryAfterHeader, 10);
-                    if (!Number.isNaN(retrySec) && retrySec > 0) {
-                        serverDelayMs = retrySec * 1000;
-                        console.warn(`[Retry-After] Google AI returned Retry-After: ${retrySec}s (${(retrySec / 60).toFixed(1)} min).`);
-                    }
+                const diagnostics = buildGoogleRateLimitDiagnostics(statusCode, responseData, retryAfterHeader);
+                let serverDelayMs = diagnostics.effectiveRetryDelaySeconds * 1000;
+                console.warn(`[Google AI Rate Limit Diagnostics] ${JSON.stringify(diagnostics, null, 2)}`);
+                if (diagnostics.effectiveRetryDelaySeconds > 0) {
+                    console.warn(`[Google AI Rate Limit] ${diagnostics.classification}. Retry after ${diagnostics.effectiveRetryDelaySeconds}s. ${diagnostics.recommendedAction}`);
+                } else {
+                    console.warn(`[Google AI Rate Limit] ${diagnostics.classification}. ${diagnostics.likelyReset} ${diagnostics.recommendedAction}`);
                 }
 
                 // Exponential backoff for the short-wait path
@@ -187,7 +270,7 @@ export const processFileForAIRenaming = async (base64EncodedFile: string,
                     console.warn(`[Rate Limit] Delay (${waitSec}s) exceeds skip threshold (${AI_SKIP_THRESHOLD_MS / 1000}s). Skipping file — will retry after remaining files finish.`);
                     return {
                         extractedMetadata: `RATE_LIMITED:${waitSec}`,
-                        error: `Rate limited — deferred retry needed (wait ${waitSec}s). Status: ${statusCode}`
+                        error: `Rate limited — deferred retry needed (wait ${waitSec}s). Status: ${statusCode}. Classification: ${diagnostics.classification}. ${diagnostics.recommendedAction}`
                     };
                 }
 
@@ -200,7 +283,7 @@ export const processFileForAIRenaming = async (base64EncodedFile: string,
                     return processFileForAIRenaming(base64EncodedFile, mimeType, prompt, retryCount + 1, initialDelay);
                 } else {
                     const errorType = statusCode === 429 ? 'Rate limit exceeded' : 'Service Unavailable';
-                    errorMessage = `${errorType}: Tried ${maxRetries} times. Status: ${statusCode}`;
+                    errorMessage = `${errorType}: Tried ${maxRetries} times. Status: ${statusCode}. Classification: ${diagnostics.classification}. Likely reset: ${diagnostics.likelyReset}. Recommendation: ${diagnostics.recommendedAction}`;
                     console.error(errorMessage);
                 }
             } else if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT') {
