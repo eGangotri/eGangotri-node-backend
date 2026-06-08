@@ -170,6 +170,192 @@ export const moveFileSrcToDest = async (srcPath: string,
     }
 }
 
+type QaToDestFileMoverParams = {
+    qaPath: string;
+    dest: string;
+    flatten?: boolean;
+    ignorePaths?: string[];
+    override?: boolean;
+}
+
+const emptyQaMoveResultsAtAGlance = () => {
+    return {
+        successes: [],
+        totals: [],
+        filesMoved: [],
+        errors: []
+    }
+}
+
+const formatQaMoveGlance = (vals: number[]) => {
+    const sum = vals.reduce((a, b) => a + b, 0);
+    return `${vals.join('+')}=${sum}`;
+}
+
+const splitAndResolvePaths = (pathsOrProfiles: string) => {
+    return pathsOrProfiles.includes(",")
+        ? pathsOrProfiles.split(",").map((p: string) => getPathOrSrcRootForProfile(p)).filter(Boolean)
+        : [getPathOrSrcRootForProfile(pathsOrProfiles)].filter(Boolean);
+}
+
+export const qaToDestFileMoverService = async ({
+    qaPath,
+    dest,
+    flatten = true,
+    ignorePaths = ["dont"],
+    override = false
+}: QaToDestFileMoverParams) => {
+    console.log(`qaToDestFileMover qaPath ${qaPath} for folder(${dest})`)
+    if (!qaPath && !dest) {
+        return {
+            statusCode: 400,
+            body: {
+                response: {
+                    "status": "failed",
+                    "success": false,
+                    "message": "Pls. provide Src and Dest Items"
+                }
+            }
+        };
+    }
+
+    const srcPaths: string[] = splitAndResolvePaths(qaPath);
+
+    if (srcPaths.length === 0) {
+        return {
+            statusCode: 400,
+            body: {
+                response: {
+                    "status": "failed",
+                    "success": false,
+                    "message": "Pls. provide valid Src Items"
+                }
+            }
+        };
+    }
+
+    const destPaths: string[] = splitAndResolvePaths(dest);
+
+    if (destPaths.length === 0) {
+        return {
+            statusCode: 400,
+            body: {
+                response: {
+                    "status": "failed",
+                    "success": false,
+                    "message": `Non-existing profile provided for dest: '${dest}'`
+                }
+            }
+        };
+    }
+
+    if (destPaths.length != srcPaths.length) {
+        return {
+            statusCode: 400,
+            body: {
+                response: {
+                    "status": "failed",
+                    "success": false,
+                    "message": `Non-matching Src/Dest Folders`
+                }
+            }
+        };
+    }
+
+    const erroneous: string[] = []
+    for (const destP of destPaths) {
+        try {
+            await fsPromise.access(destP);
+        } catch {
+            erroneous.push(destP)
+        }
+    }
+
+    if (erroneous.length > 0) {
+        return {
+            statusCode: 400,
+            body: {
+                response: {
+                    "status": "failed",
+                    "success": false,
+                    "message": `Non-existing dest paths: ${erroneous.join(", ")}`
+                }
+            }
+        };
+    }
+
+    if (!override) {
+        const nonEmptyDestPaths: string[] = [];
+        for (const destPath of destPaths) {
+            try {
+                const destEntries = await fsPromise.readdir(destPath);
+                if (destEntries.length > 0) {
+                    nonEmptyDestPaths.push(destPath);
+                }
+            } catch (e) {
+                console.log(`qaToDestFileMover: ${e}`)
+            }
+        }
+        if (nonEmptyDestPaths.length > 0) {
+            return {
+                statusCode: 400,
+                body: {
+                    response: {
+                        "status": "failed",
+                        "success": false,
+                        "message": `Destination folder(s) ${nonEmptyDestPaths.join(", ")} are not empty. Use override to proceed.`
+                    }
+                }
+            };
+        }
+    }
+
+    console.log(`qaToDestFileMover paths ${srcPaths}`)
+
+    const results: any[] = [];
+    for (let i = 0; i < srcPaths.length; i++) {
+        const srcPath = srcPaths[i];
+        const destPath = destPaths[i];
+        console.time('getAllPDFFiles (Service)');
+        const allDestPdfs = await getAllPDFFiles(destPath);
+        console.timeEnd('getAllPDFFiles (Service)');
+        console.log(`qaToDestFileMover srcPath  ${srcPath} to ${destPath}`)
+        const listingResult = await moveFileSrcToDest(srcPath, destPath, flatten, ignorePaths, allDestPdfs);
+        results.push(listingResult);
+    }
+
+    const successCount = results.filter((res: any) => !!res?.success).length;
+    const failureCount = results.length - successCount;
+
+    const glanceRaw = results.reduce((acc: any, curr: any) => {
+        acc.successes.push(curr.success ? 1 : 0);
+        acc.totals.push(curr.total || curr.srcPdfsBefore || 0);
+        acc.filesMoved.push(curr.filesMoved?.length || 0);
+        acc.errors.push(curr.errorList?.length || 0);
+        return acc;
+    }, emptyQaMoveResultsAtAGlance());
+
+    const resultsAtAGlance = {
+        successes: formatQaMoveGlance(glanceRaw.successes),
+        totals: formatQaMoveGlance(glanceRaw.totals),
+        filesMoved: formatQaMoveGlance(glanceRaw.filesMoved),
+        errors: formatQaMoveGlance(glanceRaw.errors)
+    };
+
+    return {
+        statusCode: 200,
+        body: {
+            response: {
+                resultsAtAGlance,
+                total: results.length,
+                successCount,
+                failureCount,
+                results,
+            }
+        }
+    };
+}
+
 export const moveFilesInArray = async (srcPaths: string[], destPaths: string[]) => {
     if (srcPaths.length !== destPaths.length) {
         throw new Error('Source and destination arrays must have the same length');

@@ -1,6 +1,6 @@
 import * as express from 'express';
 import { getFolderInSrcRootForProfile } from '../archiveUpload/ArchiveProfileUtils';
-import { moveFileSrcToDest, moveItemsInListOfProfileToFreeze, moveProfilesToFreeze } from '../services/yarnService';
+import { moveItemsInListOfProfileToFreeze, moveProfilesToFreeze, qaToDestFileMoverService } from '../services/yarnService';
 import { vanitizePdfForProfiles } from '../vanityService/VanityPdf';
 import { timeInfo } from '../mirror/FrontEndBackendCommonCode';
 import { compareFolders } from '../folderSync';
@@ -8,9 +8,6 @@ import { markUploadCycleAsMovedToFreeze } from '../services/uploadCycleService';
 import { unzipAllFilesInDirectory, verifyUnzipSuccessInDirectory } from '../services/zipService';
 import { FileMoveTracker } from '../models/FileMoveTracker';
 import { GDRIVE_DEFAULT_IGNORE_FOLDER } from '../services/GDriveService';
-import { isValidPath, getPathOrSrcRootForProfile } from '../utils/FileUtils';
-import { getAllPDFFiles } from '../utils/FileStatsUtils';
-import * as fsPromise from 'fs/promises';
 
 export const yarnRoute = express.Router();
 
@@ -121,130 +118,13 @@ yarnRoute.post('/qaToDestFileMover', async (req: any, resp: any) => {
         const ignorePaths = ["dont"];
         const override = req?.body?.override || false;
 
-        console.log(`qaToDestFileMover qaPath ${qaPath} for folder(${dest})`)
-        if (!qaPath && !dest) {
-            resp.status(400).send({
-                response: {
-                    "status": "failed",
-                    "success": false,
-                    "message": "Pls. provide Src and Dest Items"
-                }
-            });
-            return;
-        }
-        const paths: string[] = qaPath.includes(",")
-            ? qaPath.split(",").map((p: string) => getPathOrSrcRootForProfile(p)).filter(Boolean)
-            : [getPathOrSrcRootForProfile(qaPath)];
-
-        if (paths.length === 0) {
-            resp.status(400).send({
-                response: {
-                    "status": "failed",
-                    "success": false,
-                    "message": "Pls. provide valid Src Items"
-                }
-            });
-            return;
-        }
-
-        const destPath = getPathOrSrcRootForProfile(dest)
-
-        if (!destPath) {
-            resp.status(400).send({
-                response: {
-                    "status": "failed",
-                    "success": false,
-                    "message": `Non-existing profile provided for dest: '${dest}'`
-                }
-            });
-            return;
-        }
-
-        try {
-            await fsPromise.access(destPath);
-        } catch {
-            resp.status(400).send({
-                response: {
-                    "status": "failed",
-                    "success": false,
-                    "message": `Dest path does not exist on disk: '${destPath}'`
-                }
-            });
-            return;
-        }
-
-        //
-        // Fast check if destination is not empty and override is false
-        if (!override) {
-            try {
-                const destEntries = await fsPromise.readdir(destPath);
-                if (destEntries.length > 0) {
-                    resp.status(400).send({
-                        response: {
-                            "status": "failed",
-                            "success": false,
-                            "message": `Destination folder ${destPath} is not empty. Use override to proceed.`
-                        }
-                    });
-                    return;
-                }
-            } catch (e) {
-                console.log(`qaToDestFileMover: ${e}`)
-            }
-        }
-
-        let allDestPdfs = null;
-        // Only scan destination if it's small or we really need it. 
-        // For large destinations, we might want to skip this pre-load.
-        // But moveFilesAndFlatten currently uses it for collision checking.
-        // Let's scan it once here to avoid multiple scans in the loop.
-        console.time('getAllPDFFiles (Route)');
-        allDestPdfs = await getAllPDFFiles(destPath);
-        console.timeEnd('getAllPDFFiles (Route)');
-
-        console.log(`qaToDestFileMover paths ${paths}`)
-
-        // Process source paths sequentially to avoid potential race conditions on the same destination
-        // but remember moveFilesAndFlatten itself is now parallelized.
-        const results: any[] = [];
-        for (const srcPath of paths) {
-            console.log(`qaToDestFileMover srcPath  ${srcPath} to ${destPath}`)
-            const listingResult = await moveFileSrcToDest(srcPath, destPath, flatten, ignorePaths, allDestPdfs);
-            results.push(listingResult);
-            // Update allDestPdfs with newly moved files if we want to be super accurate, 
-            // but for performance we might skip or just append.
-        }
-
-        const successCount = results.filter((res: any) => !!res?.success).length;
-        const failureCount = results.length - successCount;
-
-        const glanceRaw = results.reduce((acc: any, curr: any) => {
-            acc.successes.push(curr.success ? 1 : 0);
-            acc.totals.push(curr.total || curr.srcPdfsBefore || 0);
-            acc.filesMoved.push(curr.filesMoved?.length || 0);
-            acc.errors.push(curr.errorList?.length || 0);
-            return acc;
-        }, emptyResultsAtAGlance());
-
-        const resultsAtAGlance = {
-            successes: formatGlance(glanceRaw.successes),
-            totals: formatGlance(glanceRaw.totals),
-            filesMoved: formatGlance(glanceRaw.filesMoved),
-            errors: formatGlance(glanceRaw.errors)
-        };
-
+        const result = await qaToDestFileMoverService({ qaPath, dest, flatten, ignorePaths, override });
         const timeTaken = Date.now() - startTime;
         console.log(`Time taken for qaToDestFileMover: ${timeInfo(timeTaken)}`);
 
-        resp.status(200).send({
+        resp.status(result.statusCode).send({
             timeTaken: timeInfo(timeTaken),
-            response: {
-                resultsAtAGlance,
-                total: results.length,
-                successCount,
-                failureCount,
-                results,
-            }
+            ...result.body
         });
     }
     catch (err: any) {
