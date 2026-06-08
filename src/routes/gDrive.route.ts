@@ -48,7 +48,7 @@ gDriveRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
             });
         }
 
-        const links = googleDriveLink.includes(",") ? googleDriveLink.split(",").map((link: string) => link.trim()) : [googleDriveLink.trim()];
+        const links = googleDriveLink.includes(",") ? googleDriveLink.split(",").map((link: string) => link.trim()).filter((x: string) => x.length > 0) : [googleDriveLink.trim()];
         const profiles = profile.includes(",") ?
             profile.split(",").map((p: string) => p.trim()) :
             Array(links.length).fill(profile.trim());
