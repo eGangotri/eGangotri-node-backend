@@ -183,9 +183,19 @@ const fetchArchiveMetadata = async (username: string,
         let currentPageIndex = 1;
         let _hits: Hits = await callArchiveAdvancedSearchApi(username, currentPageIndex, dateRange[0], dateRange[1], ascOrder, DEFAULT_HITS_PER_PAGE);
         let hitsTotal = _hits?.total || 0;
+        let usingGenericApi = false;
+        if (hitsTotal === 0) {
+            console.log(`fetchArchiveMetadata: advancedsearch returned 0 for uploader:${username} (requires email). Falling back to generic API.`);
+            _hits = await callGenericArchiveApi(username, currentPageIndex, dateRange[0], dateRange[1], ascOrder, DEFAULT_HITS_PER_PAGE);
+            hitsTotal = _hits?.total || 0;
+            usingGenericApi = true;
+        }
+        const fetchPage = (page: number) => usingGenericApi
+            ? callGenericArchiveApi(username, page, dateRange[0], dateRange[1], ascOrder, DEFAULT_HITS_PER_PAGE)
+            : callArchiveAdvancedSearchApi(username, page, dateRange[0], dateRange[1], ascOrder, DEFAULT_HITS_PER_PAGE);
         // Use the actual returned page size (Archive.org caps at 100 regardless of hits_per_page)
         const actualPageSize = _hits?.returned || _hits?.hits?.length || DEFAULT_HITS_PER_PAGE;
-        console.log(`fetchArchiveMetadata: hitsTotal=${hitsTotal}, actualPageSize=${actualPageSize}`);
+        console.log(`fetchArchiveMetadata: hitsTotal=${hitsTotal}, actualPageSize=${actualPageSize}, usingGenericApi=${usingGenericApi}`);
         const _allCollectedHits: HitsEntity[] = [];
 
         if (hitsTotal > 0) {
@@ -205,7 +215,7 @@ const fetchArchiveMetadata = async (username: string,
             // If the first page we fetched isn't the page we need, re-fetch the correct starting page
             if (startPageIndex !== 1) {
                 currentPageIndex = startPageIndex;
-                const startPageHits = await callArchiveAdvancedSearchApi(username, currentPageIndex, dateRange[0], dateRange[1], ascOrder, DEFAULT_HITS_PER_PAGE);
+                const startPageHits = await fetchPage(currentPageIndex);
                 if (startPageHits?.hits?.length > 0) {
                     _allCollectedHits.push(...startPageHits.hits);
                 }
@@ -216,7 +226,7 @@ const fetchArchiveMetadata = async (username: string,
             // Fetch subsequent pages if needed
             while (currentPageIndex < endPageIndex) {
                 currentPageIndex++;
-                const nextHits = await callArchiveAdvancedSearchApi(username, currentPageIndex, dateRange[0], dateRange[1], ascOrder, DEFAULT_HITS_PER_PAGE);
+                const nextHits = await fetchPage(currentPageIndex);
                 if (nextHits?.hits?.length > 0) {
                     _allCollectedHits.push(...nextHits.hits);
                 } else {
