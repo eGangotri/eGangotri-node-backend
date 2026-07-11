@@ -6,8 +6,9 @@
   "scripts": {
     "dev": "cross-env  ts-node ./src/index.ts",
     "build": "npx tsc",
-    "start": "cross-env  pnpm run build && node ./dist/index.js",
+    "startOrig": "cross-env  pnpm run build && node ./dist/index.js",
     "test": "pnpm test",
+    "start": "cross-env NODE_OPTIONS=--max-old-space-size=8192 ts-node ./src/index.ts forUpload",
     "upload_db": "cross-env NODE_OPTIONS=--max-old-space-size=8192 ts-node ./src/index.ts forUpload",
     "// note": "pnpm up runs -> pnpm upload_db   if you add in git bash: alias up='pnpm run upload_db' then just up",
     "up": "pnpm run upload_db",
