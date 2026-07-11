@@ -583,6 +583,29 @@ fileUtilsRoute.post('/removeHeaderFooter', async (req: any, resp: any) => {
 
 })
 
+
+fileUtilsRoute.post('/resumeRemoveHeaderFooterByCommonRunId/:commonRunId', async (req: any, resp: any) => {
+    console.log(`POST /resumeRemoveHeaderFooterByCommonRunId`);
+    try {
+        const commonRunId = req.params.commonRunId;
+        if (!commonRunId) {
+            resp.status(400).send({ response: { "status": "failed", "success": false, "message": "commonRunId is required" } });
+            return;
+        }
+        const history = await AcrobatHeaderFooterRemovalHistory.findOne({ commonRunId });
+        if (!history) {
+            resp.status(400).send({ response: { "status": "failed", "success": false, "message": "No history found for commonRunId" } });
+            return;
+        }
+        const headerFooterRemovalResp = await runHeaderFooterRemovalInLoop(history._srcFolders, history.commonDest, commonRunId, true, history._srcFolders.length);
+        resp.status(200).send(headerFooterRemovalResp);
+    }
+    catch (error: any) {
+        console.log('Error', error);
+        resp.status(400).send({ response: error });
+    }
+})
+
 fileUtilsRoute.get('/header-footer-removal-report', async (req, res) => {
     console.log(`GET /header-footer-removal-report`);
     try {
