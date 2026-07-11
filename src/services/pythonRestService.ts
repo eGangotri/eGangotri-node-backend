@@ -309,22 +309,46 @@ export const runCr2ToJpgInLoop = async (_srcFolders: string[],
 
 export const runHeaderFooterRemovalInLoop = async (_srcFolders: string[],
     commonDest: string,
-    commonRunId: string) => {
+    commonRunId: string,
+    isResume: boolean = false,
+    originalSrcFolderCount?: number) => {
     const combinedResults = [];
-    const srcFolderCount = _srcFolders.length;
 
-    try {
-        const logEntry = new AcrobatHeaderFooterRemovalHistory({
-            "_srcFolders": _srcFolders,
-            "commonDest": commonDest,
-            "srcFolderCount": srcFolderCount,
-            "commonRunId": commonRunId,
-            "success": false,
-        });
-        await logEntry.save();
-        console.log(`Saved AcrobatHeaderFooterRemovalHistory for commonRunId: ${commonRunId} `);
-    } catch (logErr) {
-        console.error('Error saving AcrobatHeaderFooterRemovalHistory:', logErr);
+    if (isResume) {
+        try {
+            const completedItems = await AcrobatHeaderFooterRemovalPerItemHistory.find({
+                commonRunId,
+                success: true
+            }).select('_srcFolder');
+            const completedFolders = new Set(completedItems.map((item: any) => item._srcFolder));
+            const skippedFolders = _srcFolders.filter(f => completedFolders.has(f));
+            const remainingFolders = _srcFolders.filter(f => !completedFolders.has(f));
+            if (skippedFolders.length > 0) {
+                console.log(`runHeaderFooterRemovalInLoop resume: skipping ${skippedFolders.length} already completed folders`, skippedFolders);
+            }
+            _srcFolders = remainingFolders;
+        } catch (filterErr) {
+            console.error('Error filtering completed folders for resume:', filterErr);
+        }
+    }
+
+    const srcFolderCount = _srcFolders.length;
+    const totalSrcFolderCount = originalSrcFolderCount !== undefined && isResume ? originalSrcFolderCount : srcFolderCount;
+
+    if (!isResume) {
+        try {
+            const logEntry = new AcrobatHeaderFooterRemovalHistory({
+                "_srcFolders": _srcFolders,
+                "commonDest": commonDest,
+                "srcFolderCount": srcFolderCount,
+                "commonRunId": commonRunId,
+                "success": false,
+            });
+            await logEntry.save();
+            console.log(`Saved AcrobatHeaderFooterRemovalHistory for commonRunId: ${commonRunId} `);
+        } catch (logErr) {
+            console.error('Error saving AcrobatHeaderFooterRemovalHistory:', logErr);
+        }
     }
 
     for (let srcFolder of _srcFolders) {
@@ -418,14 +442,26 @@ export const runHeaderFooterRemovalInLoop = async (_srcFolders: string[],
     }
 
     // update overall history
-    const successCount = combinedResults.filter((result) => result.success).length;
+    let successCount = combinedResults.filter((result) => result.success).length;
+    if (isResume) {
+        try {
+            const completedItems = await AcrobatHeaderFooterRemovalPerItemHistory.find({
+                commonRunId,
+                success: true
+            }).select('_srcFolder');
+            successCount = completedItems.length;
+        } catch (countErr) {
+            console.error('Error counting completed items for resume:', countErr);
+        }
+    }
+
     try {
         await AcrobatHeaderFooterRemovalHistory.updateOne(
             { commonRunId },
             {
                 $set: {
-                    success: successCount === srcFolderCount,
-                    status: `${successCount}/${srcFolderCount}/${srcFolderCount - successCount}`,
+                    success: successCount === totalSrcFolderCount,
+                    status: `${successCount}/${totalSrcFolderCount}/${totalSrcFolderCount - successCount}`,
                 }
             }
         );
