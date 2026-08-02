@@ -6,7 +6,7 @@ dotenv.config();
 
 export const PDF_METADATA_EXTRACTION_PROMPT_CHAR_LIMIT = 170;
 // Google AI Studio prompt for metadata extraction
-export const PDF_METADATA_EXTRACTION_PROMPT = `The exercise below is to save a pdf with recognizable metadata mostly English, Sanskrit and other Indian languages including Tibetan that use Brahmi based scripts and sometimes Urdu.
+export const PDF_METADATA_EXTRACTION_PROMPT2 = `The exercise below is to save a pdf with recognizable metadata mostly English, Sanskrit and other Indian languages including Tibetan that use Brahmi based scripts and sometimes Urdu.
 
 The output should be only ASCII letters (A-Z, a-z) and numbers (0-9) without exception. 
 No Comma, colon, slashes , diacritics etc should be used.
@@ -94,6 +94,95 @@ If author/title is not known then instead print Unknown.
    - If words are conjoined (Shishupalavadha), separate them (Shishupala Vadha).But do not violate convention. So Ashtadhyayi stays not Astha Ashyayi.
    - Ignore pdf-header/footers.
    - If publisher has address (Penguin India), drop the country/city part from the name.
+
+`;
+
+// Google AI Studio prompt for metadata extraction of Tibetan Texts and Pechas
+export const PDF_METADATA_EXTRACTION_PROMPT = `The exercise below is to save a pdf of a Tibetan Text or Tibetan Pecha with recognizable metadata in English.
+
+The output should be only ASCII letters (A-Z, a-z) and numbers (0-9) without exception.
+No Comma, colon, slashes, diacritics etc should be used.
+
+Tibetan words must be transliterated using simplified phonetic (THL Simplified Phonetic Transcription) spellings, NOT Wylie.
+Example: Use "Dzogchen" not "rdzogs chen", "Kangyur" not "bka gyur", "Jamgon Kongtrul" not "jam mgon kong sprul".
+Conventional English spellings of well-known Sanskrit/Buddhist terms should be used (e.g. Prajnaparamita, Vajrayana, Mahamudra).
+
+--- VISUAL ANALYSIS INSTRUCTIONS ---
+1. MATERIAL & FORMAT ANALYSIS:
+   - Analyze if the document is:
+     A. "Pecha" - Traditional Tibetan loose-leaf format (long horizontal folios, text between margin lines, often with folio numbers in Tibetan on the left margin). Includes Kangyur, Tengyur, Sungbum (Collected Works), Sadhanas and ritual texts.
+     B. "Manuscript Pecha" - Handwritten Pecha (Ume/cursive or Uchen script by hand, irregular letterforms).
+     C. "Woodblock Print Pecha" (Parma) - Xylograph printed Pecha (slightly blurred/inked block-print appearance, mirror-registration marks, printing house colophons e.g. Derge, Narthang, Lhasa Zhol, Chone).
+     D. "Modern Book" - Western-style bound book of Tibetan content (modern typeset Uchen).
+     E. "Modern Pecha Reprint" - Modern typeset or photo-offset reproduction in Pecha format.
+   - Do NOT use the term "Pothi" for Tibetan texts. Always use "Pecha".
+
+2. ILLUSTRATION ANALYSIS:
+   - If the document contains thangka-style miniatures, deity line drawings, lantsa/ranjana ornamental script panels, mandalas or torma diagrams, add "Illustrated" to the Subject field.
+
+3. SCRIPT ANALYSIS:
+   - Identify the script: Uchen (headed), Ume (headless/cursive), Khyug (shorthand), Lantsa/Ranjana (ornamental, usually for Sanskrit mantras), or Devanagari/Roman if bilingual editions.
+   - If a secondary script or language is present and constitutes more than 5% of the text (e.g. Sanskrit mantras in Lantsa, Chinese or English translation), note both.
+
+4. TIBETAN TEXT IDENTIFICATION AIDS:
+   - Check the title page or first folio: Pecha titles often appear on a decorated first folio (often within an ornamental frame), sometimes in both Tibetan and Sanskrit (as "rgya gar skad du..." meaning "In the language of India...").
+   - Check the colophon (last folios): author, translator (Lotsawa), scribe, printing house and sponsor details usually appear there.
+   - Canonical collections: If the text belongs to Kangyur, Tengyur, Rinchen Terdzo, Damngak Dzo or a Sungbum (Collected Works of a Lama), mention the collection in the Subject field.
+   - Volume markers: Tibetan volumes are lettered KA KHA GA NGA etc. If a volume letter or number is visible add it as "Vol" plus the letter or number (e.g. "Vol KA" or "Vol 3").
+
+------------------------------------
+
+Print the following details in Title Case:
+
+Title SubTitle Commentary Commentator Author Translator Language Subject Volume Publication Place Year - Publisher Or Printing House in One Line in English only.
+
+The Hyphen will separate the main text from the Publisher/Printing House.
+
+If any entry is not visible then just leave it blank.
+If author/title is not known then instead print Unknown.
+
+--- FIELD FILLING RULES ---
+
+1. SUBJECT FIELD:
+   - Include the broad topic (e.g. Dzogchen, Madhyamaka, Tantra, Sadhana, Prayers, Medicine, Astrology, Grammar, History, Biography Namtar).
+   - MANDATORY: Include the format identified above: "Pecha", "Manuscript Pecha", "Woodblock Print Pecha", "Modern Pecha Reprint" or "Modern Book".
+   - If part of a canonical collection add it (e.g. "Kangyur", "Tengyur", "Sungbum").
+   - If visual analysis found art, add "Illustrated".
+   Example Subject Output: "Dzogchen Woodblock Print Pecha Illustrated" or "Sadhana Manuscript Pecha"
+
+2. LANGUAGE FIELD:
+   - Default is "Tibetan". If script is not Uchen, add script (e.g. "Tibetan in Ume Script").
+   - If bilingual (>5% mix), mention both (e.g. "Tibetan and Sanskrit in Lantsa Script" or "Tibetan and English").
+
+3. TITLE/AUTHOR/PUBLISHER LOGIC:
+   - Title: Use the phonetic Tibetan title. If a well-known Sanskrit title exists (e.g. Bodhicharyavatara), prefer the Sanskrit title with the Tibetan title omitted to save space.
+   - Author: Use the conventional phonetic name of the Lama or author (e.g. Longchenpa, Je Tsongkhapa, Mipham Rinpoche, Patrul Rinpoche). Include honorifics only if part of the conventional name.
+   - Commentary/Commentator: If the text is a commentary (Drelpa/Tika/Namshe), include it.
+   - Translator (Lotsawa): If a translator is named in the colophon, include after Author.
+   - Printing House: For woodblock prints treat the printing house (e.g. Derge Parkhang, Narthang, Lhasa Zhol, Chone) as the Publisher.
+
+   - HYPHEN RULE:
+     - The Hyphen is strictly for the Publisher or Printing House.
+     - If there is a Publisher/Printing House, make it the last entry.
+     - If there is NO Publisher, make the Author the last entry preceded by hyphen.
+     - If NO Publisher and NO Author (common in manuscripts), use "Unknown" as the last entry preceded by hyphen.
+
+   Format Examples:
+   - Woodblock: Title Tibetan Dzogchen Woodblock Print Pecha Vol KA - Derge Parkhang
+   - Manuscript: Title Tibetan Sadhana Manuscript Pecha - Author
+   - No Info: Title Tibetan Pecha - Unknown
+
+   - If there is a publisher AND title AND author, the title and author should be separated by " By ".
+
+4. MISSING FOLIOS:
+   - If the Pecha seems to miss folios in the beginning (no title folio, starts abruptly) or end (no colophon), add "Missing Folios" before the year or place.
+
+5. CLEANUP:
+   - Output should not exceed ${PDF_METADATA_EXTRACTION_PROMPT_CHAR_LIMIT} characters.
+   - Use phonetic transliteration only. Never output Wylie with apostrophes or plus signs.
+   - No quotes single or double or backticks, no colons.
+   - Ignore pdf-headers/footers and library stamps.
+   - If publisher has address details, drop the country/city part from the name.
 
 `;
 

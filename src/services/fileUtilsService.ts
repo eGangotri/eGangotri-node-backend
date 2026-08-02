@@ -33,8 +33,9 @@ export const renameFilesViaExcel = async (excelPath: string, folderOrProfile: st
     try {
         const excelData: GDriveExcelHeadersFileRenamerV2[] = excelToJson(excelPath).filter((x: GDriveExcelHeadersFileRenamerV2) => {
             const firstKey = Object.keys(x)[0];
-            return isNumber((x as any)[firstKey])
+            return x[firstKey] != null && String(x[firstKey]).trim() !== ''
         })
+
         //
         const folder = getPathOrSrcRootForProfile(folderOrProfile)
         const localFileStats = await getAllPDFFiles(folder);
@@ -72,7 +73,7 @@ export const renameFilesViaExcelUsingSpecifiedColumns = async (excelPath: string
     try {
         const excelData: any[] = excelToJson(excelPath).filter((x: any) => {
             const firstKey = Object.keys(x)[0];
-            return isNumber(x[firstKey])
+            return x[firstKey] != null && String(x[firstKey]).trim() !== ''
         })
         //
         const folder = getPathOrSrcRootForProfile(folderOrProfile)
@@ -109,6 +110,59 @@ export const renameFilesViaExcelUsingSpecifiedColumns = async (excelPath: string
     return renameReport;
 }
 
+export const renameFilesViaExcelUsingTwoColumns = async (excelPath: string,
+    col1: number, col2: number) => {
+    let renameReport: RenameReportType = {
+        errorList: [],
+        success: [],
+        totalInExcel: 0,
+        totalInFolder: 0
+    }
+
+    try {
+        // Read the Excel and keep only rows whose first cell is not empty (skips blanks)
+        const excelData: any[] = excelToJson(excelPath).filter((x: any) => {
+            const firstKey = Object.keys(x)[0];
+            return x[firstKey] != null && String(x[firstKey]).trim() !== ''
+        })
+        console.log(`excelData: ${excelData?.length} `);
+        renameReport.totalInExcel = excelData?.length || 0
+
+        for (let excelRow of excelData) {
+            const excelRowKeys = Object.keys(excelRow)
+            console.log(`excelRowKeys: ${excelRowKeys}`)
+            if (col1 <= 0 || col2 <= 0 || col1 - 1 >= excelRowKeys.length || col2 - 1 >= excelRowKeys.length) {
+                renameReport.errorList.push(`Invalid columns ${col1}, ${col2}. Total Col. Count: ${excelRowKeys.length}`)
+                continue
+            }
+            const oldFilePathKey = excelRowKeys[col1 - 1];
+            const newFileNameKey = excelRowKeys[col2 - 1];
+
+            const absPath = (excelRow[oldFilePathKey] || "").trim();
+            const rawNewName = (excelRow[newFileNameKey] || "").trim();
+
+            if (!absPath || !rawNewName || absPath.startsWith("=") || rawNewName.startsWith("=")) {
+                renameReport.errorList.push(`No valid absolute path or new name in row: ${JSON.stringify(excelRow)}`)
+                continue
+            }
+
+            const origExt = path.extname(absPath);
+            let newFileName = rawNewName;
+            if (!path.extname(newFileName)) {
+                newFileName = `${rawNewName}${origExt || ".pdf"}`;
+            }
+
+            const finalNewFileName = limitCountAndSanitizeFileNameWithoutExt(newFileName, MAX_FILE_NAME_LENGTH);
+            console.log(`Renaming ${absPath} to ${finalNewFileName}`);
+            await _renameFileByAbsPath(absPath, finalNewFileName, renameReport);
+        }
+    }
+    catch (err: any) {
+        console.log('Error', err);
+        return err;
+    }
+    return renameReport;
+}
 export const renameFileViaFormula = async (origName: string,
     newName: string,
     localFileStats: FileStats[],
@@ -230,9 +284,6 @@ export const _renameFileByAbsPath = async (absPath: string, newFileName: string,
     try {
         const parentDir = path.dirname(absPath);
         const newPath = path.join(parentDir, newFileName);
-        if (!newPath.endsWith(".pdf")) {
-            throw new Error(`${newPath} doesnt end with .pdf`);
-        }
         if (newPath.length < 8) {
             throw new Error(`${newPath} length is too short`);
         }
@@ -305,8 +356,8 @@ const _validateFolderRecursive = async (folderPath: string, report: FolderValida
 
         // Subfolders (non-root) should have a numeric component
         if (!isRoot && !hasExpectedCount) {
-             report.missingNumericComponents.push(folderPath);
-             console.log(`[WARNING] Folder missing numeric component: ${folderPath}`);
+            report.missingNumericComponents.push(folderPath);
+            console.log(`[WARNING] Folder missing numeric component: ${folderPath}`);
         }
 
         const entries = await fsPromise.readdir(folderPath, { withFileTypes: true });
