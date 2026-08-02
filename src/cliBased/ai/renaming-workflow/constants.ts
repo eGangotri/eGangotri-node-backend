@@ -6,7 +6,7 @@ dotenv.config();
 
 export const PDF_METADATA_EXTRACTION_PROMPT_CHAR_LIMIT = 170;
 // Google AI Studio prompt for metadata extraction
-export const PDF_METADATA_EXTRACTION_PROMPT2 = `The exercise below is to save a pdf with recognizable metadata mostly English, Sanskrit and other Indian languages including Tibetan that use Brahmi based scripts and sometimes Urdu.
+export const PDF_METADATA_EXTRACTION_PROMPT = `The exercise below is to save a pdf with recognizable metadata mostly English, Sanskrit and other Indian languages including Tibetan that use Brahmi based scripts and sometimes Urdu.
 
 The output should be only ASCII letters (A-Z, a-z) and numbers (0-9) without exception. 
 No Comma, colon, slashes , diacritics etc should be used.
@@ -98,7 +98,7 @@ If author/title is not known then instead print Unknown.
 `;
 
 // Google AI Studio prompt for metadata extraction of Tibetan Texts and Pechas
-export const PDF_METADATA_EXTRACTION_PROMPT = `The exercise below is to save a pdf of a Tibetan Text or Tibetan Pecha with recognizable metadata in English.
+export const PDF_METADATA_EXTRACTION_PROMPT_TIBETAN = `The exercise below is to save a pdf of a Tibetan Text or Tibetan Pecha with recognizable metadata in English.
 
 The output should be only ASCII letters (A-Z, a-z) and numbers (0-9) without exception.
 No Comma, colon, slashes, diacritics etc should be used.
@@ -185,6 +185,10 @@ If author/title is not known then instead print Unknown.
    - If publisher has address details, drop the country/city part from the name.
 
 `;
+
+export const METADATA_EXTRACTION_PROMPT = {
+   CUSTOM_METADATA_EXTRACTION_PROMPT : PDF_METADATA_EXTRACTION_PROMPT
+}
 
 export const SIMPLE_TITLE_AUTHOR_GDRIVE_CP_RENAME_PROMPT_CHAR_LIMIT = 50
 export const SIMPLE_TITLE_AUTHOR_GDRIVE_CP_RENAME_PROMPT = `

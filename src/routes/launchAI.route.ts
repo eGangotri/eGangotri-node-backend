@@ -9,20 +9,25 @@ import { randomUUID } from 'crypto';
 import * as fs from 'fs';
 import { renameOriginalItemsBasedOnMetadata, retryAiRenamerByRunId, reverseMetadataFromOriginalFiles } from '../services/aiServices';
 import { RENAMER_SUFFIX, processOutputSuffixes, aggregateRenamingResults, generateRenamingSummary, performFolderCleanup } from '../utils/launchAIUtils';
-import { PDF_METADATA_EXTRACTION_PROMPT } from '../cliBased/ai/renaming-workflow/constants';
+import { METADATA_EXTRACTION_PROMPT, PDF_METADATA_EXTRACTION_PROMPT, PDF_METADATA_EXTRACTION_PROMPT_TIBETAN } from '../cliBased/ai/renaming-workflow/constants';
 import { AIHaltManager } from '../utils/aiHaltManager';
 
 export const launchAIRoute = express.Router();
 const activeAIRenamerRequests = new Set();
-export let CUSTOM_METADATA_EXTRACTION_PROMPT = PDF_METADATA_EXTRACTION_PROMPT;
 
 //ai/aiRenamer
 launchAIRoute.post('/aiRenamer', async (req: any, resp: any) => {
     const srcFolders = req?.body?.srcFolder;
     const reducedFolders = req?.body?.reducedFolder || "";
     if (req?.body?.metadataExtractionPrompt && req?.body?.metadataExtractionPrompt.trim().length > 0) {
-        CUSTOM_METADATA_EXTRACTION_PROMPT = req?.body?.metadataExtractionPrompt;
+        METADATA_EXTRACTION_PROMPT.CUSTOM_METADATA_EXTRACTION_PROMPT = req?.body?.metadataExtractionPrompt;
     }
+    const tibetan = ['true', '1', 'yes'].includes(String(req?.body?.tibetan ?? '').trim().toLowerCase());
+    if (tibetan && req?.body?.metadataExtractionPrompt) {
+        METADATA_EXTRACTION_PROMPT.CUSTOM_METADATA_EXTRACTION_PROMPT = PDF_METADATA_EXTRACTION_PROMPT_TIBETAN
+    }
+
+    console.log(`metadata prompt: ${METADATA_EXTRACTION_PROMPT.CUSTOM_METADATA_EXTRACTION_PROMPT}`)
     try {
 
         if (!reducedFolders && !srcFolders) {
