@@ -23,7 +23,7 @@ launchAIRoute.post('/aiRenamer', async (req: any, resp: any) => {
         METADATA_EXTRACTION_PROMPT.CUSTOM_METADATA_EXTRACTION_PROMPT = req?.body?.metadataExtractionPrompt;
     }
     const tibetan = ['true', '1', 'yes'].includes(String(req?.body?.tibetan ?? '').trim().toLowerCase());
-    if (tibetan && req?.body?.metadataExtractionPrompt) {
+    if (tibetan) {
         METADATA_EXTRACTION_PROMPT.CUSTOM_METADATA_EXTRACTION_PROMPT = PDF_METADATA_EXTRACTION_PROMPT_TIBETAN
     }
 
