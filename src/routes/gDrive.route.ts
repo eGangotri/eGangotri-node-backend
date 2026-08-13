@@ -49,6 +49,16 @@ gDriveRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
         }
 
         const links = googleDriveLink.includes(",") ? googleDriveLink.split(",").map((link: string) => link.trim()).filter((x: string) => x.length > 0) : [googleDriveLink.trim()];
+
+        if (new Set(links).size !== links.length) {
+            return resp.status(400).send({
+                response: {
+                    "status": "failed",
+                    "message": "Duplicate links are not allowed"
+                }
+            });
+        }
+
         const profiles = profile.includes(",") ?
             profile.split(",").map((p: string) => p.trim()) :
             Array(links.length).fill(profile.trim());
