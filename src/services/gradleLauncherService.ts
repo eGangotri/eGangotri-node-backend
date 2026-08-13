@@ -123,7 +123,7 @@ export function launchUploaderViaAbsPath(args: any): Promise<Record<string, any>
 
 export function reuploadMissed(itemsForReupload: ArchiveProfileAndTitle[]): Promise<Record<string, any>> {
     console.log(`reuploadMissed ${JSON.stringify(itemsForReupload)}`);
-    const dataAsCSV = itemsForReupload.map((x: ArchiveProfileAndTitle) => x.archiveProfile + ", '" + x.title.trim() + "'").join(" ")
+    const dataAsCSV = itemsForReupload.map((x: ArchiveProfileAndTitle) => x.archiveProfile + ", '" + x.title?.trim() + "'").join(" ")
     return makeGradleCall(generateGradleCommand(dataAsCSV, "uploadToArchiveSelective"))
 }
 
