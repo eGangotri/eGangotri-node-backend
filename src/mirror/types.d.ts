@@ -18,6 +18,12 @@ export interface ArchiveProfileAndTitle {
     title: string;
 }
 
+export interface ArchiveProfileAbsPathAndUploadCycleId {
+    archiveProfile: string;
+    absolutePath: string;
+    uploadCycleId?: string;
+}
+
 export interface UploadCycleTypes {
     countIntended?: number;
     archiveProfileAndCountIntended?: ArchiveProfileAndCount[];

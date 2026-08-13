@@ -2,7 +2,7 @@ import * as express from 'express';
 import path from 'path';
 import * as fsPromise from 'fs/promises';
 import { launchUploader, launchUploaderViaAbsPath, launchUploaderViaExcelV1, launchUploaderViaExcelV3, launchUploaderViaExcelV3Multi, launchUploaderViaJson, loginToArchive, makeGradleCall, moveToFreeze, reuploadFailedLogic, reuploadMissed, snap2htmlCmdCall } from '../services/gradleLauncherService';
-import { ArchiveProfileAndTitle, UploadCycleArchiveProfile } from '../mirror/types';
+import { ArchiveProfileAbsPathAndUploadCycleId, ArchiveProfileAndTitle, UploadCycleArchiveProfile } from '../mirror/types';
 import { isValidPath } from '../utils/FileUtils';
 import { getFolderInDestRootForProfile, getFolderInSrcRootForProfile } from '../archiveUpload/ArchiveProfileUtils';
 import { IItemsUshered, ItemsUshered } from '../models/itemsUshered';
@@ -582,7 +582,7 @@ launchGradleRoute.get('/launchUploaderViaAbsPath', async (req: any, resp: any) =
 
 launchGradleRoute.post('/reuploadMissedByProfileAndAbsPath', async (req: any, resp: any) => {
     try {
-        const itemsForReupload: ArchiveProfileAndTitle[] = req.body.itemsForReupload
+        const itemsForReupload: ArchiveProfileAbsPathAndUploadCycleId[] = req.body.itemsForReupload
         const res = await reuploadMissed(itemsForReupload)
         resp.status(200).send({
             response: res

@@ -1,7 +1,7 @@
 import { promisify } from 'util';
 import { exec, spawn } from 'child_process';
 import { WORKING_DIR } from '../common';
-import { ArchiveProfileAndTitle } from '../mirror/types';
+import { ArchiveProfileAbsPathAndUploadCycleId, ArchiveProfileAndTitle } from '../mirror/types';
 import path from 'path';
 import { stripQuotes } from '../excelToMongo/Util';
 import { itemsUsheredVerficationAndDBFlagUpdate } from '../services/itemsUsheredService';
@@ -121,9 +121,9 @@ export function launchUploaderViaAbsPath(args: any): Promise<Record<string, any>
     return makeGradleCall(generateGradleCommandForHashSeparated(args, "uploadToArchiveSelective"))
 }
 
-export function reuploadMissed(itemsForReupload: ArchiveProfileAndTitle[]): Promise<Record<string, any>> {
+export function reuploadMissed(itemsForReupload: ArchiveProfileAbsPathAndUploadCycleId[]): Promise<Record<string, any>> {
     console.log(`reuploadMissed ${JSON.stringify(itemsForReupload)}`);
-    const dataAsCSV = itemsForReupload.map((x: ArchiveProfileAndTitle) => x.archiveProfile + ", '" + x.title?.trim() + "'").join(" ")
+    const dataAsCSV = itemsForReupload.map((x: ArchiveProfileAbsPathAndUploadCycleId) => x.archiveProfile + ", '" + x.absolutePath?.trim() + (x?.uploadCycleId ? (", '" + x?.uploadCycleId?.trim()) : "") + "'").join(" ")
     return makeGradleCall(generateGradleCommand(dataAsCSV, "uploadToArchiveSelective"))
 }
 
