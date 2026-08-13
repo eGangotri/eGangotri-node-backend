@@ -124,7 +124,7 @@ export function launchUploaderViaAbsPath(args: any): Promise<Record<string, any>
 export function reuploadMissed(itemsForReupload: ArchiveProfileAbsPathAndUploadCycleId[]): Promise<Record<string, any>> {
     console.log(`reuploadMissed ${JSON.stringify(itemsForReupload)}`);
     const dataAsCSV = itemsForReupload.map((x: ArchiveProfileAbsPathAndUploadCycleId) => {
-        return x.archiveProfile + ", '" + x.absolutePath?.trim() + "'" + (x?.uploadCycleId ? (", '" + x?.uploadCycleId?.trim() + "'") : "");
+        return x.archiveProfile + ", '" + x.absolutePath?.trim() + "'" + (x?.uploadCycleId ? ("'" + x?.uploadCycleId?.trim() + "'") : "");
     }).join(" ");
     return makeGradleCall(generateGradleCommand(dataAsCSV, "uploadToArchiveSelective"))
 }
