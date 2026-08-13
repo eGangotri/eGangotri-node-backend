@@ -14,7 +14,8 @@ export interface UploadCycleArchiveProfile {
 
 export interface ArchiveProfileAndTitle {
     archiveProfile: string;
-    title: string;
+    title?: string;
+    absolutePath?: string;
 }
 
 export interface UploadCycleTypes {
