@@ -22,6 +22,7 @@ export type UserListOptionsType = {
 export type ItemsListOptionsType = {
   ids?: string,
   limit?: number,
+  limit2?: number,
   page?: number,
   startDate?: string,
   endDate?: string,

@@ -126,7 +126,7 @@ export const selectedItemsVerficationAndDBFlagUpdate = async (uploadsForVerifica
 }
 
 export const updadeAllUplodVerfiedFlagInUploadCycle = async (uploadCycleId: string) => {
-   const itemsUshered = await ItemsUshered.find({
+  const itemsUshered = await ItemsUshered.find({
     uploadCycleId: uploadCycleId.toString()
   });
   const allTrue = itemsUshered.filter(x => x.uploadFlag === true).length === itemsUshered.length;
@@ -210,9 +210,20 @@ export const handleEachRow = (uploadCycleId: string,
 
 
 export const getListOfUploadCyclesAndCorrespondingData = async (queryOptions: ItemsListOptionsType) => {
-  const usheredItems = await getListOfItemsUshered(queryOptions);
-  const queuedItems = await getListOfItemsQueued(queryOptions)
-  const uploadCycles = await getListOfUploadCycles(queryOptions);
+
+  const limit2 = queryOptions.limit2 || queryOptions.limit || 5000
+
+  const [usheredItems, queuedItems, uploadCycles] = await Promise.all([
+    getListOfItemsUshered({
+      ...queryOptions,
+      limit: Number(limit2 < 5000 ? 5000 : limit2)
+    }),
+    getListOfItemsQueued({
+      ...queryOptions,
+      limit: Number(limit2 < 5000 ? 5000 : limit2)
+    }),
+    getListOfUploadCycles(queryOptions),
+  ]);
 
   const groupedUsheredItems = _.groupBy(usheredItems, function (item: any) {
     return item.uploadCycleId;
