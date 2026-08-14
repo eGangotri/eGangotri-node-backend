@@ -7,6 +7,7 @@ import { stripQuotes } from '../excelToMongo/Util';
 import { itemsUsheredVerficationAndDBFlagUpdate } from '../services/itemsUsheredService';
 import { createJsonFileForUpload } from '../services/GradleLauncherUtil';
 import { ItemsUshered } from '../models/itemsUshered';
+import { assertRange } from 'pdf-lib';
 
 
 /*
@@ -93,11 +94,15 @@ export function launchUploaderViaExcelV1Old(profile: string, excelPath: string, 
         `gradle uploadToArchiveViaExcelV1WithFourCols -PjsonArgs="${gradleArgsAsJSON}"`)
 }
 
-export function launchUploaderViaExcelV1(profile: string, excelPath: string, uploadCycleId: string): Promise<Record<string, any>> {
+export function launchUploaderViaExcelV1(profile: string,
+    excelPath: string,
+    uploadCycleId: string,
+    range: string = ""): Promise<Record<string, any>> {
     // Escape backslashes in the path
     const escapedExcelPath = excelPath.replace(/\\/g, '\\\\');
 
-    const gradleArgsAsJSON = `{'profile': '${profile}','excelPath':'${escapedExcelPath}','range': '${uploadCycleId}'}`;
+    const rangeArg = range ? `,'range': '${range}'` : "";
+    const gradleArgsAsJSON = `{'profile': '${profile}','excelPath':'${escapedExcelPath}','uploadCycleId': '${uploadCycleId}'${rangeArg}}`;
     return makeGradleCall(
         `gradle uploadToArchiveViaExcelV1WithFourCols -PjsonArgs="${gradleArgsAsJSON}"`);
 }

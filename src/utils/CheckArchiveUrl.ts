@@ -94,11 +94,36 @@ export async function validateArchivePdf(urlString: string): Promise<boolean> {
   }
 }
 
+export interface ArchiveUploadUrlMetadata {
+    description: string;
+    subject: string;
+    creator: string;
+}
+
+const cleanQueryValue = (value: string | null): string => {
+    if (!value) return '';
+    return value.trim().replace(/^['"]+|['"]+$/g, '').trim();
+};
+
+export function parseArchiveUploadUrl(urlString: string): ArchiveUploadUrlMetadata | null {
+    try {
+        const parsedUrl = new URL(urlString);
+        return {
+            description: cleanQueryValue(parsedUrl.searchParams.get('description')),
+            subject: cleanQueryValue(parsedUrl.searchParams.get('subject')),
+            creator: cleanQueryValue(parsedUrl.searchParams.get('creator'))
+        };
+    } catch (err) {
+        console.log(`Failed to parse archive upload URL: ${urlString}`, err);
+        return null;
+    }
+}
+
 // --- Example Usage ---
 (async () => {
   const targetUrl = "https://archive.org/details/pwkb_rusi-hindi-shabdakosh-russko-khindi-slovar-by-veer-rajendra-rishi-nagendra-";
   
-  const isValid = await validateArchivePdf(targetUrl);
-  console.log(`Is the URL valid with a readable PDF? ${isValid}`); 
+  // const isValid = await validateArchivePdf(targetUrl);
+  // console.log(`Is the URL valid with a readable PDF? ${isValid}`); 
   // Output: true
 })();

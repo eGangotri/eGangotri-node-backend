@@ -26,6 +26,12 @@ export async function getUploadCycleById(uploadCycleId: string) {
   return item;
 }
 
+
+export async function getUploadCyclesById(uploadCycleId: string) {
+  const items = await UploadCycle.find({ uploadCycleId: uploadCycleId })
+  return items;
+}
+
 export async function markUploadCycleAsMovedToFreeze(uploadCycleId: string) {
   await UploadCycle.updateOne({ uploadCycleId: uploadCycleId }, { $set: { moveToFreeze: true } });
 }

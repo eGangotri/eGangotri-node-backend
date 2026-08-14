@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import express from "express";
 import { validateAdminSuperAdminUserFromRequest } from "../services/userService";
 import { UploadCycle } from "../models/uploadCycle";
-import { getListOfUploadCycles, getUploadCycleById } from "../services/uploadCycleService";
+import { getListOfUploadCycles, getUploadCycleById, getUploadCyclesById } from "../services/uploadCycleService";
 import { findMissedUploads } from "../services/GradleLauncherUtil";
 import { UploadCycleArchiveProfile } from "mirror/types";
 import { getServerNetworkInfo } from "../utils/networkUtils";
@@ -113,26 +113,35 @@ uploadCycleRoute.post("/deleteUploadCycleById", async (req: Request, resp: Respo
             resp.status(400).send({ error: 'uploadCycleId is required' });
             return;
         }
-        const uploadCycle = await getUploadCycleById(uploadCycleId);
-        if (uploadCycle) {
-            uploadCycle.deleted = true;
-            await uploadCycle.save();
-            resp.status(200).send({
-                response: {
-                    success: true,
-                    message: `uploadCycleId ${uploadCycleId} deleted`
-                }
-            });
-            return;
-        }
-        else {
-            resp.status(200).send({
+        const uploadCycles = await getUploadCyclesById(uploadCycleId);
+        if (!uploadCycles || uploadCycles.length === 0) {
+            return resp.status(404).send({
                 response: {
                     success: false,
                     message: `uploadCycleId ${uploadCycleId} not found`
                 }
             });
         }
+        let successCount = 0;
+        let failureCount = 0;
+        for (const uploadCycle of uploadCycles) {
+            uploadCycle.deleted = true;
+            uploadCycle.disposed = true;
+
+            await uploadCycle.save();
+            if (uploadCycle.deleted) {
+                successCount++;
+            } else {
+                failureCount++;
+            }
+        }
+        return resp.status(200).send({
+            response: {
+                success: successCount === uploadCycles.length,
+                msg: `Found (${uploadCycles.length}) items corresponding to ${uploadCycleId}.
+                Deleted ${successCount === uploadCycles.length? "ALL": "successCount"}`
+            }
+        });
     }
     catch (err: any) {
         console.log('Error', err);

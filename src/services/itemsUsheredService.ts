@@ -61,6 +61,11 @@ export async function getListOfItemsUshered(queryOptions: ItemsListOptionsType) 
   }
 }
 
+
+export async function getListOfItemsUsherdByUploadCycleId(uploadCycleId: string) {
+  return getListOfItemsUshered({ uploadCycleId });
+}
+
 export const itemsUsheredVerficationAndDBFlagUpdate = async (uploadCycleIdForVerification: string) => {
   //get all Items_Ushered for uploadCycleIdForVerification
   const itemsUsheredByUploadCycle = await ItemsUshered.find({

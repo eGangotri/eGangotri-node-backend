@@ -8,6 +8,10 @@ import { UploadCycle } from '../models/uploadCycle';
 import _ from 'lodash';
 import { UploadCycleArchiveProfile } from 'mirror/types';
 import { ExcelV1Columns } from './types';
+import { getListOfItemsQueuedByUploadCycleId } from './itemsQueuedService';
+import { getListOfItemsUsherdByUploadCycleId } from './itemsUsheredService';
+
+
 
 export const findMissedUploads = async (uploadCycleId: string): Promise<UploadCycleArchiveProfile[]> => {
     const uploadCycleByCycleId = await UploadCycle.findOne({
@@ -41,6 +45,38 @@ export const findMissedUploads = async (uploadCycleId: string): Promise<UploadCy
     return missing;
 }
 
+/**
+ * 
+ * @param uploadCycleId 
+ * @returns 
+ */
+export const findMissedUploadsByUploadCycleId = async (uploadCycleId: string) => {
+    const uploadCycleByCycleId = await UploadCycle.findOne({
+        uploadCycleId: uploadCycleId
+    });
+
+    if (!uploadCycleByCycleId) {
+        return [];
+    }
+
+    const profile = uploadCycleByCycleId.archiveProfiles[0];
+    const allQueued = await getListOfItemsQueuedByUploadCycleId(uploadCycleId)
+
+    const allIntendedAbsPaths = profile.absolutePaths || []
+    const queuedPaths = new Set(allQueued.map((q: any) => q.localPath));
+    const missing = allIntendedAbsPaths.filter((absPath: string) => !queuedPaths.has(absPath));
+
+    console.log(`allQueued : ${allQueued.length > 0 ? JSON.stringify(allQueued[0]) : 'empty'}`)
+    console.log(`allIntendedAbsPaths : ${allIntendedAbsPaths.length > 0 ? JSON.stringify(allIntendedAbsPaths[0]) : 'empty'}`)
+    console.log(`findMissedUploadsByUploadCycleId (${uploadCycleId})
+        allQueued : ${allQueued?.length}
+        allIntendedAbsPaths : ${allIntendedAbsPaths?.length}
+        missing : ${missing?.length}
+        `)
+
+        
+    return missing;
+}
 export const createJsonFileForUpload = async (uploadCycleId: string, _failedForUploacCycleId: any[], statusString: string) => {
     const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)
     const folder = (process.env.HOME || process.env.USERPROFILE) + path.sep + 'Downloads' + path.sep;
@@ -65,10 +101,19 @@ export const createExcelV3FileForUpload = (uploadCycleId: string, jsonArray: any
     const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)
     const folder = (process.env.HOME || process.env.USERPROFILE) + path.sep + 'Downloads' + path.sep;
     const suffix = `uplodable-v3-${uploadCycleId}-${statusString}-${timeComponent}.xlsx`;
-    const excelFileName =`${folder}-${suffix}`;
+    const excelFileName = `${folder}-${suffix}`;
     console.log(`excelFileName ${excelFileName}`)
     jsonToExcel(jsonArray, excelFileName)
     return excelFileName
 }
 
 
+export const createExcelV1FileForUploadWithId = (uploadCycleId: string, jsonArray: ExcelV1Columns[], statusString: string, infix = "") => {
+    const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)
+    const folder = (process.env.HOME || process.env.USERPROFILE) + path.sep + 'Downloads' + path.sep;
+    const suffix = `uploadable-v1-${uploadCycleId}-${statusString}-${timeComponent}.xlsx`;
+    const excelFileName = folder + `${infix}${suffix}`;
+    console.log(`excelFileName ${excelFileName}`)
+    jsonToExcel(jsonArray, excelFileName)
+    return excelFileName
+}

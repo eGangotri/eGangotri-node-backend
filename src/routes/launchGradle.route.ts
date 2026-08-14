@@ -4,12 +4,12 @@ import * as fsPromise from 'fs/promises';
 import { launchUploader, launchUploaderViaAbsPath, launchUploaderViaExcelV1, launchUploaderViaExcelV3, launchUploaderViaExcelV3Multi, launchUploaderViaJson, loginToArchive, makeGradleCall, moveToFreeze, reuploadFailedLogic, reuploadMissed, snap2htmlCmdCall } from '../services/gradleLauncherService';
 import { ArchiveProfileAbsPathAndUploadCycleId, ArchiveProfileAndTitle, UploadCycleArchiveProfile } from '../mirror/types';
 import { isValidPath } from '../utils/FileUtils';
-import { getFolderInDestRootForProfile, getFolderInSrcRootForProfile } from '../archiveUpload/ArchiveProfileUtils';
+import { getArchiveMetadataForProfile, getFolderInDestRootForProfile, getFolderInSrcRootForProfile } from '../archiveUpload/ArchiveProfileUtils';
 import { IItemsUshered, ItemsUshered } from '../models/itemsUshered';
 import { UploadCycle } from '../models/uploadCycle';
 import { excelToJson, addFolderMetadataSheet } from '../cliBased/excel/ExcelUtils';
 import { ArchiveUploadExcelProps } from '../archiveDotOrg/archive.types';
-import { createExcelV1FileForUpload, createExcelV3FileForUpload, createJsonFileForUpload, findMissedUploads } from '../services/GradleLauncherUtil';
+import { createExcelV1FileForUpload, createExcelV3FileForUpload, createJsonFileForUpload, findMissedUploads, findMissedUploadsByUploadCycleId } from '../services/GradleLauncherUtil';
 import { getLatestUploadCycle } from '../services/uploadCycleService';
 import { checkIfEmpty } from '../utils/FileUtils';
 import { timeInfo } from '../mirror/FrontEndBackendCommonCode';
@@ -18,6 +18,8 @@ import { isPDFCorrupted } from '../utils/pdfValidator';
 import { getAllPdfsInFoldersRecursive, mkDirIfDoesntExists } from '../imgToPdf/utils/Utils';
 import { extractValue } from './utils';
 import { itemsUsheredVerficationAndDBFlagUpdate } from '../services/itemsUsheredService';
+import { ExcelV1Columns } from 'services/types';
+import { parseArchiveUploadUrl } from '../utils/CheckArchiveUrl';
 
 export const launchGradleRoute = express.Router();
 export const ISOLATED_FOLDER = "isolated";
@@ -112,8 +114,8 @@ launchGradleRoute.get('/launchUploader', async (req: any, resp: any) => {
 
 launchGradleRoute.get('/launchUploaderViaExcelV1', async (req: any, resp: any) => {
     try {
-        console.log(`launchUploaderViaExcelV1 ${req.query.profile} ${req.query.excelPath} ${req.query.uploadCycleId}`)
-        const res = await launchUploaderViaExcelV1(req.query.profile, req.query.excelPath, req.query.uploadCycleId)
+        console.log(`launchUploaderViaExcelV1 ${req.query.profile} ${req.query.excelPath} ${req.query.uploadCycleId}  ${req.query.range}`)
+        const res = await launchUploaderViaExcelV1(req.query.profile, req.query.excelPath, req.query.uploadCycleId, req.query.range)
         resp.status(200).send({
             response: {
                 success: true,
@@ -200,7 +202,7 @@ launchGradleRoute.get('/launchUploaderViaUploadCycleId', async (req: any, resp: 
     }
 })
 
-launchGradleRoute.get('/reuploadMissedViaUploadCycleId', async (req: any, resp: any) => {
+launchGradleRoute.get('/reuploadMissedViaUploadCycleIdOld', async (req: any, resp: any) => {
     try {
         const uploadCycleId = req.query.uploadCycleId
         console.log(`reuploadMissedViaUploadCycleId ${uploadCycleId}`)
@@ -293,6 +295,78 @@ launchGradleRoute.get('/reuploadMissedViaUploadCycleId', async (req: any, resp: 
                 });
                 return;
             }
+    }
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send({
+            response: {
+                success: false,
+                err
+            }
+        });
+    }
+})
+
+//
+
+
+launchGradleRoute.get('/reuploadMissedViaUploadCycleId', async (req: any, resp: any) => {
+    try {
+        const uploadCycleId = req.query.uploadCycleId
+        console.log(`reuploadMissedViaUploadCycleId:new ${uploadCycleId}`)
+        const uploadCycleByCycleId = await UploadCycle.findOne({
+            uploadCycleId: uploadCycleId
+        });
+
+        if (!uploadCycleByCycleId) {
+            return resp.status(404).send({
+                response: {
+                    success: false,
+                    msg: `Upload cycle ${uploadCycleId} not found`
+                }
+            });
+        }
+
+        const _missedForUploadCycleId
+            = await findMissedUploadsByUploadCycleId(uploadCycleId);
+        if (_missedForUploadCycleId.length === 0) {
+            return resp.status(404).send({
+                response: {
+                    success: false,
+                    msg: `No Missed upload found for Upload Cycle Id: ${uploadCycleId}`
+                }
+            });
+        }
+        const profile = uploadCycleByCycleId.archiveProfiles[0].archiveProfile
+
+        const _metadata = getArchiveMetadataForProfile(profile);
+        const augmentedMetadata = [];
+        for (const absPath of _missedForUploadCycleId) {
+            const augmented: ExcelV1Columns = {
+                absPath: absPath,
+                subject: _metadata.subject,
+                description: _metadata.description,
+                creator: _metadata.creator
+            };
+            augmentedMetadata.push(augmented);
+        }
+
+        console.log(`metadata ${augmentedMetadata?.length}`)
+        console.log(`metadata ${augmentedMetadata?.length > 0 ? JSON.stringify(augmentedMetadata) : '[]'}`)
+
+        const excelFileName = createExcelV1FileForUpload(uploadCycleId, augmentedMetadata,
+            `absPaths-as-excel-v1-${profile}-${augmentedMetadata.length}`)
+
+        const res = await launchUploaderViaExcelV1(profile, excelFileName, uploadCycleId)
+        resp.status(200).send({
+            response: {
+                msg: `attempted uploads of ${augmentedMetadata?.length} missing items`,
+                excelFileName,
+                res
+            }
+        });
+        return
+
     }
     catch (err: any) {
         console.log('Error', err);
