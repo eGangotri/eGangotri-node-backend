@@ -1,13 +1,15 @@
 import { LOCAL_FOLDERS_PROPERTIES_FILE_FOR_SRC, getArchiveMetadataForProfile, isValidArchiveProfile } from '../archiveUpload/ArchiveProfileUtils';
 import * as express from 'express';
-import { getAllFileListingWithoutStats, getAllPDFFiles } from '../utils/FileStatsUtils';
+import { getAllFileListingWithoutStats, getAllPDFFilesWithIgnorePathsSpecified } from '../utils/FileStatsUtils';
 import { createExcelV1FileForUpload } from './GradleLauncherUtil';
 import { callAksharamukhaToRomanColloquial } from '../aksharamukha/convert';
 import path from 'path';
 import { ArchiveUploadExcelProps } from 'archiveDotOrg/archive.types';
 import { ExcelV1Columns } from './types';
 
-export const getJsonOfAbsPathFromProfile = async (profile: string, allNotJustPdfs: boolean) => {
+export const getJsonOfAbsPathFromProfile = async (profile: string,
+    allNotJustPdfs: boolean,
+    ignorePaths: string[] = []) => {
     const profileFolder = LOCAL_FOLDERS_PROPERTIES_FILE_FOR_SRC.get(profile);
     console.log(`profileFolder ${profile}:${profileFolder} allNotJustPdfs ${allNotJustPdfs}`);
 
@@ -16,9 +18,9 @@ export const getJsonOfAbsPathFromProfile = async (profile: string, allNotJustPdf
     }
     let filesForUpload = []
     if (allNotJustPdfs) {
-        filesForUpload = await getAllFileListingWithoutStats({ directoryPath: profileFolder });
+        filesForUpload = await getAllFileListingWithoutStats({ directoryPath: profileFolder, ignorePaths });
     } else {
-        filesForUpload = await getAllPDFFiles(profileFolder);
+        filesForUpload = await getAllPDFFilesWithIgnorePathsSpecified(profileFolder, ignorePaths);
     }
     console.log(`filesForUpload ${filesForUpload.length}`);
 
@@ -62,12 +64,15 @@ const extractV1Metadata = async (absPathAsJson: { absPath: string }, _metadata: 
     return refined;
 }
 
-export const generateV1ExcelsForMultipleProfiles = async (profiles: string, script: string, allNotJustPdfs: boolean = false, useFolderNameAsDesc = false) => {
+export const generateV1ExcelsForMultipleProfiles = async (profiles: string, 
+    script: string, allNotJustPdfs: boolean = false, 
+    useFolderNameAsDesc = false, 
+    ignorePaths: string[] = []) => {
     const result = []
     const errors = []
     const _profilesAsArray = profiles.includes(",") ? profiles?.split(",").map((x: string) => x.trim()) : [profiles.trim()];
     for (const profile of _profilesAsArray) {
-        if(!isValidArchiveProfile(profile)){
+        if (!isValidArchiveProfile(profile)) {
             console.log(`Profile ${profile} is not valid. Please check the profile name and try again.`)
             errors.push({
                 success: false,
@@ -77,7 +82,7 @@ export const generateV1ExcelsForMultipleProfiles = async (profiles: string, scri
         }
         try {
             const _metadata = getArchiveMetadataForProfile(profile);
-            const absPathsAsJsons = await getJsonOfAbsPathFromProfile(profile, allNotJustPdfs);
+            const absPathsAsJsons = await getJsonOfAbsPathFromProfile(profile, allNotJustPdfs, ignorePaths);
             const _refinedMetadata = [];
             for (const absPathAsJson of absPathsAsJsons) {
                 const _refined: ExcelV1Columns = await extractV1Metadata(absPathAsJson, _metadata, script, useFolderNameAsDesc);

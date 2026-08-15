@@ -11,6 +11,8 @@ yarnExcelRoute.post('/createExcelV1OfAbsPathFromProfile', async (req: any, resp:
         const script = req?.body?.script as string;
         const allNotJustPdfs = req?.body?.allNotJustPdfs;
         const useFolderNameAsDesc = req?.body?.useFolderNameAsDesc;
+        const ignorePaths = req?.body?.ignorePaths || "";
+        const ignorePathsAsArray = ignorePaths.includes(",") ? ignorePaths?.split(",").map((x: string) => x.trim()) : (ignorePaths.length === 0 ? []:[ignorePaths?.trim()]);
 
         if (!profiles) {
             resp.status(400).send({
@@ -46,6 +48,8 @@ yarnExcelRoute.post('/createExcelV3OfAbsPathFromProfile', async (req: any, resp:
     try {
         const profiles = req?.body?.profiles;
         const allNotJustPdfs = req?.body?.allNotJustPdfs;
+        const ignorePaths = req?.body?.ignorePaths || "";
+
         if (!profiles) {
             resp.status(400).send({
                 response: {
@@ -54,12 +58,13 @@ yarnExcelRoute.post('/createExcelV3OfAbsPathFromProfile', async (req: any, resp:
                 }
             });
         }
-        console.log(`profiles ${profiles} ${profiles?.split(",")} allNotJustPdfs ${allNotJustPdfs}`);
+        console.log(`profiles ${profiles} ${ignorePaths} ${profiles?.split(",")} allNotJustPdfs ${allNotJustPdfs}`);
         const result = []
         const _profilesAsArray = profiles.includes(",") ? profiles?.split(",").map((x: string) => x.trim()) : [profiles.trim()];
+        const ignorePathsAsArray = ignorePaths.includes(",") ? ignorePaths?.split(",").map((x: string) => x.trim()) : (ignorePaths.length === 0 ? []:[ignorePaths?.trim()]);
         for (const profile of _profilesAsArray) {
             try {
-                const absPathsAsJsons = await getJsonOfAbsPathFromProfile(profile, allNotJustPdfs);
+                const absPathsAsJsons = await getJsonOfAbsPathFromProfile(profile, allNotJustPdfs,ignorePathsAsArray);
                 const excelFileName = createExcelV3FileForUpload("", absPathsAsJsons, `absPaths-as-excel-${profile}-${absPathsAsJsons.length}`)
                 result.push({
                     profile: profile,
