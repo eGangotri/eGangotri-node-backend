@@ -328,9 +328,9 @@ launchGradleRoute.get('/reuploadMissedViaUploadCycleId', async (req: any, resp: 
             });
         }
 
-        const _missedForUploadCycleId
+        const _missedAbsPathsForUploadCycleId
             = await findMissedUploadsByUploadCycleId(uploadCycleId);
-        if (_missedForUploadCycleId.length === 0) {
+        if (_missedAbsPathsForUploadCycleId.length === 0) {
             return resp.status(404).send({
                 response: {
                     success: false,
@@ -338,16 +338,21 @@ launchGradleRoute.get('/reuploadMissedViaUploadCycleId', async (req: any, resp: 
                 }
             });
         }
+        console.log(`_missedAbsPathsForUploadCycleId ${JSON.stringify(_missedAbsPathsForUploadCycleId)}`)
         const profile = uploadCycleByCycleId.archiveProfiles[0].archiveProfile
 
         const _metadata = getArchiveMetadataForProfile(profile);
         console.log(`_metadata ${JSON.stringify(_metadata)}`)
         if (!_metadata?.subject?.length) {
-            const excelFileName = createExcelV3FileForUpload(uploadCycleId, _missedForUploadCycleId, `absPaths-as-excel-v3-${profile}-${_missedForUploadCycleId.length}`)
+            const _missedAbsPathAsJson =
+                _missedAbsPathsForUploadCycleId.map(x => {
+                    return { "absPath": x }
+                })
+            const excelFileName = createExcelV3FileForUpload(uploadCycleId, _missedAbsPathAsJson, `absPaths-as-excel-v3-${profile}-${_missedAbsPathsForUploadCycleId.length}`)
             const res = await launchUploaderViaExcelV3(profile, excelFileName, uploadCycleId)
             return resp.status(200).send({
                 response: {
-                    msg: `attempted uploads of ${_missedForUploadCycleId?.length} missing items`,
+                    msg: `attempted uploads of ${_missedAbsPathsForUploadCycleId?.length} missing items`,
                     excelFileName,
                     res
                 }
@@ -356,7 +361,7 @@ launchGradleRoute.get('/reuploadMissedViaUploadCycleId', async (req: any, resp: 
 
         else {
             const augmentedMetadata = [];
-            for (const absPath of _missedForUploadCycleId) {
+            for (const absPath of _missedAbsPathsForUploadCycleId) {
                 const augmented: ExcelV1Columns = {
                     absPath: absPath,
                     subject: _metadata?.subject,

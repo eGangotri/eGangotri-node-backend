@@ -97,7 +97,7 @@ export const createExcelV1FileForUpload = (uploadCycleId: string, jsonArray: Exc
     return excelFileName
 }
 
-export const createExcelV3FileForUpload = (uploadCycleId: string, jsonArray: any[], statusString: string) => {
+export const createExcelV3FileForUpload = (uploadCycleId: string, jsonArray: {absPath:string}[], statusString: string) => {
     const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT)
     const folder = (process.env.HOME || process.env.USERPROFILE) + path.sep + 'Downloads' + path.sep;
     const suffix = `uplodable-v3-${uploadCycleId}-${statusString}-${timeComponent}.xlsx`;
