@@ -20,6 +20,7 @@ import { extractValue } from './utils';
 import { itemsUsheredVerficationAndDBFlagUpdate } from '../services/itemsUsheredService';
 import { ExcelV1Columns } from 'services/types';
 import { parseArchiveUploadUrl } from '../utils/CheckArchiveUrl';
+import { getJsonOfAbsPathFromProfile } from 'services/yarnExcelService';
 
 export const launchGradleRoute = express.Router();
 export const ISOLATED_FOLDER = "isolated";
@@ -340,33 +341,46 @@ launchGradleRoute.get('/reuploadMissedViaUploadCycleId', async (req: any, resp: 
         const profile = uploadCycleByCycleId.archiveProfiles[0].archiveProfile
 
         const _metadata = getArchiveMetadataForProfile(profile);
-        const augmentedMetadata = [];
-        for (const absPath of _missedForUploadCycleId) {
-            const augmented: ExcelV1Columns = {
-                absPath: absPath,
-                subject: _metadata.subject,
-                description: _metadata.description,
-                creator: _metadata.creator
-            };
-            augmentedMetadata.push(augmented);
+        console.log(`_metadata ${JSON.stringify(_metadata)}`)
+        if (!_metadata?.subject?.length) {
+            const excelFileName = createExcelV3FileForUpload(uploadCycleId, _missedForUploadCycleId, `absPaths-as-excel-v3-${profile}-${_missedForUploadCycleId.length}`)
+            const res = await launchUploaderViaExcelV3(profile, excelFileName, uploadCycleId)
+            return resp.status(200).send({
+                response: {
+                    msg: `attempted uploads of ${_missedForUploadCycleId?.length} missing items`,
+                    excelFileName,
+                    res
+                }
+            });
         }
 
-        console.log(`metadata ${augmentedMetadata?.length}`)
-        console.log(`metadata ${augmentedMetadata?.length > 0 ? JSON.stringify(augmentedMetadata) : '[]'}`)
-
-        const excelFileName = createExcelV1FileForUpload(uploadCycleId, augmentedMetadata,
-            `absPaths-as-excel-v1-${profile}-${augmentedMetadata.length}`)
-
-        const res = await launchUploaderViaExcelV1(profile, excelFileName, uploadCycleId)
-        resp.status(200).send({
-            response: {
-                msg: `attempted uploads of ${augmentedMetadata?.length} missing items`,
-                excelFileName,
-                res
+        else {
+            const augmentedMetadata = [];
+            for (const absPath of _missedForUploadCycleId) {
+                const augmented: ExcelV1Columns = {
+                    absPath: absPath,
+                    subject: _metadata?.subject,
+                    description: _metadata?.description,
+                    creator: _metadata?.creator
+                };
+                augmentedMetadata.push(augmented);
             }
-        });
-        return
 
+            console.log(`metadata ${augmentedMetadata?.length}`)
+            console.log(`metadata ${augmentedMetadata?.length > 0 ? JSON.stringify(augmentedMetadata) : '[]'}`)
+
+            const excelFileName = createExcelV1FileForUpload(uploadCycleId, augmentedMetadata,
+                `absPaths-as-excel-v1-${profile}-${augmentedMetadata.length}`)
+
+            const res = await launchUploaderViaExcelV1(profile, excelFileName, uploadCycleId)
+            return resp.status(200).send({
+                response: {
+                    msg: `attempted uploads of ${augmentedMetadata?.length} missing items`,
+                    excelFileName,
+                    res
+                }
+            });
+        }
     }
     catch (err: any) {
         console.log('Error', err);

@@ -65,7 +65,7 @@ yarnExcelRoute.post('/createExcelV3OfAbsPathFromProfile', async (req: any, resp:
         for (const profile of _profilesAsArray) {
             try {
                 const absPathsAsJsons = await getJsonOfAbsPathFromProfile(profile, allNotJustPdfs,ignorePathsAsArray);
-                const excelFileName = createExcelV3FileForUpload("", absPathsAsJsons, `absPaths-as-excel-${profile}-${absPathsAsJsons.length}`)
+                const excelFileName = createExcelV3FileForUpload("", absPathsAsJsons, `absPaths-as-excel--v3-${profile}-${absPathsAsJsons.length}`)
                 result.push({
                     profile: profile,
                     excelFileName: excelFileName,
