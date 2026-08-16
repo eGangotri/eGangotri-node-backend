@@ -28,7 +28,7 @@ yarnExcelRoute.post('/createExcelV1OfAbsPathFromProfile', async (req: any, resp:
         useFolderNameAsDesc: ${useFolderNameAsDesc}
         allNotJustPdfs ${allNotJustPdfs}`);
 
-        const res = await generateV1ExcelsForMultipleProfiles(profiles, toTitleCase(script), allNotJustPdfs, useFolderNameAsDesc);
+        const res = await generateV1ExcelsForMultipleProfiles(profiles, toTitleCase(script), allNotJustPdfs, useFolderNameAsDesc, ignorePathsAsArray);
         resp.status(200).send({
             response: res
         });
