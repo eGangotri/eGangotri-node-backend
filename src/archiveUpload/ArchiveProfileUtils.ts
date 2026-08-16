@@ -9,6 +9,8 @@ import {
 } from './constants';
 import { checkFolderExistsSync } from '../utils/FolderUtils';
 
+const stripQuotes = (str: string) => str.replace(/^['"]+|['"]+$/g, '');
+
 const getFoldersCorrespondingToProfile = (root: string): Map<string, string> => {
     const properties = new Map<string, string>();
     for (const file of LOCAL_FOLDERS_PROPERTIES_FILES) {
@@ -22,7 +24,7 @@ const getFoldersCorrespondingToProfile = (root: string): Map<string, string> => 
             const [key, value] = line.split('=');
             const val = value?.replace(/\\\\/g, path.sep)
             if (key?.trim() && val?.trim()) {
-                properties.set(key.trim(), val.trim());
+                properties.set(stripQuotes(key.trim()), stripQuotes(val.trim()));
             }
         });
     }
@@ -98,7 +100,7 @@ const getArchiveMetadataProperties = () => {
             const [key, value] = line.split('=');
             const val = value?.replace(/\\\\/g, path.sep)
             if (key?.trim() && val?.trim()) {
-                properties.set(key.trim(), val.trim());
+                properties.set(stripQuotes(key.trim()), stripQuotes(val.trim()));
             }
         });
     }
@@ -160,15 +162,15 @@ export const getArchiveLoginProperties = () => {
             const [key, value] = line.split('=');
             if (value && value?.includes(",")) {
                 const values = value.split(",");
-                loginEmailProperties.set(key.trim(), values[0].trim());
-                const profileName = values[1]?.trim() || "";
-                loginProfileProperties.set(key.trim(), profileName.length === 0 || profileName === "*" ? "" : profileName);
+                loginEmailProperties.set(stripQuotes(key.trim()), stripQuotes(values[0].trim()));
+                const profileName = stripQuotes(values[1]?.trim() || "");
+                loginProfileProperties.set(stripQuotes(key.trim()), profileName.length === 0 || profileName === "*" ? "" : profileName);
             }
 
             else {
                 if (key?.trim() && value?.trim()) {
-                    loginEmailProperties.set(key.trim(), value.trim());
-                    loginProfileProperties.set(key.trim(), "");
+                    loginEmailProperties.set(stripQuotes(key.trim()), stripQuotes(value.trim()));
+                    loginProfileProperties.set(stripQuotes(key.trim()), "");
                 }
             }
         });

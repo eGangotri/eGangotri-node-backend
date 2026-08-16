@@ -12,7 +12,7 @@ yarnExcelRoute.post('/createExcelV1OfAbsPathFromProfile', async (req: any, resp:
         const allNotJustPdfs = req?.body?.allNotJustPdfs;
         const useFolderNameAsDesc = req?.body?.useFolderNameAsDesc;
         const ignorePaths = req?.body?.ignorePaths || "";
-        const ignorePathsAsArray = ignorePaths.includes(",") ? ignorePaths?.split(",").map((x: string) => x.trim()) : (ignorePaths.length === 0 ? []:[ignorePaths?.trim()]);
+        const ignorePathsAsArray = ignorePaths.includes(",") ? ignorePaths?.split(",").map((x: string) => x.trim()) : (ignorePaths.length === 0 ? [] : [ignorePaths?.trim()]);
 
         if (!profiles) {
             resp.status(400).send({
@@ -27,7 +27,7 @@ yarnExcelRoute.post('/createExcelV1OfAbsPathFromProfile', async (req: any, resp:
             script: ${script}
         useFolderNameAsDesc: ${useFolderNameAsDesc}
         allNotJustPdfs ${allNotJustPdfs}`);
-        
+
         const res = await generateV1ExcelsForMultipleProfiles(profiles, toTitleCase(script), allNotJustPdfs, useFolderNameAsDesc);
         resp.status(200).send({
             response: res
@@ -61,10 +61,18 @@ yarnExcelRoute.post('/createExcelV3OfAbsPathFromProfile', async (req: any, resp:
         console.log(`profiles ${profiles} ${ignorePaths} ${profiles?.split(",")} allNotJustPdfs ${allNotJustPdfs}`);
         const result = []
         const _profilesAsArray = profiles.includes(",") ? profiles?.split(",").map((x: string) => x.trim()) : [profiles.trim()];
-        const ignorePathsAsArray = ignorePaths.includes(",") ? ignorePaths?.split(",").map((x: string) => x.trim()) : (ignorePaths.length === 0 ? []:[ignorePaths?.trim()]);
+        const ignorePathsAsArray = ignorePaths.includes(",") ? ignorePaths?.split(",").map((x: string) => x.trim()) : (ignorePaths.length === 0 ? [] : [ignorePaths?.trim()]);
         for (const profile of _profilesAsArray) {
             try {
-                const absPathsAsJsons = await getJsonOfAbsPathFromProfile(profile, allNotJustPdfs,ignorePathsAsArray);
+                const absPathsAsJsons = await getJsonOfAbsPathFromProfile(profile, allNotJustPdfs, ignorePathsAsArray);
+                if (absPathsAsJsons.length < 1) {
+                    return resp.status(200).send({
+                        response: {
+                            msg: `Atleast 1 Profile is having 0 items.Retry after removing ${profile}`,
+                            success: false
+                        }
+                    });
+                }
                 const excelFileName = createExcelV3FileForUpload("", absPathsAsJsons, `absPaths-as-excel--v3-${profile}-${absPathsAsJsons.length}`)
                 result.push({
                     profile: profile,
