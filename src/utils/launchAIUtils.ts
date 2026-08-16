@@ -2,6 +2,7 @@ import * as path from "path";
 import * as fs from 'fs';
 import * as fsExtra from 'fs-extra';
 import { resolveProfilePathWithPercentages } from "./FileUtils";
+import { getAllFileListingWithoutStats, getAllFileStats, isEmptyOfAnyFile } from "./FileStatsUtils";
 
 
 export const RENAMER_SUFFIX = "-renamer"
@@ -139,5 +140,40 @@ export const performFolderCleanup = async (
     return {
         msg: `Folders ${reducedFolder} moved to ${destForRedFolder}`,
         msg2: `Folders ${outputFolder} moved to ${discardFolder}`
+    };
+}
+
+export const moveAllFirstLevelEmptyFolders = async (
+    profile: string
+) => {
+    const resolvedFolder = resolveProfilePathWithPercentages(profile);
+
+    const discardFolder = path.join(resolvedFolder, DISCARD_FOLDER_POST_AI_PROCESSING)
+    console.log(`moveAllFirstLevelEmptyFolders: 
+            resolvedprofile: ${resolvedFolder}
+            discardFolder: ${discardFolder}
+            `);
+    await fs.promises.mkdir(discardFolder, { recursive: true });
+
+    const entries = await fs.promises.readdir(resolvedFolder, { withFileTypes: true });
+    const firstLevelSubFolders = entries
+        .filter((entry) => entry.isDirectory() && entry.name !== DISCARD_FOLDER_POST_AI_PROCESSING)
+        .map((entry) => entry.name);
+
+    const movedFolders: string[] = [];
+    for (const folderName of firstLevelSubFolders) {
+        const folderPath = path.join(resolvedFolder, folderName);
+        const isEmpty = await isEmptyOfAnyFile({ directoryPath: folderPath, withLogs: false });
+        if (isEmpty) {
+            await fsExtra.move(folderPath, path.join(discardFolder, folderName), { overwrite: true });
+            movedFolders.push(folderName);
+        }
+    }
+
+    return {
+        movedFolders,
+        totalFirstLevelSubFolders: firstLevelSubFolders.length,
+        movedCount: movedFolders.length,
+        notMovedCount: firstLevelSubFolders.length - movedFolders.length
     };
 }

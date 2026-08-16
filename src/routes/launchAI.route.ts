@@ -8,7 +8,7 @@ import { IPdfTitleRenamingViaAITracker, PdfTitleRenamingViaAITracker } from '../
 import { randomUUID } from 'crypto';
 import * as fs from 'fs';
 import { renameOriginalItemsBasedOnMetadata, retryAiRenamerByRunId, reverseMetadataFromOriginalFiles } from '../services/aiServices';
-import { RENAMER_SUFFIX, processOutputSuffixes, aggregateRenamingResults, generateRenamingSummary, performFolderCleanup } from '../utils/launchAIUtils';
+import { RENAMER_SUFFIX, processOutputSuffixes, aggregateRenamingResults, generateRenamingSummary, performFolderCleanup, moveAllFirstLevelEmptyFolders } from '../utils/launchAIUtils';
 import { METADATA_EXTRACTION_PROMPT, PDF_METADATA_EXTRACTION_PROMPT, PDF_METADATA_EXTRACTION_PROMPT_TIBETAN } from '../cliBased/ai/renaming-workflow/constants';
 import { AIHaltManager } from '../utils/aiHaltManager';
 
@@ -419,6 +419,20 @@ launchAIRoute.post("/cleanupRedRenamerFilersMulti", async (req: Request, res: ex
     } catch (error) {
         console.log(`/cleanupRedRenamerFilersMulti error: ${JSON.stringify(error.message)}`);
         res.status(500).json({ message: "Error in cleanupRedRenamerFilersMulti", error })
+    }
+})
+
+launchAIRoute.post("/moveEmptyFoldersToDiscard", async (req: Request, res: express.Response) => {
+    try {
+        const folderToCleanUp = req.body.folderToCleanUp || "";
+        if (!folderToCleanUp) {
+            return res.status(400).json({ message: "folderToCleanUp is mandatory" });
+        }
+        const result = await moveAllFirstLevelEmptyFolders(folderToCleanUp);
+        res.json(result);
+    } catch (error) {
+        console.log(`/moveEmptyFoldersToDiscard error: ${JSON.stringify(error.message)}`);
+        res.status(500).json({ message: "Error in moveEmptyFoldersToDiscard", error })
     }
 })
 

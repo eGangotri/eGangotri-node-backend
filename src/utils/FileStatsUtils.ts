@@ -199,9 +199,22 @@ export async function getAllFileListingWithoutStats(filestatsOptions: FileStatsO
             filterExt: filestatsOptions.filterExt || [],
             ignorePaths: filestatsOptions.ignorePaths || [],
             ignoreFolders: true,
-            withLogs: filestatsOptions.withLogs || true,
+            withLogs: filestatsOptions.withLogs ?? true,
             withMetadata: false,
         })
+}
+
+export async function isEmptyOfAnyFile(filestatsOptions: FileStatsOptions): Promise<boolean> {
+    const files = await getAllFileListingWithoutStats(filestatsOptions);
+    return files.length === 0;
+}
+
+export async function isEmptyOfPdfFile(filestatsOptions: FileStatsOptions): Promise<boolean> {
+    const files = await getAllFileListingWithoutStats({
+        ...filestatsOptions,
+        filterExt: [PDF_EXT]
+    });
+    return files.length === 0;
 }
 
 export async function getAllFileListingWithFileSizeStats(directoryPath: string): Promise<FileStats[]> {
