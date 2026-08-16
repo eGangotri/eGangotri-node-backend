@@ -108,7 +108,7 @@ export async function listFolderContentsAndGenerateCSVAndExcel(_folderIdOrUrl: s
     const googleDriveFileData: Array<GoogleApiData> = await listFolderContentsAsArrayOfData(gDriveFolderId,
         drive, umbrellaFolder, ignoreFolder, type, rowCounterController, includePdfPageCount)
     const fileNameWithPath = await createFileNameWithPathForExport(gDriveFolderId,
-        umbrellaFolder, exportDestFolder, FileConstUtils.getRowCounter(rowCounterController)[1]);
+        umbrellaFolder, exportDestFolder, FileConstUtils.getRowCounter(rowCounterController)[1],includePdfPageCount);
     FileConstUtils.incrementRowCounter(rowCounterController);
 
     // Convert data to XLSX
@@ -142,7 +142,7 @@ export async function listFolderContentsAndGenerateExcelV2ForPdfRenamer(_folderI
     const googleDriveFileData: Array<GoogleApiData> = await listFolderContentsAsArrayOfData(folderId,
         drive, umbrellaFolder, ignoreFolder, type, rowCounterController, includePdfPageCount)
     const fileNameWithPath = await createFileNameWithPathForExport(folderId, umbrellaFolder, exportDestFolder,
-        FileConstUtils.getRowCounter(rowCounterController)[1]);
+        FileConstUtils.getRowCounter(rowCounterController)[1],includePdfPageCount);
     FileConstUtils.incrementRowCounter(rowCounterController);
     // Convert data to XLSX
     console.log(`googleDriveFileData ${googleDriveFileData.length} `);
