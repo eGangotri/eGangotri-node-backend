@@ -13,7 +13,7 @@ export async function createFileNameWithPathForExport(folderId: string,
     const _csvDumpFolder = `${exportDestFolder}\\${_umbrellaFolder}`;
     await createFolderIfNotExistsAsync(_csvDumpFolder);
     const timeComponent = moment(new Date()).format(DD_MM_YYYY_HH_MMFORMAT) + "_HOURS"
-    const fileNameWithPath = `${_csvDumpFolder}\\${_umbrellaFolder}-${itemCount}-Items-${includePdfPageCount?"with-pg-count":""}${timeComponent}-${folderId}`;
+    const fileNameWithPath = `${_csvDumpFolder}\\${_umbrellaFolder}-${itemCount}-Items-${includePdfPageCount?"with-pg-count-":""}${timeComponent}-${folderId}`;
     return fileNameWithPath;
 }
 
