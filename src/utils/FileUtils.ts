@@ -15,6 +15,7 @@ interface FileInfo {
     absPath: string;
     file: string;
     file2?: string;
+    toleranceBytes?: number;
 }
 
 interface FileSizeComparisonResult {
@@ -23,14 +24,21 @@ interface FileSizeComparisonResult {
     metadata2Length: number;
     diff1: number;
     diff2: number;
-    dupLength: number;
-    revDupLength: number;
+    dupLength?: number;
+    revDupLength?: number;
+    revDisjointSetLength ?: number;
+    disjointSetLength ?: number;
     duplicates?: FileInfo[];
     reverseDuplicates?: FileInfo[];
     disjointSet?: FileInfo[];
     reverseDisjointSet?: FileInfo[];
+
     [key: string]: any; // For the dynamic CSV properties
 }
+
+const withinSizeTolerance = (size1: number, size2: number, toleranceBytes: number = 0) =>
+    Math.abs(size1 - size2) <= toleranceBytes;
+
 
 
 export const isValidDirectory = async (dirPath: string): Promise<boolean> => {
@@ -225,37 +233,39 @@ export const checkIfEmpty = async (srcPath: string): Promise<boolean> => {
 };
 
 export const getDuplicatesOrUniquesBySize =
-    async (folder: string, folder2: string, findDisjoint = false): Promise<FileSizeComparisonResult> => {
+    async (folder: string, folder2: string, findDisjoint = false, toleranceBytes: number = 0): Promise<FileSizeComparisonResult> => {
         const metadata = await getAllFileListingWithFileSizeStats(folder);
         const metadata2 = await getAllFileListingWithFileSizeStats(folder2);
+        const toleranceMsg = toleranceBytes > 0 ? ` (tolerance ${toleranceBytes} bytes)` : '';
 
         if (findDisjoint) {
-            const disjointSet = disjointSetByFileSize(metadata2, metadata)
-            const reverseDisjointSet = disjointSetByFileSize(metadata2, metadata)
+            const disjointSet = disjointSetByFileSize(metadata2, metadata, toleranceBytes)
+            const reverseDisjointSet = disjointSetByFileSize(metadata2, metadata, toleranceBytes)
             return {
                 msg: `${metadata.length} files in ${folder} 
             and ${metadata2.length} files in ${folder2}
-            with ${disjointSet.length} uniques by size.`,
+            with ${disjointSet.length} uniques by size.${toleranceMsg}`,
 
                 metadata1Length: metadata.length,
                 metadata2Length: metadata2.length,
                 diff1: metadata.length - disjointSet.length,
                 diff2: metadata2.length - reverseDisjointSet.length,
-                dupLength: disjointSet.length,
-                revDupLength: reverseDisjointSet.length,
+                disjointSetLength: disjointSet.length,
+                revDisjointSetLength: reverseDisjointSet.length,
                 disjointSet,
                 reverseDisjointSet,
                 [`"disjointSetASCSV"(${disjointSet?.length})`]: disjointSet.map((x: FileInfo) => x.absPath).join(","),
                 [`"reverseDisjointSetASCSV"(${reverseDisjointSet?.length})`]: reverseDisjointSet.map((x: FileInfo) => x.absPath).join(","),
+                toleranceBytes,
             }
         }
         else {
-            const duplicates = duplicateBySizeCheck(metadata, metadata2)
-            const reverseDuplicates = duplicateBySizeCheck(metadata2, metadata)
+            const duplicates = duplicateBySizeCheck(metadata, metadata2, toleranceBytes)
+            const reverseDuplicates = duplicateBySizeCheck(metadata2, metadata, toleranceBytes)
             return {
                 msg: `${metadata.length} files in ${folder} and 
             ${metadata2.length} files in ${folder2} 
-            with ${duplicates.length} duplicates by size.`,
+            with ${duplicates.length} duplicates by size.${toleranceMsg}`,
                 metadata1Length: metadata.length,
                 metadata2Length: metadata2.length,
                 diff1: metadata.length - duplicates.length,
@@ -266,12 +276,13 @@ export const getDuplicatesOrUniquesBySize =
                 reverseDuplicates,
                 [`"duplicatesASCSV"(${duplicates?.length})`]: duplicates.map((x: FileInfo) => x.absPath).join(","),
                 [`"reverseDuplicatesASCSV"(${reverseDuplicates?.length})`]: reverseDuplicates.map((x: FileInfo) => x.absPath).join(","),
+                toleranceBytes,
             }
         }
     }
 
-export const moveDuplicatesOrDisjointSetBySize = async (folder1: string, folder2: string, findDisjoint: boolean = false, tmpFolder: string = "_tmp") => {
-    const _forMoving = await getDuplicatesOrUniquesBySize(folder1, folder2, findDisjoint);
+export const moveDuplicatesOrDisjointSetBySize = async (folder1: string, folder2: string, findDisjoint: boolean = false, tmpFolder: string = "_tmp", toleranceBytes: number = 0) => {
+    const _forMoving = await getDuplicatesOrUniquesBySize(folder1, folder2, findDisjoint, toleranceBytes);
     const _itemsMoved: { absPath: string, destPath: string }[] = [];
     const _items: FileInfo[] = []
     if (folder1 === folder2) {
@@ -383,15 +394,15 @@ export const moveDuplicatesOrDisjointSetBySize = async (folder1: string, folder2
 }
 
 
-const disjointSetByFileSize = (metadata: FileStats[], metadata2: FileStats[]) => {
+const disjointSetByFileSize = (metadata: FileStats[], metadata2: FileStats[], toleranceBytes: number = 0) => {
     const disjointSet: FileInfo[] = [];
     console.log(`metadata ${JSON.stringify(metadata[0]?.size)} metadata2 ${JSON.stringify(metadata2[0]?.size)}`)
     metadata.forEach((file: FileStats) => {
         const match = metadata2.find((file2: FileStats) => {
-            if (file.rawSize === file2.rawSize && file.absPath !== file2.absPath) {
+            if (withinSizeTolerance(file.rawSize, file2.rawSize, toleranceBytes) && file.absPath !== file2.absPath) {
                 console.log(`rawSize ${file.fileName}(${file.rawSize}) ${file2?.fileName}(${file2?.rawSize})`);
             }
-            return (file.rawSize === file2.rawSize && file.absPath !== file2.absPath);
+            return (withinSizeTolerance(file.rawSize, file2.rawSize, toleranceBytes) && file.absPath !== file2.absPath);
         });
 
         // Check if match is undefined or null
@@ -408,15 +419,18 @@ const disjointSetByFileSize = (metadata: FileStats[], metadata2: FileStats[]) =>
     return disjointSet;
 }
 
-const duplicateBySizeCheck = (metadata: FileStats[], metadata2: FileStats[]) => {
+const duplicateBySizeCheck = (metadata: FileStats[], metadata2: FileStats[], 
+    toleranceBytes: number = 0) => {
     const duplicates: FileInfo[] = [];
-    console.log(`metadata ${JSON.stringify(metadata[0]?.size)} metadata2 ${JSON.stringify(metadata2[0]?.size)}`)
+    console.log(`metadata ${JSON.stringify(metadata[0]?.size)} 
+    metadata2 ${JSON.stringify(metadata2[0]?.size)}
+    toleranceBytes: ${toleranceBytes}`)
     metadata.forEach((file: FileStats) => {
         const match = metadata2.find((file2: FileStats) => {
-            if (file.rawSize === file2.rawSize && file.absPath !== file2.absPath) {
+            if (withinSizeTolerance(file.rawSize, file2.rawSize, toleranceBytes) && file.absPath !== file2.absPath) {
                 console.log(`rawSize ${file.fileName}(${file.rawSize}) ${file2?.fileName}(${file2?.rawSize})`)
             }
-            return (file.rawSize === file2.rawSize && file.absPath !== file2.absPath)
+            return (withinSizeTolerance(file.rawSize, file2.rawSize, toleranceBytes) && file.absPath !== file2.absPath)
         });
         //console.log(`match ${JSON.stringify(match)}`)
         if (match?.fileName.length > 0) {
@@ -425,6 +439,7 @@ const duplicateBySizeCheck = (metadata: FileStats[], metadata2: FileStats[]) => 
                 file: file.fileName,
                 file2: match?.fileName,
                 absPath: file.absPath,
+                toleranceBytes
             });
         }
     });
@@ -440,7 +455,7 @@ export const getDuplicatesOrUniquesByName =
             const disjointSet = disjointSetByFileName(metadata2, metadata)
             const reverseDisjointSet = disjointSetByFileName(metadata, metadata2)
             return {
-                msg: `${metadata.length} files in ${folder} 
+                msg: `:${metadata.length} files in ${folder} 
             and ${metadata2.length} files in ${folder2}
             with ${disjointSet.length} uniques by name.`,
 
@@ -588,6 +603,13 @@ export const moveDuplicatesOrDisjointSetByName = async (folder1: string, folder2
         }
     }
 }
+
+// export const getDuplicatesOrUniquesBySizeV2 =
+//     async (folder: string, folder2: string, findDisjoint = false, toleranceBytes: number = 1000): Promise<FileSizeComparisonResult> =>
+//         getDuplicatesOrUniquesBySize(folder, folder2, findDisjoint, toleranceBytes);
+
+// export const moveDuplicatesOrDisjointSetBySizeV2 = async (folder1: string, folder2: string, findDisjoint: boolean = false, tmpFolder: string = "_tmp", toleranceBytes: number = 1000) =>
+//     moveDuplicatesOrDisjointSetBySize(folder1, folder2, findDisjoint, tmpFolder, toleranceBytes);
 
 const disjointSetByFileName = (metadata: FileStats[], metadata2: FileStats[]) => {
     const disjointSet: FileInfo[] = [];

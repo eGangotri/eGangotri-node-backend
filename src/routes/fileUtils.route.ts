@@ -104,15 +104,16 @@ fileUtilsRoute.post('/findByFileSize', async (req: any, resp: any) => {
         const folder2 = req.body.folder2;
         const findDisjoint = req.body.findDisjoint || false;
         const moveItems = req.body.moveItems || false;
-        console.log(`folder: ${folder} folder2: ${folder2}`);
+        const tolerance = req.body.tolerance || 0
+        console.log(`folder: ${folder} folder2: ${folder2} tolerance:${tolerance}`);
         if (moveItems) {
-            const result = await moveDuplicatesOrDisjointSetBySize(folder, folder2, findDisjoint);
+            const result = await moveDuplicatesOrDisjointSetBySize(folder, folder2, findDisjoint,tolerance);
             resp.status(200).send({
                 response: result
             });
         }
         else {
-            const result = await getDuplicatesOrUniquesBySize(folder, folder2, findDisjoint);
+            const result = await getDuplicatesOrUniquesBySize(folder, folder2, findDisjoint,tolerance);
             resp.status(200).send({
                 response: result
             });
