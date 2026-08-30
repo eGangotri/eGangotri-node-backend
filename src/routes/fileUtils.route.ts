@@ -102,6 +102,7 @@ fileUtilsRoute.post('/findByFileSize', async (req: any, resp: any) => {
     try {
         const folder = req.body.folder1;
         const folder2 = req.body.folder2;
+        const cutOff = req.body.cutOff;
         const findDisjoint = req.body.findDisjoint || false;
         const moveItems = req.body.moveItems || false;
         console.log(`folder: ${folder} folder2: ${folder2}`);
