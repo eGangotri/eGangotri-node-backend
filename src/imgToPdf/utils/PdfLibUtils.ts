@@ -4,18 +4,22 @@ import { formatTime, getAllPdfs } from './Utils';
 import { PDF_SIZE_LIMITATIONS } from './PdfUtil';
 import * as path from 'path';
 import { getFileSizeAsync } from '../../mirror/FrontEndBackendCommonCode';
+import { retryWithBackoff } from '../../utils/RetryUtils';
 
 /**
  *  Only handles files < 2 GB
  */
 export async function getPdfPageCountUsingPdfLib(pdfPath: string) {
     try {
-        const fileSize = await getFileSizeAsync(pdfPath);
-        if (fileSize <= PDF_SIZE_LIMITATIONS) {
-            const fileBuffer = await fsPromise.readFile(pdfPath);
-            const pdfDoc = await PDFDocument.load(fileBuffer);
-            return pdfDoc.getPageCount();
-        }
+        return await retryWithBackoff(async () => {
+            const fileSize = await getFileSizeAsync(pdfPath);
+            if (fileSize <= PDF_SIZE_LIMITATIONS) {
+                const fileBuffer = await fsPromise.readFile(pdfPath);
+                const pdfDoc = await PDFDocument.load(fileBuffer);
+                return pdfDoc.getPageCount();
+            }
+            return 0;
+        }, { label: `getPdfPageCountUsingPdfLib(${pdfPath})` });
     }
     catch (err) {
         console.log(err)
