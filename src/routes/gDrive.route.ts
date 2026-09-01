@@ -22,6 +22,7 @@ import GDriveDownload from '../models/GDriveDownloadHistory';
 import { extractGoogleDriveId } from '../mirror/GoogleDriveUtilsCommonCode';
 import { createManuExcelVersion, createMimimalExcelVersion, ExcelWriteResult } from '../cliBased/excel/ExcelUtils';
 import { redownloadFromGDriveService, RedownloadHttpError, verifyLocalDownloadSameAsGDriveService, aggregateVerificationResults, aggregateRedwnldResults } from '../services/GDriveDownloadVerifyService';
+import { findMissingPageCountAndRepopulate } from '../services/GDrivePageCountService';
 
 export const gDriveRoute = express.Router();
 const drive = getGoogleDriveInstance();
@@ -141,6 +142,67 @@ gDriveRoute.post('/downloadFromGoogleDrive', async (req: any, resp: any) => {
             resultsSummary,
             response: results,
             testResult: testResult.response
+        });
+    }
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})
+
+
+gDriveRoute.post('/findMissingPageCountAndRepopulate', async (req: any, resp: any) => {
+    console.log(`findMissingPageCountAndRepopulate:req.body ${JSON.stringify(req.body)}`)
+    const startTime = Date.now();
+    try {
+        const excelPath = req?.body?.excelPath;
+        
+
+    }
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})
+gDriveRoute.post('/findMissingPageCountAndRepopulate', async (req: any, resp: any) => {
+    const startTime = Date.now();
+    try {
+        const excelPath = req?.body?.excelPath;
+
+        if (!excelPath) {
+            return resp.status(400).send({
+                response: {
+                    "status": "failed",
+                    "message": "excelPath is mandatory"
+                }
+            });
+        }
+        if (!isValidPath(excelPath) || !excelPath.endsWith(".xlsx")) {
+            return resp.status(400).send({
+                response: {
+                    "status": "failed",
+                    "message": `Invalid Excel path (${excelPath}). Pls. provide a valid .xlsx path`
+                }
+            });
+        }
+        const invalidPaths = await findInvalidFilePaths([excelPath]);
+        if (invalidPaths.length > 0) {
+            return resp.status(400).send({
+                response: {
+                    "status": "failed",
+                    "message": `Excel not found: ${excelPath}`
+                }
+            });
+        }
+
+        const report = await findMissingPageCountAndRepopulate(excelPath, drive);
+        const endTime = Date.now();
+        const timeTaken = endTime - startTime;
+        console.log(`Time taken for /findMissingPageCountAndRepopulate: ${timeInfo(timeTaken)}`);
+
+        resp.status(200).send({
+            timeTaken: timeInfo(timeTaken),
+            response: report
         });
     }
     catch (err: any) {

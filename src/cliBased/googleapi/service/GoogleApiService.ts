@@ -71,6 +71,17 @@ export async function listFolderContentsAsArrayOfData(itemId: string,
     return googleDriveFileData
 }
 
+export async function fetchPdfPageCountFromGDrive(fileId: string, drive: drive_v3.Drive, label = ""): Promise<number> {
+    return retryWithBackoff(async () => {
+        const response = await drive.files.get({
+            fileId,
+            alt: 'media'
+        }, { responseType: 'arraybuffer' });
+        const pdfDoc = await PDFDocument.load(response.data as ArrayBuffer, { ignoreEncryption: true });
+        return pdfDoc.getPageCount();
+    }, { label: `pageCount(${label || fileId})` });
+}
+
 async function populatePageCountsFromGDrive(googleDriveFileData: GoogleApiData[], drive: drive_v3.Drive) {
     const limit = pLimit(3);
     const pdfFiles = googleDriveFileData.filter(dataRow => dataRow.googleDriveLink && dataRow.fileName.toLowerCase().endsWith('.pdf') && dataRow.fileId);
@@ -81,17 +92,8 @@ async function populatePageCountsFromGDrive(googleDriveFileData: GoogleApiData[]
         try {
             processedCount++;
             console.log(`Fetching ${processedCount}/${totalPdfs} PDF page count from GDrive for ${dataRow.fileName}...`);
-            await retryWithBackoff(async () => {
-                const response = await drive.files.get({
-                    fileId: dataRow.fileId,
-                    alt: 'media'
-                }, { responseType: 'arraybuffer' });
-                if (response.data) {
-                    const pdfDoc = await PDFDocument.load(response.data as ArrayBuffer, { ignoreEncryption: true });
-                    dataRow.pageCount = pdfDoc.getPageCount();
-                    console.log(`Page count for ${dataRow.fileName} is ${dataRow.pageCount}`);
-                }
-            }, { label: `pageCount(${dataRow.fileName})` });
+            dataRow.pageCount = await fetchPdfPageCountFromGDrive(dataRow.fileId, drive, dataRow.fileName);
+            console.log(`Page count for ${dataRow.fileName} is ${dataRow.pageCount}`);
         } catch (err: any) {
             console.error(`Error fetching page count for ${dataRow.fileName}: ${err?.message || String(err)}`);
             dataRow.pageCount = '*';
