@@ -254,9 +254,12 @@ gDriveRoute.post('/getGoogleDriveListingAsExcel', async (req: any, resp: any) =>
                 const _resps = [];
                 for (let i = 0; i < _links.length; i++) {
                     const rowCounterController = Math.random().toString(36).substring(7);
-                    console.log(`getGoogleDriveListingAsExcel:loop ${_links[i]} ${_folders[i]} (${allNotJustPdfs}) ${rowCounterController}`)
+                    const gDriveFolderName = (await getFolderNameFromGDrive(_links[i]) || "")
+                        .replace(/[<>:"/\\|?*\x00-\x1F]/g, "").trim();
+                    const folderNameWithGDriveRoot = gDriveFolderName ? `${gDriveFolderName}` : _folders[i];
+                    console.log(`getGoogleDriveListingAsExcel:loop ${_links[i]} ${folderNameWithGDriveRoot} (${allNotJustPdfs}) ${rowCounterController}`)
                     const listingResult: ExcelWriteResult | null = await generateGoogleDriveListingExcel(_links[i],
-                        _folders[i],
+                        folderNameWithGDriveRoot,
                         reduced,
                         ignoreFolder,
                         pdfRenamerXlV2,
