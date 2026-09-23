@@ -6,13 +6,13 @@ dotenv.config();
 
 export const PDF_METADATA_EXTRACTION_PROMPT_CHAR_LIMIT = 170;
 // Google AI Studio prompt for metadata extraction
-export const PDF_METADATA_EXTRACTION_PROMPT = `The exercise below is to save a pdf with recognizable metadata mostly English, Sanskrit and other Indian languages including Tibetan that use Brahmi based scripts and sometimes Urdu.
+export const PDF_METADATA_EXTRACTION_PROMPT = `The exercise below is to save a pdf with recognizable metadata mostly English, Sanskrit, Newari (Nepal Bhasa), Tibetan, Urdu and other South Asian languages.
 
-The output should be only ASCII letters (A-Z, a-z) and numbers (0-9) without exception. 
-No Comma, colon, slashes , diacritics etc should be used.
+The output should be ONLY ASCII letters (A-Z, a-z) and numbers (0-9) without exception. 
+No commas, colons, slashes, backticks, or diacritics should be used.
 
 Conventional English spellings of words in Sanskrit and other languages should be used.
-Dont use Jy for ञ use Gy instead.
+Do not use Jy for ञ; use Gy instead.
 
 --- VISUAL ANALYSIS INSTRUCTIONS ---
 1. MATERIAL & FORMAT ANALYSIS:
@@ -20,80 +20,66 @@ Dont use Jy for ञ use Gy instead.
    - If Manuscript, identify the material:
      A. "Palm Leaf Manuscript" (Long, narrow strips, horizontal grain, string holes).
      B. "Birch Bark Manuscript" (Flaky, layered bark texture, brownish).
-     C. "Paper Manuscript" (Handwritten on standard paper).
-     D. "Pecha" For Tibetan texts in Pecha Style the traditional Tibetan loose-leaf books such as the kangyur, tengyur, and sadhanas.
+     C. "Paper Manuscript" (Handwritten on standard or traditional Nepali paper/Haritala).
+     D. "Pecha" (For Tibetan traditional loose-leaf texts).
    - If Printed Book:
-     A. Check if it is a "Journal" (Look for Vol, Issue, No, Month, or multiple articles).
-     B. Check if it is "Pothi" format (Horizontal loose-leaf). doesnt apply to Tibetan Pechas
-     C. Check if it is "Lithograph" (Early printing resembling handwriting).
+     A. "Journal" (Look for Vol, Issue, No, Month, or multiple articles).
+     B. "Pothi" (Horizontal loose-leaf print format; does not apply to Tibetan Pechas).
+     C. "Lithograph" (Early printing resembling handwriting).
 
 2. ILLUSTRATION ANALYSIS:
-   - If the document contains even a single painting, miniature, diagram, or distinct geometric Yantra, add "Illustrated" to the Subject field.
+   - If the document contains any painting, miniature, diagram, deity illustration, or geometric Yantra, add "Illustrated" to the Subject field.
 
 3. SCRIPT ANALYSIS:
-   - Identify the primary script.
-   - If a secondary script is present and constitutes more than 5% of the text (e.g., distinct Tika in a different script, or alternating verses), note both scripts.
+   - Identify primary script: Devanagari, Pracalit Nepal, Ranjana, Bhujimol, Sharada, Tibetan, Bengali, etc.
+   - If a secondary script is present and constitutes >5% of the text, note both scripts.
 
 ------------------------------------
 
-Print the following details in Title Case:
+Print details in Title Case:
+Title SubTitle Commentary Commentator Author Editor Translator Language Subject Publication City Year - Publisher in One Line in English only.
 
-Title SubTitle Commentary Commentator Author Editor Translator Language Subject Publication City Year - Publisher in One Line in English only. 
+The Hyphen will separate the main text from the Publisher/Author fallback.
 
-The Hyphen will separate the main text from the Publisher.
-
-If any entry is not visible then just leave it blank. 
-If author/title is not known then instead print Unknown.
+If any entry is not visible, leave it blank.
+If author/title is not known, print Unknown.
 
 --- FIELD FILLING RULES ---
 
 1. SUBJECT FIELD:
-   - Include the broad topic (e.g. Vedanta).
-   - MANDATORY: If it is a manuscript, include the material type identified above (e.g., "Palm Leaf Manuscript", "Birch Bark Manuscript", "Paper Manuscript").
-   - If it is a printed Pothi, add "Pothi".
-   - If it is a Tibetan Pecha, add "Pecha".
-   - If it is a printed Lithograph, add "Lithograph".
-   - If it is a Periodical/Magazine, add "Journal".
+   - Include the broad topic (e.g., Tantra, Ritual, Buddhism, Ayurveda, Vedanta).
+   - MANDATORY: If manuscript, include material type ("Palm Leaf Manuscript", "Paper Manuscript", etc.).
+   - If printed Pothi, add "Pothi".
+   - If Tibetan Pecha, add "Pecha".
    - If visual analysis found art, add "Illustrated".
-   - Manuscript overrides Pothi so if Manuscript is identified Pothi should not be used.
-   - Pothi should not be used for Tibetan Texts only Pecha if it is a Pecha
-   Example Subject Output: "Vedanta Palm Leaf Manuscript Illustrated" or "Ayurveda Journal"
+   - Manuscript overrides Pothi (if Manuscript is identified, Pothi should not be used).
+   Example Subject Output: "Tantra Paper Manuscript Illustrated" or "Buddhism Palm Leaf Manuscript"
 
-2. LANGUAGE FIELD:
-   - If Language is Sanskrit but script is not Devanagari, add the Script name (e.g. "Sanskrit in Telugu Script").
-   - If MULTIPLE scripts are used (>5% mix), mention both (e.g., "Sanskrit in Devanagari and Sharada Scripts").
+2. LANGUAGE & SCRIPT FIELD:
+   - State the primary Language and Script used.
+   - Examples: "Sanskrit in Pracalit Nepal Script", "Newari in Ranjana Script", "Sanskrit and Newari in Devanagari Script".
+   - If multiple scripts (>5%), mention both (e.g., "Sanskrit in Pracalit Nepal and Devanagari Scripts").
 
-3. TITLE/AUTHOR/PUBLISHER LOGIC:
-   - SubTitle is optional only if exists.
-   - Commentary/Commentator (Tika/Tikakar) is optional. If exists, include it.
-   - Editor/Translator: If different from Author, include them.
-   - If book is completely in English, no need to mention language.
-
+3. TITLE / AUTHOR / PUBLISHER LOGIC:
+   - SubTitle, Commentary/Commentator, Editor/Translator are optional if present.
    - HYPHEN RULE:
-     - The Hyphen is strictly for the Publisher or Series.
-     - If there is a Publisher, make it the last entry.
-     - If there is NO Publisher, make the Author the last entry preceded by hyphen.
-     - If NO Publisher and NO Author (common in manuscripts), use "Unknown" as the last entry preceded by hyphen.
-     
-   Format Examples:
-   - Print: Title Language Year - Publisher
-   - Manuscript: Title Language Subject Year - Author
-   - No Info: Title Language Subject Year - Unknown
+     - The Hyphen strictly precedes the Publisher.
+     - If NO Publisher, put Author last preceded by hyphen.
+     - If NO Publisher and NO Author, put "Unknown" last preceded by hyphen.
+   - Format Examples:
+     - Print: Title Language Year - Publisher
+     - Manuscript: Title Language Subject Year - Author
+     - No Info: Title Language Subject Year - Unknown
 
-   - If there is a publisher AND title AND author, the title and author should be separated by " By ".
-
-4. MISSING PAGES:
-   - If book seems to miss pages in the beginning (e.g. starts abruptly) or end, add "Missing Pages" before the year or city.
+4. MISSING PAGES & DATES:
+   - If manuscript misses opening or closing folios, add "Missing Pages" before Year/City.
+   - Convert Nepal Samvat (NS) dates to Common Era (CE) years if identifiable, or state the numeric year provided.
 
 5. CLEANUP:
-   - Output should not exceed ${PDF_METADATA_EXTRACTION_PROMPT_CHAR_LIMIT} characters.
-   - Transliterate Hindi/Sanskrit titles to English (e.g., Kalidas Ka Adhunik...). Do not translate meanings.
-   - Use conventional English spellings (Ram, Shiva).
-   - If Institutional publisher has English and Indian names, use English.
-   - No quotes single or double or backticks, no colons.
-   - If words are conjoined (Shishupalavadha), separate them (Shishupala Vadha).But do not violate convention. So Ashtadhyayi stays not Astha Ashyayi.
-   - Ignore pdf-header/footers.
-   - If publisher has address (Penguin India), drop the country/city part from the name.
+   - Output length max: ${PDF_METADATA_EXTRACTION_PROMPT_CHAR_LIMIT} characters.
+   - Transliterate phonetically into standard English conventions (e.g., Yogini Bali Vidhi).
+   - Do not conjoin separate Sanskrit/Newari words unnecessarily.
+   - Strip headers/footers or archival ink stamps.
 
 `;
 

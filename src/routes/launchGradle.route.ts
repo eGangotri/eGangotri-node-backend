@@ -1,15 +1,15 @@
 import * as express from 'express';
 import path from 'path';
 import * as fsPromise from 'fs/promises';
-import { launchUploader, launchUploaderViaAbsPath, launchUploaderViaExcelV1, launchUploaderViaExcelV3, launchUploaderViaExcelV3Multi, launchUploaderViaJson, loginToArchive, makeGradleCall, moveToFreeze, reuploadFailedLogic, reuploadMissed, snap2htmlCmdCall } from '../services/gradleLauncherService';
+import { launchUploader, launchUploaderViaAbsPath, launchUploaderViaExcelV1, launchUploaderViaExcelV3, launchUploaderViaExcelV3Multi, launchUploaderViaJson, loginToArchive, makeGradleCall, moveToFreeze, reuploadFailedLogic, reuploadMissed, reuploadMissedLogic, snap2htmlCmdCall } from '../services/gradleLauncherService';
 import { ArchiveProfileAbsPathAndUploadCycleId, ArchiveProfileAndTitle, UploadCycleArchiveProfile } from '../mirror/types';
 import { isValidPath } from '../utils/FileUtils';
-import { getArchiveMetadataForProfile, getFolderInDestRootForProfile, getFolderInSrcRootForProfile } from '../archiveUpload/ArchiveProfileUtils';
+import { getFolderInDestRootForProfile, getFolderInSrcRootForProfile } from '../archiveUpload/ArchiveProfileUtils';
 import { IItemsUshered, ItemsUshered } from '../models/itemsUshered';
 import { UploadCycle } from '../models/uploadCycle';
 import { excelToJson, addFolderMetadataSheet } from '../cliBased/excel/ExcelUtils';
 import { ArchiveUploadExcelProps } from '../archiveDotOrg/archive.types';
-import { createExcelV1FileForUpload, createExcelV3FileForUpload, createJsonFileForUpload, findMissedUploads, findMissedUploadsByUploadCycleId } from '../services/GradleLauncherUtil';
+import { createExcelV1FileForUpload, createExcelV3FileForUpload, createJsonFileForUpload, findMissedUploads } from '../services/GradleLauncherUtil';
 import { getLatestUploadCycle } from '../services/uploadCycleService';
 import { checkIfEmpty } from '../utils/FileUtils';
 import { timeInfo } from '../mirror/FrontEndBackendCommonCode';
@@ -18,7 +18,6 @@ import { isPDFCorrupted } from '../utils/pdfValidator';
 import { getAllPdfsInFoldersRecursive, mkDirIfDoesntExists } from '../imgToPdf/utils/Utils';
 import { extractValue } from './utils';
 import { itemsUsheredVerficationAndDBFlagUpdate } from '../services/itemsUsheredService';
-import { ExcelV1Columns } from 'services/types';
 import { parseArchiveUploadUrl } from '../utils/CheckArchiveUrl';
 import { getJsonOfAbsPathFromProfile } from 'services/yarnExcelService';
 
@@ -309,83 +308,22 @@ launchGradleRoute.get('/reuploadMissedViaUploadCycleIdOld', async (req: any, res
 })
 
 //
-
-
 launchGradleRoute.get('/reuploadMissedViaUploadCycleId', async (req: any, resp: any) => {
     try {
         const uploadCycleId = req.query.uploadCycleId
         console.log(`reuploadMissedViaUploadCycleId:new ${uploadCycleId}`)
-        const uploadCycleByCycleId = await UploadCycle.findOne({
-            uploadCycleId: uploadCycleId
+        const result = await reuploadMissedLogic(uploadCycleId);
+        if (result.uploadCycleNotFound === true || result.noMissedUploads === true) {
+            return resp.status(404).send({
+                response: {
+                    ...result,
+                    success: false,
+                }
+            });
+        }
+        return resp.status(200).send({
+            response: result
         });
-
-        if (!uploadCycleByCycleId) {
-            return resp.status(404).send({
-                response: {
-                    success: false,
-                    msg: `Upload cycle ${uploadCycleId} not found`
-                }
-            });
-        }
-
-        const _missedAbsPathsForUploadCycleId
-            = await findMissedUploadsByUploadCycleId(uploadCycleId);
-        if (_missedAbsPathsForUploadCycleId.length === 0) {
-            return resp.status(404).send({
-                response: {
-                    success: false,
-                    msg: `No Missed upload found for Upload Cycle Id: ${uploadCycleId}`
-                }
-            });
-        }
-        console.log(`_missedAbsPathsForUploadCycleId ${JSON.stringify(_missedAbsPathsForUploadCycleId)}`)
-        const profile = uploadCycleByCycleId.archiveProfiles[0].archiveProfile
-
-        const _metadata = getArchiveMetadataForProfile(profile);
-        console.log(`_metadata ${JSON.stringify(_metadata)}`)
-        if (!_metadata?.subject?.length) {
-            const _missedAbsPathAsJson =
-                _missedAbsPathsForUploadCycleId.map(x => {
-                    return { "absPath": x }
-                })
-            const excelFileName = createExcelV3FileForUpload(uploadCycleId, _missedAbsPathAsJson, `absPaths-as-excel-v3-${profile}-${_missedAbsPathsForUploadCycleId.length}`)
-            const res = await launchUploaderViaExcelV3(profile, excelFileName, uploadCycleId)
-            return resp.status(200).send({
-                response: {
-                    msg: `attempted uploads of ${_missedAbsPathsForUploadCycleId?.length} missing items`,
-                    excelFileName,
-                    res
-                }
-            });
-        }
-
-        else {
-            const augmentedMetadata = [];
-            for (const absPath of _missedAbsPathsForUploadCycleId) {
-                const augmented: ExcelV1Columns = {
-                    absPath: absPath,
-                    subject: _metadata?.subject,
-                    description: _metadata?.description,
-                    creator: _metadata?.creator
-                };
-                augmentedMetadata.push(augmented);
-            }
-
-            console.log(`metadata ${augmentedMetadata?.length}`)
-            console.log(`metadata ${augmentedMetadata?.length > 0 ? JSON.stringify(augmentedMetadata) : '[]'}`)
-
-            const excelFileName = createExcelV1FileForUpload(uploadCycleId, augmentedMetadata,
-                `absPaths-as-excel-v1-${profile}-${augmentedMetadata.length}`)
-
-            const res = await launchUploaderViaExcelV1(profile, excelFileName, uploadCycleId)
-            return resp.status(200).send({
-                response: {
-                    msg: `attempted uploads of ${augmentedMetadata?.length} missing items`,
-                    excelFileName,
-                    res
-                }
-            });
-        }
     }
     catch (err: any) {
         console.log('Error', err);
@@ -648,6 +586,33 @@ launchGradleRoute.post('/reuploadFailedMulti', async (req: any, resp: any) => {
         return resp.status(200).json(results);
     } catch (error: any) {
         console.error(`/ reuploadFailedMulti /:runId retry error: ${error?.message || String(error)} `);
+        return resp.status(500).json({ status: 'failed', message: error?.message || String(error) });
+    }
+});
+
+launchGradleRoute.post('/reuploadMissedMulti', async (req: any, resp: any) => {
+    try {
+        const uploadCycleIds = req.body.uploadCycleIds
+        if (!uploadCycleIds || uploadCycleIds.length === 0) {
+            return resp.status(400).json({ status: 'failed', message: 'atleast one uploadCycleId is required' });
+        }
+        const results = []
+        for (const uploadCycleId of uploadCycleIds) {
+            try {
+                const result = await reuploadMissedLogic(uploadCycleId);
+                results.push({
+                    uploadCycleId,
+                    ...result
+                });
+            }
+            catch (error: any) {
+                console.error(`/ reuploadMissedMulti / ${uploadCycleId} retry error: ${error?.message || String(error)} `);
+                results.push({ uploadCycleId, status: 'failed', message: error?.message || String(error) });
+            }
+        }
+        return resp.status(200).json(results);
+    } catch (error: any) {
+        console.error(`/ reuploadMissedMulti error: ${error?.message || String(error)} `);
         return resp.status(500).json({ status: 'failed', message: error?.message || String(error) });
     }
 });
