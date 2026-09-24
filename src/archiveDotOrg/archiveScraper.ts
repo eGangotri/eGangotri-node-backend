@@ -59,6 +59,248 @@ const buildAdvancedSearchQuery = (username: string, startDate: number = 0, endDa
     return queryParts.join(" AND ");
 }
 
+//Sample: https://archive.org/search?query=subject%3A%22Funding-Span-Foundation-Delhi%22 -> subject:"Funding-Span-Foundation-Delhi"
+export const extractQueryFromSearchUrl = (queryOrUrl: string): string => {
+    const trimmed = queryOrUrl?.trim() || "";
+    if (trimmed.startsWith("http")) {
+        try {
+            const url = new URL(trimmed);
+            return url.searchParams.get("query") || "";
+        } catch (err) {
+            console.log(`extractQueryFromSearchUrl: invalid url ${trimmed}`);
+            return "";
+        }
+    }
+    return trimmed;
+}
+
+const sanitizeQueryForLabel = (query: string) => {
+    return query.replace(/[<>:"/\\|?*\x00-\x1F']/g, "").replace(/\s+/g, "-").substring(0, 60);
+}
+
+const callArchiveAdvancedSearchApiByQuery = async (query: string,
+    pageIndex = 1,
+    ascOrder: boolean = false,
+    rows: number = DEFAULT_HITS_PER_PAGE): Promise<Hits> => {
+    const SORT_ORDER = ascOrder === true ? "publicdate asc" : "publicdate desc";
+    if (!rows || isNaN(rows) || rows <= 0 || rows > DEFAULT_HITS_PER_PAGE) {
+        rows = DEFAULT_HITS_PER_PAGE;
+    }
+    try {
+        const params = new URLSearchParams();
+        params.append("q", query);
+        ARCHIVE_SEARCH_FIELDS.forEach(field => params.append("fl[]", field));
+        params.append("sort[]", SORT_ORDER);
+        params.append("rows", rows.toString());
+        params.append("page", pageIndex.toString());
+        params.append("output", "json");
+        const _url = `https://archive.org/advancedsearch.php?${params.toString()}`;
+        console.log(`callArchiveAdvancedSearchApiByQuery: PageIndex: ${pageIndex}
+        ${_url}`);
+        const response = await fetch(_url);
+        if (!response.ok) {
+            throw new Error(`Archive advancedsearch failed with ${response.status} ${response.statusText}`);
+        }
+        const data = await response.json();
+        const docs = data?.response?.docs || [];
+        return {
+            total: data?.response?.numFound || 0,
+            returned: docs.length,
+            hits: docs.map(normalizeAdvancedSearchDoc)
+        };
+    }
+    catch (err) {
+        console.log(`Error in callArchiveAdvancedSearchApiByQuery ${err.message}`);
+        return { total: 0, returned: 0, hits: [] };
+    }
+};
+
+export const fetchArchiveMetadataByQuery = async (query: string,
+    dateRange: [number, number] = [0, 0],
+    limitedFields = false,
+    ascOrder = false,
+    maxItemsOrRange: number | [number, number] = MAX_ITEMS_RETRIEVABLE_IN_ARCHIVE_ORG): Promise<ArchiveScrapReport> => {
+
+    FETCH_ACRHIVE_METADATA_COUNTER.reset();
+
+    let fullQuery = query;
+    if (dateRange[0] > 0 && dateRange[1] > 0) {
+        const startDateOnly = new Date(dateRange[0]).toISOString().slice(0, 10);
+        const endDateOnly = new Date(dateRange[1]).toISOString().slice(0, 10);
+        fullQuery = `${query} AND publicdate:[${startDateOnly} TO ${endDateOnly}]`;
+    }
+
+    let start = 1;
+    let end = MAX_ITEMS_RETRIEVABLE_IN_ARCHIVE_ORG + 1;
+
+    if (Array.isArray(maxItemsOrRange)) {
+        start = maxItemsOrRange[0];
+        end = maxItemsOrRange[1];
+    } else {
+        end = maxItemsOrRange + 1;
+    }
+
+    if (start < 1) start = 1;
+
+    console.log(`fetchArchiveMetadataByQuery: ${fullQuery} Range: [${start}, ${end})`);
+
+    try {
+        const fetchPage = (page: number) => callArchiveAdvancedSearchApiByQuery(fullQuery, page, ascOrder, DEFAULT_HITS_PER_PAGE);
+        let currentPageIndex = 1;
+        const _hits: Hits = await fetchPage(currentPageIndex);
+        const hitsTotal = _hits?.total || 0;
+        const actualPageSize = _hits?.returned || _hits?.hits?.length || DEFAULT_HITS_PER_PAGE;
+        console.log(`fetchArchiveMetadataByQuery: hitsTotal=${hitsTotal}, actualPageSize=${actualPageSize}`);
+        const _allCollectedHits: HitsEntity[] = [];
+
+        if (hitsTotal > 0) {
+            FETCH_ACRHIVE_METADATA_COUNTER.hitsTotal = hitsTotal;
+
+            const actualEnd = Math.min(end, hitsTotal + 1);
+            if (start > hitsTotal) {
+                return { linkData: [], stats: `Start index ${start} exceeds total items ${hitsTotal}` };
+            }
+
+            const startIndex = start - 1;
+            const startPageIndex = Math.floor(startIndex / actualPageSize) + 1;
+            const endIndex = actualEnd - 1;
+            const endPageIndex = Math.floor((endIndex - 1) / actualPageSize) + 1;
+
+            if (startPageIndex !== 1) {
+                currentPageIndex = startPageIndex;
+                const startPageHits = await fetchPage(currentPageIndex);
+                if (startPageHits?.hits?.length > 0) {
+                    _allCollectedHits.push(...startPageHits.hits);
+                }
+            } else {
+                _allCollectedHits.push(...(_hits.hits || []));
+            }
+
+            while (currentPageIndex < endPageIndex) {
+                currentPageIndex++;
+                const nextHits = await fetchPage(currentPageIndex);
+                if (nextHits?.hits?.length > 0) {
+                    _allCollectedHits.push(...nextHits.hits);
+                } else {
+                    break;
+                }
+            }
+
+            const offsetInFirstPage = startIndex - (startPageIndex - 1) * actualPageSize;
+            const countToTake = actualEnd - start;
+            const finalHits = _allCollectedHits.slice(offsetInFirstPage, offsetInFirstPage + countToTake);
+
+            if (finalHits.length === 0) {
+                return { linkData: [], stats: "No items found in specified range" };
+            }
+
+            //query results can span multiple uploaders; email of first item is indicative only
+            let email = "";
+            try {
+                email = await extractEmail(finalHits[0].fields.identifier);
+            } catch (err) {
+                console.log(`fetchArchiveMetadataByQuery: could not extract email ${err.message}`);
+            }
+            const queryLabel = sanitizeQueryForLabel(query);
+            const _linkData = await extractLinkedDataAndSpecificFieldsFromAPI(finalHits, email, queryLabel, limitedFields);
+
+            return {
+                linkData: _linkData,
+                stats: `Total Gen: () === ItemsInArchive(${FETCH_ACRHIVE_METADATA_COUNTER.hitsTotal})
+                === ItemsCounter(${FETCH_ACRHIVE_METADATA_COUNTER.value}) `
+            }
+        }
+        return { linkData: [], stats: "No items found" };
+    }
+    catch (err) {
+        console.log(`Error in fetchArchiveMetadataByQuery ${err.message}`);
+        return { linkData: [], error: err, stats: "Error in fetchArchiveMetadataByQuery" };
+    }
+}
+
+export const scrapeArchiveOrgBySearchQuery = async (searchQueriesOrUrlsAsCSV: string,
+    dateRange: [number, number] = [0, 0],
+    onlyLinks: boolean = false,
+    limitedFields: boolean = false,
+    ascOrder: boolean = false,
+    maxItemsOrRange: number | [number, number] = MAX_ITEMS_RETRIEVABLE_IN_ARCHIVE_ORG
+): Promise<ArchiveDataRetrievalMsg> => {
+    const searchQueriesOrUrls = searchQueriesOrUrlsAsCSV.includes(",") ?
+        searchQueriesOrUrlsAsCSV.split(",").map((link: string) => link.trim()).filter((x: string) => x.length > 0) :
+        [searchQueriesOrUrlsAsCSV.trim()];
+
+    console.log(`scrapeArchiveOrgBySearchQuery ${searchQueriesOrUrls} onlyLinks ${onlyLinks}`);
+    const _status: ArchiveDataRetrievalStatus[] = []
+    for (let i = 0; i < searchQueriesOrUrls.length; i++) {
+        const query = extractQueryFromSearchUrl(searchQueriesOrUrls[i]);
+        const queryLabel = sanitizeQueryForLabel(query);
+        try {
+            console.log(`Scraping Query # ${i + 1}. ${query}`)
+            if (!query) {
+                _status.push({
+                    success: false,
+                    archiveAcctName: searchQueriesOrUrls[i],
+                    error: `Couldnt extract search query from ${searchQueriesOrUrls[i]}`,
+                });
+                continue;
+            }
+
+            const archiveReport: ArchiveScrapReport = await fetchArchiveMetadataByQuery(query, dateRange, limitedFields, ascOrder, maxItemsOrRange);
+            if (onlyLinks) {
+                _status.push({
+                    order: ascOrder === true ? "Asc. Order" : "Desc. Order",
+                    archiveAcctName: queryLabel,
+                    archiveItemCount: archiveReport.linkData.length,
+                    success: true,
+                    archiveReport: archiveReport
+                });
+            }
+            else {
+                if (archiveReport?.linkData?.length === 0) {
+                    _status.push({
+                        excelPath: "NONE. No links found for the search query",
+                        success: false,
+                        order: ascOrder === true ? "Asc. Order" : "Desc. Order",
+                        archiveAcctName: queryLabel,
+                        archiveItemCount: archiveReport.linkData.length,
+                    });
+                }
+                else {
+                    const excelPath = await generateExcel(archiveReport.linkData, limitedFields, ascOrder);
+                    _status.push({
+                        excelPath,
+                        success: true,
+                        order: ascOrder === true ? "Asc. Order" : "Desc. Order",
+                        archiveAcctName: queryLabel,
+                        archiveItemCount: archiveReport.linkData.length,
+                    });
+                }
+            }
+        }
+        catch (e) {
+            console.log(`Error in scrapeArchiveOrgBySearchQuery ${e.message}`);
+            _status.push({
+                success: false,
+                archiveAcctName: queryLabel,
+                error: `${e}: ${e.message}`,
+            });
+        }
+    }
+    console.log(`_status ${JSON.stringify(_status)}`)
+    const numFailures = _status.filter(item => item.success === false).length;
+    return {
+        msg: {
+            "Total": `${_status.length}`,
+            "Success": `${_status.length - numFailures}`,
+            "Failures": `${numFailures}`,
+            "All-Fields?": `${limitedFields === true ? "No" : "YES"}`
+        },
+        scrapedMetadata: _status,
+        numFailures,
+        numSuccess: _status.length - numFailures,
+    };
+}
+
 const callArchiveAdvancedSearchApi = async (username: string,
     pageIndex = 1,
     startDate: number = 0,

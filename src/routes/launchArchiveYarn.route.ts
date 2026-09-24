@@ -1,5 +1,5 @@
 import * as express from 'express';
-import { MAX_ITEMS_RETRIEVABLE_IN_ARCHIVE_ORG, scrapeArchiveOrgProfiles } from '../archiveDotOrg/archiveScraper';
+import { MAX_ITEMS_RETRIEVABLE_IN_ARCHIVE_ORG, scrapeArchiveOrgProfiles, scrapeArchiveOrgBySearchQuery } from '../archiveDotOrg/archiveScraper';
 import { ArchiveDataRetrievalMsg, ArchiveDataRetrievalStatus } from '../archiveDotOrg/types';
 import { archiveExceltoMongo } from '../excelToMongo/transferArchiveExcelToMongo';
 import { downloadArchiveItems, downloadPdfFromArchiveToProfile } from '../archiveDotOrg/downloadUtil';
@@ -73,6 +73,75 @@ launchArchiveYarnRoute.post('/getArchiveListing', async (req: any, resp: any) =>
             });
         }
         const _resp: ArchiveDataRetrievalMsg = await scrapeArchiveOrgProfiles(archiveLinks, parsedDateRange, onlyLinks, limitedFields, ascOrder, maxItemsOrRange);
+        resp.status(200).send({
+            response: {
+                _results: _resp,
+                caution: "Max API supports is 10K results. For more use scraping API. See https://archive.org/help/aboutsearch.htm  or, you may request up to 1000000000 results at one time if you do NOT specify any page. For best results,  do NOT specify sort (sort may be automatically disabled for very large queries).)"
+            }
+        });
+    }
+
+    catch (err: any) {
+        console.log('Error', err);
+        resp.status(400).send(err);
+    }
+})
+
+
+//Sample body: { "searchQueries": "https://archive.org/search?query=subject%3A%22Funding-Span-Foundation-Delhi%22" }
+//or raw query: { "searchQueries": "subject:\"Funding-Span-Foundation-Delhi\"" }
+launchArchiveYarnRoute.post('/getArchiveListingByQuery', async (req: any, resp: any) => {
+    try {
+        const searchQueries = req?.body?.archiveLinks;
+        const onlyLinks = (req?.body?.onlyLinks == true) || false;
+        const limitedFields = (req?.body?.limitedFields == true) || false;
+        const dateRange = req?.body?.dateRange || ""; //dateRange:"2024/04/01-2024/04/31"
+        const ascOrder = req?.body?.ascOrder || false;
+        const maxItemsInput = req?.body?.maxItems || MAX_ITEMS_RETRIEVABLE_IN_ARCHIVE_ORG;
+        let maxItemsOrRange: number | [number, number] = MAX_ITEMS_RETRIEVABLE_IN_ARCHIVE_ORG;
+
+        if (maxItemsInput) {
+            if (typeof maxItemsInput === 'number') {
+                maxItemsOrRange = maxItemsInput;
+            } else if (typeof maxItemsInput === 'string') {
+                const matches = maxItemsInput.match(/(\d+)/g);
+                if (matches && matches.length >= 2) {
+                    // Extract start and end. e.g. "20-90" -> [20, 90]
+                    maxItemsOrRange = [parseInt(matches[0]), parseInt(matches[1])];
+                } else if (matches && matches.length === 1) {
+                    maxItemsOrRange = parseInt(matches[0]);
+                }
+            }
+        }
+        let parsedDateRange: [number, number] = [0, 0]
+
+        console.log(`getArchiveListingByQuery params ${JSON.stringify(req.body)} ${maxItemsInput}`)
+
+        if (dateRange) {
+            const _validateDates = validateDateRange(dateRange);
+            console.log(`validateDateRange ${JSON.stringify(_validateDates)}`)
+            if (dateRange && _validateDates.success) {
+                parsedDateRange = _validateDates.parsedDateRange || [0, 0];
+            }
+            else {
+                return resp.status(400).send({
+                    response: {
+                        ..._validateDates
+                    }
+                });
+            }
+        }
+
+        if (!searchQueries) {
+            return resp.status(400).send({
+                response: {
+                    "status": "failed",
+                    "success": false,
+                    "msg": "Pls. provide search Queries or archive.org search URLs. At least one is mandatory"
+                }
+            });
+        }
+        const _resp: ArchiveDataRetrievalMsg = await scrapeArchiveOrgBySearchQuery(searchQueries, parsedDateRange, onlyLinks, limitedFields, ascOrder, maxItemsOrRange);
         resp.status(200).send({
             response: {
                 _results: _resp,
