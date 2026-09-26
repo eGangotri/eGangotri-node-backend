@@ -59,8 +59,11 @@ If author/title is not known, print Unknown.
    - State the primary Language and Script used.
    - Examples: "Sanskrit in Pracalit Nepal Script", "Newari in Ranjana Script", "Sanskrit and Newari in Devanagari Script".
    - If multiple scripts (>5%), mention both (e.g., "Sanskrit in Pracalit Nepal and Devanagari Scripts").
-   - For Print Items dont mention script unless it is Sanskrit in non-Devanagari script.
-3. TITLE / AUTHOR / PUBLISHER LOGIC:
+   - For Print Items dont mention script unless it is in a Script it is not conventionally written in. example Sanskrit in Tamil or Urdu in Devanagari. 
+
+   3. TITLE / AUTHOR / PUBLISHER LOGIC:
+   - All Titles that are in Sanskrit must be De-sandhised. Example Amarabharatikusumavali should be Amar Bharati Kusumavali, Ashtavimshatyupanishadah should be Ashta Vimshati Upanishadah
+   - Remember once again, we will use conventional spelling of Common Sanskrit words not there academic usages so Amar not Amara, Mandir not Mandira unless the extra represent a girls name etc
    - SubTitle, Commentary/Commentator, Editor/Translator are optional if present.
    - HYPHEN RULE:
      - The Hyphen strictly precedes the Publisher.
