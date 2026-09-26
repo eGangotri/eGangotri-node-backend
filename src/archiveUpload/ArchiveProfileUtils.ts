@@ -8,6 +8,7 @@ import {
     SRC_ROOT
 } from './constants';
 import { checkFolderExistsSync } from '../utils/FolderUtils';
+import { resolveProfilePathWithPercentages } from '../utils/FileUtils';
 
 const stripQuotes = (str: string) => str.replace(/^['"]+|['"]+$/g, '');
 
@@ -77,6 +78,14 @@ export const getFolderInSrcRootForProfile = (profile: string) => {
 export const getFolderInDestRootForProfile = (profile: string) => {
     return getFolderFromProfile(profile, LOCAL_FOLDERS_PROPERTIES_FILE_FOR_DEST);
 }
+
+export const getFolderinDestOrResolveVariable = (profileOrPath: string) => {
+    if (profileOrPath.includes("%")) {
+        return resolveProfilePathWithPercentages(profileOrPath)
+    } else {
+        return getFolderInDestRootForProfile(profileOrPath)
+    }
+} 
 
 //create this
 export const HEADER_FOOTER_PROPERTIES_FILE: Map<string, string> = getFoldersCorrespondingToProfile(SRC_ROOT);

@@ -3,7 +3,7 @@ import path from 'path';
 import * as fsPromise from 'fs/promises';
 import { launchUploader, launchUploaderViaAbsPath, launchUploaderViaExcelV1, launchUploaderViaExcelV3, launchUploaderViaExcelV3Multi, launchUploaderViaJson, loginToArchive, makeGradleCall, moveToFreeze, reuploadFailedLogic, reuploadMissed, reuploadMissedLogic, snap2htmlCmdCall } from '../services/gradleLauncherService';
 import { ArchiveProfileAbsPathAndUploadCycleId, ArchiveProfileAndTitle, UploadCycleArchiveProfile } from '../mirror/types';
-import { isValidPath } from '../utils/FileUtils';
+import { isValidPath, resolveProfilePathWithPercentages } from '../utils/FileUtils';
 import { getFolderInDestRootForProfile, getFolderInSrcRootForProfile } from '../archiveUpload/ArchiveProfileUtils';
 import { IItemsUshered, ItemsUshered } from '../models/itemsUshered';
 import { UploadCycle } from '../models/uploadCycle';
@@ -671,6 +671,13 @@ launchGradleRoute.get('/moveToFreeze', async (req: any, resp: any) => {
     }
 })
 
+const getFolderinDestOrResolveVariable = (profileOrPath: string) => {
+    if (profileOrPath.includes("%")) {
+        return resolveProfilePathWithPercentages(profileOrPath)
+    } else {
+        return getFolderInDestRootForProfile(profileOrPath)
+    }
+}
 
 launchGradleRoute.get('/bookTitles', async (req: any, resp: any) => {
     try {
@@ -683,7 +690,7 @@ launchGradleRoute.get('/bookTitles', async (req: any, resp: any) => {
         const responseArray = []
         for (let i = 0; i < profileOrPaths.length; i++) {
             const profileOrPath = profileOrPaths[i]
-            const pdfDumpFolder = isValidPath(profileOrPath) ? profileOrPath : getFolderInDestRootForProfile(profileOrPath)
+            const pdfDumpFolder = isValidPath(profileOrPath) ? profileOrPath : getFolderinDestOrResolveVariable(profileOrPath)
             console.log(`bookTitles: ${pdfDumpFolder}`)
             const _cmd = `gradle bookTitles --args="paths='${pdfDumpFolder}', pdfsOnly=${pdfsOnly}, withAdditionalCopy=${withAdditionalCopy}"`
             console.log(`_cmd ${_cmd}`)

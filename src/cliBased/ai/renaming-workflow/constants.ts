@@ -59,7 +59,7 @@ If author/title is not known, print Unknown.
    - State the primary Language and Script used.
    - Examples: "Sanskrit in Pracalit Nepal Script", "Newari in Ranjana Script", "Sanskrit and Newari in Devanagari Script".
    - If multiple scripts (>5%), mention both (e.g., "Sanskrit in Pracalit Nepal and Devanagari Scripts").
-
+   - For Print Items dont mention script unless it is Sanskrit in non-Devanagari script.
 3. TITLE / AUTHOR / PUBLISHER LOGIC:
    - SubTitle, Commentary/Commentator, Editor/Translator are optional if present.
    - HYPHEN RULE:

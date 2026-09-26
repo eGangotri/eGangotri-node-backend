@@ -17,6 +17,19 @@ const logger = winston.createLogger({
     ]
 });
 
+//Archive.org identifier rules: only A-Za-z0-9 . _ - allowed, must start with alphanumeric, max 100 chars
+export const ARCHIVE_IDENTIFIER_MAX_LENGTH = 100;
+export const sanitizeArchiveIdentifier = (rawId: string): string => {
+    return rawId
+        .trim()
+        .replace(/\s+/g, "-")               // spaces -> hyphens
+        .replace(/[^A-Za-z0-9._-]/g, "")    // strip all other illegal chars
+        .replace(/-{2,}/g, "-")             // collapse repeated hyphens
+        .replace(/^[^A-Za-z0-9]+/, "")      // must start with alphanumeric
+        .substring(0, ARCHIVE_IDENTIFIER_MAX_LENGTH)
+        .replace(/[^A-Za-z0-9]+$/, "");     // avoid trailing separator after truncation
+}
+
 export class ArchiveHandler {
     private browser: Browser | null = null;
     private config: UploadConfig;
@@ -121,9 +134,10 @@ export class ArchiveHandler {
 
             // Set custom identifier if provided
             if (item.archiveItemId) {
-                console.log(`Setting custom identifier: ${item.archiveItemId}`);
+                const sanitizedId = sanitizeArchiveIdentifier(item.archiveItemId);
+                console.log(`Setting custom identifier: ${sanitizedId} (raw: ${item.archiveItemId})`);
                 await page.waitForSelector(`#${SELECTORS.PAGE_URL}`);
-                await page.type(`#${SELECTORS.PAGE_URL}`, item.archiveItemId);
+                await page.type(`#${SELECTORS.PAGE_URL}`, sanitizedId);
                 await page.keyboard.press('Enter');
 
                 // Handle potential alert
