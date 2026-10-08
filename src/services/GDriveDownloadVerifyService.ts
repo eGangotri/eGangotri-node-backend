@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 
 import { downloadFromGoogleDriveToProfile } from '../cliBased/googleapi/GoogleDriveApiReadAndDownload';
 import { timeInfo } from '../mirror/FrontEndBackendCommonCode';
-import { genLinksAndFolders } from './yarnListMakerService';
+import { genLinksForGDriveListing } from './yarnListMakerService';
 import { getFolderNameFromGDrive } from '../cliBased/googleapi/GoogleDriveApiReadAndExport';
 import { getPathOrSrcRootForProfile } from '../utils/FileUtils';
 import { GDRIVE_DEFAULT_IGNORE_FOLDER, verifyGDriveLocalIntegirtyPerLink, verifyGDriveLocalIntegrity, ComparisonResult } from './GDriveService';
@@ -48,7 +48,7 @@ export async function redownloadFromGDriveService(params: {
         });
     }
 
-    const _linksGen = genLinksAndFolders(googleDriveLink, folderOrProfile);
+    const _linksGen = genLinksForGDriveListing(googleDriveLink);
     if (_linksGen.error) {
         throw new RedownloadHttpError(400, {
             response: {
@@ -62,8 +62,8 @@ export async function redownloadFromGDriveService(params: {
     const _rootFolders = await Promise.all(
         _linksGen._links.map(async (link) => (await getFolderNameFromGDrive(link)) || ''),
     );
-    const foldersWithRoot2 = _linksGen._folders.map((folder, index) => {
-        const fileDumpFolder = getPathOrSrcRootForProfile(folder);
+    const foldersWithRoot2 = _linksGen._links.map((link, index) => {
+        const fileDumpFolder = getPathOrSrcRootForProfile(folderOrProfile);
         return path.join(fileDumpFolder, _rootFolders[index]);
     });
 
@@ -169,7 +169,7 @@ export async function verifyLocalDownloadSameAsGDriveService(params: {
     const startTime = Date.now();
 
     if (id && id !== '') {
-        const linksGen = genLinksAndFolders(googleDriveLink, folderOrProfile);
+        const linksGen = genLinksForGDriveListing(googleDriveLink);
         if (linksGen.error) {
             throw new RedownloadHttpError(400, {
                 response: {
@@ -183,8 +183,8 @@ export async function verifyLocalDownloadSameAsGDriveService(params: {
         const rootFolders = await Promise.all(
             linksGen._links.map(async (link) => (await getFolderNameFromGDrive(link)) || ''),
         );
-        const foldersWithRoot = linksGen._folders.map((folder, index) => {
-            const fileDumpFolder = getPathOrSrcRootForProfile(folder);
+        const foldersWithRoot = linksGen._links.map((link, index) => {
+            const fileDumpFolder = getPathOrSrcRootForProfile(profile);
             return path.join(fileDumpFolder, rootFolders[index]);
         });
 

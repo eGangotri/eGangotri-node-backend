@@ -10,7 +10,7 @@ import { getGoogleDriveInstance } from '../cliBased/googleapi/service/CreateGoog
 
 import { timeInfo } from '../mirror/FrontEndBackendCommonCode';
 import { PDF_TYPE, ZIP_TYPE } from '../cliBased/googleapi/_utils/constants';
-import { genLinksAndFolders, validateGenGDriveLinks } from '../services/yarnListMakerService';
+import { genLinksForGDriveListing, validateGenGDriveLinks } from '../services/yarnListMakerService';
 import { generateGoogleDriveListingExcel, getFolderNameFromGDrive } from '../cliBased/googleapi/GoogleDriveApiReadAndExport';
 import { formatTime } from '../imgToPdf/utils/Utils';
 import { convertGDriveExcelToLinkData, downloadGDriveData } from '../services/GDriveItemService';
@@ -156,7 +156,7 @@ gDriveRoute.post('/findMissingPageCountAndRepopulate', async (req: any, resp: an
     const startTime = Date.now();
     try {
         const excelPath = req?.body?.excelPath;
-        
+
 
     }
     catch (err: any) {
@@ -216,7 +216,6 @@ gDriveRoute.post('/getGoogleDriveListingAsExcel', async (req: any, resp: any) =>
     const startTime = Date.now();
     try {
         const googleDriveLink = req?.body?.googleDriveLink;
-        const folderName = req?.body?.folderName || "";
         const reduced = req?.body?.reduced || false;
         const ignoreFolder = req?.body?.ignoreFolder
         const allNotJustPdfs = req?.body?.allNotJustPdfs || false;
@@ -227,9 +226,9 @@ gDriveRoute.post('/getGoogleDriveListingAsExcel', async (req: any, resp: any) =>
 
         console.log(`getGoogleDriveListingAsExcel 
             googleDriveLink:
-         ${googleDriveLink}/${folderName}/${reduced}/${ignoreFolder}/${allNotJustPdfs}/${pdfRenamerXlV2}`)
+         ${googleDriveLink}/${reduced}/${ignoreFolder}/${allNotJustPdfs}/${pdfRenamerXlV2}`)
 
-        const _validations = validateGenGDriveLinks(googleDriveLink, folderName)
+        const _validations = validateGenGDriveLinks(googleDriveLink)
         if (_validations.success === false) {
             console.log(`getGoogleDriveListingAsExcel:validation failed ${JSON.stringify(_validations)}`)
             resp.status(400).send({
@@ -238,14 +237,14 @@ gDriveRoute.post('/getGoogleDriveListingAsExcel', async (req: any, resp: any) =>
         }
 
         else {
-            const { _links, _folders, error } = genLinksAndFolders(googleDriveLink, folderName)
+            const { _links, error } = genLinksForGDriveListing(googleDriveLink)
             if (error) {
-                console.log(`getGoogleDriveListingAsExcel:genLinksAndFolders failed ${JSON.stringify(error)}`)
+                console.log(`getGoogleDriveListingAsExcel:genLinksForGDriveListing failed ${JSON.stringify(error)}`)
                 resp.status(400).send({
                     response: {
                         "status": "failed",
                         "success": false,
-                        "message": "Number of Links and Folder Names should match"
+                        error
                     }
                 });
             }
@@ -256,10 +255,9 @@ gDriveRoute.post('/getGoogleDriveListingAsExcel', async (req: any, resp: any) =>
                     const rowCounterController = Math.random().toString(36).substring(7);
                     const gDriveFolderName = (await getFolderNameFromGDrive(_links[i]) || "")
                         .replace(/[<>:"/\\|?*\x00-\x1F]/g, "").trim();
-                    const folderNameWithGDriveRoot = gDriveFolderName ? `${gDriveFolderName}` : _folders[i];
-                    console.log(`getGoogleDriveListingAsExcel:loop ${_links[i]} ${folderNameWithGDriveRoot} (${allNotJustPdfs}) ${rowCounterController}`)
+                    console.log(`getGoogleDriveListingAsExcel:loop ${_links[i]} ${gDriveFolderName} (${allNotJustPdfs}) ${rowCounterController}`)
                     const listingResult: ExcelWriteResult | null = await generateGoogleDriveListingExcel(_links[i],
-                        folderNameWithGDriveRoot,
+                        gDriveFolderName,
                         reduced,
                         ignoreFolder,
                         pdfRenamerXlV2,
