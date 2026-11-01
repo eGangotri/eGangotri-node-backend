@@ -46,9 +46,11 @@ const fetchArchiveMetadata = async (identifier: string): Promise<ArchiveMetadata
 }
 
 /**
- * Validates an archive.org URL and verifies it contains a readable, non-empty PDF.
+ * Validates an archive.org URL.
+ * If the item contains PDF files, it verifies they are readable and non-empty.
+ * Otherwise, it performs a generic validation that the item exists and has valid files.
  * @param urlString The Archive.org item details URL
- * @returns Promise<boolean> True if valid and contains a non-empty, accessible PDF
+ * @returns Promise<boolean> True if valid
  */
 export async function validateArchivePdf(urlString: string): Promise<boolean> {
   try {
@@ -75,18 +77,34 @@ export async function validateArchivePdf(urlString: string): Promise<boolean> {
       return false;
     }
 
-    // 4. Look for a valid PDF file in the metadata
-    const hasValidPdf = data.files.some((file) => {
-      const isPdfFormat = file.format === 'Text PDF' || file.format === 'Additional Text PDF' || file.name.toLowerCase().endsWith('.pdf');
-      const size = parseInt(file.size, 10);
-      
-      // Ensure the file size is greater than 0 (not empty) and it's not encrypted/restricted
-      const isReadable = !file.encrypted && size > 0;
-
-      return isPdfFormat && isReadable;
+    // 4. Check if the item contains PDF files
+    const hasPdfFiles = data.files.some((file) => {
+      return file.format === 'Text PDF' || file.format === 'Additional Text PDF' || file.name.toLowerCase().endsWith('.pdf');
     });
 
-    return hasValidPdf;
+    if (hasPdfFiles) {
+      // PDF-specific validation: look for a valid PDF file in the metadata
+      const hasValidPdf = data.files.some((file) => {
+        const isPdfFormat = file.format === 'Text PDF' || file.format === 'Additional Text PDF' || file.name.toLowerCase().endsWith('.pdf');
+        const size = parseInt(file.size, 10);
+        
+        // Ensure the file size is greater than 0 (not empty) and it's not encrypted/restricted
+        const isReadable = !file.encrypted && size > 0;
+
+        return isPdfFormat && isReadable;
+      });
+
+      return hasValidPdf;
+    } else {
+      // Generic validation: check if the item has any valid, non-empty files
+      const hasValidFiles = data.files.some((file) => {
+        const size = parseInt(file.size, 10);
+        const isReadable = !file.encrypted && size > 0;
+        return isReadable;
+      });
+
+      return hasValidFiles;
+    }
 
   } catch (error) {
     // If URL parsing fails or network error occurs, it's invalid
